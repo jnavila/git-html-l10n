@@ -1,0 +1,106 @@
+-b::
+	Mostrar SHA-1 em branco para confirmações de commits. Isso também pode ser
+	controlado através da opção de configuração 'blame.blankboundary'.
+
+--root::
+	Não trate commits raíz como fronteiras. Isso pode ser controlado via a opção
+	de configuração `blame.showRoot` .
+
+--show-stats::
+	Inclui estatísticas adicionais no fim da saída do comando blame.
+
+-L <começo>,<fim>::
+-L :<nome da função>::
+	Anota apenas a variação da linha dada. Pode ser espeficado várias vezes. É
+	permitido sobrepor as variações.
++
+<começo> e <fim> são opcionais. ``-L <começo>" ou ``-L <começo>," toma do
+<começo> até o fim do arquivo. ``-L <fim>" toma do começo do arquivo até
+<fim>.
++
+include::line-range-format.txt[]
+
+-l::
+	Mostra o rev longo (Padrão: desligado).
+
+-t::
+	Mostra o tempo de forma crua (Padrão: desligado).
+
+-S <arquivo-revs>::
+	Use revisões do arquivo-revs no lugar de chamar  linkgit:git-rev-list[1].
+
+--reverso <rev>..<rev>::
+	Caminhe para a frente em vez de para trás. Em vez de mostrar a revisão em
+	que uma linha apareceu, isso mostra a última revisão em que uma linha
+	existiu. Isso requer um intervalo de revisão como START..END, onde o path
+	responsável  existe em START. --'git blame --reverse START' is taken as 'git
+	blame --reverse START..HEAD' por conveniência.
+
+-p::
+--porcelain::
+	Mostra em um formato designado para o consumo de máquina.
+
+--line-porcelain::
+	Mostra o formato porcelain, mas a informação de saída do commit para cada
+	linha, não apenas a primeira vez que o commit é referenciado. Implica
+	--porcelain.
+
+--incremental::
+	Mostra o resultado incrementadamente em um formado designado para o consumo
+	de máquina.
+
+--encoding=<codificação>::
+	Especifica o encoding usado para a saída dos nomes dos autores e sumários de
+	commit. Setando isso para `none` faz com que a saída do blame (culpa) não
+	seja convertida. Para maior informação, veja a discussão sobre encoding na
+	página de manual  linkgit:git-log[1].
+
+--contents <arquivo>::
+	Quando <rev> não é especificado, o comando anota as mudanças começando para
+	trás da cópia da árvore de trabalho. Essa flag faz com que o comando pareça
+	estar trabalhando na cópia da árvore de trabalho  que tem os conteúdos do
+	arquivo nomeado (especifique `-` para fazer o comando ler da entrada
+	padrão).
+
+--date <formato>::
+	Especifica o formato usado por datas de saída. Se --date não é dado, o valor
+	da variável  de configuração blame.date é usado. Se a variável blame.date
+	não está setada, o formato iso é usado. Para valores suportados, veja a
+	discussão da opção --date em linkgit:git-log[1].
+
+--[no-]progress::
+	O status de progresso é reportado na saída padrão  de erro por padrão quando
+	está anexado a um terminal. Esta flag habilita o relatório de progresso caso
+	não esteja anexado a um terminal. Não use `--progress` junto com
+	`--porcelain` ou `--incremental`.
+
+-M[<num>]::
+	Detectar linhas movidas ou copiadas dentro de um arquivo. Quando um commit
+	move ou copia um bloco de linhas (por exemplo, o arquivo original tem A e B,
+	e o commit muda para B e depois para A), o algoritmo tradicional de 'culpa'
+	percebe apenas metade do movimento e geralmente culpa as linhas que foram
+	movidas para cima (i.e. B) ao pai e atribui a culpa às linhas que foram
+	movidas para baixo (i.e. A) para o commit filho. Com essa opção os dois
+	grupos de linhas são culpados pelos pais executando passagens extras de
+	inspeção.
++
+<num> é opcional mas é o limite inferior do número de caracteres alfa
+numéricos que o Gif tem que detectar como movendo/copiando em um arquivo o
+qual ele associa essas linhas ao commit principal. O valor padrão é 20.
+
+-C[<num>]::
+	Em adição a `-M`, detecta as linhas movidas ou copiadas de outros arquivos
+	que são modificados no mesmo commit. Isso é útil quando você reorganiza o
+	seu programa e move código entre arquivos. Quando essa opção é dada duas
+	vezes, o comando adicionalmente olha para cópias de outros arquivos no
+	commit que o cria.  Quando essa opção é dada três vezes, esse comando
+	adicionalmente olha para cópias de outros arquivos em qualquer commit.
++
+<num> é opcional mas ele é o limite inferior no número de caracteres alfa
+numéricos que o Git tem que detectar como se movendo/copiando entre arquivos
+para que ele associe essas linha no commit principal. E o valor padrão é
+40. Se mais opções que `-C` são dadas, o argumento <num> do último `-C` terá
+efeito.
+
+-h::
+	Mostra a mensagem de ajuda.

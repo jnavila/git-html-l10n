@@ -1,0 +1,731 @@
+
+ifndef::git-format-patch[]
+ifndef::git-diff[]
+ifndef::git-log[]
+:git-diff-core: 1
+endif::git-log[]
+endif::git-diff[]
+endif::git-format-patch[]
+
+ifdef::git-format-patch[]
+-p::
+--no-stat::
+	Générer des correctifs normaux sans aucun diffstat.
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+-p::
+-u::
+--patch::
+	Générer un correctif (voir section sur la génération de correctifs).
+ifdef::git-diff[]
+	C'est l'option par défaut.
+endif::git-diff[]
+
+-s::
+--no-patch::
+	Supprimer la sortie diff. Utile pour les commandes telles que `git show` qui
+	affichent la rustine par défaut, ou pour supprimer l'effet de `--patch`.
+endif::git-format-patch[]
+
+-U<n>::
+--unified=<n>::
+	Générer des diffs avec <n> lignes de contexte au lieu des trois habituelles.
+ifndef::git-format-patch[]
+	Implique `-p`.
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+--raw::
+ifndef::git-log[]
+	Genérer la diff en format brut.
+ifdef::git-diff-core[]
+	C'est l'option par défaut.
+endif::git-diff-core[]
+endif::git-log[]
+ifdef::git-log[]
+	Pour chaque commit, afficher un résumé des modifications en
+	format de diff brut. Voir la section « FORMAT DE SORTIE BRUT »
+	de linkgit:git-diff[1]. C'est différent de l'affichage du
+	journal en format brut, que vous pouvez obtenir avec
+	`--format=raw`.
+endif::git-log[]
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+--patch-with-raw::
+	Synonyme de `-p --raw`.
+endif::git-format-patch[]
+
+--indent-heuristic::
+	Activer l'heuristique qui décale les limites des sections de diff pour
+	rendre les rustines plus facile à lire. C'est l'option par défaut.
+
+--no-indent-heuristic::
+	Désactiver l'heuristique d'indentation.
+
+--minimal::
+	Passer plus de temps pour s'assurer que le diff le plus petit possible est
+	produit.
+
+--patience::
+	Générer un diff en utilisant l'algorithme « patience diff ».
+
+--histogram::
+	Générer un diff en utilisant l'algorithme « diff histogramme ».
+
+--anchored=<texte>::
+	Générer un diff en utilisant l'algorithme « diff ancré ».
++
+Cette option peut être spécifiée plus d'une fois.
++
+Si une ligne existe dans la source et la destination, n'existe qu'une seule
+fois, et démarre avec ce texte, cet algorithme tente d'empêcher qu'elle
+apparaisse comme une suppression ou une addition dans la
+sortie. L'algorithme « patience diff » est utilisée en interne.
+
+--diff-algorithm={patience|minimal|histogram|myers}::
+	Choisir un algorithme de diff. Les variantes sont comme suit :
++
+--
+`default`, `myers`;;
+	L'algorithme de diff avide. C'est actuellement celui par défaut.
+`minimal`;;
+	Passer plus de temps pour s'assurer que le diff le plus petit possible est
+	produit.
+`patience`;;
+	Utiliser l'algorithme « patience diff » pour la génération de rustine.
+`histogram`;;
+	Cet algorithme étend l'algorithme patience pour « supporter les éléments
+	communs de faible fréquence ».
+--
++
+Par exemple, si vous avez configuré la variable `diff.algorithm` à une
+valeur différente du défaut et souhaitez utiliser la valeur par défaut,
+alors vous devez utiliser l'option `--diff-algorithm=default`.
+
+--stat[=<largeur>[,<largeur-de-nom>[,<nombre>]]]::
+	Génerer un diffstat. Par défaut, autant d'espace que nécessaire sera utilisé
+	pour la partie du nom de fichier et le reste pour la partie de graphe. La
+	largeur maximum est par défaut la largeur du terminal, ou 80 colonnes si non
+	connecté à un terminal, et peut être outrepassé avec `<largeur>`. La largeur
+	du nom de fichier peut être limitée en fournissant une autre largeur
+	`<largeur-de-nom>` après une virgule. La largeur de la partie du graphe peut
+	être limitée en utilisant `--stat-graph-width=<largeur>` (affecte toutes les
+	commandes générant un graphe de stat) ou en réglant
+	`diff.statGraphWidth=<largeur>` (n'affecte pas `git format-patch`). En
+	ajoutant un troisième paramètre `<nombre>`, vous pouvez limiter la sortie
+	aux premières `<nombre>` lignes, suivies de `...` s'il y en a plus.
++
+Ces paramètres peuvent aussi être positionnés individuellement avec
+`--stat-width=<largeur>`, `--stat-name-width=<largeur-de-nom>` et
+`--stat-count=<nombre>`.
+
+--compact-summary::
+	Afficher un résumé condensé de l'information d'entête étendu telle que les
+	créations ou les suppressions (« nouveau » ou « disparu », optionnellement
+	« +l » si c'est un lien symbolique) et les modifications de mode (« +x » ou
+	« -x » pour l'addition et la suppression du bit exécutable respectivement)
+	dans le diffstat. L'information est affichée entre la partie nom de fichier
+	et la partie graphe. Implique `--stat`.
+
+--numstat::
+	Similaire à `--stat`, mais afficher le nombre de lignes ajoutées ou
+	supprimées en notation décimale et le nom de chemin sans abréviation, pour
+	le rendre plus facile à traiter automatiquement. Pour les fichiers binaires,
+	affiche deux `-` au lieu de `0 0`.
+
+--shortstat::
+	N'affiche que la dernière ligne du format `--stat` contenant le nombre total
+	de fichiers modifiés, de même que le nombre de lignes ajoutées et
+	supprimées.
+
+--dirstat[=<param1,param2,...>]::
+	Afficher la distribution de la quantité relative de modifications pour
+	chaque sous-répertoire. Le comportement de `--dirstat` peut être
+	personnalisé en lui passant une liste de paramètres séparés par des
+	virgules. Les valeurs par défaut sont contrôlées par la variable de
+	configuration `diff.dirstat` (voir linkgit:git-config[1]). Les paramètres
+	suivants sont disponibles :
++
+--
+`changes`;;
+	Calculer les valeurs de dirstat en comptant les lignes supprimées de la
+	source ou ajoutées dans la destination. Ceci ignore la quantité de
+	mouvements purs de code dans un fichier. En d'autres termes, le
+	réarrangement de lignes dans un fichier n'est pas compté autant que les
+	autres modifications. C'est le comportement par défaut quand aucun paramètre
+	n'est fourni.
+`lines`;;
+	Calculer les valeurs dirstat en faisant l'analyse diff normal par ligne, et
+	en additionnant les totaux de lignes ajoutées/supprimées. (Pour les fichiers
+	binaires, compter plutôt les sections de 64 octets, puisque les fichiers
+	binaires n'ont pas de concept de ligne). C'est un comportement de
+	`--dirstat` plus onéreux que le comportement `changes`, mais il ne compte
+	pas les lignes réarrangées dans un fichier autant que les autres
+	modifications. La sortie résultante est consistante avec ce que vous
+	obtiendriez avec d'autres options `--*stat`.
+`files`;;
+	Calculer les valeurs dirstat en comptant le nombre de fichiers
+	changés. Chaque fichier modifié compte également dans l'analyse
+	dirstat. C'est le comportement `--dirstat` le moins cher en termes de
+	calcul, puisqu'il n'a pas du tout besoin d'analyser le contenu du fichier.
+`cumulative`;;
+	Compter les modifications dans un répertoire enfant pour le répertoire
+	parent. Notez qu'en utilisant `cumulative`, la somme des pourcentages
+	constatés peut dépasser 100 %. Le comportement par défaut (non cumulatif)
+	peut être spécifié avec le paramètre `noncumulative`.
+<limite>;;
+	Un paramètre entier qui spécifie un pourcentage limite (3% par défaut). Les
+	répertoires contribuant moins que ce pourcentage de modifications ne sont
+	pas affichés dans la sortie.
+--
++
+Exemple : ce qui suit va compter les fichiers modifiés, tout en ignorant les
+répertoires qui contiennent moins de 10 % de la quantité totale de fichiers
+modifiés et en accumulant les totaux des répertoires enfants dans les
+répertoires parents : `--dirstat=files,10,cumulative`.
+
+--summary::
+	Afficher un résumé condensé d'information d'entête étendu tel que les
+	créations, les renommages et les modifications de mode.
+
+ifndef::git-format-patch[]
+--patch-with-stat::
+	Synonyme de `-p --stat`.
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+
+-z::
+ifdef::git-log[]
+	Séparer les commits avec des NULs au lieu de retours chariot.
++
+Aussi, quand `--raw` ou `--numstat` ont été fournis, ne pas modifier les
+noms de chemins et utiliser des NULs comme terminateurs de champs.
+endif::git-log[]
+ifndef::git-log[]
+	Quand `--raw`, `--numstat`, `--name-only` ou `--name-status` a été fourni,
+	ne pas modifier les noms de chemin et utiliser des NULs comme terminateurs de champs.
+endif::git-log[]
++
+Sans cette option, les noms de chemin avec des caractères « inhabituels »
+sont cités comme expliqué pour le variable de configuration `core.quotePath`
+(voir linkgit:git-config[1]).
+
+--name-only::
+	N'afficher que les noms des fichiers modifiés.
+
+--name-status::
+	N'afficher que les noms et statuts des fichiers modifiés. Voir la
+	description de loption `--diff-filter` pour la signification des lettres de
+	statut.
+
+--submodule[=<format>]::
+	Spécifier comment les différences dans les sous-modules sont
+	affichées. Spécifier `--submodule=short` utilise le format 'short'
+	« court ». Ce format n'affiche le nom des commits du début et de la fin de
+	la plage. Quand `--submodule` or `--submodule=log` est spécifié, le format
+	« log » (journal) est utilisé. Ce format liste les commits dans la plage
+	comme le fait `summary` de linkgit:git-submodule[1]. Quand
+	`--submodule=diff` est spécifié, le format 'diff' est utilisé. Ce format
+	affiche une diff en ligne des modifications dans le sous-module pour la
+	plage de commits. Par défaut `diff.submodule` ou le format 'short' si
+	l'option de configuration n'est pas renseignée.
+
+--color[=<quand>]::
+	Afficher des diff colorés. `--color` (sans '=<quand>') est identique à
+	`--color=always`. '<quand>' peut être `always`, `never` ou `auto`.
+ifdef::git-diff[]
+	Ceci peut être changé par les réglages de configuration
+	`color.ui` et `color.diff`.
+endif::git-diff[]
+
+--no-color::
+	Désactiver les diff colorés.
+ifdef::git-diff[]
+	Ceci peut être utilisé pour outrepasser les réglages de configuration.
+endif::git-diff[]
+	C'est identique à `--color=never`.
+
+--color-moved[=<mode>]::
+	Les lignes de code déplacées sont colorées différemment.
+ifdef::git-diff[]
+	Ceci peut être modifié par le réglage de configuration `diff.colorMoved`.
+endif::git-diff[]
+	Le <mode> vaut par defaut 'no' si l'option n'est pas fournie
+	et à 'zebra' si l'option est fournie sans mode.
+	Le mode est une valeur parmi :
++
+--
+no::
+	Les lignes déplacées ne sont pas surlignées.
+default::
+	C'est un synonyme de `zebra`. Cela peut changer pour un mode plus
+	raisonnable dans le futur.
+plain::
+	Toute ligne qui est ajoutée à un endroit et supprimée à un autre endroit
+	sera colorée avec 'color.diff.newMoved'. Similairement 'color.diff.oldMoved'
+	sera utilisé pour les lignes retirées qui ont été ajoutées ailleurs dans le
+	diff. Ce mode prend n'importe quelle ligne déplacée, mais il n'est pas très
+	utile dans une revue pour déterminer si un bloc de code a été déplacé sans
+	permutation.
+blocks::
+	Les blocs de texte déplacé d'au moins 20 caractères alphanumériques sont
+	détectés avidement. Les blocs détectés sont peints avec les couleurs
+	'color.diff.oldMoved' pour l'ancienne place et 'color.diff.newMoved' pour la
+	nouvelle place. Les blocs adjacents ne peuvent pas être différenciés.
+zebra::
+	Les blocs de texte déplacé sont détectés comme dans le mode 'blocks'. Les
+	blocs sont peints en utilisant 'color.diff.{old,new}Moved' color ou
+	'color.diff.{old,new}MovedAlternative'. La différence entre les deux
+	couleurs indique qu'un nouveau bloc a été détecté.
+dimmed-zebra::
+	Similaire à 'zebra', mais avec une limitation supplémentaire des parties
+	inintéressantes du code déplacé. Les lignes de frontière de deux blocs
+	adjacents sont considérées intéressantes, le reste est
+	inintéressant. 'dimmed_zebra' est un synonyme déconseillé.
+--
+
+--no-color-moved::
+	Désactiver la détection de déplacement. Ce peut être utilisé pour
+	outrepasser les réglages de configuration. C'est identique comme
+	`--color-moved=no`.
+
+--color-moved-ws=<modes>::
+	Ceci configure comment les espaces sont ignorés lors de la détection de
+	déplacement par `--color-moved`.
+ifdef::git-diff[]
+	Le réglage de configuration `diff.colorMovedWS` permet de le modifier.
+endif::git-diff[]
+	Ces modes peuvent être fournis comme une liste séparée par virgules :
++
+--
+no::
+	Ne pas ignorer les espaces lors de la détection de déplacement.
+ignore-space-at-eol::
+	Ignorer les modifications d'espaces en fin de ligne.
+ignore-space-change::
+	Ignorer les modifications de nombre d'espaces. Cela ignore les espaces en
+	fin de ligne et considère toutes les autres séquences d'un caractère blanc
+	ou plus comme equivalentes.
+ignore-all-space::
+	Ignorer les espaces lors de la comparaison de lignes. Ceci ignore les
+	différences même si une ligne a des espaces quand l'autre n'en a aucun.
+allow-indentation-change::
+	Ignorer initialement tout espace lors de la détection de déplacement, puis
+	grouper les blocs de code déplacé dans un bloc si la modification de blancs
+	est identique par ligne. C'est incompatible avec les autres modes.
+--
+
+--no-color-moved-ws::
+	Ne pas ignorer les blancs lors de la détection de déplacement. Ceci peut
+	être utilisé pour outrepasser les réglages de configuration. C'est identique
+	comme `--color-moved-ws=no`.
+
+--word-diff[=<mode>]::
+	Afficher un diff par mot, en utilisant le <mode> pour délimiter les mots
+	modififiés. Par défaut, les mots sont délimités par des espaces ; voir
+	`--word-diff-regex` ci-dessous. Le <mode> vaut par défaut 'plain', et peut
+	valoir :
++
+--
+color::
+	Surligner les mots modifiés en n'utilisant que des couleurs. Implique
+	`--color`.
+plain::
+	Afficher les mots comme `[-supprimé-]` et `{+ajouté+}`. Ne pas tenter
+	d'échapper ces délimiteurs s'ils apparaissent dans l'entrée, donc la sortie
+	peut être ambigüe.
+porcelain::
+	Utiliser un format spécial ligne par ligne destiné à la consommation par
+	script. Les séquences ajoutées/supprimées/non-modifiées sont affichées dans
+	le format diff unifié habituel, commençant par un caractère `+`/`-`/` ` en
+	début de ligne et en étendant en fin de ligne. Les retours chariot dans
+	l'entrée sont représentés par un tilde `~` sur une ligne à part.
+none::
+	Désactiver à nouveau la diff par mots.
+--
++
+Notez qu'en dépit du nom du premier mode, color est utilisé pour surligner
+les parties modifiées dans tous les modes, si activé.
+
+--word-diff-regex=<regex>::
+	Utiliser <regex> pour décider ce qu'est un mot, au lieu de définir un mot
+	comme une séquence continue de caractères non blancs. Implique aussi
+	`--word-diff` à moins qu'elle ait déjà été spécifiée.
++
+Toutes correspondances de <regex> qui ne se chevauchent pas sont considérées
+comme des mots. Tout ce qui se situe entre ces correspondances est considéré
+comme de l'espace blanc et ignoré (!) lors du calcul de différences. Vous
+souhaiterez ajouter `|[^[:space:]]` à l'expression régulière pour être sûr
+qu'elle englobe tous les caractères non blancs. Une correspondance qui
+contient un retour à la ligne est tronqué silencieusement (!) au retour à la
+ligne.
++
+Par exemple, `--word-diff-regex=.` va traiter chaque caractère comme un mot
+et de ce fait présenter les différences caractère par caractère.
++
+La regex peut aussi être indiquée par un pilote de diff ou une option de
+configuration, voir linkgit:gitattributes[5] ou linkgit:git-config[1]. La
+ligne de commande a précédence sur le pilote de diff ou la configuration. Le
+pilote de diff a précédence sur l'option de configuration.
+
+--color-words[=<regex>]::
+	Équivalent à `--word-diff=color` plus (si une regex a été spécifiée)
+	`--word-diff-regex=<regex>`.
+endif::git-format-patch[]
+
+--no-renames::
+	Désactiver la détection de renommage, même si le fichier de configuration
+	indique de le faire par défaut.
+
+ifndef::git-format-patch[]
+--check::
+	Avertir si les modifications introduisent des marqueurs de conflit ou des
+	erreurs d'espaces. Les erreurs d'espaces sont définies par l'option de
+	configuration `core.whitespace`. Par défaut, les espaces en fin de ligne
+	(incluant les lignes ne contenant que des espaces) et le caractère espace
+	suivi immédiatement par une tabulation lors d'une indentation initiale de
+	ligne sont considérés comme des erreurs d'espace. Le code d'erreur de sortie
+	est non nul en cas de problèmes trouvés. Non compatible avec `--exit-code`.
+
+--ws-error-highlight=<sorte>::
+	Surligner les erreurs d'espace dans les lignes `context` (contexte), `old`
+	(ancien) et `new` (nouveau) du diff. Des valeurs multiples sont séparées par
+	des virgules, `none` réinitialise les valeurs précédentes, `default`
+	réinitialise la liste à `new` et `all` est un raccourci pour
+	`old,new,context`. Quand cette option n'est pas fournie et que la variable
+	de configuration `diff.wsErrorHighlight` n'est pas assignée, seules les
+	erreurs d'espace dans les lignes `new` sont surlignées. Les erreurs d'espace
+	sont colorées avec `color.diff.whitespace`.
+
+endif::git-format-patch[]
+
+--full-index::
+	Au lieu de montrer quelques-uns des premiers caractères, montrer les noms
+	complets des images pré- et post- des objets blob sur la ligne d'index lors
+	de la génération la sortie au format patch.
+
+--binary::
+	En addition à `--full-index`, afficher un diff binaire qui peut être
+	appliqué avec `git-apply`.
+
+--abbrev[=<n>]::
+	Au lieu de montrer le nom de l'objet avec les 40 caractères hexadécimaux
+	dans le format de diff brut et les lignes d'entête de l'arbre de diff, ne
+	montrer que des préfixes partiels. C'est indépendant de l'option
+	`--full-index` ci-dessus, qui contrôle le format de sortie de la rustine
+	diff. Un nombre de chiffres différent du défaut peut être spécifié avec
+	`--abbrev=<n>`.
+
+-B[<n>][/<m>]::
+--break-rewrites[=[<n>][/<m>]]::
+	Casser les modifications de réécriture complète en paires de suppression et
+	création. Cela sert deux objectifs :
++
+Ceci affecte la manière dont une modification qui correspond à une
+réécriture complète d'un fichier apparaît comme une série de suppressions et
+d'insertions entrelacées avec quelques lignes qui tombent comme un contexte,
+mais comme une seule suppression de la totalité ancienne suivie d'une
+insertion unique de la totalité nouvelle, et le nombre `m` contrôle cet
+aspect de l'option -B (par défaut 60 %). `-B/70%` spécifie que moins de 30 %
+du contenu original devrait rester dans le résultat pour le considérer comme
+une réécriture complète (c-à-d sinon, la rustine résultante sera une série
+de suppressions et d'insertions entrelacées avec quelques lignes de
+contexte).
++
+Utilisé avec -M, un fichier complètement réécrit est aussi considéré comme
+la source d'un renommage (habituellement -M ne considère que les fichiers
+qui ont disparu comme source de renommage), et le nombre `n` contrôle le
+niveau de l'option -B (par défaut, 50 %). `-B20%` signifie qu'une
+modification avec des additions et des suppressions représentant 20 % ou
+plus du contenu du fichier est considérée pour être utilisée comme une
+source possible pour un renommage en un autre fichier.
+
+-M[<n>]::
+--find-renames[=<n>]::
+ifndef::git-log[]
+	Détecter les renommages.
+endif::git-log[]
+ifdef::git-log[]
+	Si des diffs sont générés, détecter et afficher les renommages
+	pour chaque commit. Pour suivre les fichiers au fil des renommages
+	qui apparaissent dans l'historique, voir `--follow`.
+endif::git-log[]
+	Si `n` est spécifié, c'est un seuil d'index de similarité
+	(c-à-d la quantité d'addition/suppression comparé à la taille
+	du fichier). Par exemple, `-M90%` signifie que Git considérera 
+	qu'un couple suppression/ajout comme renommage si plus de 90 %
+	du fichier n'a pas changé. Sans le signe `%`, le nombre doit être
+	lu comme une fraction précédée du point décimal. `-M5` devient
+	0,5, tout comme `-M50%`. De même, `-M05` est identique à
+	`-M5%`.  Pour limiter la détection à des renommages exacts,
+	utilisez `-M100%`. L'index de similarité par défaut est `50%`.
+
+-C[<n>]::
+--find-copies[=<n>]::
+	Détecter les copies aussi bien que les renommages. Voir aussi
+	`--find-copies-harder`. Si `n` est spécifié, il a la même signification que
+	pour `-M<n>`.
+
+--find-copies-harder::
+	Pour des raisons de performance, par défaut, l'option `-C` trouve des copies
+	seulement si le fichier original de la copie a été modifié dans le même
+	ensemble de modifications. Ce drapeau fait inspecter à la commande les
+	fichiers non modifiés comme candidats comme source de copie. C'est une
+	opération très chère pour des projets importants, donc à utiliser avec
+	précaution. Spécifier plusieurs fois l'option `-C` a le même effet.
+
+-D::
+--irreversible-delete::
+	Omettre la pré-image pour des suppressions, c-à-d n'afficher que l'entête
+	mais pas la diff entre la pré-image et `/dev/null`. La rustine résultante
+	n'est pas destinée à être appliquée avec `patch` ou `git apply`  ; C'est
+	seulement pour les personnes qui veulent juste se concentrer sur une revue
+	des modifications. De plus, la sortie manque clairement d'assez
+	d'information pour appliquer la rustine en inverse, même manuellement, d'où
+	le nom de l'option.
++
+Lorsqu'utilisé conjointement avec `-B`, omettre aussi la pré-image dans la
+partie suppression d'une paire suppression/création.
+
+-l<num>::
+	Les options `-M` et `-C` nécessitent un temps de traitement en O(n²) où n
+	est le nombre de cibles potentielles renommage/copie. Cette option empêche
+	l'utilisation de la détection de renommage/copie si le nombre de cibles de
+	renommage/copie excède le nombre indiqué.
+
+ifndef::git-format-patch[]
+--diff-filter=[(A|C|D|M|R|T|U|X|B)...[*]]::
+	Sélectionner seulement les fichiers qui sont Ajoutés (`A`), Copiés (`C`),
+	supprimés (Deleted `D`), Modifiés (`M`), Renommés (`R`), ont eu un
+	changement de Type (`T`) (c-à-d fichier normal, lien symbolique, sous-module
+	…), sont non fusionnés (Unmerged `U`), sont inconnus (Unknown `X`) ou ont eu
+	leur appairage cassé (Broken `B`). Toute combinaison de caractères de filtre
+	(incluant aucun) peut être utilisée). Quand `*` (Tout-ou-rien) est ajouté à
+	la combinaison, tous les chemins sont sélectionnés s'il y a des fichiers qui
+	correspondent aux autres critères dans la comparaison ; s'il n'y a aucun
+	fichier qui correspond aux autres critères, rien n'est sélectionné.
++
+Aussi, ces lettres majuscules peuvent être spécifiées en minuscules pour
+exclure. Par exemple, `--diff-filter=ad` exclut les chemins ajoutés et
+supprimés.
++
+Notez que toutes les diffs ne peuvent pas présenter tous les types. Par
+exemple, les diffs de l'index par rapport à l'arbre de travail ne peuvent
+jamais avoir des entrées Ajoutées (parce que l'ensemble des chemins inclus
+dans le diff est limité par ce qui est présent dans l'index). Similairement,
+les entrées copiées et renommées ne peuvent pas apparaître si la détection
+de ces types sont désactivées.
+
+-S<chaîne>::
+	Trouver des différences qui modifient le nombre d'occurrences de la chaîne
+	spécifiée (par ex. addition/suppression) dans un fichier. Destiné à l'usage
+	dans des scripts.
++
+C'est utile lorsqu'on cherche un bloc exact de code (comme une struct), et
+qu'on veut connaître l'historique de ce bloc depuis son apparition :
+utiliser cette fonctionnalité itérativement pour fournir le bloc d'une
+pré-image à `-S` et continuer jusqu'à obtenir la toute première version du
+bloc.
++
+Les fichiers binaires sont aussi analysés.
+
+-G<regex>::
+	Rechercher des différences dont le texte de rustine contient les lignes
+	ajoutées/supprimées correspondant à <regex>.
++
+Pour illustrer la différence entre `-S<regex> --pickaxe-regex` et
+`-G<regex>`, considérons un commit contenant la diff suivante dans un même
+fichier :
++
+----
++    return !regexec(regexp, two->ptr, 1, &regmatch, 0);
+...
+-    hit = !regexec(regexp, mf2.ptr, 1, &regmatch, 0);
+----
++
+Alors que `git log -G"regexec\(regexp"` affichera ce commit, `git log
+-S"regexec\(regexp" --pickaxe-regex` ne l'affichera pas (parce que le nombre
+d'occurrences de cette chaîne n'a pas changé).
++
+À moins que `--text` soit fourni, les rustines de fichiers binaires sans
+filtre textconv seront ignorés.
++
+Voir l'entrée 'pickaxe' dans linkgit:gitdiffcore[7] pour plus d'information.
+
+--find-object=<id-objet>::
+	Rechercher les différences qui modifient le nombre d'occurrences de l'objet
+	indiqué. Similaire à `-S`, juste que l'argument est différent en ce qu'elle
+	ne cherche pas une chaîne particulière mais un identifiant d'objet
+	particulier.
++
+L'objet peut être un commit de blob ou de sous-module. Cela implique
+l'option `-t` dans `git-log` pour trouver aussi des arbres.
+
+--pickaxe-all::
+	Quand `-S` ou `-G` trouvent une modification, afficher toutes les
+	modifications dans l'ensemble de modifications, pas seulement les fichiers
+	qui contiennent la modification dans <chaîne>.
+
+--pickaxe-regex::
+	Traiter la <chaîne> fournie à `-S` comme une expression régulière POSIX
+	étendue à faire correspondre.
+
+endif::git-format-patch[]
+
+-O<fichier-d-ordre>::
+	Contrôler l'ordre dans lequel les fichiers apparaissent dans la sortie. Ceci
+	passe outre la variable de configuration `diff.orderFile` (voir
+	linkgit:git-config[1]). Pour annuler `diff.orderFile`, utiliser
+	`-O/dev/null`.
++
+L'ordre en sortie est déterminé par l'ordre des motifs glob dans
+<fichier-d-ordre>. Tous les fichiers dont le nom de chemin correspond au
+premier motif sont affichés en premier, tous les fichiers dont le nom de
+chemin correspond au second motif (mais pas au premier) sont affichés
+ensuite, et ainsi de suite. Tous les fichiers dont les noms de chemin qui ne
+correspondent à aucun motif sont affichés en dernier, comme s'il y avait un
+motif ramasse-tout à la fin du fichier. Si de multiples noms de chemin ont
+le même rang (ils correspondent avec le même motif mais pas de motifs
+antérieurs), leur ordre relatif d'affichage est l'ordre normal.
++
+<fichier-d-ordre> est analysé comme suit :
++
+--
+ - Les lignes blanches sont ignorées, de sorte qu'elles peuvent être utilisées
+   comme séparateurs pour lisibilité.
+
+ - Les lignes commençant par un dièse ("`#`") sont ignorées, elles peuvent donc
+   être utilisées comme commentaires. Ajoutez une barre oblique inverse ("`\`")
+   au début du motif s'il doit commencer par un dièse.
+
+ - Toutes les autres lignes contiennent un motif unique.
+--
++
+Les motifs ont la même syntaxe et sémantique comme les motifs utilisés pour
+fnmatch(3) sans le drapeau FNM_PATHNAME, sauf qu'un nom de chemin correspond
+aussi à un motif si la suppression de n'importe quel nombre de composants
+finaux du nom de chemin correspond au motif. Par exemple, le motif
+"`foo*bar`" correspond à "`fooasdfbar`" et "`foo/bar/baz/asdf`" mais pas
+"`foobarx`".
+
+ifndef::git-format-patch[]
+-R::
+	Échanger deux entrées ; c'est-à-dire afficher les différences depuis l'index
+	ou avec un fichier sur disque avec le contenu de l'arbre.
+
+--relative[=<chemin>]::
+	Lorsque lancé depuis un sous-répertoire du projet, il peut lui être indiqué
+	d'exclure les modifications hors du répertoire et d'afficher les noms de
+	chemins relativement à lui avec cette option. Quand vous n'êtes pas dans un
+	sous-répertoire (par ex. dans un dépôt nu), vous pouvez nommer quel
+	sous-répertoire par rapport auquel afficher la sortie en fournissant un
+	argument <chemin>.
+endif::git-format-patch[]
+
+-a::
+--text::
+	Traiter tous les fichiers comme texte.
+
+--ignore-cr-at-eol::
+	Ignorer les retours chariot en fin de ligne lors de la comparaison.
+
+--ignore-space-at-eol::
+	Ignorer les modifications d'espaces en fin de ligne.
+
+-b::
+--ignore-space-change::
+	Ignorer les modifications de nombre d'espaces. Cela ignore les espaces en
+	fin de ligne et considère toutes les autres séquences d'un caractère blanc
+	ou plus comme equivalentes.
+
+-w::
+--ignore-all-space::
+	Ignorer les blancs lors de la comparaison de lignes. Ceci ignore les
+	différences même si une ligne contient des espaces alors que l'autre n'en a
+	pas.
+
+--ignore-blank-lines::
+	Ignorer les modifications dont les lignes sont blanches.
+
+--inter-hunk-context=<lignes>::
+	Afficher le contexte entre des sections de diff, jusqu'au nombre spécifié de
+	lignes, fusionnant de ce fait les sections qui sont proches. Par défaut,
+	`diff.interHunkContext` ou 0 si l'option de configuration n'est pas
+	configurée.
+
+-W::
+--function-context::
+	Afficher le corps des fonctions englobant les modifications.
+
+ifndef::git-format-patch[]
+ifndef::git-log[]
+--exit-code::
+	Faire sortir le programme avec un code similaire à diff(1). Autrement dit,
+	il sort avec 1 s'il y avait des différences et 0 signifie aucune différence.
+
+--quiet::
+	Désactiver toute sortie du programme. Implique `--exit-code`.
+endif::git-log[]
+endif::git-format-patch[]
+
+--ext-diff::
+	Permettre l'exécution d'un assistant externe de différence. Si vous
+	positionnez un pilote externe de différence avec linkgit:gitattributes[5],
+	vous avez besoin d'utiliser cette option avec linkgit:git-log[1] et
+	compagnie.
+
+--no-ext-diff::
+	Désactiver les pilotes de diff externes.
+
+--textconv::
+--no-textconv::
+	Permettre (et désactiver) le lancement des filtres externes de conversion en
+	texte lors de la comparaison de fichiers binaires. Voir
+	linkgit:gitattributes[5] pour plus de détails. Parce que les filtres
+	textconv sont typiquement des conversions à sens unique, la diff résultante
+	est adaptée à la consommation humaine, mais ne peut pas être appliquée. Pour
+	cette raison, les filtres textconv sont activés par défaut seulement pour
+	linkgit:git-diff[1] et linkgit:git-log[1], mais pas pour
+	linkgit:git-format-patch[1] ou les commandes de plomberie de diff.
+
+--ignore-submodules[=<quand>]::
+	Ignorer les modifications à des sous-modules lors de la génération du
+	diff. <quand> peut valoir "none" (aucun), "untracked" (non-suivi), "dirty"
+	(sale) ou "all" (tout) qui est la valeur par défaut. L'utilisation de "none"
+	va considérer comme modifiés les sous-modules quand ils contiennent soit des
+	fichiers non-suivis ou modifiés, ou si sa HEAD diffère du commit enregistré
+	dans le super-projet, et peut être utilisé pour passer outre tout réglage de
+	l'option 'ignore' dans linkgit:git-config[1] ou linkgit:gitmodules[5]. Quand
+	"untracked" est utilisé, les sous-modules ne sont pas considérés sales quand
+	ils ne contiennent que du contenu non suivi (mais ils sont quand même
+	scannés pour trouver du contenu modifié). L'utilisation de "dirty" ignore
+	toutes les modifications à l'arbre de travail des sous-modules, seuls les
+	modifications aux commits stockés dans le super-projet sont affichées
+	(c'était le comportement jusqu'à 1.7.0). La valeur "all" cache toutes les
+	modifications des sous-modules.
+
+--src-prefix=<préfixe>::
+	Afficher le préfixe de source fourni au lieu de "a/".
+
+--dst-prefix=<préfixe>::
+	Afficher le préfixe de destination fourni au lieu de "b/".
+
+--no-prefix::
+	N'afficher aucun préfixe ni de source, ni de destination.
+
+--line-prefix=<préfixe>::
+	Préfixer avec une chaîne additionnelle chaque ligne de la sortie.
+
+--ita-invisible-in-index::
+	Par défaut, une entrée ajoutée par "git add -N" apparaît comme un fichier
+	vide existant dans "git diff" et un nouveau fichier dans "git diff
+	--cached". Cette option fait apparaître l'entrée comme un fichier nouveau
+	dans "git diff" et non existant dans "git diff --cached". Cette option peut
+	être inversée avec `--ita-visible-in-index`. Les deux options sont
+	expérimentales et peuvent être retirées dans le futur.
+
+Pour une explication plus détaillée sur ces options communes, voir aussi
+linkgit:gitdiffcore[7].

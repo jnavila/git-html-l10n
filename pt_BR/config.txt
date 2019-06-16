@@ -1,0 +1,438 @@
+ARQUIVO DE CONFIGURAÇÃO
+-----------------------
+
+O arquivo de configuração do Git contém um número de variáveis que afetam o
+comportamento dos comandos do Git. Os arquivos `.git/config` e,
+opcionalmente, `config.worktree` (veja `extensions.worktreeConfig` abaixo)
+em cada repositório são usados para armazenar a configuração para aquele
+repositório, e o `$HOME/.gitconfig` é usado para armazenar uma configuração
+por usuário como valores de fallback para o arquivo `.git/config`. O arquivo
+`/etc/gitconfig` pode ser usado para armazenar uma configuração padrão do
+sistema.
+
+As variáveis de configuração são usadas pelo encanamento Git e pelas
+porcelanas. As variáveis são divididas em seções, em que o nome completo da
+variável da variável em si é o último segmento separado por ponto e o nome
+da seção é tudo antes do último ponto. Os nomes das variáveis não fazem
+distinção entre maiúsculas e minúsculas, permitem apenas caracteres
+alfanuméricos e `-` e devem começar com um caractere alfabético. Algumas
+variáveis podem aparecer várias vezes; dizemos então que a variável é de
+valor múltiplo.
+
+Sintaxe
+~~~~~~~
+
+A sintaxe é muito flexível e permissiva; espaços em branco são ignorados em
+sua maioria. Os caracteres '#' e ';' começam comentários no fim da linha,
+linhas vazias são ignoradas.
+
+O arquivo consiste em seções e variáveis. Uma seção começa com o nome da
+seção entre colchetes e continua até a próxima seção começar. Os nomes das
+seções são insensíveis a maiúsculas e minúsculas. Somente caracteres
+alfanuméricos, '-' e '.' são permitidos nos nomes das seções. Cada variável
+deve pertencer a alguma seção, o que significa que deve haver um cabeçalho
+de seção antes da primeira configuração de uma variável.
+
+As seções podem ser divididas em subseções. Para começar uma subseção
+coloque o seu nome em quotes duplos, separados por espaços do nome da seção,
+no cabeçalho da seção, como no exemplo abaixo:
+
+--------
+	[seção "subseção"]
+
+--------
+
+Os nomes das subseções diferenciam maiúsculas e minúsculas e podem conter
+qualquer caractere, exceto a nova linha e o byte nulo. Citação dupla `"` e
+barra invertida podem ser incluídos, escapando-os como  `\"` e `\\`,
+respectivamente. As barras invertidas que precedem outros caracteres são
+descartadas durante a leitura; por exemplo, `\t` é lido como `t` e `\0` é
+lido como `0`. Os cabeçalhos da seção não podem ocupar várias linhas. As
+variáveis podem pertencer diretamente a uma seção ou a uma determinada
+subseção. Você pode ter `[section]` se você tem `[section "subsection"]`,
+mas você não precisa.
+
+Há também uma sintaxe obsoleta do `[section.subsection]`. Com essa sintaxe,
+o nome da subseção é convertido em minúscula e também é comparado com
+maiúsculas e minúsculas. Esses nomes de subseção seguem as mesmas restrições
+que nomes de seção.
+
+Todas as outras linhas (e os lembretes da linha depois do cabeçalho de
+seção) são reconhecidos como variáveis definíveis, na forma 'nome=valor' (ou
+simplesmente 'nome', o qual é um atalho para dizer que a variável é um
+booleano "true"). O nome de variáveis não diferenciam nome de maiúsculas ou
+minúsculas, permitindo apenas caracteres alfanuméricos e `-`, e tem que
+começar com um caracter alfanumérico.
+
+Uma linha que define um valor pode ser continuada na próxima linha
+finalizando-a com um `\`; o backquote e o fim-de-linha são tirados. Os
+principais espaços em branco após 'name =', o restante da linha após o
+primeiro caractere de comentário '#' ou ';' e espaços em branco à direita da
+linha são descartados, a menos que estejam entre aspas duplas. Os espaços
+internos dentro do valor são retidos na íntegra.
+
+Dentro de quotes duplos `"`e barra invertida '\'  os caracteres podem ser
+usados literalmente: use  `\"` para `"` e `\\` para `\`.
+
+A seguintes sequências de escape (ao lado de `\"` e `\\`) são reconhecidas:
+`\n` para caracteres de nova linha (NL), `\t` para tabulção horizontal (HT,
+TAB) e `\b` para backspace (BS). Outras sequências de escape de caracteres
+(incluindo sequências de escape octal) são inválidas.
+
+
+Inclui
+~~~~~~
+
+As seções `include` e `includeIf` permitem incluir diretivas de configuração
+de outra fonte. Essas seções se comportam de maneira idêntica, com a exceção
+de que as seções `includeIf` podem ser ignoradas se sua condição não for
+avaliada como verdadeira; veja "Inclui condicional" abaixo.
+
+Você pode incluir um arquivo de configuração de outro, definindo a variável
+especial `include.path`  (ou `includeIf.*.path`) para o nome do arquivo a
+ser incluído. A variável usa um nome-path como seu valor e está sujeita à
+expansão de til. essas variáveis podem ser dadas várias vezes.
+
+O conteúdo do arquivo incluído é inserido imediatamente, como se eles
+tivessem sido encontrados no local da diretiva include. Se o valor da
+variável for um path relativo, o path será considerado relativo ao arquivo
+de configuração no qual a diretiva de inclusão foi localizada. Veja abaixo
+exemplos.
+
+Inclui condicional
+~~~~~~~~~~~~~~~~~~
+
+Você pode incluir um arquivo de configuração de outro condicionalmente
+setando uma variável `includeIf.<condition>.path` para o nome do arquivo a
+ser incluído.
+
+A condição começa quando uma palavra-chave seguida de dois pontos e alguns
+dados cujo formato e significado depende da palavra-chave. Palavras-chave
+suportadas são:
+
+`gitdir`::
+
+	O dado que seguem a palavra chave `gitdir:` é usado como um padrão
+	global. Se a localização do diretório .git casa com o padrão, a condição
+	incluída é encontrada.
++
+A localização de .git pode ser auto-descoberta, ou vir da variável de
+ambiente `$GIT_DIR`. Se o repositório é auto descoberto via um arquivo. git
+(e.x. de submódulos ou linkado a uma árvore de trabalho), a localização de
+.git pode ser a localização final onde o diretório. git é, não onde o
+.o arquivo git é.
++
+O padrão pode conter wildcads globbing padrão e dois adicionais, `**/` e
+`/**`, que podem casar múltplos components de caminho. Por favor procure por
+linkgit:gitignore[5]  para detalhes. Para conveniência:
+
+ * Se o padrão começa com `~/`, `~` será substituído com o conteúdo da variável
+   de ambiente `HOME`.
+
+ * Se o padrão começa com `./`, então ele é substituído com o diretório
+   contendo o arquivo de configuração corrente.
+
+ * Se o padrão não começa com `~/`, `./` ou `/`, `**/`  ele será pré-anexado
+   automaticamente. Por exemplo, o padrão `foo/bar` se torna `**/foo/bar` e
+   pode casar com  `/any/path/to/foo/bar`.
+
+ * Se o padrão termina com `/`, `**`  será automaticamente adicionado. Por
+   exemplo, o padrão `foo/` se torna`foo/**`.  Em outras palavras, ele casa
+   "foo" e tudo o que estiver dentro, recursivamente.
+
+'gitdir/i'::
+	Isto é o mesmo que `gitdir`exceto que casa ignorando mudança de caixa
+	(e.x. em sistemas de arquivo que ignoram mudança de caixa)
+
+Algumas poucas notas em casar via `gitdir` e `gitdir/i`:
+
+ * Sumlinks em `$GIT_DIR` não são resolvidos sem casar.
+
+ * Ambas as versões symlink & realpath dos paths serão correspondidas fora do
+   `$GIT_DIR`. Por exemplo, se ~/git for um link simbólico para
+   /mnt/storage/git, ambos `gitdir:~/git` e `gitdir:/mnt/storage/git` serão
+   encontrados.
++
+Este não foi o caso na versão inicial deste recurso na v2.13.0, que
+correspondia apenas à versão do caminho real. A configuração que deseja ser
+compatível com o release inicial desse recurso precisa especificar apenas a
+versão do caminho real ou as duas versões.
+
+ * Note que "../" não é especial e não irá casar literalmente, o que não é o
+   que você quer.
+
+Exemplo
+~~~~~~~
+
+	# Principais variáveis
+	[core]
+		; Não confie nos modos de arquivo
+		filemode = false
+
+	# Nosso algoritmo de diff
+	[diff]
+		external = /usr/local/bin/diff-wrapper
+		renames = true
+
+	[branch "devel"]
+		remoto = origem
+		merge = refs/heads/devel
+
+	# Configurações de proxy
+	[core]
+		gitProxy="ssh" para "kernel.org"
+		gitProxy=default-proxy; para o resto
+
+	[include]
+		path = /path/to/foo.inc; incluir absolutamente pelo path
+		path = foo.inc; encontrar "foo.inc" em relação ao arquivo atual
+		path = ~/foo.inc; encontre "foo.inc" no diretório  `$HOME`
+
+	;inclua se $GIT_DIR for /path/to/foo/.git
+	[includeIf "gitdir:/path/to/foo/.git"]
+		path = /path/to/foo.inc
+
+	;incluir para todos os repositórios dentro de /path/to/group
+		[includeIf "gitdir:/path/to/group/"]
+			path = /path/to/foo.inc
+
+	; incluir para todos os repositórios dentro de $HOME/to/group
+	[includeIf "gitdir:~/to/group/"]
+		path = /path/to/foo.inc
+
+	;  paths relativos são sempre relativos à inclusão
+	; arquivo (se a condição inicial for verdadeira); sua localização não é
+	; afetada pela condição
+	[includeIf "gitdir:/path/to/group/"]
+		path = foo.inc
+
+Valores
+~~~~~~~
+
+Valores de várias variáveis são tratados como string simples, mas sempre
+existem variáveis que pegam valores de tipos específicos e existem regras de
+como os soletrar.
+
+booleano::
+
+       Quando uma variável pega um valor booleano, muitos sinônimos são aceitos
+       para 'true' e 'false', esses são todos insensíveis a mudança de caixa.
+
+	verdadeiro;; 	Literais booleanos verdades são `yes`,`on`,`true`,
+		e `1`.  Além disso, uma variável definida sem `= <value>`
+		é tomada como verdadeira.
+
+	falso;; 	Falsos literais booleanos são `no`, `off`, `false`,
+		`0` e a string vazia.
++
+Quando converter um valor a sua forma canônica usando o tipo de
+especificação `--type=bool`, 'git config' se assegurará que a saída é 'true'
+ou "false" (em caixa baixa).
+
+inteiro::
+       O valor de muitas variáveis que especificam vários tamanhos podem ter como
+       sufixo `k`,`M`, para dizer "escale o número por 1024", "por 1024x1024", etc.
+
+cor::
+       O valor de uma variável que pega uma cor de uma lista de cores (ao menos
+       duas, uma para o foreground e outra para o background) e atributos (quantos
+       você quiser), separados por espaços.
++
+As cores básicas aceitas são `black` (preto) , `red` (vermelho) , `green`
+(verde), `yellow` (amarelo) , `blue` (azul), `magenta` (magenta), `cyan`
+(ciano) and `white` (branco) para o primeiro plano; o segundo é o segundo
+plano.
++
+As cores também podem ser dadas como números entre 0 e 255; estes usam o
+modo ANSI de 256 cores (mas note que nem todos os terminais suportam
+isso). Se o seu terminal suportar, você também pode especificar valores RGB
+de 24 bits como hexadecimais, como `#ff0ab3`.
++
+Os atributos aceitos são `bold`, `dim`, `ul`, `blink`, `reverse`, `italic`,
+e `strike` (para letras cruzadas  ou "rasuradas"). A posição de qualquer
+atributo em relação às cores (antes, depois ou entre) não importa. Atributos
+específicos podem ser desativados prefixando-os com `no` ou `no-` (por
+exemplo, `noreverse`, `no-ul`, etc).
++
+Uma sequência de cores vazia não produz nenhum efeito de cor. Isso pode ser
+usado para evitar colorir elementos específicos sem desabilitar totalmente a
+cor.
++
+Para os slots de cores predefinidos do git, os atributos devem ser
+redefinidos no início de cada item na saída colorida. Portanto, definir
+`color.decorate.branch` como `black` irá pintar esse nome de branch em
+`black`, mesmo que a anterior esteja na mesma linha de saída (por exemplo,
+abrindo parênteses antes da linha de nomes de ramificações em `log
+--decorate`) é definido para ser pintado com `bold` ou algum outro
+atributo. No entanto, formatos de log personalizados podem fazer cores mais
+complicadas e em camadas, e os formulários negados podem ser úteis lá.
+
+caminho do diretório::
+	Uma variável que recebe um valor de nome de caminho pode receber uma string
+	que começa com "`~/`" ou "`~user/`", e a expansão usual do til acontece com
+	essa string:  `~/` é expandida para o valor de `$HOME`, e `~user/` para o
+	diretório inicial do usuário especificado.
+
+
+Variáveis
+~~~~~~~~~
+
+Note que esta lista não é abrangente e não necessariamente completa. Para
+variáveis específicas de comando, você encontrará uma descrição mais
+detalhada na página de manual apropriada.
+
+Outras ferramentas relacionadas ao git podem e usam suas próprias
+variáveis. Ao inventar novas variáveis para uso em sua própria ferramenta,
+certifique-se de que seus nomes não conflitem com aqueles que são usados
+pelo próprio Git e outras ferramentas populares, e descrevê-los em sua
+documentação.
+
+include::config/advice.txt[]
+
+include::config/core.txt[]
+
+include::config/add.txt[]
+
+include::config/alias.txt[]
+
+include::config/am.txt[]
+
+include::config/apply.txt[]
+
+include::config/blame.txt[]
+
+include::config/branch.txt[]
+
+include::config/browser.txt[]
+
+include::config/checkout.txt[]
+
+include::config/clean.txt[]
+
+include::config/color.txt[]
+
+include::config/column.txt[]
+
+include::config/commit.txt[]
+
+include::config/credential.txt[]
+
+include::config/completion.txt[]
+
+include::config/diff.txt[]
+
+include::config/difftool.txt[]
+
+include::config/fastimport.txt[]
+
+include::config/fetch.txt[]
+
+include::config/format.txt[]
+
+include::config/filter.txt[]
+
+include::config/fsck.txt[]
+
+include::config/gc.txt[]
+
+include::config/gitcvs.txt[]
+
+include::config/gitweb.txt[]
+
+include::config/grep.txt[]
+
+include::config/gpg.txt[]
+
+include::config/gui.txt[]
+
+include::config/guitool.txt[]
+
+include::config/help.txt[]
+
+include::config/http.txt[]
+
+include::config/i18n.txt[]
+
+include::config/imap.txt[]
+
+include::config/index.txt[]
+
+include::config/init.txt[]
+
+include::config/instaweb.txt[]
+
+include::config/interactive.txt[]
+
+include::config/log.txt[]
+
+include::config/mailinfo.txt[]
+
+include::config/mailmap.txt[]
+
+include::config/man.txt[]
+
+include::config/merge.txt[]
+
+include::config/mergetool.txt[]
+
+include::config/notes.txt[]
+
+include::config/pack.txt[]
+
+include::config/pager.txt[]
+
+include::config/pretty.txt[]
+
+include::config/protocol.txt[]
+
+include::config/pull.txt[]
+
+include::config/push.txt[]
+
+include::config/rebase.txt[]
+
+include::config/receive.txt[]
+
+include::config/remote.txt[]
+
+include::config/remotes.txt[]
+
+include::config/repack.txt[]
+
+include::config/rerere.txt[]
+
+include::config/reset.txt[]
+
+include::config/sendemail.txt[]
+
+include::config/sequencer.txt[]
+
+include::config/showbranch.txt[]
+
+include::config/splitindex.txt[]
+
+include::config/ssh.txt[]
+
+include::config/status.txt[]
+
+include::config/stash.txt[]
+
+include::config/submodule.txt[]
+
+include::config/tag.txt[]
+
+include::config/transfer.txt[]
+
+include::config/uploadarchive.txt[]
+
+include::config/uploadpack.txt[]
+
+include::config/url.txt[]
+
+include::config/user.txt[]
+
+include::config/versionsort.txt[]
+
+include::config/web.txt[]
+
+include::config/worktree.txt[]

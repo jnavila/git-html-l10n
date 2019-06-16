@@ -1,0 +1,219 @@
+--all::
+	Buscar todos os controles remotos.
+
+-a::
+--append::
+	Anexe os nomes das ref e os nomes dos objetos das referências buscadas ao
+	conteúdo existente de `.git/FETCH_HEAD`. Sem essa opção, os dados antigos em
+	`.git/FETCH_HEAD` serão sobrescritos.
+
+--profundidade=<profundidade>::
+	Limite a busca para o número especificado de confirmações da ponta de cada
+	histórico de ramificação remota. Se buscar um repositório 'superficial'
+	criado pelo `git clone` com a opção` --depth = <depth> `(veja linkgit:
+	git-clone[1]), aprofunde ou encurte o histórico para o número especificado
+	de commits. As tags para as confirmações aprofundadas não são buscadas.
+
+--aprofundar=<profundidade>::
+	Semelhante a --depth, exceto que especifica o número de confirmações do
+	limite raso atual em vez da ponta de cada histórico de ramificação remota.
+
+--raso-desde=<data>::
+	Aprofundar ou encurtar o histórico de um repositório raso para incluir todas
+	as confirmações alcançáveis após <data>.
+
+--raso-excluir=<revisão>::
+	Aprofundar ou encurtar o histórico de um repositório raso para incluir todas
+	as confirmações alcançáveis após <data>.
+
+--unshallow::
+	Se o repositório de origem estiver completo, converta um repositório raso em
+	um completo, removendo todas as limitações impostas pelos repositórios
+	rasos.
++
+Se o repositório de origem for superficial, busque o máximo possível para
+que o repositório atual tenha o mesmo histórico que o repositório de origem.
+
+--update-shallow::
+	Por padrão, ao buscar a partir de um repositório superficial, o `git fetch`
+	recusa refs que requerem atualização .git/shallow. Esta opção atualiza
+	.git/shallow e aceita tais referências.
+
+--negociação-tip=<commit|glob>::
+	Por padrão, o Git reportará, ao servidor, o commit alcançável de todos os
+	refs locais para encontrar commits comuns na tentativa de reduzir o tamanho
+	do arquivo de pacotes a ser recebido. Se especificado, o Git só reportará
+	commits alcançáveis das dicas dadas. Isso é útil para acelerar buscas quando
+	o usuário sabe qual ref local provavelmente terá commits em comum com o ref
+	upstream sendo buscado.
++
+Esta opção pode ser especificada mais de uma vez; Se assim for, o Git irá
+reportar commits de qualquer um dos commits dados.
++
+O argumento para essa opção pode ser um glob nos nomes de ref, um ref ou o
+(possivelmente abreviado) SHA-1 de um commit. A especificação de glob é
+equivalente a especificar essa opção várias vezes, uma para cada nome de
+referência correspondente.
++
+Veja também a variável de configuração `fetch.negotiationAlgorithm`
+documentada em linkgit: git-config[1].
+
+ifndef::git-pull[]
+--dry-run::
+	Mostre o que seria feito, sem fazer alterações.
+endif::git-pull[]
+
+-f::
+--force::
+	Quando 'git fetch' é usado com `<src>: <dst>` refspec ele pode se recusar a
+	atualizar o branch local como discutido
+ifdef::git-pull[]
+	na parte `<refspec>` do linkgit:git-fetch[1]
+	documentação.
+endif::git-pull[]
+ifndef::git-pull[]
+	na parte `<refspec>` abaixo.
+endif::git-pull[]
+	Esta opção sobrescreve essa verificação.
+
+-k::
+--keep::
+	Mantenha o pacote baixado.
+
+ifndef::git-pull[]
+--multiple::
+	Permitir que vários argumentos <repository> e <group> sejam
+	especificados. Nenhum <refspec> s pode ser especificado.
+
+-p::
+--prune::
+	Antes de buscar, remova todas as referências de rastreamento remoto que não
+	existem mais no controle remoto. As tags não estão sujeitas a remoção se
+	forem buscadas apenas por causa do acompanhamento automático da tag padrão
+	ou devido a uma opção --tags. No entanto, se as tags forem buscadas devido a
+	um refspec explícito (na linha de comando ou na configuração remota, por
+	exemplo, se o controle remoto foi clonado com a opção --mirror), elas também
+	estarão sujeitas a remoção. Fornecer `--prune-tags` é uma forma abreviada de
+	fornecer a tag refspec.
++
+Veja a seção de PRUNING abaixo para mais detalhes.
+
+-p::
+--prune-tags::
+	Antes de buscar, remova quaisquer tags locais que não existam mais no
+	controle remoto se `--prune` estiver ativado. Esta opção deve ser usada com
+	mais cuidado, ao contrário de `--prune` ela irá remover quaisquer
+	referências locais (tags locais) que tenham sido criadas. Esta opção é uma
+	forma abreviada de fornecer o refspec de tag explícito junto com o
+	`--prune`, veja a discussão sobre isso em sua documentação.
++
+Veja a seção de PRUNING abaixo para mais detalhes.
+
+endif::git-pull[]
+
+ifndef::git-pull[]
+-n::
+endif::git-pull[]
+--no-tags::
+	Por padrão, as tags que apontam para objetos que são baixados do repositório
+	remoto são buscadas e armazenadas localmente. Esta opção desativa esta tag
+	automática. O comportamento padrão de um controle remoto pode ser
+	especificado com a configuração remota. <Nome>.tagOpt. Veja linkgit:
+	git-config[1].
+
+ifndef::git-pull[]
+--refmap=<refspec>::
+	Ao buscar refs listadas na linha de comando, use o refspec especificado
+	(pode ser fornecido mais de uma vez) para mapear os refs para filiais de
+	rastreamento remoto, em vez dos valores das variáveis de configuração
+	`remote.*.Fetch` para o repositório remoto. Consulte a seção "Ramificações
+	de rastreamento remoto configuradas" para detalhes.
+
+-t::
+--tags::
+	Busque todas as tags do controle remoto (ou seja, busque as tags remotas
+	`refs/tags/*` em tags locais com o mesmo nome), além de qualquer outra coisa
+	que seria buscada. Usar essa opção sozinha não submete as tags à remoção,
+	mesmo se --prune for usado (embora as tags possam ser removidas de qualquer
+	maneira, se elas também forem o destino de uma referência explícita;
+	consulte `--prune`).
+
+--recurso-submódulos[=sim|sob-demanda|não]::
+	Essa opção controla se e sob quais condições novas confirmações de
+	submódulos preenchidos devem ser buscadas também. Ele pode ser usado como
+	uma opção booleana para desabilitar completamente a recursão quando definido
+	como 'no' ou para recodificar incondicionalmente em todos os submódulos
+	preenchidos quando definido como 'yes', que é o padrão quando essa opção é
+	usada sem qualquer valor. Use 'on-demand' para reciclar apenas em um
+	submódulo preenchido quando o superprojeto recuperar uma confirmação que
+	atualiza a referência do submódulo para uma confirmação que ainda não esteja
+	no clone do submódulo local.
+
+-j::
+--empregos=<n>::
+	Número de filhos paralelos a serem usados para buscar submódulos. Cada um
+	buscará de diferentes submódulos, de modo que buscar muitos submódulos será
+	mais rápido. Por padrão, os submódulos serão buscados um de cada vez.
+
+--no-recurse-submodules::
+	Desabilite a busca recursiva de submódulos (isto tem o mesmo efeito que usar
+	a opção `--recurse-submodules=no`).
+
+--submódulo-prefixo=<path>::
+	Prefira <path> a caminhos impressos em mensagens informativas, como
+	"Buscando submodulo foo". Essa opção é usada internamente ao recorrer a
+	submódulos.
+
+--recurso-submódulo-padrão=[sim|sob-demanda]::
+	Essa opção é usada internamente para fornecer temporariamente um valor
+	padrão não negativo para a opção --recurse-submodules. Todos os outros
+	métodos de configuração da recursão do submódulo da busca (como
+	configurações em linkgit: gitmodules[5] e linkgit: git-config[1])
+	sobrescrevem esta opção, assim como especificar - [no-]recurse-submodules
+	diretamente.
+endif::git-pull[]
+
+-u::
+--update-head-ok::
+	Por padrão, 'git fetch' se recusa a atualizar a cabeça que corresponde à
+	ramificação atual. Este sinalizador desativa o cheque. Isto é puramente para
+	o uso interno de 'git pull' para se comunicar com 'git fetch', e a menos que
+	você esteja implementando sua própria Porcelana, você não deve usá-la.
+
+--envio-pacote <envio-pacote>::
+	Quando dado, e o repositório para buscar é manipulado por 'git fetch-pack',
+	`--exec=<upload-pack>` é passado para o comando para especificar o caminho
+	não padrão para o comando executado na outra extremidade.
+
+ifndef::git-pull[]
+-q::
+--quiet::
+	Passe - silencie para git-fetch-pack e silencie quaisquer outros comandos
+	git usados internamente. O progresso não é relatado para o fluxo de erros
+	padrão.
+
+-v::
+--verbose::
+	Seja verboso.
+endif::git-pull[]
+
+--progress::
+	O status de progresso é relatado no fluxo de erro padrão por padrão quando
+	ele é anexado a um terminal, a menos que -q seja especificado. Esse
+	sinalizador força o status de progresso mesmo se o fluxo de erro padrão não
+	for direcionado para um terminal.
+
+-o <option>::
+--servidor-opção=<option>::
+	Transmita a string fornecida para o servidor ao se comunicar usando o
+	protocolo versão 2. A string fornecida não deve conter um caractere NUL ou
+	LF. Quando múltiplos `--server-option=<option>` são fornecidos, todos eles
+	são enviados para o outro lado na ordem listada na linha de comando.
+
+-4::
+--ipv4::
+	Use apenas endereços IPv4, ignorando endereços IPv6.
+
+-6::
+--ipv6::
+	Use apenas endereços IPv6, ignorando endereços IPv4.

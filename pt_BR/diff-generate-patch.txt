@@ -1,0 +1,180 @@
+Gerando patches com -p
+----------------------
+
+Quando "git-diff-index", "git-diff-tree", ou "git-diff-files" são executados
+com a opção -p, git diff sem a opção `--raw`, ou git log "com a opção" -p,
+eles não produzem a saída descrita acima; em vez disso, eles produzem um
+arquivo de correção. Você pode personalizar a criação de tais correções
+através das variáveis de ambiente `GIT_EXTERNAL_DIFF` e `GIT_DIFF_OPTS`.
+
+O que a opção -p produz é um pouco diferente do formato tradicional diff:
+
+1.   Ele é percebido por um cabeçalho "git diff" que se parece com isso:
+
+       diff --git a/arquivo1 b/arquivo2
++
+Os nomes de arquivos `a/` e `b/` são os mesmos, a menos que haja renomeação/
+cópia. Especialmente, mesmo para uma criação ou uma exclusão, `/dev/null` é
+_não_usado no lugar dos nomes de arquivos `a/` ou `b/`.
++
+Quando renomear/ copiar está envolvido, `file1` e `file2` mostram o nome do
+arquivo de origem da renomeação/ cópia e o nome do arquivo que renomeia/
+copia, produz, respectivamente.
+
+2.   Ele é seguido por uma ou mais linhas de cabeçalho estendidas:
+
+       modo antigo <mode>
+       novo modo <mode>
+       modo de arquivo excluído <mode>
+       novo modo de arquivo <mode>
+       copiar de <path>
+       copiar para <path>
+       renomear de <path>
+       renomear para <path>
+       índice de similaridade <number>
+       índice de dissimilaridade <number>
+       índice <hash>..<hash> <mode>
++
+Os modos de arquivo são impressos como números octal de 6 dígitos, incluindo
+o tipo de arquivo e os bits de permissão de arquivo.
++
+Os nomes de path nos cabeçalhos estendidos não incluem os prefixos `a/` e
+`b/`.
++
+O índice de similaridade é a porcentagem de linhas inalteradas e o índice de
+dissimilaridade é a porcentagem de linhas alteradas. É um inteiro
+arredondado, seguido por um sinal de porcentagem. O valor de índice de
+similaridade de 100% é, portanto, reservado para dois arquivos iguais,
+enquanto 100% de dissemelhança significa que nenhuma linha do arquivo antigo
+foi convertida no novo.
++
+A linha de índice inclui a soma de verificação SHA-1 antes e depois da
+alteração. O <mode> é incluído se o modo de arquivo não mudar; caso
+contrário, linhas separadas indicam o modo antigo e o novo.
+
+3.  Pathnames com caracteres "incomuns" são citados como explicado para a
+    variável de configuração `core.quotePath` (veja linkgit:git-config[1]).
+
+4.  Todos os arquivos `file1` na saída referem-se a arquivos antes do commit, e
+    todos os arquivos `file2` se referem a arquivos após o commit. É incorreto
+    aplicar cada alteração a cada arquivo sequencialmente. Por exemplo, este
+    patch irá trocar a e b:
+
+      diff --git a/a b/b
+      renomear de a
+      renomear para b
+      diff --git a/b b/a
+      renomear de b
+      renomear para a
+
+
+formato diff combinado
+----------------------
+
+Qualquer comando gerador de diff pode pegar a opção `-c` ou `--cc` para
+produzir um 'diff combinado' ao mostrar uma mesclagem. Este é o formato
+padrão ao mostrar mesclagens com linkgit:git-diff[1] ou
+linkgit:git-show[1]. Note também que você ode dar a opção `-m` a qualquer um
+desses comandos para forçar a geração de diffs com pais individuais de uma
+mesclagem.
+
+Um formato 'diff combinado' é assim:
+
+------------
+diff --combinado descreve.c
+index fabadb8,cc95eb0..4866510
+--- a/descrive.c
++++ b/descrive.c
+@@@ -98,20 -98,12 +98,20 @@@
+	return (a_date > b_date) ? -1 : (a_date == b_date) ? 0 : 1;
+  }
+
+- static void describe (char * arg)
+  -static void describe (struct commit * cmit, int last_one)
+++ estático void describe (char * arg, int last_one)
+   {
+  + unsigned char sha1 [20];
+  + struct commit * cmit;
+struct commit_list * list;
+static int inicializado = 0;
+struct commit_name * n;
+
+.+ 	if (get_sha1 (arg, sha1) <0)
+.+		 uso (describe_usage);
+.+	 cmit = lookup_commit_reference (sha1);
+.+	 if (! cmit)
+.+		 uso (describe_usage);
+.+
+	if (! inicializado) {
+		inicializado = 1;
+		for_each_ref (get_name);
+------------
+
+1.   Ele é percebido por um cabeçalho "git diff", que se parece com isso (quando
+     a opção  `-c` é usada):
+
+       diff --arquivo combinado
++
+ou assim (quando a opção `--cc` é usada):
+
+       .......arquivo diff --cc
+
+2.   Ele é seguido por uma ou mais linhas de cabeçalho estendidas (este exemplo
+     mostra uma mesclagem com dois pais):
+
+       índice <hash>,<hash>..<hash>
+       modo <mode>,<mode>..<mode>
+       novo modo de arquivo <mode>
+       modo de arquivo excluído <mode>,<mode>
++
+A linha `mode <mode>,<mode>..<mode>` aparece somente se pelo menos um dos
+<mode> for diferente do resto. Cabeçalhos estendidos com informações sobre o
+movimento de conteúdo detectado (renomeação e detecção de cópia) são
+projetados para trabalhar com diff de dois <tree-ish> e não são usados pelo
+formato diff combinado.
+
+3.   É seguido por duas-linhas-do-arquivo/ cabeçalho-de arquivo
+
+       --- a/ arquivo
+       +++ b/ arquivo
++
+Semelhante ao cabeçalho de duas linhas para o formato diff 'unificado'
+tradicional, o `/dev/null` é usado para sinalizar arquivos criados ou
+excluídos.
+
+4.   O formato do cabeçalho do pedaço é modificado para evitar que as pessoas o
+     carreguem acidentalmente para `patch -p1`. O formato diff combinado foi
+     criado para revisar as alterações de consolidação de mesclagem, e não foi
+     feito para ser aplicado. A mudança é semelhante à alteração no cabeçalho
+     'index' estendido:
+
+       @@@ <from-file-range> <from-file-range> <to-file-range> @@@
++
+Existem (números de pais + 1 caracteres `@` no cabeçalho do bloco para o
+formato de comparação combinado diff.
+
+Ao contrário do formato diff tradicional 'unificado', que mostra dois
+arquivos A e B com uma única coluna que tem `-` (menos -- aparece em A, mas
+removido em B), `+` (mais -- faltando em A, mas adicionado para B), ou `" "`
+(espaço -- inalterado) prefixo, este formato compara dois ou mais arquivos
+file1, file2, ... com um arquivo X, e mostra como X difere de cada
+fileN. Uma coluna para cara arquivo fileN é anexada à linha de saída para
+observar como a linha do X é diferente dela.
+
+Um caractere `-` na coluna N significa que a linha aparece no arquivo N, mas
+não aparece no resultado. Um caractere `+` na coluna N significa que a linha
+aparece no resultado, e fileN não possui aquela linha (em outras palavras, a
+linha foi adicionada, do ponto de vista daquele main).
+
+Na saída do exemplo acima, a assinatura da função foi alterada de ambos os
+arquivos (portanto, duas remoções `-` do file1 e do file2, mais `++` para
+significar que uma linha adicionada não aparece no file1 nem no
+file2). Também oito outras linhas são as mesmas do file1, mas não aparecem
+no file2 (portanto, prefixado com `+`).
+
+Quando mostrado pelo `git diff-tree -c`, ele compara os pais de uma
+consolidação de mesclagem com o resultado da mesclagem (ou seja,
+file1..fileN são os pais). Quando mostrado pelo `git diff-files -c`, compara
+os dois pais de mesclagem não resolvidos com o arquivo da árvore de trabalho
+(ou seja, file1 é o estágio 2, também conhecido como" nossa versão ", file2
+é o estágio 3" aka sua versão ").

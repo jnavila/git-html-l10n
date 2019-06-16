@@ -1,0 +1,65 @@
+Git est dans une certaine mesure agnostique concernant l'encodage des
+caractères.
+
+ - Le contenu des objets blob est une séquence d'octets non interprétés. Il n'y
+   a pas de conversion d'encodage au niveau de base.
+
+ - Les noms de chemins sont encodés en forme C de normalisation UTF-8. Ceci
+   s'applique aux objets arbre, au fichier d'index, au noms de références ainsi
+   qu'aux noms de chemin en argument de ligne de commande, aux variables
+   d'environnement et aux fichiers de configuration (`.git/config` (voir
+   linkgit:git-config[1]), linkgit:gitignore[5], linkgit:gitattributes[5] and
+   linkgit:gitmodules[5]).
++
+Remarquez que Git traite les noms de chemins comme des séquences d'octets
+non-nuls au niveau de base, il n'y a pas de conversion d'encodage des noms
+de fichiers (sauf sur Mac et Windows). De ce fait, l'utilisation de noms de
+chemins non-ASCII fonctionnera pratiquement, même sur les plateformes et
+systèmes de fichier utilisant d'anciens encodages d'ASCII étendu.
+
+ - Les messages du journal des validations sont typiquement encodés en UTF-8,
+   mais les autres encodages d'ASCII étendu sont aussi pris en charge. Ceci
+   inclut  ISO-8859-x, CP125x et de nombreux autres, mais _pas_ UTF-16/32,
+   EBCDIC ni les encodages multi-octets CJK (GBK, Shift-JIS, Big5, EUC-x, CP9xx
+   etc.).
+
+Bien que l'usage de UTF-8 dans les messages de validation soit encouragé, le
+cœur de Git et la porcelaine sont conçus pour ne pas forcer l'usage d'UTF-8
+dans les projets. Si tous les participants d'un projet donné trouvent plus
+simple d'utiliser des encodages anciens, Git ne l'interdit pas. Cependant,
+il y a quelques détails à garder en tête.
+
+. `git commit` et `git commit-tree` affichent un avertissement si le message
+  de validation fourni ne semble pas être une chaîne de caractères UTF-8
+  valide, à moins que vous n'indiquiez explicitement que votre projet utilise
+  un encodage ancien. La manière de l'indiquer est d'avoir i18n.commitencoding
+  dans `.git/config`, comme ceci :
++
+------------
+[i18n]
+	commitEncoding = ISO-8859-1
+------------
++
+Les objets commit créés avec le réglage ci-dessus enregistrent la valeur de
+`i18n.commitEncoding` dans leur entête d'encodage `encoding`. Ceci permet
+d'aider les personnes qui les liront plus tard. L'absence de cet entête
+implique que les message de validation est encodé en UTF-8.
+
+. Sauf indication contraire, 'git log', 'git show', 'git blame' et consort
+  lisent l'entête `encoding` d'un objet commit et essaient de ré-encoder le
+  message de validation en UTF-8. Vous pouvez spécifier l'encodage de sortie
+  que vous souhaitez avec `i18n.logOutputEncoding` dans le fichier
+  `.git/config`, comme ceci :
++
+------------
+[i18n]
+	logOutputEncoding = ISO-8859-1
+------------
++
+Si vous n'avez pas changé cette variable de configuration, c'est la valeur
+de `i18n.commitEncoding` qui est utilisée.
+
+Remarquez qu'il a été délibérément choisi de ne pas ré-encoder le message de
+validation quand le commit est créé pour forcer l'UTF-8 au niveau de l'objet
+commit parce que ré-encoder en UTF-8 n'est pas nécessairement une opération
+réversible.

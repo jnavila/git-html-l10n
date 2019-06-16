@@ -1,0 +1,1233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.10" />
+<title>git-bisect(1)</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>
+git-bisect(1) Manual Page
+</h1>
+<h2>NAME</h2>
+<div class="sectionbody">
+<p>git-bisect -
+   Use a pesquisa binária para encontrar o commit que introduziu um bug
+</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_sinopse">SINOPSE</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>git bisect</em> &lt;subcomando&gt; &lt;opções&gt;</pre>
+<div class="attribution">
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_descrição">DESCRIÇÃO</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>O comando assume vários subcomandos e diferentes opções, dependendo do
+subcomando:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git início de divisão [--prazo-{velho,bom}=&lt;prazo&gt; --prazo-{novo,mau}=&lt;prazo&gt;]
+                 [--não-confira] [&lt;mau&gt; [&lt;bom&gt;...]] [--] [&lt;paths&gt;...]
+git divisão (mau|novo|&lt;prazo-novo&gt;) [&lt;rev&gt;]
+git divisão (bom|velho|&lt;prazo-velho&gt;) [&lt;rev&gt;...]
+git termos de divisão [--termo-bom | --termo-ruim]
+git ignorar skip [(&lt;rev&gt;|&lt;alcance&gt;)...]
+git redefinição de divisão [&lt;commit&gt;]
+git divisão (visualizar|visão)
+git reprise de divisão &lt;logfile&gt;
+git divisão de registro
+git divisão corrida &lt;cmd&gt;...
+git ajuda na divisão</code></pre>
+</div></div>
+<div class="paragraph"><p>Esse comando usa um algoritmo de busca binária para descobrir qual commit no
+histórico do seu projeto introduziu um bug. Você o utiliza primeiro
+informando a um commit "ruim" que é conhecido por conter o bug, e um commit
+"bom" que é sabido antes do bug ser introduzido. Então, <code>git bisect</code>
+seleciona um commit entre esses dois endpoints e pergunta se o commit
+selecionado é" good "ou" bad ". Ele continua reduzindo o intervalo até
+encontrar o commit exato que introduziu a mudança.</p></div>
+<div class="paragraph"><p>De fato, <code>git bisect</code> pode ser usado para encontrar o commit que mudou *
+qualquer * propriedade do seu projeto; por exemplo, o commit que corrigiu um
+bug, ou o commit que causou o desempenho de um benchmark para melhorar. Para
+suportar esse uso mais geral, os termos "antigo" e "novo" podem ser usados
+no lugar de "bom" e "ruim", ou você pode escolher seus próprios
+termos. Consulte a seção "Termos alternativos" abaixo para obter mais
+informações.</p></div>
+<div class="sect2">
+<h3 id="_comandos_básicos_da_bissecção_começar_ruim_bom">Comandos básicos da bissecção: começar, ruim, bom</h3>
+<div class="paragraph"><p>Como exemplo, suponha que você esteja tentando encontrar o commit que
+quebrou um recurso que era conhecido por funcionar na versão <code>v2.6.13-rc2</code>
+do seu projeto. Você inicia uma sessão de bisseção da seguinte maneira:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect start
+$ git bisect bad                 # Current version is bad
+$ git bisect good v2.6.13-rc2    # v2.6.13-rc2 is known to be good</code></pre>
+</div></div>
+<div class="paragraph"><p>Uma vez que você tenha especificado pelo menos um commit ruim e um bom
+commit, o <code>git bisect</code> seleciona um commit no meio desse intervalo do
+histórico, faz check-out e produz algo similar ao seguinte:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Bisecting: 675 revisões deixadas para testar depois disso (aproximadamente 10 passos)</code></pre>
+</div></div>
+<div class="paragraph"><p>Agora você deve compilar a versão com check-out e testá-la. Se essa versão
+funcionar corretamente, digite</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect bom</code></pre>
+</div></div>
+<div class="paragraph"><p>Se essa versão estiver quebrada, digite</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect mau</code></pre>
+</div></div>
+<div class="paragraph"><p>Então <code>git bisect</code> irá responder com algo como</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>Bisecting: 337 revisões deixadas para testar depois disso (aproximadamente 9 passos)</code></pre>
+</div></div>
+<div class="paragraph"><p>Continue repetindo o processo: compile a árvore, teste-a e, dependendo se
+ela é boa ou ruim, execute <code>git bisect good</code> ou` git bisect bad` para
+solicitar o próximo commit que precisa ser testado.</p></div>
+<div class="paragraph"><p>Eventualmente, não haverá mais revisões para inspecionar e o comando
+imprimirá uma descrição do primeiro commit inválido. A referência
+<code>refs/bisect/bad</code> será deixada apontando para o commit.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_redefinir_bisseta">Redefinir bisseta</h3>
+<div class="paragraph"><p>Após uma sessão de divisão, para limpar o estado de bisseção e retornar ao
+CABEÇO original, emita o seguinte comando:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git redefinição de bisseta</code></pre>
+</div></div>
+<div class="paragraph"><p>Por padrão, isso retornará sua árvore para o commit que foi verificado antes
+de <code>git bisect start</code>.  (Um novo <code>git início de bisseta</code> também fará isso,
+já que limpa o antigo estado de bisseção.)</p></div>
+<div class="paragraph"><p>Com um argumento opcional, você pode retornar a um commit diferente:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git redefinição de bisseta &lt;commit&gt;</code></pre>
+</div></div>
+<div class="paragraph"><p>Por exemplo, <code>git bisect reset bisect/bad</code> irá verificar a primeira revisão
+incorreta, enquanto` git bisect reset HEAD` deixará você no commit atual da
+bisseção e evitará cometer commits.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_termos_alternativos">Termos alternativos</h3>
+<div class="paragraph"><p>Às vezes, você não está procurando a confirmação que introduziu uma quebra,
+mas sim uma confirmação que causou uma alteração entre algum outro estado
+"antigo" e o estado "novo". Por exemplo, você pode estar procurando o commit
+que introduziu uma correção específica. Ou você pode estar procurando pelo
+primeiro commit no qual os nomes dos arquivos de código-fonte foram
+finalmente convertidos para o padrão de nomenclatura de sua empresa. Como
+queira.</p></div>
+<div class="paragraph"><p>Em tais casos, pode ser muito confuso usar os termos "bom" e "ruim" para se
+referir a "o estado antes da mudança" e "o estado após a mudança". Então, em
+vez disso, você pode usar os termos "antigo" e "novo", respectivamente, no
+lugar de "bom" e "ruim". (Mas note que você não pode misturar "bom" e "ruim"
+com "velho" e "novo" em uma única sessão.)</p></div>
+<div class="paragraph"><p>Neste uso mais geral, você fornece <code>git bisect</code> com um commit" novo "que tem
+alguma propriedade e um commit" antigo "que não tem essa propriedade. Cada
+vez que <code>git bisect</code> faz o check out de um commit, você testa se o commit
+tem a propriedade. Em caso afirmativo, marque o commit como "novo"; Caso
+contrário, marque-o como "antigo". Quando a bissecção estiver concluída, o
+<code>git bisect</code> informará qual commit introduziu a propriedade.</p></div>
+<div class="paragraph"><p>Para usar "velho" e "novo" em vez de "bom" e mau, você deve executar o <code>git
+bisect start</code> sem confirmar como argumento e depois executar os seguintes
+comandos para adicionar os commits:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>git bisseta velha [&lt;rev&gt;]</code></pre>
+</div></div>
+<div class="paragraph"><p>para indicar que um commit foi feito antes da mudança solicitada, ou</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>git bisseta nova [&lt;rev&gt;...]</code></pre>
+</div></div>
+<div class="paragraph"><p>para indicar que foi depois.</p></div>
+<div class="paragraph"><p>Para receber um lembrete dos termos usados no momento, use</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>git termos de divisão</code></pre>
+</div></div>
+<div class="paragraph"><p>Você pode obter apenas o termo antigo (respectivamente novo) com <code>git bisect
+terms --term-old</code> ou` git bisect terms --term-good`.</p></div>
+<div class="paragraph"><p>Se você gostaria de usar seus próprios termos em vez de "ruim"/ "bom" ou
+"novo"/ "velho", você pode escolher qualquer nome que quiser (exceto os
+subcomandos bisect existentes como <code>reset</code>,` start`, .. .) iniciando a
+bissecção usando</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>git início de divisão --termo-velho &lt;termo-velho&gt; --termo-novo &lt;termo-novo&gt;</code></pre>
+</div></div>
+<div class="paragraph"><p>Por exemplo, se você estiver procurando por uma confirmação que introduziu
+uma regressão de desempenho, poderá usar</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>git início de divisão --termo-velho rápido --termo-novo lento</code></pre>
+</div></div>
+<div class="paragraph"><p>Ou se você está procurando o commit que corrigiu um bug, você pode usar</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>git início de divisão --term-novo fixo --term-velho quebrado</code></pre>
+</div></div>
+<div class="paragraph"><p>Então, use <code>git divisão &lt;termo-velho&gt;</code> e <code>git divisão &lt;termo-novo&gt;</code> em vez
+de <code>git divisão bom</code> e` git divisão mau` para marcar os commits.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_bissetrizar_visualizar_visão">Bissetrizar Visualizar/visão</h3>
+<div class="paragraph"><p>Para ver os suspeitos restantes no <em>gitk</em>, emita o seguinte comando durante
+o processo de bissetriz (o <code>view</code> do subcomando pode ser usado como uma
+alternativa para` visualize`):</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git visualizar divisão</code></pre>
+</div></div>
+<div class="paragraph"><p>Se a variável de ambiente <code>DISPLAY</code> não estiver definida, o <em>git log</em> é
+usado em seu lugar.  Você também pode dar opções de linha de comando como
+<code>-p</code> e` --stat`.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git visualizar divisão --stat</code></pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_divisão_de_log_e_divisão_de_replay">Divisão de log e divisão de replay</h3>
+<div class="paragraph"><p>Depois de ter marcado as revisões como boas ou ruins, emita o seguinte
+comando para mostrar o que foi feito até agora:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git log de divisão</code></pre>
+</div></div>
+<div class="paragraph"><p>Se você descobrir que cometeu um erro ao especificar o status de uma
+revisão, poderá salvar a saída desse comando em um arquivo, editá-lo para
+remover as entradas incorretas e, em seguida, emitir os seguintes comandos
+para retornar a um estado corrigido:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git redefinição de divisão
+$ git repetir a divisão desse arquivo</code></pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_evitando_testar_um_commit">Evitando testar um commit</h3>
+<div class="paragraph"><p>Se, no meio de uma sessão de bisect, você sabe que a revisão sugerida não é
+boa para testar (por exemplo, ela falha em construir e você sabe que a falha
+não tem nada a ver com o bug que você está perseguindo), pode selecionar
+manualmente um commit próximo e testá-lo.</p></div>
+<div class="paragraph"><p>Por exemplo:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect good/bad                   # previous round was good or bad.
+Bisecting: 337 revisions left to test after this (roughly 9 steps)
+$ git bisect visualize                  # oops, that is uninteresting.
+$ git reset --hard HEAD~3               # try 3 revisions before what
+                                        # was suggested</code></pre>
+</div></div>
+<div class="paragraph"><p>Em seguida, compile e teste a revisão escolhida e depois marque a revisão
+como boa ou ruim da maneira usual.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_pular_divisão">Pular divisão</h3>
+<div class="paragraph"><p>Em vez de escolher um commit próximo, você pode pedir ao Git para fazer isso
+por você, emitindo o comando:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect skip                 # Current version cannot be tested</code></pre>
+</div></div>
+<div class="paragraph"><p>No entanto, se você pular um commit adjacente ao que você está procurando, o
+Git não saberá exatamente qual desses commits foi o primeiro mau.</p></div>
+<div class="paragraph"><p>Você também pode ignorar um intervalo de confirmações, em vez de apenas um
+commit, usando a notação de intervalo. Por exemplo:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git pular divisão v2.5..v2.6</code></pre>
+</div></div>
+<div class="paragraph"><p>Isso diz ao processo de divisão que nenhuma confirmação após <code>v2.5</code>, até e
+incluindo` v2.6`, deve ser testada.</p></div>
+<div class="paragraph"><p>Observe que, se você também quiser pular a primeira confirmação do
+intervalo, deverá emitir o comando:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git pukar divisão v2.5 v2.5..v2.6</code></pre>
+</div></div>
+<div class="paragraph"><p>Isso informa ao processo de divisão que as confirmações entre <code>v2.5</code> e`
+v2.6` (inclusive) devem ser ignoradas.</p></div>
+</div>
+<div class="sect2">
+<h3 id="_reduzir_a_bisseção_fornecendo_mais_parâmetros_para_o_início_da_divisão">Reduzir a bisseção, fornecendo mais parâmetros para o início da divisão</h3>
+<div class="paragraph"><p>Você pode reduzir ainda mais o número de tentativas, se você souber que
+parte da árvore está envolvida no problema que você está rastreando,
+especificando parâmetros de caminho ao emitir o comando <code>bisect start</code>:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git divisão start -- arch/i386 incluir/asm-i386</code></pre>
+</div></div>
+<div class="paragraph"><p>Se você souber de antemão mais de um bom commit, você pode restringir o
+espaço de bisseção especificando todas as boas confirmações imediatamente
+após o commit negativo ao emitir o comando <code>bisect start</code>:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect start v2.6.20-rc6 v2.6.20-rc4 v2.6.20-rc1 --
+                   # v2.6.20-rc6 is bad
+                   # v2.6.20-rc4 and v2.6.20-rc1 are good</code></pre>
+</div></div>
+</div>
+<div class="sect2">
+<h3 id="_corrida_de_divisão">Corrida de divisão</h3>
+<div class="paragraph"><p>Se você tiver um script que possa dizer se o código-fonte atual é bom ou
+ruim, você pode dividir a divisão emitindo o comando:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git executar divisão de argumentos my_script</code></pre>
+</div></div>
+<div class="paragraph"><p>Observe que o script (<code>my_script</code> no exemplo acima) deve sair com o código 0
+se o código-fonte atual for bom / antigo e sair com um código entre 1 e 127
+(inclusive), exceto 125, se o código-fonte atual for má notícia.</p></div>
+<div class="paragraph"><p>Qualquer outro código de saída abortará o processo de divisão. Deve-se notar
+que um programa que termina via <code>exit (-1)</code> deixa $? = 255, (veja a saída
+(3) página de manual), como o valor é cortado com <code>&amp; 0377</code>.</p></div>
+<div class="paragraph"><p>O código de saída especial 125 deve ser usado quando o código-fonte atual
+não puder ser testado. Se o script sair com este código, a revisão atual
+será pulada (veja <code>git bisect skip</code> acima). 125 foi escolhido como o valor
+sensivel mais alto a ser usado para este propósito, porque 126 e 127 são
+usados por shells POSIX para sinalizar status de erro específico (127 é para
+comando não encontrado, 126 é para comando encontrado mas não executável -
+esses detalhes não importa, como eles são erros normais no script, no que
+diz respeito <code>bisect run</code>).</p></div>
+<div class="paragraph"><p>Muitas vezes você pode achar que durante uma sessão de bisseção você quer
+ter modificações temporárias (por exemplo, s / # define DEBUG 0 / # define
+DEBUG 1 / em um arquivo de cabeçalho, ou "revisão que não tem este commit
+precisa deste patch aplicado a um trabalho outro problema que esta bissecção
+não está interessada em ") aplicada à revisão que está sendo testada.</p></div>
+<div class="paragraph"><p>Para lidar com tal situação, após o <em>git bisect</em> interno encontrar a próxima
+revisão a ser testada, o script pode aplicar o patch antes de compilar,
+executar o teste real e depois decidir se a revisão (possivelmente com o
+patch necessário) foi aprovada teste e rebobine a árvore até o estado
+original. Finalmente, o script deve sair com o status do teste real para
+permitir que o loop de comando <code>git bisect run</code> determine o resultado final
+da sessão de bisseção.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_opções">OPÇÕES</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+--no-checkout
+</dt>
+<dd>
+<div class="paragraph"><p>Não registre a nova árvore de trabalho em cada iteração do processo de
+bissecção. Em vez disso, basta atualizar uma referência especial chamada
+<code>BISECT_HEAD</code> para que aponte para a confirmação que deve ser testada.</p></div>
+<div class="paragraph"><p>Essa opção pode ser útil quando o teste que você executaria em cada etapa
+não exigir uma árvore com check-out.</p></div>
+<div class="paragraph"><p>Se o repositório estiver vazio, <code>--no-checkout</code> é assumido.</p></div>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exemplos">EXEMPLOS</h2>
+<div class="sectionbody">
+<div class="ulist"><ul>
+<li>
+<p>
+Bissectar automaticamente uma construção quebrada entre v1.2 e HEAD:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect start HEAD v1.2 --      # HEAD is bad, v1.2 is good
+$ git bisect run make                # "make" builds the app
+$ git bisect reset                   # quit the bisect session</code></pre>
+</div></div>
+</li>
+<li>
+<p>
+Bissectar automaticamente uma falha de teste entre origem e HEAD:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect start HEAD origin --    # HEAD is bad, origin is good
+$ git bisect run make test           # "make test" builds and tests
+$ git bisect reset                   # quit the bisect session</code></pre>
+</div></div>
+</li>
+<li>
+<p>
+Bissectar automaticamente um caso de teste quebrado:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ cat ~/test.sh
+#!/bin/sh
+make || exit 125                     # this skips broken builds
+~/check_test_case.sh                 # does the test case pass?
+$ git bisect start HEAD HEAD~10 --   # culprit is among the last 10
+$ git bisect run ~/test.sh
+$ git bisect reset                   # quit the bisect session</code></pre>
+</div></div>
+<div class="paragraph"><p>Aqui nós usamos um script customizado <code>test.sh</code>. Neste script, se <code>make</code>
+falhar, pulamos o commit atual. <code>check_test_case.sh</code> deve` exit 0` se o caso
+de teste passar, e <code>exit 1</code> caso contrário.</p></div>
+<div class="paragraph"><p>É mais seguro se os arquivos <code>test.sh</code> e` check_test_case.sh` estiverem fora
+do repositório para evitar interações entre os processos de divisão, criação
+e teste e os scripts.</p></div>
+</li>
+<li>
+<p>
+Cortar automaticamente com modificações temporárias (hot-fix):
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ cat ~/teste.sh
+#!/bin/sh
+
+# tweak the working tree by merging the hot-fix branch
+# and then attempt a build
+if      git merge --no-commit hot-fix &amp;&amp;
+        make
+then
+        # run project specific test and report its status
+        ~/check_test_case.sh
+        status=$?
+else
+        # tell the caller this is untestable
+        status=125
+fi
+
+# desfaça o tweak para permitir uma mudança limpa para o próximo commit
+git reset --hard
+
+# controle de retorno
+existir $status</code></pre>
+</div></div>
+<div class="paragraph"><p>Isto aplica modificações de uma ramificação de correção automática antes de
+cada teste, por ex. caso seu ambiente de criação ou teste seja alterado, de
+modo que as revisões mais antigas possam precisar de uma correção que as
+mais recentes já tenham. (Certifique-se de que a ramificação hot-fix seja
+baseada em uma confirmação que está contida em todas as revisões que você
+está dividindo, de forma que a mesclagem não atraia muito, ou use <code>git
+cherry-pick</code> em vez de` git merge`. )</p></div>
+</li>
+<li>
+<p>
+Bissectar automaticamente um caso de teste quebrado:
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect start HEAD HEAD~10 --   # culprit is among the last 10
+$ git bisect run sh -c "make || exit 125; ~/check_test_case.sh"
+$ git bisect reset                   # quit the bisect session</code></pre>
+</div></div>
+<div class="paragraph"><p>Isso mostra que você pode fazer sem um script de execução se você escrever o
+teste em uma única linha.</p></div>
+</li>
+<li>
+<p>
+Localize uma boa região do gráfico de objetos em um repositório danificado
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git bisect start HEAD &lt;known-good-commit&gt; [ &lt;boundary-commit&gt; ... ] --no-checkout
+$ git bisect run sh -c '
+        GOOD=$(git for-each-ref "--format=%(objectname)" refs/bisect/good-*) &amp;&amp;
+        git rev-list --objects BISECT_HEAD --not $GOOD &gt;tmp.$$ &amp;&amp;
+        git pack-objects --stdout &gt;/dev/null &lt;tmp.$$
+        rc=$?
+        rm -f tmp.$$
+        test $rc = 0'
+
+$ git bisect reset                   # quit the bisect session</code></pre>
+</div></div>
+<div class="paragraph"><p>Neste caso, quando <em>git bisect run</em> termina, bisect / bad se referirá a um
+commit que tem pelo menos um pai cujo grafo alcançável é totalmente travável
+no sentido requerido pelos <em>git pack objects</em>.</p></div>
+</li>
+<li>
+<p>
+Procure uma correção em vez de uma regressão no código
+</p>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git início de divisão
+$ git divisão nova HEAD    # commit atual está marcado como novo
+$ git divisão velha HEAD~10 # o décimo commit a partir de agora é marcado como antigo</code></pre>
+</div></div>
+<div class="paragraph"><p>ou:</p></div>
+</li>
+</ul></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git início de divisão --termo-velho quebrado --termo-novo fixo
+$ git divisão fixada
+$ git dividir quebrado HEAD ~ 10</code></pre>
+</div></div>
+<div class="sect2">
+<h3 id="_conseguindo_ajuda">Conseguindo ajuda</h3>
+<div class="paragraph"><p>Use <code>git bisect</code> para obter uma descrição resumida do uso, e` git bisect
+help` ou <code>git bisect -h</code> para obter uma descrição longa do uso.</p></div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_veja_também">VEJA TAMBÉM</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="git-divisão-lk2009.html">Regressões de combate com divisão git</a>,
+<a href="git-blame.html">git-blame(1)</a>.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Parte do linkgit: git[1] suite</p></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated
+ 2019-06-16 22:08:34 CEST
+</div>
+</div>
+</body>
+</html>

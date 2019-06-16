@@ -1,0 +1,108 @@
+URL GIT[[URLS]]
+---------------
+
+En général, les URL contiennent une information sur le protocole de
+transport, l'adresse du serveur distant et le chemin vers le dépôt. En
+fonction du protocole de transport, certaines de ces informations peuvent
+être absentes.
+
+Git supporte les protocoles ssh, git, http et https (en plus, ftp et ftps
+peuvent être utilisés pour la récupération, mais ceux-ci sont inefficaces et
+déconseillés ; ne les utilisez pas).
+
+Le transport natif (c'est-à-dire l'URL git://) n'utilise pas
+d'authentification et ne devrait être utilisé qu'avec précaution sur des
+réseaux non sécurisés.
+
+Les syntaxes suivantes peuvent être utilisées avec eux :
+
+- ssh://{startsb}utilisateur@{endsb}hôte.xz{startsb}:port{endsb}/chemin/vers/le/dépôt.git/
+- git://hôte.xz{startsb}:port{endsb}/chemin/vers/le/dépôt.git/
+- http{startsb}s{endsb}://hôte.xz{startsb}:port{endsb}/chemin/vers/le/dépôt.git/
+- ftp{startsb}s{endsb}://hôte.xz{startsb}:port{endsb}/chemin/vers/le/dépôt.git/
+
+Une syntaxe alternative de type scp peut aussi être utilisée pour le
+protocole ssh :
+
+- {startsb}utilisateur@{endsb}hôte.xz:chemin/vers/le/dépôt.git/
+
+Cette syntaxe n'est reconnue que s'il n'y a pas de barre oblique devant les
+premiers deux-points. Cela permet de prendre en charge des chemins locaux
+qui contiendraient des deux-points. Par exemple, le chemin local `toto:titi`
+pourrait être spécifié comme un chemin absolu ou `./toto:titi` pour éviter
+d'être interprété comme une url ssh.
+
+Les protocoles ssh et git supportent en plus l'expansion ~utilisateur :
+
+- ssh://{startsb}utilisateur@{endsb}hôte.xz{startsb}:port{endsb}/~{startsb}utilisateur{endsb}/chemin/vers/le/dépôt.git/
+- git://hôte.xz{startsb}:port{endsb}/~{startsb}utilisateur{endsb}/chemin/vers/le/dépôt.git/
+- {startsb}utilisateur@{endsb}hôte.xz:/~{startsb}utilisateur{endsb}/chemin/vers/le/dépôt.git/
+
+Pour les dépôts locaux, supportés aussi nativement par Git, les syntaxes
+suivantes sont aussi admises :
+
+- /chemin/vers/le/dépôt.git/
+- \file:///chemin/vers/le/dépôt.git/
+
+ifndef::git-clone[]
+Ces deux syntaxes sont à peu près équivalentes, à part lors d'un clonage, où
+la première implique l'option `--local`. Voir linkgit:git-clone[1] pour plus
+de détails.
+endif::git-clone[]
+
+ifdef::git-clone[]
+Ces deux syntaxes sont à peu près équivalentes, à part que la première
+implique l'option `--local`.
+endif::git-clone[]
+
+Quand Git ne sait pas comment gérer un certain protocole, il essaie
+d'utiliser l'assistant de gestion de distant 'remote-<transport>', s'il
+existe. Pour requérir l'emploi d'un assistant spécifique, la syntaxe
+suivante peut être utilisée :
+
+- <transport>::<adresse>
+
+où <adresse> peut être un chemin, un serveur et chemin, ou une chaîne URL
+arbitraire reconnue par l'assistant de gestion de distant invoqué. Voir
+linkgit:gitremote-helpers[1] pour plus de détails.
+
+S'il y a un grand nombre de dépôts aux noms similaires et que vous souhaitez
+utiliser un format différent pour eux (de telle sorte que les URL que vous
+utiliserez seront réécrites en URL fonctionnelles), vous pouvez créer une
+section de configuration de la forme :
+
+------------
+	[url "<base d'URL correcte>"]
+		insteadOf = <autre base d'URL>
+------------
+
+Par exemple, avec ceci :
+
+------------
+	[url "git://git.host.xz/"]
+		insteadOf = host.xz:/chemin/vers/
+		insteadOf = travail:
+------------
+
+une URL comme « travail:depot.git » ou « host.xz:/chemin/vers/depot.git »
+sera réécrite dans tout contexte qui requiert une URL en
+« git://git.host.xz/depot.git ».
+
+Si vous souhaitez réécrire les URL seulement pour pousser, vous pouvez créer
+une section de configuration de la forme :
+
+------------
+	[url "<base d'URL correcte>"]
+		pushInsteadOf = <autre base d'URL>
+------------
+
+Par exemple, avec ceci :
+
+------------
+	[url "ssh://exemple.org/"]
+		pushInsteadOf = git://exemple.org/
+------------
+
+une URL telle que « git://exemple.org/chemin/vers/le/depot.git » sera
+réécrite en « ssh://exemple.org/chemin/vers/le/depot.git » pour les
+poussées, mais les tirages utiliseront encore l'URL originale.

@@ -1,0 +1,137 @@
+git-check-ref-format(1)
+=======================
+
+NOME
+----
+git-verifique-o-formato-ref - Garante que um nome de referência seja bem
+formado
+
+SINOPSE
+-------
+[verse]
+'git check-ref-format' [--normalize]
+       [--[no-]allow-onelevel] [--refspec-pattern]
+       <refname>
+'git check-ref-format' --branch <branchname-shorthand>
+
+DESCRIÇÃO
+---------
+Verifica se um determinado 'refnome' é aceitável e sai com um status
+diferente de zero, se não for.
+
+Uma referência é usada no Git para especificar ramificações e tags.  Um
+branch head é armazenado na hierarquia `refs/heads`, enquanto um tag é
+armazenado na hierarquia` refs/tags` do espaço de nome ref (normalmente em
+`$GIT_DIR/refs/heads` e` $GIT_DIR/refs/tags `diretórios ou, como entradas no
+arquivo` $GIT_DIR/packed-refs`, se os refs forem empacotados por `git gc`).
+
+O Git impõe as seguintes regras sobre como as referências são nomeadas:
+
+. Eles podem incluir slash `/` para agrupamento hierárquico (diretório),
+   mas nenhum componente separado por barras pode começar com um ponto `.` ou
+  terminar com a sequência `.lock`.
+
+. Eles devem conter pelo menos um `/`. Isso impõe a presença de uma categoria
+  como `heads /`, `tags /` etc., mas os nomes reais não são restritos.  Se a
+  opção `--allow-onelevel` for usada, esta regra é dispensada.
+
+. Eles não podem ter dois pontos consecutivos `..` em qualquer lugar.
+
+. Eles não podem ter caracteres de controle ASCII (ou seja, bytes cujos
+  valores são menores que \040, ou \177 `DEL`), espaço, til `~ `, circunflexo
+  `^ `ou dois pontos `: `em qualquer lugar.
+
+. Eles não podem ter o ponto de interrogação `?`, asterisco `*` ou colchete
+  aberto `[` em qualquer lugar.  Veja a opção `--refspec-pattern` abaixo para
+  uma exceção a esta regra.
+
+. Eles não podem iniciar ou terminar com uma barra `/` ou conter múltiplas
+  barras consecutivas (veja a opção `--normalize` abaixo para uma exceção a
+  esta regra)
+
+. Eles não podem terminar com um ponto `.`.
+
+. Eles não podem conter uma sequência `@{`.
+
+. Eles não podem ser o único caractere `@`.
+
+. Eles não podem conter um `\`.
+
+Estas regras facilitam para ferramentas baseadas em script de shell analisar
+nomes de referência, expansão de nome de caminho pelo shell quando um nome
+de referência é usado sem aspas (por engano), e também evitar ambiguidades
+em certas expressões de nomes de referência (ver linkgit:gitrevisions[7]) :
+
+. Um ponto duplo `..`  é freqüentemente usado como em` ref1..ref2` e, em
+  alguns contextos, essa notação significa `^ref1 ref2` (isto é, não em` ref1`
+  e em `ref2`).
+
+. Um til `~` e um caractere circunflexo `^` são usados para introduzir a
+  operação do postfix 'nth parent' e 'peel onion'.
+
+. Um ponto-e-vírgula `:` é usado como `srcref: dstref` para significar" use o
+  valor de srcref e armazene-o em dstref "em operações de busca e envio.  Ele
+  também pode ser usado para selecionar um objeto específico, como com 'git
+  cat-file': "git cat-arquivo blob v1.3.3: refs.c".
+
+. at-open-brace `@{` é usado como uma notação para acessar uma entrada de
+  reflog.
+
+Com a opção `--branch`, o comando obtém um nome e verifica se ele pode ser
+usado como um nome de ramificação válido (por exemplo, ao criar uma nova
+ramificação). Mas seja cauteloso ao usar a sintaxe de verificar anterior que
+pode se referir a um estado HEAD separado. A regra `git
+verifique-o-formato-ref --branch $nome` implementa pode ser mais restrita do
+que o que diz o` git check-ref-format refs/heads/$nome` (por exemplo, um
+traço pode aparecer no início de um componente de referência, mas é
+explicitamente proibido no início de um nome de ramificação).  Quando
+executado com a opção `--branch` em um repositório, a entrada é
+primeiramente expandida para a` `sintaxe de verificação prévia ''`@{- n}`.
+Por exemplo, `@{- 1}` é uma maneira de referenciar a última coisa que foi
+registrada usando a operação "git verificar". Essa opção deve ser usada por
+porcelanas para aceitar essa sintaxe em qualquer lugar em que um nome de
+ramificação é esperado, para que eles possam agir como se você tivesse
+digitado o nome da ramificação. Como uma exceção, note que a operação de
+verificar anterior pode resultar em um nome de objeto commit quando a última
+coisa que foi registrada não é uma ramificação.
+
+OPÇÕES
+------
+--[no-]allow-onelevel::
+	Controla se refnomes de um nível são aceitos (isto é, refnomes que não
+	contêm múltiplos componentes separados por `/`).  O padrão é
+	`--não-allow-onelevel`.
+
+--refspec-pattern::
+	Interprete <refnome> como um padrão de nome de referência para um refspec
+	(conforme usado com repositórios remotos). Se esta opção estiver habilitada,
+	<refnome> tem permissão para conter um único `*` no refspec (por exemplo,
+	`foo/bar*/baz` ou`foo/bar*baz/ `mas não` foo/bar*/baz*`).
+
+--normalize::
+	Normalize 'refnome' removendo quaisquer caracteres de barra (`/`) e
+	reduzindo as execuções de barras adjacentes entre componentes de nomes em
+	uma única barra.  Se o refnome normalizado for válido, imprima-o na saída
+	padrão e saia com um status 0, caso contrário saia com um status diferente
+	de zero. (`--print` é uma maneira obsoleta de soletrar` --normalize`.)
+
+
+EXEMPLOS
+--------
+
+* Imprima o nome da coisa anterior registrada:
++
+------------
+$ git verifique-o-formato-ref --branch @{-1}
+------------
+
+* Determine o nome de referência a ser usado para uma nova ramificação:
++
+------------
+$ ref=$(git verifica-o-formato-ref--normalize "refs/heads/$novobranch")||
+{ echo "nós não gostamos '$novobranch' as a branch nome." >&2 ; exit 1 ; }
+------------
+
+GIT
+---
+Parte do linkgit: git[1] suite

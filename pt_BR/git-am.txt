@@ -1,0 +1,228 @@
+git-am(1)
+=========
+
+NOME
+----
+git-am - Aplica uma série de patches de uma caixa de correio
+
+
+SINOPSE
+-------
+[verse]
+'git am' [--signoff] [--manter] [--[não-]manter-cr] [--[não-]utf8]
+	[--[não-]3caminho] [--interativo] [--committer-data-é-autor-data]
+	[--ignorar-data] [--ignorar-mudança-de-espaço | --ignorar-espaço-em-branco]
+	[--espaço-em-branco=<opção>] [-C<n>] [-p<n>] [--diretório=<dir>]
+	[--excluir=<path>] [--incluir=<path>] [--rejeitar] [-q | --quieto]
+	[--[não-]tesouras] [-S[<keyid>]] [--patch-formato=<formato>]
+	[(<mbox> | <Maildir>)...]
+'git am' (--continuar | --skip | --abortar | --quieto | --mostrar-atual-patch)
+
+DESCRIÇÃO
+---------
+Divide as mensagens de correio em uma caixa de correio em mensagens de log
+de confirmação, informações de autoria e correções e as aplica ao ramo
+atual.
+
+OPÇÕES
+------
+(<mbox>|<Maildir>)...::
+	A lista de arquivos de caixa de correio para ler os patches. Se você não
+	fornecer esse argumento, o comando lerá a partir da entrada padrão.  Se você
+	fornecer diretórios, eles serão tratados como Maildirs.
+
+-s::
+--signoff::
+	Adicione uma linha 'Assinado-off-by:' à mensagem de commit, usando a própria
+	identidade do committer.  Veja a opção de signoff em linkgit:git-commit[1]
+	para mais informações.
+
+-k::
+--keep::
+	Passe o sinalizador `-k` para 'git mailinfo' (veja linkgit:
+	git-mailinfo[1]).
+
+--keep-non-patch::
+	Passe o sinalizador `-b` para 'git mailinfo' (veja linkgit:git-mailinfo[1]).
+
+--[no-]keep-cr::
+	Com `--keep-cr`, chame 'git mailsplit' (veja linkgit:git-mailsplit[1])  com
+	a mesma opção, para evitar que ele retire CR no final das linhas. A variável
+	de configuração `am.keepcr` pode ser usada para especificar o comportamento
+	padrão.  `--no-keep-cr` é útil para sobrescrever` am.keepcr`.
+
+-c::
+--scissors::
+	Remova tudo no corpo antes de uma linha de tesoura (veja
+	linkgit:git-mailinfo[1]). Pode ser ativado por padrão usando a variável de
+	configuração `mailinfo.scissors`.
+
+--no-scissors::
+	Ignore linhas de tesoura (veja linkgit:git-mailinfo[1]).
+
+-m::
+--message-id::
+	Passe o sinalizador `-m` para 'git mailinfo' (veja linkgit:git-mailinfo[1]),
+	para que o cabeçalho do Message-ID seja adicionado à mensagem de submissão.
+	A variável de configuração 'am.messageid` pode ser usada para especificar o
+	comportamento padrão.
+
+--no-message-id::
+	Não adicione o cabeçalho do ID da mensagem à mensagem de confirmação.
+	`no-message-id` é útil para sobrescrever` am.messageid`.
+
+-q::
+--quiet::
+	Fique quieto. Imprime apenas mensagens de erro.
+
+-u::
+--utf8::
+	Passe o sinalizador `-u` para 'git mailinfo' (veja
+	linkgit:git-mailinfo[1]).  A mensagem de log de confirmação proposta
+	retirada do e-mail é recodificada em codificação UTF-8 (a variável de
+	configuração `i18n.commitencoding` pode ser usada para especificar a
+	codificação preferida do projeto, se não for UTF-8).
++
+Isso era opcional em versões anteriores do git, mas agora é o
+padrão.   Você pode usar `--no-utf8` para sobrescrever isto. 
+
+--no-utf8::
+	Passe o sinalizador `-n` para 'git mailinfo' (veja linkgit:git-mailinfo[1]).
+
+-3::
+--3way::
+--no-3way::
+	Quando o patch não se aplica corretamente, use a mesclagem de 3 vias se o
+	patch registra a identidade dos blobs aos quais ele deve se aplicar e temos
+	esses blobs disponíveis localmente. `--no-3way` pode ser usado para
+	sobrescrever a variável de configuração am.threeWay. Para mais informações,
+	veja am.threeWay em linkgit:git-config[1].
+
+--ignore-space-change::
+--ignore-whitespace::
+--espaçoembranco=<opção>::
+-C<n>::
+-p<n>::
+--diretório=<dir>::
+--excluir=<path>::
+--incluir=<path>::
+--reject::
+	Esses sinalizadores são passados para o programa 'git apply' (ver
+	linkgit:git-apply 1])  que aplica o patch.
+
+--patch-format::
+	Por padrão, o comando tentará detectar o formato do patch
+	automaticamente. Esta opção permite que o usuário ignore a detecção
+	automática e especifique o formato do patch com o qual os patch(es) devem
+	ser interpretados. Os formatos válidos são mbox, mboxrd, stgit, stgit-series
+	e hg.
+
+-i::
+--interactive::
+	Corra interativamente.
+
+--committer-date-is-author-date::
+	Por padrão, o comando registra a data da mensagem de e-mail como a data do
+	autor de confirmação e usa a hora da criação de confirmação como a data do
+	committer. Isso permite ao usuário mentir sobre a data do committer usando o
+	mesmo valor da data do autor.
+
+--ignore-date::
+	Por padrão, o comando registra a data da mensagem de e-mail como a data do
+	autor de confirmação e usa a hora da criação de confirmação como a data do
+	committer. Isso permite ao usuário mentir sobre a data do autor usando o
+	mesmo valor que a data do committer.
+
+--skip::
+	Ignore o patch atual.  Isso só é significativo ao reiniciar um patch
+	abortado.
+
+-S[<keyid>]::
+--gpg-sinal[=<keyid>]::
+	Confirmações de assinatura de GPG. O argumento `keyid` é opcional e
+	padroniza a identidade do committer; se especificado, deve estar preso à
+	opção sem espaço.
+
+--continue::
+-r::
+--resolved::
+	Após uma falha de patch (por exemplo, tentar aplicar um patch em conflito),
+	o usuário o aplicou manualmente e o arquivo de índice armazena o resultado
+	do aplicativo.  Faça um commit usando o log de autoria e confirmação
+	extraído da mensagem de e-mail e o arquivo de índice atual e continue.
+
+--resolvermsg=<msg>::
+	Quando ocorre uma falha de patch, <msg> será impresso na tela antes de
+	sair.  Isto substitui a mensagem padrão informando que você deve usar
+	`--continue` ou` --skip` para manipular a falha. Isto é apenas para uso
+	interno entre 'git rebase' e 'git am'.
+
+--abort::
+	Restaure a ramificação original e aborte a operação de correção.
+
+--quit::
+	Anule a operação de correção, mas mantenha HEAD e o índice inalterados.
+
+--show-current-patch::
+	Mostrar o patch sendo aplicado quando "git am" é interrompido devido a
+	conflitos.
+
+DISCUSSÃO
+---------
+
+O nome do autor de confirmação é retirado da linha "De:" da mensagem e a
+data do autor de envio é obtida a partir da linha "Data:" da mensagem.  A
+linha "Assunto:" é usada como o título da confirmação, após remover o
+prefixo comum "[PATCH <qualquer>>]".  A linha "Assunto:" deve descrever de
+forma concisa o que é o compromisso em uma linha de texto.
+
+As linhas "De:" e "Assunto:" iniciando o corpo substituem os respectivos
+valores de nome e título do autor de confirmação retirados dos cabeçalhos.
+
+A mensagem de confirmação é formada pelo título obtido a partir do
+"Assunto:", uma linha em branco e o corpo da mensagem até onde o patch
+começa.  O excesso de espaço em branco no final de cada linha é
+automaticamente eliminado.
+
+Espera-se que o patch esteja em linha, seguindo diretamente a
+mensagem. Qualquer linha que seja da forma:
+
+* três-traços e fim-de-linha, ou
+* uma linha que começa com "diff -" ou
+* uma linha que começa com "Index:"
+
+é tomado como o início de um patch, e a mensagem de log de confirmação é
+finalizada antes da primeira ocorrência de tal linha.
+
+Ao invocar inicialmente o `git am`, você fornece os nomes das caixas de
+correio a serem processadas.  Ao ver o primeiro patch que não se aplica, ele
+aborta no meio.  Você pode se recuperar disso de duas maneiras:
+
+. pule o patch atual reexecutando o comando com a opção `--skip`.
+
+. mão resolver o conflito no diretório de trabalho e atualizar o arquivo de
+  índice para colocá-lo em um estado que o patch deve ter produzido.
+   Então execute o comando com a opção `--continue`.
+
+O comando se recusa a processar novas caixas de correio até que a operação
+atual seja concluída, portanto, se você decidir recomeçar do zero, execute o
+`git am --abort` antes de executar o comando com nomes de caixa de correio.
+
+Antes que qualquer correção seja aplicada, ORIG_HEAD é definido como a ponta
+da ramificação atual.  Isso é útil se você tiver problemas com várias
+confirmações, como executar 'git am' na ramificação errada ou um erro nas
+confirmações mais facilmente corrigido alterando a caixa de correio (por
+exemplo,  erros nas linhas "De:").
+
+GANCHOS
+-------
+Este comando pode executar os ganchos `applypatch-msg`,` pre-applypatch` e
+`post-applypatch`. Veja linkgit:githooks[5] para mais informações.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-aplicar1].
+
+GIT
+---
+Parte do linkgit: git[1] suite

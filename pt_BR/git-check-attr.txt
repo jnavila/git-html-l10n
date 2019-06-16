@@ -1,0 +1,118 @@
+git-check-attr(1)
+=================
+
+NOME
+----
+git-check-attr - Exibe informações sobre gitattributes
+
+
+SINOPSE
+-------
+[verse]
+'git check-attr' [-a | --all | <attr>...] [--] <pathname>...
+'git check-attr' --stdin [-z] [-a | --all | <attr>...]
+
+DESCRIÇÃO
+---------
+Para cada nome de caminho, este comando listará se cada atributo é "não
+especificado", "definido" ou "não configurado" como um atributo de atributo
+nesse nome de caminho.
+
+OPÇÕES
+------
+-a, --todo::
+	Listar todos os atributos associados aos caminhos especificados.  Se esta
+	opção for usada, os atributos 'não especificados' não serão incluídos na
+	saída.
+
+--cached::
+	Considere `.gitattributos` apenas no índice, ignorando a árvore de trabalho.
+
+--stdin::
+	Leia os nomes de caminho da entrada padrão, um por linha, em vez da linha de
+	comando.
+
+-z::
+	O formato de saída é modificado para ser analisável por máquina.  Se
+	`--stdin` também é fornecido, os caminhos de entrada são separados por um
+	caractere NUL em vez de um caractere de alimentação de linha.
+
+\--::
+	Interprete todos os argumentos anteriores como atributos e todos os
+	argumentos a seguir como nomes de caminho.
+
+Se nenhum `--stdin`,` --todo` ou `--` para usado, o primeiro argumento será
+tratado como um atributo e o restante dos argumentos como nomes de caminho.
+
+SAÍDA
+-----
+
+A saída é do formato: <caminho> COLON SP <atributo> COLON SP <info> LF
+
+a menos que `-z` esteja em vigor, caso em que NUL é usado como delimitador:
+<path> NUL <atributo> NUL <info> NUL
+
+
+<path> é o caminho de um arquivo sendo consultado, <atributo> é um atributo
+sendo consultado e <info> pode ser:
+
+'não especificado';; quando o atributo não está definido para o path.
+'não definido';;	quando o atributo é definido como falso.
+'conjunto';;		quando o atributo é definido como verdadeiro.
+<valor>;;	quando um valor foi atribuído ao atributo.
+
+Buffering acontece conforme documentado sob a opção `GIT_FLUSH` em
+linkgit:git[1]. O chamador é responsável por evitar deadlocks causados pelo
+excesso de buffer de entrada ou pela leitura de um buffer de saída vazio.
+
+EXEMPLOS
+--------
+
+Nos exemplos, o seguinte arquivo '.gitattributos' é usado:
+---------------
+*.java diff=java -crlf myAttr
+NoMyAttr.java !myAttr
+README caveat=unspecified
+---------------
+
+* Listando um único atributo:
+---------------
+$ git check-attr diff org/example/MyClass.java
+org/example/MyClass.java: diff: java
+---------------
+
+* Listando vários atributos para um arquivo:
+---------------
+$ git check-attr crlf diff myAttr -- org/example/MyClass.java
+org/example/MyClass.java: crlf: unset
+org/example/MyClass.java: diff: java
+org/example/MyClass.java: myAttr: set
+---------------
+
+* Listando todos os atributos de um arquivo:
+---------------
+$ git check-attr --all -- org/example/MyClass.java
+org/example/MyClass.java: diff: java
+org/example/MyClass.java: myAttr: set
+---------------
+
+* Listando um atributo para vários arquivos:
+---------------
+$ git check-attr myAttr -- org/example/MyClass.java org/example/NoMyAttr.java
+org/example/MyClass.java: myAttr: set
+org/example/NoMyAttr.java: myAttr: unspecified
+---------------
+
+* Nem todos os valores são igualmente inequívocos:
+---------------
+$ git check-attr caveat README
+README: caveat: unspecified
+---------------
+
+VEJA TAMBÉM
+-----------
+linkgit:gitatributos[5].
+
+GIT
+---
+Parte do linkgit: git[1] suite

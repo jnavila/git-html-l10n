@@ -1,0 +1,352 @@
+git-branch(1)
+=============
+
+NOME
+----
+git-branch - Lista, cria ou exclui filiais
+
+SINOPSE
+-------
+[verse]
+'git branch' [--color[=<when>] | --no-color] [-r | -a]
+	[--list] [-v [--abbrev=<length> | --no-abbrev]]
+	[--column[=<options>] | --no-column] [--sort=<key>]
+	[(--merged | --no-merged) [<commit>]]
+	[--contains [<commit]] [--no-contains [<commit>]]
+	[--points-at <object>] [--format=<format>] [<pattern>...]
+'git branch' [--track | --no-track] [-f] <branchname> [<start-point>]
+'git branch' (--set-upstream-to=<upstream> | -u <upstream>) [<branchname>]
+'git branch' --unset-upstream [<branchname>]
+'git branch' (-m | -M) [<oldbranch>] <newbranch>
+'git branch' (-c | -C) [<oldbranch>] <newbranch>
+'git branch' (-d | -D) [-r] <branchname>...
+'git branch' --edit-description [<branchname>]
+
+DESCRIÇÃO
+---------
+
+Se `--list` for fornecido, ou se não houver argumentos não-opcionais, as
+ramificações existentes serão listadas; o ramo atual será destacado com um
+asterisco. A opção `-r` faz com que as ramificações de rastreamento remoto
+sejam listadas, e a opção` -a` mostra ramificações locais e remotas. Se um
+`<pattern>` é dado, ele é usado como um caractere curinga do shell para
+restringir a saída às ramificações correspondentes. Se vários padrões forem
+fornecidos, uma ramificação será mostrada se corresponder a qualquer um dos
+padrões.  Note que ao fornecer um `<pattern>`, você deve usar `--list`; caso
+contrário, o comando é interpretado como criação de ramificação.
+
+Com `--contains`, mostra apenas as ramificações que contêm o commit nomeado
+(em outras palavras, os branches cuja dica commit é descendente da commit
+nomeada),` --no-contains` a inverte. Com o `--merged`, somente os ramos
+mesclados na confirmação nomeada (ou seja, os ramos cujas dicas são
+acessadas a partir da confirmação nomeada) serão listados.  Com as
+ramificações `--no-merged` somente não mescladas no commit nomeado serão
+listadas. Se o argumento <commit> estiver faltando, o padrão é `HEAD` (isto
+é, a ponta do branch atual).
+
+O segundo formulário do comando cria um novo cabeçalho de ramificação
+chamado <branchname>, que aponta para o atual `HEAD`, ou <start-point>, se
+fornecido.
+
+Observe que isso criará a nova ramificação, mas não mudará a árvore de
+trabalho para ela; use "git checkout <newbranch>" para mudar para o novo
+branch.
+
+Quando uma ramificação local é iniciada em uma ramificação de controle
+remoto, o Git configura a ramificação (especificamente as entradas de
+configuração branch. <Name> .remote` e branch. <Name> .merge`) para que 'git
+pull' seja mesclar adequadamente a ramificação de rastreamento remoto. Este
+comportamento pode ser alterado através do sinalizador de configuração
+global `branch.autoSetupMerge`. Essa configuração pode ser sobrescrita
+usando as opções `--track` e` --no-track`, e alteradas posteriormente usando
+`git branch --set-upstream-to`.
+
+Com uma opção `-m` ou` -M`, <oldbranch> será renomeado para <newbranch>.  Se
+<oldbranch> tiver um reflog correspondente, ele será renomeado para
+corresponder a <newbranch> e uma entrada reflog será criada para lembrar a
+renomeação da ramificação. Se <newbranch> existir, -M deve ser usado para
+forçar a renomeação.
+
+As opções `-c` e` -C` possuem exatamente a mesma semântica de `-m` e` -M`,
+exceto que em vez de o branch ser renomeado juntamente com sua configuração,
+o reflog será copiado para um novo nome.
+
+Com uma opção `-d` ou` -D`, o `<branchname>` será deletado.  Você pode
+especificar mais de uma ramificação para exclusão. Se a ramificação tiver um
+reflog atualmente, o reflog também será excluído.
+
+Use `-r` juntamente com` -d` para excluir ramificações de rastreamento
+remoto. Observe que só faz sentido excluir ramificações de rastreamento
+remoto se elas não existirem mais no repositório remoto ou se a "busca de
+git" tiver sido configurada para não buscá-las novamente. Veja também o
+subcomando 'prune' do linkgit: git-remote[1] para uma maneira de limpar
+todas as ramificações de rastreamento remoto obsoletas.
+
+
+OPÇÕES
+------
+-d::
+--delete::
+	Exclua uma ramificação. A ramificação deve ser totalmente integrada em sua
+	ramificação upstream, ou em `HEAD` se não houver upstream configurado com`
+	--track` ou `--set-upstream-to`.
+
+-D::
+	Atalho para `--excluir--força`.
+
+--create-reflog::
+	Crie o reflogo da ramificação. Isso ativa a gravação de todas as alterações
+	feitas no ref da ramificação, permitindo o uso de expressões sha1 baseadas
+	em data, como "<branchname>@{yesterday}".  Note que em repositórios não-nus,
+	os reflogs são geralmente ativados por padrão pela opção de configuração
+	`core.logAllRefUpdates`.  O formulário negado `--no-create-reflog` apenas
+	substitui um` --create-reflog` anterior, mas atualmente não nega a
+	configuração de `core.logAllRefUpdates`.
+
+-f::
+--force::
+	Redefina <nome da ramificação> para <ponto inicial>, mesmo que o <nome da
+	ramificação> já exista. Sem `-f`, o 'git branch' se recusa a mudar um branch
+	existente.  Em combinação com o `-d` (ou` --delete`), permite deletar o
+	branch independentemente de seu status mesclado. Em combinação com `-m` (ou`
+	--move`), permite renomear o ramo mesmo que o novo nome de ramificação já
+	exista, o mesmo se aplica a `-c` (ou` --copy`).
+
+-m::
+--move::
+	Mover / renomear uma ramificação e o reflog correspondente.
+
+-M::
+	Atalho para `--mover --força`.
+
+-c::
+--copy::
+	Copie uma ramificação e o reflogo correspondente.
+
+-C::
+	Shortcut for `--cópia --força`.
+
+--color [= <quando>]::
+	Ramos de cor para realçar ramificações atuais, locais e remotas. O valor
+	deve ser sempre (o padrão), nunca ou automático.
+
+--no-color::
+	Desative as cores das ramificações, mesmo quando o arquivo de configuração
+	fornecer a saída padrão a cores. O mesmo que `--cor=nunca`.
+
+-i::
+--ignore-case::
+	As ramificações de classificação e filtragem não diferenciam maiúsculas de
+	minúsculas.
+
+--coluna[=<opções>]::
+--no-column::
+	Exibir listagem de filiais em colunas. Veja a variável de configuração
+	coluna.branch para a sintaxe de opções. - coluna` e `--não-coluna` sem
+	opções são equivalentes a 'sempre' e 'nunca' respectivamente.
++
+Esta opção é aplicável apenas no modo não detalhado.
+
+-r::
+--remotes::
+	Listar ou excluir (se usado com -d) os ramos de rastreamento remoto.
+
+-a::
+--all::
+	Listar filiais de rastreamento remoto e filiais locais.
+
+-l::
+--list::
+	Listar branches.  Com o opcional `<pattern> ...`, por ex. `git branch --list
+	'maint - *'`, lista apenas as ramificações que correspondem ao(s)
+	padrão(ões).
+
+-v::
+-vv::
+--verbose::
+	Quando estiver no modo de lista, mostre sha1 e submeta a linha de assunto
+	para cada cabeçalho, junto com o relacionamento com a ramificação upstream
+	(se houver). Se dado duas vezes, imprima o nome da ramificação upstream,
+	também (veja também `git remote show <remote>`).
+
+-q::
+--quiet::
+	Seja mais quieto ao criar ou excluir uma ramificação, suprimindo mensagens
+	que não sejam de erro.
+
+--abrev=<comprimento>::
+	Altere o comprimento de exibição mínimo do sha1 na listagem de saída. O
+	valor padrão é 7 e pode ser sobrescrito pela opção de configuração
+	`core.abbrev`.
+
+--no-abbrev::
+	Exibe os sha1s completos na listagem de saída, em vez de abreviá-los.
+
+-t::
+--track::
+	Ao criar uma nova ramificação, configure as entradas de configuração
+	`branch. <Name> .remote` e` branch. <Name> .merge` para marcar a ramificação
+	do ponto inicial como "upstream" da nova ramificação. Esta configuração irá
+	dizer ao git para mostrar a relação entre as duas ramificações em `git
+	status` e` git branch -v`. Além disso, ele direciona `git pull` sem
+	argumentos para puxar do upstream quando o novo branch é retirado.
++
+Esse comportamento é o padrão quando o ponto inicial é um ramo de
+rastreamento remoto. Configure a variável de configuração
+branch.autoSetupMerge para `false` se você quiser que` git checkout` e `git
+branch` sempre se comporte como se` --no-track` fosse dado. Defina-o como
+`sempre` se você quiser esse comportamento quando o ponto de partida for um
+ramo local ou de rastreamento remoto.
+
+--no-track::
+	Não configure "upstream", mesmo que a variável de configuração
+	branch.autoSetupMerge seja verdadeira.
+
+--set-upstream::
+	Como essa opção tinha uma sintaxe confusa, não é mais suportada.  Por favor
+	use `--track` ou` --set-upstream-to`.
+
+-u <upstream>::
+--set-upstream-to=<upstream>::
+	Configure as informações de rastreamento do <branchnome> para que o
+	<upstream> seja considerado o ramo upstream do <branchnome>. Se nenhum
+	<branchnome> for especificado, o padrão será o ramo atual.
+
+--unset-upstream::
+	Remova as informações de upstream para <branchnome>. Se nenhuma ramificação
+	for especificada, o padrão será a ramificação atual.
+
+--edit-description::
+	Abra um editor e edite o texto para explicar para que serve o ramo, para ser
+	usado por vários outros comandos (por exemplo, `format-patch`,`
+	request-pull` e `merge` (se ativado)). Explicações de várias linhas podem
+	ser usadas.
+
+--contém [<commit>]::
+	Apenas as ramificações da lista que contêm a confirmação especificada (HEAD,
+	se não especificada). Implica `--list`.
+
+--não-contém [<commit>]::
+	Apenas listar ramificações que não contenham o commit especificado (HEAD se
+	não especificado). Implica `--list`.
+
+--merged [<commit>]::
+	Apenas listar ramificações cujas dicas estejam acessíveis a partir da
+	confirmação especificada (HEAD, se não especificado). Implica `--list`,
+	incompatível com` --no-merged`.
+
+--não-merged [<commit>]::
+	Apenas listar ramificações cujas dicas não podem ser acessadas a partir da
+	confirmação especificada (HEAD, se não especificado). Implica `--list`,
+	incompatível com` --merged`.
+
+<branchnome>::
+	O nome do ramo a criar ou eliminar.  O novo nome da ramificação deve passar
+	por todas as verificações definidas pelo linkgit: git-check-ref-format[1].
+	Algumas dessas verificações podem restringir os caracteres permitidos em um
+	nome de ramificação.
+
+<start-ponto>::
+	O novo chefe de ramificação apontará para este commit.  Pode ser dado como
+	um nome de ramificação, um ID de confirmação ou uma tag.  Se esta opção for
+	omitida, o HEAD atual será usado no lugar.
+
+<velhobranch>::
+	O nome de uma ramificação existente para renomear.
+
+<novobranch>::
+	O novo nome para um ramo existente. As mesmas restrições que para
+	<branchnome> se aplicam.
+
+--ordenar=<chave>::
+	Classifique com base na chave fornecida. Prefixo `-` para classificar em
+	ordem decrescente do valor. Você pode usar a opção --ordenar = <chave>
+	várias vezes, em cujo caso a última chave se torna a chave primária. As
+	chaves suportadas são as mesmas do `git para-cada-ref`. A ordem de
+	classificação é padronizada para o valor configurado para a variável
+	branch.sort, se existir, ou para a classificação baseada no refnome completo
+	(incluindo o prefixo `refs/...`). Isso lista HEAD separado (se presente)
+	primeiro, depois as ramificações locais e, finalmente, as ramificações de
+	rastreamento remoto. Veja linkgit:git-config[1].
+
+
+--pontos-em <objeto>::
+	Apenas lista ramos do objeto dado.
+
+--formato <formato>::
+	Uma string que interpola `%(fieldnome)` de uma ref de branch sendo mostrada
+	e o objeto para o qual ela aponta.  O formato é o mesmo do
+	linkgit:git-para-cada-ref[1].
+
+CONFIGURAÇÃO
+------------
+`pager.branch` só é respeitado quando se listam ramificações, ou seja,
+quando` --list` é usado ou implícito. O padrão é usar um pager. Veja
+linkgit:git-config[1].
+
+EXEMPLOS
+--------
+
+Inicie o desenvolvimento a partir de uma tag conhecida::
++
+------------
+$ git clone git://git.kernel.org/pub/scm/.../linux-2.6 my2.6
+$ cd my2.6
+$ git branch my2.6.14 v2.6.14   <1>
+$ git checkout my2.6.14
+------------
++
+<1> Esta etapa e a próxima poderiam ser combinadas em uma única etapa com
+    "checkout -b my2.6.14 v2.6.14".
+
+Excluir um ramo desnecessário::
++
+------------
+$ git clone git://git.kernel.org/.../git.git my.git
+$ cd my.git
+$ git branch -d -r origin/todo origin/html origin/man   <1>
+$ git branch -D test                                    <2>
+------------
++
+<1> Exclua os ramos de rastreamento remoto "todo", "html" e "man". A próxima
+    'fetch' ou 'pull' irá criá-los novamente, a menos que você os configure
+    não. Veja linkgit:git-fetch[1].
+<2> Exclua a ramificação "teste", mesmo que a ramificação "principal" (ou a
+    ramificação que está com check-out no momento) não tenha todas as
+    confirmações da ramificação de teste.
+
+
+NOTAS
+-----
+
+Se você está criando uma ramificação que deseja obter imediatamente, é mais
+fácil usar o comando git checkout com sua opção `-b` para criar uma
+ramificação e verificar com um único comando.
+
+As opções `--contains`,` --não-contains`, `--merged` e` --não-merged` servem
+quatro finalidades relacionadas, mas diferentes:
+
+- `--contains <commit>` é usado para encontrar todas as ramificações que
+  precisarão de atenção especial se <commit> precisar ser rebaseado ou
+  corrigido, uma vez que essas ramificações contêm o <commit> especificado.
+
+- `--não-contains <commit>` é o inverso disso, isto é, ramificações que não
+  contêm o <commit> especificado.
+
+- `--merged` é usado para encontrar todas as ramificações que podem ser
+  excluídas com segurança, uma vez que essas ramificações são totalmente
+  contidas pelo HEAD.
+
+- `--não-merged` é usado para encontrar ramificações candidatas a serem
+  mescladas no HEAD, uma vez que essas ramificações não são totalmente
+  contidas pelo HEAD.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-check-ref-formato[1], linkgit: git-busca[1],
+linkgit:git-remoto[1], link: usuário-manual.html#que-é-uma-branch[``
+Compreensão história: O que é um branch? ''] no Manual do Usuário do Git.
+
+GIT
+---
+Parte do linkgit: git[1] suite

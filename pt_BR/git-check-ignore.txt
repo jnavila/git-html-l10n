@@ -1,0 +1,121 @@
+git-check-ignore(1)
+===================
+
+NOME
+----
+git-verifique-ignorar - Depurar gitignorar / excluir arquivos
+
+
+SINOPSE
+-------
+[verse]
+'git verificar-ignorar' [<opções>] <pathnome>...
+'git verificar-ignorar' [<opções>] --stdin
+
+DESCRIÇÃO
+---------
+
+Para cada nome de caminho dado através da linha de comando ou de um arquivo
+via `--stdin`, verifique se o arquivo foi excluído por .gitignorar (ou
+outros arquivos de entrada para o mecanismo de exclusão) e imprima o caminho
+se ele for excluído.
+
+Por padrão, os arquivos rastreados não são exibidos, pois não estão sujeitos
+a regras de exclusão. mas veja `--não-índice '.
+
+OPÇÕES
+------
+-q, --quieto::
+	Não produza nada, apenas configure o status de saída.  Isso é válido apenas
+	com um único nome de path.
+
+-v, --verbose::
+	Também detalhes de saída sobre o padrão correspondente (se houver)  para
+	cada nome de caminho fornecido. Para regras de precedência dentro e entre as
+	fontes exclude, veja linkgit:gitignorar[5].
+
+--stdin::
+	Leia os nomes de caminho da entrada padrão, um por linha, em vez da linha de
+	comando.
+
+-z::
+	O formato de saída é modificado para ser analisável por máquina (veja
+	abaixo).  Se `--stdin` também é fornecido, os caminhos de entrada são
+	separados por um caractere NUL em vez de um caractere de alimentação de
+	linha.
+
+-n, --não-coincidindo::
+	Mostrar paths que não correspondem a nenhum padrão.	 Isto só faz sentido
+	quando o `--verbose` está habilitado, caso contrário não seria possível
+	distinguir entre caminhos que correspondem a um padrão e aqueles que não o
+	fazem.
+
+--no-index::
+	Não procure no índice ao realizar as verificações. Isso pode ser usado para
+	depurar porque um caminho foi rastreado por, e. `git add .` e não foi
+	ignorado pelas regras como esperado pelo usuário ou ao desenvolver padrões
+	incluindo negação para corresponder a um caminho previamente adicionado com`
+	git add -f`.
+
+SAÍDA
+-----
+
+Por padrão, qualquer um dos nomes de caminho fornecidos que correspondem a
+um padrão de ignorar será gerado, um por linha.  Se nenhum padrão
+corresponder a um determinado caminho, nada será produzido para esse
+caminho; isso significa que o caminho não será ignorado.
+
+Se `--verbose` for especificado, a saída será uma série de linhas do
+formulário:
+
+<origem> <COLON> <linenum> <COLON> <padrão> <HT> <nome do path>
+
+<pathnome> é o path de um arquivo sendo consultado, <padronizar> é o padrão
+correspondente, <fonte> é o arquivo de origem do padrão e <número-de-linha>
+é o número da linha do padrão dentro dessa origem. Se o padrão continha um
+prefixo `!` Ou `/`, ele será preservado na saída. <fonte> será um caminho
+absoluto quando se referir ao arquivo configurado por `core.excluirArquivo`,
+ou relativo à raiz do repositório quando se referir a` .git/info/excluir` ou
+um arquivo de exclusão por diretório.
+
+Se `-z` for especificado, os nomes de caminho na saída são delimitados pelo
+caractere nulo; se `--verbose` também for especificado, então caracteres
+nulos também serão usados em vez de vírgulas e guias rígidas:
+
+<fonte> <NULL> <número de linhas> <NULL> <padrão> <NULL> <nome do path>
+<NULL>
+
+Se `-n` ou` --não-coincidindo` forem especificados, nomes de caminhos não
+correspondentes também serão emitidos, caso em que todos os campos em cada
+registro de saída, exceto para <nome do path>, estarão vazios. Isso pode ser
+útil ao executar de forma não interativa, para que os arquivos possam ser
+transmitidos de forma incremental para STDIN de um processo de ignorar
+cheque de longa execução e, para cada um desses arquivos, STDOUT indicará se
+esse arquivo correspondeu a um padrão. (Sem essa opção, seria impossível
+dizer se a ausência de saída para um determinado arquivo significava que ele
+não correspondia a nenhum padrão ou que a saída ainda não havia sido
+gerada.)
+
+Buffering acontece conforme documentado sob a opção `GIT_FLUSH` em
+linkgit:git[1]. O chamador é responsável por evitar deadlocks causados pelo
+excesso de buffer de entrada ou pela leitura de um buffer de saída vazio.
+
+ESTADO DE SAÍDA
+---------------
+
+0::
+	Um ou mais dos caminhos fornecidos são ignorados.
+
+1::
+	Nenhum dos caminhos fornecidos é ignorado.
+
+128::
+	Um erro fatal foi encontrado.
+
+VEJA TAMBÉM
+-----------
+linkgit:gitignore[5] linkgit:git-config[1] linkgit:git-ls-files[1]
+
+GIT
+---
+Parte do linkgit: git[1] suite

@@ -1,0 +1,219 @@
+git-cherry-pick(1)
+==================
+
+NOME
+----
+git-cherry-pick - Aplique as alterações introduzidas por alguns commits
+existentes
+
+SINOPSE
+-------
+[verse]
+'git cherry-pick' [--edit] [-n] [-m parent-number] [-s] [-x] [--ff]
+		  [-S[<keyid>]] <commit>...
+'git cherry-pick' --continue
+'git cherry-pick' --quit
+'git cherry-pick' --abort
+
+DESCRIÇÃO
+---------
+
+Dado um ou mais commits existentes, aplique a mudança que cada um introduz,
+registrando um novo commit para cada um.  Isso requer que sua árvore de
+trabalho esteja limpa (nenhuma modificação do commit HEAD).
+
+Quando não é óbvio como aplicar uma alteração, acontece o seguinte:
+
+1. O ramo atual e o ponteiro `HEAD` permanecem no último commit realizado com
+   sucesso.
+2. A referência `CHERRY_PICK_HEAD` é configurada para apontar para o commit que
+   introduziu a mudança que é difícil de aplicar.
+3. Caminhos nos quais a mudança aplicada corretamente são atualizados no
+   arquivo de índice e na sua árvore de trabalho.
+4. Para caminhos conflitantes, o arquivo de índice registra até três versões,
+   conforme descrito na seção "TRUE MERGE" do linkgit:git-merge[1].  Os
+   arquivos da árvore de trabalho incluirão uma descrição do conflito entre os
+   marcadores de conflito habituais `<<<<<<<` e `>>>>>>>`.
+5. Nenhuma outra modificação é feita.
+
+Veja linkgit:git-merge[1] para algumas dicas sobre como resolver tais
+conflitos.
+
+OPÇÕES
+------
+<commit>...::
+	Compromete-se a escolher. Para uma lista mais completa de maneiras de
+	soletrar commits, veja linkgit:gitrevisions[7].  Conjuntos de commits podem
+	ser passados, mas nenhuma passagem é feita por padrão, como se a opção
+	`--não-caminhar` fosse especificada, veja linkgit:git-rev-list[1]. Note que
+	especificar um intervalo alimentará todos os argumentos <commit> ... para um
+	único passo de revisão (veja um exemplo posterior que usa 'maint
+	master..next').
+
+-e::
+--edit::
+	Com esta opção, o 'git cherry-pick' permitirá que você edite a mensagem de
+	commit antes de confirmar.
+
+-x::
+	Ao gravar o commit, acrescente uma linha que diz "(cherry picked from commit
+	...)" à mensagem de commit original para indicar qual commit esta mudança
+	foi escolhida. Isso é feito apenas para picaretas de cereja sem conflitos.
+	Não use esta opção se você estiver escolhendo o seu ramo privado porque a
+	informação é inútil para o destinatário.  Se, por outro lado, você estiver
+	escolhendo entre dois ramos publicamente visíveis (por exemplo, retrocedendo
+	uma correção para um ramo de manutenção para uma versão mais antiga de um
+	ramo de desenvolvimento), adicionar essa informação pode ser útil.
+
+-r::
+	Costumava ser que o comando padronizava para fazer `-x` descrito acima, e`
+	-r` era desativá-lo.  Agora o padrão é não fazer `-x`, então esta opção não
+	é op.
+
+-m número-pai::
+--mainline número-pai::
+	Normalmente você não pode selecionar uma mesclagem porque não sabe qual lado
+	da mesclagem deve ser considerado a linha principal.
+	 Esta opção especifica o número pai (a partir de 1) da linha principal e
+	permite que cherry-pick repita a alteração em relação ao pai especificado.
+
+-n::
+--no-commit::
+	Normalmente, o comando cria automaticamente uma sequência de commits.  Este
+	sinalizador aplica as alterações necessárias para selecionar cada
+	confirmação nomeada para sua árvore de trabalho e o índice, sem fazer
+	nenhuma confirmação.  Além disso, quando essa opção é usada, seu índice não
+	precisa corresponder ao commit do HEAD. O cherry-pick é feito contra o
+	estado inicial do seu índice.
++
+Isso é útil quando você seleciona mais de um efeito de commit para seu
+índice em uma linha.
+
+-s::
+--signoff::
+	Adicionar linha assinada no final da mensagem de confirmação.  Veja a opção
+	de signoff em linkgit:git-commit[1] para mais informações.
+
+-S[<keyid>]::
+--gpg-sinal[=<keyid>]::
+	Confirmações de assinatura de GPG. O argumento `keyid` é opcional e
+	padroniza a identidade do committer; se especificado, deve estar preso à
+	opção sem espaço.
+
+--ff::
+	Se o atual HEAD é o mesmo que o pai do commit cherry-pick'ed, então um
+	avanço rápido para este commit será executado.
+
+--allow-empty::
+	Por padrão, a escolha aleatória de uma confirmação vazia falhará, indicando
+	que uma chamada explícita de `git commit --allow-empty` é necessária. Essa
+	opção substitui esse comportamento, permitindo que os commits vazios sejam
+	preservados automaticamente em um cherry-pick. Observe que quando "--ff"
+	está em vigor, os commits vazios que atendem ao requisito de "fast forward"
+	serão mantidos mesmo sem essa opção.  Observe também que o uso desta opção
+	mantém apenas confirmações que estavam inicialmente vazias (isto é, o commit
+	registrou a mesma árvore que seu pai).  Commits que são feitos em branco
+	devido a um commit anterior são descartados.  Para forçar a inclusão desses
+	commits use `--keep-redundant-commits`.
+
+--allow-empty-message::
+	Por padrão, escolher um commit com uma mensagem vazia falhará.
+	 Essa opção substitui esse comportamento, permitindo que as confirmações de
+	mensagens vazias sejam selecionadas.
+
+--keep-redundant-commits::
+	Se um commit que está sendo escolhido, duplicar um commit já no histórico
+	atual, ele ficará vazio.  Por padrão, estas confirmações redundantes fazem
+	com que o `cherry-pick` pare para que o usuário possa examinar o
+	commit. Esta opção substitui esse comportamento e cria um objeto de
+	confirmação vazio.  Implica `--allow-empty`.
+
+--strategy=<strategy>::
+	Use a estratégia de mesclagem fornecida. Deve ser usado apenas uma vez.
+	Veja a seção MERGE STRATEGIES em linkgit:git-merge[1] para detalhes.
+
+-X<opção>::
+--strategy-opção=<opção>::
+	Passe a opção específica da estratégia de mesclagem até a estratégia de
+	merge Veja linkgit:git-merge[1] para detalhes.
+
+SEQUENCER SUBCOMANDOS
+---------------------
+include::sequencer.txt[]
+
+EXEMPLOS
+--------
+`git cherry-pick master`::
+
+	Aplique a mudança introduzida pelo commit na ponta do branch master e crie
+	um novo commit com esta mudança.
+
+`git cherry-pick ..master`::
+`git cherry-pick ^HEAD master`::
+
+	Aplique as alterações introduzidas por todos os commits que são ancestrais
+	do master, mas não do HEAD para produzir novos commits.
+
+`git cherry-pick maint próximo ^master`::
+`git cherry-pick maint master..próximo`::
+
+	Aplique as alterações introduzidas por todos os commits que são ancestrais
+	de maint ou próximo, mas não master ou qualquer um de seus ancestrais. Note
+	que o último não significa `maint` e tudo entre` master` e `próximo`;
+	especificamente, `maint` não será usado se estiver incluído no` mestre`.
+
+`git cherry-pick master~4 master~2`::
+
+	Aplique as alterações introduzidas pelo quinto e terceiro últimos commits
+	apontados pelo master e crie 2 novos commits com essas mudanças.
+
+`git cherry-pick -n master~1 next`::
+
+	Aplique à árvore de trabalho e ao índice as alterações introduzidas pela
+	segunda última confirmação apontada pelo mestre e pela última confirmação
+	apontada pela próxima, mas não crie nenhuma confirmação com essas mudanças.
+
+`git cherry-pick --ff ..próximo`::
+
+	Se o histórico for linear e HEAD for um ancestral do próximo, atualize a
+	árvore de trabalho e avance o ponteiro HEAD para corresponder ao
+	próximo. Caso contrário, aplique as alterações introduzidas pelas
+	confirmações que estão na próxima, mas não na HEAD, para a ramificação
+	atual, criando uma nova confirmação para cada nova alteração.
+
+`git rev-list --reverse master -- README | git cherry-pick -n --stdin`::
+
+	Aplique as alterações introduzidas por todas as confirmações no ramo
+	principal que tocaram no README para a árvore de trabalho e o índice, para
+	que o resultado possa ser inspecionado e transformado em uma única nova
+	confirmação, se adequado.
+
+A seqüência a seguir tenta retroceder um patch, suspender porque o código ao
+qual o patch se aplica mudou muito e, em seguida, tenta novamente, desta vez
+exercendo mais cuidado com as linhas de contexto correspondentes.
+
+------------
+$ git cherry-pick topic^             <1>
+$ git diff                           <2>
+$ git reset --merge ORIG_HEAD        <3>
+$ git cherry-pick -Xpatience topic^  <4>
+------------
+<1> aplique a mudança que seria mostrada pelo `git mostra tópicos ^`.  Neste
+    exemplo, o patch não se aplica de forma limpa, portanto as informações sobre
+    o conflito são gravadas no índice e na árvore de trabalho e não há novos
+    resultados de confirmação.
+<2> resumir as alterações a serem reconciliadas
+<3> cancele a escolha de cereja.  Em outras palavras, retorne ao estado
+    pré-escolha de cereja, preservando quaisquer modificações locais que você
+    tenha na árvore de trabalho.
+<4> tente aplicar a mudança introduzida por `topic^` novamente, gastando tempo
+    extra para evitar erros baseados em linhas de contexto correspondentes
+    incorretas.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-revert[1]
+
+GIT
+---
+Parte do linkgit: git[1] suite

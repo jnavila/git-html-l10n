@@ -1,0 +1,202 @@
+git-bundle(1)
+=============
+
+NOME
+----
+git-bundle - Mover objetos e refs por arquivo
+
+
+SINOPSE
+-------
+[verse]
+'git pacote' criar <arquivo><git-rev-list-args>
+'git pacote' verificar <arquivo>
+'git pacote' list-cabeças <arquivo>[<refnome>...]
+'git pacote' unbundle <arquivo>[<refnome>...]
+
+DESCRIÇÃO
+---------
+
+Alguns fluxos de trabalho exigem que um ou mais ramos de desenvolvimento em
+uma máquina sejam replicados em outra máquina, mas as duas máquinas não
+podem ser conectadas diretamente e, portanto, os protocolos Git interativos
+(git, ssh, http) não podem ser usados.  Este comando fornece suporte para
+'git fetch' e 'git pull' para operar empacotando objetos e referências em um
+arquivo na máquina de origem, importando-os em outro repositório usando 'git
+fetch' e 'git pull' após mover o arquivo por alguns meios (por exemplo, por
+sneakernet).  Como não existe conexão direta entre os repositórios, o
+usuário deve especificar uma base para o bundle que é mantido pelo
+repositório de destino: o bundle assume que todos os objetos na base já
+estão no repositório de destino.
+
+OPÇÕES
+------
+
+criar <arquivo>::
+	Usado para criar um pacote denominado 'file'.  Isso requer argumentos
+	'git-rev-list-args' para definir o conteúdo do pacote.
+
+verificar <arquivo>::
+	Usado para verificar se um arquivo de pacote é válido e será aplicado
+	corretamente ao repositório atual.  Isso inclui verificações no formato do
+	pacote configurável e verificar se os commits de pré-requisitos existem e
+	estão totalmente vinculados no repositório atual.  'git bundle' imprime uma
+	lista de confirmações ausentes, se houver, e sai com um status diferente de
+	zero.
+
+lista de cabeças <arquivo>::
+	Lista as referências definidas no pacote.  Se seguido por uma lista de
+	referências, somente as referências que correspondem àquelas fornecidas são
+	impressas.
+
+unbundle <arquivo>::
+	Passa os objetos no pacote para 'git index-pack' para armazenamento no
+	repositório, depois imprime os nomes de todas as referências definidas. Se
+	uma lista de referências é fornecida, apenas as referências que correspondem
+	àquelas na lista são impressas. Este comando é realmente de encanamento,
+	destinado a ser chamado apenas por "git fetch".
+
+<git-rev-list-args>::
+	Uma lista de argumentos, aceitável para 'git rev-parse' e 'git rev-list' (e
+	contendo um ref nomeado, consulte ESPECIFICANDO REFERENCIAS abaixo), que
+	especifica os objetos específicos e referências ao transporte.  Por exemplo,
+	`mestre ~ 10..master` faz com que a referência principal atual seja
+	empacotada junto com todos os objetos adicionados desde sua 10ª confirmação
+	ancestral.  Não há limite explícito para o número de referências e objetos
+	que podem ser empacotados.
+
+
+[<refnome>...]::
+	Uma lista de referências usadas para limitar as referências relatadas como
+	disponíveis. Isso é principalmente usado para 'git fetch', que espera
+	receber apenas as referências solicitadas e não necessariamente tudo no
+	pacote (neste caso, 'git bundle' age como 'git fetch-pack').
+
+ESPECIFICANDO REFERÊNCIAS
+-------------------------
+
+O 'git bundle' só irá empacotar referências mostradas por 'git mostra-ref':
+isso inclui cabeçalhos, tags e cabeças remotas.  Referências como `master~1`
+não podem ser empacotadas, mas são perfeitamente adequadas para definir a
+base.  Mais de uma referência pode ser empacotada e mais de uma base pode
+ser especificada.  Os objetos empacotados são aqueles que não estão contidos
+na união das bases dadas.  Cada base pode ser especificada explicitamente
+(por exemplo, `^master~10`) ou implicitamente (por
+exemplo,`mestre~10..master`, `--segmento=10.dias.atrás master`).
+
+É muito importante que a base usada seja mantida pelo destino.  Não há
+problema em errar do lado da precaução, fazendo com que o arquivo do pacote
+contenha objetos já no destino, pois eles são ignorados ao descompactar no
+destino.
+
+EXEMPLOS
+--------
+
+Suponha que você queira transferir o histórico de um repositório R1 na
+máquina A para outro repositório R2 na máquina B.  Por alguma razão, a
+conexão direta entre A e B não é permitida, mas podemos mover dados de A
+para B através de algum mecanismo (CD , e-mail, etc.).  Queremos atualizar o
+R2 com o desenvolvimento feito no mestre de filial no R1.
+
+Para inicializar o processo, você pode primeiro criar um pacote que não
+tenha base. Você pode usar uma tag para lembrar até o último commit
+processado, para facilitar a atualização posterior do outro repositório com
+um pacote incremental:
+
+----------------
+máquinaA$ cd R1
+máquinaA$ git pacote criar arquivo.pacote master
+máquinaA$ git tag -f lastR2pacote master
+----------------
+
+Em seguida, você transfere file.bundle para a máquina de destino B. Como
+esse pacote não requer que nenhum objeto existente seja extraído, você pode
+criar um novo repositório na máquina B clonando a partir dele:
+
+----------------
+máquinaB$ git clone -b master /home/me/tmp/arquivo.bundle R2
+----------------
+
+Isso definirá um controle remoto chamado "origem" no repositório resultante,
+que permite buscar e extrair do pacote. O arquivo $GIT_DIR/config no R2 terá
+uma entrada como esta:
+
+------------------------
+[remote "origin"]
+    url = /home/me/tmp/file.bundle
+    fetch = refs/heads/*:refs/remotes/origin/*
+------------------------
+
+Para atualizar o repositório mine.git resultante, você pode buscar ou
+extrair depois de substituir o pacote armazenado em /home/me/tmp/file.bundle
+com atualizações incrementais.
+
+Depois de trabalhar um pouco mais no repositório original, você pode criar
+um pacote incremental para atualizar o outro repositório:
+
+----------------
+máquinaA$ cd R1
+máquinaA$ git pacote criar arquivo.pacote lastR2pacote..master
+máquinaA$ git tag -f lastR2pacote master
+----------------
+
+Em seguida, você transfere o pacote para a outra máquina para substituir
+/home/me/tmp/file.bundle e extrai dele.
+
+----------------
+máquinaB$ cd R2
+máquinaB$ git puxar
+----------------
+
+Se você sabe até que ponto o repositório de destinatários pretendido deve
+ter os objetos necessários, você pode usar esse conhecimento para
+especificar a base, dando um ponto de corte para limitar as revisões e os
+objetos que entram no pacote resultante. O exemplo anterior usou a tag
+lastR2bundle para este propósito, mas você pode usar qualquer outra opção
+que você daria ao comando linkgit:git-log[1]. Aqui estão mais exemplos:
+
+Você pode usar uma tag presente em ambos:
+
+----------------
+$ git criar pacote mybundle v1.0.0..master
+----------------
+
+Você pode usar uma base baseada no tempo:
+
+----------------
+$ git criar pacote meu-pacote --desde=10.dias master
+----------------
+
+Você pode usar o número de confirmações:
+
+----------------
+$ git criar pacote meu-pacote - 10 master
+----------------
+
+Você pode executar o `git-verificar pacote` para ver se você pode extrair de
+um pacote que foi criado com base:
+
+----------------
+$ git verificar pacote meu-pacote
+----------------
+
+Isso listará quais commits você deve ter para extrair do pacote e errará se
+você não os tiver.
+
+Um pacote do ponto de vista de um repositório de destinatários é exatamente
+como um repositório comum que ele busca ou extrai. Você pode, por exemplo,
+mapear referências ao buscar:
+
+----------------
+$ git buscar meu-pacote master:localRef
+----------------
+
+Você também pode ver quais referências ela oferece:
+
+----------------
+$ git ls-remoto meu-pacote
+----------------
+
+GIT
+---
+Parte do linkgit: git[1] suite

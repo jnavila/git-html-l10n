@@ -1,0 +1,534 @@
+git-checkout(1)
+===============
+
+NOME
+----
+git-checkout - Alterne filiais ou restaure arquivos da árvore de trabalho
+
+SINOPSE
+-------
+[verse]
+'git checkout' [-q] [-f] [-m] [<branch>]
+'git checkout' [-q] [-f] [-m] --detach [<branch>]
+'git checkout' [-q] [-f] [-m] [--detach] <commit>
+'git checkout' [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
+'git checkout' [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] [--] <paths>...
+'git checkout' [<tree-ish>] [--] <pathspec>...
+'git checkout' (-p|--patch) [<tree-ish>] [--] [<paths>...]
+
+DESCRIÇÃO
+---------
+Atualiza arquivos na árvore de trabalho para corresponder à versão no índice
+ou na árvore especificada.  Se nenhum caminho for fornecido, 'git checkout'
+também atualizará `HEAD` para definir o ramo especificado como o ramo atual.
+
+'git confira' <branch>::
+	Para se preparar para trabalhar em <branch>, alterne para ele atualizando o
+	índice e os arquivos na árvore de trabalho e apontando HEAD na
+	ramificação. As modificações locais nos arquivos na árvore de trabalho são
+	mantidas, para que possam ser confirmadas no <branch>.
++
+Se <branch> não for encontrado, mas existir uma ramificação de rastreamento
+em exatamente um controle remoto (chamá-lo <remoto>) com um nome
+correspondente, trate como equivalente a
++
+------------
+$ git verificar -b <branch> --rastrear <remoto>/<branch>
+------------
++
+Se o branch existir em múltiplos controles remotos e um deles for nomeado
+pela variável de configuração `verificar.padrãoRemoto`, usaremos aquele para
+propósitos de desambiguação, mesmo que o` <branch> `não seja único em todos
+os remotos . Definir como, por exemplo `verificar.padrãoRemoto=origem` para
+sempre verificar as ramificações remotas de lá se` <branch> `for ambíguo,
+mas existir no remoto de 'origem'. Veja também `verificar.padrãoRemoto` no
+linkgit:gitconfig[1].
++
+Você pode omitir <branch>, caso em que o comando se degenera para "verificar
+o branch atual", que é um glorificado não-op com efeitos colaterais bastante
+caros para mostrar apenas as informações de rastreamento, se existir, para o
+branch atual.
+
+'git verificar' -b|-B <novo_branch> [<start point>]::
+
+	Especificar `-b` faz com que uma nova ramificação seja criada como se
+	linkgit:git-branch[1] fosse chamado e, em seguida, retirado. Neste caso você
+	pode usar as opções `--track` ou` --não-track`, que serão passadas para 'git
+	branch'. Por conveniência, `--track` sem` -b` implica criação de
+	ramificação; veja a descrição de `--track` abaixo.
++
+Se `-B` é dado, <novo_branch> é criado se não existir; caso contrário, é
+redefinido. Este é o equivalente transacional de
++
+------------
+$ git branch -f <branch> [<ponto de partida>]
+$ git verificar <branch>
+------------
++
+isto é, a ramificação não é redefinida/criada a menos que "git verificar"
+seja bem-sucedido.
+
+'git verificar' --desanexar [<branch>]::
+'git verificar' [--desanexar] <commit>::
+
+	Prepare-se para trabalhar em cima de <commit>, desanexando HEAD nele
+	(consulte a seção "DESTACADO HEAD") e atualizando o índice e os arquivos na
+	árvore de trabalho.  As modificações locais nos arquivos na árvore de
+	trabalho são mantidas, de forma que a árvore de trabalho resultante seja o
+	estado registrado no commit mais as modificações locais.
++
+Quando o argumento <commit> é um nome de ramificação, a opção `--desanexar`
+pode ser usada para desanexar HEAD na ponta da ramificação (` git verificar
+<branch> `veria aquela ramificação sem desanexar HEAD).
++
+Omitir <branch> desanexa o HEAD na ponta do ramo atual.
+
+'git verificar' [<tree-ish>] [--] <pathspec>...::
+
+	Sobrescreva caminhos na árvore de trabalho substituindo o conteúdo no índice
+	ou no <tree-ish> (na maioria das vezes uma confirmação).
+	 Quando um <tree-ish> é fornecido, os caminhos que correspondem ao
+	<pathspec> são atualizados no índice e na árvore de trabalho.
++
+O índice pode conter entradas não mescladas devido a uma mesclagem anterior
+com falha.  Por padrão, se você tentar verificar essa entrada do índice, a
+operação de check-out falhará e nada será retirado. Usar `-f` irá ignorar
+essas entradas não-mescladas.  O conteúdo de um lado específico da mesclagem
+pode ser retirado do índice usando `--ours` ou` --theirs`.  Com `-m`, as
+alterações feitas no arquivo da árvore de trabalho podem ser descartadas
+para recriar o resultado da mesclagem original em conflito.
+
+'git verificar' (-p|--patch) [<tree-ish>] [--] [<pathspec>...]::
+	Isso é semelhante ao "verificar paths para a árvore de trabalho do modo de
+	índice ou de árvore-ish" descrito acima, mas permite usar a interface
+	interativa para mostrar a saída "diff" e escolher quais blocos usar no
+	resultado.  Veja abaixo a descrição da opção `--patch`.
+
+
+OPÇÕES
+------
+-q::
+--quiet::
+	Silencioso, suprima as mensagens de feedback.
+
+--[no-]progress::
+	O status de progresso é relatado no fluxo de erro padrão por padrão quando
+	ele é anexado a um terminal, a menos que `--quiet` seja especificado. Este
+	sinalizador permite relatórios de progresso, mesmo que não estejam anexados
+	a um terminal, independentemente de `--quiet`.
+
+-f::
+--force::
+	Ao alternar as ramificações, continue mesmo se o índice ou a árvore de
+	trabalho diferirem de HEAD.  Isso é usado para jogar fora as alterações
+	locais.
++
+Ao verificar os caminhos do índice, não falhe em entradas não mescladas; Em
+vez disso, as entradas não mescladas são ignoradas.
+
+--ours::
+--theirs::
+	Ao verificar os caminhos do índice, confira o estágio #2 ('nosso') ou #3
+	('deles') para paths não mesclados.
++
+Note que durante o `git rebase` e` git pull --rebase`, 'ours' e 'theirs'
+podem aparecer trocados; `--ours` fornece a versão da ramificação onde as
+alterações são feitas, enquanto` --theirs` fornece a versão da ramificação
+que contém o seu trabalho que está sendo rebaixado.
++
+Isso ocorre porque o `rebase` é usado em um fluxo de trabalho que trata o
+histórico no remoto como o canônico compartilhado e trata o trabalho
+realizado na ramificação que você está rebaixando como o trabalho de
+terceiros a ser integrado, e você está temporariamente assumindo o papel do
+guardião da história canônica durante o rebase.
+ Como guardião da história canônica, você precisa ver a história do controle
+remoto como "nosso" (isto é, "nossa história canônica compartilhada"),
+enquanto o que você fez em seu ramo lateral como "seu" (isto é, "um trabalho
+de colaborador" em cima dele ").
+
+-b <novo_branch>::
+	Crie uma nova ramificação chamada <novo_branch> e inicie-a em
+	<ponto_de_partida>; veja linkgit:git-branch[1] para detalhes.
+
+-B <novo_branch>::
+	Cria o ramo <novo_branch> e inicia em <ponto_de_partida>; se já existir,
+	redefina-o para <ponto_de_partida>. Isso é equivalente a executar "git
+	branch" com "-f"; veja linkgit:git-branch[1] para detalhes.
+
+-t::
+--track::
+	Ao criar um novo branch, configure "upstream". Veja "--track" em
+	linkgit:git-branch[1] para detalhes.
++
+Se nenhuma opção `-b` for fornecida, o nome da nova ramificação será
+derivado da ramificação de controle remoto, observando a parte local da
+refspec configurada para o controle remoto correspondente e, em seguida,
+removendo a parte inicial para o "*".  Isso nos diria para usar "hack" como
+a ramificação local ao se ramificar de "origin/hack" (ou "remotos/origem/
+hack", ou mesmo "refs/remotos/ origem/ hack").  Se o nome dado não tiver
+barra, ou se a suposição acima resultar em um nome vazio, a adivinhação será
+abortada. Você pode dar explicitamente um nome com `-b` em tal caso.
+
+--no-track::
+	Não configure "upstream", mesmo que a variável de configuração
+	branch.autoSetupMerge seja verdadeira.
+
+-l::
+	Crie o reflog da nova ramificação; veja linkgit:git-branch[1] para detalhes.
+
+--detach::
+	Em vez de verificar um ramo para trabalhar nele, confira um commit para
+	inspeções e experiências descartáveis.  Este é o comportamento padrão de
+	"git checkout <commit>" quando <commit> não é um nome de ramificação. Veja a
+	seção "DESTACADO CABEÇA" abaixo para detalhes.
+
+--orfão <novo_branch>::
+	Crie uma nova ramificação 'órfã', denominada <novo_branch>, iniciada a
+	partir de <ponto_de_partida> e mude para ela. O primeiro commit feito nesta
+	nova branch não terá pais e será a raiz de uma nova história totalmente
+	desconectada de todas as outras ramificações e commits.
++
+O índice e a árvore de trabalho são ajustados como se você tivesse executado
+anteriormente "git checkout <ponto_de_partida>". Isso permite que você
+inicie um novo histórico que registra um conjunto de paths semelhante ao
+<ponto_de_partida> executando facilmente "git commit -a" para fazer o commit
+raiz.
++
+Isso pode ser útil quando você deseja publicar a árvore de um commit sem
+expor seu histórico completo. Você pode querer fazer isso para publicar uma
+ramificação de código aberto de um projeto cuja árvore atual esteja "limpa",
+mas cujo histórico completo contenha bits de código proprietários ou de
+outra forma onerados.
++
+Se você quiser iniciar um histórico desconectado que registra um conjunto de
+caminhos totalmente diferente do <start_point>, então você deve limpar o
+índice e a árvore de trabalho logo após criar o branch órfão executando "git
+rm -rf. " do nível superior da árvore de trabalho. Depois disso, você estará
+pronto para preparar seus novos arquivos, preenchendo a árvore de trabalho,
+copiando-os de outro lugar, extraindo um tarball, etc.
+
+--ignore-skip-worktree-bits::
+	No modo de checkout esparso, `git checkout - <paths>` atualizaria apenas
+	entradas correspondidas por <paths> e padrões esparsos em
+	$GIT_DIR/info/sparse-checkout. Esta opção ignora os padrões esparsos e
+	adiciona de volta os arquivos em <paths>.
+
+-m::
+--merge::
+	Ao alternar ramificações, se você tiver modificações locais em um ou mais
+	arquivos que sejam diferentes entre a ramificação atual e a ramificação para
+	a qual você está alternando, o comando se recusará a alternar as
+	ramificações para preservar suas modificações no contexto.  No entanto, com
+	essa opção, uma mesclagem de três vias entre a ramificação atual, o conteúdo
+	da árvore de trabalho e a nova ramificação é concluída e você estará na nova
+	ramificação.
++
+Quando ocorre um conflito de mesclagem, as entradas de índice para caminhos
+conflitantes são deixadas sem migração, e você precisa resolver os conflitos
+e marcar os paths resolvidos com `git add` (ou` git rm` se a mesclagem
+resultar na exclusão do caminho) .
++
+Ao efetuar o check-out de caminhos do índice, essa opção permite recriar a
+mesclagem conflitante nos caminhos especificados.
+
+--conflito=<estilo>::
+	O mesmo que a opção --merge acima, mas altera a forma como os blocos
+	conflitantes são apresentados, substituindo a variável de configuração
+	merge.conflictStyle.  Os valores possíveis são "merge" (padrão) e "diff3"
+	(além do que é mostrado pelo estilo "merge", mostra o conteúdo original).
+
+-p::
+--patch::
+	Selecione interativamente os pedaços na diferença entre o <tree-ish> (ou o
+	índice, se não especificado) e a árvore de trabalho.  Os pedaços escolhidos
+	são então aplicados em reverso à árvore de trabalho (e se um <tree-ish> for
+	especificado, o índice).
++
+Isso significa que você pode usar o `git checkout -p` para descartar
+seletivamente as edições da sua árvore de trabalho atual. Veja a seção ``
+Interactive Mode '' do linkgit:git-add[1] para aprender como operar o modo
+`--patch`.
+
+--ignore-other-worktrees::
+	`git checkout` recusa-se quando a referência desejada já foi verificada por
+	outra worktree. Esta opção faz com que verifique o ref fora de qualquer
+	maneira. Em outras palavras, o ref pode ser mantido por mais de uma árvore
+	de trabalho.
+
+--[no-]recurse-submodules::
+	Usando --recurso-submódulos irá atualizar o conteúdo de todos os submódulos
+	inicializados de acordo com o commit registrado no superprojeto. Se
+	modificações locais em um submódulo forem sobrescritas, o check-out falhará,
+	a menos que `-f` seja usado. Se nada (ou --não-recurso-submódulos)  for
+	usado, as árvores de trabalho dos submódulos não serão atualizadas. Assim
+	como o linkgit:git-submodule[1], isso desanexará os submódulos HEAD.
+
+--no-guess::
+	Não tente criar uma ramificação se existir uma ramificação de rastreamento
+	remoto com o mesmo nome.
+
+<branch>::
+	Filial para check-out; se refere-se a um ramo (isto é, um nome que, quando
+	prefixado com "refs/heads/", é um ref válido), então esse ramo é
+	retirado. Caso contrário, se se referir a um commit válido, seu HEAD se
+	torna "separado" e você não está mais em nenhum branch (veja abaixo para
+	detalhes).
++
+Você pode usar a sintaxe `" @{- N}"` para se referir à última branch/commit
+finalizada usando a operação "git checkout". Você também pode especificar
+`-` que é sinônimo de` "@{- 1}`.
++
+Como um caso especial, você pode usar `"A ... B"` como um atalho para a base
+de mesclagem de `A` e` B` se houver exatamente uma base de merge. Você pode
+deixar de fora, no máximo, um de `A` e` B`, caso em que o padrão é `HEAD`.
+
+<novo_branch>::
+	Nome para o novo branch.
+
+<ponto_de_partida>::
+	O nome de um commit no qual iniciar o novo branch; veja
+	linkgit:git-branch[1] para detalhes. Padrão para HEAD.
+
+<tree-ish>::
+	Árvore para checkout (quando os paths são dados). Se não especificado, o
+	índice será usado.
+
+
+
+CABEÇA DESTACADA
+----------------
+HEAD normalmente se refere a uma ramificação nomeada (por exemplo,
+'mestre'). Enquanto isso, cada ramo se refere a um commit específico. Vamos
+olhar para um repositório com três commits, um deles marcado, e com branch
+'master' check out:
+
+------------
+           HEAD (refers to branch 'master')
+            |
+            v
+a---b---c  branch 'master' (refers to commit 'c')
+    ^
+    |
+  tag 'v2.0' (refers to commit 'b')
+------------
+
+Quando uma confirmação é criada nesse estado, a ramificação é atualizada
+para se referir à nova confirmação. Especificamente, 'git commit' cria um
+novo commit 'd', cujo pai é commit 'c', e então atualiza o branch 'master'
+para se referir ao novo commit 'd'. HEAD ainda se refere à ramificação
+'master' e então indiretamente agora se refere a commit 'd':
+
+------------
+$ editar; git adicionar; git commit
+
+               HEAD (refers to branch 'master')
+                |
+                v
+a---b---c---d  branch 'master' (refers to commit 'd')
+    ^
+    |
+  tag 'v2.0' (refers to commit 'b')
+------------
+
+Às vezes, é útil poder fazer o checkout de uma confirmação que não esteja na
+ponta de qualquer ramificação nomeada, ou mesmo criar uma nova confirmação
+que não seja referenciada por uma ramificação nomeada. Vejamos o que
+acontece quando fazemos o checkout commit 'b' (aqui mostramos duas maneiras
+pelas quais isso pode ser feito):
+
+------------
+$ git verificar v2.0  # ou
+$ git verificar master^^
+
+   HEAD (refers to commit 'b')
+    |
+    v
+a---b---c---d  branch 'master' (refers to commit 'd')
+    ^
+    |
+  tag 'v2.0' (refers to commit 'b')
+------------
+
+Observe que, independentemente do comando de checkout usado, o HEAD agora se
+refere diretamente ao commit 'b'. Isso é conhecido como estando no estado
+HEAD separado. Significa simplesmente que HEAD se refere a um commit
+específico, ao invés de se referir a um branch nomeado. Vamos ver o que
+acontece quando criamos um commit:
+
+------------
+$ editar; git adicionar; git commit
+
+     HEAD (refers to commit 'e')
+      |
+      v
+      e
+     /
+a---b---c---d  branch 'master' (refers to commit 'd')
+    ^
+    |
+  tag 'v2.0' (refers to commit 'b')
+------------
+
+Existe agora um novo commit 'e', mas é referenciado apenas pelo
+HEAD. Podemos, claro, adicionar mais um commit nesse estado:
+
+------------
+$ editar; git adicionar; git commit
+
+	 HEAD (refers to commit 'f')
+	  |
+	  v
+      e---f
+     /
+a---b---c---d  branch 'master' (refers to commit 'd')
+    ^
+    |
+  tag 'v2.0' (refers to commit 'b')
+------------
+
+Na verdade, podemos executar todas as operações normais do Git. Mas, vamos
+ver o que acontece quando, então, fazemos o checkout master:
+
+------------
+$ git verificar master
+
+               HEAD (refers to branch 'master')
+      e---f     |
+     /          v
+a---b---c---d  branch 'master' (refers to commit 'd')
+    ^
+    |
+  tag 'v2.0' (refers to commit 'b')
+------------
+
+É importante perceber que neste ponto nada se refere ao commit
+'f'. Eventualmente, o commit 'f' (e por extensão commit 'e') será deletado
+pelo processo de coleta de lixo do Git, a não ser que criemos uma referência
+antes que isso aconteça. Se ainda não tivermos mudado do commit 'f',
+qualquer um deles criará uma referência a ele:
+
+------------
+$ git verificar -b foo   <1>
+$ git branch foo        <2>
+$ git tag foo           <3>
+------------
+
+<1> cria um novo branch 'foo', que se refere a commit 'f', e então atualiza HEAD
+    para se referir a branch 'foo'. Em outras palavras, não estaremos mais no
+    estado HEAD separado após este comando.
+
+<2> similarmente cria uma nova ramificação 'foo', que se refere ao commit 'f',
+    mas deixa o HEAD desanexado.
+
+<3> cria uma nova tag 'foo', que se refere ao commit 'f', deixando o HEAD
+    desanexado.
+
+Se nos afastamos do commit 'f', devemos primeiro recuperar o nome do objeto
+(geralmente usando o git reflog), e então podemos criar uma referência para
+ele. Por exemplo, para ver os dois últimos commits aos quais o HEAD se
+referiu, podemos usar um destes comandos:
+
+------------
+$ git reflog -2 HEAD # or
+$ git log -g -2 HEAD
+------------
+
+DISAMBIGUAÇÃO DE ARGUMENTOS
+---------------------------
+
+Quando há apenas um argumento dado e não é `--` (eg" git checkout abc"), e
+quando o argumento é ambos um` <tree-ish> `válido (ex. Um ramo" abc "existe)
+e um válido `<pathspec>` (por exemplo, um arquivo ou diretório cujo nome é
+"abc" existe), o Git normalmente pede para você desambiguar. Como o
+check-out de uma ramificação é uma operação tão comum, no entanto, "git
+checkout abc" toma "abc" como um `<tree-ish>` em tal situação. Use `git
+checkout - <pathspec>` se você quiser fazer o checkout desses caminhos fora
+do índice.
+
+EXEMPLOS
+--------
+
+. A sequência a seguir faz o checkout do branch `master`, reverte o` Makefile`
+  para duas revisões, apaga hello.c por engano e o recupera do índice.
++
+------------
+$ git verificar master             <1>
+$ git verificar master~2 Fazer arquivo  <2>
+$ rm -f hello.c
+$ git verificar hello.c            <3>
+------------
++
+<1> comutação de branch
+<2> tirar um arquivo de outro commit
+<3> restaurar o hello.c do índice
++
+Se você quiser dar uma olhada nos arquivos de código-fonte, todos fora do
+índice, você pode dizer
++
+------------
+$ git verificar -- '*.c'
+------------
++
+Observe as aspas em torno de `* .c`.  O arquivo `hello.c` também será
+retirado, mesmo que não esteja mais na árvore de trabalho, porque o
+agrupamento de arquivos é usado para corresponder entradas no índice (não na
+árvore de trabalho pelo shell).
++
+Se você tem um ramo infeliz chamado `hello.c`, este passo seria confundido
+como uma instrução para mudar para esse ramo.  Você deve escrever:
++
+------------
+$ git verificar -- hello.c
+------------
+
+. Depois de trabalhar no ramo errado, mudar para o ramo correto seria feito
+  usando:
++
+------------
+$ git checkout meu tópico
+------------
++
+No entanto, sua ramificação "errada" e a ramificação "meu tópico" correta
+podem diferir nos arquivos que você modificou localmente. Nesse caso, a
+verificação acima falharia assim:
++
+------------
+$ git verificar meu tópico
+erro: você tem alterações locais em 'frotz'; não comutação de branches.
+------------
++
+Você pode dar o sinalizador `-m` ao comando, que tentaria uma merge de três
+vias:
++
+------------
+$ git verificar -m meu tópico
+Auto-merging frotz
+------------
++
+Após essa mesclagem de três vias, as modificações locais não serão
+registradas em seu arquivo de índice, portanto, o `git diff` mostrará quais
+alterações foram feitas desde a dica da nova ramificação.
+
+. Quando um conflito de mesclagem acontece durante a troca de branches com a
+  opção `-m`, você veria algo assim:
++
+------------
+$ git verificar -m meu tópico
+Auto-merging frotz
+ERRO: Merger conflito em frotz
+fatal: falha no programa de merge
+------------
++
+Neste ponto, o `git diff` mostra as mudanças mescladas como no exemplo
+anterior, bem como as mudanças nos arquivos conflitantes.
+ Editar e resolver o conflito e marcá-lo resolvido com `git add` como de
+costume:
++
+------------
+$ editar frotz
+$ git adicionar frotz
+------------
+
+GIT
+---
+Parte do linkgit: git[1] suite

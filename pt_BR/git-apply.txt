@@ -1,0 +1,275 @@
+git-apply(1)
+============
+
+NOME
+----
+git-apply - Aplica um patch aos arquivos e/ou ao índice
+
+
+SINOPSE
+-------
+[verse]
+'git aplique' [--stat] [--numstat] [--resumo] [--verifica] [--índice | --intenção-de-adicionar] [--3caminho]
+	  [--aplique] [--não-adicionar] [--construir-antepassado-falso=<arquivo>] [-R | --reverso]
+	  [--permitir-substituição-binária | --binário] [--rejeitar] [-z]
+	  [-p<n>] [-C<n>] [--impreciso-eof] [--recontagem] [--em-cache]
+	  [--ignorar-mudança-de-estado | --ignorar-espaço-em-branco]
+	  [--espaço-em-branco=(agora|advertir|consertar|erro|todo-erro)]
+	  [--excluir=<path>] [--incluir=<path>] [--diretório=<root>]
+	  [--verbose] [--unsafe-paths] [<patch>...]
+
+DESCRIÇÃO
+---------
+Lê a saída do diff fornecida (por exemplo, "um patch") e aplica-a aos
+arquivos.  Ao executar a partir de um subdiretório em um repositório, os
+caminhos corrigidos fora do diretório são ignorados.  Com a opção `--index`
+o patch também é aplicado ao índice, e com a opção --cached` o patch é
+aplicado apenas ao índice.  Sem essas opções, o comando aplica o patch
+apenas aos arquivos e não exige que eles estejam em um repositório Git.
+
+Este comando aplica o patch, mas não cria um commit.  Use linkgit:git-am[1]
+para criar commits de patches gerados pelo linkgit:git-format-patch[1] e/ou
+recebidos por e-mail.
+
+OPÇÕES
+------
+<patch>...::
+	Os arquivos para ler o patch de.  '-' pode ser usado para ler a entrada
+	padrão.
+
+--stat::
+	Em vez de aplicar o patch, imprima o diffstat para a entrada.  Desativa
+	"aplicar".
+
+--numstat::
+	Semelhante ao `--stat`, mas mostra o número de linhas adicionadas e
+	deletadas em notação decimal e o nome do caminho sem abreviação, para
+	torná-lo mais amigável ao computador.  Para arquivos binários, gera dois `-`
+	ao invés de dizer` 0 0`.  Desativa "aplicar".
+
+--summary::
+	Em vez de aplicar o patch, imprima um resumo condensado das informações
+	obtidas a partir dos cabeçalhos estendidos do git diff, como criações,
+	renomeações e mudanças de modo.  Desativa "aplicar".
+
+--check::
+	Em vez de aplicar o patch, verifique se o patch é aplicável à árvore de
+	trabalho atual e/ou ao arquivo de índice e detecta erros.  Desativa
+	"aplicar".
+
+--index::
+	Quando `--check` estiver em vigor ou ao aplicar o patch (que é o padrão
+	quando nenhuma das opções que o desativam estiver em vigor), certifique-se
+	de que o patch seja aplicável ao que o arquivo de índice atual registra.  Se
+	o arquivo a ser corrigido na árvore de trabalho não estiver atualizado, ele
+	será marcado como um erro.  Esse sinalizador também faz com que o arquivo de
+	índice seja atualizado.
+
+--cached::
+	Aplique um patch sem tocar na árvore de trabalho. Em vez disso, pegue os
+	dados em cache, aplique o patch e armazene o resultado no índice sem usar a
+	árvore de trabalho. Isso implica em `--index`.
+
+--intent-to-add::
+	Ao aplicar o patch somente na árvore de trabalho, marque novos arquivos a
+	serem adicionados ao índice posteriormente (veja a opção `--intent-to-add`
+	no linkgit:git-add[1]). Esta opção é ignorada, a menos que a execução em um
+	repositório Git e `--index` não seja especificada.  Note que `--index` pode
+	ser implicado por outras opções como` --cached` ou `--3way`.
+
+-3::
+--3way::
+	Quando o patch não se aplica corretamente, use a mesclagem de 3 vias se o
+	patch registrar a identidade dos blobs aos quais ele deve se aplicar, e
+	temos esses blobs disponíveis localmente, possivelmente deixando os
+	marcadores de conflito nos arquivos na árvore de trabalho. para o usuário
+	resolver.  Esta opção implica a opção `--index`, e é incompatível com as
+	opções` --reject` e `--cached`.
+
+--construir-antepassado-falso=<file>::
+	A saída mais recente do 'git diff' incorporou 'informações de índice' para
+	cada blob para ajudar a identificar a versão original à qual o patch se
+	aplica.  Quando esse sinalizador é fornecido e se as versões originais dos
+	blobs estão disponíveis localmente, cria um índice temporário contendo esses
+	blobs.
++
+Quando uma alteração de modo puro é encontrada (que não contém informações
+de índice), as informações são lidas a partir do índice atual.
+
+-R::
+--reverse::
+	Aplique o patch ao contrário.
+
+--reject::
+	Para atomicidade, 'git apply' por padrão falha em todo o patch e não toca na
+	árvore de trabalho quando alguns dos blocos não se aplicam.
+	 Essa opção faz com que ela aplique as partes do patch aplicáveis e deixa os
+	pedaços rejeitados nos arquivos *.rej correspondentes.
+
+-z::
+	Quando `--numstat` for fornecido, não munge nomes de caminhos, mas use um
+	formato legível por máquina com terminação NUL.
++
+Sem esta opção, nomes de caminho com caracteres "incomuns" são citados como
+explicado para a variável de configuração `core.quotePath` (veja linkgit:
+git-config [1]).
+
+-p<n>::
+	Remova os componentes do caminho principal <n> (separados por barras) dos
+	caminhos tradicionais do diff. Por exemplo, com `-p2`, um patch contra`
+	a/dir/file` será aplicado diretamente ao `file`. O padrão é 1.
+
+-C<n>::
+	Assegure pelo menos <n> linhas de correspondência de contexto ao redor antes
+	e depois de cada alteração.  Quando menos linhas de contexto circundante
+	existem, todas devem corresponder.  Por padrão, nenhum contexto é ignorado.
+
+--unidiff-zero::
+	Por padrão, 'git apply' espera que o patch sendo aplicado seja um diff
+	unificado com pelo menos uma linha de contexto.  Isso fornece boas medidas
+	de segurança, mas é interrompido ao aplicar um diff gerado com `--unified =
+	0`. Para ignorar estas verificações, use `- unidiff-zero`.
++
+Note, pelas razões expostas acima, o uso de patches livres de contexto é
+desencorajado.
+
+--apply::
+	Se você usar qualquer uma das opções marcadas como "Desativar 'aplicar'"
+	acima, 'git apply' lerá e exibirá as informações solicitadas sem aplicar o
+	patch.  Dê esse sinalizador após esses sinalizadores para também aplicar o
+	patch.
+
+--no-add::
+	Ao aplicar um patch, ignore as adições feitas pelo patch.  Isso pode ser
+	usado para extrair a parte comum entre dois arquivos, primeiro executando
+	'diff' neles e aplicando o resultado com essa opção, que aplicaria a parte
+	de exclusão, mas não a parte de adição.
+
+--allow-binary-replacement::
+--binary::
+	Historicamente, não permitíamos que o patch binário fosse aplicado sem uma
+	permissão explícita do usuário, e esse sinalizador era a maneira de fazer
+	isso.  Atualmente, sempre permitimos a aplicação de correção binária,
+	portanto, isso é um não operacional.
+
+--excluir=<path-padrão>::
+	Não aplique alterações a arquivos correspondentes ao padrão de caminho
+	fornecido. Isso pode ser útil ao importar conjuntos de patch, onde você
+	deseja excluir determinados arquivos ou diretórios.
+
+--incluir=<path-padrão>::
+	Aplique mudanças nos arquivos correspondentes ao padrão de caminho
+	fornecido. Isso pode ser útil ao importar conjuntos de patch, onde você
+	deseja incluir determinados arquivos ou diretórios.
++
+Quando os padrões `--exclude` e` --include` são usados, eles são examinados
+na ordem em que aparecem na linha de comando, e a primeira correspondência
+determina se um patch para cada caminho é usado.  Um patch para um caminho
+que não corresponde a nenhum padrão de inclusão/exclusão é usado por padrão
+se não houver um padrão de inclusão na linha de comando e ignorado se houver
+algum padrão de inclusão.
+
+--ignore-space-change::
+--ignore-whitespace::
+	Ao aplicar um patch, ignore as alterações no espaço em branco nas linhas de
+	contexto, se necessário.  As linhas de contexto preservarão seu espaço em
+	branco e não passarão por correção de espaço em branco, independentemente do
+	valor da opção `--whitespace`. Novas linhas ainda serão corrigidas.
+
+--espaçoembranco=<action>::
+	Ao aplicar um patch, detecte uma linha nova ou modificada que tenha erros de
+	espaço em branco.  O que é considerado erro de espaço em branco é controlado
+	pela configuração `core.whitespace`.  Por padrão, os espaços em branco à
+	direita (incluindo linhas que consistem apenas em espaços em branco) e um
+	caractere de espaço que é imediatamente seguido por um caractere de
+	tabulação dentro do recuo inicial da linha são considerados erros de espaço
+	em branco.
++
+Por padrão, o comando gera mensagens de aviso, mas aplica o patch.
+ Quando o `git-apply` é usado para estatísticas e não aplica um patch, o
+padrão é` nowarn`.
++
+Você pode usar valores diferentes de <action> para controlar este
+comportamento:
++
+* `nowarn` desativa o aviso de espaço em branco à direita.
+* `warn` envia avisos para alguns desses erros, mas aplica o patch como está
+  (padrão).
+* `fix` envia avisos para alguns desses erros, e aplica o patch depois de
+  corrigí-los (`strip` é um sinônimo --- a ferramenta costumava considerar
+  apenas caracteres de espaço em branco como erros, e a correção envolvia
+  'descascá-los', mas Gits modernos fazem mais).
+* `error` envia avisos para alguns desses erros e se recusa a aplicar o patch.
+* `error-all` é semelhante a`error`, mas mostra todos os erros.
+
+--inaccurate-eof::
+	Em determinadas circunstâncias, algumas versões do 'diff' não detectam
+	corretamente uma nova linha ausente no final do arquivo. Como resultado, as
+	correções criadas por esses programas 'diff' não registram linhas
+	incompletas corretamente. Esta opção adiciona suporte para aplicar tais
+	correções trabalhando em torno deste bug.
+
+-v::
+--verbose::
+	Relatar o progresso para stderr. Por padrão, apenas uma mensagem sobre o
+	patch atual sendo aplicado será impressa. Esta opção fará com que
+	informações adicionais sejam relatadas.
+
+--recount::
+	Não confie nas contagens de linha nos cabeçalhos, mas deduza-as
+	inspecionando o patch (por exemplo, depois de editar o patch sem ajustar os
+	cabeçalhos adequadamente).
+
+--diretório=<root>::
+	Prefira <root> a todos os nomes de arquivos.  Se um argumento "-p" também
+	foi passado, ele será aplicado antes de prefixar a nova raiz.
++
+Por exemplo, um patch que fala sobre a atualização de `a/git-gui.sh`
+para`b/git-gui.sh` pode ser aplicado ao arquivo na árvore de trabalho
+`modules/git-gui/git-gui.sh `executando`git apply
+--directory=modules/git-gui`.
+
+--unsafe-paths::
+	Por padrão, um patch que afeta fora da área de trabalho (uma árvore de
+	trabalho controlada pelo Git ou o diretório de trabalho atual quando o "git
+	apply" é usado como uma substituição do patch GNU) é rejeitado como um erro
+	(ou um dano).
++
+Quando `git apply` é usado como um "melhor patch GNU", o usuário pode passar
+a opção` --unsafe-paths` para sobrescrever esta verificação de
+segurança. Esta opção não tem efeito quando o `--index` ou` --cached` está
+em uso.
+
+CONFIGURAÇÃO
+------------
+
+apply.ignoreWhitespace::
+	Defina para 'alterar' se quiser que as alterações no espaço em branco sejam
+	ignoradas por padrão.  Defina como um dos seguintes: não, nenhum, nunca,
+	falso, se desejar que as mudanças no espaço em branco sejam significativas.
+apply.whitespace::
+	Quando nenhum sinalizador `--whitespace` é fornecido a partir da linha de
+	comandos, este item de configuração é usado como padrão.
+
+SUBMÓDULOS
+----------
+Se o patch contiver alguma alteração nos submódulos, 'git apply' tratará
+essas alterações da seguinte maneira.
+
+Se `--index` for especificado (explicitamente ou implicitamente), então o
+submódulo commit deve corresponder exatamente ao índice para o patch ser
+aplicado.  Se qualquer um dos submódulos estiver em check-out, esses
+check-outs serão completamente ignorados, ou seja, eles não precisarão estar
+atualizados ou limpos e não serão atualizados.
+
+Se `--index` não for especificado, os submódulos confirmados no patch serão
+ignorados e somente a ausência ou presença do subdiretório correspondente
+será verificada e (se possível) atualizada.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-am[1].
+
+GIT
+---
+Parte do linkgit: git[1] suite

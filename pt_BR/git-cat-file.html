@@ -1,0 +1,1191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.10" />
+<title>git-cat-file(1)</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>
+git-cat-file(1) Manual Page
+</h1>
+<h2>NAME</h2>
+<div class="sectionbody">
+<p>git-arquivo-gato -
+   Forneça informações de conteúdo ou tipo e tamanho para objetos de repositório
+</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_sinopse">SINOPSE</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>git cat-file</em> (-t [--allow-unknown-type]| -s [--allow-unknown-type]| -e | -p | &lt;type&gt; | --textconv | --filters ) [--path=&lt;path&gt;] &lt;object&gt;
+<em>git cat-file</em> (--batch | --batch-check) [ --textconv | --filters ] [--follow-symlinks]</pre>
+<div class="attribution">
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_descrição">DESCRIÇÃO</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Em sua primeira forma, o comando fornece o conteúdo ou o tipo de um objeto
+no repositório. O tipo é requerido a menos que <code>-t</code> ou` -p` seja usado para
+encontrar o tipo de objeto, ou <code>-s</code> seja usado para encontrar o tamanho do
+objeto, ou` --textconv` ou <code>--filters</code> seja usado (que implicam tipo
+"blob").</p></div>
+<div class="paragraph"><p>No segundo formulário, uma lista de objetos (separados por feeds de linha) é
+fornecida em stdin, e o SHA-1, tipo e tamanho de cada objeto são impressos
+em stdout. O formato de saída pode ser substituído usando o argumento
+opcional <code>&lt;formato&gt;</code>. Se <code>--textconv</code> ou` --filters` forem especificados, a
+entrada deverá listar os nomes dos objetos seguidos pelo nome do caminho,
+separados por um único espaço em branco, para que os drivers apropriados
+possam ser determinados.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_opções">OPÇÕES</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+&lt;objeto&gt;
+</dt>
+<dd>
+<p>
+        O nome do objeto a ser mostrado. Para uma lista mais completa de maneiras de
+        soletrar nomes de objetos, veja a seção "ESPECIFICANDO REVISÕES" em
+        <a href="gitrevisions.html">gitrevisions(7)</a>.
+</p>
+</dd>
+<dt class="hdlist1">
+-t
+</dt>
+<dd>
+<p>
+        Em vez do conteúdo, mostre o tipo de objeto identificado por &lt;objeto&gt;.
+</p>
+</dd>
+<dt class="hdlist1">
+-s
+</dt>
+<dd>
+<p>
+        Em vez do conteúdo, mostre o tamanho do objeto identificado por &lt;objeto&gt;.
+</p>
+</dd>
+<dt class="hdlist1">
+-e
+</dt>
+<dd>
+<p>
+        Saia com status zero se &lt;objeto&gt; existir e for um objeto válido. Se &lt;objeto&gt;
+        for de um formato inválido, saia com um valor diferente de zero e emite um
+        erro no stderr.
+</p>
+</dd>
+<dt class="hdlist1">
+-p
+</dt>
+<dd>
+<p>
+        Impressão-bonita o conteúdo de &lt;objeto&gt; baseado em seu tipo.
+</p>
+</dd>
+<dt class="hdlist1">
+&lt;tipo&gt;
+</dt>
+<dd>
+<p>
+        Normalmente, isso corresponde ao tipo real de &lt;objeto&gt;, mas também é
+        permitido solicitar um tipo que possa ser desreferenciado trivialmente do
+        &lt;objeto&gt; fornecido.  Um exemplo é pedir uma "árvore" com &lt;objeto&gt; sendo um
+        objeto commit que a contenha, ou pedir um "blob" com &lt;objeto&gt; sendo um
+        objeto de tag que aponta para ele.
+</p>
+</dd>
+<dt class="hdlist1">
+--textconv
+</dt>
+<dd>
+<p>
+        Mostrar o conteúdo como transformado por um filtro textconv. Nesse caso,
+        &lt;objeto&gt; deve estar no formato &lt;tree-ish&gt;: &lt;path&gt;, ou: &lt;path&gt; para aplicar o
+        filtro ao conteúdo registrado no índice em &lt;path&gt;.
+</p>
+</dd>
+<dt class="hdlist1">
+--filters
+</dt>
+<dd>
+<p>
+        Mostrar o conteúdo como convertido pelos filtros configurados na árvore de
+        trabalho atual para o &lt;path&gt; fornecido (por exemplo, filtros de manchas,
+        conversão de fim de linha, etc.). Nesse caso, &lt;objeto&gt; deve estar no formato
+        &lt;tree-ish&gt;: &lt;path&gt;, ou: &lt;path&gt;.
+</p>
+</dd>
+<dt class="hdlist1">
+--path=&lt;path&gt;
+</dt>
+<dd>
+<p>
+        Para uso com --textconv ou --filters, para permitir a especificação de um
+        nome de objeto e um caminho separadamente, por ex. quando é difícil
+        descobrir a revisão de onde veio a bolha.
+</p>
+</dd>
+<dt class="hdlist1">
+--batch
+</dt>
+<dt class="hdlist1">
+--batch=&lt;formato&gt;
+</dt>
+<dd>
+<p>
+        Imprima informações sobre o objeto e o conteúdo de cada objeto fornecido no
+        stdin.  Não pode ser combinado com quaisquer outras opções ou argumentos,
+        exceto <code>--textconv</code> ou` --filters`, caso em que as linhas de entrada também
+        precisam especificar o caminho, separadas por espaço em branco.
+         Veja a seção <code>BATCH OUTPUT</code> abaixo para detalhes.
+</p>
+</dd>
+<dt class="hdlist1">
+--batch-check
+</dt>
+<dt class="hdlist1">
+--batch-check=&lt;formato&gt;
+</dt>
+<dd>
+<p>
+        Imprime as informações do objeto para cada objeto fornecido no stdin. Não
+        pode ser combinado com quaisquer outras opções ou argumentos, exceto
+        <code>--textconv</code> ou` --filters`, caso em que as linhas de entrada também
+        precisam especificar o caminho, separadas por espaço em branco. Veja a seção
+        <code>BATCH OUTPUT</code> abaixo para detalhes.
+</p>
+</dd>
+<dt class="hdlist1">
+--batch-all-objects
+</dt>
+<dd>
+<p>
+        Em vez de ler uma lista de objetos no stdin, execute a operação em lote
+        solicitada em todos os objetos no repositório e em quaisquer armazenamentos
+        de objetos alternativos (não apenas objetos acessíveis).  Requer <code>--batch</code>
+        ou` --batch-check` ser especificado. Observe que os objetos são visitados em
+        ordem classificados por seus hashes.
+</p>
+</dd>
+<dt class="hdlist1">
+--buffer
+</dt>
+<dd>
+<p>
+        Normalmente, a saída em lote é liberada após a saída de cada objeto, para
+        que um processo possa ler e gravar interativamente a partir do arquivo
+        "cat-file". Com essa opção, a saída usa o buffer stdio normal; isso é muito
+        mais eficiente ao invocar o <code>--batch-check</code> em um grande número de objetos.
+</p>
+</dd>
+<dt class="hdlist1">
+--unordered
+</dt>
+<dd>
+<p>
+        Quando <code>--batch-all-objects</code> estiver em uso, visite objetos em uma ordem que
+        pode ser mais eficiente para acessar o conteúdo do objeto do que a ordem
+        hash. Os detalhes exatos do pedido não são especificados, mas se você não
+        precisar de um pedido específico, isso geralmente deve resultar em uma saída
+        mais rápida, especialmente com <code>--batch</code>.  Note que <code>cat-file</code> ainda
+        mostrará cada objeto apenas uma vez, mesmo que seja armazenado várias vezes
+        no repositório.
+</p>
+</dd>
+<dt class="hdlist1">
+--allow-unknown-type
+</dt>
+<dd>
+<p>
+        Permitir que -s ou -t consultem objetos corrompidos/corrompidos de tipo
+        desconhecido.
+</p>
+</dd>
+<dt class="hdlist1">
+--follow-symlinks
+</dt>
+<dd>
+<p>
+        Com --batch ou --batch-check, siga os links simbólicos dentro do repositório
+        ao solicitar objetos com expressões SHA-1 estendidas do formulário tree-ish:
+        path-in-tree.  Em vez de fornecer saída sobre o próprio link, forneça saída
+        sobre o objeto vinculado.  Se um link simbólico apontar para fora da
+        árvore-ish (por exemplo, um link para /foo ou um link no nível-raiz para
+        ../foo), a parte do link que está fora da árvore será impressa.
+</p>
+<div class="paragraph"><p>Esta opção não funciona (atualmente) corretamente quando um objeto no índice
+é especificado (por exemplo, <code>: link</code> em vez de` HEAD: link`) em vez de um
+na árvore.</p></div>
+<div class="paragraph"><p>Esta opção não pode (atualmente) ser usada, a menos que <code>--batch</code> ou`
+--batch-check` seja usado.</p></div>
+<div class="paragraph"><p>Por exemplo, considere um repositório git contendo:</p></div>
+<div class="openblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre><code>f: a file containing "hello\n"
+link: a symlink to f
+dir/link: a symlink to ../f
+plink: a symlink to ../f
+alink: a symlink to /etc/passwd</code></pre>
+</div></div>
+</div></div>
+<div class="paragraph"><p>Para um arquivo normal <code>f</code>,` echo HEAD:f | git cat-file --batch` imprimiria</p></div>
+<div class="openblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre><code>ce013625030ba8dba906f756967f9e9ca394464a blob 6</code></pre>
+</div></div>
+</div></div>
+<div class="paragraph"><p>E <code>echo HEAD:link | git cat-file --batch --follow-symlinks</code> imprimiria a
+mesma coisa, assim como <code>HEAD:dir/link</code>, como ambos apontam para` HEAD:f`.</p></div>
+<div class="paragraph"><p>Sem <code>- siga-links-simbólicos</code>, estes iriam imprimir dados sobre o link
+simbólico em si. No caso de "HEAD: link", você veria</p></div>
+<div class="openblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre><code>4d1ae35ba2c8ec712fa2a379db44ad639ca277bd blob 1</code></pre>
+</div></div>
+</div></div>
+<div class="paragraph"><p>Ambos <code>plink</code> e` alink` apontam para fora da árvore, então eles imprimiriam
+respectivamente:</p></div>
+<div class="openblock">
+<div class="content">
+<div class="literalblock">
+<div class="content">
+<pre><code>link-simbólico 4
+../f</code></pre>
+</div></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>link-simbólico 11
+/etc/passwd</code></pre>
+</div></div>
+</div></div>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_saída">SAÍDA</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Se <code>-t</code> for especificado, um dos &lt;tipo&gt;.</p></div>
+<div class="paragraph"><p>Se <code>-s</code> for especificado, o tamanho do &lt;objeto&gt; em bytes.</p></div>
+<div class="paragraph"><p>Se <code>-e</code> for especificado, nenhuma saída, a menos que o &lt;objeto&gt; esteja
+malformado.</p></div>
+<div class="paragraph"><p>Se <code>-p</code> for especificado, o conteúdo de &lt;object&gt; será bem impresso.</p></div>
+<div class="paragraph"><p>Se &lt;tipo&gt; for especificado, o conteúdo bruto (embora não compactado) do
+&lt;objeto&gt; será retornado.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_saída_do_lote">SAÍDA DO LOTE</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Se <code>--batch</code> ou` --batch-check` for fornecido, o <code>cat-file</code> lerá objetos de
+stdin, um por linha, e imprimirá informações sobre eles. Por padrão, a linha
+inteira é considerada como um objeto, como se fosse alimentada para
+<a href="git-rev-parse.html">git-rev-parse(1)</a>.</p></div>
+<div class="paragraph"><p>Você pode especificar as informações mostradas para cada objeto usando um
+<code>&lt;formato&gt;</code> personalizado. O <code>&lt;formato&gt;</code> é copiado literalmente para stdout
+para cada objeto, com espaços reservados da forma <code>%(atom)</code> expandidos,
+seguidos por uma nova linha. Os átomos disponíveis são:</p></div>
+<div class="dlist"><dl>
+<dt class="hdlist1">
+<code>objectname</code>
+</dt>
+<dd>
+<p>
+        O nome do objeto com 40 hexadecimais do objeto.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>objecttype</code>
+</dt>
+<dd>
+<p>
+        O tipo do objeto (o mesmo que os relatórios <code>cat-file -t</code>).
+</p>
+</dd>
+<dt class="hdlist1">
+<code>objectsize</code>
+</dt>
+<dd>
+<p>
+        O tamanho, em bytes, do objeto (o mesmo que os relatórios <code>cat-file -s</code>).
+</p>
+</dd>
+<dt class="hdlist1">
+<code>tamanho do objeto:disk</code>
+</dt>
+<dd>
+<p>
+        O tamanho, em bytes, que o objeto ocupa no disco. Veja a nota sobre tamanhos
+        em disco na seção "CAVEATS" abaixo.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>deltabase</code>
+</dt>
+<dd>
+<p>
+        Se o objeto é armazenado como um delta no disco, isso se expande para o hex
+        sha-401 do objeto base delta. Caso contrário, expande para o nulo sha1 (40
+        zeros). Veja <code>CAVEATS</code> abaixo.
+</p>
+</dd>
+<dt class="hdlist1">
+<code>rest</code>
+</dt>
+<dd>
+<p>
+        Se esse átomo for usado na sequência de saída, as linhas de entrada serão
+        divididas no primeiro limite de espaço em branco. Todos os caracteres antes
+        desses espaços em branco são considerados o nome do objeto; caracteres após
+        essa primeira execução de espaço em branco (ou seja, o "resto" da linha) são
+        emitidos no lugar do átomo "%(restante)".
+</p>
+</dd>
+</dl></div>
+<div class="paragraph"><p>Se nenhum formato for especificado, o formato padrão é <code>%(objeto-nome)
+%(objeto-tipo)%(objeto-tamanho)</code>.</p></div>
+<div class="paragraph"><p>Se <code>--batch</code> for especificado, as informações do objeto são seguidas pelo
+conteúdo do objeto (consistindo de`% (objeto-tamanho) `bytes), seguido por
+uma nova linha.</p></div>
+<div class="paragraph"><p>Por exemplo, <code>--batch</code> sem um formato personalizado produziria:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>&lt;sha1&gt; SP &lt;tipo&gt; SP &lt;tamanho&gt; LF
+&lt;conteúdo&gt; LF</code></pre>
+</div></div>
+<div class="paragraph"><p>Considerando que <code>--batch-check ='%(objeto-nome)% (objeto-tipo)'</code>
+produziria:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>&lt;sha1&gt; SP &lt;tipo&gt; LF</code></pre>
+</div></div>
+<div class="paragraph"><p>Se um nome é especificado no stdin que não pode ser resolvido para um objeto
+no repositório, então o <code>cat-file</code> irá ignorar qualquer formato customizado
+e imprimir:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>&lt;objeto&gt; SP faltando LF</code></pre>
+</div></div>
+<div class="paragraph"><p>Se for especificado um nome que possa se referir a mais de um objeto (um sha
+curto ambíguo), então o <code>cat-file</code> ignorará qualquer formato personalizado e
+imprimirá:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>&lt;objeto&gt; SP ambíguo LF</code></pre>
+</div></div>
+<div class="paragraph"><p>Se --siga-links-simbólicos for usado, e um link-simbólico no repositório
+apontar para fora do repositório, então o <code>cat-file</code> irá ignorar qualquer
+formato customizado e imprimir:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>link-simbólico SP &lt;tamanho&gt; LF
+&lt;link-simbólico&gt; LF</code></pre>
+</div></div>
+<div class="paragraph"><p>O link simbólico será absoluto (começando com a /) ou relativo à raiz da
+árvore.  Por exemplo, se dir/link apontar para ../../foo, então
+&lt;link-simbólico&gt; será ../foo.  &lt;tamanho&gt; é o tamanho do link-simbólico em
+bytes.</p></div>
+<div class="paragraph"><p>Se --seguir-links-simbólicos for usado, as seguintes mensagens de erro serão
+exibidas:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>&lt;objeto&gt; SP faltando LF</code></pre>
+</div></div>
+<div class="paragraph"><p>é impresso quando o link simbólico inicial solicitado não existe.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>balançando SP &gt;tamanho&gt; LF
+&lt;objeto&gt; LF</code></pre>
+</div></div>
+<div class="paragraph"><p>é impresso quando o link-simbólico inicial existe, mas algo que ele
+(transitivo) aponta não.</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>laço SP &lt;tamanho&gt; LF
+&lt;objeto&gt; LF</code></pre>
+</div></div>
+<div class="paragraph"><p>é impresso para laços de links simbólicos (ou quaisquer links simbólicos que
+exijam mais de 40 resoluções de link para resolver).</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>notdir SP &lt;tamanho&gt; LF
+&lt;objeto&gt; LF</code></pre>
+</div></div>
+<div class="paragraph"><p>é impresso quando, durante a resolução do link-simbólico, um arquivo é usado
+como um nome de diretório.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ressalvas">RESSALVAS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Observe que os tamanhos dos objetos no disco são relatados com precisão, mas
+deve-se tomar cuidado ao tirar conclusões sobre quais refs ou objetos são
+responsáveis pelo uso do disco. O tamanho de um objeto não delta compactado
+pode ser muito maior que o tamanho de objetos que o delta, mas a escolha de
+qual objeto é a base e qual é o delta é arbitrária e está sujeita a
+alterações durante um empacotamento.</p></div>
+<div class="paragraph"><p>Observe também que várias cópias de um objeto podem estar presentes no banco
+de dados de objetos; neste caso, é indefinido qual tamanho da cópia ou base
+delta será relatada.</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Parte do linkgit: git[1] suite</p></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated
+ 2019-06-16 22:08:34 CEST
+</div>
+</div>
+</body>
+</html>

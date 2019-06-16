@@ -1,0 +1,179 @@
+Format brut de sortie
+---------------------
+
+Les formats bruts de sortie de "git-diff-index", "git-diff-tree",
+"git-diff-files" et "git diff --raw" sont très similaires.
+
+Ces commandes comparent toutes deux ensembles de choses ; ce qui est comparé
+varie :
+
+git-diff-index <arbre-esque>::
+        compare l'<arbre-esque> et les fichiers du système de fichiers.
+
+git-diff-index --cached <arbre-esque>::
+        compare l'<arbre-esque> et l'index.
+
+git-diff-tree [-r] <arbre-esque-1> <arbre-esque-2> [<motif>...]::
+        Compare les arbres nommés par les deux arguments.
+
+git-diff-files [<motif>...]::
+        compare l'index et les fichiers sur le système de fichier.
+
+La commande "git-diff-tree" débute sa sortie par l'empreinte de ce qui est
+comparé. Ensuite, toutes les commandes affichent une ligne par fichier
+modifié.
+
+une ligne affichée est formatée de la manière suivante :
+
+------------------------------------------------
+in-place edit  :100644 100644 bcd1234 0123456 M fichier0
+copy-edit      :100644 100644 abcd123 1234567 C68 fichier1 fichier2
+rename-edit    :100644 100644 abcd123 1234567 R86 fichier1 fichier3
+create         :000000 100644 0000000 1234567 A fichier4
+delete         :100644 000000 1234567 0000000 D fichier5
+unmerged       :000000 000000 0000000 0000000 U fichier6
+------------------------------------------------
+
+C'est-à-dire, de gauche à droite :
+
+. deux points.
+. le mode pour "src" ; 000000 si c'est une création ou non fusionné.
+. un espace.
+. mode pour "dst" ; 000000 si suppression ou non-fusionné.
+. un espace.
+. sha1 de "src", 0\{40\} si création ou non fusionné.
+. un espace.
+. sha1 de "dst", 0\{40\} si création, non fusionné ou "recherche dans l'arbre
+  de travail".
+. un espace.
+. status, suivi optionnellement d'un nombre score.
+. une tabulation ou un caractère NUL si l'option `-z` est utilisée.
+. chemin pour "src"
+. une tabulation ou un caractère NUL si l'option `-z` est utilisée ; n'existe
+  que pour C ou R.
+. chemin pour "dst" ; n'existe que pour C ou R.
+. un caractère LF ou NUL si l'option `-z` est utilisée, pour terminer
+  l'enregistrement.
+
+Les lettres de statut possibles sont :
+
+- A : addition d'un fichier
+- C : copie d'un fichier en un autre
+- D : suppression (deletion) d'un fichier
+- M : modification de contenu ou du mode d'un fichier
+- R : renommage d'un fichier
+- T : modification du type d'un fichier
+- U : le fichier est non-fusionné (unmerged) (vous devez finir la fusion avant
+  de le valider)
+- X : type de modification "inconnue" (probablement un bug, veuillez le
+  signaler)
+
+Les lettres de statut C et R sont toujours suivies d'un score (indiquant le
+pourcentage de similarité entre la source et la cible du déplacement ou de
+la copie). La lettre de statut M peut être suivie d'un score (indiquant le
+pourcentage de dissimilarité) pour une réécriture de fichier.
+
+Le <sha1> est tout à zéro si le fichier est nouveau sur le système de
+fichiers et est désynchronisé avec l'index.
+
+Exemple :
+
+------------------------------------------------
+:100644 100644 5be4a4a 0000000 M fichier.c
+------------------------------------------------
+
+Sans l'option `-z`, les noms de chemin avec des caractères « inhabituels »
+sont cités comme expliqué pour la variable de configuration `core.quotePath`
+(voir linkgit:git-config[1]). Lors de l'utilisation de `-z` le fichier est
+affiché verbatim et la ligne est terminée par un octet NUL.
+
+format diff pour les fusions
+----------------------------
+
+"git-diff-tree", "git-diff-files" et "git diff --raw" peuvent prendre une
+option `-c` ou `--cc` pour générer une sortie diff pour les commits de
+fusion. La sortie diffère du format décrit ci-dessus sur les points
+suivants :
+
+. il y a un caractère deux points pour chaque parent
+. il y a plus de modes "src" et de sha1 "src"
+. les statut est la concaténation des caractères de statut de chaque parent
+. pas de nombre optionnel de "score"
+. un seul chemin, seulement pour "dst"
+
+Exemple :
+
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	description.c
+------------------------------------------------
+
+Notez que le 'diff combiné' ne liste que les fichiers qui ont été modifiés
+depuis tous leurs parents.
+
+
+include::diff-generate-patch.txt[]
+
+
+autres formats de diff
+----------------------
+
+L'option `--summary` décrit les fichiers nouvellement additionnés,
+supprimés, renommés et copiés. L'option `--stat` ajoute un graphe
+diffstat(1) à la sortie. Ces options peuvent être combinées avec d'autres
+options, telles que `-p` et sont destinées à une consommation humaine.
+
+Lors de l'affichage d'une modification qui comprend un renommage ou une
+copie, la sortie de `--stat` formate de manière compacte les noms de chemins
+en combinant les préfixes et suffixes communs des noms de chemins. Par
+exemple, une modification qui déplace `arch/i386/Makefile` vers
+`arch/x86/Makefile` en modifiant 4 lignes seront affichées comme ceci :
+
+------------------------------------
+arch/{i386 => x86}/Makefile    |   4 +--
+------------------------------------
+
+L'option `--numstat` donne l'information diffstat(1) mais est organisée pour
+un meilleur traitement automatique. Une entrée dans `--numstat` ressemble à
+ceci :
+
+----------------------------------------
+1	2	README
+3	1	arch/{i386 => x86}/Makefile
+----------------------------------------
+
+Soit, de gauche à droite :
+
+. le nombre de lignes ajoutées ;
+. une tabulation ;
+. le nombre de lignes supprimées ;
+. une tabulation ;
+. nom de chemin (avec potentiellement une information de renommage/copie) ;
+. une retour à la ligne.
+
+Quand l'option de sortie `-z` est active, la sortie est formatée comme
+ceci :
+
+----------------------------------------
+1	2	README NUL
+3	1	NUL arch/i386/Makefile NUL arch/x86/Makefile NUL
+----------------------------------------
+
+Soit :
+
+. le nombre de lignes ajoutées ;
+. une tabulation ;
+. le nombre de lignes supprimées ;
+. une tabulation ;
+. un caractère NUL (n'existe que si renommé/copié) ;
+. le nom de chemin dans preimage ;
+. un caractère NUL (n'existe que si renommé/copié) ;
+. le nom de chemin dans postimage (n'existe que si renommé/copié) ;
+. un caractère NUL.
+
+Le caractère `NUL` supplémentaire avant le chemin de préimage dans le cas de
+renommage permet aux scripts qui lisent la sortie de détecter si
+l'enregistrement actuellement lu est un enregistrement de chemin unique ou
+un enregistrement de renommage/copie sans avoir besoin de lire plus
+loin. Après lecture des lignes ajoutées et supprimées, une lecture jusqu'au
+caractère `NUL` fournit le nom de chemin, mais si c'est `NUL`,
+l'enregistrement fournit deux chemins.

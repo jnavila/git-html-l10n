@@ -1,0 +1,235 @@
+git-blame(1)
+============
+
+NOME
+----
+git-blame - Mostra que revisão e autor modificou pela última vez cada linha
+de um arquivo
+
+SINOPSE
+-------
+[verse]
+'git blame' [-c] [-b] [-l] [--root] [-t] [-f] [-n] [-s] [-e] [-p] [-w] [--incremental]
+	    [-L <range>] [-S <revs-file>] [-M] [-C] [-C] [-C] [--since=<date>]
+	    [--progress] [--abbrev=<n>] [<rev> | --contents <file> | --reverse <rev>..<rev>]
+	    [--] <file>
+
+DESCRIÇÃO
+---------
+
+Anota cada linha no arquivo fornecido com informações da revisão que
+modificou a linha pela última vez. Opcionalmente, comece anotando a partir
+da revisão dada.
+
+Quando especificado uma ou mais vezes, `-L` restringe a anotação às linhas
+solicitadas.
+
+A origem das linhas é automaticamente seguida em renomeações de todo o
+arquivo (atualmente não há opção para desativar o renomeamento). Para seguir
+linhas movidas de um arquivo para outro, ou para seguir linhas que foram
+copiadas e coladas de outro arquivo, etc., veja as opções `-C` e` -M`.
+
+O relatório não informa nada sobre linhas que foram eliminadas ou
+substituídas; você precisa usar uma ferramenta como "git diff" ou a
+interface "pickaxe" brevemente mencionada no parágrafo seguinte.
+
+Além de suportar a anotação de arquivos, o Git também suporta a pesquisa do
+histórico de desenvolvimento para quando um trecho de código ocorreu em uma
+alteração. Isso permite acompanhar quando um snippet de código foi
+adicionado a um arquivo, movido ou copiado entre arquivos e, eventualmente,
+excluído ou substituído. Ele funciona procurando por uma string de texto no
+diff. Um pequeno exemplo da interface da pickaxe que procura por
+`blame_usage`:
+
+-----------------------------------------------------------------------------
+$ git log --pretty=oneline -S'uso_de_responsabilidade'
+5040f17eba15504bad66b14a645bddd9b015ebb7 blame -S <arquivo-de-ancestralidade>
+ea4c7f9bf69e781dd0cd88d2bccb2bf5cc15c9a7 git-blame: Faça a saída
+-----------------------------------------------------------------------------
+
+OPÇÕES
+------
+include::blame-options.txt[]
+
+-c::
+	Use o mesmo modo de saída que o linkgit: git-anotar [1] (Padrão: fora).
+
+--score-debug::
+	Inclua informações de depuração relacionadas ao movimento de linhas entre
+	arquivos (consulte `-C) e linhas movidas dentro de um arquivo (consulte`
+	-M`).  O primeiro número listado é a pontuação.
+	 Esse é o número de caracteres alfanuméricos detectados como tendo sido
+	movidos entre ou dentro dos arquivos.  Isso deve estar acima de um certo
+	limite para 'git blame' considerar essas linhas de código que foram movidas.
+
+-f::
+--show-name::
+	Mostrar o nome do arquivo no commit original.  Por padrão, o nome do arquivo
+	é mostrado se houver alguma linha que tenha vindo de um arquivo com um nome
+	diferente, devido à renomeação da detecção.
+
+-n::
+--show-number::
+	Mostrar o número da linha no commit original (padrão: off).
+
+-s::
+	Suprima o nome do autor e o registro de data e hora da saída.
+
+-e::
+--show-email::
+	Mostrar o email do autor em vez do nome do autor (Padrão: desativado).  Isso
+	também pode ser controlado através da opção de configuração
+	`blame.showEmail`.
+
+-w::
+	Ignore os espaços em branco ao comparar a versão dos pais e a criança para
+	descobrir de onde vieram as linhas.
+
+--abrev=<n>::
+	Em vez de usar os dígitos hexadecimais padrão 7+1 como o nome do objeto
+	abreviado, use <n>+1 dígitos. Observe que 1 coluna é usada para um acento
+	circunflexo para marcar a confirmação de limite.
+
+
+O FORMATO PORCELANA
+-------------------
+
+Nesse formato, cada linha é enviada após um cabeçalho; o cabeçalho no mínimo
+tem a primeira linha que tem:
+
+- 40-byte SHA-1 do commit da linha é atribuído a;
+- o número da linha da linha no arquivo original;
+- o número da linha da linha no arquivo final;
+- em uma linha que inicia um grupo de linhas de um commit diferente do
+  anterior, o número de linhas neste grupo.  Nas linhas subsequentes, este
+  campo está ausente.
+
+Esta linha de cabeçalho é seguida pelas seguintes informações pelo menos uma
+vez para cada commit:
+
+- o nome do autor ("autor"), email ("autor-mail"), time ("autor-time") e fuso
+  horário ("autor-tz"); da mesma forma para o committer.
+- o nome do arquivo no commit ao qual a linha é atribuída.
+- a primeira linha da mensagem de log de confirmação ("resumo").
+
+O conteúdo da linha real é gerado após o cabeçalho acima, prefixado por uma
+TAB. Isso permite adicionar mais elementos de cabeçalho posteriormente.
+
+O formato de porcelana geralmente suprime informações de confirmação que já
+foram vistas. Por exemplo, duas linhas que são responsabilizadas para a
+mesma confirmação serão mostradas, mas os detalhes dessa confirmação serão
+mostrados apenas uma vez. Isso é mais eficiente, mas pode exigir que mais
+estado seja mantido pelo leitor. A opção `--line-porcelain` pode ser usada
+para gerar informações completas de commit para cada linha, permitindo um
+uso mais simples (mas menos eficiente)  como:
+
+# conta o número de linhas atribuídas a cada autor
+	git culpar arquivo de --linha-porcelana |
+	sed -n 's/^autor //p' |
+	ordenar | uniq -c | ordenar -rn
+
+
+ESPECIFICANDO FAIXAS
+--------------------
+
+Ao contrário de 'git blame' e 'git annotate' em versões mais antigas do git,
+a extensão da anotação pode ser limitada a ambos os intervalos de linha e de
+revisão. A opção `-L`, que limita a anotação a um intervalo de linhas, pode
+ser especificada várias vezes.
+
+Quando você estiver interessado em encontrar a origem para as linhas 40-60
+do arquivo `foo`, você pode usar a opção` -L` assim (eles significam a mesma
+coisa - ambos pedem 21 linhas iniciando na linha 40):
+
+	git responsabilidade -L 40,60 foo
+	git responsabilidade  -L 40,+21 foo
+
+Além disso, você pode usar uma expressão regular para especificar o
+intervalo de linha:
+
+	git responsabilidade -L '/^sub olá {/,/^}$/' foo
+
+que limita a anotação ao corpo da sub-rotina `hello`.
+
+Quando você não está interessado em mudanças mais antigas que a versão
+v2.6.18, ou em mudanças anteriores a 3 semanas, você pode usar
+especificadores de intervalo de revisão similares a 'git rev-list':
+
+	git responsabilidade v2.6.18.. -- foo
+	git responsabilidade --desde=3.semanas -- foo
+
+Quando os especificadores de intervalo de revisão são usados para limitar a
+anotação, as linhas que não foram alteradas desde o limite de intervalo
+(seja a confirmação v2.6.18 ou a confirmação mais recente com mais de 3
+semanas no exemplo acima) são responsabilizadas por esse limite de intervalo
+commit.
+
+Uma maneira particularmente útil é verificar se um arquivo adicionado possui
+linhas criadas por copiar e colar de arquivos existentes.  Às vezes, isso
+indica que o desenvolvedor estava sendo malfeito e não refatorou o código
+corretamente.  Você pode primeiro encontrar o commit que introduziu o
+arquivo com:
+
+	git log --diff-filtro=A --pretty=short -- foo
+
+e então anote a mudança entre o commit e seus pais, usando a notação `commit
+^!`:
+
+	git responsabilidade -C -C -f $commit^! -- foo
+
+
+SAÍDA INCREMENTAL
+-----------------
+
+Quando chamado com a opção --incremental, o comando gera o resultado
+conforme ele é construído.  A saída geralmente irá falar sobre linhas
+tocadas por commits mais recentes primeiro (ou seja, as linhas serão
+anotadas fora de ordem) e destina-se a ser usado por visualizadores
+interativos.
+
+O formato de saída é semelhante ao formato Porcelain, mas não contém as
+linhas reais do arquivo que está sendo anotado.
+
+. Cada entrada de culpa sempre começa com uma linha de:
+
+	<40-byte hex sha1> <fonte-linha> <result-linha> <num_linha>
++
+Os números de linha contam a partir de 1.
+
+. A primeira vez que um commit é exibido no fluxo, ele contém várias outras
+  informações sobre ele impressas com uma tag de uma palavra no início de cada
+  linha, descrevendo as informações adicionais de confirmação (autor, email,
+  committer, datas, resumo, etc. .
+
+. Ao contrário do formato Porcelana, as informações do nome do arquivo são
+  sempre dadas e terminam a entrada:
+
+	"nome-do-arquivo" <espaço-em-branco-quoted-nomed-do-arquivo-vai-aqui>
++
+e, portanto, é realmente muito fácil analisar algum analisador de linha e
+palavra (que deve ser bastante natural para a maioria das linguagens de
+script).
++
+[NOTE]
+Para as pessoas que fazem análise: para torná-lo mais robusto, simplesmente
+ignore quaisquer linhas entre a primeira e a última (linhas "<sha1>" e "nome
+do arquivo") onde você não reconhece as palavras da tag (ou se preocupa com
+aquela em particular) no início das linhas de "informações
+estendidas". Dessa forma, se houver alguma informação adicionada (como a
+codificação de commit ou comentário de commit estendido), um visualizador de
+culpa não se importará.
+
+
+AUTORES DE MAPEAMENTO
+---------------------
+
+include::mailmap.txt[]
+
+
+VEJA TAMBÉM
+-----------
+linkgit:git-annotate[1]
+
+GIT
+---
+Parte do linkgit: git[1] suite

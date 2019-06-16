@@ -1,0 +1,1279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+    "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<meta name="generator" content="AsciiDoc 8.6.10" />
+<title>git-blame(1)</title>
+<style type="text/css">
+/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
+
+/* Default font. */
+body {
+  font-family: Georgia,serif;
+}
+
+/* Title font. */
+h1, h2, h3, h4, h5, h6,
+div.title, caption.title,
+thead, p.table.header,
+#toctitle,
+#author, #revnumber, #revdate, #revremark,
+#footer {
+  font-family: Arial,Helvetica,sans-serif;
+}
+
+body {
+  margin: 1em 5% 1em 5%;
+}
+
+a {
+  color: blue;
+  text-decoration: underline;
+}
+a:visited {
+  color: fuchsia;
+}
+
+em {
+  font-style: italic;
+  color: navy;
+}
+
+strong {
+  font-weight: bold;
+  color: #083194;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: #527bbd;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+
+h1, h2, h3 {
+  border-bottom: 2px solid silver;
+}
+h2 {
+  padding-top: 0.5em;
+}
+h3 {
+  float: left;
+}
+h3 + * {
+  clear: left;
+}
+h5 {
+  font-size: 1.0em;
+}
+
+div.sectionbody {
+  margin-left: 0;
+}
+
+hr {
+  border: 1px solid silver;
+}
+
+p {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+ul, ol, li > p {
+  margin-top: 0;
+}
+ul > li     { color: #aaa; }
+ul > li > * { color: black; }
+
+.monospaced, code, pre {
+  font-family: "Courier New", Courier, monospace;
+  font-size: inherit;
+  color: navy;
+  padding: 0;
+  margin: 0;
+}
+pre {
+  white-space: pre-wrap;
+}
+
+#author {
+  color: #527bbd;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+#email {
+}
+#revnumber, #revdate, #revremark {
+}
+
+#footer {
+  font-size: small;
+  border-top: 2px solid silver;
+  padding-top: 0.5em;
+  margin-top: 4.0em;
+}
+#footer-text {
+  float: left;
+  padding-bottom: 0.5em;
+}
+#footer-badges {
+  float: right;
+  padding-bottom: 0.5em;
+}
+
+#preamble {
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+}
+div.imageblock, div.exampleblock, div.verseblock,
+div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
+div.admonitionblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.admonitionblock {
+  margin-top: 2.0em;
+  margin-bottom: 2.0em;
+  margin-right: 10%;
+  color: #606060;
+}
+
+div.content { /* Block element content. */
+  padding: 0;
+}
+
+/* Block element titles. */
+div.title, caption.title {
+  color: #527bbd;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 1.0em;
+  margin-bottom: 0.5em;
+}
+div.title + * {
+  margin-top: 0;
+}
+
+td div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content div.title:first-child {
+  margin-top: 0.0em;
+}
+div.content + div.title {
+  margin-top: 0.0em;
+}
+
+div.sidebarblock > div.content {
+  background: #ffffee;
+  border: 1px solid #dddddd;
+  border-left: 4px solid #f0f0f0;
+  padding: 0.5em;
+}
+
+div.listingblock > div.content {
+  border: 1px solid #dddddd;
+  border-left: 5px solid #f0f0f0;
+  background: #f8f8f8;
+  padding: 0.5em;
+}
+
+div.quoteblock, div.verseblock {
+  padding-left: 1.0em;
+  margin-left: 1.0em;
+  margin-right: 10%;
+  border-left: 5px solid #f0f0f0;
+  color: #888;
+}
+
+div.quoteblock > div.attribution {
+  padding-top: 0.5em;
+  text-align: right;
+}
+
+div.verseblock > pre.content {
+  font-family: inherit;
+  font-size: inherit;
+}
+div.verseblock > div.attribution {
+  padding-top: 0.75em;
+  text-align: left;
+}
+/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
+div.verseblock + div.attribution {
+  text-align: left;
+}
+
+div.admonitionblock .icon {
+  vertical-align: top;
+  font-size: 1.1em;
+  font-weight: bold;
+  text-decoration: underline;
+  color: #527bbd;
+  padding-right: 0.5em;
+}
+div.admonitionblock td.content {
+  padding-left: 0.5em;
+  border-left: 3px solid #dddddd;
+}
+
+div.exampleblock > div.content {
+  border-left: 3px solid #dddddd;
+  padding-left: 0.5em;
+}
+
+div.imageblock div.content { padding-left: 0; }
+span.image img { border-style: none; vertical-align: text-bottom; }
+a.image:visited { color: white; }
+
+dl {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+dt {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  font-style: normal;
+  color: navy;
+}
+dd > *:first-child {
+  margin-top: 0.1em;
+}
+
+ul, ol {
+    list-style-position: outside;
+}
+ol.arabic {
+  list-style-type: decimal;
+}
+ol.loweralpha {
+  list-style-type: lower-alpha;
+}
+ol.upperalpha {
+  list-style-type: upper-alpha;
+}
+ol.lowerroman {
+  list-style-type: lower-roman;
+}
+ol.upperroman {
+  list-style-type: upper-roman;
+}
+
+div.compact ul, div.compact ol,
+div.compact p, div.compact p,
+div.compact div, div.compact div {
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+tfoot {
+  font-weight: bold;
+}
+td > div.verse {
+  white-space: pre;
+}
+
+div.hdlist {
+  margin-top: 0.8em;
+  margin-bottom: 0.8em;
+}
+div.hdlist tr {
+  padding-bottom: 15px;
+}
+dt.hdlist1.strong, td.hdlist1.strong {
+  font-weight: bold;
+}
+td.hdlist1 {
+  vertical-align: top;
+  font-style: normal;
+  padding-right: 0.8em;
+  color: navy;
+}
+td.hdlist2 {
+  vertical-align: top;
+}
+div.hdlist.compact tr {
+  margin: 0;
+  padding-bottom: 0;
+}
+
+.comment {
+  background: yellow;
+}
+
+.footnote, .footnoteref {
+  font-size: 0.8em;
+}
+
+span.footnote, span.footnoteref {
+  vertical-align: super;
+}
+
+#footnotes {
+  margin: 20px 0 20px 0;
+  padding: 7px 0 0 0;
+}
+
+#footnotes div.footnote {
+  margin: 0 0 5px 0;
+}
+
+#footnotes hr {
+  border: none;
+  border-top: 1px solid silver;
+  height: 1px;
+  text-align: left;
+  margin-left: 0;
+  width: 20%;
+  min-width: 100px;
+}
+
+div.colist td {
+  padding-right: 0.5em;
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+div.colist td img {
+  margin-top: 0.3em;
+}
+
+@media print {
+  #footer-badges { display: none; }
+}
+
+#toc {
+  margin-bottom: 2.5em;
+}
+
+#toctitle {
+  color: #527bbd;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-top: 1.0em;
+  margin-bottom: 0.1em;
+}
+
+div.toclevel0, div.toclevel1, div.toclevel2, div.toclevel3, div.toclevel4 {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+div.toclevel2 {
+  margin-left: 2em;
+  font-size: 0.9em;
+}
+div.toclevel3 {
+  margin-left: 4em;
+  font-size: 0.9em;
+}
+div.toclevel4 {
+  margin-left: 6em;
+  font-size: 0.9em;
+}
+
+span.aqua { color: aqua; }
+span.black { color: black; }
+span.blue { color: blue; }
+span.fuchsia { color: fuchsia; }
+span.gray { color: gray; }
+span.green { color: green; }
+span.lime { color: lime; }
+span.maroon { color: maroon; }
+span.navy { color: navy; }
+span.olive { color: olive; }
+span.purple { color: purple; }
+span.red { color: red; }
+span.silver { color: silver; }
+span.teal { color: teal; }
+span.white { color: white; }
+span.yellow { color: yellow; }
+
+span.aqua-background { background: aqua; }
+span.black-background { background: black; }
+span.blue-background { background: blue; }
+span.fuchsia-background { background: fuchsia; }
+span.gray-background { background: gray; }
+span.green-background { background: green; }
+span.lime-background { background: lime; }
+span.maroon-background { background: maroon; }
+span.navy-background { background: navy; }
+span.olive-background { background: olive; }
+span.purple-background { background: purple; }
+span.red-background { background: red; }
+span.silver-background { background: silver; }
+span.teal-background { background: teal; }
+span.white-background { background: white; }
+span.yellow-background { background: yellow; }
+
+span.big { font-size: 2em; }
+span.small { font-size: 0.6em; }
+
+span.underline { text-decoration: underline; }
+span.overline { text-decoration: overline; }
+span.line-through { text-decoration: line-through; }
+
+div.unbreakable { page-break-inside: avoid; }
+
+
+/*
+ * xhtml11 specific
+ *
+ * */
+
+div.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+div.tableblock > table {
+  border: 3px solid #527bbd;
+}
+thead, p.table.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.table {
+  margin-top: 0;
+}
+/* Because the table frame attribute is overriden by CSS in most browsers. */
+div.tableblock > table[frame="void"] {
+  border-style: none;
+}
+div.tableblock > table[frame="hsides"] {
+  border-left-style: none;
+  border-right-style: none;
+}
+div.tableblock > table[frame="vsides"] {
+  border-top-style: none;
+  border-bottom-style: none;
+}
+
+
+/*
+ * html5 specific
+ *
+ * */
+
+table.tableblock {
+  margin-top: 1.0em;
+  margin-bottom: 1.5em;
+}
+thead, p.tableblock.header {
+  font-weight: bold;
+  color: #527bbd;
+}
+p.tableblock {
+  margin-top: 0;
+}
+table.tableblock {
+  border-width: 3px;
+  border-spacing: 0px;
+  border-style: solid;
+  border-color: #527bbd;
+  border-collapse: collapse;
+}
+th.tableblock, td.tableblock {
+  border-width: 1px;
+  padding: 4px;
+  border-style: solid;
+  border-color: #527bbd;
+}
+
+table.tableblock.frame-topbot {
+  border-left-style: hidden;
+  border-right-style: hidden;
+}
+table.tableblock.frame-sides {
+  border-top-style: hidden;
+  border-bottom-style: hidden;
+}
+table.tableblock.frame-none {
+  border-style: hidden;
+}
+
+th.tableblock.halign-left, td.tableblock.halign-left {
+  text-align: left;
+}
+th.tableblock.halign-center, td.tableblock.halign-center {
+  text-align: center;
+}
+th.tableblock.halign-right, td.tableblock.halign-right {
+  text-align: right;
+}
+
+th.tableblock.valign-top, td.tableblock.valign-top {
+  vertical-align: top;
+}
+th.tableblock.valign-middle, td.tableblock.valign-middle {
+  vertical-align: middle;
+}
+th.tableblock.valign-bottom, td.tableblock.valign-bottom {
+  vertical-align: bottom;
+}
+
+
+/*
+ * manpage specific
+ *
+ * */
+
+body.manpage h1 {
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  border-top: 2px solid silver;
+  border-bottom: 2px solid silver;
+}
+body.manpage h2 {
+  border-style: none;
+}
+body.manpage div.sectionbody {
+  margin-left: 3em;
+}
+
+@media print {
+  body.manpage div#toc { display: none; }
+}
+
+
+</style>
+<script type="text/javascript">
+/*<![CDATA[*/
+var asciidoc = {  // Namespace.
+
+/////////////////////////////////////////////////////////////////////
+// Table Of Contents generator
+/////////////////////////////////////////////////////////////////////
+
+/* Author: Mihai Bazon, September 2002
+ * http://students.infoiasi.ro/~mishoo
+ *
+ * Table Of Content generator
+ * Version: 0.4
+ *
+ * Feel free to use this script under the terms of the GNU General Public
+ * License, as long as you do not remove or alter this notice.
+ */
+
+ /* modified by Troy D. Hanson, September 2006. License: GPL */
+ /* modified by Stuart Rackham, 2006, 2009. License: GPL */
+
+// toclevels = 1..4.
+toc: function (toclevels) {
+
+  function getText(el) {
+    var text = "";
+    for (var i = el.firstChild; i != null; i = i.nextSibling) {
+      if (i.nodeType == 3 /* Node.TEXT_NODE */) // IE doesn't speak constants.
+        text += i.data;
+      else if (i.firstChild != null)
+        text += getText(i);
+    }
+    return text;
+  }
+
+  function TocEntry(el, text, toclevel) {
+    this.element = el;
+    this.text = text;
+    this.toclevel = toclevel;
+  }
+
+  function tocEntries(el, toclevels) {
+    var result = new Array;
+    var re = new RegExp('[hH]([1-'+(toclevels+1)+'])');
+    // Function that scans the DOM tree for header elements (the DOM2
+    // nodeIterator API would be a better technique but not supported by all
+    // browsers).
+    var iterate = function (el) {
+      for (var i = el.firstChild; i != null; i = i.nextSibling) {
+        if (i.nodeType == 1 /* Node.ELEMENT_NODE */) {
+          var mo = re.exec(i.tagName);
+          if (mo && (i.getAttribute("class") || i.getAttribute("className")) != "float") {
+            result[result.length] = new TocEntry(i, getText(i), mo[1]-1);
+          }
+          iterate(i);
+        }
+      }
+    }
+    iterate(el);
+    return result;
+  }
+
+  var toc = document.getElementById("toc");
+  if (!toc) {
+    return;
+  }
+
+  // Delete existing TOC entries in case we're reloading the TOC.
+  var tocEntriesToRemove = [];
+  var i;
+  for (i = 0; i < toc.childNodes.length; i++) {
+    var entry = toc.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div'
+     && entry.getAttribute("class")
+     && entry.getAttribute("class").match(/^toclevel/))
+      tocEntriesToRemove.push(entry);
+  }
+  for (i = 0; i < tocEntriesToRemove.length; i++) {
+    toc.removeChild(tocEntriesToRemove[i]);
+  }
+
+  // Rebuild TOC entries.
+  var entries = tocEntries(document.getElementById("content"), toclevels);
+  for (var i = 0; i < entries.length; ++i) {
+    var entry = entries[i];
+    if (entry.element.id == "")
+      entry.element.id = "_toc_" + i;
+    var a = document.createElement("a");
+    a.href = "#" + entry.element.id;
+    a.appendChild(document.createTextNode(entry.text));
+    var div = document.createElement("div");
+    div.appendChild(a);
+    div.className = "toclevel" + entry.toclevel;
+    toc.appendChild(div);
+  }
+  if (entries.length == 0)
+    toc.parentNode.removeChild(toc);
+},
+
+
+/////////////////////////////////////////////////////////////////////
+// Footnotes generator
+/////////////////////////////////////////////////////////////////////
+
+/* Based on footnote generation code from:
+ * http://www.brandspankingnew.net/archive/2005/07/format_footnote.html
+ */
+
+footnotes: function () {
+  // Delete existing footnote entries in case we're reloading the footnodes.
+  var i;
+  var noteholder = document.getElementById("footnotes");
+  if (!noteholder) {
+    return;
+  }
+  var entriesToRemove = [];
+  for (i = 0; i < noteholder.childNodes.length; i++) {
+    var entry = noteholder.childNodes[i];
+    if (entry.nodeName.toLowerCase() == 'div' && entry.getAttribute("class") == "footnote")
+      entriesToRemove.push(entry);
+  }
+  for (i = 0; i < entriesToRemove.length; i++) {
+    noteholder.removeChild(entriesToRemove[i]);
+  }
+
+  // Rebuild footnote entries.
+  var cont = document.getElementById("content");
+  var spans = cont.getElementsByTagName("span");
+  var refs = {};
+  var n = 0;
+  for (i=0; i<spans.length; i++) {
+    if (spans[i].className == "footnote") {
+      n++;
+      var note = spans[i].getAttribute("data-note");
+      if (!note) {
+        // Use [\s\S] in place of . so multi-line matches work.
+        // Because JavaScript has no s (dotall) regex flag.
+        note = spans[i].innerHTML.match(/\s*\[([\s\S]*)]\s*/)[1];
+        spans[i].innerHTML =
+          "[<a id='_footnoteref_" + n + "' href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+        spans[i].setAttribute("data-note", note);
+      }
+      noteholder.innerHTML +=
+        "<div class='footnote' id='_footnote_" + n + "'>" +
+        "<a href='#_footnoteref_" + n + "' title='Return to text'>" +
+        n + "</a>. " + note + "</div>";
+      var id =spans[i].getAttribute("id");
+      if (id != null) refs["#"+id] = n;
+    }
+  }
+  if (n == 0)
+    noteholder.parentNode.removeChild(noteholder);
+  else {
+    // Process footnoterefs.
+    for (i=0; i<spans.length; i++) {
+      if (spans[i].className == "footnoteref") {
+        var href = spans[i].getElementsByTagName("a")[0].getAttribute("href");
+        href = href.match(/#.*/)[0];  // Because IE return full URL.
+        n = refs[href];
+        spans[i].innerHTML =
+          "[<a href='#_footnote_" + n +
+          "' title='View footnote' class='footnote'>" + n + "</a>]";
+      }
+    }
+  }
+},
+
+install: function(toclevels) {
+  var timerId;
+
+  function reinstall() {
+    asciidoc.footnotes();
+    if (toclevels) {
+      asciidoc.toc(toclevels);
+    }
+  }
+
+  function reinstallAndRemoveTimer() {
+    clearInterval(timerId);
+    reinstall();
+  }
+
+  timerId = setInterval(reinstall, 500);
+  if (document.addEventListener)
+    document.addEventListener("DOMContentLoaded", reinstallAndRemoveTimer, false);
+  else
+    window.onload = reinstallAndRemoveTimer;
+}
+
+}
+asciidoc.install();
+/*]]>*/
+</script>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>
+git-blame(1) Manual Page
+</h1>
+<h2>NAME</h2>
+<div class="sectionbody">
+<p>git-blame -
+   Mostra que revisão e autor modificou pela última vez cada linha de um arquivo
+</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_sinopse">SINOPSE</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>git blame</em> [-c] [-b] [-l] [--root] [-t] [-f] [-n] [-s] [-e] [-p] [-w] [--incremental]
+            [-L &lt;range&gt;] [-S &lt;revs-file&gt;] [-M] [-C] [-C] [-C] [--since=&lt;date&gt;]
+            [--progress] [--abbrev=&lt;n&gt;] [&lt;rev&gt; | --contents &lt;file&gt; | --reverse &lt;rev&gt;..&lt;rev&gt;]
+            [--] &lt;file&gt;</pre>
+<div class="attribution">
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_descrição">DESCRIÇÃO</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Anota cada linha no arquivo fornecido com informações da revisão que
+modificou a linha pela última vez. Opcionalmente, comece anotando a partir
+da revisão dada.</p></div>
+<div class="paragraph"><p>Quando especificado uma ou mais vezes, <code>-L</code> restringe a anotação às linhas
+solicitadas.</p></div>
+<div class="paragraph"><p>A origem das linhas é automaticamente seguida em renomeações de todo o
+arquivo (atualmente não há opção para desativar o renomeamento). Para seguir
+linhas movidas de um arquivo para outro, ou para seguir linhas que foram
+copiadas e coladas de outro arquivo, etc., veja as opções <code>-C</code> e` -M`.</p></div>
+<div class="paragraph"><p>O relatório não informa nada sobre linhas que foram eliminadas ou
+substituídas; você precisa usar uma ferramenta como "git diff" ou a
+interface "pickaxe" brevemente mencionada no parágrafo seguinte.</p></div>
+<div class="paragraph"><p>Além de suportar a anotação de arquivos, o Git também suporta a pesquisa do
+histórico de desenvolvimento para quando um trecho de código ocorreu em uma
+alteração. Isso permite acompanhar quando um snippet de código foi
+adicionado a um arquivo, movido ou copiado entre arquivos e, eventualmente,
+excluído ou substituído. Ele funciona procurando por uma string de texto no
+diff. Um pequeno exemplo da interface da pickaxe que procura por
+<code>blame_usage</code>:</p></div>
+<div class="listingblock">
+<div class="content">
+<pre><code>$ git log --pretty=oneline -S'uso_de_responsabilidade'
+5040f17eba15504bad66b14a645bddd9b015ebb7 blame -S &lt;arquivo-de-ancestralidade&gt;
+ea4c7f9bf69e781dd0cd88d2bccb2bf5cc15c9a7 git-blame: Faça a saída</code></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_opções">OPÇÕES</h2>
+<div class="sectionbody">
+<div class="dlist"><dl>
+<dt class="hdlist1">
+-b
+</dt>
+<dd>
+<p>
+        Mostrar SHA-1 em branco para confirmações de commits. Isso também pode ser
+        controlado através da opção de configuração <em>blame.blankboundary</em>.
+</p>
+</dd>
+<dt class="hdlist1">
+--root
+</dt>
+<dd>
+<p>
+        Não trate commits raíz como fronteiras. Isso pode ser controlado via a opção
+        de configuração <code>blame.showRoot</code> .
+</p>
+</dd>
+<dt class="hdlist1">
+--show-stats
+</dt>
+<dd>
+<p>
+        Inclui estatísticas adicionais no fim da saída do comando blame.
+</p>
+</dd>
+<dt class="hdlist1">
+-L &lt;começo&gt;,&lt;fim&gt;
+</dt>
+<dt class="hdlist1">
+-L :&lt;nome da função&gt;
+</dt>
+<dd>
+<p>
+        Anota apenas a variação da linha dada. Pode ser espeficado várias vezes. É
+        permitido sobrepor as variações.
+</p>
+<div class="paragraph"><p>&lt;começo&gt; e &lt;fim&gt; são opcionais. ``-L &lt;começo&gt;" ou ``-L &lt;começo&gt;," toma do
+&lt;começo&gt; até o fim do arquivo. ``-L &lt;fim&gt;" toma do começo do arquivo até
+&lt;fim&gt;.</p></div>
+</dd>
+<dt class="hdlist1">
+-l
+</dt>
+<dd>
+<p>
+        Mostra o rev longo (Padrão: desligado).
+</p>
+</dd>
+<dt class="hdlist1">
+-t
+</dt>
+<dd>
+<p>
+        Mostra o tempo de forma crua (Padrão: desligado).
+</p>
+</dd>
+<dt class="hdlist1">
+-S &lt;arquivo-revs&gt;
+</dt>
+<dd>
+<p>
+        Use revisões do arquivo-revs no lugar de chamar  <a href="git-rev-list.html">git-rev-list(1)</a>.
+</p>
+</dd>
+<dt class="hdlist1">
+--reverso &lt;rev&gt;..&lt;rev&gt;
+</dt>
+<dd>
+<p>
+        Caminhe para a frente em vez de para trás. Em vez de mostrar a revisão em
+        que uma linha apareceu, isso mostra a última revisão em que uma linha
+        existiu. Isso requer um intervalo de revisão como START..END, onde o path
+        responsável  existe em START. --<em>git blame --reverse START</em> is taken as <em>git
+        blame --reverse START..HEAD</em> por conveniência.
+</p>
+</dd>
+<dt class="hdlist1">
+-p
+</dt>
+<dt class="hdlist1">
+--porcelain
+</dt>
+<dd>
+<p>
+        Mostra em um formato designado para o consumo de máquina.
+</p>
+</dd>
+<dt class="hdlist1">
+--line-porcelain
+</dt>
+<dd>
+<p>
+        Mostra o formato porcelain, mas a informação de saída do commit para cada
+        linha, não apenas a primeira vez que o commit é referenciado. Implica
+        --porcelain.
+</p>
+</dd>
+<dt class="hdlist1">
+--incremental
+</dt>
+<dd>
+<p>
+        Mostra o resultado incrementadamente em um formado designado para o consumo
+        de máquina.
+</p>
+</dd>
+<dt class="hdlist1">
+--encoding=&lt;codificação&gt;
+</dt>
+<dd>
+<p>
+        Especifica o encoding usado para a saída dos nomes dos autores e sumários de
+        commit. Setando isso para <code>none</code> faz com que a saída do blame (culpa) não
+        seja convertida. Para maior informação, veja a discussão sobre encoding na
+        página de manual  <a href="git-log.html">git-log(1)</a>.
+</p>
+</dd>
+<dt class="hdlist1">
+--contents &lt;arquivo&gt;
+</dt>
+<dd>
+<p>
+        Quando &lt;rev&gt; não é especificado, o comando anota as mudanças começando para
+        trás da cópia da árvore de trabalho. Essa flag faz com que o comando pareça
+        estar trabalhando na cópia da árvore de trabalho  que tem os conteúdos do
+        arquivo nomeado (especifique <code>-</code> para fazer o comando ler da entrada
+        padrão).
+</p>
+</dd>
+<dt class="hdlist1">
+--date &lt;formato&gt;
+</dt>
+<dd>
+<p>
+        Especifica o formato usado por datas de saída. Se --date não é dado, o valor
+        da variável  de configuração blame.date é usado. Se a variável blame.date
+        não está setada, o formato iso é usado. Para valores suportados, veja a
+        discussão da opção --date em <a href="git-log.html">git-log(1)</a>.
+</p>
+</dd>
+<dt class="hdlist1">
+--[no-]progress
+</dt>
+<dd>
+<p>
+        O status de progresso é reportado na saída padrão  de erro por padrão quando
+        está anexado a um terminal. Esta flag habilita o relatório de progresso caso
+        não esteja anexado a um terminal. Não use <code>--progress</code> junto com
+        <code>--porcelain</code> ou <code>--incremental</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+-M[&lt;num&gt;]
+</dt>
+<dd>
+<p>
+        Detectar linhas movidas ou copiadas dentro de um arquivo. Quando um commit
+        move ou copia um bloco de linhas (por exemplo, o arquivo original tem A e B,
+        e o commit muda para B e depois para A), o algoritmo tradicional de <em>culpa</em>
+        percebe apenas metade do movimento e geralmente culpa as linhas que foram
+        movidas para cima (i.e. B) ao pai e atribui a culpa às linhas que foram
+        movidas para baixo (i.e. A) para o commit filho. Com essa opção os dois
+        grupos de linhas são culpados pelos pais executando passagens extras de
+        inspeção.
+</p>
+<div class="paragraph"><p>&lt;num&gt; é opcional mas é o limite inferior do número de caracteres alfa
+numéricos que o Gif tem que detectar como movendo/copiando em um arquivo o
+qual ele associa essas linhas ao commit principal. O valor padrão é 20.</p></div>
+</dd>
+<dt class="hdlist1">
+-C[&lt;num&gt;]
+</dt>
+<dd>
+<p>
+        Em adição a <code>-M</code>, detecta as linhas movidas ou copiadas de outros arquivos
+        que são modificados no mesmo commit. Isso é útil quando você reorganiza o
+        seu programa e move código entre arquivos. Quando essa opção é dada duas
+        vezes, o comando adicionalmente olha para cópias de outros arquivos no
+        commit que o cria.  Quando essa opção é dada três vezes, esse comando
+        adicionalmente olha para cópias de outros arquivos em qualquer commit.
+</p>
+<div class="paragraph"><p>&lt;num&gt; é opcional mas ele é o limite inferior no número de caracteres alfa
+numéricos que o Git tem que detectar como se movendo/copiando entre arquivos
+para que ele associe essas linha no commit principal. E o valor padrão é
+40. Se mais opções que <code>-C</code> são dadas, o argumento &lt;num&gt; do último <code>-C</code> terá
+efeito.</p></div>
+</dd>
+<dt class="hdlist1">
+-h
+</dt>
+<dd>
+<p>
+        Mostra a mensagem de ajuda.
+</p>
+</dd>
+<dt class="hdlist1">
+-c
+</dt>
+<dd>
+<p>
+        Use o mesmo modo de saída que o linkgit: git-anotar [1] (Padrão: fora).
+</p>
+</dd>
+<dt class="hdlist1">
+--score-debug
+</dt>
+<dd>
+<p>
+        Inclua informações de depuração relacionadas ao movimento de linhas entre
+        arquivos (consulte <code>-C) e linhas movidas dentro de um arquivo (consulte</code>
+        -M`).  O primeiro número listado é a pontuação.
+         Esse é o número de caracteres alfanuméricos detectados como tendo sido
+        movidos entre ou dentro dos arquivos.  Isso deve estar acima de um certo
+        limite para <em>git blame</em> considerar essas linhas de código que foram movidas.
+</p>
+</dd>
+<dt class="hdlist1">
+-f
+</dt>
+<dt class="hdlist1">
+--show-name
+</dt>
+<dd>
+<p>
+        Mostrar o nome do arquivo no commit original.  Por padrão, o nome do arquivo
+        é mostrado se houver alguma linha que tenha vindo de um arquivo com um nome
+        diferente, devido à renomeação da detecção.
+</p>
+</dd>
+<dt class="hdlist1">
+-n
+</dt>
+<dt class="hdlist1">
+--show-number
+</dt>
+<dd>
+<p>
+        Mostrar o número da linha no commit original (padrão: off).
+</p>
+</dd>
+<dt class="hdlist1">
+-s
+</dt>
+<dd>
+<p>
+        Suprima o nome do autor e o registro de data e hora da saída.
+</p>
+</dd>
+<dt class="hdlist1">
+-e
+</dt>
+<dt class="hdlist1">
+--show-email
+</dt>
+<dd>
+<p>
+        Mostrar o email do autor em vez do nome do autor (Padrão: desativado).  Isso
+        também pode ser controlado através da opção de configuração
+        <code>blame.showEmail</code>.
+</p>
+</dd>
+<dt class="hdlist1">
+-w
+</dt>
+<dd>
+<p>
+        Ignore os espaços em branco ao comparar a versão dos pais e a criança para
+        descobrir de onde vieram as linhas.
+</p>
+</dd>
+<dt class="hdlist1">
+--abrev=&lt;n&gt;
+</dt>
+<dd>
+<p>
+        Em vez de usar os dígitos hexadecimais padrão 7+1 como o nome do objeto
+        abreviado, use &lt;n&gt;+1 dígitos. Observe que 1 coluna é usada para um acento
+        circunflexo para marcar a confirmação de limite.
+</p>
+</dd>
+</dl></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_o_formato_porcelana">O FORMATO PORCELANA</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Nesse formato, cada linha é enviada após um cabeçalho; o cabeçalho no mínimo
+tem a primeira linha que tem:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+40-byte SHA-1 do commit da linha é atribuído a;
+</p>
+</li>
+<li>
+<p>
+o número da linha da linha no arquivo original;
+</p>
+</li>
+<li>
+<p>
+o número da linha da linha no arquivo final;
+</p>
+</li>
+<li>
+<p>
+em uma linha que inicia um grupo de linhas de um commit diferente do
+  anterior, o número de linhas neste grupo.  Nas linhas subsequentes, este
+  campo está ausente.
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>Esta linha de cabeçalho é seguida pelas seguintes informações pelo menos uma
+vez para cada commit:</p></div>
+<div class="ulist"><ul>
+<li>
+<p>
+o nome do autor ("autor"), email ("autor-mail"), time ("autor-time") e fuso
+  horário ("autor-tz"); da mesma forma para o committer.
+</p>
+</li>
+<li>
+<p>
+o nome do arquivo no commit ao qual a linha é atribuída.
+</p>
+</li>
+<li>
+<p>
+a primeira linha da mensagem de log de confirmação ("resumo").
+</p>
+</li>
+</ul></div>
+<div class="paragraph"><p>O conteúdo da linha real é gerado após o cabeçalho acima, prefixado por uma
+TAB. Isso permite adicionar mais elementos de cabeçalho posteriormente.</p></div>
+<div class="paragraph"><p>O formato de porcelana geralmente suprime informações de confirmação que já
+foram vistas. Por exemplo, duas linhas que são responsabilizadas para a
+mesma confirmação serão mostradas, mas os detalhes dessa confirmação serão
+mostrados apenas uma vez. Isso é mais eficiente, mas pode exigir que mais
+estado seja mantido pelo leitor. A opção <code>--line-porcelain</code> pode ser usada
+para gerar informações completas de commit para cada linha, permitindo um
+uso mais simples (mas menos eficiente)  como:</p></div>
+<div class="paragraph"><p># conta o número de linhas atribuídas a cada autor
+        git culpar arquivo de --linha-porcelana |
+        sed -n <em>s/^autor //p</em> |
+        ordenar | uniq -c | ordenar -rn</p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_especificando_faixas">ESPECIFICANDO FAIXAS</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Ao contrário de <em>git blame</em> e <em>git annotate</em> em versões mais antigas do git,
+a extensão da anotação pode ser limitada a ambos os intervalos de linha e de
+revisão. A opção <code>-L</code>, que limita a anotação a um intervalo de linhas, pode
+ser especificada várias vezes.</p></div>
+<div class="paragraph"><p>Quando você estiver interessado em encontrar a origem para as linhas 40-60
+do arquivo <code>foo</code>, você pode usar a opção` -L` assim (eles significam a mesma
+coisa - ambos pedem 21 linhas iniciando na linha 40):</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git responsabilidade -L 40,60 foo
+git responsabilidade  -L 40,+21 foo</code></pre>
+</div></div>
+<div class="paragraph"><p>Além disso, você pode usar uma expressão regular para especificar o
+intervalo de linha:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git responsabilidade -L '/^sub olá {/,/^}$/' foo</code></pre>
+</div></div>
+<div class="paragraph"><p>que limita a anotação ao corpo da sub-rotina <code>hello</code>.</p></div>
+<div class="paragraph"><p>Quando você não está interessado em mudanças mais antigas que a versão
+v2.6.18, ou em mudanças anteriores a 3 semanas, você pode usar
+especificadores de intervalo de revisão similares a <em>git rev-list</em>:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git responsabilidade v2.6.18.. -- foo
+git responsabilidade --desde=3.semanas -- foo</code></pre>
+</div></div>
+<div class="paragraph"><p>Quando os especificadores de intervalo de revisão são usados para limitar a
+anotação, as linhas que não foram alteradas desde o limite de intervalo
+(seja a confirmação v2.6.18 ou a confirmação mais recente com mais de 3
+semanas no exemplo acima) são responsabilizadas por esse limite de intervalo
+commit.</p></div>
+<div class="paragraph"><p>Uma maneira particularmente útil é verificar se um arquivo adicionado possui
+linhas criadas por copiar e colar de arquivos existentes.  Às vezes, isso
+indica que o desenvolvedor estava sendo malfeito e não refatorou o código
+corretamente.  Você pode primeiro encontrar o commit que introduziu o
+arquivo com:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git log --diff-filtro=A --pretty=short -- foo</code></pre>
+</div></div>
+<div class="paragraph"><p>e então anote a mudança entre o commit e seus pais, usando a notação <code>commit
+^!</code>:</p></div>
+<div class="literalblock">
+<div class="content">
+<pre><code>git responsabilidade -C -C -f $commit^! -- foo</code></pre>
+</div></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_saída_incremental">SAÍDA INCREMENTAL</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Quando chamado com a opção --incremental, o comando gera o resultado
+conforme ele é construído.  A saída geralmente irá falar sobre linhas
+tocadas por commits mais recentes primeiro (ou seja, as linhas serão
+anotadas fora de ordem) e destina-se a ser usado por visualizadores
+interativos.</p></div>
+<div class="paragraph"><p>O formato de saída é semelhante ao formato Porcelain, mas não contém as
+linhas reais do arquivo que está sendo anotado.</p></div>
+<div class="olist arabic"><ol class="arabic">
+<li>
+<p>
+Cada entrada de culpa sempre começa com uma linha de:
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>&lt;40-byte hex sha1&gt; &lt;fonte-linha&gt; &lt;result-linha&gt; &lt;num_linha&gt;</code></pre>
+</div></div>
+<div class="paragraph"><p>Os números de linha contam a partir de 1.</p></div>
+</li>
+<li>
+<p>
+A primeira vez que um commit é exibido no fluxo, ele contém várias outras
+  informações sobre ele impressas com uma tag de uma palavra no início de cada
+  linha, descrevendo as informações adicionais de confirmação (autor, email,
+  committer, datas, resumo, etc. .
+</p>
+</li>
+<li>
+<p>
+Ao contrário do formato Porcelana, as informações do nome do arquivo são
+  sempre dadas e terminam a entrada:
+</p>
+<div class="literalblock">
+<div class="content">
+<pre><code>"nome-do-arquivo" &lt;espaço-em-branco-quoted-nomed-do-arquivo-vai-aqui&gt;</code></pre>
+</div></div>
+<div class="paragraph"><p>e, portanto, é realmente muito fácil analisar algum analisador de linha e
+palavra (que deve ser bastante natural para a maioria das linguagens de
+script).</p></div>
+<div class="admonitionblock">
+<table><tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">Para as pessoas que fazem análise: para torná-lo mais robusto, simplesmente
+ignore quaisquer linhas entre a primeira e a última (linhas "&lt;sha1&gt;" e "nome
+do arquivo") onde você não reconhece as palavras da tag (ou se preocupa com
+aquela em particular) no início das linhas de "informações
+estendidas". Dessa forma, se houver alguma informação adicionada (como a
+codificação de commit ou comentário de commit estendido), um visualizador de
+culpa não se importará.</td>
+</tr></table>
+</div>
+</li>
+</ol></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_autores_de_mapeamento">AUTORES DE MAPEAMENTO</h2>
+<div class="sectionbody">
+</div>
+</div>
+<div class="sect1">
+<h2 id="_veja_também">VEJA TAMBÉM</h2>
+<div class="sectionbody">
+<div class="paragraph"><p><a href="git-annotate.html">git-annotate(1)</a></p></div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph"><p>Parte do linkgit: git[1] suite</p></div>
+</div>
+</div>
+</div>
+<div id="footnotes"><hr /></div>
+<div id="footer">
+<div id="footer-text">
+Last updated
+ 2019-06-16 22:08:34 CEST
+</div>
+</div>
+</body>
+</html>

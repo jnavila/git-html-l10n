@@ -1,0 +1,116 @@
+git-archimport(1)
+=================
+
+NOME
+----
+git-archimport - Importar um repositório do GNU Arch para o Git
+
+
+SINOPSE
+-------
+[verse]
+'git archimport' [-h] [-v] [-o] [-a] [-f] [-T] [-D depth] [-t tempdir]
+               <archive/branch>[:<git-branch>] ...
+
+DESCRIÇÃO
+---------
+Importa um projeto de um ou mais repositórios do GNU Arch.  Ele seguirá
+ramificações e repositórios dentro dos namespaces definidos pelos parâmetros
+<archive/branch> fornecidos. Se ele não puder encontrar o branch remoto, uma
+merge será importada como um commit regular. Se puder encontrá-lo, ele será
+marcado como uma mesclagem sempre que possível (veja a discussão abaixo).
+
+O script espera que você forneça as principais raízes onde ele pode iniciar
+a importação de um tipo 'initial import' ou 'tag' do Arch commit. Ele
+seguirá e importará novos ramos dentro das raízes fornecidas.
+
+Espera estar lidando apenas com um projeto. Se ele vir ramificações com
+raízes diferentes, ele se recusará a ser executado. Nesse caso, edite seus
+parâmetros <archive/branch> para definir claramente o escopo da importação.
+
+'git archimport' usa `tla` extensivamente em segundo plano para acessar o
+repositório Arch.  Certifique-se de ter uma versão recente do `tla`
+disponível no caminho. `tla` deve saber sobre os repositórios que você passa
+para 'git archimport'.
+
+Para a importação inicial, o 'git archimport' espera encontrar-se em um
+diretório vazio. Para acompanhar o desenvolvimento de um projeto que usa o
+Arch, execute novamente o 'git archimport' com os mesmos parâmetros da
+importação inicial para executar importações incrementais.
+
+Enquanto o 'git archimport' tentará criar nomes de ramificações sensíveis
+para os arquivos que ele importa, também é possível especificar os nomes das
+ramificações do Git manualmente.  Para fazer isso, escreva um nome de
+ramificação Git após cada parâmetro <archive/branch>, separado por dois
+pontos. Dessa forma, você pode encurtar os nomes das ramificações do Arch e
+converter o jargão do Arch para o jargão do Git, por exemplo, mapeando um
+"PROJECT {litdd} devo {litdd} VERSION" ramificação para "master".
+
+A associação de vários ramos do Arch a um ramo do Git é possível; o
+resultado fará mais sentido somente se nenhuma confirmação for feita na
+primeira ramificação, depois que a segunda ramificação for criada.
+ Ainda assim, isso é útil para converter repositórios do Arch que foram
+rotacionados periodicamente.
+
+
+MERGES
+------
+Os dados de mesclagem de patch do Arch são usados para marcar as mesclagens
+no Git também. O Git não se importa muito com o rastreamento de patches e
+considera apenas uma mesclagem quando um branch incorpora todos os commits
+desde o ponto que eles criaram. O resultado final é que o Git terá uma boa
+ideia de quanto as ramificações divergiram. Portanto, o processo de
+importação perde alguns metadados de troca de patches.
+
+Felizmente, quando você tenta mesclar ramificações importadas do Arch, o Git
+encontrará uma boa base de mesclagem e tem uma boa chance de identificar os
+patches que foram trocados fora de sequência entre os ramos.
+
+OPÇÕES
+------
+
+-h::
+	Exibir uso.
+
+-v::
+	Saída detalhada.
+
+-T::
+	Muitas tags. Irá criar uma tag para cada commit, refletindo o nome da commit
+	no repositório Arch.
+
+-f::
+	Use a estratégia de importação de conjuntos de faixas rápida.  Isso pode ser
+	significativamente mais rápido para árvores grandes, mas não pode manipular
+	alterações de renomeação ou permissões de diretório.  A estratégia padrão é
+	lenta e segura.
+
+-o::
+	Use isso para compatibilidade com nomes de ramificações de estilo antigo
+	usados por versões anteriores de 'git archimport'.  Os nomes de ramificações
+	de estilo antigo eram da categoria {litdd}, enquanto os nomes de
+	ramificações de novos estilos são archive, categoria {litdd} branch {litdd}
+	version.  Em ambos os casos, os nomes dados na linha de comando substituirão
+	os gerados automaticamente.
+
+-D <depth>::
+	Siga o ancestral da mesclagem e tente importar as árvores que foram
+	mescladas.  Especifique uma profundidade maior que 1 se os logs de patch
+	tiverem sido removidos.
+
+-a::
+	Tente registrar automaticamente os arquivos em
+	`http://mirrors.sourcecontrol.net` Isso é particularmente útil com a opção
+	-D.
+
+-t <tmpdir>::
+	Substituir o tempdir padrão.
+
+
+<archive/branch>::
+	Arquivo/identificador de ramificação em um formato que o `tla log` entenda.
+
+
+GIT
+---
+Parte do linkgit: git[1] suite
