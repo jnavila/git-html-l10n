@@ -30,10 +30,20 @@ endif::git-format-patch[]
 
 -U<n>::
 --unified=<n>::
-	Gere diffs com <n> linhas de contexto em vez das três usuais.
+	Generate diffs with <n> lines of context instead of the usual three. Implies
+	`--patch`.
 ifndef::git-format-patch[]
 	Implica `-p`.
 endif::git-format-patch[]
+
+--saída=<arquivo>::
+	Output to a specific file instead of stdout.
+
+--output-indicator-new=<char>::
+--output-indicator-old=<char>::
+--output-indicator-context=<char>::
+	Specify the character used to indicate new, old or context lines in the
+	generated patch. Normally they are '+', '-' and ' ' respectively.
 
 ifndef::git-format-patch[]
 --raw::
@@ -88,7 +98,7 @@ internamente.
 	Escolha um algoritmo de diff. As variantes são as seguintes:
 +
 --
-`padrão`, `myers`;;
+`default`, `myers`;;
 	O algoritmo de diferenciação guloso básico. Atualmente, esse é o padrão.
 `minimal`;;
 	Gaste tempo extra para garantir que o menor diferencial possível seja
@@ -139,6 +149,7 @@ Estes parâmetros também podem ser ajustados individualmente com
 	Saída apenas a última linha do formato `--stat` contendo o número total de
 	arquivos modificados, assim como o número de linhas adicionadas e deletadas.
 
+-X[<param1,param2,...>]::
 --dirstat[=<param1,param2,...>]::
 	Saída da distribuição da quantidade relativa de alterações para cada
 	subdiretório. O comportamento de `--dirstat` pode ser customizado
@@ -181,6 +192,12 @@ Exemplo: O seguinte contará os arquivos alterados, ignorando os diretórios
 com menos de 10% da quantidade total de arquivos alterados e acumulando
 contagens de diretório-filho nos diretórios-pai: `--dirstat = files, 10,
 cumulative`.
+
+--cumulative::
+	Synonym for --dirstat=cumulative
+
+--dirstat-by-file[=<param1,param2>...]::
+	Synonym for --dirstat=files,param1,param2...
 
 --summary::
 	Produza um resumo condensado de informações de cabeçalho estendidas, como
@@ -253,18 +270,18 @@ endif::git-diff[]
 	O modo dever ser um dos seguintes:
 +
 --
-não::
+no::
 	As linhas movidas não são destacadas.
-padrão::
+default::
 	É um sinônimo para `zebra`. Isso pode mudar para um modo mais sensato no
 	futuro.
-avião::
+plain::
 	Qualquer linha adicionada em um local e removida em outro local será
 	colorida com 'color.diff.newMoved'. Da mesma forma, 'color.diff.oldMoved'
 	será usado para linhas removidas que são adicionadas em algum outro lugar no
 	diff. Este modo seleciona qualquer linha movida, mas não é muito útil em uma
 	revisão determinar se um bloco de código foi movido sem permutação.
-blocos::
+blocks::
 	Blocos de texto movido de pelo menos 20 caracteres alfanuméricos são
 	detectados com avidez. Os blocos detectados são pintados usando a cor
 	'color.diff.{old, new}Moved'. Blocos adjacentes não podem ser separados.
@@ -273,7 +290,7 @@ zebra::
 	pintados usando 'color.diff.{old,new}Moved' color ou
 	'color.diff.{old,new}MovedAlternative'. A mudança entre as duas cores indica
 	que um novo bloco foi detectado.
-zebra-escurecida::
+dimmed-zebra::
 	Semelhante a 'zebra', mas o escurecimento adicional de partes
 	desinteressantes do código movido é executado. As linhas limítrofes de dois
 	blocos adjacentes são consideradas interessantes, o resto é
@@ -293,19 +310,19 @@ endif::git-diff[]
 	Esses modos podem ser dados como uma lista separada por vírgula:
 +
 --
-não::
+no::
 	Não ignore espaços em branco ao realizar a detecção de movimento.
-ignorar-espaço-at-eol::
+ignore-space-at-eol::
 	Ignore as alterações no espaço em branco na EOL.
-ignorar-mudança-de espaço::
+ignore-space-change::
 	Ignore as alterações na quantidade de espaço em branco. Isso ignora o espaço
 	em branco no final da linha e considera todas as outras sequências de um ou
 	mais caracteres em branco como equivalentes.
-ignore-todo-espaço::
+ignore-all-space::
 	Ignore os espaços em branco ao comparar linhas. Isso ignora as diferenças,
 	mesmo que uma linha tenha espaço em branco onde a outra linha não tenha
 	nenhuma.
-permitir-alteração-de recuo::
+allow-indentation-change::
 	Inicialmente, ignore qualquer espaço em branco na detecção de movimento e
 	agrupe os blocos de código movidos apenas em um bloco se a alteração no
 	espaço em branco for a mesma por linha. Isso é incompatível com os outros
@@ -324,19 +341,19 @@ permitir-alteração-de recuo::
 	deve ser um dos seguintes:
 +
 --
-cor::
+color::
 	Realce palavras alteradas usando apenas cores. Implica `--color`.
-avião::
+plain::
 	Mostrar palavras como `[-removed-]` e `{+ added +}`. Não faz nenhuma
 	tentativa de escapar dos delimitadores se eles aparecerem na entrada,
 	portanto a saída pode ser ambígua.
-porcelana::
+porcelain::
 	Use um formato baseado em linha especial destinado ao consumo de scripts. As
 	corridas adicionadas / removidas / inalteradas são impressas no formato
 	usual de diff unificado, começando com um caractere `+` / `-` /` `no início
 	da linha e se estendendo até o final da linha. Novas linhas na entrada são
 	representadas por um til `~` em uma linha própria.
-nenhuma::
+none::
 	Desative a palavra diff novamente.
 --
 +
@@ -373,6 +390,9 @@ endif::git-format-patch[]
 	Desative a detecção de renomeação, mesmo quando o arquivo de configuração
 	fornecer o padrão para isso.
 
+--[no-]rename-empty::
+	Whether to use empty blobs as rename source.
+
 ifndef::git-format-patch[]
 --check::
 	Avisar se as alterações introduzem marcadores de conflito ou erros de espaço
@@ -401,8 +421,8 @@ endif::git-format-patch[]
 	formato patch.
 
 --binary::
-	Além de `--full-index`, gera um diff binário que pode ser aplicado com`
-	git-apply`.
+	In addition to `--full-index`, output a binary diff that can be applied with
+	`git-apply`. Implies `--patch`.
 
 --abrev[=<n>]::
 	Em vez de mostrar o nome completo do objeto hexadecimal de 40 bytes em

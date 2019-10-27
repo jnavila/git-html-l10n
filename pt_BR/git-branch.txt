@@ -8,12 +8,14 @@ git-branch - Lista, cria ou exclui filiais
 SINOPSE
 -------
 [verse]
-'git branch' [--color[=<when>] | --no-color] [-r | -a]
-	[--list] [-v [--abbrev=<length> | --no-abbrev]]
+'git branch' [--color[=<when>] | --no-color] [--show-current]
+	[-v [--abbrev=<length> | --no-abbrev]]
 	[--column[=<options>] | --no-column] [--sort=<key>]
 	[(--merged | --no-merged) [<commit>]]
 	[--contains [<commit]] [--no-contains [<commit>]]
-	[--points-at <object>] [--format=<format>] [<pattern>...]
+	[--points-at <object>] [--format=<format>]
+	[(-r | --remotes) | (-a | --all)]
+	[--list] [<pattern>...]
 'git branch' [--track | --no-track] [-f] <branchname> [<start-point>]
 'git branch' (--set-upstream-to=<upstream> | -u <upstream>) [<branchname>]
 'git branch' --unset-upstream [<branchname>]
@@ -25,15 +27,19 @@ SINOPSE
 DESCRIÇÃO
 ---------
 
-Se `--list` for fornecido, ou se não houver argumentos não-opcionais, as
-ramificações existentes serão listadas; o ramo atual será destacado com um
-asterisco. A opção `-r` faz com que as ramificações de rastreamento remoto
-sejam listadas, e a opção` -a` mostra ramificações locais e remotas. Se um
-`<pattern>` é dado, ele é usado como um caractere curinga do shell para
-restringir a saída às ramificações correspondentes. Se vários padrões forem
-fornecidos, uma ramificação será mostrada se corresponder a qualquer um dos
-padrões.  Note que ao fornecer um `<pattern>`, você deve usar `--list`; caso
-contrário, o comando é interpretado como criação de ramificação.
+If `--list` is given, or if there are no non-option arguments, existing
+branches are listed; the current branch will be highlighted in green and
+marked with an asterisk.  Any branches checked out in linked worktrees will
+be highlighted in cyan and marked with a plus sign. Option `-r` causes the
+remote-tracking branches to be listed, and option `-a` shows both local and
+remote branches.
+
+If a `<pattern>` is given, it is used as a shell wildcard to restrict the
+output to matching branches. If multiple patterns are given, a branch is
+shown if it matches any of the patterns.
+
+Note that when providing a `<pattern>`, you must use `--list`; otherwise the
+command may be interpreted as branch creation.
 
 Com `--contains`, mostra apenas as ramificações que contêm o commit nomeado
 (em outras palavras, os branches cuja dica commit é descendente da commit
@@ -44,12 +50,14 @@ ramificações `--no-merged` somente não mescladas no commit nomeado serão
 listadas. Se o argumento <commit> estiver faltando, o padrão é `HEAD` (isto
 é, a ponta do branch atual).
 
-O segundo formulário do comando cria um novo cabeçalho de ramificação
-chamado <branchname>, que aponta para o atual `HEAD`, ou <start-point>, se
-fornecido.
+The command's second form creates a new branch head named <branchname> which
+points to the current `HEAD`, or <start-point> if given. As a special case,
+for <start-point>, you may use `"A...B"` as a shortcut for the merge base of
+`A` and `B` if there is exactly one merge base. You can leave out at most
+one of `A` and `B`, in which case it defaults to `HEAD`.
 
-Observe que isso criará a nova ramificação, mas não mudará a árvore de
-trabalho para ela; use "git checkout <newbranch>" para mudar para o novo
+Note that this will create the new branch, but it will not switch the
+working tree to it; use "git switch <newbranch>" to switch to the new
 branch.
 
 Quando uma ramificação local é iniciada em uma ramificação de controle
@@ -149,11 +157,13 @@ Esta opção é aplicável apenas no modo não detalhado.
 
 -r::
 --remotes::
-	Listar ou excluir (se usado com -d) os ramos de rastreamento remoto.
+	List or delete (if used with -d) the remote-tracking branches.  Combine with
+	`--list` to match the optional pattern(s).
 
 -a::
 --all::
-	Listar filiais de rastreamento remoto e filiais locais.
+	List both remote-tracking branches and local branches.  Combine with
+	`--list` to match optional pattern(s).
 
 -l::
 --list::
@@ -161,13 +171,19 @@ Esta opção é aplicável apenas no modo não detalhado.
 	'maint - *'`, lista apenas as ramificações que correspondem ao(s)
 	padrão(ões).
 
+--show-current::
+	Print the name of the current branch. In detached HEAD state, nothing is
+	printed.
+
 -v::
 -vv::
 --verbose::
-	Quando estiver no modo de lista, mostre sha1 e submeta a linha de assunto
-	para cada cabeçalho, junto com o relacionamento com a ramificação upstream
-	(se houver). Se dado duas vezes, imprima o nome da ramificação upstream,
-	também (veja também `git remote show <remote>`).
+	When in list mode, show sha1 and commit subject line for each head, along
+	with relationship to upstream branch (if any). If given twice, print the
+	path of the linked worktree (if any) and the name of the upstream branch, as
+	well (see also `git remote show <remote>`).  Note that the current
+	worktree's HEAD will not have its path printed (it will always be your
+	current directory).
 
 -q::
 --quiet::
@@ -191,12 +207,11 @@ Esta opção é aplicável apenas no modo não detalhado.
 	status` e` git branch -v`. Além disso, ele direciona `git pull` sem
 	argumentos para puxar do upstream quando o novo branch é retirado.
 +
-Esse comportamento é o padrão quando o ponto inicial é um ramo de
-rastreamento remoto. Configure a variável de configuração
-branch.autoSetupMerge para `false` se você quiser que` git checkout` e `git
-branch` sempre se comporte como se` --no-track` fosse dado. Defina-o como
-`sempre` se você quiser esse comportamento quando o ponto de partida for um
-ramo local ou de rastreamento remoto.
+This behavior is the default when the start point is a remote-tracking
+branch.  Set the branch.autoSetupMerge configuration variable to `false` if
+you want `git switch`, `git checkout` and `git branch` to always behave as
+if `--no-track` were given. Set it to `always` if you want this behavior
+when the start-point is either a local or remote-tracking branch.
 
 --no-track::
 	Não configure "upstream", mesmo que a variável de configuração
@@ -293,7 +308,7 @@ Inicie o desenvolvimento a partir de uma tag conhecida::
 $ git clone git://git.kernel.org/pub/scm/.../linux-2.6 my2.6
 $ cd my2.6
 $ git branch my2.6.14 v2.6.14   <1>
-$ git checkout my2.6.14
+$ git switch my2.6.14
 ------------
 +
 <1> Esta etapa e a próxima poderiam ser combinadas em uma única etapa com
@@ -315,13 +330,26 @@ $ git branch -D test                                    <2>
     ramificação que está com check-out no momento) não tenha todas as
     confirmações da ramificação de teste.
 
+Listing branches from a specific remote::
++
+------------
+$ git branch -r -l '<remote>/<pattern>'                 <1>
+$ git for-each-ref 'refs/remotes/<remote>/<pattern>'    <2>
+------------
++
+<1> Using `-a` would conflate <remote> with any local branches you happen to
+    have been prefixed with the same <remote> pattern.
+<2> `for-each-ref` can take a wide range of options. See
+    linkgit:git-for-each-ref[1]
+
+Patterns will normally need quoting.
 
 NOTAS
 -----
 
-Se você está criando uma ramificação que deseja obter imediatamente, é mais
-fácil usar o comando git checkout com sua opção `-b` para criar uma
-ramificação e verificar com um único comando.
+If you are creating a branch that you want to switch to immediately, it is
+easier to use the "git switch" command with its `-c` option to do the same
+thing with a single command.
 
 As opções `--contains`,` --não-contains`, `--merged` e` --não-merged` servem
 quatro finalidades relacionadas, mas diferentes:

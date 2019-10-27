@@ -26,13 +26,15 @@ toutes les formes.
 	leur état de `<arbre-esque>` (ceci n'affecte pas l'arbre de travail ou la
 	branche actuelle.)
 +
-Cela signifie que `git reset <chemins>` est l'opposé de `git add <chemins>`.
+Cela signifie que `git reset <chemins>` est l'opposé de `git add
+<chemins>`. Cette commande est équivalent à `git restore
+[--source=<arbre-esque>] --staged <chemins>...`.
 +
 Après avoir lancé `git reset <chemins>` pour mettre à jour l'entrée d'index,
-vous pouvez linkgit:git-checkout[1] pour extraire le contenu de l'index dans
-l'arbre de travail. Alternativement, en utilisant linkgit:git-checkout[1] et
-en spécifiant un commit, vous pouvez copier le contenu d'un chemin d'un
-commit vers l'index et l'arbre de travail d'une seule traite.
+vous pouvez linkgit:git-restore[1] pour extraire le contenu de l'index dans
+l'arbre de travail. Alternativement, en utilisant linkgit:git-restore[1] et
+en spécifiant un commit avec `--source`, vous pouvez copier le contenu d'un
+chemin d'un commit vers l'index et l'arbre de travail d'une seule traite.
 
 'git reset' (--patch | -p) [<arbre-esque>] [--] [<chemins>...]::
 	Sélectionner interactivement les sections dans la différence entre  l'index
@@ -87,8 +89,8 @@ En d'autres termes, `--merge` fait quelque chose comme `git read-tree -u -m
 	réinitialisation est annulée.
 --
 
-Si vous souhaitez défaire un commit autre que le dernier sur la branche,
-linkgit:git-revert[1] est votre ami.
+Voir « Reset, restore et revert » dans linkgit:git[1] pour les différences
+entre les trois commandes.
 
 
 OPTIONS
@@ -155,7 +157,7 @@ Défaire le commit, en le transformant en branche thématique::
 ------------
 $ git branch theme/wip     <1>
 $ git reset --hard HEAD~3  <2>
-$ git checkout theme/wip   <3>
+$ git switch theme/wip   <3>
 ------------
 +
 <1> Vous avez fait des commits, mais vous vous êtes aperçu qu'ils étaient
@@ -236,13 +238,13 @@ votre arbre de travail ne sont pas du tout en état d'être validés, mais vous
 devez aller sur une autre branche pour votre correctif rapide.
 +
 ------------
-$ git checkout feature ;# vous travailliez sur la branche feature
+$ git switch feature ;# vous travailliez sur la branche feature
 $ travail travail      ;# et arrive une interruption
 $ git commit -a -m "instantané en cours"          <1>
-$ git checkout master
+$ git switch master
 $ correctif correctif
 $ git commit           ;# validation avec un vrai message
-$ git checkout feature
+$ git switch feature
 $ git reset --soft HEAD^ ;# retour au travail     <2>
 $ git reset                                       <3>
 ------------
@@ -286,18 +288,18 @@ travail.
 +
 ------------
 $ git tag debut
-$ git checkout -b branche1
+$ git switch -c branche1
 $ édition
 $ git commit ...                            <1>
 $ édition
-$ git checkout -b branche2                  <2>
+$ git switch -c branche2                  <2>
 $ git reset --keep debut                    <3>
 ------------
 +
 <1> Ceci valide vos premières éditions dans `branche1`.
 <2> Dans un monde idéal, vous pourriez avoir réalisé que le commit précédent
     n'appartenait pas au nouveau sujet quand vous avez créé et avez basculé sur
-    `branche2` (c-à-d `git checkout -b branche2 debut`), mais personne n'est
+    `branche2` (c-à-d `git switch -c branche2 debut`), mais personne n'est
     parfait.
 <3> Mais vous pouvez utiliser `reset --keep` pour retirer le commit non voulu
     après avoir basculé sur `branche2`.
@@ -471,13 +473,13 @@ travail index HEAD cible          travail index HEAD
 ....
 
 ....
-working index HEAD target         working index HEAD
+travail index HEAD cible          travail index HEAD
 ----------------------------------------------------
- X       U     A    A     --soft  (disallowed)
+ X       U     A    A     --soft  (interdit)
 			  --mixed  X       A     A
 			  --hard   A       A     A
 			  --merge  A       A     A
-			  --keep  (disallowed)
+			  --keep  (interdit)
 ....
 
 `X` signifie n'importe quel état et `U` signifie un index non fusionné.

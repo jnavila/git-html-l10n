@@ -15,15 +15,16 @@ SYNOPSIS
 	  [--dissociate] [--separate-git-dir <répertoire git>]
 	  [--depth <profondeur>] [--[no-]single-branch] [--no-tags]
 	  [--recurse-submodules[=<spéc.de chemin>]] [--[no-]shallow-submodules]
-	  [--jobs <n>] [--] <dépôt> [<répertoire>]
+	  [--[no-]remote-submodules] [--jobs <n>] [--] <dépôt>
+	  [<répertoire>]
 
 DESCRIPTION
 -----------
 
 Clone un dépôt dans un répertoire nouvellement créé, crée une branche de
 suivi à distance pour chaque branche du dépôt cloné (visible en utilisant
-`git branch -r`) et crée et extrait une branche initiale qui est dupliquée
-depuis la branche active actuelle du dépôt cloné.
+`git branch --remotes`) et crée et extrait une branche initiale qui est
+dupliquée depuis la branche active actuelle du dépôt cloné.
 
 Après clonage, un simple `git fetch` sans argument va mettre à jour toutes
 les branches de suivi à distance, et `git pull` sans argument va en plus
@@ -38,8 +39,8 @@ les variables de configuration `remote.origin.url` et `remote.origin.fetch`.
 
 OPTIONS
 -------
---local::
 -l::
+--local::
 	Quand le dépôt à cloner est sur la machine locale, cette option
 	court-circuite les mécanismes de transport « spécial Git » normaux et clone
 	le dépôt en faisant une copie de HEAD et de tout ce qu'il y a dans les
@@ -60,8 +61,8 @@ l'utilisation de transport Git normal à la place.
 	d'utiliser des liens physiques. Ceci peut être voulu si vous souhaitez faire
 	une copie de sauvegarde de votre dépôt.
 
---shared::
 -s::
+--shared::
 	Quand le dépôt à cloner est sur la machine locale, au lieu d'utiliser des
 	liens physiques, créer automatiquement `.git/objects/info/alternates` pour
 	partager les objets du dépôt source. Le dépôt résultant démarre sans aucun
@@ -77,15 +78,15 @@ que `git commit`) qui appellent automatiquement `git gc --auto`. (Voir linkgit:g
 Si ces objets sont supprimés et qu'ils étaient référencés dans un dépôt cloné,
 alors le dépôt cloné sera corrompu.
 +
-Notez que lancer `git repack` sans l'option `-l` dans un dépôt cloné avec
-`-s` va copier les objets depuis le dépôt source dans un paquet dans le
-répertoire cloné, éliminant de ce fait les économies d'espace disque de
-`clone -s`. Par contre, il est possible de lancer `git gc`, qui utilise
-l'option `-l` par défaut.
+Notez que lancer `git repack` sans l'option `--local` dans un dépôt cloné
+avec `--shared` va copier les objets depuis le dépôt source dans un paquet
+dans le répertoire cloné, éliminant de ce fait les économies d'espace disque
+de `clone --shared`. Par contre, il est possible de lancer `git gc`, qui
+utilise l'option `--local` par défaut.
 +
-Si vous souhaitez casser la dépendance d'un dépôt cloné avec `-s` à son
-dépôt source, vous pouvez simplement lancer `git repack -a` pour copier tous
-les objets depuis le dépôt source dans un paquet dans le dépôt cloné.
+Si vous souhaitez casser la dépendance d'un dépôt cloné avec `--shared` à
+son dépôt source, vous pouvez simplement lancer `git repack -a` pour copier
+tous les objets depuis le dépôt source dans un paquet dans le dépôt cloné.
 
 --reference[-if-able] <dépôt>::
 	Si le dépôt référence est sur la machine locale, créer automatiquement
@@ -108,36 +109,44 @@ l'option `--dissociate`.
 	dépôt -- le nouveau dépôt va emprunter des objets au même dépôt, et cette
 	option peut être utilisée pour arrêter l'emprunt.
 
---quiet::
 -q::
+--quiet::
 	Mode silencieux. L'avancement n'est pas affiché sur le flux d'erreur
 	standard.
 
---verbose::
 -v::
+--verbose::
 	Mode verbeux. N'agit pas sur l'affichage de l'état d'avancement sur le flux
 	d'erreur standard.
 
 --progress::
 	L'état d'avancement est affiché sur la sortie d'erreur standard quand elle
-	est attachée à un terminal, à moins que -q soit spécifié. Ce drapeau force
-	l'état d'avancement même si le flux d'erreur standard n'est pas dirigé vers
-	un terminal.
+	est attachée à un terminal, à moins que `--quiet` soit spécifié. Ce drapeau
+	force l'état d'avancement même si le flux d'erreur standard n'est pas dirigé
+	vers un terminal.
 
---no-checkout::
+--server-option=<option>::
+	Transmettre la chaîne donnée au serveur lors d'une communication utilisant
+	la version 2 du protocole.  La chaîne donnée ne doit pas contenir de
+	caractère NUL ou LF.  La gestion par le serveur des options du serveur, y
+	compris les options inconnues, est spécifique au serveur.  Lorsque plusieurs
+	`---server-option=<option>' sont donnés, ils sont tous envoyés à l'autre
+	côté dans l'ordre indiqué sur la ligne de commande.
+
 -n::
+--no-checkout::
 	Aucune extraction de HEAD n'est effectuée après la fin du clonage.
 
 --bare::
 	Créer un dépôt Git « nu ». Cela signifie qu'au lieu de créer `<répertoire>`
 	et de placer les fichiers administratifs dans `<répertoire>/.git`, faire de
 	`<répertoire>` lui-même le `$GIT_DIR`. Cela implique évidemment l'option
-	`-n` parce qu'il n'y a nulle part où extraire l'arbre de travail. De plus,
-	les têtes de branches distantes sont également copiées directement dans les
-	têtes de branches locales correspondantes, sans les préfixer de
-	`refs/remotes/origin/`. Lorsque cette option est utilisée, ni les branches
-	de suivi à distance ni les variables de configuration s'y rattachant ne sont
-	créées.
+	`--no-checkout` parce qu'il n'y a nulle part où extraire l'arbre de
+	travail. De plus, les têtes de branches distantes sont également copiées
+	directement dans les têtes de branches locales correspondantes, sans les
+	préfixer de `refs/remotes/origin/`. Lorsque cette option est utilisée, ni
+	les branches de suivi à distance ni les variables de configuration s'y
+	rattachant ne sont créées.
 
 --mirror::
 	Construire un miroir du dépôt source. Ceci implique `--bare`. Par rapport à
@@ -147,20 +156,20 @@ l'option `--dissociate`.
 	elle définit une configuration de refspec telle que toutes ces références
 	sont réécrites par un `git remote update` dans le dépôt cible.
 
---origin <nom>::
 -o <nom>::
+--origin <nom>::
 	Au lieu d'utiliser le nom de distant `origin` pour suivre le dépôt amont,
 	utiliser `<nom>`.
 
---branch <nom>::
 -b <nom>::
+--branch <nom>::
 	Au lieu de pointer la HEAD nouvellement créée sur la branche pointée par la
 	HEAD du dépôt cloné, pointer plutôt sur la branche `<nom>`. Dans un dépôt
 	non-nu, c'est la branche qui sera extraite. `--branch` accepte aussi des
 	étiquettes et détache alors la HEAD à ce commit dans le dépôt résultant.
 
---upload-pack <upload-pack>::
 -u <upload-pack>::
+--upload-pack <upload-pack>::
 	Quand cette option est indiquée et que le dépôt à cloner est accédé via ssh,
 	ceci spécifie un chemin différent de celui par défaut pour la commande
 	lancée sur l'hôte distant.
@@ -169,8 +178,8 @@ l'option `--dissociate`.
 	Spécifier le répertoire depuis lequel les modèles vont être tirés ; (voir la
 	section « RÉPERTOIRE DE MODÈLES » de linkgit:git-init[1].)
 
---config <clé>=<valeur>::
 -c <clé>=<valeur>::
+--config <clé>=<valeur>::
 	Définir une variable de configuration dans le dépôt nouvellement créé ; ceci
 	prend effet immédiatement après que le dépôt est initialisé, mais avant que
 	l'historique distant ne soit récupéré ou qu'un fichier soit extrait. La clé
@@ -243,6 +252,12 @@ ignorée si le dépôt cloné n'a pas d'arbre de travail/d'extraction
 --[no-]shallow-submodules::
 	Tous les sous-modules qui sont clonés seront superficiels avec une
 	profondeur de 1.
+
+--[no-]remote-submodules::
+	All submodules which are cloned will use the status of the submoduleâs
+	remote-tracking branch to update the submodule, rather than the
+	superprojectâs recorded SHA-1. Equivalent to passing `--remote` to `git
+	submodule update`.
 
 --separate-git-dir=<répertoire git>::
 	Au lieu de placer le dépôt clone là où il est supposé être, placer le dépôt
