@@ -1,0 +1,989 @@
+Limitation de commit
+~~~~~~~~~~~~~~~~~~~~
+
+En plus de spécifier une plage de commits qui doivent être listés en
+utilisant les notations spéciales expliquées dans la description, des
+limitations supplémentaires de commits peuvent être appliquées.
+
+L'utilisation d'un plus grand nombre d'options filtre généralement plus la
+sortie (par exemple `--since=<date1>` limite aux commits plus récents que
+`<date1>`, et son utilisation avec `--grep=<motif>` limite aux commits dont
+le message de journal a une ligne qui correspond `<motif>`), sauf indication
+contraire.
+
+Notez que celles-ci sont appliquées avant les options de classement et de
+formatage des commits, telles que `--reverse`.
+
+-<nombre>::
+-n <nombre>::
+--max-count==<nombre>::
+	Limite le nombre de commits dans la sortie.
+
+--skip=<nombre>::
+	Sauter'nombre' commits avant de commencer à afficher la sortie de journal.
+
+--since=<date>::
+--after=<date>::
+	Afficher les commits plus récents qu'une date spécifique.
+
+--until=<date>::
+--before=<date>::
+	Afficher les commits plus anciens qu'une date spécifique.
+
+ifdef::git-rev-list[]
+--max-age=<horodatage>::
+--min-age=<horodatage>::
+	Limiter la sortie des commits à une plage de temps spécifiée.
+endif::git-rev-list[]
+
+--author=<motif>::
+--committer=<motif>::
+	Limiter la sortie des commits à ceux dont les lignes d'en-tête
+	auteur/validateur correspondent au motif spécifié (expression régulière).
+	Avec plus d'un `--author=<motif>`, les commits dont l'auteur correspond à
+	l'un des motifs donnés sont choisis (de même pour plusieurs
+	`--committer=<motif>`).
+
+--grep-reflog=<motif>::
+	Limiter la sortie des commits à ceux dont les entrées de reflog
+	correspondent au motif spécifié (expression régulière). Avec plus d'un
+	`--grep-reflog', les commits dont le message de reflog correspond à l'un des
+	modèles donnés sont choisis.  C'est une erreur d'utiliser cette option à
+	moins que `-walk-reflogs' ne soit utilisé.
+
+--grep=<motif>::
+	Limiter la sortie des commits à ceux dont le message de validation
+	correspond au motif spécifié (expression régulière).  Avec plus d'un
+	`--grep=<motif>`, les commits dont le message correspond à l'un des motifs
+	donnés sont choisis (mais voir `--all-match`).
+ifndef::git-rev-list[]
++
+Lorsque `--show-notes' est en vigueur, le message des notes est vérifié
+comme s'il faisait partie du message du journal.
+endif::git-rev-list[]
+
+--all-match::
+	Limiter la sortie des commits à ceux qui correspondent à la fois à tous les
+	`--grep' donnés, au lieu de ceux qui correspondent à au moins un.
+
+--invert-grep::
+	Limiter la sortie des commits à ceux dont le message de log ne correspond
+	pas au motif spécifié avec `--grep=<motif>`.
+
+-i::
+--regexp-ignore-case::
+	Faites correspondre les expressions régulières sans tenir compte de la casse
+	des lettres.
+
+--basic-regexp::
+	Considérer les motifs limitatifs comme des expressions régulières de base ;
+	c'est la valeur par défaut.
+
+-E::
+--extended-regexp::
+	Considérer les motifs limitatifs comme des expressions régulières étendues
+	au lieu des expressions régulières par défaut de base.
+
+-F::
+--fixed-strings::
+	Considérer les motifs limitatifs comme des chaînes de caractères fixes (ne
+	pas interpréter le motif comme une expression régulière).
+
+-P::
+--perl-regexp::
+	Considérer les motifs limitatifs comme des expressions régulières
+	compatibles Perl.
++
+La prise en charge de ces types d'expressions régulières est une dépendance
+optionnelle à la compilation. Si Git n'a pas été compilé avec ce support et
+que cette option est activée, la commande se termine immédiatement.
+
+--remove-empty::
+	Arrêter lorsqu'un chemin donné disparaît de l'arbre.
+
+--merges::
+	N'afficher que les commits de fusion. C'est exactement la même chose que
+	`--min-parents=2`.
+
+--no-merges::
+	Ne pas afficher les commits avec plus d'un parent. C'est exactement la même
+	chose que `--max-parents=1`.
+
+--min-parents=<nombre>::
+--max-parents=<nombre>::
+--no-min-parents::
+--no-max-parents::
+	Afficher uniquement les commits qui ont au moins (ou au plus) autant de
+	commits parents. En particulier, `--max-parents=1`est la même chose que
+	`--no-merges`, `--min-parents=2` est la même chose que `--merges`.
+	`--max-parents=0` donne tous les commits racine et `--min-parents=3` toutes
+	les fusions octopus.
++
+`--no-min-parents` et `--no-max-parents` réinitialisent ces limites (à sans
+limite).  Les formes équivalentes sont `--min-parents=0` (tout commit a 0 ou
+plus de parents) et `--max-parents=-1` (les nombres négatifs dénotent
+l'absence de limite supérieure).
+
+--first-parent::
+	Ne suivre que le premier commit parent lors d'un commit de fusion.  Cette
+	option peut donner une meilleure vue d'ensemble lors de l'affichage de
+	l'évolution d'une branche de sujet particulière, parce que la fusion dans
+	une branche de sujet a tendance à n'être que des mises à jour avec l'amont
+	de temps en temps, et cette option permet d'ignorer les commits individuels
+	apportés dans votre historique par de telles fusions. Ne peut pas être
+	combiné avec --bisect.
+
+--not::
+	Inverser la signification du préfixe'{caret}' (ou son absence) pour tous les
+	spécificateurs de révision suivants, jusqu'au prochain `--not`.
+
+--all::
+	Faire comme si toutes les refs de `refs/`, ainsi que `HEAD`, étaient listées
+	sur la ligne de commande comme'<commit>'.
+
+--branches[=<motif>]::
+	Faire comme si toutes les refs de `refs/heads` étaient listées sur la ligne
+	de commande comme'<commit>'. Si'<motif>' est fournir, limiter les branches à
+	celles qui correspondent à un glob shell donné. Si le motif ne présente pas
+	de '?', '{asterisk}', ni '[', '/{asterisk}' à la fin est implicite.
+
+--tags[=<motif>]::
+	Faire comme si toutes les refs de `refs/tags` étaient listées sur la ligne
+	de commande comme'<commit>'. Si'<motif>' est fournir, limiter les étiquettes
+	à celles qui correspondent à un glob shell donné. Si le motif ne présente
+	pas de '?', '{asterisk}', ni '[', '/{asterisk}' à la fin est implicite.
+
+--remotes[=<motif>]::
+	Faire comme si toutes les refs de `refs/remotes' étaient listées sur la
+	ligne de commande comme'<commit>'. Si'<motif>' est donné, limiter les
+	branches de suivi à distance à celles qui correspondent à un glob shell
+	donné.  Si le motif ne présent pas '?', '{asterisk}', ni '[', '/{asterisk}'
+	à la fin est implicite.
+
+--glob=<motif-glob>::
+	Faire comme si toutes les réfs correspondant au shell glob'<motif-glob>'
+	étaient listées sur la ligne de commande comme'<commit>'. Le préfixe
+	'refs/', est automatiquement ajouté s'il n'y en a pas. Si le motif ne
+	présente pas de  '?', '{asterisk}', ni '[', '/{asterisk}' à la fin est
+	implicite.
+
+--exclude=<motif-glob>::
+
+	Ne pas inclure les références correspondant à'<glob-pattern>' que les
+	`--all`, `--branches`, `--tags`, `--remotes`, ou `--glob` suivantes
+	considéreraient autrement. Les répétitions de cette option accumulent les
+	motifs d'exclusion jusqu'à la prochaine option `--all`, `--branches`,
+	`--tags`, `--tags`, `--remotes` ou `--glob` (les autres options ou arguments
+	n'éliminent pas les motifs accumulés).
++
+Les motifs donnés ne doivent pas commencer par `refs/heads`, `refs/tags`, ou
+`refs/remotes` lorsqu'ils sont appliqués à `--branches`, `--tags`, ou
+`--remotes`, respectivement, et ils doivent commencer par `refs/` lorsqu'ils
+sont appliqués à `--glob` ou `--all`. Si un'/{asterisk}' final est
+intentionnel, il doit être donné explicitement.
+
+--reflog::
+	Faire comme si tous les objets mentionnés par les reflogs étaient listés sur
+	la ligne de commande comme `<commit>`.
+
+--alternate-refs::
+	Faire comme si tous les objets mentionnés en tant que sommets de référence
+	des dépôts alternatifs étaient listés sur la ligne de commande. Un dépôt
+	alternatif est tout dépôt dont le répertoire d'objets est spécifié dans
+	`objects/info/alternates`.  L'ensemble des objets inclus peut être modifié
+	par `core.alternateRefsCommand`, etc. Voir linkgit:git-config[1].
+
+--single-worktree::
+	Par défaut, tous les arbres de travail seront examinés par les options
+	suivantes lorsqu'il y en a plusieurs (voir linkgit:git-worktree[1]) :
+	`--all`, `--reflog` et `--indexed-objects`.  Cette option les oblige à
+	n'examiner que l'arbre de travail actuel.
+
+--ignore-missing::
+	En voyant un nom d'objet invalide dans l'entrée, faire comme si la mauvaise
+	entrée n'avait pas été donnée.
+
+ifndef::git-rev-list[]
+--bisect::
+	Faire comme si le mauvais bissection ref `refs/bisect/bad` a été inscrite
+	comme si elle a été suivie par `--not` et que les bonnes refs de bissection
+	`refs/bisect/good-*` sur la ligne de commande. Ne peut être combiné avec
+	--first-parent.
+endif::git-rev-list[]
+
+--stdin::
+	En plus des '<commit>' indiqués sur la ligne de commande, les lire à partir
+	de l'entrée standard. Si un séparateur `--` est vu, arrêter la lecture des
+	commits et commencer à lire les chemins pour limiter le résultat.
+
+ifdef::git-rev-list[]
+--quiet::
+	Ne rien imprimer en sortie standard.  Cette forme est principalement
+	destinée à permettre à l'appelant de tester l'état de sortie pour voir si
+	une série d'objets est entièrement connectée (ou non).  C'est plus rapide
+	que de rediriger stdout vers `/dev/null` car la sortie n'a pas besoin d'être
+	formatée.
+endif::git-rev-list[]
+
+--cherry-mark::
+	Comme `--cherry-pick` (voir ci-dessous) mais marquer les commits équivalents
+	avec `==` plutôt que de les omettre, et les différents avec `+`.
+
+--cherry-pick::
+	Omettre tout commit qui introduit le même changement qu'un autre commit de
+	l'"autre côté" lorsque l'ensemble des commits est limité avec une différence
+	symétrique.
++
+Par exemple, si vous avez deux branches, `A` et `B`, une façon habituelle de
+lister tous les commits d'un seul côté d'entre elles est avec `--left-right`
+(voir l'exemple ci-dessous dans la description de l'option
+`--left-right`). Cependant, cela montre les commits qui ont été picorés sur
+l'autre branche (par exemple, ``3rd on b'' peut être trié sur la branche
+A). Avec cette option, ces paires de commits sont exclues de la sortie.
+
+--left-only::
+--right-only::
+	Ne lister que les commits du côté respectif d'une différence symétrique,
+	c'est-à-dire seulement ceux qui seraient marqués `<` resp. `>` par
+	`--left-right`.
++
+Par exemple, `--cherry-pick --right-only A...B` omet les commits de `B` qui
+sont dans `A` ou sont équivalents en rustine à un commit en `A`. En d'autres
+termes, cela liste les commits `+` de `git cherry A B`.  Plus précisément,
+`--cherry-pick --right-only --no-merges` donne la liste exacte.
+
+--cherry::
+	Un synonyme pour `--right-only --cherry-mark --no-merges` ; utile pour
+	limiter la sortie aux commits de notre côté et marquer ceux qui ont été
+	appliqués de l'autre côté d'une histoire en fourche avec `git log --cherry
+	amont...mabranche', similaire à `git cherry upstream mabranche`.
+
+-g::
+--walk-reflogs::
+	Au lieu de marcher dans la chaîne des commits ancêtres, parcourir les
+	entrées de reflog du plus récent au plus ancien.  Lorsque cette option est
+	utilisée, vous ne pouvez pas spécifier de commits à exclure (c'est-à-dire
+	que les notations '{caret}commit', 'commit1..commit2' et'commit1\...commit2'
+	ne peuvent pas être utilisées).
++
+Avec le format `--pretty` autre que `online` (pour des raisons évidentes),
+cela fait que la sortie a deux lignes supplémentaires d'informations tirées
+du reflog.  L'indicateur de reflog dans la sortie peut être affiché comme
+`ref@{Nième}` (où `Nième` est l'index chronologique inverse dans le reflog)
+ou comme `ref@{horodatage}` (avec l'horodatage pour cette entrée), selon
+quelques règles :
++
+--
+1. Si le point de départ est spécifié comme `ref@{Nième}`, afficher le format
+   de l'index.
++
+2. Si le point de départ a été spécifié comme `ref@{now}`, afficher le format
+   de l'horodatage.
++
+3. Si ni l'un ni l'autre n'a été utilisé, mais que `--date' a été donné sur la
+   ligne de commande, afficher l'horodatage dans le format demandé par
+   `--date`.
++
+4. Sinon, afficher le format de l'index.
+--
++
+Sous `--pretty=oneline`, le message de commit est préfixé avec cette
+information sur la même ligne.  Cette option ne peut pas être combinée avec
+`--reverse'.  Voir aussi linkgit:git-reflog[1].
+
+--merge::
+	Après une fusion ratée, afficher les références qui touchent les fichiers en
+	conflit et qui n'existent pas sur toutes les têtes à fusionner.
+
+--boundary::
+	Afficher les commits de limite exclus. Les limites sont préfixées par `-`.
+
+ifdef::git-rev-list[]
+--use-bitmap-index::
+
+	Essayer d'accélérer la traversée en utilisant l'index bitmap empaqueté (si
+	disponible). Notez que lorsque vous parcourez avec `--objets`, les arbres et
+	les blobs n'auront pas leur chemin associé affiché.
+
+--progress=<entête>::
+	Afficher les rapports d'avancement sur stderr au fur et à mesure que les
+	objets sont pris en compte. Le texte "<en-tête>" sera affiché à chaque mise
+	à jour de l'état d'avancement.
+endif::git-rev-list[]
+
+Simplification de l'historique
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Parfois vous n'êtes intéressé que par certaines parties de l'historique, par
+exemple les commits qui modifient un <chemin> particulier. Mais il y a deux
+parties dans la 'Simplification de l'historique', une partie est la
+sélection des commits et l'autre la manière de le faire, car il existe
+différentes stratégies pour simplifier l'histoire.
+
+Les options suivantes sélectionnent les commits à afficher :
+
+<chemins>::
+	Les commits qui modifient les <chemins> donnés sont sélectionnés.
+
+--simplify-by-decoration::
+	Les commits qui sont liés à une branche ou une étiquette sont sélectionnés.
+
+Notez que des commits supplémentaires peuvent être affichés pour donner un
+historique significatif.
+
+Les options suivantes influent sur la façon dont la simplification est
+effectuée :
+
+Mode par défaut::
+	Simplifie l'historique jusqu'à l'historique le plus simple en expliquant
+	l'état final de l'arbre. Le plus simple parce qu'il taille certaines
+	branches latérales si le résultat final est le même (c'est-à-dire qu'il
+	fusionne des branches avec le même contenu)
+
+--full-history::
+	Identique au mode par défaut, mais ne pas élaguer l'historique.
+
+--dense::
+	Seuls les commits sélectionnés sont affichés, plus certains pour avoir un
+	historique significatif.
+
+--sparse::
+	Tous les commits de l'historique simplifié sont affichés.
+
+--simplify-merges::
+	Option supplémentaire à `--full-history' pour supprimer certaines fusions
+	inutiles de l'historique résultant, car il n'y a pas de commits sélectionnés
+	contribuant à cette fusion.
+
+--ancestry-path::
+	Lorsqu'on lui donne une plage de commits à afficher (par
+	exemple'commit1..commit2' ou'commit2 {caret}commit1'), seuls les commits qui
+	existent directement sur la chaîne des ancêtres entre 'commit1' et
+	'commit2', c'est-à-dire les commits qui sont à la fois descendants de
+	'commit1' et ancêtres de 'commit2', sont affichés.
+
+Une explication plus détaillée suit.
+
+Supposons que vous ayez spécifié `foo` pour <chemins>.  Nous appellerons les
+commits qui modifient `foo` !MEMEARBRE, et le reste MEMEARBRE.  (Dans un
+diff filtré pour `foo`, ils sont différents et égaux, respectivement.)
+
+Dans ce qui suit, nous nous référerons toujours au même exemple d'historique
+pour illustrer les différences entre les paramètres de simplification.  Nous
+supposons que vous filtrez pour un fichier `foo` dans ce graphe de commits :
+-----------------------------------------------------------------------
+	  .-A---M---N---O---P---Q
+	 /     /   /   /   /   /
+	I     B   C   D   E   Y
+	 \   /   /   /   /   /
+	  `-------------'   X
+-----------------------------------------------------------------------
+La ligne horizontale de l'histoire A---Q est prise pour être le premier
+parent de chaque fusion.  Les commits sont :
+
+* `I` est le commit initial, dans lequel 'foo` existe avec le contenu
+  ''asdf'', et un fichier `quux` existe avec le contenu ''quux''. Les commits
+  initiaux sont comparés à un arbre vide, donc `I` est !MEMEARBRE.
+
+* Dans `A`, `foo` ne contient que ``foo''.
+
+* `B` contient le même changement que `A`.  Sa fusion `M` est triviale et donc
+  MEMEARBRE pour tous les parents.
+
+* `C` ne change pas `foo`, mais sa fusion `N` le change en ``foobar'', donc ce
+  n'est pas MEMEARBRE à aucun parent.
+
+* `D` met `foo` sur `baz`. Sa fusion `O` combine les chaînes de caractères de
+  `N` et `D` à ``foobarbaz'' ; c'est-à-dire qu'elle n'est pas MEMEARBRE à
+  aucun parent.
+
+* `E` change `quux` en ``xyzzy'', et sa fusion `P` combine les chaînes en
+  ``quux xyzzy''. `P` est MEMEARBRE à `O`, mais pas à `E`.
+
+* `X` est un commit racine indépendant qui a ajouté un nouveau fichier `side`,
+  et `Y` l'a modifié. `Y` est MEMEARBRE à `X`. Sa fusion `Q` a ajouté `side` à
+  `P`, et `Q` est MEMEARBRE à `P`, mais pas à `Y`.
+
+`rev-list` traverse en arrière l'historique, y compris ou en excluant les
+commits en fonction de si '--full-history' et / ou la réécriture des parents
+(par l'intermédiaire de `--parents` ou `--children`) sont utilisés. Les
+paramètres suivants sont disponibles.
+
+Mode par défaut::
+	Les commits sont inclus s'ils ne sont pas MEMEARBRE à un parent (bien que
+	ceci puisse être changé, voir `--sparse` ci-dessous).  Si le commit était
+	une fusion, et que c'était MEMEARBRE à un des parents, ne suivez que ce
+	parent.  (Même s'il y a plusieurs parents MEMEARBRE, ne suivez qu'un seul
+	d'entre eux.) Sinon, suivez tous les parents.
++
+Il en résulte :
++
+-----------------------------------------------------------------------
+	  .-A---N---O
+	 /     /   /
+	I---------D
+-----------------------------------------------------------------------
++
+Notez que la règle de ne suivre que le parent MEMEARBRE, s'il y en a un
+disponible, a entièrement supprimé `B` de la considération.  `C` a été pris
+en compte via `N`, mais il est MEMEARBRE.  Les commits racines sont comparés
+à un arbre vide, donc `I` est !MEMEARBRE.
++
+Les relations parents/enfants ne sont visibles qu'avec `--parents', mais
+cela n'affecte pas les commits sélectionnés en mode par défaut, nous avons
+donc montré les lignes parentales.
+
+--full-history sans réécriture des parents::
+	Ce mode diffère du mode par défaut en un point : toujours suivre tous les
+	parents d'une fusion, même si c'est MEMEARBRE à l'un d'eux.  Même si plus
+	d'un côté de la fusion a des commits qui sont inclus, cela ne signifie pas
+	que la fusion elle-même l'est ! Dans l'exemple, nous obtenons
++
+-----------------------------------------------------------------------
+	I  A  B  N  D  O  P  Q
+-----------------------------------------------------------------------
++
+`M` a été exclu parce qu'il s'agit d'un MEMEARBRE pour les deux parents.
+`E`, `C` et `B` ont tous été parcourus, mais seul `B` était un !MEMEARBRE,
+donc les autres n'apparaissent pas.
++
+Notez que sans réécriture des parents, il n'est pas vraiment possible de
+parler des relations parent/enfant entre les commits, donc nous les montrons
+déconnectés.
+
+--full-history sans réécriture des parents::
+	Les commits ordinaires ne sont inclus que s'ils le sont !MEMEARBRE (bien que
+	cela puisse être changé, voir `--sparse` ci-dessous).
++
+Les fusions sont toujours incluses.  Cependant, leur liste de parents est
+réécrite : à côté de chaque parent, élaguer les commits qui ne sont pas
+inclus eux-mêmes.  Il en résulte
++
+-----------------------------------------------------------------------
+	  .-A---M---N---O---P---Q
+	 /     /   /   /   /
+	I     B   /   D   /
+	 \   /   /   /   /
+	  `-------------'
+-----------------------------------------------------------------------
++
+À comparer avec `--full-history` sans réécrire ci-dessus.  Notez que `E` a
+été élagué parce que c'est MEMEARBRE, mais la liste parent de P a été
+réécrite pour contenir le parent `I` de `E`.  Il en a été de même pour `C`
+et `N`, et `X`, `Y` et `Q`.
+
+En plus des paramètres ci-dessus, vous pouvez modifier si MEMEARBRE affecte
+l'inclusion :
+
+--dense::
+	Les commits qui sont parcourus sont inclus s'ils ne sont pas MEMEARBRE pour
+	aucun parent.
+
+--sparse::
+	Tous les commits qui sont parcourus sont inclus.
++
+Notez que sans `--full-history`, cela simplifie encore les fusions : si l'un
+des parents est MEMEARBRE, nous ne suivons que celui-là, donc les autres
+côtés de la fusion ne sont jamais parcourus.
+
+--simplify-merges::
+	Tout d'abord, construire un graphe d'historique de la même manière que
+	`--full-history` avec la réécriture des parents (voir ci-dessus).
++
+Puis simplifier chaque commit `C` à son remplacement `C'` dans l'historique
+final selon les règles suivantes :
++
+--
+* Définir `C'` sur `C`.
++
+* Remplacer chaque parent `P` de `C'` par sa simplification `P'`.  Dans le
+  processus, déposer les parents qui sont les ancêtres d'autres parents ou qui
+  sont des commits racines MEMEARBRE à un arbre vide, et supprimer les
+  doublons, mais prendre soin de ne jamais laisser tomber tous les parents
+  auxquels nous sommes MEMEARBRE.
++
+* Si après cette réécriture des parents, `C'` est un commit racine ou de
+  fusion (qui a zéro ou >1 parents), un commit limite, ou !MEMEARBRE, il est
+  conservé.  Sinon, il est remplacé par son seul parent.
+--
++
+L'effet de ceci est mieux montré en comparant avec `--full-history` avec la
+réécriture des parents.  L'exemple se transforme en :
++
+-----------------------------------------------------------------------
+	  .-A---M---N---O
+	 /     /       /
+	I     B       D
+	 \   /       /
+	  `---------'
+-----------------------------------------------------------------------
++
+Notez les principales différences entre `N`, `P` et `Q` par rapport à
+`--full-history` :
++
+--
+* 'La liste des parents de `N` a été supprimée, parce qu'elle est un ancêtre
+  de l'autre parent `M`.  Pourtant, `N` est resté parce qu'il est !MEMEARBRE.
++
+* De même, la liste des parents de `P` a eu `I` supprimé.  `P` a ensuite été
+  complètement enlevé, parce qu'il avait un parent et qu'il est MEMEARBRE.
++
+* La liste des parents de `Q` a rendu `Y` simplifié en `X`. `X` a ensuite été
+  supprimé, parce que c'était une racine MEMEARBRE. `Q` a ensuite été
+  complètement supprimée, parce qu'elle avait un parent et qu'il  est
+  MEMEARBRE.
+--
+
+Enfin, il existe un cinquième mode de simplification :
+
+--ancestry-path::
+	Limiter les commits affichés à ceux qui se trouvent directement sur la
+	chaîne des ancêtres entre les commits "from" et "to" dans la plage de commit
+	donnée. C'est-à-dire n'afficher que les commits qui sont l'ancêtre du commit
+	"to" et les descendants du commit "from".
++
+À titre d'exemple, considérons l'historique de commits suivant :
++
+-----------------------------------------------------------------------
+	    D---E-------F
+	   /     \       \
+	  B---C---G---H---I---J
+	 /                     \
+	A-------K---------------L--M
+-----------------------------------------------------------------------
++
+Un 'D..M' régulier calcule l'ensemble des commits qui sont les ancêtres de
+`M`, mais exclut ceux qui sont les ancêtres de `D`. C'est utile pour voir ce
+qui s'est passé dans l'historique qui a mené à `M` depuis le `D`, au sens de
+« ce que `M` a qui n'existait pas dans `D` ». Le résultat dans cet exemple
+serait tous les commits, sauf `A` et `B` (et `D` lui-même, bien sûr).
++
+Quand nous voulons savoir quels commits dans `M` sont contaminés par le
+bogue introduit par `D` et ont besoin d'être corrigés, cependant, nous
+pourrions vouloir voir seulement le sous-ensemble de 'D..M' qui sont en fait
+des descendants de `D`, c'est-à-dire en excluant `C` et `K`. C'est
+exactement ce que fait l'option `--ancestry-path`. Appliqué à l'intervalle
+'D..M', il se traduit en :
++
+-----------------------------------------------------------------------
+		E-------F
+		 \       \
+		  G---H---I---J
+			       \
+				L--M
+-----------------------------------------------------------------------
+
+L'option `--simplify-by-decoration` vous donne une vue d'ensemble de la
+topologie de l'historique, en omettant les commits qui ne sont pas
+référencés par des étiquettes.  Les commits sont marqués comme !MEMEARBRE(en
+d'autres termes, conservés après les règles de simplification de
+l'historique décrites ci-dessus) si (1) ils sont référencés par des
+étiquettes, ou (2) ils changent le contenu des chemins donnés sur la ligne
+de commande.  Tous les autres commits sont marqués comme MEMEARBRE (soumis à
+une possible simplification).
+
+ifdef::git-rev-list[]
+Aides à la bisection
+~~~~~~~~~~~~~~~~~~~~
+
+--bisect::
+	Limiter la sortie à l'objet commit qui est à peu près à mi-chemin entre les
+	commits inclus et les commits exclus. Notez que la référence mauvaise de
+	bissection  `refs/bisect/bad` est ajoutée aux commits inclus (si elle
+	existe) et la référence bonne de bissection `refs/bisect/good-*` est ajoutée
+	aux commits exclus (s'ils existent). Ainsi, en supposant qu'il n'y ait pas
+	de références dans `refs/bisect/`, si
++
+-----------------------------------------------------------------------
+	$ git rev-list --bisect foo ^bar ^baz
+-----------------------------------------------------------------------
++
+affiche 'midpoint', la sortie des deux commandes
++
+-----------------------------------------------------------------------
+	$ git rev-list foo ^midpoint
+	$ git rev-list midpoint ^bar ^baz
+-----------------------------------------------------------------------
++
+seraientt à peu près de la même longueur.  Trouver le changement qui
+introduit une régression se réduit donc à une recherche binaire : générer et
+tester à plusieurs reprises de nouveaux 'midpoint' jusqu'à ce que la chaîne
+de commits soit de longueur un. Ne peut pas être combiné avec
+--first-parent.
+
+--bisect-vars::
+	Cela calcule la même chose que '--bisect', sauf que les références dans
+	`refs/bisect/` ne sont pas utilisées, et sauf que cela affiche un texte prêt
+	à être évalué par le shell. Ces lignes attribueront le nom de la révision à
+	mi-parcours à la variable `bisect_rev`, et le nombre prévu de commits à
+	tester après `bisect_rev` est testé à `bisect_nr`, le nombre prévu de
+	commits à tester si `bisect_rev` s'avère être bon à `bisect_good`, le nombre
+	prévu d'engagements à tester si `bisect_rev` s'avère être mauvais à
+	`bisect_bad`, et le nombre de commits que nous sommes en train de bissecter
+	en ce moment à `bisect_all`.
+
+--bisect-all::
+	Ceci affiche tous les objets commit entre les commits inclus et exclus,
+	classés selon leur distance par rapport aux commits inclus et exclus. Les
+	références dans `refs/bisect/` ne sont pas utilisées. Le plus éloigné d'eux
+	est affiché en premier. (C'est le seul affiché par `--bisect`.)
++
+Ceci est utile car il est facile de choisir un bon commit à tester lorsque
+vous voulez éviter de tester certains d'entre eux pour une raison quelconque
+(ils peuvent ne pas compiler par exemple).
++
+Cette option peut être utilisée avec `--bisect-vars', dans ce cas, après
+tous les objets commit triés, le texte sera le même que si `--bisect-vars'
+avait été utilisé seul.
+endif::git-rev-list[]
+
+
+Ordre des commits
+~~~~~~~~~~~~~~~~~
+
+Par défaut, les commits sont affichés dans l'ordre chronologique inverse.
+
+--date-order::
+	N'afficher aucun parent avant que tous ses enfants ne soient affichés, mais
+	sinon montrer les commits dans l'ordre de l'horodatage des commits.
+
+--author-date-order::
+	N'afficher aucun parent avant que tous ses enfants ne soient affichés, mais
+	autrement afficher les commits dans l'ordre d'horodatage de l'auteur.
+
+--topo-order::
+	N'afficher aucun parent avant que tous ses enfants ne soient affichés, et
+	éviter d'afficher des commits entremêlés sur plusieurs lignes d'historique.
++
+Par exemple, dans un historique de commit comme celui-ci :
++
+----------------------------------------------------------------
+
+    ---1----2----4----7
+	\	       \
+	 3----5----6----8---
+
+----------------------------------------------------------------
++
+où les nombres indiquent l'ordre des horodatages de commit, `git rev-list`
+et consorts avec `--date-order` affichent les commits dans l'ordre
+d'horodatage : 8 7 6 5 4 3 2 1.
++
+Avec `--topo-order', ils afficheraient 8 6 5 5 3 3 7 4 7 4 2 1 (ou 8 7 4 2 2
+6 5 5 3 1) ; certains commits plus anciens sont affichés avant les plus
+récents afin d'éviter de montrer mélangés ensemble les commits de deux
+pistes de développement parallèles.
+
+--reverse::
+	Sortir les commits choisis pour être affichés (voir la section Limitation
+	des commits ci-dessus) dans l'ordre inverse. Ne peut pas être combiné avec
+	`--walk-reflogs`.
+
+Traversée d'objets
+~~~~~~~~~~~~~~~~~~
+
+Ces options sont principalement destinées à l'empaquetage des dépôts Git.
+
+ifdef::git-rev-list[]
+--objects::
+	Imprimer les ID d'objet de tout objet référencé par les commits listés.
+	`--objets foo foo ^bar` signifie donc ``envoie-moi tous les ID d'objets que
+	je dois télécharger si j'ai l'objet commit _bar_ mais pas _foo_''.
+
+--in-commit-order::
+	Imprimer les identifiants des arbres et des blobs dans l'ordre des
+	commits. Les identifiants des arbres et des blobs sont imprimés que lors
+	qu'ils sont référencés la première fois par un commit.
+
+--objects-edge::
+	Semblable à `--objects`, mais afficher aussi les ID des commits exclus
+	préfixés par un caractère ``-''.  Ceci est utilisé par
+	linkgit:git-pack-objects[1] pour construire un paquet ``thin'', qui
+	enregistre les objets sous forme déltaifiée en fonction des objets contenus
+	dans ces commits exclus pour réduire le trafic réseau.
+
+--objects-edge-aggressive::
+	Similaire à `--objects-edge', mais s'efforce de trouver les commits exclus
+	au prix d'un temps plus long de traitement.  Ceci est utilisé à la place de
+	`--objects-edge' pour construire des paquets ``thin'' pour les dépôts
+	superficiels.
+
+--indexed-objects::
+	Pretend as if all trees and blobs used by the index are listed on the
+	command line.  Note that you probably want to use `--objects`, too.
+
+--unpacked::
+	Uniquement utile avec `--objects` ; afficher les ID d'objets qui ne sont pas
+	dans les paquets.
+
+--object-names::
+	Uniquement utile avec `--objects` ; afficher les noms des ID des objets
+	trouvés. C'est le comportement par défaut.
+
+--no-object-names::
+	Uniquement utile avec `--objects` ; ne pas afficher les noms des ID des
+	objets trouvés. Ceci inverse `--object-names`. Ce drapeau permet à la sortie
+	d'être plus facilement analysée par des commandes telles que
+	linkgit:git-cat-file[1].
+
+--filter=<spéc. du filtre>::
+	Uniquement utile avec l'un des `--objects*' ; omettre des objets
+	(généralement les blobs) de la liste des objets affichés.
+	Le'<spécificateur-de-filtre>' peut être l'un des suivants :
++
+La forme '--filter=blob:none' omet tous les blobs.
++
+La forme'--filter=blob:limit=<n>[kmg]' omet les blobls plus gros que n
+octets ou unités. n peut être zéro.  Les suffixes k, m et g peuvent être
+utilisés pour nommer les unités en Kio, Mio ou Gio.  Par
+exemple,'blob:limit=1k' est identique à 'blob:limit=1024'.
++
+La forme '--filter=sparse:oid=<blob-esque>' utilise une spécification
+d'extraction clairsemée contenue dans le blob (ou l'expression de blob)
+'<blob-esque>' pour omettre les blobs qui ne seraient pas nécessaires pour
+une extraction clairsemée sur les références demandées.
++
+The form '--filter=tree:<depth>' omits all blobs and trees whose depth from
+the root tree is >= <depth> (minimum depth if an object is located at
+multiple depths in the commits traversed). <depth>=0 will not include any
+trees or blobs unless included explicitly in the command-line (or standard
+input when --stdin is used). <depth>=1 will include only the tree and blobs
+which are referenced directly by a commit reachable from <commit> or an
+explicitly-given object. <depth>=2 is like <depth>=1 while also including
+trees and blobs one more level removed from an explicitly-given commit or
+tree.
++
+Note that the form '--filter=sparse:path=<path>' that wants to read from an
+arbitrary path on the filesystem has been dropped for security reasons.
+
+--no-filter::
+	Turn off any previous `--filter=` argument.
+
+--filter-print-omitted::
+	Only useful with `--filter=`; prints a list of the objects omitted by the
+	filter.  Object IDs are prefixed with a ``~'' character.
+
+--missing=<action-manquante>::
+	Une option de débogage pour aider au développement futur de "clones
+	partiels".  Cette option spécifie comment les objets manquants sont traités.
++
+The form '--missing=error' requests that rev-list stop with an error if a
+missing object is encountered.  This is the default action.
++
+La forme '--missing=allow-any' permet de continuer le parcours d'objet si un
+objet manquant est rencontré.  Les objets manquants seront silencieusement
+omis des résultats.
++
+The form '--missing=allow-promisor' is like 'allow-any', but will only allow
+object traversal to continue for EXPECTED promisor missing objects.
+Unexpected missing objects will raise an error.
++
+The form '--missing=print' is like 'allow-any', but will also print a list
+of the missing objects.  Object IDs are prefixed with a ``?'' character.
+
+--exclude-promisor-objects::
+	(For internal use only.)  Prefilter object traversal at promisor boundary.
+	This is used with partial clone.  This is stronger than
+	`--missing=allow-promisor` because it limits the traversal, rather than just
+	silencing errors about missing objects.
+endif::git-rev-list[]
+
+--no-walk[=(sorted|unsorted)]::
+	Only show the given commits, but do not traverse their ancestors.  This has
+	no effect if a range is specified. If the argument `unsorted` is given, the
+	commits are shown in the order they were given on the command
+	line. Otherwise (if `sorted` or no argument was given), the commits are
+	shown in reverse chronological order by commit time.  Cannot be combined
+	with `--graph`.
+
+--do-walk::
+	Overrides a previous `--no-walk`.
+
+Formatage des commits
+~~~~~~~~~~~~~~~~~~~~~
+
+ifdef::git-rev-list[]
+Using these options, linkgit:git-rev-list[1] will act similar to the more
+specialized family of commit log tools: linkgit:git-log[1],
+linkgit:git-show[1], and linkgit:git-whatchanged[1]
+endif::git-rev-list[]
+
+include::pretty-options.txt[]
+
+--relative-date::
+	Synonym for `--date=relative`.
+
+--date=<format>::
+	Only takes effect for dates shown in human-readable format, such as when
+	using `--pretty`. `log.date` config variable sets a default value for the
+	log command's `--date` option. By default, dates are shown in the original
+	time zone (either committer's or author's). If `-local` is appended to the
+	format (e.g., `iso-local`), the user's local time zone is used instead.
++
+--
+`--date=relative` shows dates relative to the current time, e.g. ``2 hours
+ago''. The `-local` option has no effect for `--date=relative`.
+
+`--date=local` is an alias for `--date=default-local`.
+
+`--date=iso` (or `--date=iso8601`) shows timestamps in a ISO 8601-like
+format.  The differences to the strict ISO 8601 format are:
+
+	- a space instead of the `T` date/time delimiter
+	- a space between time and time zone
+	- no colon between hours and minutes of the time zone
+
+`--date=iso-strict` (or `--date=iso8601-strict`) shows timestamps in strict
+ISO 8601 format.
+
+`--date=rfc` (or `--date=rfc2822`) shows timestamps in RFC 2822 format,
+often found in email messages.
+
+`--date=short` shows only the date, but not the time, in `YYYY-MM-DD`
+format.
+
+`--date=raw` shows the date as seconds since the epoch (1970-01-01 00:00:00
+UTC), followed by a space, and then the timezone as an offset from UTC (a
+`+` or `-` with four digits; the first two are hours, and the second two are
+minutes). I.e., as if the timestamp were formatted with `strftime("%s
+%z")`).  Note that the `-local` option does not affect the
+seconds-since-epoch value (which is always measured in UTC), but does switch
+the accompanying timezone value.
+
+`--date=human` shows the timezone if the timezone does not match the current
+time-zone, and doesn't print the whole date if that matches (ie skip
+printing year for dates that are "this year", but also skip the whole date
+itself if it's in the last few days and we can just say what weekday it
+was).  For older dates the hour and minute is also omitted.
+
+`--date=unix` shows the date as a Unix epoch timestamp (seconds since
+1970).  As with `--raw`, this is always in UTC and therefore `-local` has no
+effect.
+
+`--date=format:...` feeds the format `...` to your system `strftime`, except
+for %z and %Z, which are handled internally.  Use `--date=format:%c` to show
+the date in your system locale's preferred format.  See the `strftime`
+manual for a complete list of format placeholders. When using `-local`, the
+correct syntax is `--date=format-local:...`.
+
+`--date=default` is the default format, and is similar to `--date=rfc2822`,
+with a few exceptions:
+--
+	- there is no comma after the day-of-week
+
+	- the time zone is omitted when the local time zone is used
+
+ifdef::git-rev-list[]
+--header::
+	Print the contents of the commit in raw-format; each record is separated
+	with a NUL character.
+endif::git-rev-list[]
+
+--parents::
+	Print also the parents of the commit (in the form "commit parent...").  Also
+	enables parent rewriting, see 'History Simplification' above.
+
+--children::
+	Print also the children of the commit (in the form "commit child...").  Also
+	enables parent rewriting, see 'History Simplification' above.
+
+ifdef::git-rev-list[]
+--timestamp::
+	Print the raw commit timestamp.
+endif::git-rev-list[]
+
+--left-right::
+	Mark which side of a symmetric difference a commit is reachable from.
+	Commits from the left side are prefixed with `<` and those from the right
+	with `>`.  If combined with `--boundary`, those commits are prefixed with
+	`-`.
++
+For example, if you have this topology:
++
+-----------------------------------------------------------------------
+	     y---b---b  branch B
+	    / \ /
+	   /   .
+	  /   / \
+	 o---x---a---a  branch A
+-----------------------------------------------------------------------
++
+you would get an output like this:
++
+-----------------------------------------------------------------------
+	$ git rev-list --left-right --boundary --pretty=oneline A...B
+
+	>bbbbbbb... 3rd on b
+	>bbbbbbb... 2nd on b
+	<aaaaaaa... 3rd on a
+	<aaaaaaa... 2nd on a
+	-yyyyyyy... 1st on b
+	-xxxxxxx... 1st on a
+-----------------------------------------------------------------------
+
+--graph::
+	Draw a text-based graphical representation of the commit history on the left
+	hand side of the output.  This may cause extra lines to be printed in
+	between commits, in order for the graph history to be drawn properly.
+	Cannot be combined with `--no-walk`.
++
+This enables parent rewriting, see 'History Simplification' above.
++
+This implies the `--topo-order` option by default, but the `--date-order`
+option may also be specified.
+
+--show-linear-break[=<barrier>]::
+	When --graph is not used, all history branches are flattened which can make
+	it hard to see that the two consecutive commits do not belong to a linear
+	branch. This option puts a barrier in between them in that case. If
+	`<barrier>` is specified, it is the string that will be shown instead of the
+	default one.
+
+ifdef::git-rev-list[]
+--count::
+	Print a number stating how many commits would have been listed, and suppress
+	all other output.  When used together with `--left-right`, instead print the
+	counts for left and right commits, separated by a tab. When used together
+	with `--cherry-mark`, omit patch equivalent commits from these counts and
+	print the count for equivalent commits separated by a tab.
+endif::git-rev-list[]
+
+ifndef::git-rev-list[]
+Formatage des diffs
+~~~~~~~~~~~~~~~~~~~
+
+Listed below are options that control the formatting of diff output.  Some
+of them are specific to linkgit:git-rev-list[1], however other diff options
+may be given. See linkgit:git-diff-files[1] for more options.
+
+-c::
+	With this option, diff output for a merge commit shows the differences from
+	each of the parents to the merge result simultaneously instead of showing
+	pairwise diff between a parent and the result one at a time. Furthermore, it
+	lists only files which were modified from all parents.
+
+--cc::
+	This flag implies the `-c` option and further compresses the patch output by
+	omitting uninteresting hunks whose contents in the parents have only two
+	variants and the merge result picks one of them without modification.
+
+--combined-all-paths::
+	Cet indicateur fait en sorte que les diffs combinés (utilisés pour les
+	commits de fusion) listent le nom du fichier de tous les parents.  Il n'a
+	donc d'effet que lorsque -c ou --cc sont spécifiés, et n'est probablement
+	utile que si des changements de nom de fichier sont détectés
+	(c.-à-d. lorsque la détection de renommage ou de copie a été demandée).
+
+-m::
+	This flag makes the merge commits show the full diff like regular commits;
+	for each merge parent, a separate log entry and diff is generated. An
+	exception is that only diff against the first parent is shown when
+	`--first-parent` option is given; in that case, the output represents the
+	changes the merge brought _into_ the then-current branch.
+
+-r::
+	Show recursive diffs.
+
+-t::
+	Show the tree objects in the diff output. This implies `-r`.
+endif::git-rev-list[]
