@@ -58,8 +58,8 @@ endif::git-rev-list[]
 	donnés sont choisis (mais voir `--all-match`).
 ifndef::git-rev-list[]
 +
-Lorsque `--show-notes' est en vigueur, le message des notes est vérifié
-comme s'il faisait partie du message du journal.
+Lorsque `notes' est en vigueur, le message des notes est vérifié comme s'il
+faisait partie du message du journal.
 endif::git-rev-list[]
 
 --all-match::
@@ -164,7 +164,7 @@ l'absence de limite supérieure).
 	Faire comme si toutes les réfs correspondant au shell glob'<motif-glob>'
 	étaient listées sur la ligne de commande comme'<commit>'. Le préfixe
 	'refs/', est automatiquement ajouté s'il n'y en a pas. Si le motif ne
-	présente pas de  '?', '{asterisk}', ni '[', '/{asterisk}' à la fin est
+	présente pas de '?', '{asterisk}', ni '[', '/{asterisk}' à la fin est
 	implicite.
 
 --exclude=<motif-glob>::
@@ -266,12 +266,12 @@ termes, cela liste les commits `+` de `git cherry A B`.  Plus précisément,
 	que les notations '{caret}commit', 'commit1..commit2' et'commit1\...commit2'
 	ne peuvent pas être utilisées).
 +
-Avec le format `--pretty` autre que `online` (pour des raisons évidentes),
-cela fait que la sortie a deux lignes supplémentaires d'informations tirées
-du reflog.  L'indicateur de reflog dans la sortie peut être affiché comme
-`ref@{Nième}` (où `Nième` est l'index chronologique inverse dans le reflog)
-ou comme `ref@{horodatage}` (avec l'horodatage pour cette entrée), selon
-quelques règles :
+Avec le format `--pretty` autre que `online` et `reference` (pour des
+raisons évidentes), cela fait que la sortie a deux lignes supplémentaires
+d'informations tirées du reflog.  L'indicateur de reflog dans la sortie peut
+être affiché comme `ref@{Nième}` (où `Nième` est l'index chronologique
+inverse dans le reflog) ou comme `ref@{horodatage}` (avec l'horodatage pour
+cette entrée), selon quelques règles :
 +
 --
 1. Si le point de départ est spécifié comme `ref@{Nième}`, afficher le format
@@ -290,6 +290,9 @@ quelques règles :
 Sous `--pretty=oneline`, le message de commit est préfixé avec cette
 information sur la même ligne.  Cette option ne peut pas être combinée avec
 `--reverse'.  Voir aussi linkgit:git-reflog[1].
++
+Sous l'option `--pretty = reference`, ces informations ne seront pas
+affichées du tout.
 
 --merge::
 	Après une fusion ratée, afficher les références qui touchent les fichiers en
@@ -530,7 +533,7 @@ Notez les principales différences entre `N`, `P` et `Q` par rapport à
 +
 * La liste des parents de `Q` a rendu `Y` simplifié en `X`. `X` a ensuite été
   supprimé, parce que c'était une racine MEMEARBRE. `Q` a ensuite été
-  complètement supprimée, parce qu'elle avait un parent et qu'il  est
+  complètement supprimée, parce qu'elle avait un parent et qu'il est
   MEMEARBRE.
 --
 
@@ -582,6 +585,7 @@ l'historique décrites ci-dessus) si (1) ils sont référencés par des
 de commande.  Tous les autres commits sont marqués comme MEMEARBRE (soumis à
 une possible simplification).
 
+ifndef::git-shortlog[]
 ifdef::git-rev-list[]
 Aides à la bisection
 ~~~~~~~~~~~~~~~~~~~~
@@ -589,10 +593,10 @@ Aides à la bisection
 --bisect::
 	Limiter la sortie à l'objet commit qui est à peu près à mi-chemin entre les
 	commits inclus et les commits exclus. Notez que la référence mauvaise de
-	bissection  `refs/bisect/bad` est ajoutée aux commits inclus (si elle
-	existe) et la référence bonne de bissection `refs/bisect/good-*` est ajoutée
-	aux commits exclus (s'ils existent). Ainsi, en supposant qu'il n'y ait pas
-	de références dans `refs/bisect/`, si
+	bissection `refs/bisect/bad` est ajoutée aux commits inclus (si elle existe)
+	et la référence bonne de bissection `refs/bisect/good-*` est ajoutée aux
+	commits exclus (s'ils existent). Ainsi, en supposant qu'il n'y ait pas de
+	références dans `refs/bisect/`, si
 +
 -----------------------------------------------------------------------
 	$ git rev-list --bisect foo ^bar ^baz
@@ -636,8 +640,9 @@ Cette option peut être utilisée avec `--bisect-vars', dans ce cas, après
 tous les objets commit triés, le texte sera le même que si `--bisect-vars'
 avait été utilisé seul.
 endif::git-rev-list[]
+endif::git-shortlog[]
 
-
+ifndef::git-shortlog[]
 Ordre des commits
 ~~~~~~~~~~~~~~~~~
 
@@ -678,7 +683,9 @@ pistes de développement parallèles.
 	Sortir les commits choisis pour être affichés (voir la section Limitation
 	des commits ci-dessus) dans l'ordre inverse. Ne peut pas être combiné avec
 	`--walk-reflogs`.
+endif::git-shortlog[]
 
+ifndef::git-shortlog[]
 Traversée d'objets
 ~~~~~~~~~~~~~~~~~~
 
@@ -709,8 +716,9 @@ ifdef::git-rev-list[]
 	superficiels.
 
 --indexed-objects::
-	Pretend as if all trees and blobs used by the index are listed on the
-	command line.  Note that you probably want to use `--objects`, too.
+	Faire comme si tous les arbres et tous les blobs utilisés par l'index
+	étaient listés sur la ligne de commande.  Notez que vous voudrez
+	probablement utiliser aussi `--objects`.
 
 --unpacked::
 	Uniquement utile avec `--objects` ; afficher les ID d'objets qui ne sont pas
@@ -743,172 +751,203 @@ d'extraction clairsemée contenue dans le blob (ou l'expression de blob)
 '<blob-esque>' pour omettre les blobs qui ne seraient pas nécessaires pour
 une extraction clairsemée sur les références demandées.
 +
-The form '--filter=tree:<depth>' omits all blobs and trees whose depth from
-the root tree is >= <depth> (minimum depth if an object is located at
-multiple depths in the commits traversed). <depth>=0 will not include any
-trees or blobs unless included explicitly in the command-line (or standard
-input when --stdin is used). <depth>=1 will include only the tree and blobs
-which are referenced directly by a commit reachable from <commit> or an
-explicitly-given object. <depth>=2 is like <depth>=1 while also including
-trees and blobs one more level removed from an explicitly-given commit or
-tree.
+La forme '--filter=tree:<profondeur>' omet tous les blobs et tous les arbres
+dont la profondeur de l'arbre racine est >= <profondeur> (profondeur
+minimale si un objet est situé à plusieurs profondeurs dans les commits
+traversés). <profondeur>=0 n'inclura pas d'arbres ni de blobs à moins d'être
+inclus explicitement dans la ligne de commande (ou dans l'entrée standard
+lorsque --stdin est utilisé). <profondeur>=1 inclura seulement l'arbre et
+les blobs qui sont référencés directement par un commit accessible depuis
+<commit> ou un objet explicitement donné. <profondeur>=2 est comme
+<profondeur>=1 tout en incluant aussi les arbres et les blobs d'un niveau
+supplémentaire tiré d'un commit ou d'un arbre explicitement donné.
 +
-Note that the form '--filter=sparse:path=<path>' that wants to read from an
-arbitrary path on the filesystem has been dropped for security reasons.
+Notez que la forme '--filter=sparse:path=<chemin>' qui veut lire à partir
+d'un chemin arbitraire sur le système de fichiers a été supprimé pour des
+raisons de sécurité.
++
+Plusieurs drapeaux '--filter=' peuvent être spécifiés pour combiner les
+filtres. Seuls les objets acceptés par tous les filtres sont inclus.
++
+La forme'--filter=combine:<filtre1>+<filtre2>+...<filtreN>' peut aussi être
+utilisée pour combiner plusieurs filtres, mais c'est plus difficile que de
+répéter simplement le drapeau'--filter' et ce n'est généralement pas
+nécessaire. Les filtres sont joints par des signes '{plus}' et les filtres
+individuels sont codés en % (c'est-à-dire codés comme des URL).  Outre les
+caractères '{plus}' et'%', les caractères suivants sont réservés et doivent
+également être encodés : `~!@#$^^&*()[]{]{}\ ;",<>?`+&#39;&#96;+ ainsi que
+tous les caractères avec un code ASCII <= `0x20`, qui inclut l'espace et la
+ligne nouvelle.
++
+D'autres caractères arbitraires peuvent également être encodés. Par
+exemple,'combine:tree:3+blob:none' et 'combine:tree%3A3+blob%3Anone' sont
+équivalents.
 
 --no-filter::
-	Turn off any previous `--filter=` argument.
+	Désactiver tout argument `--filter=` précédent.
 
 --filter-print-omitted::
-	Only useful with `--filter=`; prints a list of the objects omitted by the
-	filter.  Object IDs are prefixed with a ``~'' character.
+	Uniquement utile avec `--filter=` ; imprimer une liste des objets omis par
+	le filtre.  Les ID d'objet sont préfixés par un caractère "~".
 
 --missing=<action-manquante>::
 	Une option de débogage pour aider au développement futur de "clones
 	partiels".  Cette option spécifie comment les objets manquants sont traités.
 +
-The form '--missing=error' requests that rev-list stop with an error if a
-missing object is encountered.  This is the default action.
+La forme '--missing=error' demande que rev-list s'arrête avec une erreur si
+un objet manquant est rencontré.  C'est l'action par défaut.
 +
 La forme '--missing=allow-any' permet de continuer le parcours d'objet si un
 objet manquant est rencontré.  Les objets manquants seront silencieusement
 omis des résultats.
 +
-The form '--missing=allow-promisor' is like 'allow-any', but will only allow
-object traversal to continue for EXPECTED promisor missing objects.
-Unexpected missing objects will raise an error.
+Le forme '--missing=allow-promisor' est comme 'allow-any', mais ne permettra
+la traversée d'objets de continuer que pour les objets manquants du
+promettant EXPECTED.  Les objets manquants inattendus entraîneront une
+erreur.
 +
-The form '--missing=print' is like 'allow-any', but will also print a list
-of the missing objects.  Object IDs are prefixed with a ``?'' character.
+La forme '--missing=print' est comme 'allow-any', mais affichera aussi une
+liste des objets manquants.  Les ID d'objet sont préfixés par un caractère
+"?".
 
 --exclude-promisor-objects::
-	(For internal use only.)  Prefilter object traversal at promisor boundary.
-	This is used with partial clone.  This is stronger than
-	`--missing=allow-promisor` because it limits the traversal, rather than just
-	silencing errors about missing objects.
+	(Pour usage interne seulement.) Préfiltrer la traversée de l'objet à la
+	limite du promettant.  Ceci est utilisé avec un clone partiel.  C'est plus
+	fort que `--missing=allow-promisor` parce qu'il limite la traversée, plutôt
+	que de simplement réduire au silence les erreurs sur les objets manquants.
 endif::git-rev-list[]
 
 --no-walk[=(sorted|unsorted)]::
-	Only show the given commits, but do not traverse their ancestors.  This has
-	no effect if a range is specified. If the argument `unsorted` is given, the
-	commits are shown in the order they were given on the command
-	line. Otherwise (if `sorted` or no argument was given), the commits are
-	shown in reverse chronological order by commit time.  Cannot be combined
-	with `--graph`.
+	Montrer seulement les commits donnés, mais ne pas traverser leurs ancêtres.
+	Ceci n'a aucun effet si une plage est spécifiée. Si l'argument `unsorted`
+	est donné, les commits sont affichés dans l'ordre dans lequel ils ont été
+	donnés sur la ligne de commande. Sinon (si `sorted` ou aucun argument n'a
+	été donné), les commits sont affichés dans l'ordre chronologique inverse par
+	date de validation.  Ne peut pas être combiné avec `--graph`.
 
 --do-walk::
-	Overrides a previous `--no-walk`.
+	Remplacer un `--no-walk` précédent.
+endif::git-shortlog[]
 
+ifndef::git-shortlog[]
 Formatage des commits
 ~~~~~~~~~~~~~~~~~~~~~
 
 ifdef::git-rev-list[]
-Using these options, linkgit:git-rev-list[1] will act similar to the more
-specialized family of commit log tools: linkgit:git-log[1],
-linkgit:git-show[1], and linkgit:git-whatchanged[1]
+En utilisant ces options, linkgit:git-rev-list[1] agira de la même manière
+que la famille plus spécialisée d'outils de journaux de validation :
+linkgit:git-log[1], linkgit:git-show[1] et linkgit:git-whatch changed[1]
 endif::git-rev-list[]
 
 include::pretty-options.txt[]
 
 --relative-date::
-	Synonym for `--date=relative`.
+	Synonyme de ` --date=relative`.
 
 --date=<format>::
-	Only takes effect for dates shown in human-readable format, such as when
-	using `--pretty`. `log.date` config variable sets a default value for the
-	log command's `--date` option. By default, dates are shown in the original
-	time zone (either committer's or author's). If `-local` is appended to the
-	format (e.g., `iso-local`), the user's local time zone is used instead.
+	Ne prendre effet que pour les dates indiquées dans un format lisible par
+	l'homme, par exemple lors de l'utilisation de `--pretty`. La variable config
+	`log.date` définit une valeur par défaut pour l'option `--date` de la
+	commande log. Par défaut, les dates sont affichées dans le fuseau horaire
+	d'origine (soit celui du validateur ou celui de l'auteur). Si `-local` est
+	ajouté au format (p. ex., `iso-local`), le fuseau horaire local de
+	l'utilisateur est utilisé à la place.
 +
 --
-`--date=relative` shows dates relative to the current time, e.g. ``2 hours
-ago''. The `-local` option has no effect for `--date=relative`.
+`--date=relative` affiche les dates relatives à l'heure actuelle, par
+exemple ``Il y a 2 heures''. L'option `-local` n'a aucun effet pour
+`--date=relative`.
 
-`--date=local` is an alias for `--date=default-local`.
+`--date=local` est un alias pour `--date=default-local`.
 
-`--date=iso` (or `--date=iso8601`) shows timestamps in a ISO 8601-like
-format.  The differences to the strict ISO 8601 format are:
+`--date=iso` (ou `--date=iso8601`) montre les horodatages dans un format
+similaire à ISO 8601.  Les différences par rapport au format strict ISO 8601
+sont :
 
-	- a space instead of the `T` date/time delimiter
-	- a space between time and time zone
-	- no colon between hours and minutes of the time zone
+	- une espace au lieu du délimiteur date/heure `T`
+	- une espace entre l'heure et le fuseau horaire
+	- pas de deux points entre les heures et les minutes du fuseau horaire
 
-`--date=iso-strict` (or `--date=iso8601-strict`) shows timestamps in strict
-ISO 8601 format.
+`--date=iso-strict` (ou `--date=iso8601-strict`) affiche les horodatages au
+format ISO 8601 strict.
 
-`--date=rfc` (or `--date=rfc2822`) shows timestamps in RFC 2822 format,
-often found in email messages.
+`--date=rfc` (ou `--date=rfc2822`) montre les horodatages au format RFC
+2822, souvent trouvés dans les messages électroniques.
 
-`--date=short` shows only the date, but not the time, in `YYYY-MM-DD`
-format.
+`--date=short` montre seulement la date, mais pas l'heure, au format
+`AAA-MM-JJ`.
 
-`--date=raw` shows the date as seconds since the epoch (1970-01-01 00:00:00
-UTC), followed by a space, and then the timezone as an offset from UTC (a
-`+` or `-` with four digits; the first two are hours, and the second two are
-minutes). I.e., as if the timestamp were formatted with `strftime("%s
-%z")`).  Note that the `-local` option does not affect the
-seconds-since-epoch value (which is always measured in UTC), but does switch
-the accompanying timezone value.
+`--date=raw` montre la date en secondes depuis l'époque (1970-01-01 00:00:00
+UTC), suivi d'une espace, puis le fuseau horaire en décalage par rapport à
+UTC (un `+` ou `-` avec quatre chiffres ; les deux premiers sont des heures,
+et les deux seconds des minutes), c'est-à-dire comme si l'horodatage était
+formaté avec `strftime("%s %z")`).  Notez que l'option `-local` n'affecte
+pas la valeur des secondes depuis l'écho (qui est toujours mesurée en UTC),
+mais commute la valeur du fuseau horaire qui l'accompagne.
 
-`--date=human` shows the timezone if the timezone does not match the current
-time-zone, and doesn't print the whole date if that matches (ie skip
-printing year for dates that are "this year", but also skip the whole date
-itself if it's in the last few days and we can just say what weekday it
-was).  For older dates the hour and minute is also omitted.
+`--date=human` montre le fuseau horaire si le fuseau horaire ne correspond
+pas au fuseau horaire actuel, et n'affiche pas la date complète s'il y a
+correspondance (c'est-à-dire ne pas afficher l'année pour les dates qui sont
+"cette année", mais aussi sauter la date complète elle-même si elle est dans
+les derniers jours et que nous pouvons juste indiquer le jour de la semaine
+passée).  Pour les dates plus anciennes, l'heure et la minute sont également
+omises.
 
-`--date=unix` shows the date as a Unix epoch timestamp (seconds since
-1970).  As with `--raw`, this is always in UTC and therefore `-local` has no
-effect.
+`--date=unix` affiche la date sous forme d'un horodatage d'époque Unix
+(secondes depuis 1970).  Comme dans le cas de " --raw ", c'est toujours en
+UTC et donc " --local " n'a aucun effet.
 
-`--date=format:...` feeds the format `...` to your system `strftime`, except
-for %z and %Z, which are handled internally.  Use `--date=format:%c` to show
-the date in your system locale's preferred format.  See the `strftime`
-manual for a complete list of format placeholders. When using `-local`, the
-correct syntax is `--date=format-local:...`.
+`--date=format :...` alimente le format `...` vers `strftime` de votre
+système , sauf pour %z et %Z, qui sont gérés en interne.  Utilisez
+`--date=format:%c` pour afficher la date dans le format préféré de la locale
+de votre système.  Voir le manuel de `strftime` pour une liste complète des
+espaces réservés de format. Quand on utilise `-local`, la syntaxe correcte
+est `--date=format-local :...`.
 
-`--date=default` is the default format, and is similar to `--date=rfc2822`,
-with a few exceptions:
+`--date=default` est le format par défaut, et est similaire à
+`--date=rfc2822`, avec quelques exceptions :
 --
-	- there is no comma after the day-of-week
+	- il n'y a pas de virgule après le jour de la semaine
 
-	- the time zone is omitted when the local time zone is used
+	- le fuseau horaire est omis lorsque le fuseau horaire local est utilisé
 
 ifdef::git-rev-list[]
 --header::
-	Print the contents of the commit in raw-format; each record is separated
-	with a NUL character.
+	Afficher le contenu du commit en format brut ; chaque enregistrement est
+	séparé par un caractère NUL.
 endif::git-rev-list[]
 
 --parents::
-	Print also the parents of the commit (in the form "commit parent...").  Also
-	enables parent rewriting, see 'History Simplification' above.
+	Afficher aussi les parents du commit (sous la forme "parent du commit...").
+	Permet également la réécriture des parents, voir " Simplification de
+	l'historique " ci-dessus.
 
 --children::
-	Print also the children of the commit (in the form "commit child...").  Also
-	enables parent rewriting, see 'History Simplification' above.
+	Afficher aussi les enfants du commit (sous la forme "commit child...").
+	Permet également la réécriture des parents, voir " Simplification de
+	l'historique " ci-dessus.
 
 ifdef::git-rev-list[]
 --timestamp::
-	Print the raw commit timestamp.
+	Imprimer l'horodatage brut du commit.
 endif::git-rev-list[]
 
 --left-right::
-	Mark which side of a symmetric difference a commit is reachable from.
-	Commits from the left side are prefixed with `<` and those from the right
-	with `>`.  If combined with `--boundary`, those commits are prefixed with
-	`-`.
+	Indiquer de quel côté d'une différence symétrique un commit est accessible.
+	Les commits de gauche sont préfixés par " < " et ceux de  droite par " > ".
+	Si on combine avec `--boundary`, ces commits sont préfixés par `-`.
 +
-For example, if you have this topology:
+Par exemple, si vous avez cette topologie :
 +
 -----------------------------------------------------------------------
-	     y---b---b  branch B
+	     y---b---b  branche B
 	    / \ /
 	   /   .
 	  /   / \
-	 o---x---a---a  branch A
+	 o---x---a---a  branche A
 -----------------------------------------------------------------------
 +
-you would get an output like this:
+vous obtiendriez une sortie comme celle-ci :
 +
 -----------------------------------------------------------------------
 	$ git rev-list --left-right --boundary --pretty=oneline A...B
@@ -922,50 +961,57 @@ you would get an output like this:
 -----------------------------------------------------------------------
 
 --graph::
-	Draw a text-based graphical representation of the commit history on the left
-	hand side of the output.  This may cause extra lines to be printed in
-	between commits, in order for the graph history to be drawn properly.
-	Cannot be combined with `--no-walk`.
+	Dessiner une représentation graphique en texte de l'historique du commit sur
+	la gauche de la sortie.  Cela peut entraîner l'impression de lignes
+	supplémentaires entre les validations, afin que l'historique du graphique
+	soit correctement tracé.  Ne peut pas être combiné avec `--no-walk`.
 +
-This enables parent rewriting, see 'History Simplification' above.
+Cela permet la réécriture des parents, voir « Simplification de l'historique
+» ci-dessus.
 +
-This implies the `--topo-order` option by default, but the `--date-order`
-option may also be specified.
+Cela implique l'option `--topo-order` par défaut, mais l'option
+`--date-order` peut aussi être spécifiée.
 
---show-linear-break[=<barrier>]::
-	When --graph is not used, all history branches are flattened which can make
-	it hard to see that the two consecutive commits do not belong to a linear
-	branch. This option puts a barrier in between them in that case. If
-	`<barrier>` is specified, it is the string that will be shown instead of the
-	default one.
+--show-linear-break [=<barrière>]::
+	Lorsque --graph n'est pas utilisé, toutes les branches de l'historique sont
+	aplaties, ce qui peut rendre difficile de voir que les deux commits
+	consécutifs n'appartiennent pas à une branche linéaire. Dans ce cas, cette
+	option met une barrière entre les deux. Si `<barrière>` est spécifié, c'est
+	la chaîne de caractères qui sera affichée à la place de celle par défaut.
 
 ifdef::git-rev-list[]
 --count::
-	Print a number stating how many commits would have been listed, and suppress
-	all other output.  When used together with `--left-right`, instead print the
-	counts for left and right commits, separated by a tab. When used together
-	with `--cherry-mark`, omit patch equivalent commits from these counts and
-	print the count for equivalent commits separated by a tab.
+	Imprimer un nombre indiquant combien de commits auraient été listés, et
+	supprimer toutes les autres sorties.  Lorsqu'il est utilisé avec
+	`--left-right`, imprimer à la place les comptes des commits gauche et
+	droite, séparés par une tabulation. Lorsqu'utilisé avec `--cherry-mark`,
+	omettre les commits équivalents de rustines de ces comptes et imprimer le
+	compte des commits équivalents séparés par une tabulation.
 endif::git-rev-list[]
+endif::git-shortlog[]
 
+ifndef::git-shortlog[]
 ifndef::git-rev-list[]
 Formatage des diffs
 ~~~~~~~~~~~~~~~~~~~
 
-Listed below are options that control the formatting of diff output.  Some
-of them are specific to linkgit:git-rev-list[1], however other diff options
-may be given. See linkgit:git-diff-files[1] for more options.
+Voici la liste des options qui permettent de contrôler la mise en forme de
+la sortie de la commande diff. Certaines d'entre elles sont spécifiques à
+linkgit:git-rev-list[1], mais d'autres options de diff peuvent être
+spécifiées. Voir linkgit:git-diff-files[1] pour plus d'options.
 
 -c::
-	With this option, diff output for a merge commit shows the differences from
-	each of the parents to the merge result simultaneously instead of showing
-	pairwise diff between a parent and the result one at a time. Furthermore, it
-	lists only files which were modified from all parents.
+	Avec cette option, la sortie de diff pour un commit de fusion montre les
+	différences de chacun des parents vers le résultat de la fusion
+	simultanément au lieu de montrer une à une les différences par paires entre
+	un parent et le résultat. De plus, il ne répertorie que les fichiers qui ont
+	été modifiés par tous les parents.
 
 --cc::
-	This flag implies the `-c` option and further compresses the patch output by
-	omitting uninteresting hunks whose contents in the parents have only two
-	variants and the merge result picks one of them without modification.
+	Ce drapeau implique l'option `-c` et compresse davantage la sortie du patch
+	en omettant les morceaux inintéressants dont le contenu dans les parents n'a
+	que deux variantes et le résultat de la fusion choisit l'une d'entre elles
+	sans modification.
 
 --combined-all-paths::
 	Cet indicateur fait en sorte que les diffs combinés (utilisés pour les
@@ -975,15 +1021,17 @@ may be given. See linkgit:git-diff-files[1] for more options.
 	(c.-à-d. lorsque la détection de renommage ou de copie a été demandée).
 
 -m::
-	This flag makes the merge commits show the full diff like regular commits;
-	for each merge parent, a separate log entry and diff is generated. An
-	exception is that only diff against the first parent is shown when
-	`--first-parent` option is given; in that case, the output represents the
-	changes the merge brought _into_ the then-current branch.
+	Ce drapeau fait que les commits de fusion montrent la différence complète
+	comme les commits réguliers ; pour chaque parent de la fusion, une entrée de
+	journal et une différence séparées sont générées. Une exception est que
+	seule la différence par rapport au premier parent est affichée quand
+	l'option `--first-parent` est donnée ; dans ce cas, la sortie représente les
+	modifications que la fusion a apportées _dans_ la branche alors courante.
 
 -r::
-	Show recursive diffs.
+	Afficher les différences récursives.
 
 -t::
-	Show the tree objects in the diff output. This implies `-r`.
+	Afficher les objets arbres dans la sortie diff. Cela implique `-r`.
 endif::git-rev-list[]
+endif::git-shortlog[]

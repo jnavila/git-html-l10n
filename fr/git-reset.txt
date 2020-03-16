@@ -8,35 +8,38 @@ git-reset - Réinitialise la HEAD actuelle à l'état spécifié
 SYNOPSIS
 --------
 [verse]
-'git reset' [-q] [<arbre-esque>] [--] <chemins>...
-'git reset' (--patch | -p) [<arbre-esque>] [--] [<chemins>...]
+'git reset' [-q] [<arbre-esque>] [--] <spec-de-chemin>...
+'git reset' [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]
+'git reset' (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]
 'git reset' [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
 
 DESCRIPTION
 -----------
-Dans la première et la deuxième forme, cette commande copie les entrées
-depuis `<arbre-esque>` vers l'index. Dans la troisième forme, elle amène le
+Dans la première et la troisième forme, cette commande copie les entrées
+depuis `<arbre-esque>` vers l'index. Dans la dernière forme, elle amène le
 sommet de la branche actuelle (`HEAD`) à `<commit>`, optionnellement en
 modifiant l'index et l'arbre de travail en
 correspondance. L'`<arbre-esque>`/`<commit>` vaut par défaut `HEAD` dans
 toutes les formes.
 
-'git reset' [-q] [<arbre-esque>] [--] <chemins>...::
-	Cette forme réinitialise les entrées d'index pour tous les `<chemins>` à
-	leur état de `<arbre-esque>` (ceci n'affecte pas l'arbre de travail ou la
-	branche actuelle.)
+'git reset' [-q] [<arbre-esque>] [--] <spec-de-chemin>...::
+'git reset' [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]::
+	Ces formes réinitialisent les entrées d'index pour tous fichiers
+	correspondant à <spec-de-chemin> à leur état de `<arbre-esque>` (ceci
+	n'affecte pas l'arbre de travail ou la branche actuelle.)
 +
-Cela signifie que `git reset <chemins>` est l'opposé de `git add
-<chemins>`. Cette commande est équivalent à `git restore
-[--source=<arbre-esque>] --staged <chemins>...`.
+Cela signifie que `git reset <spec-de-chemin>` est l'opposé de `git add
+<spec-de-chemin>`. Cette commande est équivalent à `git restore
+[--source=<arbre-esque>] --staged <spec-de-chemin>...`.
 +
-Après avoir lancé `git reset <chemins>` pour mettre à jour l'entrée d'index,
-vous pouvez linkgit:git-restore[1] pour extraire le contenu de l'index dans
-l'arbre de travail. Alternativement, en utilisant linkgit:git-restore[1] et
-en spécifiant un commit avec `--source`, vous pouvez copier le contenu d'un
-chemin d'un commit vers l'index et l'arbre de travail d'une seule traite.
+Après avoir lancé `git reset <spec-de-chemin>` pour mettre à jour l'entrée
+d'index, vous pouvez linkgit:git-restore[1] pour extraire le contenu de
+l'index dans l'arbre de travail. Alternativement, en utilisant
+linkgit:git-restore[1] et en spécifiant un commit avec `--source`, vous
+pouvez copier le contenu d'un chemin d'un commit vers l'index et l'arbre de
+travail d'une seule traite.
 
-'git reset' (--patch | -p) [<arbre-esque>] [--] [<chemins>...]::
+'git reset' (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]::
 	Sélectionner interactivement les sections dans la différence entre  l'index
 	et l'<arbre-esque> (par défaut `HEAD`). Les sections choisies sont ensuite
 	appliquées en ordre inversé à l'index.
@@ -103,6 +106,29 @@ OPTIONS
 	géré par l'option de configuration `reset.quiet`. `--quiet` et `--no-quiet`
 	outrepassent le comportement par défaut.
 
+--pathspec-from-file=<fichier>::
+	Le spécificateur de chemin est passé dans `<fichier>` au lieu des arguments
+	de la ligne de commande. Si `<fichier>` vaut `-` alors l'entrée standard est
+	utilisée. Les éléments du spécificateur de chemin sont séparés par LF ou
+	CR/LF. Les éléments du spécificateur de chemin peuvent être cités comme
+	expliqué pour la variable de configuration `core.quotePath` (voir
+	linkgit:git-config[1]). Voir aussi l'option `--pathspec-file-nul` et
+	l'option globale `--literal-pathspecs`.
+
+--pathspec-file-nul::
+	Uniquement significatif avec `--pathspec-from-file`. Les éléments du
+	spécificateur de chemin sont séparés par le caractère NUL et tous les autres
+	caractères sont utilisés littéralement (y compris les retours à la ligne et
+	les guillemets).
+
+\--::
+	Ne pas interpréter les arguments qui suivent comme options.
+
+<spécificateur de chemin>...::
+	Limite les chemins affectés par l'opération.
++
+Pour plus de détail, voir l'entrée 'spécificateur de chemin' dans
+linkgit:gitglossary[7].
 
 EXEMPLES
 --------

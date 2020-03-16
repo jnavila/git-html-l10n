@@ -3,8 +3,8 @@ FORMATS AUTOMATIQUES
 
 Si le commit est une fusion, et si la mise en forme n'est pas 'oneline',
 'email' ou 'raw', une ligne supplémentaire est insérée avant la ligne
-'Author:'.  Cette ligne commence par "Merge:" et les sha1s des commits
-ancêtres sont affichés, séparés par des espaces.  Notez que les commits
+'Author:'.  Cette ligne commence par "Merge:" et les empreintes des commits
+ancêtres sont affichées, séparées par des espaces.  Notez que les commits
 énumérés ne sont pas nécessairement la liste des commits parents *directs*
 si vous avez limité votre vue de l'histoire : par exemple, si vous n'êtes
 intéressé que par les modifications liées à un certain répertoire ou
@@ -17,20 +17,20 @@ nouveau nom de format, soit une chaîne'format:', comme décrit ci-dessous
 
 * 'oneline'
 
-	  <sha1> <ligne de titre>
+	  <empreinte> <ligne de titre>
 +
 C'est conçu pour être aussi compact que possible.
 
 * 'short'
 
-	  commit <sha1>
+	  commit <empreinte>
 	  Author: <auteur>
 
 	      <ligne de titre>
 
 * 'medium'
 
-	  commit <sha1>
+	  commit <empreinte>
 	  Author: <auteur>
 	  Date:   <date d'auteur>
 
@@ -40,7 +40,7 @@ C'est conçu pour être aussi compact que possible.
 
 * 'full'
 
-	  commit <sha1>
+	  commit <empreinte>
 	  Author: <auteur>
 	  Commit: <validateur>
 
@@ -50,7 +50,7 @@ C'est conçu pour être aussi compact que possible.
 
 * 'fuller'
 
-	  commit <sha1>
+	  commit <epreinte>
 	  Author:     <auteur>
 	  AuthorDate: <date d'auteur>
 	  Commit:     <validateur>
@@ -60,9 +60,20 @@ C'est conçu pour être aussi compact que possible.
 
 	       <message de validation complet>
 
+* 'reference'
+
+	  <empreinte abrégée> (<ligne de titre>, <courte date d'auteur>)
++
+Ce format est utilisé pour faire référence à un autre commit dans un message
+de validation et est le même que `--pretty='format:%C(auto)%h (%s, %ad)'`.
+Par défaut, la date est formatée avec `--date=short` à moins qu'une autre
+option `--date` ne soit explicitement spécifiée.  Comme pour tout `format:`
+avec des espaces réservés de format, sa sortie n'est pas affectée par
+d'autres options comme `--decorate` et `--walk-reflogs`.
+
 * 'email'
 
-	  From <sha1> <date>
+	  From <empreinte> <date>
 	  From: <auteur>
 	  Date: <date d'auteur>
 	  Subject: [PATCH] <ligne de titre>
@@ -72,13 +83,14 @@ C'est conçu pour être aussi compact que possible.
 * 'raw'
 +
 Le format'raw' montre le commit entier telle qu'elle est stockée dans
-l'objet commit.  Notamment, les SHA-1 sont affichés dans leur intégralité,
-que --abbrev ou --no-abbrev soient utilisés ou non, et l'information
-'parents' indiquent le véritable commit parent, sans tenir compte des
-greffes ou de la simplification d'historique. Notez que ce format affecte la
-façon dont les commits sont affichés, mais pas la façon dont la différence
-est affichée, par exemple avec `git log --raw`. Pour obtenir les noms
-complets des objets dans un format de diff brut, utilisez `--no-abbrev`.
+l'objet commit.  Notamment, les empreintes sont affichées dans leur
+intégralité, que --abbrev ou --no-abbrev soient utilisés ou non, et
+l'information 'parents' indiquent le véritable commit parent, sans tenir
+compte des greffes ou de la simplification d'historique. Notez que ce format
+affecte la façon dont les commits sont affichés, mais pas la façon dont la
+différence est affichée, par exemple avec `git log --raw`. Pour obtenir les
+noms complets des objets dans un format de diff brut, utilisez
+`--no-abbrev`.
 
 * 'format:<chaîne>'
 +
@@ -153,17 +165,25 @@ Les espaces réservés sont :
 '%ae':: e-mail de l'auteur
 '%aE':: e-mail de l'auteur (en respectant .mailmap, voir linkgit:git-shortlog[1]
 	ou linkgit:git-blame[1])
+'%al':: partie locale de l'e-mail de l'auteur (la partie avant le signe "@")
+'%aL':: partie locale de l'auteur (voir '%al') en respectant le fichier .mailmap,
+voir
+	linkgit:git-shortlog[1] ou linkgit:git-blame[1])
 '%ad':: date de l'auteur (le format respecte l'option --date=)
 '%aD':: date d'auteur, style RFC2822
 '%ar':: date de l'auteur, date relative
 '%at':: date de l'auteur, horodatage UNIX
 '%ai':: date de création, format de type ISO 8601
 '%aI':: date d'auteur, format strict ISO 8601
+'%as':: date d'auteur, format court (`AAAA-MM-JJ`)
 '%cn':: nom du validateur
 '%cN':: nom du validateur (en respectant .mailmap, voir
 	linkgit:git-shortlog[1] ou linkgit:git-blame[1])
 '%ce':: e-mail du validateur
 '%cE':: e-mail du validateur (en respectant .mailmap, voir
+	linkgit:git-shortlog[1] ou linkgit:git-blame[1])
+'%cl':: partie locale de l'e-mail de l'auteur (la partie avant le signe "@")
+'%cL':: partie locale de l'auteur (voir '%cl') en respectant .mailmap, voir
 	linkgit:git-shortlog[1] ou linkgit:git-blame[1])
 '%cd':: date de validation (le format respecte l'option --date=)
 '%cD':: date de validation, style RFC2822
@@ -171,6 +191,7 @@ Les espaces réservés sont :
 '%ct':: date de validation, horodatage UNIX
 '%ci':: date de validation, format de type ISO 8601
 '%cI':: date de validation, format ISO 8601 strict
+'%cs':: date de validation, format court (`AAAA-MM-JJ`)
 '%d':: les noms de ref, comme l'option --decorate de linkgit:git-log[1].
 '%D':: les noms des refs, sans encadrement par « ( » et « ) ».
 '%S':: nom de ref fourni en ligne de commande par lequel le commit a été atteint
@@ -197,7 +218,7 @@ endif::git-rev-list[]
 utilisée
 	pour signer un commit signé
 '%gD':: sélecteur de reflog, par exemple, `refs/stash@{1}`` ou `refs/stash@{2
-	minutes ago`} ; le format suit les règles décrites pour l'option `-g'. La
+	minutes ago}` ; le format suit les règles décrites pour l'option `-g'. La
 	partie avant `@' est le refname tel qu'il est donné sur la ligne de commande
 	(donc `git log -g refs/heads/master` produirait `refs/heads/master@{0}`).
 '%gd':: sélecteur de reflog raccourci ; identique à `%gD', mais la partie du nom du
@@ -242,8 +263,8 @@ voir
    d'attributs dont la clé est « Ticket » séparées par une virgule et un
    espace.
 ** 'unfold[=val]' : se comporter comme si l'option `--unfold` d'interprétation
-   des attributs  était donnée. De la même manière que pour `only`, il peut
-   être suivi d'un signe égal et d'une valeur explicite. Par exemple,
+   des attributs était donnée. De la même manière que pour `only`, il peut être
+   suivi d'un signe égal et d'une valeur explicite. Par exemple,
    `%(trailers:only,unfold=true)` déplie et affiche toutes les lignes
    d'attributs.
 ** 'valueonly[=val]' : sauter la partie clé de la ligne d'attribut et

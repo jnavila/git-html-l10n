@@ -9,32 +9,36 @@ git-bundle - Mover objetos e refs por arquivo
 SINOPSE
 -------
 [verse]
-'git pacote' criar <arquivo><git-rev-list-args>
-'git pacote' verificar <arquivo>
-'git pacote' list-cabeças <arquivo>[<refnome>...]
-'git pacote' unbundle <arquivo>[<refnome>...]
+'git bundle' create [-q | --quiet | --progress | --all-progress] [--all-progress-implied] <file> <git-rev-list-args>
+'git bundle' verify [-q | --quiet] <file>
+'git bundle' list-heads <file> [<refname>...]
+'git bundle' unbundle <file> [<refname>...]
 
 DESCRIÇÃO
 ---------
 
-Alguns fluxos de trabalho exigem que um ou mais ramos de desenvolvimento em
-uma máquina sejam replicados em outra máquina, mas as duas máquinas não
-podem ser conectadas diretamente e, portanto, os protocolos Git interativos
-(git, ssh, http) não podem ser usados.  Este comando fornece suporte para
-'git fetch' e 'git pull' para operar empacotando objetos e referências em um
-arquivo na máquina de origem, importando-os em outro repositório usando 'git
-fetch' e 'git pull' após mover o arquivo por alguns meios (por exemplo, por
-sneakernet).  Como não existe conexão direta entre os repositórios, o
-usuário deve especificar uma base para o bundle que é mantido pelo
-repositório de destino: o bundle assume que todos os objetos na base já
-estão no repositório de destino.
+Some workflows require that one or more branches of development on one
+machine be replicated on another machine, but the two machines cannot be
+directly connected, and therefore the interactive Git protocols (git, ssh,
+http) cannot be used.
+
+The 'git bundle' command packages objects and references in an archive at
+the originating machine, which can then be imported into another repository
+using 'git fetch', 'git pull', or 'git clone', after moving the archive by
+some means (e.g., by sneakernet).
+
+As no direct connection between the repositories exists, the user must
+specify a basis for the bundle that is held by the destination repository:
+the bundle assumes that all objects in the basis are already in the
+destination repository.
 
 OPÇÕES
 ------
 
-criar <arquivo>::
-	Usado para criar um pacote denominado 'file'.  Isso requer argumentos
-	'git-rev-list-args' para definir o conteúdo do pacote.
+create [options] <file> <git-rev-list-args>::
+	Used to create a bundle named 'file'.  This requires the
+	'<git-rev-list-args>' arguments to define the bundle contents.  'options'
+	contains the options specific to the 'git bundle create' subcommand.
 
 verificar <arquivo>::
 	Usado para verificar se um arquivo de pacote é válido e será aplicado
@@ -72,6 +76,31 @@ unbundle <arquivo>::
 	receber apenas as referências solicitadas e não necessariamente tudo no
 	pacote (neste caso, 'git bundle' age como 'git fetch-pack').
 
+--progress::
+	O status de progresso é relatado no fluxo de erro padrão por padrão quando
+	ele é anexado a um terminal, a menos que -q seja especificado. Esse
+	sinalizador força o status de progresso mesmo se o fluxo de erro padrão não
+	for direcionado para um terminal.
+
+--all-progress::
+	When --stdout is specified then progress report is displayed during the
+	object count and compression phases but inhibited during the write-out
+	phase. The reason is that in some cases the output stream is directly linked
+	to another command which may wish to display progress status of its own as
+	it processes incoming pack data.  This flag is like --progress except that
+	it forces progress report for the write-out phase as well even if --stdout
+	is used.
+
+--all-progress-implied::
+	This is used to imply --all-progress whenever progress display is
+	activated.  Unlike --all-progress this flag doesn't actually force any
+	progress display by itself.
+
+-q::
+--quiet::
+	This flag makes the command not to report its progress on the standard error
+	stream.
+
 ESPECIFICANDO REFERÊNCIAS
 -------------------------
 
@@ -88,6 +117,12 @@ exemplo,`mestre~10..master`, `--segmento=10.dias.atrás master`).
 problema em errar do lado da precaução, fazendo com que o arquivo do pacote
 contenha objetos já no destino, pois eles são ignorados ao descompactar no
 destino.
+
+`git clone` can use any bundle created without negative refspecs (e.g.,
+`new`, but not `old..new`).  If you want to match `git clone --mirror`,
+which would include your refs such as `refs/remotes/*`, use `--all`.  If you
+want to provide the same set of refs that a clone directly from the source
+repository would get, use `--branches --tags` for the `<git-rev-list-args>`.
 
 EXEMPLOS
 --------
