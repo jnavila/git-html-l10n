@@ -8,33 +8,41 @@ git-rm - Supprime des fichiers de l'arbre de travail et de l'index
 SYNOPSIS
 --------
 [verse]
-'git rm' [-f | --force] [-n] [-r] [--cached] [--ignore-unmatch] [--quiet] [--] <fichier>...
+'git rm' [-f | --force] [-n] [-r] [--cached] [--ignore-unmatch]
+	  [--quiet] [--pathspec-from-file=<fichier> [--pathspec-file-nul]]
+	  [--] [<spec-de-fichier>...]
 
 DESCRIPTION
 -----------
-Supprime les fichiers de l'index, ou de l'arbre de travail et de
-l'index. `git rm` ne supprimera pas un fichier seulement de votre répertoire
-de travail (il n'y a aucune option pour supprimer un fichier seulement
-depuis l'arbre de travail et le conserver dans l'index ; utilisez `/bin/rm`
-si c'est ce que vous souhaitez faire). Les fichiers à supprimer doivent être
-identiques à ceux du sommet de la branche, et avec aucune mise à jour
-indexée, mais ce comportement par défaut peut être outrepassé avec l'option
-`-f`. Quand `--cached` est fourni, le contenu indexé doit correspondre soit
-au sommet de la branche soit au fichier sur disque, de sorte que le fichier
-puisse n'être supprimé que de l'index.
+Supprime les fichiers correspondant à spec-de-fichier de l'index, ou de
+l'arbre de travail et de l'index. `git rm` ne supprimera pas un fichier
+seulement de votre répertoire de travail (il n'y a aucune option pour
+supprimer un fichier seulement depuis l'arbre de travail et le conserver
+dans l'index ; utilisez `/bin/rm` si c'est ce que vous souhaitez faire). Les
+fichiers à supprimer doivent être identiques à ceux du sommet de la branche,
+et avec aucune mise à jour indexée, mais ce comportement par défaut peut
+être outrepassé avec l'option `-f`. Quand `--cached` est fourni, le contenu
+indexé doit correspondre soit au sommet de la branche soit au fichier sur
+disque, de sorte que le fichier puisse n'être supprimé que de l'index.
 
 
 OPTIONS
 -------
-<fichier>...::
-	Fichiers à supprimer. Les patrons de fichiers (par exemple, `*.c`) peuvent
-	être fournis pour supprimer tous les fichiers correspondants. Si vous
-	souhaitez que Git étende les caractères de patrons de fichier, vous devrez
-	peut-être les échapper de l'interpréteur de commande. Un nom de répertoire
-	en préfixe (par exemple `rép` pour supprimer `rép/fichier1` et
-	`rép/fichier2`) peut être indiqué pour supprimer tous les fichiers dans un
-	répertoire, et récursivement dans tous ses sous-répertoires, mais cela
-	nécessite explicitement l'option `-r`.
+<spécificateur de chemin>...::
+	Fichiers à supprimer. Un nom de répertoire en préfixe (par exemple `rép`
+	pour supprimer `rép/fichier1` et `rép/fichier2`) peut être indiqué pour
+	supprimer tous les fichiers dans un répertoire, et récursivement dans tous
+	ses sous-répertoires, mais cela nécessite explicitement l'option `-r`.
++
+La commande ne supprime que les chemins qui sont connus de Git.
++
+La correspondance de motifs de fichiers fonctionne à travers les limites de
+répertoires. Ainsi, étant donnés deux répertoires `r` et `r2`, il y a une
+différence entre utiliser `git rm 'r*'` et `git rm 'r/*'`, car la première
+forme supprime aussi le répertoire `r2`.
++
+Pour plus de détail, voir l'entrée 'spécificateur de chemin' dans
+linkgit:gitglossary[7].
 
 -f::
 --force::
@@ -66,19 +74,21 @@ OPTIONS
 	`git rm` affiche normalement une ligne (sous la forme d'une commande `rm`)
 	pour chaque fichier supprimé. Cette option élimine cet affichage.
 
+--pathspec-from-file=<fichier>::
+	Le spécificateur de chemin est passé dans `<fichier>` au lieu des arguments
+	de la ligne de commande. Si `<fichier>` vaut `-` alors l'entrée standard est
+	utilisée. Les éléments du spécificateur de chemin sont séparés par LF ou
+	CR/LF. Les éléments du spécificateur de chemin peuvent être cités comme
+	expliqué pour la variable de configuration `core.quotePath` (voir
+	linkgit:git-config[1]). Voir aussi l'option `--pathspec-file-nul` et
+	l'option globale `--literal-pathspecs`.
 
-DISCUSSION
-----------
+--pathspec-file-nul::
+	Uniquement significatif avec `--pathspec-from-file`. Les éléments du
+	spécificateur de chemin sont séparés par le caractère NUL et tous les autres
+	caractères sont utilisés littéralement (y compris les retours à la ligne et
+	les guillemets).
 
-La liste de <fichier> fournie à la commande doit être faite de chemins
-exacts, de motifs de fichiers, ou de répertoires en entêtes. La commande
-supprime seulement les fichiers connus de Git. Fournir le nom d'un fichier
-qui n'est pas pas reconnu par Git ne supprime pas ce fichier.
-
-La correspondance de motifs de fichiers fonctionne à travers les limites de
-répertoires. Ainsi, étant donnés deux répertoires `r` et `r2`, il y a une
-différence entre utiliser `git rm 'r*'` et `git rm 'r/*'`, car la première
-forme supprime aussi le répertoire `r2`.
 
 SUPPRESSION DE FICHIERS QUI ONT DISPARU DU SYSTÈME DE FICHIERS
 --------------------------------------------------------------
