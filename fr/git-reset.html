@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="generator" content="Asciidoctor 2.0.10"/>
-<title>git-am(1)</title>
+<title>git-reset(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -438,306 +438,703 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="manpage">
 <div id="header">
-<h1>git-am(1) Manual Page</h1>
-<h2 id="_nome">NOME</h2>
+<h1>git-reset(1) Manual Page</h1>
+<h2 id="_nom">NOM</h2>
 <div class="sectionbody">
-<p>git-am - Aplica uma série de patches de uma caixa de correio</p>
+<p>git-reset - Réinitialise la HEAD actuelle à l'état spécifié</p>
 </div>
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_sinopse">SINOPSE</h2>
+<h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git am</em> [--signoff] [--keep] [--[no-]keep-cr] [--[no-]utf8]
-	 [--[no-]3way] [--interactive] [--committer-date-is-author-date]
-	 [--ignore-date] [--ignore-space-change | --ignore-whitespace]
-	 [--whitespace=&lt;option&gt;] [-C&lt;n&gt;] [-p&lt;n&gt;] [--directory=&lt;dir&gt;]
-	 [--exclude=&lt;path&gt;] [--include=&lt;path&gt;] [--reject] [-q | --quiet]
-	 [--[no-]scissors] [-S[&lt;keyid&gt;]] [--patch-format=&lt;format&gt;]
-	 [(&lt;mbox&gt; | &lt;Maildir&gt;)&#8230;&#8203;]
-<em>git am</em> (--continue | --skip | --abort | --quit | --show-current-patch[=(diff|raw)])</pre>
+<pre class="content"><em>git reset</em> [-q] [&lt;arbre-esque&gt;] [--] &lt;spec-de-chemin&gt;&#8230;&#8203;
+<em>git reset</em> [-q] [--pathspec-from-file=&lt;fichier&gt; [--pathspec-file-nul]] [&lt;arbre-esque&gt;]
+<em>git reset</em> (--patch | -p) [&lt;arbre-esque&gt;] [--] [&lt;spec-de-chemin&gt;&#8230;&#8203;]
+<em>git reset</em> [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [&lt;commit&gt;]</pre>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_descrição">DESCRIÇÃO</h2>
+<h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Divide as mensagens de correio em uma caixa de correio em mensagens de log
-de confirmação, informações de autoria e correções e as aplica ao ramo
-atual.</p>
+<p>Dans la première et la troisième forme, cette commande copie les entrées
+depuis <code>&lt;arbre-esque&gt;</code> vers l&#8217;index. Dans la dernière forme, elle amène le
+sommet de la branche actuelle (<code>HEAD</code>) à <code>&lt;commit&gt;</code>, optionnellement en
+modifiant l&#8217;index et l&#8217;arbre de travail en
+correspondance. L'<code>&lt;arbre-esque&gt;</code>/<code>&lt;commit&gt;</code> vaut par défaut <code>HEAD</code> dans
+toutes les formes.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><em>git reset</em> [-q] [&lt;arbre-esque&gt;] [--] &lt;spec-de-chemin&gt;&#8230;&#8203;</dt>
+<dt class="hdlist1"><em>git reset</em> [-q] [--pathspec-from-file=&lt;fichier&gt; [--pathspec-file-nul]] [&lt;arbre-esque&gt;]</dt>
+<dd>
+<p>Ces formes réinitialisent les entrées d&#8217;index pour tous fichiers
+correspondant à &lt;spec-de-chemin&gt; à leur état de <code>&lt;arbre-esque&gt;</code> (ceci
+n&#8217;affecte pas l&#8217;arbre de travail ou la branche actuelle.)</p>
+<div class="paragraph">
+<p>Cela signifie que <code>git reset &lt;spec-de-chemin&gt;</code> est l&#8217;opposé de <code>git add
+&lt;spec-de-chemin&gt;</code>. Cette commande est équivalent à <code>git restore
+[--source=&lt;arbre-esque&gt;] --staged &lt;spec-de-chemin&gt;...</code>.</p>
+</div>
+<div class="paragraph">
+<p>Après avoir lancé <code>git reset &lt;spec-de-chemin&gt;</code> pour mettre à jour l&#8217;entrée
+d&#8217;index, vous pouvez <a href="git-restore.html">git-restore(1)</a> pour extraire le contenu de
+l&#8217;index dans l&#8217;arbre de travail. Alternativement, en utilisant
+<a href="git-restore.html">git-restore(1)</a> et en spécifiant un commit avec <code>--source</code>, vous
+pouvez copier le contenu d&#8217;un chemin d&#8217;un commit vers l&#8217;index et l&#8217;arbre de
+travail d&#8217;une seule traite.</p>
+</div>
+</dd>
+<dt class="hdlist1"><em>git reset</em> (--patch | -p) [&lt;arbre-esque&gt;] [--] [&lt;spec-de-chemin&gt;&#8230;&#8203;]</dt>
+<dd>
+<p>Sélectionner interactivement les sections dans la différence entre  l&#8217;index
+et l'&lt;arbre-esque&gt; (par défaut <code>HEAD</code>). Les sections choisies sont ensuite
+appliquées en ordre inversé à l&#8217;index.</p>
+<div class="paragraph">
+<p>Ceci signifie que <code>git reset -p</code> est l&#8217;opposé de <code>git add -p</code>, autrement
+dit, vous pouvez l&#8217;utiliser pour réinitialiser sélectivement les
+sections. Voir la section « Mode interactif » de <a href="git-add.html">git-add(1)</a> pour
+apprendre comment utiliser le mode <code>--patch</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><em>git reset</em> [&lt;mode&gt;] [&lt;commit&gt;]</dt>
+<dd>
+<p>Cette forme réinitialise le sommet de la branche courante à <code>&lt;commit&gt;</code> et
+met à jour l&#8217;index éventuellement (en le réinitialisant à l&#8217;arbre de
+<code>&lt;commit&gt;</code>) et l&#8217;arbre de travail en fonction de <code>&lt;mode&gt;</code>. Si <code>&lt;mode&gt;</code> est
+omis, l&#8217;option par défaut est <code>--mixed</code>. Le mode est une valeur parmi :</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--soft</dt>
+<dd>
+<p>Ne pas toucher du tout le fichier d&#8217;index ou l&#8217;arbre de travail (mais
+réinitialise le sommet à <code>&lt;commit&gt;</code>, juste comme le font tous les
+modes). Cela laisse tous vos fichiers modifiés « Modifications qui seront
+validées », comme l&#8217;indiquerait <code>git status</code>.</p>
+</dd>
+<dt class="hdlist1">--mixed</dt>
+<dd>
+<p>Réinitialiser l&#8217;index mais pas l&#8217;arbre de travail (c&#8217;est-à-dire, les
+fichiers modifiés sont préservés mais marqués pour la validation) et affiche
+ce qui n&#8217;a pas été mis à jour. C&#8217;est l&#8217;action par défaut.</p>
+<div class="paragraph">
+<p>Si <code>-N</code> est spécifié, les chemins supprimés sont marqués comme « à ajouter »
+(voir <a href="git-add.html">git-add(1)</a>).</p>
+</div>
+</dd>
+<dt class="hdlist1">--hard</dt>
+<dd>
+<p>Réinitialiser l&#8217;index et l&#8217;arbre de travail. Toute modification sur les
+fichiers suivis dans l&#8217;arbre de travail depuis <code>&lt;commit&gt;</code> est supprimée.</p>
+</dd>
+<dt class="hdlist1">--merge</dt>
+<dd>
+<p>Réinitialiser l&#8217;index et mettre à jour les fichiers de l&#8217;arbre de travail
+qui sont différents entre <code>&lt;commit&gt;</code> et <code>HEAD</code>, mais conserver ceux qui sont
+différents entre l&#8217;index et l&#8217;arbre de travail (c-à-d qui ont des
+modifications qui n&#8217;ont pas été indexés). Si un fichier qui est différent
+entre <code>&lt;commit&gt;</code> et l&#8217;index a des modifications non indexées, la
+réinitialisation est annulée.</p>
+<div class="paragraph">
+<p>En d&#8217;autres termes, <code>--merge</code> fait quelque chose comme <code>git read-tree -u -m
+&lt;commit&gt;</code>, mais transfère les entrées d&#8217;index non indexées.</p>
+</div>
+</dd>
+<dt class="hdlist1">--keep</dt>
+<dd>
+<p>Réinitialiser les entrées d&#8217;index et mettre à jour les fichiers dans l&#8217;arbre
+de travail qui sont différents entre <code>&lt;commit&gt;</code> et <code>HEAD</code>. Si un fichier qui
+est différent entre <code>&lt;commit&gt;</code> et <code>HEAD</code> a des modifications locales, la
+réinitialisation est annulée.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Voir « Reset, restore et revert » dans <a href="git.html">git(1)</a> pour les différences
+entre les trois commandes.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_opções">OPÇÕES</h2>
+<h2 id="_options">OPTIONS</h2>
 <div class="sectionbody">
 <div class="dlist">
 <dl>
-<dt class="hdlist1">(&lt;mbox&gt;|&lt;Maildir&gt;)&#8230;&#8203;</dt>
-<dd>
-<p>A lista de arquivos de caixa de correio para ler os patches. Se você não
-fornecer esse argumento, o comando lerá a partir da entrada padrão.  Se você
-fornecer diretórios, eles serão tratados como Maildirs.</p>
-</dd>
-<dt class="hdlist1">-s</dt>
-<dt class="hdlist1">--signoff</dt>
-<dd>
-<p>Adicione uma linha <em>Assinado-off-by:</em> à mensagem de commit, usando a própria
-identidade do committer.  Veja a opção de signoff em <a href="git-commit.html">git-commit(1)</a>
-para mais informações.</p>
-</dd>
-<dt class="hdlist1">-k</dt>
-<dt class="hdlist1">--keep</dt>
-<dd>
-<p>Passe o sinalizador <code>-k</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
-</dd>
-<dt class="hdlist1">--keep-non-patch</dt>
-<dd>
-<p>Passe o sinalizador <code>-b</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
-</dd>
-<dt class="hdlist1">--[no-]keep-cr</dt>
-<dd>
-<p>Com <code>--keep-cr</code>, chame <em>git mailsplit</em> (veja <a href="git-mailsplit.html">git-mailsplit(1)</a>)  com
-a mesma opção, para evitar que ele retire CR no final das linhas. A variável
-de configuração <code>am.keepcr</code> pode ser usada para especificar o comportamento
-padrão.  <code>--no-keep-cr</code> é útil para sobrescrever` am.keepcr`.</p>
-</dd>
-<dt class="hdlist1">-c</dt>
-<dt class="hdlist1">--scissors</dt>
-<dd>
-<p>Remova tudo no corpo antes de uma linha de tesoura (veja
-<a href="git-mailinfo.html">git-mailinfo(1)</a>). Pode ser ativado por padrão usando a variável de
-configuração <code>mailinfo.scissors</code>.</p>
-</dd>
-<dt class="hdlist1">--no-scissors</dt>
-<dd>
-<p>Ignore linhas de tesoura (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
-</dd>
-<dt class="hdlist1">-m</dt>
-<dt class="hdlist1">--message-id</dt>
-<dd>
-<p>Passe o sinalizador <code>-m</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>),
-para que o cabeçalho do Message-ID seja adicionado à mensagem de submissão.
-A variável de configuração 'am.messageid` pode ser usada para especificar o
-comportamento padrão.</p>
-</dd>
-<dt class="hdlist1">--no-message-id</dt>
-<dd>
-<p>Não adicione o cabeçalho do ID da mensagem à mensagem de confirmação.
-<code>no-message-id</code> é útil para sobrescrever` am.messageid`.</p>
-</dd>
 <dt class="hdlist1">-q</dt>
 <dt class="hdlist1">--quiet</dt>
+<dt class="hdlist1">--no-quiet</dt>
 <dd>
-<p>Fique quieto. Imprime apenas mensagens de erro.</p>
+<p>Mode silencieux, ne reporter que les erreurs. Le comportement par défaut est
+géré par l&#8217;option de configuration <code>reset.quiet</code>. <code>--quiet</code> et <code>--no-quiet</code>
+outrepassent le comportement par défaut.</p>
 </dd>
-<dt class="hdlist1">-u</dt>
-<dt class="hdlist1">--utf8</dt>
+<dt class="hdlist1">--pathspec-from-file=&lt;fichier&gt;</dt>
 <dd>
-<p>Passe o sinalizador <code>-u</code> para <em>git mailinfo</em> (veja
-<a href="git-mailinfo.html">git-mailinfo(1)</a>).  A mensagem de log de confirmação proposta
-retirada do e-mail é recodificada em codificação UTF-8 (a variável de
-configuração <code>i18n.commitencoding</code> pode ser usada para especificar a
-codificação preferida do projeto, se não for UTF-8).</p>
+<p>Le spécificateur de chemin est passé dans <code>&lt;fichier&gt;</code> au lieu des arguments
+de la ligne de commande. Si <code>&lt;fichier&gt;</code> vaut <code>-</code> alors l&#8217;entrée standard est
+utilisée. Les éléments du spécificateur de chemin sont séparés par LF ou
+CR/LF. Les éléments du spécificateur de chemin peuvent être cités comme
+expliqué pour la variable de configuration <code>core.quotePath</code> (voir
+<a href="git-config.html">git-config(1)</a>). Voir aussi l&#8217;option <code>--pathspec-file-nul</code> et
+l&#8217;option globale <code>--literal-pathspecs</code>.</p>
+</dd>
+<dt class="hdlist1">--pathspec-file-nul</dt>
+<dd>
+<p>Uniquement significatif avec <code>--pathspec-from-file</code>. Les éléments du
+spécificateur de chemin sont séparés par le caractère NUL et tous les autres
+caractères sont utilisés littéralement (y compris les retours à la ligne et
+les guillemets).</p>
+</dd>
+<dt class="hdlist1">--</dt>
+<dd>
+<p>Ne pas interpréter les arguments qui suivent comme options.</p>
+</dd>
+<dt class="hdlist1">&lt;spécificateur de chemin&gt;&#8230;&#8203;</dt>
+<dd>
+<p>Limite les chemins affectés par l&#8217;opération.</p>
 <div class="paragraph">
-<p>Isso era opcional em versões anteriores do git, mas agora é o
-padrão.   Você pode usar <code>--no-utf8</code> para sobrescrever isto.</p>
+<p>Pour plus de détail, voir l&#8217;entrée <em>spécificateur de chemin</em> dans
+<a href="gitglossary.html">gitglossary(7)</a>.</p>
 </div>
-</dd>
-<dt class="hdlist1">--no-utf8</dt>
-<dd>
-<p>Passe o sinalizador <code>-n</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
-</dd>
-<dt class="hdlist1">-3</dt>
-<dt class="hdlist1">--3way</dt>
-<dt class="hdlist1">--no-3way</dt>
-<dd>
-<p>Quando o patch não se aplica corretamente, use a mesclagem de 3 vias se o
-patch registra a identidade dos blobs aos quais ele deve se aplicar e temos
-esses blobs disponíveis localmente. <code>--no-3way</code> pode ser usado para
-sobrescrever a variável de configuração am.threeWay. Para mais informações,
-veja am.threeWay em <a href="git-config.html">git-config(1)</a>.</p>
-</dd>
-<dt class="hdlist1">--rerere-autoupdate</dt>
-<dt class="hdlist1">--no-rerere-autoupdate</dt>
-<dd>
-<p>Allow the rerere mechanism to update the index with the result of
-auto-conflict resolution if possible.</p>
-</dd>
-<dt class="hdlist1">--ignore-space-change</dt>
-<dt class="hdlist1">--ignore-whitespace</dt>
-<dt class="hdlist1">--espaçoembranco=&lt;opção&gt;</dt>
-<dt class="hdlist1">-C&lt;n&gt;</dt>
-<dt class="hdlist1">-p&lt;n&gt;</dt>
-<dt class="hdlist1">--diretório=&lt;dir&gt;</dt>
-<dt class="hdlist1">--excluir=&lt;path&gt;</dt>
-<dt class="hdlist1">--incluir=&lt;path&gt;</dt>
-<dt class="hdlist1">--reject</dt>
-<dd>
-<p>Esses sinalizadores são passados para o programa <em>git apply</em> (ver
-linkgit:git-apply 1])  que aplica o patch.</p>
-</dd>
-<dt class="hdlist1">--patch-format</dt>
-<dd>
-<p>Por padrão, o comando tentará detectar o formato do patch
-automaticamente. Esta opção permite que o usuário ignore a detecção
-automática e especifique o formato do patch com o qual os patch(es) devem
-ser interpretados. Os formatos válidos são mbox, mboxrd, stgit, stgit-series
-e hg.</p>
-</dd>
-<dt class="hdlist1">-i</dt>
-<dt class="hdlist1">--interactive</dt>
-<dd>
-<p>Corra interativamente.</p>
-</dd>
-<dt class="hdlist1">--committer-date-is-author-date</dt>
-<dd>
-<p>Por padrão, o comando registra a data da mensagem de e-mail como a data do
-autor de confirmação e usa a hora da criação de confirmação como a data do
-committer. Isso permite ao usuário mentir sobre a data do committer usando o
-mesmo valor da data do autor.</p>
-</dd>
-<dt class="hdlist1">--ignore-date</dt>
-<dd>
-<p>Por padrão, o comando registra a data da mensagem de e-mail como a data do
-autor de confirmação e usa a hora da criação de confirmação como a data do
-committer. Isso permite ao usuário mentir sobre a data do autor usando o
-mesmo valor que a data do committer.</p>
-</dd>
-<dt class="hdlist1">--skip</dt>
-<dd>
-<p>Ignore o patch atual.  Isso só é significativo ao reiniciar um patch
-abortado.</p>
-</dd>
-<dt class="hdlist1">-S[&lt;keyid&gt;]</dt>
-<dt class="hdlist1">--gpg-sinal[=&lt;keyid&gt;]</dt>
-<dd>
-<p>Confirmações de assinatura de GPG. O argumento <code>keyid</code> é opcional e
-padroniza a identidade do committer; se especificado, deve estar preso à
-opção sem espaço.</p>
-</dd>
-<dt class="hdlist1">--continue</dt>
-<dt class="hdlist1">-r</dt>
-<dt class="hdlist1">--resolved</dt>
-<dd>
-<p>Após uma falha de patch (por exemplo, tentar aplicar um patch em conflito),
-o usuário o aplicou manualmente e o arquivo de índice armazena o resultado
-do aplicativo.  Faça um commit usando o log de autoria e confirmação
-extraído da mensagem de e-mail e o arquivo de índice atual e continue.</p>
-</dd>
-<dt class="hdlist1">--resolvermsg=&lt;msg&gt;</dt>
-<dd>
-<p>Quando ocorre uma falha de patch, &lt;msg&gt; será impresso na tela antes de
-sair.  Isto substitui a mensagem padrão informando que você deve usar
-<code>--continue</code> ou` --skip` para manipular a falha. Isto é apenas para uso
-interno entre <em>git rebase</em> e <em>git am</em>.</p>
-</dd>
-<dt class="hdlist1">--abort</dt>
-<dd>
-<p>Restaure a ramificação original e aborte a operação de correção.</p>
-</dd>
-<dt class="hdlist1">--quit</dt>
-<dd>
-<p>Anule a operação de correção, mas mantenha HEAD e o índice inalterados.</p>
-</dd>
-<dt class="hdlist1">--show-current-patch[=(diff|raw)]</dt>
-<dd>
-<p>Show the message at which <code>git am</code> has stopped due to conflicts.  If <code>raw</code>
-is specified, show the raw contents of the e-mail message; if <code>diff</code>, show
-the diff portion only.  Defaults to <code>raw</code>.</p>
 </dd>
 </dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_discussão">DISCUSSÃO</h2>
+<h2 id="_exemples">EXEMPLES</h2>
 <div class="sectionbody">
-<div class="paragraph">
-<p>O nome do autor de confirmação é retirado da linha "De:" da mensagem e a
-data do autor de envio é obtida a partir da linha "Data:" da mensagem.  A
-linha "Assunto:" é usada como o título da confirmação, após remover o
-prefixo comum "[PATCH &lt;qualquer&gt;&gt;]".  A linha "Assunto:" deve descrever de
-forma concisa o que é o compromisso em uma linha de texto.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Défaire un ajout</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ edit                                     <b class="conum">(1)</b>
+$ git add frotz.c filfre.c
+$ mailx                                    <b class="conum">(2)</b>
+$ git reset                                <b class="conum">(3)</b>
+$ git pull git://info.example.com/ nitfol  <b class="conum">(4)</b></pre>
 </div>
-<div class="paragraph">
-<p>"From: ", "Date: ", and "Subject: " lines starting the body override the
-respective commit author name and title values taken from the headers.</p>
 </div>
-<div class="paragraph">
-<p>A mensagem de confirmação é formada pelo título obtido a partir do
-"Assunto:", uma linha em branco e o corpo da mensagem até onde o patch
-começa.  O excesso de espaço em branco no final de cada linha é
-automaticamente eliminado.</p>
-</div>
-<div class="paragraph">
-<p>Espera-se que o patch esteja em linha, seguindo diretamente a
-mensagem. Qualquer linha que seja da forma:</p>
-</div>
-<div class="ulist">
-<ul>
+<div class="colist arabic">
+<ol>
 <li>
-<p>três-traços e fim-de-linha, ou</p>
+<p>Vous travaillez joyeusement sur quelque chose, et trouvez que les
+modifications dans ces fichiers sont prêtes. Vous ne voulez pas les voir
+lorsque vous lancez <code>git diff</code>, parce que vous allez travailler sur d&#8217;autres
+fichiers et les modifications à ces fichiers vous distrairaient de votre
+travail.</p>
 </li>
 <li>
-<p>uma linha que começa com "diff -" ou</p>
+<p>Quelqu&#8217;un vous demande de tirer, et les modifications paraissent valoir le
+coup d&#8217;être fusionnées.</p>
 </li>
 <li>
-<p>uma linha que começa com "Index:"</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>é tomado como o início de um patch, e a mensagem de log de confirmação é
-finalizada antes da primeira ocorrência de tal linha.</p>
-</div>
-<div class="paragraph">
-<p>Ao invocar inicialmente o <code>git am</code>, você fornece os nomes das caixas de
-correio a serem processadas.  Ao ver o primeiro patch que não se aplica, ele
-aborta no meio.  Você pode se recuperar disso de duas maneiras:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>pule o patch atual reexecutando o comando com a opção <code>--skip</code>.</p>
+<p>Cependant, vous avez déjà sali l&#8217;index (c-à-d votre index ne correspond pas
+au commit <code>HEAD</code>). Mais vous savez que le tirage que vous allez faire
+n&#8217;affecte ni <code>frotz.c</code> ni <code>filfre.c</code>, donc vous rembobinez les modifications
+de l&#8217;index pour ces deux fichiers. Vos modifications dans l&#8217;arbre de travail
+restent là.</p>
 </li>
 <li>
-<p>mão resolver o conflito no diretório de trabalho e atualizar o arquivo de
-índice para colocá-lo em um estado que o patch deve ter produzido.
- Então execute o comando com a opção <code>--continue</code>.</p>
+<p>Puis vous pouvez tirer et fusionner, en laissant les modifications à
+<code>frotz.c</code> et <code>filfre.c</code> dans l&#8217;arbre de travail.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Défaire un commit et le refaire</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git commit ...
+$ git reset --soft HEAD^      <b class="conum">(1)</b>
+$ éditer                      <b class="conum">(2)</b>
+$ git commit -a -c ORIG_HEAD  <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Cela sert le plus souvent quand vous vous êtes souvenu que ce que vous avez
+validé est incomplet, ou que vous avez mal orthographié votre message de
+validation, ou les deux. Cela laisse l&#8217;arbre de travail comme il était avant
+« reset ».</p>
+</li>
+<li>
+<p>Corrige les fichiers de l&#8217;arbre de travail.</p>
+</li>
+<li>
+<p>"reset" copie l&#8217;ancienne HEAD vers <code>.git/ORIG_HEAD</code> ; refait le commit en
+démarrant par son message de validation. Si vous n&#8217;avez pas besoin d&#8217;éditer
+plus le message, vous pouvez plutôt passer l&#8217;option <code>-C</code>.</p>
 </li>
 </ol>
 </div>
 <div class="paragraph">
-<p>O comando se recusa a processar novas caixas de correio até que a operação
-atual seja concluída, portanto, se você decidir recomeçar do zero, execute o
-<code>git am --abort</code> antes de executar o comando com nomes de caixa de correio.</p>
+<p>Voir aussi l&#8217;option <code>--amend</code> de <a href="git-commit.html">git-commit(1)</a>.</p>
+</div>
+</dd>
+<dt class="hdlist1">Défaire le commit, en le transformant en branche thématique</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git branch theme/wip     <b class="conum">(1)</b>
+$ git reset --hard HEAD~3  <b class="conum">(2)</b>
+$ git switch theme/wip   <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Vous avez fait des commits, mais vous vous êtes aperçu qu&#8217;ils étaient
+prématurés pour la branche <code>master</code>. Vous voulez continuer à le polir dans
+une branche thématique, donc vous créez la branche <code>theme/wip</code> de la <code>HEAD</code>
+actuelle.</p>
+</li>
+<li>
+<p>Rembobinez la branche <code>master</code> pour en éliminer ces trois commits.</p>
+</li>
+<li>
+<p>Basculez sur la branche <code>theme/wip</code> et continuez à travailler.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Défaire des commit de manière permanente</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git commit ...
+$ git reset --hard HEAD~3   <b class="conum">(1)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Les trois derniers commits (<code>HEAD</code>, <code>HEAD^</code> et <code>HEAD~2</code>) étaient mauvais et
+vous ne plus jamais les voir. <strong>Ne faites pas</strong> ceci si vous avez déjà fourni
+ces commits à quelqu&#8217;un d&#8217;autre. (Voir la section « RÉPARER UN REBASAGE
+AMONT » dans <a href="git-rebase.html">git-rebase(1)</a> pour les implications d&#8217;une telle
+action.)</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Défaire une fusion ou un tirage</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git pull                         <b class="conum">(1)</b>
+Auto-fusion nitfol
+CONFLIT (contenu): Conflit de fusion dans nitfol
+La fusion automatique a échoué ; réglez les conflits et validez le résultat.
+$ git reset --hard                 <b class="conum">(2)</b>
+$ git pull . theme/branche         <b class="conum">(3)</b>
+Avance rapide de  41223... sur 13134...
+
+$ git reset --hard ORIG_HEAD       <b class="conum">(4)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>L&#8217;essai de mettre à jour depuis l&#8217;amont a apporté beaucoup de conflits ;
+vous n&#8217;êtes pas prêt à passer beaucoup de temps à les fusionner maintenant,
+donc vous décidez de le faire plus tard.</p>
+</li>
+<li>
+<p>"pull" n&#8217;a pas créé de commit de fusion, donc <code>git reset --hard</code> qui est
+synonyme de <code>git reset --hard HEAD</code> nettoie le bazar dans l&#8217;index et l&#8217;arbre
+de travail.</p>
+</li>
+<li>
+<p>Fusionne une branche thématique dans la branche actuelle, qui a résulté en
+une avance rapide.</p>
+</li>
+<li>
+<p>Mais vous avez décidé que la branche thématique n&#8217;est pas encore prête pour
+la publication. "pull" et "merge" laissent toujours le sommet originel de la
+branche actuelle dans <code>ORIG_HEAD</code>, donc la réinitialisation dure sur elle
+remet votre fichier d&#8217;index et l&#8217;arbre de travail à cet état et réinitialise
+le sommet de la branche à ce commit.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Défaire une fusion ou un tirage dans un arbre de travail sale</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git pull                         <b class="conum">(1)</b>
+Auto-merging nitfol
+Merge made by recursive.
+ nitfol                |   20 +++++----
+ ...
+$ git reset --merge ORIG_HEAD      <b class="conum">(2)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Même si vous pouviez avoir des modifications locales dans votre arbre de
+travail, vous pouvez lancer <code>git pull</code> en toute sécurité quand vous savez
+que les modifications dans l&#8217;autre branche n&#8217;entrent pas en conflit avec
+elles.</p>
+</li>
+<li>
+<p>Après inspection du résultat de la fusion, vous pouvez trouver que cette
+modification dans l&#8217;autre branche n&#8217;est pas satisfaisante. Lancer <code>git reset
+--hard ORIG_HEAD</code> vous ramènera à l&#8217;état antérieur, mais cela éliminera
+aussi vos modifications locales, ce que vous ne désirez pas. <code>git reset
+--merge</code> conserve vos modifications locales.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Interruption du flux de travail</dt>
+<dd>
+<div class="paragraph">
+<p>Supposons que vous êtes interrompu par une demande urgente de correctif
+pendant que vous êtes au milieu d&#8217;une grande modification. Les fichiers dans
+votre arbre de travail ne sont pas du tout en état d&#8217;être validés, mais vous
+devez aller sur une autre branche pour votre correctif rapide.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git switch feature ;# vous travailliez sur la branche feature
+$ travail travail      ;# et arrive une interruption
+$ git commit -a -m "instantané en cours"          <b class="conum">(1)</b>
+$ git switch master
+$ correctif correctif
+$ git commit           ;# validation avec un vrai message
+$ git switch feature
+$ git reset --soft HEAD^ ;# retour au travail     <b class="conum">(2)</b>
+$ git reset                                       <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Ce commit sera écrasé donc un message de validation jetable, c&#8217;est OK.</p>
+</li>
+<li>
+<p>Ceci élimine le commit « instantané » de l&#8217;historique des commits et met
+votre arbre de travail dans l&#8217;état précédent cet instantané.</p>
+</li>
+<li>
+<p>À ce point, le fichier d&#8217;index a toujours toutes les modifications en cours
+que vous avez validées comme « instantané en cours ». Ceci met à jour
+l&#8217;index pour afficher vos fichiers en cours d&#8217;édition comme non validés.</p>
+</li>
+</ol>
 </div>
 <div class="paragraph">
-<p>Antes que qualquer correção seja aplicada, ORIG_HEAD é definido como a ponta
-da ramificação atual.  Isso é útil se você tiver problemas com várias
-confirmações, como executar <em>git am</em> na ramificação errada ou um erro nas
-confirmações mais facilmente corrigido alterando a caixa de correio (por
-exemplo,  erros nas linhas "De:").</p>
+<p>Voir aussi <a href="git-stash.html">git-stash(1)</a>.</p>
+</div>
+</dd>
+<dt class="hdlist1">Réinitialiser un seul fichier dans l&#8217;index</dt>
+<dd>
+<div class="paragraph">
+<p>Supposons que vous avez ajouté un fichier à votre index, mais décidez plus
+tard que vous ne voulez plus l&#8217;ajouter à votre validation. Vous pouvez
+retirer le fichier de l&#8217;index tout en conservant vos modifications avec git
+reset.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git reset -- frotz.c                      <b class="conum">(1)</b>
+$ git commit -m "Validation de l'index"     <b class="conum">(2)</b>
+$ git add frotz.c                           <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Ceci supprime un fichier de l&#8217;index tout en le conservant dans le répertoire
+de travail.</p>
+</li>
+<li>
+<p>Ceci valide tous les autres fichiers dans l&#8217;index.</p>
+</li>
+<li>
+<p>Ajouter à nouveau le fichier à l&#8217;index.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Conserver les modifications dans l&#8217;arbre de travail tout en éliminant les validations précédentes</dt>
+<dd>
+<div class="paragraph">
+<p>Supposons que vous êtes en train de travailler sur quelque chose et que vous
+le validez, et qu&#8217;alors vous continuez à travailler un peu plus, mais vous
+pensez maintenant que ce que vous avez dans votre arbre de travail devrait
+aller dans une autre branche qui n&#8217;a rien à voir avec ce que vous avez
+validé précédemment. Vous pouvez commencer une nouvelle branche et la
+réinitialiser tout en conservant les modifications dans votre arbre de
+travail.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git tag debut
+$ git switch -c branche1
+$ édition
+$ git commit ...                            <b class="conum">(1)</b>
+$ édition
+$ git switch -c branche2                  <b class="conum">(2)</b>
+$ git reset --keep debut                    <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Ceci valide vos premières éditions dans <code>branche1</code>.</p>
+</li>
+<li>
+<p>Dans un monde idéal, vous pourriez avoir réalisé que le commit précédent
+n&#8217;appartenait pas au nouveau sujet quand vous avez créé et avez basculé sur
+<code>branche2</code> (c-à-d <code>git switch -c branche2 debut</code>), mais personne n&#8217;est
+parfait.</p>
+</li>
+<li>
+<p>Mais vous pouvez utiliser <code>reset --keep</code> pour retirer le commit non voulu
+après avoir basculé sur <code>branche2</code>.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Découper un commit en une séquence de commits</dt>
+<dd>
+<div class="paragraph">
+<p>Supposons que vous avez créé de nombreuses modifications logiquement
+atomiques et les avez toutes validées ensemble. Plus tard, vous décidez
+qu&#8217;il serait mieux d&#8217;avoir chaque section logique associée à son propre
+commit. Vous pouvez utiliser git reset pour rembobiner l&#8217;historique sans
+changer le contenu de vos fichiers locaux, puis successivement utiliser <code>git
+add -p</code> pour sélectionner interactivement quelles sections inclure dans
+chaque validation, en utilisant <code>git commit -c</code> pour pré-charger le message
+de validation.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git reset -N HEAD^                        <b class="conum">(1)</b>
+$ git add -p                                <b class="conum">(2)</b>
+$ git diff --cached                         <b class="conum">(3)</b>
+$ git commit -c HEAD@{1}                    <b class="conum">(4)</b>
+...                                         <b class="conum">(5)</b>
+$ git add ...                               <b class="conum">(6)</b>
+$ git diff --cached                         <b class="conum">(7)</b>
+$ git commit ...                            <b class="conum">(8)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Réinitialise d&#8217;abord l&#8217;historique en arrière d&#8217;un commit de manière à
+retirer le commit original, mais laisse l&#8217;arbre de travail avec toutes ses
+modifications. Le drapeau -N garantit que tous les nouveaux fichiers ajoutés
+avec <code>HEAD</code> sont toujours marqués de telle manière que <code>git add -p</code> les
+trouve.</p>
+</li>
+<li>
+<p>Ensuite, on sélectionne interactivement les sections de diff à ajouter en
+utilisant <code>git add -p</code>. Ceci vous demandera pour chaque section de diff
+l&#8217;une après l&#8217;autre et vous pouvez répondre simplement « oui, à inclure »,
+« non, ne pas inclure » ou même utiliser la fonctionnalité puissante
+d&#8217;édition de la section.</p>
+</li>
+<li>
+<p>Une fois satisfait des sections à inclure, vous devriez vérifier ce qui a
+été préparé pour la première validation en utilisant <code>git diff
+--cached</code>. Cela montre toutes les modifications qui ont été indexées et sont
+sur le point d&#8217;être validées.</p>
+</li>
+<li>
+<p>Ensuite, valider les modifications stockées dans l&#8217;index. L&#8217;option <code>-c</code>
+indique de pré-remplir le message de validation avec le message original qui
+a servi au premier commit. C&#8217;est utile pour éviter de le retaper. Le
+<code>HEAD@{1}</code> est une notation spéciale pour le commit que <code>HEAD</code> a été avant
+le commit original réinitialisé (il y a une modification). Voir
+<a href="git-reflog.html">git-reflog(1)</a> pour plus de détails. Vous pouvez aussi utiliser une
+référence à tout autre commit valide.</p>
+</li>
+<li>
+<p>Vous pouvez répéter les étapes 2 à 4 plusieurs fois pour scinder le code
+original en un certain nombre de commits.</p>
+</li>
+<li>
+<p>Maintenant, vous avez séparé beaucoup des modifications dans leurs propres
+commits, et pourriez ne plus utiliser le mode patch du <code>git add</code> pour
+sélectionner toutes les modifications non validées restantes.</p>
+</li>
+<li>
+<p>Une fois de plus, vérifiez que vous avez inclus ce que vous souhaitez. Vous
+souhaitez peut-être vérifier que git diff ne montre aucune modification
+restante à valider plus tard.</p>
+</li>
+<li>
+<p>Et finalement crée le commit final.</p>
+</li>
+</ol>
+</div>
+</dd>
+</dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_ganchos">GANCHOS</h2>
+<h2 id="_discussion">DISCUSSION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Este comando pode executar os ganchos <code>applypatch-msg</code>,` pre-applypatch` e
-<code>post-applypatch</code>. Veja <a href="githooks.html">githooks(5)</a> para mais informações.</p>
+<p>Les tables ci-dessous montrent ce qui arrive lorsqu&#8217;on lance :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>git reset --option cible</pre>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_veja_também">VEJA TAMBÉM</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-apply.html">git-apply(1)</a>.</p>
+<p>pour réinitialiser <code>HEAD</code> à un autre commit (<code>cible</code>) avec des options de
+réinitialisation en fonction de l&#8217;état des fichiers.</p>
+</div>
+<div class="paragraph">
+<p>Dans ces tableaux, <code>A</code>, <code>B</code>, <code>C</code> et <code>D</code> sont différents états d&#8217;un
+fichier. Par exemple, la première ligne du premier tableau signifie que si
+un fichier est dans l&#8217;état <code>A</code> dans l&#8217;arbre de travail, dans l&#8217;état <code>B</code> dans
+l&#8217;index, dans l&#8217;état <code>C</code> dans <code>HEAD</code> et dans l&#8217;état <code>D</code> dans la cible, alors
+<code>git reset --soft cible</code> laissera le fichier dans l&#8217;arbre de travail dans
+l&#8217;état <code>A</code> et dans l&#8217;index dans l&#8217;état <code>B</code>. Il réinitialise (c-à-d déplace)
+la <code>HEAD</code> (en d&#8217;autres termes le sommet de la branche actuelle, si vous êtes
+dessus) à <code>cible</code> (qui a le fichier dans l&#8217;état <code>D</code>).</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible         travail index HEAD
+----------------------------------------------------
+ A       B     C    D     --soft   A       B     D
+			  --mixed  A       D     D
+			  --hard   D       D     D
+			  --merge (interdit)
+			  --keep  (interdit)</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible         travail index HEAD
+----------------------------------------------------
+ A       B     C    C     --soft   A       B     C
+			  --mixed  A       C     C
+			  --hard   C       C     C
+			  --merge (interdit)
+			  --keep   A       C     C</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible         travail index HEAD
+----------------------------------------------------
+ B       B     C    D     --soft   B       B     D
+			  --mixed  B       D     D
+			  --hard   D       D     D
+			  --merge  D       D     D
+			  --keep  (interdit)</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible         travail index HEAD
+----------------------------------------------------
+ B       B     C    C     --soft   B       B     C
+			  --mixed  B       C     C
+			  --hard   C       C     C
+			  --merge  C       C     C
+			  --keep   B       C     C</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible         travail index HEAD
+----------------------------------------------------
+ B       C     C    D     --soft   B       C     D
+			  --mixed  B       D     D
+			  --hard   D       D     D
+			  --merge (interdit)
+			  --keep  (interdit)</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible         travail index HEAD
+----------------------------------------------------
+ B       C     C    C     --soft   B       C     C
+			  --mixed  B       C     C
+			  --hard   C       C     C
+			  --merge  B       C     C
+			  --keep   B       C     C</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>reset --merge</code> est fait pour être utilisé lors de la réinitialisation d&#8217;une
+fusion conflictuelle. Toute opération de type fusion garantit que le fichier
+de l&#8217;arbre de travail qui est impliqué dans une fusion ne subit pas de
+modification locale par rapport à l&#8217;index avant son démarrage, et qu&#8217;elle
+écrit le résultat dans l&#8217;arbre de travail. Donc si nous voyons des
+différences entre l&#8217;index et la cible et aussi entre l&#8217;index et l&#8217;arbre de
+travail, alors cela signifie que nous ne réinitialisons pas depuis un état
+qu&#8217;une opération de type fusion a laissé après un échec de conflit. C&#8217;est
+pourquoi l&#8217;option <code>--merge</code> est interdite dans ce cas.</p>
+</div>
+<div class="paragraph">
+<p><code>reset --keep</code> est fait pour être utilisé lors de la suppression d&#8217;un
+certain nombre des derniers commits dans la branche actuelle tout en
+conservant les modifications dans l&#8217;arbre de travail. S&#8217;il pouvait y avoir
+conflit entre les modifications dans le commit que nous souhaitons retirer
+et les modifications dans l&#8217;arbre de travail que nous souhaitons conserver,
+la réinitialisation est interdite. C&#8217;est pourquoi il est interdit s&#8217;il y a
+des modifications à la fois dans l&#8217;arbre de travail et dans <code>HEAD</code>, et entre
+<code>HEAD</code> et la cible. Pour plus de sécurité, c&#8217;est aussi interdit quand des
+entrées sont non fusionnées.</p>
+</div>
+<div class="paragraph">
+<p>Le tableau suivant montre ce qui arrive quand il y a des entrées non
+fusionnées :</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible          travail index HEAD
+----------------------------------------------------
+ X       U     A    B     --soft  (disallowed)
+			  --mixed  X       B     B
+			  --hard   B       B     B
+			  --merge  B       B     B
+			  --keep  (disallowed)</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>travail index HEAD cible          travail index HEAD
+----------------------------------------------------
+ X       U     A    A     --soft  (interdit)
+			  --mixed  X       A     A
+			  --hard   A       A     A
+			  --merge  A       A     A
+			  --keep  (interdit)</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>X</code> signifie n&#8217;importe quel état et <code>U</code> signifie un index non fusionné.</p>
 </div>
 </div>
 </div>
@@ -745,14 +1142,14 @@ exemplo,  erros nas linhas "De:").</p>
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Parte do <a href="git.html">git(1)</a> suite</p>
+<p>Fait partie de la suite <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-10 23:41:50 +0200
+Last updated 2020-04-10 23:41:09 +0200
 </div>
 </div>
 </body>

@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="generator" content="Asciidoctor 2.0.10"/>
-<title>git-am(1)</title>
+<title>git-add(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -438,306 +438,407 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="manpage">
 <div id="header">
-<h1>git-am(1) Manual Page</h1>
-<h2 id="_nome">NOME</h2>
+<h1>git-add(1) Manual Page</h1>
+<h2 id="_名称">名称</h2>
 <div class="sectionbody">
-<p>git-am - Aplica uma série de patches de uma caixa de correio</p>
+<p>git-add - 添加内容到索引</p>
 </div>
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_sinopse">SINOPSE</h2>
+<h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git am</em> [--signoff] [--keep] [--[no-]keep-cr] [--[no-]utf8]
-	 [--[no-]3way] [--interactive] [--committer-date-is-author-date]
-	 [--ignore-date] [--ignore-space-change | --ignore-whitespace]
-	 [--whitespace=&lt;option&gt;] [-C&lt;n&gt;] [-p&lt;n&gt;] [--directory=&lt;dir&gt;]
-	 [--exclude=&lt;path&gt;] [--include=&lt;path&gt;] [--reject] [-q | --quiet]
-	 [--[no-]scissors] [-S[&lt;keyid&gt;]] [--patch-format=&lt;format&gt;]
-	 [(&lt;mbox&gt; | &lt;Maildir&gt;)&#8230;&#8203;]
-<em>git am</em> (--continue | --skip | --abort | --quit | --show-current-patch[=(diff|raw)])</pre>
+<pre class="content"><em>git add</em> [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
+	  [--edit | -e] [--[no-]all | --[no-]ignore-removal | [--update | -u]]
+	  [--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
+	  [--chmod=(+|-)x] [--pathspec-from-file=&lt;file&gt; [--pathspec-file-nul]]
+	  [--] [&lt;pathspec&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_descrição">DESCRIÇÃO</h2>
+<h2 id="_描述">描述</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Divide as mensagens de correio em uma caixa de correio em mensagens de log
-de confirmação, informações de autoria e correções e as aplica ao ramo
-atual.</p>
+<p>该命令在工作树中找到的当前的内容以更新索引，为下一次提交准备暂存的内容。它通常会整体添加现有路径的当前内容，但是通过某些选项，它也可以用于仅添加对工作树文件所做的部分更改，或删除工作树中不存在的路径。</p>
+</div>
+<div class="paragraph">
+<p>“索引”保存着工作树内容的快照，该快照作为下一次提交的内容。因此，在对工作树进行任何更改之后，以及在运行commit命令之前，必须使用`add`命令将所有新文件或修改过的文件添加到索引中。</p>
+</div>
+<div class="paragraph">
+<p>提交前可以多次执行此命令。它仅在运行add命令时添加指定文件的内容；如果要在下一次提交中包含后续更改，则必须再次运行`git
+add`将新内容添加到索引中。</p>
+</div>
+<div class="paragraph">
+<p><code>git status</code> 命令可用于获取摘要，说明哪些变化的文件已暂存，准备下一次提交。</p>
+</div>
+<div class="paragraph">
+<p><code>git add</code> 命令默认不会添加被忽略的文件。如果在命令行上明确指定了任何被忽略的文件，则`git
+add`会失败，并显示被忽略文件的列表。由目录递归或Git执行的文件名通配符（在shell之前引用的通配符）所涉及的忽略文件将被静默忽略。 <em>git
+add</em> 命令可用于通过 -f 选项（force）强制添加忽略的文件。</p>
+</div>
+<div class="paragraph">
+<p>请参阅 <a href="git-commit.html">git-commit(1)</a> 了解将内容添加到提交的其他替代方法。</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_opções">OPÇÕES</h2>
+<h2 id="_选项">选项</h2>
 <div class="sectionbody">
 <div class="dlist">
 <dl>
-<dt class="hdlist1">(&lt;mbox&gt;|&lt;Maildir&gt;)&#8230;&#8203;</dt>
+<dt class="hdlist1">&lt;pathspec&gt;&#8230;&#8203;</dt>
 <dd>
-<p>A lista de arquivos de caixa de correio para ler os patches. Se você não
-fornecer esse argumento, o comando lerá a partir da entrada padrão.  Se você
-fornecer diretórios, eles serão tratados como Maildirs.</p>
-</dd>
-<dt class="hdlist1">-s</dt>
-<dt class="hdlist1">--signoff</dt>
-<dd>
-<p>Adicione uma linha <em>Assinado-off-by:</em> à mensagem de commit, usando a própria
-identidade do committer.  Veja a opção de signoff em <a href="git-commit.html">git-commit(1)</a>
-para mais informações.</p>
-</dd>
-<dt class="hdlist1">-k</dt>
-<dt class="hdlist1">--keep</dt>
-<dd>
-<p>Passe o sinalizador <code>-k</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
-</dd>
-<dt class="hdlist1">--keep-non-patch</dt>
-<dd>
-<p>Passe o sinalizador <code>-b</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
-</dd>
-<dt class="hdlist1">--[no-]keep-cr</dt>
-<dd>
-<p>Com <code>--keep-cr</code>, chame <em>git mailsplit</em> (veja <a href="git-mailsplit.html">git-mailsplit(1)</a>)  com
-a mesma opção, para evitar que ele retire CR no final das linhas. A variável
-de configuração <code>am.keepcr</code> pode ser usada para especificar o comportamento
-padrão.  <code>--no-keep-cr</code> é útil para sobrescrever` am.keepcr`.</p>
-</dd>
-<dt class="hdlist1">-c</dt>
-<dt class="hdlist1">--scissors</dt>
-<dd>
-<p>Remova tudo no corpo antes de uma linha de tesoura (veja
-<a href="git-mailinfo.html">git-mailinfo(1)</a>). Pode ser ativado por padrão usando a variável de
-configuração <code>mailinfo.scissors</code>.</p>
-</dd>
-<dt class="hdlist1">--no-scissors</dt>
-<dd>
-<p>Ignore linhas de tesoura (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
-</dd>
-<dt class="hdlist1">-m</dt>
-<dt class="hdlist1">--message-id</dt>
-<dd>
-<p>Passe o sinalizador <code>-m</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>),
-para que o cabeçalho do Message-ID seja adicionado à mensagem de submissão.
-A variável de configuração 'am.messageid` pode ser usada para especificar o
-comportamento padrão.</p>
-</dd>
-<dt class="hdlist1">--no-message-id</dt>
-<dd>
-<p>Não adicione o cabeçalho do ID da mensagem à mensagem de confirmação.
-<code>no-message-id</code> é útil para sobrescrever` am.messageid`.</p>
-</dd>
-<dt class="hdlist1">-q</dt>
-<dt class="hdlist1">--quiet</dt>
-<dd>
-<p>Fique quieto. Imprime apenas mensagens de erro.</p>
-</dd>
-<dt class="hdlist1">-u</dt>
-<dt class="hdlist1">--utf8</dt>
-<dd>
-<p>Passe o sinalizador <code>-u</code> para <em>git mailinfo</em> (veja
-<a href="git-mailinfo.html">git-mailinfo(1)</a>).  A mensagem de log de confirmação proposta
-retirada do e-mail é recodificada em codificação UTF-8 (a variável de
-configuração <code>i18n.commitencoding</code> pode ser usada para especificar a
-codificação preferida do projeto, se não for UTF-8).</p>
+<p>要从中添加内容的文件。Fileglobs（例如`*.c`）可以用来添加所有匹配的文件。此外，还可以提供一个前导目录名（例如，指定`dir`以添加`dir/file1`和`dir/file2`）来更新索引，使其与整个目录的当前状态相匹配（例如，指定`dir`不仅会记录在工作树中修改的文件`dir/file1`，还会记录在工作树中添加的文件`dir/file2`，还有从工作树中删除的文件`dir/file3`）。请注意，旧版本的Git会忽略已删除的文件；如果要添加已修改的文件或新文件，但忽略已删除的文件，请使用“--no
+all”选项。</p>
 <div class="paragraph">
-<p>Isso era opcional em versões anteriores do git, mas agora é o
-padrão.   Você pode usar <code>--no-utf8</code> para sobrescrever isto.</p>
+<p>有关 &lt;pathspec&gt; 格式的更多细节，请参考 <a href="gitglossary.html">gitglossary(7)</a>。</p>
 </div>
 </dd>
-<dt class="hdlist1">--no-utf8</dt>
+<dt class="hdlist1">-n</dt>
+<dt class="hdlist1">--dry-run</dt>
 <dd>
-<p>Passe o sinalizador <code>-n</code> para <em>git mailinfo</em> (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
+<p>实际上不添加文件，仅展示文件是否存在或是否忽略。</p>
 </dd>
-<dt class="hdlist1">-3</dt>
-<dt class="hdlist1">--3way</dt>
-<dt class="hdlist1">--no-3way</dt>
+<dt class="hdlist1">-v</dt>
+<dt class="hdlist1">--verbose</dt>
 <dd>
-<p>Quando o patch não se aplica corretamente, use a mesclagem de 3 vias se o
-patch registra a identidade dos blobs aos quais ele deve se aplicar e temos
-esses blobs disponíveis localmente. <code>--no-3way</code> pode ser usado para
-sobrescrever a variável de configuração am.threeWay. Para mais informações,
-veja am.threeWay em <a href="git-config.html">git-config(1)</a>.</p>
+<p>冗余模式。</p>
 </dd>
-<dt class="hdlist1">--rerere-autoupdate</dt>
-<dt class="hdlist1">--no-rerere-autoupdate</dt>
+<dt class="hdlist1">-f</dt>
+<dt class="hdlist1">--force</dt>
 <dd>
-<p>Allow the rerere mechanism to update the index with the result of
-auto-conflict resolution if possible.</p>
-</dd>
-<dt class="hdlist1">--ignore-space-change</dt>
-<dt class="hdlist1">--ignore-whitespace</dt>
-<dt class="hdlist1">--espaçoembranco=&lt;opção&gt;</dt>
-<dt class="hdlist1">-C&lt;n&gt;</dt>
-<dt class="hdlist1">-p&lt;n&gt;</dt>
-<dt class="hdlist1">--diretório=&lt;dir&gt;</dt>
-<dt class="hdlist1">--excluir=&lt;path&gt;</dt>
-<dt class="hdlist1">--incluir=&lt;path&gt;</dt>
-<dt class="hdlist1">--reject</dt>
-<dd>
-<p>Esses sinalizadores são passados para o programa <em>git apply</em> (ver
-linkgit:git-apply 1])  que aplica o patch.</p>
-</dd>
-<dt class="hdlist1">--patch-format</dt>
-<dd>
-<p>Por padrão, o comando tentará detectar o formato do patch
-automaticamente. Esta opção permite que o usuário ignore a detecção
-automática e especifique o formato do patch com o qual os patch(es) devem
-ser interpretados. Os formatos válidos são mbox, mboxrd, stgit, stgit-series
-e hg.</p>
+<p>允许添加已被忽略的文件。</p>
 </dd>
 <dt class="hdlist1">-i</dt>
 <dt class="hdlist1">--interactive</dt>
 <dd>
-<p>Corra interativamente.</p>
+<p>以交互方式将工作树中的修改内容添加到索引。可以提供可选的路径参数，以将操作限制为工作树的子集。有关详细信息，请参见`&#8216;交互模式&#8217;'。</p>
 </dd>
-<dt class="hdlist1">--committer-date-is-author-date</dt>
+<dt class="hdlist1">-p</dt>
+<dt class="hdlist1">--patch</dt>
 <dd>
-<p>Por padrão, o comando registra a data da mensagem de e-mail como a data do
-autor de confirmação e usa a hora da criação de confirmação como a data do
-committer. Isso permite ao usuário mentir sobre a data do committer usando o
-mesmo valor da data do autor.</p>
+<p>交互地在索引和工作树之间选择补丁块并将它们添加到索引中。这让用户有机会在将修改后的内容添加到索引之前查看差异。</p>
+<div class="paragraph">
+<p>这可以有效地运行`add --interactive`，但是会绕过初始命令菜单，而直接跳转到“
+patch”子命令。有关详细信息，请参见`&#8216;交互模式&#8217;'。</p>
+</div>
 </dd>
-<dt class="hdlist1">--ignore-date</dt>
+<dt class="hdlist1">-e</dt>
+<dt class="hdlist1">--edit</dt>
 <dd>
-<p>Por padrão, o comando registra a data da mensagem de e-mail como a data do
-autor de confirmação e usa a hora da criação de confirmação como a data do
-committer. Isso permite ao usuário mentir sobre a data do autor usando o
-mesmo valor que a data do committer.</p>
+<p>在编辑器中打开与索引的差异，使用户进行编辑。关闭编辑器后，调整块补丁头并将其应用于索引。</p>
+<div class="paragraph">
+<p>此选项的目的是选择并选择要应用的补丁的行，甚至修改要暂存的行的内容。与使用交互式补丁块选择器相比，其更快，更灵活。但是，很容易混淆自己并创建不应用于索引的补丁。请参阅下面的编辑补丁。</p>
+</div>
 </dd>
-<dt class="hdlist1">--skip</dt>
+<dt class="hdlist1">-u</dt>
+<dt class="hdlist1">--update</dt>
 <dd>
-<p>Ignore o patch atual.  Isso só é significativo ao reiniciar um patch
-abortado.</p>
+<p>在索引已经具有与&lt;pathspec&gt;匹配项的地方更新索引。这会删除和修改索引项以匹配工作树，但不添加新文件。</p>
+<div class="paragraph">
+<p>如果在使用`-u`选项时未指定&lt;pathspec&gt;，则整个工作树中的所有跟踪文件都将更新（旧版本Git会限制更新当前目录及其子目录）。</p>
+</div>
 </dd>
-<dt class="hdlist1">-S[&lt;keyid&gt;]</dt>
-<dt class="hdlist1">--gpg-sinal[=&lt;keyid&gt;]</dt>
+<dt class="hdlist1">-A</dt>
+<dt class="hdlist1">--all</dt>
+<dt class="hdlist1">--no-ignore-removal</dt>
 <dd>
-<p>Confirmações de assinatura de GPG. O argumento <code>keyid</code> é opcional e
-padroniza a identidade do committer; se especificado, deve estar preso à
-opção sem espaço.</p>
+<p>不仅在工作树中有与&lt;pathspec&gt;匹配的文件的地方更新索引，而且在索引中已经有一个项的地方更新索引。这将添加、修改和删除与工作树匹配的索引项。</p>
+<div class="paragraph">
+<p>如果在使用`-A`选项时未指定&lt;pathspec&gt;，则整个工作树中的所有文件都将更新（旧版本的Git会限制当前目录及其子目录的更新）。</p>
+</div>
 </dd>
-<dt class="hdlist1">--continue</dt>
-<dt class="hdlist1">-r</dt>
-<dt class="hdlist1">--resolved</dt>
+<dt class="hdlist1">--no-all</dt>
+<dt class="hdlist1">--ignore-removal</dt>
 <dd>
-<p>Após uma falha de patch (por exemplo, tentar aplicar um patch em conflito),
-o usuário o aplicou manualmente e o arquivo de índice armazena o resultado
-do aplicativo.  Faça um commit usando o log de autoria e confirmação
-extraído da mensagem de e-mail e o arquivo de índice atual e continue.</p>
+<p>通过添加索引未知的新文件和在工作树中修改的文件以更新索引，但忽略已从工作树中删除的文件。当不使用&lt;pathspec&gt;时，此选项是必须的。</p>
+<div class="paragraph">
+<p>此选项主要用于帮助那些习惯于较旧版本Git的用户。旧版本中的"Git add&lt;pathspec&gt;&#8230;&#8203;"是"Git add&#8212;&#8203;no
+all&lt;pathspec&gt;&#8230;&#8203;"的同义词，即忽略已删除的文件。</p>
+</div>
 </dd>
-<dt class="hdlist1">--resolvermsg=&lt;msg&gt;</dt>
+<dt class="hdlist1">-N</dt>
+<dt class="hdlist1">--intent-to-add</dt>
 <dd>
-<p>Quando ocorre uma falha de patch, &lt;msg&gt; será impresso na tela antes de
-sair.  Isto substitui a mensagem padrão informando que você deve usar
-<code>--continue</code> ou` --skip` para manipular a falha. Isto é apenas para uso
-interno entre <em>git rebase</em> e <em>git am</em>.</p>
+<p>Record only the fact that the path will be added later. An entry for the
+path is placed in the index with no content. This is useful for, among other
+things, showing the unstaged content of such files with <code>git diff</code> and
+committing them with <code>git commit -a</code>.</p>
 </dd>
-<dt class="hdlist1">--abort</dt>
+<dt class="hdlist1">--refresh</dt>
 <dd>
-<p>Restaure a ramificação original e aborte a operação de correção.</p>
+<p>不添加文件，只刷新索引中的stat()信息。</p>
 </dd>
-<dt class="hdlist1">--quit</dt>
+<dt class="hdlist1">--ignore-errors</dt>
 <dd>
-<p>Anule a operação de correção, mas mantenha HEAD e o índice inalterados.</p>
+<p>如果由于索引错误而无法添加某些文件，请不要中止操作，而是继续添加其他文件。命令仍应以非零状态退出。可以将配置变量`add.ignoreErrors`设置为true，使其成为默认行为。</p>
 </dd>
-<dt class="hdlist1">--show-current-patch[=(diff|raw)]</dt>
+<dt class="hdlist1">--ignore-missing</dt>
 <dd>
-<p>Show the message at which <code>git am</code> has stopped due to conflicts.  If <code>raw</code>
-is specified, show the raw contents of the e-mail message; if <code>diff</code>, show
-the diff portion only.  Defaults to <code>raw</code>.</p>
+<p>此选项只能与&#8212;&#8203;dry-run一起使用。通过使用此选项，用户可以检查是否会忽略任何给定的文件，无论它们是否已存在于工作树中。</p>
+</dd>
+<dt class="hdlist1">--no-warn-embedded-repo</dt>
+<dd>
+<p>默认情况下，<code>git add`将在向索引添加嵌入式存储库时发出警告，而不使用`git submodule
+add`在</code>.gitmodules`中创建条目。此选项将抑制警告（例如，如果手动对子模块执行操作）。</p>
+</dd>
+<dt class="hdlist1">--renormalize</dt>
+<dd>
+<p>对所有跟踪的文件应用`clean`过程，将它们再次强制添加到索引中。这在更改`core.autocrlf`配置或`text`属性以更正添加了错误CRLF/LF行结尾的文件后非常有用。此选项隐含`-u`选项。</p>
+</dd>
+<dt class="hdlist1">--chmod=(+|-)x</dt>
+<dd>
+<p>重写添加文件的可执行位。可执行位仅在索引中更改，磁盘上的文件保持不变。</p>
+</dd>
+<dt class="hdlist1">--pathspec-from-file=&lt;file&gt;</dt>
+<dd>
+<p>Pathspec is passed in <code>&lt;file&gt;</code> instead of commandline args. If <code>&lt;file&gt;</code> is
+exactly <code>-</code> then standard input is used. Pathspec elements are separated by
+LF or CR/LF. Pathspec elements can be quoted as explained for the
+configuration variable <code>core.quotePath</code> (see <a href="git-config.html">git-config(1)</a>). See
+also <code>--pathspec-file-nul</code> and global <code>--literal-pathspecs</code>.</p>
+</dd>
+<dt class="hdlist1">--pathspec-file-nul</dt>
+<dd>
+<p>只有在使用`--pathspec-from-file”时才有意义。Pathspec元素用NUL字符分隔，所有其他字符都按字面意思（包括换行符和引号）表示。</p>
+</dd>
+<dt class="hdlist1">--</dt>
+<dd>
+<p>此选项可用于分离命令行选项和文件列表（当文件名可能被误认为命令行选项时非常有用）。</p>
 </dd>
 </dl>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_discussão">DISCUSSÃO</h2>
+<h2 id="_实例">实例</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>添加`Documentation`目录及其子目录下所有`*.txt`文件的内容：</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git add Documentation/\*.txt</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>注意，在本例中，星号`*`是从shell中引入的；这使命令可以包含`Documentation/`中子目录的文件。</p>
+</div>
+</li>
+<li>
+<p>Considers adding content from all git-*.sh scripts:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git add git-*.sh</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>因为这个示例允许shell扩展星号（即显式列出文件），所以它不包含`subdir/git-foo.sh`。</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_交互模式">交互模式</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>O nome do autor de confirmação é retirado da linha "De:" da mensagem e a
-data do autor de envio é obtida a partir da linha "Data:" da mensagem.  A
-linha "Assunto:" é usada como o título da confirmação, após remover o
-prefixo comum "[PATCH &lt;qualquer&gt;&gt;]".  A linha "Assunto:" deve descrever de
-forma concisa o que é o compromisso em uma linha de texto.</p>
+<p>当命令进入交互模式时，它将显示`status`子命令的输出，然后进入其交互命令循环。</p>
 </div>
 <div class="paragraph">
-<p>"From: ", "Date: ", and "Subject: " lines starting the body override the
-respective commit author name and title values taken from the headers.</p>
+<p>命令循环显示可用的子命令列表，并提示`What now&gt;<code>。通常，当提示以单个</code>&gt;`结尾时，您只能选择给定的一个选项并键入return，如下所示：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>    *** Commands ***
+      1: status       2: update       3: revert       4: add untracked
+      5: patch        6: diff         7: quit         8: help
+    What now&gt; 1</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>A mensagem de confirmação é formada pelo título obtido a partir do
-"Assunto:", uma linha em branco e o corpo da mensagem até onde o patch
-começa.  O excesso de espaço em branco no final de cada linha é
-automaticamente eliminado.</p>
+<p>你也可以输入`s`、<code>sta`或`status</code>，只要候选项是唯一的。</p>
 </div>
 <div class="paragraph">
-<p>Espera-se que o patch esteja em linha, seguindo diretamente a
-mensagem. Qualquer linha que seja da forma:</p>
+<p>主命令循环有6个子命令（包括帮助和退出）。</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">status</dt>
+<dd>
+<p>这将显示每个路径下HEAD和索引之间的更改（即，如果输入`git commit`，将提交什么），以及索引和工作树文件之间的更改（即，在输入`git
+commit`之前，执行`git add`可以进一步暂存什么）。示例输出如下：</p>
+<div class="listingblock">
+<div class="content">
+<pre>              staged     unstaged path
+     1:       binary      nothing foo.png
+     2:     +403/-35        +1/-1 git-add--interactive.perl</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>它表明foo.png与HEAD有区别（但其是二进制的，因此无法显示行数），索引副本和工作树版本之间没有区别（如果工作树版本也不同，<code>nothing`的位置上会显示`binary</code>）。另一个文件git
+add-{litdd}interactive.perl添加了403行，如果提交索引中的内容，则删除了35行，但工作树文件有额外修改（一次添加一次删除）。</p>
+</div>
+</dd>
+<dt class="hdlist1">update</dt>
+<dd>
+<p>这将显示状态信息并发出“更新&gt;&gt;”提示。当提示以“&gt;&gt;”结尾时，可以进行多个选择，并用空格或逗号连接。你也可以输入范围。例如：“2-5
+7,9”将从列表中选择2、3、4、5、7、9。如果省略一个范围中的第二个数字，则将获取所有剩余的补丁。例如：“7-”从列表中选择7、8、9。你可以输入“*”来选择全部补丁。</p>
+<div class="paragraph">
+<p>您选择的内容会用“*”突出显示，如下所示：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>           staged     unstaged path
+  1:       binary      nothing foo.png
+* 2:     +403/-35        +1/-1 git-add--interactive.perl</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>要删除选定内容，请在输入前加上`-`，如下所示：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Update&gt;&gt; -2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>进行选择后，输入空行，以便为索引中选定的路径暂存工作树文件的内容。</p>
+</div>
+</dd>
+<dt class="hdlist1">revert</dt>
+<dd>
+<p>它有一个与s`update`非常相似的UI，所选路径的暂存信息将还原为HEAD版本。还原新路径将使它们不被追踪。</p>
+</dd>
+<dt class="hdlist1">add untracked</dt>
+<dd>
+<p>它有一个与“update”和“revert”非常相似的UI，允许您向索引添加未跟踪的路径。</p>
+</dd>
+<dt class="hdlist1">补丁</dt>
+<dd>
+<p>这允许您从类似“status”命令的选择中选择一条路径。在选择路径之后，它将显示索引和工作树文件之间的差异，并询问您是否要暂存每个块的更改。您可以选择以下选项之一并输入回车：</p>
+<div class="literalblock">
+<div class="content">
+<pre>y - stage this hunk
+n - do not stage this hunk
+q - quit; do not stage this hunk or any of the remaining ones
+a - stage this hunk and all later hunks in the file
+d - do not stage this hunk or any of the later hunks in the file
+g - select a hunk to go to
+/ - search for a hunk matching the given regex
+j - leave this hunk undecided, see next undecided hunk
+J - leave this hunk undecided, see next hunk
+k - leave this hunk undecided, see previous undecided hunk
+K - leave this hunk undecided, see previous hunk
+s - split the current hunk into smaller hunks
+e - manually edit the current hunk
+? - print help</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>在决定了所有块的操作后，如果有选择的块，则会使用其来更新索引。</p>
+</div>
+<div class="paragraph">
+<p>通过将配置变量`interactive.singleKey`设置为`true`，在此处您可以不必键入回车。</p>
+</div>
+</dd>
+<dt class="hdlist1">diff</dt>
+<dd>
+<p>这使您可以查看要提交的内容（即，在HEAD和索引之间）。</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_编辑补丁">编辑补丁</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>调用`git add
+-e`或从交互式块选择器中选择`e`命令，将在编辑器中打开一个补丁。编辑器退出后，结果将应用于索引。您可以随意对补丁进行任何更改，但是请注意，某些更改可能会导致混乱，甚至导致补丁无法使用。如果您想完全中止该操作（即不在索引中更新内容），只需删除补丁中的所有行。下面的列表描述了您可能会在补丁中看到的一些常见内容，以及对其进行哪些编辑操作才有意义。</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">添加的内容</dt>
+<dd>
+<p>添加的内容以“ &#43;”开头的行表示。您可以删除它们以防止暂存。</p>
+</dd>
+<dt class="hdlist1">删除的内容</dt>
+<dd>
+<p>删除的内容以“-”开头的行表示。您可以通过将“-”转换为“ ”（空格）来防止将其删除。</p>
+</dd>
+<dt class="hdlist1">modified content</dt>
+<dd>
+<p>修改后的内容由“-”行（删除旧内容）和“&#43;”行（添加替换内容）表示。通过将“-”行转换为“
+”，并删除“&#43;”行，可以防止临时进行修改。请注意，只修改其中一个可能会给索引带来混乱的更改。</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>There are also more complex operations that can be performed. But beware
+that because the patch is applied only to the index and not the working
+tree, the working tree will appear to "undo" the change in the index.  For
+example, introducing a new line into the index that is in neither the HEAD
+nor the working tree will stage the new line for commit, but the line will
+appear to be reverted in the working tree.</p>
+</div>
+<div class="paragraph">
+<p>Avoid using these constructs, or do so with extreme caution.</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">删除未改动的内容</dt>
+<dd>
+<p>索引和工作树之间没有区别的内容可能会显示在上下文行中，以“
+”（空格）开头。您可以通过将空格转换为“-”来暂存要删除的上下文行。生成的工作树文件将重新添加内容。</p>
+</dd>
+<dt class="hdlist1">修改现有的内容</dt>
+<dd>
+<p>也可以通过暂存上下文行（通过将“ ”转换为“-”）以进行删除来修改上下文行，并在其中添加新内容的“ &#43;”行。类似地，可以修改“
+&#43;”行以进行现有内容的添加或修改。在所有情况下，新的修改都将在工作树中还原。</p>
+</dd>
+<dt class="hdlist1">新的内容</dt>
+<dd>
+<p>您还可以添加补丁中不存在的新内容。只需添加新行，每行以“ &#43;”开头。添加的内容将还原到工作树中。</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>还有一些操作应完全避免，因为它们会使补丁无法应用：</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>três-traços e fim-de-linha, ou</p>
+<p>添加上下文（“ ”）行或添加删除（“-”）行</p>
 </li>
 <li>
-<p>uma linha que começa com "diff -" ou</p>
+<p>删除上下文行或删除标记为删除的行</p>
 </li>
 <li>
-<p>uma linha que começa com "Index:"</p>
+<p>修改上下文或删除行的内容</p>
 </li>
 </ul>
 </div>
-<div class="paragraph">
-<p>é tomado como o início de um patch, e a mensagem de log de confirmação é
-finalizada antes da primeira ocorrência de tal linha.</p>
-</div>
-<div class="paragraph">
-<p>Ao invocar inicialmente o <code>git am</code>, você fornece os nomes das caixas de
-correio a serem processadas.  Ao ver o primeiro patch que não se aplica, ele
-aborta no meio.  Você pode se recuperar disso de duas maneiras:</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>pule o patch atual reexecutando o comando com a opção <code>--skip</code>.</p>
-</li>
-<li>
-<p>mão resolver o conflito no diretório de trabalho e atualizar o arquivo de
-índice para colocá-lo em um estado que o patch deve ter produzido.
- Então execute o comando com a opção <code>--continue</code>.</p>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>O comando se recusa a processar novas caixas de correio até que a operação
-atual seja concluída, portanto, se você decidir recomeçar do zero, execute o
-<code>git am --abort</code> antes de executar o comando com nomes de caixa de correio.</p>
-</div>
-<div class="paragraph">
-<p>Antes que qualquer correção seja aplicada, ORIG_HEAD é definido como a ponta
-da ramificação atual.  Isso é útil se você tiver problemas com várias
-confirmações, como executar <em>git am</em> na ramificação errada ou um erro nas
-confirmações mais facilmente corrigido alterando a caixa de correio (por
-exemplo,  erros nas linhas "De:").</p>
-</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_ganchos">GANCHOS</h2>
+<h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Este comando pode executar os ganchos <code>applypatch-msg</code>,` pre-applypatch` e
-<code>post-applypatch</code>. Veja <a href="githooks.html">githooks(5)</a> para mais informações.</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_veja_também">VEJA TAMBÉM</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p><a href="git-apply.html">git-apply(1)</a>.</p>
+<p><a href="git-status.html">git-status(1)</a> <a href="git-rm.html">git-rm(1)</a> <a href="git-reset.html">git-reset(1)</a>
+<a href="git-mv.html">git-mv(1)</a> <a href="git-commit.html">git-commit(1)</a> <a href="git-update-index.html">git-update-index(1)</a></p>
 </div>
 </div>
 </div>
@@ -745,14 +846,14 @@ exemplo,  erros nas linhas "De:").</p>
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Parte do <a href="git.html">git(1)</a> suite</p>
+<p>Part of the <a href="git.html">git(1)</a> suite</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-10 23:41:50 +0200
+Last updated 2020-04-10 23:42:08 +0200
 </div>
 </div>
 </body>
