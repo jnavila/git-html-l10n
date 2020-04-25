@@ -1,0 +1,166 @@
+git-init(1)
+===========
+
+NAME
+----
+git-init-db – Erstellt ein leeres Git-Repository oder initialisiert ein
+vorhandenes erneut
+
+
+ÜBERSICHT
+---------
+[verse]
+'git init' [-q | --quiet] [--bare] [--template=<Template-Verzeichnis>]
+	  [--separate-git-dir <Git-Verzeichnis>]
+	  [--shared[=<Berechtigungen>]] [Verzeichnis]
+
+
+BESCHREIBUNG
+------------
+
+Dieser Befehl erzeugt ein leeres Git-Repository – im Grunde ein
+`.git`-Verzeichnis mit Unterverzeichnissen für `objects`, `refs/heads`,
+`refs/tags` und für die Template-Dateien. Eine initiale `HEAD` Datei, die
+auf den HEAD des Master-Branchs verweist, wird ebenfalls erstellt.
+
+Wenn die Umgebungsvariable `$GIT_DIR` gesetzt ist, dann gibt sie einen Pfad
+an, der anstelle von `./.git` für die Basis des Repositorys verwendet werden
+soll.
+
+If the object storage directory is specified via the `$GIT_OBJECT_DIRECTORY`
+environment variable then the sha1 directories are created underneath -
+otherwise the default `$GIT_DIR/objects` directory is used.
+
+Das Ausführen von `git init` in einem bestehenden Repository ist
+ungefährlich. Es wird nichts überschrieben, was dort bereits vorhanden
+ist. Der Hauptgrund für das erneute Ausführen von `git init` ist das
+Aufnehmen neu hinzugefügter Templates (oder das Verschieben des Repositorys
+an einen anderen Ort, wenn `--separate-git-dir` angegeben wird).
+
+OPTIONEN
+--------
+
+-q::
+--quiet::
+
+Nur Fehler- und Warnmeldungen ausgeben; alle anderen Meldungen werden
+ausgeblendet.
+
+--bare::
+
+Erstellt ein Bare-Repository. Wenn die Umgebungsvariable `GIT_DIR` nicht
+festgelegt ist, wird sie auf das aktuelle Arbeitsverzeichnis angewendet.
+
+--template=<Template_Directory>::
+
+Gib das Verzeichnis an, aus dem Templates verwendet werden sollen (Siehe
+unten den Abschnitt „TEMPLATE VERZEICHNIS“).
+
+--separate-git-dir=<Git-Dir>::
+
+Anstatt das Repository als ein Verzeichnis entweder nach `$GIT_DIR` oder
+`./.git/` zu initialisieren, wird hier eine Textdatei erstellt, die den Pfad
+zum eigentlichen Repository enthält.  Diese Datei fungiert als symbolischer
+Git-Link zum Repository, der vom Dateisystem unabhängig ist.
++
+Falls dies eine Neu-Initialisierung ist, wird das Repository auf den
+angegebenen Pfad verschoben.
+
+--shared[=(false|true|umask|group|all|world|everybody|0xxx)]::
+
+Bestimmt, dass das Git-Repository von mehreren Benutzern gemeinsam genutzt
+werden soll. Dadurch können Benutzer, die derselben Gruppe angehören, in
+dieses Repository pushen. Falls spezifiziert, wird die config-Variable
+"core.sharedRepository" so angelegt, dass Dateien und Verzeichnisse unter
+`$GIT_DIR` mit den angeforderten Berechtigungen erstellt werden.  Wenn
+nichts angegeben wird, wird Git die von umask(2) gelieferten Berechtigungen
+verwenden.
++
+Die Option kann die folgenden Werte annehmen, wobei 'group' die
+Standardeinstellung ist, falls kein Wert angegeben wird:
++
+--
+'umask' (or 'false')::
+
+Verwendet die von umask(2) gelieferten Berechtigungen. Die Voreinstellung,
+falls `--shared` nicht angegeben ist.
+
+'group' (or 'true')::
+
+Das Repository von der Gruppe beschreibbar machen, (mit g+sx, da die
+Git-Gruppe möglicherweise nicht die primäre Gruppe aller User ist). Das wird
+verwendet, um die Berechtigungen eines ansonsten sicheren umask(2)-Wertes zu
+erweitern. Beachten Sie, dass die umask immer noch für die anderen
+Berechtigungsbits gilt (z.B. wenn umask '0022' ist, wird die Verwendung von
+'group' nicht die Leseberechtigungen anderer (Nicht-Gruppen-) Benutzer
+entfernen). Siehe bei '0xxx' wie die Repository-Berechtigungen genau gesetzt
+werden.
+
+'all' (or 'world' or 'everybody')::
+
+Das gleiche wie 'group', aber macht das Repository für alle Benutzer lesbar.
+
+'0xxx'::
+
+'0xxx' ist eine Oktalzahl und jede Datei hat den Status '0xxx'. '0xxx'
+überschreibt den umask(2)-Wert des Benutzers (und entsperrt nicht nur die
+Berechtigungen, wie es 'group' und 'all' tun). '0640' wird ein Repository
+erstellen, das gruppenlesbar, aber nicht gruppenbeschreibbar und für andere
+nicht zugänglich ist. '0660' erzeugt ein Repository, das für den aktuellen
+Benutzer und die aktuelle Gruppe les- und beschreibbar, aber für andere
+unzugänglich ist.
+--
+
+Standardmäßig ist das Konfigurationsflag `receive.denyNonFastForwards` in
+gemeinsam genutzten Repositorys aktiviert, sodass Sie keinen
+non-fast-forward Push erzwingen können.
+
+Wenn Sie 'directory' angeben, wird der Befehl innerhalb dieses
+Verzeichnisses ausgeführt. Wenn dieses Verzeichnis nicht existiert, wird es
+erstellt.
+
+TEMPLATE DIRECTORY
+------------------
+
+Dateien und Verzeichnisse im Template-Verzeichnis, deren Name nicht mit
+einem Punkt beginnt, werden nach der Erstellung in das `$GIT_DIR` kopiert.
+
+Das Template-Verzeichnis wird aus folgender Einstellung generiert
+(Reihenfolge nach Priorität):
+
+ - dem Argument, das mit der Option `--template` angegeben wurde;
+
+ - dem Inhalt der Umgebungs-Variablen `$GIT_TEMPLATE_DIR`;
+
+ - der Konfigurations-Variablen `init.templateDir`; oder
+
+ - dem standardmäßigen Template-Verzeichnis: `/usr/share/git-core/templates`.
+
+Das standardmäßige Template-Verzeichnis enthält eine gewisse
+Verzeichnisstruktur, vorgeschlagene „Ausschlussmuster“ (siehe
+linkgit:gitignore[5]) und Beispiele für Hook-Dateien.
+
+Die Beispiel-Hooks sind automatisch alle deaktiviert. Diese Hooks können
+aktiviert werden, indem die Datei-Erweiterung `.sample` entfernt wird.
+
+Siehe linkgit:githooks[5] für generelle Informationen zur Hook-Anwendung.
+
+EXAMPLES
+--------
+
+Ein neues Git-Repository mit einer vorhandenen Code-Basis anlegen::
++
+----------------
+$ cd /Pfad/zu/meiner/Code-Basis
+$ git init      <1>
+$ git add .     <2>
+$ git commit    <3>
+----------------
++
+<1> Erstellt das Verzeichnis /Pfad/zu/meiner/Code-Basis/.git.
+<2> Fügt alle vorhandenen Dateien zum Index hinzu.
+<3> Zeichnet den Urzustand als ersten Commit im Verlauf des Repositorys auf.
+
+GIT
+---
+Teil der linkgit:git[1] Suite

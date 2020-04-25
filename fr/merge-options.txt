@@ -1,0 +1,168 @@
+--commit::
+--no-commit::
+	Effectuer la fusion et valider le résultat. Cette option peut être utilisée
+	pour passer outre --no-commit.
++
+Avec --no-commit, effectuer la fusion et s'arrêter juste avant de créer un
+commit de fusion, pour donner à l'utilisateur une chance d'inspecter et de
+peaufiner le résultat de la fusion avant de valider.
++
+Notez que les mises à jour en avance rapide ne créent pas de commit de
+fusion et qu'il n'y a donc aucun moyen d'arrêter ces fusions avec
+--no-commit.  Ainsi, si vous voulez vous assurer que votre branche n'est pas
+modifiée ou mise à jour par la commande de fusion, utilisez --no-ff avec
+--no-commit.
+
+--edit::
+-e::
+--no-edit::
+	Avant de procéder à une fusion automatisée réussie, lancer un éditeur pour
+	modifier le message de fusion généré automatiquement, afin que l'utilisateur
+	puisse expliquer et justifier la fusion. L'option `--no-edit` peut être
+	utilisée pour accepter le message généré automatiquement (ce qui est
+	généralement déconseillé).
+ifndef::git-pull[]
+L'option `--edit` (ou `-e`) est toujours utile si vous donnez un brouillon
+de message avec l'option `-m` de la ligne de commande et que vous voulez
+l'éditer dans l'éditeur.
+endif::git-pull[]
++
+Les scripts plus anciens peuvent dépendre du comportement historique de ne
+pas autoriser l'utilisateur à modifier le message du journal de fusion. Ils
+verront un éditeur ouvert lorsqu'ils exécuteront `git merge`. Pour faciliter
+l'ajustement de ces scripts au comportement mis à jour, la variable
+d'environnement `GIT_MERGE_AUTOEDIT` peut être définie sur `no` à leur
+début.
+
+--cleanup=<mode>::
+	Cette option détermine comment le message de fusion sera nettoyé avant
+	d'être envoyé. Voir linkgit:git-commit[1] pour plus de détails. De plus, si
+	le '<mode>' a la valeur `scissors`, les ciseaux seront ajoutés à 'MERGE_MSG'
+	avant d'être transmis à la machinerie de commit dans le cas d'un conflit de
+	fusion.
+
+--ff::
+--no-ff::
+--ff-only::
+	Précise comment une fusion est traitée lorsque l'historique fusionné est
+	déjà un descendant de l'historique actuel.  `--ff` est la valeur par défaut,
+	sauf si l'on fusionne une étiquette annotée (et éventuellement signée) qui
+	n'est pas stockée à sa place naturelle dans la hiérarchie `refs/tags/`,
+	auquel cas `--no-ff` est supposé.
++
+Avec `--ff`, lorsque c'est possible, résoudre la fusion comme une avance
+rapide (ne mettre à jour le pointeur de branche que pour qu'il corresponde à
+la branche fusionnée ; ne pas créer de commit de fusion).  Lorsque ce n'est
+pas possible (lorsque l'historique fusionné n'est pas un descendant de
+l'historique actuel), créer un commit de fusion.
++
+Avec `--no-ff`, créer un commit de fusion dans tous les cas, même si la
+fusion peut être résolue en avance rapide.
++
+Dans le cas `--ff-only`, il faut résoudre la fusion en avance rapide lorsque
+c'est possible.  Lorsque ce n'est pas possible, refuser de fusionner et
+sortir avec un statut non nul.
+
+-S[<idclé>]::
+--gpg-sign[=<idclé>]::
+	Signer le commit résultant de la fusion avec GPG. L'argument `idclé` est
+	optionnel avec par défaut l'identité du validateur ; si spécifiée, elle doit
+	être collée à l'option sans aucun espace.
+
+--log[=<n>]::
+--no-log::
+	En plus des noms de branches, remplir le message du journal avec les
+	descriptions d'une ligne depuis au maximum <n> commits réels qui sont en
+	train d'être fusionnés. Voir aussi linkgit:git-fmt-merge-msg[1].
++
+Avec --no-log, ne pas indiquer les descriptions d'une ligne des commits
+réels qui sont fusionnés.
+
+--signoff::
+--no-signoff::
+	Ajouter une ligne Signed-off-by du validateur à la fin du message de
+	validation. La signification de signoff dépend du projet, mais ceci certifie
+	typiquement que le validateur a les droits de soumettre son travail sous la
+	même licence et accepte un Certificat d'Origine de Développeur (voir
+	http://developercertificate.org/ pour plus d'information).
++
+Avec --no-signoff ne pas ajouter de ligne Signed-off-by.
+
+--stat::
+-n::
+--no-stat::
+	Afficher un diffstat à la fin de la fusion. Le diffstat est également
+	contrôlé par l'option de configuration merge.stat.
++
+Avec -n ou --no-stat, ne pas afficher de diffstat à la fin de la fusion.
+
+--squash::
+--no-squash::
+	Produire l'arbre de travail et l'état d'index comme si une fusion réelle
+	s'était produite (sauf pour les informations de fusion), mais ne pas faire
+	de commit, déplacer la `HEAD`, ou enregistrer `$GIT_DIR/MERGE_HEAD` (pour
+	forcer le prochain `git commit` à créer un commit de fusion). Cela vous
+	permet de créer un seul commit au-dessus de la branche actuelle dont l'effet
+	est identique à la fusion d'une autre branche (ou plus dans le cas d'une
+	fusion pieuvre).
++
+Avec --no-squash, effectuer la fusion et valider le résultat. Cette option
+peut être utilisée pour passer outre --squash.
++
+Avec --squash, --commit n'est pas permis, et échouera.
+
+--no-verify::
+	Cette option court-circuite les crochets pre-merge et commit-msg. Voir aussi
+	linkgit:githooks[5].
+
+-s <stratégie>::
+--strategy=<strategie>::
+	Utiliser la stratégie de fusion donnée ; peut être fourni plus d'une fois
+	pour spécifier l'ordre dans lequel elles doivent être essayées.  S'il n'y a
+	pas d'option `-s`, une liste intégrée de stratégies est utilisée à la place
+	('git merge-recursive' lors de la fusion d'une seule tête, 'git
+	merge-octopus' sinon).
+
+-X <option>::
+--strategy-option=<option>::
+	Faire passer l'option spécifique de la stratégie de fusion à la stratégie de
+	fusion.
+
+--verify-signatures::
+--no-verify-signatures::
+	Vérifier que le commit sommet de la branche latérale à fusionner est signé
+	avec une clé valide, c'est-à-dire une clé qui a un uid valide : dans le
+	modèle de confiance par défaut, cela signifie que la clé de signature a été
+	signée par une clé de confiance.  Si le commit sommet de la branche latérale
+	n'est pas signé avec une clé valide, la fusion est annulée.
+
+--summary::
+--no-summary::
+	Synonymes de --stat et --no-stat ; ils sont déconseillés et seront supprimés
+	à l'avenir.
+
+ifndef::git-pull[]
+-q::
+--quiet::
+	Mode Silencieux. Implique --no-progress.
+
+-v::
+--verbose::
+	Mode bavard.
+
+--progress::
+--no-progress::
+	Activer/désactiver explicitement l'affichage du progrès. Si aucun des deux
+	n'est spécifié, la progression est indiquée si l'erreur standard est
+	connectée à un terminal.  Notez que toutes les stratégies de fusion peuvent
+	ne pas prendre en charge le rapport d'avancement.
+
+endif::git-pull[]
+
+--allow-unrelated-histories::
+	Par défaut, la commande `git merge` refuse de fusionner les historiques qui
+	ne partagent pas un ancêtre commun.  Cette option peut être utilisée pour
+	passer outre cette sécurité lors de la fusion des historiques de deux
+	projets qui ont commencé leur vie indépendamment l'un de l'autre. Comme
+	c'est une occasion très rare, il n'existe pas de variable de configuration
+	pour activer cette option par défaut et elle ne sera pas ajoutée.

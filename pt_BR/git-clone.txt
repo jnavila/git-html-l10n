@@ -1,0 +1,326 @@
+git-clone(1)
+============
+
+NOME
+----
+git-clone - Clona um repositório em um novo diretório
+
+
+SINOPSE
+-------
+[verse]
+'git clone' [--template=<template_directory>]
+	  [-l] [-s] [--no-hardlinks] [-q] [-n] [--bare] [--mirror]
+	  [-o <name>] [-b <name>] [-u <upload-pack>] [--reference <repository>]
+	  [--dissociate] [--separate-git-dir <git dir>]
+	  [--depth <depth>] [--[no-]single-branch] [--no-tags]
+	  [--recurse-submodules[=<pathspec>]] [--[no-]shallow-submodules]
+	  [--[no-]remote-submodules] [--jobs <n>] [--sparse] [--] <repository>
+	  [<directory>]
+
+DESCRIÇÃO
+---------
+
+Clona um repositório em um diretório recém-criado, cria ramificações de
+rastreamento remoto para cada ramificação no repositório clonado (visível
+usando `git branch --remotes`), cria e verifica uma ramificação inicial que
+é bifurcada da ramificação atualmente ativa do repositório clonado .
+
+Após o clone, uma simples `git buscar` sem argumentos atualizará todas as
+ramificações de controle remoto, e um` git puxar` sem argumentos irá, além
+disso, mesclar a ramificação mestre remota na ramificação atual, se houver
+(isto não é verdade quando "- único ramo" é dado; veja abaixo).
+
+Esta configuração padrão é obtida através da criação de referências aos
+cabeçalhos de ramificações remotas em `refs/remotos/origem` e inicializando
+as variáveis de configuração` remote.origin.url` e `remote.origin.fetch`.
+
+
+OPÇÕES
+------
+-l::
+--local::
+	Quando o repositório para clonar está em uma máquina local, esse sinalizador
+	ignora o mecanismo de transporte normal "Git aware" e clona o repositório
+	fazendo uma cópia de HEAD e tudo em diretórios objetos e refs.  Os arquivos
+	no diretório `.git/objects/` são hardlinked para economizar espaço quando
+	possível.
++
+Se o repositório for especificado como um caminho local (por exemplo,
+`/path/to/repo`), este é o padrão, e --local é essencialmente um não
+operacional.  Se o repositório for especificado como um URL, esse
+sinalizador será ignorado (e nunca usaremos as otimizações locais).
+ Especificar `--no-local` irá sobrescrever o padrão quando`/path/to/repo`
+for dado, usando o transporte regular do Git.
+
+--no-hardlinks::
+	Força o processo de clonagem de um repositório em um sistema de arquivos
+	local para copiar os arquivos sob o diretório `.git/objetos` em vez de usar
+	hardlinks. Isso pode ser desejável se você estiver tentando fazer um backup
+	de seu repositório.
+
+-s::
+--shared::
+	Quando o repositório a ser clonado estiver na máquina local, em vez de usar
+	links físicos, configure automaticamente `.git/objetos/info/alternates` para
+	compartilhar os objetos com o repositório de origem.  O repositório
+	resultante é iniciado sem nenhum objeto próprio.
++
+*NOTA*: esta é uma operação possivelmente perigosa de se fazer; *não* use
+a menos que você entenda o que ele faz. Se você clonar o seu
+repositório usando esta opção e em seguida excluir os ramos branches (ou usar qualquer
+outro comando Git que faz qualquer compromisso existente não referenciado) no
+repositório de origem, alguns objetos podem perder a referência (ou ficarem pendurados).
+Esses objetos podem ser removidos por operações normais do Git (como 'git commit')
+que automaticamente chamam de `git gc --auto`. (Veja linkgit:git-gc[1].)
+Caso esses objetos sejam removidos e forem referenciados pelo repositório clonado,
+então o repositório clonado se tornará corrupto.
++
+Note que executar o `git repack` sem a opção `--local` em um repositório
+clonado com `--shared` copiará os objetos do repositório de origem em um
+pacote dentro do repositório clonado removendo a economia de espaço em disco
+do `clone --shared`.  É seguro, no entanto, rodar o `git gc`, que usa a
+opção `--local` por padrão.
++
+Caso queira quebrar a dependência de um repositório clonado com `--shared`
+no seu repositório de origem, você pode simplesmente executar o comando `git
+repack -a` para copiar todos os objetos do repositório de origem em um
+pacote dentro do repositório clonado.
+
+--referência [-if-able] <repositório>::
+	Se o repositório de referência estiver na máquina local, configure
+	automaticamente `.git/objects/info/alternates` para obter objetos do
+	repositório de referência.  A utilização de um repositório já existente como
+	alternativa exigirá que menos objetos sejam copiados do repositório que está
+	sendo clonado, reduzindo os custos de armazenamento local e de rede.  Ao
+	usar o `--reference-if-able`, um diretório não existente é ignorado com um
+	aviso em vez de abortar o clone.
++
+*NOTE*: veja a NOTA para o `--shared` opção, e também o
+`--dissociate` opção.
+
+--dissociate::
+	Emprestar os objetos dos repositórios de referência especificados com as
+	opções `--reference` somente para reduzir a transferência de rede e parar de
+	tomar emprestado deles após um clone, fazendo cópias locais necessárias dos
+	objetos emprestados.  Esta opção também pode ser usada ao clonar localmente
+	a partir de um repositório que já toma emprestado objetos de outro
+	repositório - o novo repositório pegará emprestado objetos do mesmo
+	repositório, e esta opção pode ser usada para parar o empréstimo.
+
+-q::
+--quiet::
+	Opere em silêncio.  O progresso não é relatado para o fluxo de erros padrão.
+
+-v::
+--verbose::
+	Executa em modo louquaz. Não afera o relatório da condição de progresso para
+	o fluxo de erro padrão.
+
+--progress::
+	A condição do progresso é relatado no padrão do fluxo de erro por padrão
+	quando ele é anexado em um terminal, a menos que `--quiet` seja
+	especificado. Esta sinalização impõe o status de progresso mesmo que o fluxo
+	de erro padrão não seja direcionado para um terminal.
+
+--servidor-opção=<option>::
+	Transmita a string fornecida para o servidor ao se comunicar usando o
+	protocolo versão 2. A string fornecida não deve conter um caractere NUL ou
+	LF. A maneira que o servidor lida com as opções do servidor específicas para
+	ele, incluindo as opções desconhecidas. Quando múltiplos
+	`--server-option=<option>` são fornecidos, todos eles são enviados para o
+	outro lado na ordem listada na linha de comando.
+
+-n::
+--no-checkout::
+	Nenhum checkout de HEAD é executado após o clone estar completo.
+
+--bare::
+	Faça um repositório 'bare' Git.  Isto é, ao invés de criar o `<directory>` e
+	colocar os arquivos administrativos em `<directory>/.git`, faça o próprio
+	`<directory>` ser o `$GIT_DIR`. Isto obviamente implica a opção
+	`--no-checkout` pois não há nenhum lugar para verificar a árvore de
+	trabalho.  Além disso os "heads" da ramificação remota são copiadas
+	diretamente para os "heads" de ramificação locais correspondentes sem
+	mapeá-las para `refs/remotes/origin/`.  Quando essa opção é usada, nem as
+	ramificações de rastreamento remoto nem as variáveis de configuração
+	relacionadas são criadas.
+
+--sparse::
+	Inicialize o "checkout esparso" para que o diretório de trabalho comece
+	apenas com os arquivos na raiz do repositório. O arquivo "checkout esparso"
+	pode ser modificado para aumentar o diretório de trabalho conforme a
+	necessidade.
+
+--mirror::
+	Configure um espelho do repositório de origem. Isso implica `--bare`.
+	 Comparado com `--bare`,` --mirror` não apenas mapeia as ramificações locais
+	da origem para as ramificações locais do destino, ele mapeia todas as refs
+	(incluindo ramificações de controle remoto, notas, etc.) e configura uma
+	configuração de refspec como que todos esses refs são sobrescritos por um
+	`git remote update` no repositório de destino.
+
+-o <nome>::
+--origem <nome>::
+	Ao invés de usar o nome remoto `origin` para acompanhar o repositório
+	upstream, use o` <nome> `.
+
+-b <nome>::
+--branch <nome>::
+	Em vez de apontar o HEAD recém-criado para a ramificação apontada pelo HEAD
+	do repositório clonado, aponte para branch <nome> em vez disso. Em um
+	repositório não nu, esta é a ramificação que será registrada.  `--branch`
+	também pode pegar tags e desanexar o HEAD naquele commit no repositório
+	resultante.
+
+-u <upload-pack>::
+--upload-pack <pacote-para-envio>::
+	Quando informado e o repositório a ser clonado for acessível através do ssh,
+	determina que seja executado um caminho fora do padrão na outra extremidade.
+
+--template=<template_directory>::
+	Informe o diretório de onde os modelos serão usados; (Consulte a seção
+	"DIRETÓRIO MODELO" do linkgit:git-init[1].)
+
+-c <key>=<value>::
+--config <key>=<value>::
+	Define uma variável de configuração no repositório recém-criado; isso entra
+	em vigor imediatamente após a inicialização do repositório, porém antes da
+	busca remota do histórico ou do checkout de quaisquer arquivos.  Como é
+	esperado, a chave está no mesmo formato de linkgit:git-config[1] (ou seja,
+	`core.eol=true`). Caso vários valores sejam fornecidos para a mesma chave,
+	cada valor será gravado no arquivo de configuração. Isso o torna mais seguro
+	para incluir "fetch refspecs" adicionais ao "origin" remoto por exemplo.
++
+Devido as limitações da implementação atual, algumas variáveis de
+configuração não entram em vigor até o próximo "fetch" e "checkout".  As
+variáveis de configuração que são conhecidas por não terem efeito são:
+`remote.<name>.mirror` and `remote.<name>.tagOpt`.  Em vez disso, use as
+opções correspondentes `--mirror` e `--no-tags`.
+
+--depth <depth>::
+	Crie um clone 'raso' com um histórico truncado para uma quantidade
+	determinada de revisões. Implica no uso da opção `--single-branch` a menos
+	que `--no-single-branch` seja usado para resgatar os históricos próximos às
+	pontas de todos os ramos, caso queira clonar os submódulos superficialmente,
+	use também `--shallow-submodules`.
+
+--shallow-since=<data>::
+	Crie um clone superficial com um histórico após o tempo determinado.
+
+--shallow-exclude=<revisão>::
+	Crie um clone superficial com um histórico, excluindo os commits disponíveis
+	a partir de uma ramificação remota ou tag específica.  Esta opção pode ser
+	usada mais de uma vez.
+
+--[no-]single-branch::
+	Clone only the history leading to the tip of a single branch, either
+	specified by the `--branch` option or the primary branch remote's `HEAD`
+	points at.  Further fetches into the resulting repository will only update
+	the remote-tracking branch for the branch this option was used for the
+	initial cloning.  If the HEAD at the remote did not point at any branch when
+	`--single-branch` clone was made, no remote-tracking branch is created.
+
+--no-tags::
+	Não clone quaisquer tags e defina `remote.<remote>.tagOpt=--no-tags` nas
+	configurações, garantindo que as futuras operações `git pull` e `git fetch`
+	não sigam qualquer tag. As buscas explícitas subsequentes das tags ainda
+	funcionarão (consulte linkgit:git-fetch[1]).
++
+Can be used in conjunction with `--single-branch` to clone and maintain a
+branch with no references other than a single cloned branch. This is useful
+e.g. to maintain minimal clones of the default branch of some repository for
+search indexing.
+
+--recurse-submodules[=<pathspec]::
+	After the clone is created, initialize and clone submodules within based on
+	the provided pathspec.  If no pathspec is provided, all submodules are
+	initialized and cloned.  This option can be given multiple times for
+	pathspecs consisting of multiple entries.  The resulting clone has
+	`submodule.active` set to the provided pathspec, or "." (meaning all
+	submodules) if no pathspec is provided.
++
+Submodules are initialized and cloned using their default settings. This is
+equivalent to running `git submodule update --init --recursive <pathspec>`
+immediately after the clone is finished. This option is ignored if the
+cloned repository does not have a worktree/checkout (i.e. if any of
+`--no-checkout`/`-n`, `--bare`, or `--mirror` is given)
+
+--[no-]shallow-submodules::
+	All submodules which are cloned will be shallow with a depth of 1.
+
+--[no-]remote-submodules::
+	Todos os submódulos que forem clonados, para realizar a atualização os
+	submódulos usarão a condição remota do ramo do submódulo de rastreamento em
+	vez do SHA-1 registrado no superprojeto. Equivale encaminhar `--remote` para
+	`git submodule update`.
+
+--separate-git-dir=<git dir>::
+	Em vez de colocar o repositório clonado onde deveria estar, coloque o
+	repositório clonado no diretório especificado e em seguida, faça um link
+	simbólico Git independente do sistema de arquivos para lá.  O resultado é
+	que o repositório Git pode ser separado da árvore de trabalho.
+
+-j <n>::
+--jobs <n>::
+	A quantidade de submódulos que foram recuperados ao mesmo tempo.  É
+	predefinido na opção `submodule.fetchJobs`.
+
+<repositório>::
+	Os repositórios que serão clonados (possivelmente remotos).  Consulte a
+	seção <<URLS,GIT URLS>> abaixo para mais informações sobre as
+	especificidades dos repositórios.
+
+<diretório>::
+	O nome de um novo diretório que será clonado.  A parte "humanística" do
+	repositório de origem é usada caso nenhum diretório seja explicitamente
+	informado (`repo` para `/path/to/repo.git` e `foo` para
+	`host.xz:foo/.git`).  A clonagem em um diretório existente é permitida
+	apenas caso o diretório esteja vazio.
+
+:git-clone: 1
+include::urls.txt[]
+
+EXEMPLOS
+--------
+
+* Clonando de um upstream:
++
+------------
+$ git clone git://git.kernel.org/pub/scm/.../linux.git my-linux
+$ cd my-linux
+$ make
+------------
+
+
+* Faça uma clonagem local que pegue emprestado do diretório atual sem
+  verificação:
++
+------------
+$ git clone -l -s -n . ../copy
+$ cd ../copy
+$ git show-branch
+------------
+
+
+* Clone do upstream enquanto pega emprestado de um diretório local já
+  existente:
++
+------------
+$ git clone --reference /git/linux.git \
+	git://git.kernel.org/pub/scm/.../linux.git \
+	my-linux
+$ cd my-linux
+------------
+
+
+* Crie um repositório simples para publicar suas alterações ao público:
++
+------------
+$ git clone --bare -l /home/proj/.git /pub/scm/proj.git
+------------
+
+
+GIT
+---
+Parte do linkgit:git[1] suite

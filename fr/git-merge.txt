@@ -1,0 +1,383 @@
+git-merge(1)
+============
+
+NOM
+---
+git-merge - Fusionner deux ou plusieurs historiques de développement
+ensemble
+
+
+SYNOPSIS
+--------
+[verse]
+'git merge' [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
+	[--no-verify] [-s <strategie>] [-X <option-de-strategie>] [-S[<id-clé>]]
+	[--[no-]allow-unrelated-histories]
+	[--[no-]rerere-autoupdate] [-m <msg>] [-F <fichier>] [<commit>...]
+'git merge' (--continue | --abort | --quit)
+
+DESCRIPTION
+-----------
+Intègre les modifications des commits nommés (depuis le moment où leur
+histoire a divergé de la branche actuelle) dans la branche actuelle.  Cette
+commande est utilisée par 'git pull' pour incorporer les modifications d'un
+autre dépôt et peut être utilisée à la main pour fusionner les modifications
+d'une branche dans une autre.
+
+Supposons que l'histoire suivante existe et que la branche actuelle est
+`master` :
+
+------------
+	  A---B---C theme
+	 /
+    D---E---F---G master
+------------
+
+Alors, "`git merge theme`" rejouera les modifications apportées à la branche
+"theme" puisqu’elle s’est écartée de `master` (c’est-à-dire `E`) jusqu’à son
+commit actuel (`C`) par dessus `master`, et enregistrera le résultat dans un
+nouveau commit comprenant les noms des deux parents et un message de
+validation de l’utilisateur décrivant les modifications.
+
+------------
+	  A---B---C theme
+	 /         \
+    D---E---F---G---H master
+------------
+
+La seconde syntaxe ("`git merge --abort`") ne peut être exécutée qu'après
+que la fusion ait entraîné des conflits. 'git merge --abort' annulera le
+processus de fusion et tentera de reconstruire l'état antérieur à la
+fusion. Cependant, s'il y a eu des changements non validés au début de la
+fusion (et surtout si ces changements ont été modifiés après le début de la
+fusion), 'git merge --abort' sera dans certains cas incapable de
+reconstruire les modifications originales (avant la fusion). Par conséquent
+:
+
+*Attention* : l'exécution de 'git merge' avec des modifications non triviales non validées est
+découragée : bien que possible, elle peut vous laisser dans un état duquel il est difficile de revenir en arrière
+en cas de conflit.
+
+La troisième syntaxe ("`git merge --continue`") ne peut être exécutée
+qu'après que la fusion ait entraîné des conflits.
+
+OPTIONS
+-------
+include::merge-options.txt[]
+
+-m <msg>::
+	Définir le message de commit à utiliser pour le commit de fusion (dans le
+	cas où un commit est créé).
++
+Si `--log` est spécifié, un journal court des commits en cours de fusion
+sera ajouté au message spécifié.
++
+La commande 'git fmt-merge-msg' peut être utilisée pour donner une bonne
+valeur par défaut pour les invocations automatisées de 'git merge'. Le
+message automatisé peut inclure la description de la branche.
+
+-F <fichier>::
+--file=<fichier>::
+	Lire le message de commit à utiliser pour le commit de fusion (dans le cas
+	où un commit est créé).
++
+Si `--log` est spécifié, un journal court des commits en cours de fusion
+sera ajouté au message spécifié.
+
+--rerere-autoupdate::
+--no-rerere-autoupdate::
+	Permettre au mécanisme rerere de mettre à jour l'index avec le résultat de
+	la résolution automatique des conflits si possible.
+
+--overwrite-ignore::
+--no-overwrite-ignore::
+	Écraser silencieusement les fichiers ignorés du résultat de la fusion. C'est
+	le comportement par défaut. Utilisez `--no overwrite-ignore` pour
+	abandonner.
+
+--abort::
+	Abandonner le processus actuel de résolution des conflits, et essayer de
+	reconstruire l'état antérieur à la fusion.
++
+S'il y avait des modifications non validées dans l'arbre de travail lorsque
+la fusion a commencé, `git merge --abort` sera dans certains cas incapable
+de reconstruire ces changements. Il est donc recommandé de toujours valider
+ou remiser vos modifications avant de lancer 'git merge'.
++
+'git merge --abort' est équivalent à 'git reset --merge' quand `MERGE_HEAD`
+est présent.
+
+--quit::
+	Oublier la fusion en cours. Laisser l'index et l'arbre de travail en l'ếtat.
+
+--continue::
+	Après l'arrêt d'un 'git merge' en raison de conflits, vous pouvez conclure
+	la fusion en lançant 'git merge --continue' (voir la section "COMMENT
+	RÉSOUDRE LES CONFLITS" ci-dessous).
+
+<commit>...::
+	Les commits, généralement les sommets des autres branches, à fusionner avec
+	notre branche.  En spécifiant plus d'un commit, on crée une fusion avec plus
+	de deux parents (affectueusement appelée fusion Octopus).
++
+Si aucun commit n'est donné sur la ligne de commande, fusionner les branches
+de suivi à distance que la branche actuelle est configurée pour utiliser
+comme sa branche amont.  Voir aussi la section configuration de cette page
+de manuel.
++
+Lorsque `FETCH_HEAD` (et aucun autre commit) est spécifié, les branches
+enregistrées dans le fichier `.git/FETCH_HEAD` par l'invocation précédente
+de `git fetch` pour la fusion sont fusionnées à la branche courante.
+
+
+VÉRIFICATIONS AVANT LA FUSION
+-----------------------------
+
+Avant d'appliquer des modifications extérieures, vous devez faire en sorte
+que votre propre travail soit en bon état et validé localement, afin qu'il
+ne soit pas écrasé en cas de conflits.  Voir aussi
+linkgit:git-stash[1]. 'git pull' et 'git merge' s'arrêteront sans rien faire
+lorsque des modifications locales non validées chevaucheront des fichiers
+que 'git pull'/'git merge' devront mettre à jour.
+
+Pour éviter d'enregistrer des modifications sans rapport dans le commit de
+fusion, 'git pull' et 'git merge' seront également annulés s'il y a des
+modifications enregistrées dans l'index par rapport au commit `HEAD`.  (Des
+exceptions rares à cette règle peuvent exister selon la stratégie de fusion
+utilisée, mais en général, l'index doit correspondre à HEAD).
+
+Si tous les commit nommés sont déjà des ancêtres de `HEAD`, 'git merge'
+sortira plus tôt avec le message « Déjà à jour ».
+
+FUSION EN AVANCE RAPIDE
+-----------------------
+
+Souvent, le sommet de la branche actuelle est un ancêtre du commit nommé.
+C'est le cas le plus courant, surtout lorsqu'il est invoqué depuis 'git
+pull' : vous suivez un dépôt amont, vous n'avez pas validé de modifications
+locales, et vous voulez maintenant mettre à jour vers une révision amont
+plus récente.  Dans ce cas, un nouveau commit n'est pas nécessaire pour
+stocker l'historique combiné ; à la place, la `HEAD` (avec l'index) est mise
+à jour pour pointer vers le commit nommé, sans créer un commit de fusion
+supplémentaire.
+
+Ce comportement peut être supprimé avec l'option `--no-off`.
+
+VÉRITABLE FUSION
+----------------
+
+Sauf dans le cas d'une fusion en avance rapide (voir ci-dessus), les
+branches à fusionner doivent être liées par un commit de fusion qui a pour
+parents les deux branches.
+
+Une version fusionnée réconciliant les changements de toutes les branches à
+fusionner est validées, et votre `HEAD`, votre index et votre arbre de
+travail sont mis à jour en conséquence.  Il est possible d'avoir des
+modifications dans l'arbre de travail tant qu'elles ne se chevauchent pas ;
+la mise à jour les préservera.
+
+Lorsqu'il n'est pas évident de réconcilier les modifications, voici ce qui
+se passe :
+
+1. Le pointeur `HEAD` reste le même.
+2. La référence `MERGE_HEAD` est définie pour pointer vers l'autre tête de
+   branche.
+3. Les chemins qui ont été fusionnés proprement sont mis à jour à la fois dans
+   le fichier d'index et dans votre arbre de travail.
+4. En cas de conflit de chemins, le fichier d'index enregistre jusqu'à trois
+   versions : l'étape 1 stocke la version de l'ancêtre commun, l'étape 2 de
+   `HEAD`, et l'étape 3 de `MERGE_HEAD` (vous pouvez inspecter les étapes avec
+   `git ls-files -u`).  Les fichiers de l'arbre de travail contiennent le
+   résultat du programme "merge", c'est-à-dire les résultats de la fusion à 3
+   points avec les marqueurs de conflit familiers `<<<` `===` `>>>`.
+5. Aucune autre modification n'est apportée.  En particulier, les modifications
+   locales que vous aviez avant de commencer la fusion resteront les mêmes et
+   les entrées de l'index qui les concernent resteront telles quelles,
+   c'est-à-dire correspondant à `HEAD`.
+
+Si vous avez essayé une fusion qui a donné lieu à des conflits complexes et
+que vous voulez recommencer, vous pouvez vous remettre à zéro avec `git
+merge --abort`.
+
+LA FUSION D'ÉTIQUETTE
+---------------------
+
+Lors de la fusion d'une étiquette annotée (et éventuellement signée), Git
+crée toujours un commit de fusion même si une fusion en avance rapide est
+possible, et le modèle de message de validation est préparé avec le message
+de l'étiquette.  De plus, si l'étiquette est signée, la vérification de la
+signature est signalée sous forme de commentaire dans le modèle de
+message. Voir aussi linkgit:git-tag[1].
+
+Lorsque vous souhaitez simplement intégrer le travail menant au commit qui
+se trouve être étiqueté, par exemple lors de la synchronisation avec un
+point de publication en amont, vous ne voudrez peut-être pas faire un commit
+de fusion inutile.
+
+Dans ce cas, vous pouvez "déballer" l'étiquette vous-même avant de la donner
+à `git merge`, ou passer `--ff only` lorsque vous n'avez pas de travail à
+faire vous-même par exemple
+
+----
+git fetch origin
+git merge v1.2.3^0
+git merge --ff-only v1.2.3
+----
+
+
+COMMENT LES CONFLITS SONT PRÉSENTÉS
+-----------------------------------
+
+Lors d'une fusion, les fichiers de l'arbre de travail sont mis à jour pour
+refléter le résultat de la fusion.  Parmi les modifications apportées à la
+version de l'ancêtre commun, celles qui ne se chevauchent pas (c'est-à-dire
+que vous avez modifié une zone du fichier alors que l'autre côté a laissé
+cette zone intacte, ou vice versa) sont incorporées directement dans le
+résultat final.  Cependant, lorsque les deux côtés ont apporté des
+modifications à la même zone, Git ne peut pas choisir au hasard un côté par
+rapport à l'autre, et vous demande de résoudre le problème en laissant ce
+que les deux côtés ont fait à cette zone.
+
+Par défaut, Git utilise le même style que celui utilisé par le programme
+"merge" de la suite RCS pour présenter une telle section conflictuelle,
+comme ceci :
+
+------------
+Voici des lignes qui sont soit inchangées par rapport à l'ancêtre
+commun, ou résolues proprement car un seul côté a changé.
+<<<<<<< yours : exemple.txt
+La résolution des conflits est difficile ;
+allons faire du shopping.
+=======
+Git facilite la résolution des conflits.
+>>>>>>> theirs : exemple.txt
+Et voici une autre ligne qui est résolue proprement ou non modifiée.
+------------
+
+La zone où une paire de modifications contradictoires s'est produite est
+marquée par les marqueurs `<<<<<<<`, `========`, et `>>>>>>>>>>``.  La
+partie qui précède le `=======` est généralement votre côté, et la partie
+qui suit est généralement leur côté.
+
+Le format par défaut ne montre pas ce que l'original a dit dans la zone de
+conflit.  Vous ne pouvez pas savoir combien de lignes sont supprimées et
+remplacées par la remarque de Barbie à votre côté.  La seule chose que vous
+pouvez dire, c'est que votre côté veut dire que c'est difficile et que vous
+préférez faire du shopping, alors que l'autre côté veut prétendre que c'est
+facile.
+
+Un autre style peut être utilisé en réglant la variable de configuration
+"merge.conflictStyle" sur "diff3".  Dans le style "diff3", le conflit
+ci-dessus peut ressembler à ceci :
+
+------------
+Voici les lignes qui sont soit inchangées par rapport à l'ancêtre
+commun, ou proprement résolu parce qu'un seul côté a changé.
+<<<<<<<< yours:exemple.txt
+La résolution des conflits est difficile ;
+Allons faire du shopping.
+|||||||
+La résolution des conflits est difficile.
+=======
+Git facilite la résolution des conflits.
+>>>>>>> theirs:exemple.txt
+Et voici une autre ligne qui est proprement résolue ou non modifiée.
+------------
+
+En plus des marqueurs `<<<<<<<<`, `=======`, et `>>>>>>>>>>>, il utilise un
+autre marqueur `||||||||` qui est suivi par le texte original.  Vous pouvez
+voir que l'original ne faisait qu'énoncer un fait, et que votre camp a
+simplement cédé à cette déclaration et a abandonné, tandis que l'autre camp
+a essayé d'avoir une attitude plus positive.  Vous pouvez parfois aboutir à
+une meilleure résolution en regardant l'original.
+
+
+COMMENT RÉSOUDRE LES CONFLITS
+-----------------------------
+
+Après avoir vu un conflit, vous pouvez faire deux choses :
+
+ * Décider de ne pas fusionner.  Les seuls nettoyages dont vous avez besoin
+   sont de réinitialiser le fichier index au commit `HEAD` à inverser 2. et
+   pour nettoyer les modification d’arbre de travail effectuées par 2. et 3.  ;
+   `git merge --abort` peut être utilisé pour cela.
+
+ * Résoudre les conflits.  Git marquera les conflits dans l’arbre de travail.
+   Modifier les fichiers en forme et les «git add» à l’index.  Utiliser 'git
+   commit' ou 'git merge --continue' pour sceller l’affaire. Cette dernière
+   commande vérifie s’il y a une fusion (interrompue) en cours avant d’appeler
+   'git commit'.
+
+Vous pouvez résoudre le conflit à l'aide d'un certain nombre d'outils :
+
+ * Utiliser un mergetool.  `git mergetool` pour lancer un outil de fusion
+   graphique qui vous permettra de travailler sur la fusion.
+
+ * Regarder les différences. ` git diff` affichera une différence à trois
+   points, en mettant en évidence les modifications apportées par les versions
+   `HEAD` et `MERGE_HEAD`.
+
+ * Regarder les différences de chaque branche. `git log --merge -p <chemin>`
+   montrera les différences d'abord pour la version `HEAD` et ensuite pour la
+   version `MERGE_HEAD`.
+
+ * Regarder les originaux.  `git show :1:nom-de-fichier` montre l'ancêtre
+   commun, `git show :2:nom-de-fichier` montre la version `HEAD`, et `git show
+   :3:nom-de-fichier` montre la version `MERGE_HEAD`.
+
+
+EXEMPLES
+--------
+
+* Fusionner les branches `corrections` et "améliorations` par dessus la
+  branche actuelle, en faisant une fusion octopus :
++
+------------------------------------------------
+$ git merge corrections améliorations
+------------------------------------------------
+
+* Fusionner la branche `obsolète` dans la branche actuelle, en utilisant la
+  stratégie de fusion `ours` :
++
+------------------------------------------------
+$ git merge -s ours obsolète
+------------------------------------------------
+
+* Fusionner la branche `maint` dans la branche actuelle, mais ne pas faire un
+  nouveau commit automatiquement :
++
+------------------------------------------------
+$ git merge --no-commit maint
+------------------------------------------------
++
+Ceci peut être utilisé lorsque vous souhaitez inclure d'autres modifications
+à la fusion ou lorsque vous souhaitez rédiger votre propre message de
+validation de la fusion.
++
+Vous devriez vous abstenir d'abuser de cette possibilité pour introduire en
+douce des modifications substantielles dans un commit de fusion.  De petites
+corrections comme le remplacement du nom de la version ou de la livraison
+seraient acceptables.
+
+
+include::merge-strategies.txt[]
+
+CONFIGURATION
+-------------
+include::config/merge.txt[]
+
+branch.<nom>.mergeOptions::
+	Définir les options par défaut pour la fusion dans la branche <nom>. La
+	syntaxe et les options prises en charge sont les mêmes que celles de 'git
+	merge', mais les valeurs d'options contenant des espaces ne sont
+	actuellement pas prises en charge.
+
+VOIR AUSSI
+----------
+linkgit:git-fmt-merge-msg[1], linkgit:git-pull[1], linkgit:gitattributes[5],
+linkgit:git-reset[1], linkgit:git-diff[1], linkgit:git-ls-files[1],
+linkgit:git-add[1], linkgit:git-rm[1], linkgit:git-mergetool[1]
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]

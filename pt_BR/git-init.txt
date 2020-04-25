@@ -1,0 +1,162 @@
+git-init(1)
+===========
+
+NOME
+----
+git-init - Cria um repositório Git vazio ou reinicializa um já existente
+
+
+SINOPSE
+-------
+[verse]
+'git init' [-q | --quiet] [--bare] [--template=<template_directory>]
+	  [--separate-git-dir <git dir>]
+	  [--shared[=<permissions>]] [directory]
+
+
+DESCRIÇÃO
+---------
+
+Este comando cria um repositório Git vazio, basicamente um diretório `.git`
+com subdiretórios para os arquivos `objects`, `refs/heads`, `refs/tags` e
+arquivos modelo.  Também é criado um arquivo inicial `HEAD` que tem como
+referencia o `HEAD` da ramificação principal.
+
+Caso a variável de ambiente `$ GIT_DIR` esteja configurada, esta
+especificará um caminho a ser usado para a base dos repositórios em vez de
+`./.git`.
+
+Caso o diretório de armazenamento de objetos seja especificado através da
+variável de ambiente `$GIT_OBJECT_DIRECTORY`, então os diretórios "sha1"
+serão criados abaixo, caso contrário, será usado o diretório predefinido
+`$GIT_DIR/objects`.
+
+É seguro executar o comando `git init` em um repositório existente. O
+comando não substituirá as coisas que já estiverem lá. O principal motivo
+para executar novamente o comando `git init` é pegar os modelos adicionados
+recentemente (ou mover o repositório para um outro local caso
+`--separate-git-dir` seja usado).
+
+OPÇÕES
+------
+
+-q::
+--quiet::
+
+Exiba apenas mensagens de erro e aviso; suprima todas as outras mensagens.
+
+--bare::
+
+Crie um repositório vazio. Caso a variável de ambiente `GIT_DIR` não esteja
+definido, defina diretório de trabalho atual.
+
+--template=<template_directory>::
+
+Informe o diretório de onde os modelos serão usados.  (Consulte a seção
+"DIRETÓRIO MODELO" abaixo.)
+
+--separate-git-dir=<git dir>::
+
+Em vez de inicializar o repositório como um diretório para `$GIT_DIR` or
+`./.git/`, crie um arquivo de texto contendo o caminho para o repositório
+real.  Este arquivo atua como um link simbólico independente para o
+repositório do sistema de arquivos Git.
++
+Caso seja reinicializado, o repositório será movido para um caminho
+determinado.
+
+--shared[=(false|true|umask|group|all|world|everybody|0xxx)]::
+
+Determina que o repositório Git deve ser compartilhado entre vários
+usuários.  Isso permite que os usuários pertencentes ao mesmo grupo enviem
+para esse repositório.  Quando definido, a variável de configuração
+`core.sharedRepository` é usada para que os arquivos e os diretórios
+definidos pela variável `$ GIT_DIR` sejam criados com as permissões
+solicitadas.  Quando não definido, o Git usará as permissões informadas pelo
+umask(2).
++
+A opção pode ter os seguintes valores, predefinido como 'group' caso nenhum
+valor seja informado:
++
+--
+'umask' (ou 'false')::
+
+Use as permissões informadas por umask(2). É a predefinição quando
+`--shared` não é usado.
+
+'group' (ou 'true')::
+
+Torne o grupo do repositório com permissão de escrita (g+sx por exemplo,
+pois o grupo git pode não ser o grupo principal de todos os usuários). Isso
+é usado para afrouxar as permissões de um valor, a não ser que indique o
+contrário, umask(2) seguro. Observe que o umask ainda se aplica aos outros
+bits de permissão (por exemplo, caso o umask seja '0022' o uso de 'group'
+não removerá os privilégios de leitura dos outros usuários (sem um
+grupo). Consulte '0xxx' para saber como usar exatamente as permissões do
+repositório.
+
+'all' (ou 'world' ou 'everyone')::
+
+O mesmo que 'group', mas torna o repositório legível para todos os usuários.
+
+'0xxx'::
+
+'0xxx' is an octal number and each file will have mode '0xxx'. '0xxx' will
+override users' umask(2) value (and not only loosen permissions as 'group'
+and 'all' does). '0640' will create a repository which is group-readable,
+but not group-writable or accessible to others. '0660' will create a repo
+that is readable and writable to the current user and group, but
+inaccessible to others.
+--
+
+By default, the configuration flag `receive.denyNonFastForwards` is enabled
+in shared repositories, so that you cannot force a non fast-forwarding push
+into it.
+
+If you provide a 'directory', the command is run inside it. If this
+directory does not exist, it will be created.
+
+DIRETÓRIO MODELO
+----------------
+
+Os arquivos e diretórios no diretório modelo cujo nome não começa com um
+ponto serão copiados para o `$GIT_DIR` após a sua criação.
+
+O diretório modelo será um dos seguintes (em ordem):
+
+ - o argumento fornecido com a opção `--template`;
+
+ - o conteúdo da variável de ambiente `$GIT_TEMPLATE_DIR`;
+
+ - a variável de configuração `init.templateDir`; ou
+
+ - A predefinição do diretório modelo: `/usr/share/git-core/templates`.
+
+A predefinição do diretório modelo inclui alguma estrutura de diretórios,
+"padrões de exclusão" sugeridos (consulte linkgit:gitignore[5]) e os
+arquivos gancho de amostra.
+
+Por predefinição os ganchos de amostra estão todos desativados. Para ativar
+um dos ganchos de amostra, renomeie-o removendo o sufixo `.sample`.
+
+Para um apanhado geral sobre execução hook consulte linkgit:githooks[5].
+
+EXEMPLOS
+--------
+
+Inicie um novo repositório Git para uma base de código já existente::
++
+----------------
+$ cd /path/to/my/codebase
+$ git init      <1>
+$ git add .     <2>
+$ git commit    <3>
+----------------
++
+<1> Cria um diretório /path/to/my/codebase/.git.
+<2> Adicione todos os arquivos existentes ao índice.
+<3> Registre o estado intocado como o primeiro commit no histórico.
+
+GIT
+---
+Parte do linkgit:git[1] suite
