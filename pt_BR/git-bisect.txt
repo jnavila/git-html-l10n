@@ -17,18 +17,18 @@ DESCRIÇÃO
 O comando assume vários subcomandos e diferentes opções, dependendo do
 subcomando:
 
- git início de divisão [--prazo-{velho,bom}=<prazo> --prazo-{novo,mau}=<prazo>]
-		  [--não-confira] [<mau> [<bom>...]] [--] [<paths>...]
- git divisão (mau|novo|<prazo-novo>) [<rev>]
- git divisão (bom|velho|<prazo-velho>) [<rev>...]
- git termos de divisão [--termo-bom | --termo-ruim]
- git ignorar skip [(<rev>|<alcance>)...]
- git redefinição de divisão [<commit>]
- git divisão (visualizar|visão)
- git reprise de divisão <logfile>
- git divisão de registro
- git divisão corrida <cmd>...
- git ajuda na divisão
+ git bisect start [--term-{old,good}=<termo> --term-{new,bad}=<termo>]
+		  [--no-checkout] [<bad> [<good>...]] [--] [<caminhos>...]
+ git bisect (bad|new|<novo-termo>) [<rev>]
+ git bisect (good|old|<termo-antigo>) [<rev>...]
+ git bisect terms [--term-good | --term-bad]
+ git bisect skip [(<rev>|<faixa>)...]
+ git bisect reset [<commit>]
+ git bisect (visualize|view)
+ git bisect replay <logfile>
+ git bisect log
+ git bisect run <cmd>...
+ git bisect help
 
 Esse comando usa um algoritmo de busca binária para descobrir qual commit no
 histórico do seu projeto introduziu um bug. Você o utiliza primeiro
@@ -175,20 +175,20 @@ subcomandos bisect existentes como `reset`,` start`, .. .) iniciando a
 bissecção usando
 
 ------------------------------------------------
-git início de divisão --termo-velho <termo-velho> --termo-novo <termo-novo>
+git bisect start --term-old <termo-antigo> --term-new <novo-termo>
 ------------------------------------------------
 
 Por exemplo, se você estiver procurando por uma confirmação que introduziu
 uma regressão de desempenho, poderá usar
 
 ------------------------------------------------
-git início de divisão --termo-velho rápido --termo-novo lento
+git bisect start --term-old fast --term-new slow
 ------------------------------------------------
 
 Ou se você está procurando o commit que corrigiu um bug, você pode usar
 
 ------------------------------------------------
-git início de divisão --term-novo fixo --term-velho quebrado
+git bisect start --term-new fixed --term-old broken
 ------------------------------------------------
 
 Então, use `git divisão <termo-velho>` e `git divisão <termo-novo>` em vez
@@ -210,7 +210,7 @@ usado em seu lugar.  Você também pode dar opções de linha de comando como
 `-p` e` --stat`.
 
 ------------
-$ git visualizar divisão --stat
+$ git bisect visualize --stat
 ------------
 
 Divisão de log e divisão de replay
@@ -244,8 +244,8 @@ manualmente um commit próximo e testá-lo.
 Por exemplo:
 
 ------------
-$ git bisect good/bad			# a rodada anterior estava bom ou ruim.
-Bisecting: 337 deixadas para testar depois disso (aproximadamente 9 passos)
+$ git bisect good/bad			# a rodada anterior estava boa ou ruim.
+Bisecting: 337 deixadas para serem testadas depois disso (aproximadamente 9 passos)
 $ git bisect visualize			# oops, isso não foi interessante.
 $ git reset --hard HEAD~3		# tente 3 revisões antes do que
 					# foi sugerido
@@ -296,7 +296,7 @@ parte da árvore está envolvida no problema que você está rastreando,
 especificando parâmetros de caminho ao emitir o comando `bisect start`:
 
 ------------
-$ git divisão start -- arch/i386 incluir/asm-i386
+$ git bisect start -- arch/i386 include/asm-i386
 ------------
 
 Se você souber de antemão mais de um bom commit, você pode restringir o
@@ -370,7 +370,7 @@ EXEMPLOS
 +
 ------------
 $ git bisect start HEAD v1.2 --      # HEAD está ruim, v1.2 está bom
-$ git bisect run make                # "make" constrói o app
+$ git bisect run make                # "make" compila o app
 $ git bisect reset                   # encerra a seção bisect
 ------------
 
@@ -378,7 +378,7 @@ $ git bisect reset                   # encerra a seção bisect
 +
 ------------
 $ git bisect start HEAD origin --    # HEAD está ruim, origin está bom
-$ git bisect run make test           # "make test" monta e testa
+$ git bisect run make test           # "make test" compila e testa
 $ git bisect reset                   # encerra a seção bisect
 ------------
 
@@ -408,16 +408,16 @@ e teste e os scripts.
 $ cat ~/teste.sh
 #!/bin/sh
 
-# tweak the working tree by merging the hot-fix branch
-# and then attempt a build
+# faz ajustes na árvore de trabalho ao mesclar
+# a solução do problema no ramo e tenta compilá-lo
 if	git merge --no-commit --no-ff hot-fix &&
 	make
 then
-	# run project specific test and report its status
+	# executa testes específicos no projeto e informa a sua condição atual
 	~/check_test_case.sh
 	status=$?
 else
-	# tell the caller this is untestable
+	# informa quem pediu os testes que não foi possível testar
 	status=125
 fi
 

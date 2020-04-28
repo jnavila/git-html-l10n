@@ -9,13 +9,13 @@ git-apply - Aplica um patch aos arquivos e/ou ao índice
 SINOPSE
 -------
 [verse]
-'git aplique' [--stat] [--numstat] [--resumo] [--verifica] [--índice | --intenção-de-adicionar] [--3caminho]
-	  [--aplique] [--não-adicionar] [--construir-antepassado-falso=<arquivo>] [-R | --reverso]
-	  [--permitir-substituição-binária | --binário] [--rejeitar] [-z]
-	  [-p<n>] [-C<n>] [--impreciso-eof] [--recontagem] [--em-cache]
-	  [--ignorar-mudança-de-estado | --ignorar-espaço-em-branco]
-	  [--espaço-em-branco=(agora|advertir|consertar|erro|todo-erro)]
-	  [--excluir=<path>] [--incluir=<path>] [--diretório=<root>]
+'git apply' [--stat] [--numstat] [--summary] [--check] [--index | --intent-to-add] [--3way]
+	  [--apply] [--no-add] [--build-fake-ancestor=<arquivo>] [-R | --reverse]
+	  [--allow-binary-replacement | --binary] [--reject] [-z]
+	  [-p<n>] [-C<n>] [--inaccurate-eof] [--recount] [--cached]
+	  [--ignore-space-change | --ignore-whitespace]
+	  [--whitespace=(nowarn|warn|fix|error|error-all)]
+	  [--exclude=<caminho>] [--include=<caminho>] [--directory=<root>]
 	  [--verbose] [--unsafe-paths] [<patch>...]
 
 DESCRIÇÃO
@@ -42,10 +42,10 @@ OPÇÕES
 	"aplicar".
 
 --numstat::
-	Semelhante ao `--stat`, mas mostra o número de linhas adicionadas e
-	deletadas em notação decimal e o nome do caminho sem abreviação, para
-	torná-lo mais amigável ao computador.  Para arquivos binários, gera dois `-`
-	ao invés de dizer` 0 0`.  Desativa "aplicar".
+	Semelhante ao `--stat`, mas exibe a quantidade de linhas adicionadas e
+	excluídas sem a notação decimal e o nome do caminho sem abreviação para
+	torná-lo mais amigável ao computador.  Para os arquivos binários, geram dois
+	`-` em vez de ` 0 0`.  Desativa o "apply".
 
 --summary::
 	Em vez de aplicar o patch, imprima um resumo condensado das informações
@@ -79,14 +79,14 @@ OPÇÕES
 
 -3::
 --3way::
-	Quando o patch não se aplica corretamente, use a mesclagem de 3 vias se o
-	patch registrar a identidade dos blobs aos quais ele deve se aplicar, e
-	temos esses blobs disponíveis localmente, possivelmente deixando os
-	marcadores de conflito nos arquivos na árvore de trabalho. para o usuário
-	resolver.  Esta opção implica a opção `--index`, e é incompatível com as
-	opções` --reject` e `--cached`.
+	Quando o patch não for aplicado corretamente, use a mesclagem de 3 vias caso
+	o patch registre a identidade das gotas aos quais devem ser aplicadas
+	disponibilizando-as localmente, possivelmente deixando os marcadores de
+	conflito nos arquivos na árvore de trabalho para o usuário resolver.  Esta
+	opção implica no uso de `--index` sendo incompatível com as opções
+	`--reject` e `--cached`.
 
---construir-antepassado-falso=<file>::
+--build-fake-ancestor=<arquivo>::
 	A saída mais recente do 'git diff' incorporou 'informações de índice' para
 	cada blob para ajudar a identificar a versão original à qual o patch se
 	aplica.  Quando esse sinalizador é fornecido e se as versões originais dos
@@ -152,12 +152,12 @@ desencorajado.
 	isso.  Atualmente, sempre permitimos a aplicação de correção binária,
 	portanto, isso é um não operacional.
 
---excluir=<path-padrão>::
+--exclude=<caminho-padrão>::
 	Não aplique alterações a arquivos correspondentes ao padrão de caminho
 	fornecido. Isso pode ser útil ao importar conjuntos de patch, onde você
 	deseja excluir determinados arquivos ou diretórios.
 
---incluir=<path-padrão>::
+--include=<caminho-padrão>::
 	Aplique mudanças nos arquivos correspondentes ao padrão de caminho
 	fornecido. Isso pode ser útil ao importar conjuntos de patch, onde você
 	deseja incluir determinados arquivos ou diretórios.
@@ -176,7 +176,7 @@ algum padrão de inclusão.
 	branco e não passarão por correção de espaço em branco, independentemente do
 	valor da opção `--whitespace`. Novas linhas ainda serão corrigidas.
 
---espaçoembranco=<action>::
+--whitespace=<ação>::
 	Ao aplicar um patch, detecte uma linha nova ou modificada que tenha erros de
 	espaço em branco.  O que é considerado erro de espaço em branco é controlado
 	pela configuração `core.whitespace`.  Por padrão, os espaços em branco à
@@ -220,7 +220,7 @@ comportamento:
 	inspecionando o patch (por exemplo, depois de editar o patch sem ajustar os
 	cabeçalhos adequadamente).
 
---diretório=<root>::
+--directory=<raiz>::
 	Prefira <root> a todos os nomes de arquivos.  Se um argumento "-p" também
 	foi passado, ele será aplicado antes de prefixar a nova raiz.
 +
@@ -262,9 +262,9 @@ aplicado.  Se qualquer um dos submódulos estiver em check-out, esses
 check-outs serão completamente ignorados, ou seja, eles não precisarão estar
 atualizados ou limpos e não serão atualizados.
 
-Se `--index` não for especificado, os submódulos confirmados no patch serão
-ignorados e somente a ausência ou presença do subdiretório correspondente
-será verificada e (se possível) atualizada.
+Caso a opção `--index` não seja informada, os submódulos confirmados no
+patch serão ignorados e somente a ausência ou presença do subdiretório
+correspondente será verificada e (se possível) atualizada.
 
 VEJA TAMBÉM
 -----------

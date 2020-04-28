@@ -7,7 +7,7 @@
 	conteúdo existente de `.git/FETCH_HEAD`. Sem essa opção, os dados antigos em
 	`.git/FETCH_HEAD` serão sobrescritos.
 
---profundidade=<profundidade>::
+--depth=<profundidade>::
 	Limite a busca para o número especificado de confirmações da ponta de cada
 	histórico de ramificação remota. Se buscar um repositório 'superficial'
 	criado pelo `git clone` com a opção` --depth = <depth> `(veja
@@ -15,7 +15,7 @@
 	especificado de commits. As tags para as confirmações aprofundadas não são
 	buscadas.
 
---aprofundar=<profundidade>::
+--deepen=<profundidade>::
 	Semelhante a --depth, exceto que especifica o número de confirmações do
 	limite raso atual em vez da ponta de cada histórico de ramificação remota.
 
@@ -147,7 +147,7 @@ ifndef::git-pull[]
 	maneira, se elas também forem o destino de uma referência explícita;
 	consulte `--prune`).
 
---recurso-submódulos[=sim|sob-demanda|não]::
+--recurse-submodules[=yes|on-demand|no]::
 	Essa opção controla se e sob quais condições novas confirmações de
 	submódulos preenchidos devem ser buscadas também. Ele pode ser usado como
 	uma opção booleana para desabilitar completamente a recursão quando definido
@@ -159,38 +159,40 @@ ifndef::git-pull[]
 	no clone do submódulo local.
 
 -j::
---empregos=<n>::
+--jobs=<n>::
 	Number of parallel children to be used for all forms of fetching.
 +
-If the `--multiple` option was specified, the different remotes will be
-fetched in parallel. If multiple submodules are fetched, they will be
-fetched in parallel. To control them independently, use the config settings
-`fetch.parallel` and `submodule.fetchJobs` (see linkgit:git-config[1]).
+Caso a opção `--multiple` seja especificada, diferentes ramos remotos serão
+buscados em paralelo. Caso vários submódulos seja buscados, este serão
+buscados em paralelo. Para controlá-los independentemente, use as definições
+de configuração `fetch.parallel` e `submodule.fetchJobs` (consulte
+linkgit:git-config[1]).
 +
-Typically, parallel recursive and multi-remote fetches will be faster. By
-default fetches are performed sequentially, not in parallel.
+Normalmente, buscas remotas de múltiplos ramos de forma paralela e recursiva
+serão mais rápidas. A predefinição é realizar buscas em sequência e não e
+paralelo.
 
 --no-recurse-submodules::
-	Desabilite a busca recursiva de submódulos (isto tem o mesmo efeito que usar
-	a opção `--recurse-submodules=no`).
+	Desabilite a busca recursiva de submódulos (tem o mesmo efeito que usar a
+	opção `--recurse-submodules=no`).
 
 --set-upstream::
-	If the remote is fetched successfully, pull and add upstream (tracking)
-	reference, used by argument-less linkgit:git-pull[1] and other commands. For
-	more information, see `branch.<name>.merge` and `branch.<name>.remote` in
-	linkgit:git-config[1].
+	Caso a busca remota seja bem sucedida, uma referência de rastreamento `pull`
+	e `add` será adicionada ao upstream, utilizado pelo argumento `less`
+	linkgit:git-pull[1] e outros comandos. Para mais informações, consulte
+	`branch.<name>.merge` e `branch.<name>.remote` em linkgit:git-config[1].
 
---submódulo-prefixo=<path>::
-	Prefira <path> a caminhos impressos em mensagens informativas, como
-	"Buscando submodulo foo". Essa opção é usada internamente ao recorrer a
-	submódulos.
+--submodule-prefix=<path>::
+	Anexar <path> para os caminhos impressos nas mensagens informativas como
+	"Recolhendo o submódulo foo".  Esta opção é utilizada internamente quando
+	recorrer as submódulos.
 
---recurso-submódulo-padrão=[sim|sob-demanda]::
-	Essa opção é usada internamente para fornecer temporariamente um valor
-	padrão não negativo para a opção --recurse-submodules. Todos os outros
-	métodos de configuração da recursão do submódulo da busca (como
-	configurações em linkgit:gitmodules[5] e linkgit:git-config[1]) sobrescrevem
-	esta opção, assim como especificar - [no-]recurse-submodules diretamente.
+--recurse-submodules-default=[yes|on-demand]::
+	Esta opção é utilizada internamente para prover temporariamente um valor não
+	negative de forma predefinida para a opção --recurse-submodules.  Todos os
+	outros métodos de configurar a recursão do submódulo `fetch` (como as
+	configurações em linkgit:gitmodules[5] e linkgit:git-config[1]) sobrescreva
+	esta opção usando --[no-]recurse-submodules diretamente.
 endif::git-pull[]
 
 -u::
@@ -224,7 +226,7 @@ endif::git-pull[]
 	for direcionado para um terminal.
 
 -o <option>::
---servidor-opção=<option>::
+--server-option=<option>::
 	Transmita a string fornecida para o servidor ao se comunicar usando o
 	protocolo versão 2. A string fornecida não deve conter um caractere NUL ou
 	LF. A maneira que o servidor lida com as opções do servidor específicas para
@@ -233,16 +235,18 @@ endif::git-pull[]
 	outro lado na ordem listada na linha de comando.
 
 --show-forced-updates::
-	By default, git checks if a branch is force-updated during fetch. This can
-	be disabled through fetch.showForcedUpdates, but the --show-forced-updates
-	option guarantees this check occurs.  See linkgit:git-config[1].
+	É predefinido que o Git verifique se a atualização do ramo foi imposta
+	durante uma busca. Isso pode ser desativado por meio de
+	`fetch.showForcedUpdates`, porém a opção `--show-forced-updates garante que
+	essa verificação ocorra.  Consulte linkgit:git-config[1].
 
 --no-show-forced-updates::
-	By default, git checks if a branch is force-updated during fetch. Pass
-	--no-show-forced-updates or set fetch.showForcedUpdates to false to skip
-	this check for performance reasons. If used during 'git-pull' the --ff-only
-	option will still check for forced updates before attempting a fast-forward
-	update. See linkgit:git-config[1].
+	É predefinido que o Git verifique se a atualização do ramo foi imposta
+	durante uma busca. Use a opção `--no-show-forced-updates` ou defina
+	`fetch.showForcedUpdates` como to `false` para ignorar essa verificação por
+	questões de desempenho. Se usada durante o `git pull`, a opção `--ff-only`
+	ainda verificará as atualizações impostas antes de tentar uma atualização
+	rápida. Consulte linkgit:git-config[1].
 
 -4::
 --ipv4::

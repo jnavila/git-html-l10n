@@ -9,10 +9,10 @@ trabalho
 SINOPSE
 -------
 [verse]
-'git checkout' [-q] [-f] [-m] [<branch>]
-'git checkout' [-q] [-f] [-m] --detach [<branch>]
+'git checkout' [-q] [-f] [-m] [<ramo>]
+'git checkout' [-q] [-f] [-m] --detach [<ramo>]
 'git checkout' [-q] [-f] [-m] [--detach] <commit>
-'git checkout' [-q] [-f] [-m] [[-b|-B|--orphan] <new_branch>] [<start_point>]
+'git checkout' [-q] [-f] [-m] [[-b|-B|--orphan] <novo_ramo>] [<ponto_de_início>]
 'git checkout' [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] [--] <pathspec>...
 'git checkout' [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] --pathspec-from-file=<file> [--pathspec-file-nul]
 'git checkout' (-p|--patch) [<tree-ish>] [--] [<pathspec>...]
@@ -63,8 +63,8 @@ $ git verificar <branch>
 isto é, a ramificação não é redefinida/criada a menos que "git verificar"
 seja bem-sucedido.
 
-'git verificar' --desanexar [<branch>]::
-'git verificar' [--desanexar] <commit>::
+'git checkout' --detach [<ramo>]::
+'git checkout' [--detach] <commit>::
 
 	Prepare-se para trabalhar em cima de `<commit>`, desanexando o `HEAD` nele
 	(consulte a seção "DESTACADO HEAD") e atualizando o índice e os arquivos na
@@ -81,10 +81,11 @@ Ao omitir o `<branch>` isso desanexa o `HEAD` na ponta do ramo atual.
 'git checkout' [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] [--] <pathspec>...::
 'git checkout' [-f|--ours|--theirs|-m|--conflict=<style>] [<tree-ish>] --pathspec-from-file=<file> [--pathspec-file-nul]::
 
-	Overwrite the contents of the files that match the pathspec.  When the
-	`<tree-ish>` (most often a commit) is not given, overwrite working tree with
-	the contents in the index.  When the `<tree-ish>` is given, overwrite both
-	the index and the working tree with the contents at the `<tree-ish>`.
+	Substitua o conteúdo dos arquivos que correspondem ao `pathspec`.  Quando o
+	`<tree-ish>` (na maioria das vezes um commit) não for fornecido, substitua a
+	árvore de trabalho pelo conteúdo do índice.  Quando o `<tree-ish>` for
+	informado, substitua o índice e a árvore de trabalho pelo conteúdo em
+	`<tree-ish>`.
 +
 O índice pode conter entradas não mescladas devido a uma mesclagem anterior
 com falha.  Por padrão, se você tentar verificar essa entrada do índice, a
@@ -94,7 +95,7 @@ pode ser retirado do índice usando `--ours` ou` --theirs`.  Com `-m`, as
 alterações feitas no arquivo da árvore de trabalho podem ser descartadas
 para recriar o resultado da mesclagem original em conflito.
 
-'git verificar' (-p|--patch) [<tree-ish>] [--] [<pathspec>...]::
+'git checkout' (-p|--patch) [<tree-ish>] [--] [<pathspec>...]::
 	Isso é semelhante ao modo anterior, porém permite usar a interface
 	interativa para mostrar a saída "diff" e escolher quais blocos usar no
 	resultado.  Veja abaixo a descrição da opção `--patch`.
@@ -186,7 +187,7 @@ sempre verificar as ramificações remotas de lá se` <branch> `for ambíguo,
 mas existir no remoto de 'origem'. Veja também `verificar.padrãoRemoto` no
 linkgit:gitconfig[1].
 +
-Use `--no-guess` to disable this.
+Utilize a opção `--no-guess` para desativar.
 
 -l::
 	Crie o reflog da nova ramificação; veja linkgit:git-branch[1] para detalhes.
@@ -197,7 +198,7 @@ Use `--no-guess` to disable this.
 	`git checkout <commit>` quando `<commit>` não for um nome de
 	ramificação. Veja a seção "DESASSOCIANDO O HEAD" abaixo para detalhes.
 
---orfão <novo_branch>::
+--orphan <novo_ramo>::
 	Crie uma nova ramificação 'orphan' denominada `<new_branch>` iniciada a
 	partir do <start_point> e mude para ela. O primeiro commit feito nesta nova
 	ramificação não terá matrizes e será a raiz de uma nova história totalmente
@@ -248,7 +249,7 @@ mesclagem conflitante nos caminhos especificados.
 +
 When switching branches with `--merge`, staged changes may be lost.
 
---conflito=<estilo>::
+--conflict=<estilo>::
 	O mesmo que a opção `--merge acima` porém altera a forma como os blocos
 	conflitantes são apresentados, substituindo a variável de configuração
 	`merge.conflictStyle`.  Os valores possíveis são "merge" (padrão) e "diff3"
@@ -312,7 +313,7 @@ Note that this option uses the no overlay mode by default (see also
 	caracteres são considerados de forma literal (incluindo novas linhas e
 	citações).
 
-<branch>::
+<ramo>::
 	Ramificação que será extraída; se refere a um ramo (ou seja, um nome que
 	quando preparado com "refs/heads/", for um "ref" válido) então este ramo é
 	extraído. Caso contrário, caso se referira a um commit válido, seu `HEAD` se
@@ -347,26 +348,26 @@ deixar de fora, no máximo, um de `A` e` B`, caso em que o padrão é `HEAD`.
 	Não interprete mais argumentos como opções.
 
 <pathspec>...::
-	Limits the paths affected by the operation.
+	Limita os caminhos afetados pela operação.
 +
 Para mais detalhes sobre a sintaxe <pathspec>, veja a entrada 'pathspec' em
 linkgit:gitglossary[7].
 
 CABEÇA DESTACADA
 ----------------
-`HEAD` normalmente se refere a um branch ou ramificação de nome próprio
-(como `master` por exemplo). Enquanto isso, cada ramo ou ramificação tem
-como referência um "commit" específico. Vamos olhar para um repositório com
-três commits onde um deles está marcado como ramificação `master`:
+Em geral `HEAD` refere-se a um ramo ou ramificação de nome próprio (como
+`master` por exemplo). Enquanto isso, cada ramo ou ramificação tem como
+referência um "commit" específico. Vamos olhar para um repositório com três
+commits onde um deles está marcado como ramificação `master`:
 
 ------------
-           HEAD (refers to branch 'master')
+           HEAD (refere-se ao ramo 'master')
             |
             v
-a---b---c  branch 'master' (refers to commit 'c')
+a---b---c  branch 'master' (refere-se ao commit 'c')
     ^
     |
-  tag 'v2.0' (refers to commit 'b')
+  tag 'v2.0' (refere-se ao commit 'b')
 ------------
 
 Quando uma confirmação é criada nesta condição a ramificação é atualizada
@@ -378,13 +379,13 @@ ramificação `master` e então indiretamente agora se refere ao commit `d`:
 ------------
 $ editar; git adicionar; git commit
 
-               HEAD (refers to branch 'master')
+               HEAD (refere-se ao ramo 'master')
                 |
                 v
-a---b---c---d  branch 'master' (refers to commit 'd')
+a---b---c---d  branch 'master' (refere-se ao commit 'd')
     ^
     |
-  tag 'v2.0' (refers to commit 'b')
+  tag 'v2.0' (refere-se ao commit 'b')
 ------------
 
 Às vezes é útil poder fazer o checkout do nome de um commit que não esteja
@@ -397,13 +398,13 @@ isso pode ser feito):
 $ git verificar v2.0  # ou
 $ git verificar master^^
 
-   HEAD (refers to commit 'b')
+   HEAD (refere-se ao commit 'b')
     |
     v
-a---b---c---d  branch 'master' (refers to commit 'd')
+a---b---c---d  branch 'master' (refere-se ao commit 'd')
     ^
     |
-  tag 'v2.0' (refers to commit 'b')
+  tag 'v2.0' (refere-se ao commit 'b')
 ------------
 
 Observe que, independente do comando checkout usado o `HEAD` agora se refere
@@ -415,15 +416,15 @@ quando criamos um commit:
 ------------
 $ editar; git adicionar; git commit
 
-     HEAD (refers to commit 'e')
+     HEAD (refere-se ao commit 'e')
       |
       v
       e
      /
-a---b---c---d  branch 'master' (refers to commit 'd')
+a---b---c---d  branch 'master' (refere-se ao commit 'd')
     ^
     |
-  tag 'v2.0' (refers to commit 'b')
+  tag 'v2.0' (refere-se ao commit 'b')
 ------------
 
 Agora existe um novo commit `e`, com referência apenas em` HEAD`. Nessa
@@ -432,15 +433,15 @@ condição fica claro que podemos adicionar mais um commit:
 ------------
 $ editar; git adicionar; git commit
 
-	 HEAD (refers to commit 'f')
+	 HEAD (refere-se ao commit 'f')
 	  |
 	  v
       e---f
      /
-a---b---c---d  branch 'master' (refers to commit 'd')
+a---b---c---d  branch 'master' (refere-se ao commit 'd')
     ^
     |
-  tag 'v2.0' (refers to commit 'b')
+  tag 'v2.0' (refere-se ao commit 'b')
 ------------
 
 De fato, podemos executar todas as operações normais do Git. Porém vejamos o
@@ -449,13 +450,13 @@ que acontece quando fazemos um checkout do `master`:
 ------------
 $ git verificar master
 
-               HEAD (refers to branch 'master')
+               HEAD (refere-se ao ramo 'master')
       e---f     |
      /          v
-a---b---c---d  branch 'master' (refers to commit 'd')
+a---b---c---d  branch 'master' (refere-se ao commit 'd')
     ^
     |
-  tag 'v2.0' (refers to commit 'b')
+  tag 'v2.0' (refere-se ao commit 'b')
 ------------
 
 É importante perceber que neste momento nada se refere ao commit
@@ -486,7 +487,7 @@ referência para ele. Para ver os dois últimos commits aos quais o `HEAD` se
 refere, podemos usar um destes comandos, por exemplo:
 
 ------------
-$ git reflog -2 HEAD # or
+$ git reflog -2 HEAD # ou
 $ git log -g -2 HEAD
 ------------
 
@@ -524,7 +525,7 @@ Se você quiser dar uma olhada nos arquivos de código-fonte, todos fora do
 índice, você pode dizer
 +
 ------------
-$ git verificar -- '*.c'
+$ git checkout -- '*.c'
 ------------
 +
 Observe as aspas em torno de `* .c`.  O arquivo `hello.c` também será
@@ -536,7 +537,7 @@ Se você tem um ramo infeliz chamado `hello.c`, este passo seria confundido
 como uma instrução para mudar para esse ramo.  Você deve escrever:
 +
 ------------
-$ git verificar -- hello.c
+git checkout -- hello.c
 ------------
 
 . Depois de trabalhar no ramo errado, mudar para o ramo correto seria feito

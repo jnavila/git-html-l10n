@@ -462,18 +462,18 @@ subcomando:</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>git início de divisão [--prazo-{velho,bom}=&lt;prazo&gt; --prazo-{novo,mau}=&lt;prazo&gt;]
-	  [--não-confira] [&lt;mau&gt; [&lt;bom&gt;...]] [--] [&lt;paths&gt;...]
-git divisão (mau|novo|&lt;prazo-novo&gt;) [&lt;rev&gt;]
-git divisão (bom|velho|&lt;prazo-velho&gt;) [&lt;rev&gt;...]
-git termos de divisão [--termo-bom | --termo-ruim]
-git ignorar skip [(&lt;rev&gt;|&lt;alcance&gt;)...]
-git redefinição de divisão [&lt;commit&gt;]
-git divisão (visualizar|visão)
-git reprise de divisão &lt;logfile&gt;
-git divisão de registro
-git divisão corrida &lt;cmd&gt;...
-git ajuda na divisão</pre>
+<pre>git bisect start [--term-{old,good}=&lt;termo&gt; --term-{new,bad}=&lt;termo&gt;]
+	  [--no-checkout] [&lt;bad&gt; [&lt;good&gt;...]] [--] [&lt;caminhos&gt;...]
+git bisect (bad|new|&lt;novo-termo&gt;) [&lt;rev&gt;]
+git bisect (good|old|&lt;termo-antigo&gt;) [&lt;rev&gt;...]
+git bisect terms [--term-good | --term-bad]
+git bisect skip [(&lt;rev&gt;|&lt;faixa&gt;)...]
+git bisect reset [&lt;commit&gt;]
+git bisect (visualize|view)
+git bisect replay &lt;logfile&gt;
+git bisect log
+git bisect run &lt;cmd&gt;...
+git bisect help</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -651,7 +651,7 @@ bissecção usando</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>git início de divisão --termo-velho &lt;termo-velho&gt; --termo-novo &lt;termo-novo&gt;</pre>
+<pre>git bisect start --term-old &lt;termo-antigo&gt; --term-new &lt;novo-termo&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -660,7 +660,7 @@ uma regressão de desempenho, poderá usar</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>git início de divisão --termo-velho rápido --termo-novo lento</pre>
+<pre>git bisect start --term-old fast --term-new slow</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -668,7 +668,7 @@ uma regressão de desempenho, poderá usar</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>git início de divisão --term-novo fixo --term-velho quebrado</pre>
+<pre>git bisect start --term-new fixed --term-old broken</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -695,7 +695,7 @@ usado em seu lugar.  Você também pode dar opções de linha de comando como
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ git visualizar divisão --stat</pre>
+<pre>$ git bisect visualize --stat</pre>
 </div>
 </div>
 </div>
@@ -736,8 +736,8 @@ manualmente um commit próximo e testá-lo.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ git bisect good/bad                   # a rodada anterior estava bom ou ruim.
-Bisecting: 337 deixadas para testar depois disso (aproximadamente 9 passos)
+<pre>$ git bisect good/bad                   # a rodada anterior estava boa ou ruim.
+Bisecting: 337 deixadas para serem testadas depois disso (aproximadamente 9 passos)
 $ git bisect visualize                  # oops, isso não foi interessante.
 $ git reset --hard HEAD~3               # tente 3 revisões antes do que
                                         # foi sugerido</pre>
@@ -799,7 +799,7 @@ especificando parâmetros de caminho ao emitir o comando <code>bisect start</cod
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ git divisão start -- arch/i386 incluir/asm-i386</pre>
+<pre>$ git bisect start -- arch/i386 include/asm-i386</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -899,7 +899,7 @@ não exigir uma árvore com check-out.</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ git bisect start HEAD v1.2 --      # HEAD está ruim, v1.2 está bom
-$ git bisect run make                # "make" constrói o app
+$ git bisect run make                # "make" compila o app
 $ git bisect reset                   # encerra a seção bisect</pre>
 </div>
 </div>
@@ -909,7 +909,7 @@ $ git bisect reset                   # encerra a seção bisect</pre>
 <div class="listingblock">
 <div class="content">
 <pre>$ git bisect start HEAD origin --    # HEAD está ruim, origin está bom
-$ git bisect run make test           # "make test" monta e testa
+$ git bisect run make test           # "make test" compila e testa
 $ git bisect reset                   # encerra a seção bisect</pre>
 </div>
 </div>
@@ -945,16 +945,16 @@ e teste e os scripts.</p>
 <pre>$ cat ~/teste.sh
 #!/bin/sh
 
-# tweak the working tree by merging the hot-fix branch
-# and then attempt a build
+# faz ajustes na árvore de trabalho ao mesclar
+# a solução do problema no ramo e tenta compilá-lo
 if      git merge --no-commit --no-ff hot-fix &amp;&amp;
         make
 then
-        # run project specific test and report its status
+        # executa testes específicos no projeto e informa a sua condição atual
         ~/check_test_case.sh
         status=$?
 else
-        # tell the caller this is untestable
+        # informa quem pediu os testes que não foi possível testar
         status=125
 fi
 
@@ -1062,7 +1062,7 @@ help` ou <code>git bisect -h</code> para obter uma descrição longa do uso.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-25 20:39:45 +0200
+Last updated 2020-04-28 17:13:35 +0200
 </div>
 </div>
 </body>

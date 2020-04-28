@@ -449,13 +449,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_sinopse">SINOPSE</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git aplique</em> [--stat] [--numstat] [--resumo] [--verifica] [--índice | --intenção-de-adicionar] [--3caminho]
-          [--aplique] [--não-adicionar] [--construir-antepassado-falso=&lt;arquivo&gt;] [-R | --reverso]
-          [--permitir-substituição-binária | --binário] [--rejeitar] [-z]
-          [-p&lt;n&gt;] [-C&lt;n&gt;] [--impreciso-eof] [--recontagem] [--em-cache]
-          [--ignorar-mudança-de-estado | --ignorar-espaço-em-branco]
-          [--espaço-em-branco=(agora|advertir|consertar|erro|todo-erro)]
-          [--excluir=&lt;path&gt;] [--incluir=&lt;path&gt;] [--diretório=&lt;root&gt;]
+<pre class="content"><em>git apply</em> [--stat] [--numstat] [--summary] [--check] [--index | --intent-to-add] [--3way]
+          [--apply] [--no-add] [--build-fake-ancestor=&lt;arquivo&gt;] [-R | --reverse]
+          [--allow-binary-replacement | --binary] [--reject] [-z]
+          [-p&lt;n&gt;] [-C&lt;n&gt;] [--inaccurate-eof] [--recount] [--cached]
+          [--ignore-space-change | --ignore-whitespace]
+          [--whitespace=(nowarn|warn|fix|error|error-all)]
+          [--exclude=&lt;caminho&gt;] [--include=&lt;caminho&gt;] [--directory=&lt;root&gt;]
           [--verbose] [--unsafe-paths] [&lt;patch&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
@@ -495,10 +495,10 @@ padrão.</p>
 </dd>
 <dt class="hdlist1">--numstat</dt>
 <dd>
-<p>Semelhante ao <code>--stat</code>, mas mostra o número de linhas adicionadas e
-deletadas em notação decimal e o nome do caminho sem abreviação, para
-torná-lo mais amigável ao computador.  Para arquivos binários, gera dois <code>-</code>
-ao invés de dizer` 0 0`.  Desativa "aplicar".</p>
+<p>Semelhante ao <code>--stat</code>, mas exibe a quantidade de linhas adicionadas e
+excluídas sem a notação decimal e o nome do caminho sem abreviação para
+torná-lo mais amigável ao computador.  Para os arquivos binários, geram dois
+<code>-</code> em vez de ` 0 0`.  Desativa o "apply".</p>
 </dd>
 <dt class="hdlist1">--summary</dt>
 <dd>
@@ -538,14 +538,14 @@ ser implicado por outras opções como` --cached` ou <code>--3way</code>.</p>
 <dt class="hdlist1">-3</dt>
 <dt class="hdlist1">--3way</dt>
 <dd>
-<p>Quando o patch não se aplica corretamente, use a mesclagem de 3 vias se o
-patch registrar a identidade dos blobs aos quais ele deve se aplicar, e
-temos esses blobs disponíveis localmente, possivelmente deixando os
-marcadores de conflito nos arquivos na árvore de trabalho. para o usuário
-resolver.  Esta opção implica a opção <code>--index</code>, e é incompatível com as
-opções` --reject` e <code>--cached</code>.</p>
+<p>Quando o patch não for aplicado corretamente, use a mesclagem de 3 vias caso
+o patch registre a identidade das gotas aos quais devem ser aplicadas
+disponibilizando-as localmente, possivelmente deixando os marcadores de
+conflito nos arquivos na árvore de trabalho para o usuário resolver.  Esta
+opção implica no uso de <code>--index</code> sendo incompatível com as opções
+<code>--reject</code> e <code>--cached</code>.</p>
 </dd>
-<dt class="hdlist1">--construir-antepassado-falso=&lt;file&gt;</dt>
+<dt class="hdlist1">--build-fake-ancestor=&lt;arquivo&gt;</dt>
 <dd>
 <p>A saída mais recente do <em>git diff</em> incorporou <em>informações de índice</em> para
 cada blob para ajudar a identificar a versão original à qual o patch se
@@ -624,13 +624,13 @@ permissão explícita do usuário, e esse sinalizador era a maneira de fazer
 isso.  Atualmente, sempre permitimos a aplicação de correção binária,
 portanto, isso é um não operacional.</p>
 </dd>
-<dt class="hdlist1">--excluir=&lt;path-padrão&gt;</dt>
+<dt class="hdlist1">--exclude=&lt;caminho-padrão&gt;</dt>
 <dd>
 <p>Não aplique alterações a arquivos correspondentes ao padrão de caminho
 fornecido. Isso pode ser útil ao importar conjuntos de patch, onde você
 deseja excluir determinados arquivos ou diretórios.</p>
 </dd>
-<dt class="hdlist1">--incluir=&lt;path-padrão&gt;</dt>
+<dt class="hdlist1">--include=&lt;caminho-padrão&gt;</dt>
 <dd>
 <p>Aplique mudanças nos arquivos correspondentes ao padrão de caminho
 fornecido. Isso pode ser útil ao importar conjuntos de patch, onde você
@@ -652,7 +652,7 @@ contexto, se necessário.  As linhas de contexto preservarão seu espaço em
 branco e não passarão por correção de espaço em branco, independentemente do
 valor da opção <code>--whitespace</code>. Novas linhas ainda serão corrigidas.</p>
 </dd>
-<dt class="hdlist1">--espaçoembranco=&lt;action&gt;</dt>
+<dt class="hdlist1">--whitespace=&lt;ação&gt;</dt>
 <dd>
 <p>Ao aplicar um patch, detecte uma linha nova ou modificada que tenha erros de
 espaço em branco.  O que é considerado erro de espaço em branco é controlado
@@ -715,7 +715,7 @@ informações adicionais sejam relatadas.</p>
 inspecionando o patch (por exemplo, depois de editar o patch sem ajustar os
 cabeçalhos adequadamente).</p>
 </dd>
-<dt class="hdlist1">--diretório=&lt;root&gt;</dt>
+<dt class="hdlist1">--directory=&lt;raiz&gt;</dt>
 <dd>
 <p>Prefira &lt;root&gt; a todos os nomes de arquivos.  Se um argumento "-p" também
 foi passado, ele será aplicado antes de prefixar a nova raiz.</p>
@@ -778,9 +778,9 @@ check-outs serão completamente ignorados, ou seja, eles não precisarão estar
 atualizados ou limpos e não serão atualizados.</p>
 </div>
 <div class="paragraph">
-<p>Se <code>--index</code> não for especificado, os submódulos confirmados no patch serão
-ignorados e somente a ausência ou presença do subdiretório correspondente
-será verificada e (se possível) atualizada.</p>
+<p>Caso a opção <code>--index</code> não seja informada, os submódulos confirmados no
+patch serão ignorados e somente a ausência ou presença do subdiretório
+correspondente será verificada e (se possível) atualizada.</p>
 </div>
 </div>
 </div>
@@ -803,7 +803,7 @@ será verificada e (se possível) atualizada.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-25 20:39:45 +0200
+Last updated 2020-04-28 17:13:35 +0200
 </div>
 </div>
 </body>
