@@ -1,0 +1,196 @@
+git-diff(1)
+===========
+
+NOME
+----
+git-diff - Exibe as mudanças entre os commits, o commit, a árvore de
+trabalho, etc
+
+
+SINOPSE
+-------
+[verse]
+'git diff' [<opções>] [<commit>] [--] [<caminho>...]
+'git diff' [<opções>] --cached [<commit>] [--] [<caminho>...]
+'git diff' [<opções>] <commit> <commit> [--] [<caminho>...]
+'git diff' [<opções>] <blob> <blob>
+'git diff' [<opções>] --no-index [--] <caminho> <caminho>
+
+DESCRIÇÃO
+---------
+Exibe as alterações entre a árvore de trabalho, o índice ou uma árvore, as
+alterações entre o índice e uma árvore, as alterações entre as duas árvores,
+alterações entre dois objetos gota ou alterações entre dois arquivos no
+disco.
+
+'git diff' [<opções>] [--] [<caminho>...]::
+
+	Este formulário serve para exibir as alterações feitas em relação ao índice
+	(área de preparação para o próximo commit).  Em outras palavras, as
+	diferenças são as que você _pode_ informar ao Git para adicionar ao índice,
+	mas ainda não o fez.   Você pode preparar essas alterações usando
+	linkgit:git-add[1].
+
+'git diff' [<opções>] --no-index [--] <caminho> <caminho>::
+
+	Este formulário serve para comparar os dois caminhos usados no sistema de
+	arquivos.  Você pode omitir a opção `--no-index` durante a execução do
+	comando em uma árvore de trabalho controlado pelo Git e pelo menos um dos
+	pontos dos caminhos fora da árvore de trabalho ou ao executar o comando fora
+	de uma árvore de trabalho que é controlado pelo Git. Este formulário implica
+	no uso da opção `--exit-code`.
+
+'git diff' [<opções>] --cached [<commit>] [--] [<caminho>...]::
+
+	Este formulário serve para exibir as alterações feitas em relação ao próximo
+	commit relativo ao `<commit>` nomeado.  Geralmente você vai querer uma
+	comparação com o commit mais recente, portanto, se não fizer o `<commit>` a
+	predefinição é `HEAD`.  Se `HEAD` não existir (por exemplo, galhos que ainda
+	vão aparecer) e um `<commit>` não tenha sido feito, exibe todas as
+	alterações em etapas.  --staged é um sinônimo de --cached.
+
+'git diff' [<opções>] <commit> [--] [<caminho>...]::
+
+	Este formulário exibe as modificações feitas por você na sua árvore de
+	trabalho relativo ao nome do `<commit>`.  Você pode usar `HEAD` para
+	compará-lo com o commit mais recente ou para comparar com o topo de um ramo
+	diferente.
+
+'git diff' [<opções>] <commit> <commit> [--] [<caminho>...]::
+
+	Isso é para exibir as alterações entre os dois `<commits>` arbitrários.
+
+'git diff' [<opções>] <commit>..<commit> [--] [<caminho>...]::
+
+	Isso é um sinônimo do formulário anterior. Caso o <commitir> de um lado seja
+	omitido, ele terá o mesmo efeito que usar `HEAD`.
+
+'git diff' [<opções>] <commit>\...<commit> [--] [<caminho>...]::
+
+	Este formulário é para exibir as alterações no ramo que contenha até o
+	segundo `<commit>`, iniciando com um ancestral comum de ambos os
+	`<commit>`.  `git diff A\...B` é o equivalente a um `git diff $(git
+	merge-base A B) B`.  Você pode omitir qualquer um dos `<commit>` que tem o
+	mesmo efeito que usar `HEAD`.
+
+No caso de você estar fazendo algo exótico, deve-se notar que todos os
+`<commit>` na descrição acima, exceto nas duas últimas formas que usam as
+notações "..", podem ser qualquer `<árvore>`.
+
+Para obter uma lista mais completa de maneiras de soletrar um `<commit>`,
+consulte a seção "ESPECIFICANDO REVISÕES" em linkgit:gitrevisions[7].  No
+entanto, `diff` é sobre comparar dois _endpoints_, e não faixas, as notações
+de intervalo ("<commit>.. <commit>" e "<commit>\... <commit>") não
+significam um intervalo definido na seção "ESPECIFICANDO INTERVALOS" em
+linkgit:gitrevisions[7].
+
+'git diff' [<options>] <blob> <blob>::
+
+	Este formulário serve para exibir as alterações feitas entre o conteúdo
+	bruto de dois objetos gota.
+
+OPÇÕES
+------
+:git-diff: 1
+include::diff-options.txt[]
+
+-1 --base::
+-2 --ours::
+-3 --theirs::
+	Compare a árvore de trabalho com a versão "base" (stage #1), "o nosso ramo(
+	branch)" (stage #2)  "o ramo deles" (stage #3). O índice contém estas etapas
+	apenas para entradas não mescladas (unmerged) enquanto estiver resolvendo
+	conflitos.  Consulte a seção "3-Way Merge" linkgit:git-read-tree[1] para
+	obter informações com mais detalhes.
+
+-0::
+	Omita a saída diff para as entradas que não tenham sido mescladas e exiba
+	"Unmergedd".  Só pode ser usado quando comparamos a árvore de trabalho com o
+	índice.
+
+<caminho>...::
+	Os parâmetros `<paths>`, quando usados, são para limitar o `diff` quanto aos
+	nomes dos caminhos (você pode dar nomes de diretórios e obter um `diff` para
+	todos os arquivos sob eles).
+
+
+include::diff-format.txt[]
+
+EXEMPLOS
+--------
+
+Várias maneiras para verificar a sua árvore de trabalho::
++
+------------
+$ git diff            <1>
+$ git diff --cached   <2>
+$ git diff HEAD       <3>
+------------
++
+<1> As mudanças na árvore de trabalho ainda não preparadas para o próximo
+    commit.
+<2> As alterações entre o índice e o seu último commit; o que você estaria
+    fazendo no commit caso você executasse o comando "git commit" sem a opção
+    "-a".
+<3> As alterações na árvore de trabalho desde o seu último commit; o que você
+    estaria fazendo no commit caso executasse o comando "git commit -a"
+
+Comparando com commits arbitrários::
++
+------------
+$ git diff test            <1>
+$ git diff HEAD -- ./test  <2>
+$ git diff HEAD^ HEAD      <3>
+------------
++
+<1> Em vez de usar o topo da ramificação atual, compare com o topo da
+    ramificação "teste".
+<2> Em vez de comparar com o topo da ramificação "teste", compare com o topo da
+    ramificação atual, limitando-se a comparação ao arquivo "teste".
+<3> Compare a versão antes do último commit e o último commit.
+
+Comparando os ramos::
++
+------------
+$ git diff topic master    <1>
+$ git diff topic..master   <2>
+$ git diff topic...master  <3>
+------------
++
+<1> As alterações entre as dicas do tópico e as ramificações principais.
+<2> O mesmo que acima.
+<3> As alterações que ocorreram na ramificação master (mestre) desde quando a
+    ramificação do tópico foi iniciada.
+
+Limitando a saída diff::
++
+------------
+$ git diff --diff-filter=MRC            <1>
+$ git diff --name-status                <2>
+$ git diff arch/i386 include/asm-i386   <3>
+------------
++
+<1> Exibe apenas as modificações, renomeações e cópias, mas não a adição ou
+    exclusão.
+<2> Exibe apenas os nomes e a natureza da alteração, mas não a saída diff real.
+<3> Limite a saída diff aos nomes das subárvores.
+
+Arruinando a saída diff::
++
+------------
+$ git diff --find-copies-harder -B -C  <1>
+$ git diff -R                          <2>
+------------
++
+<1> Gaste alguns ciclos extras para encontrar renomeações, cópias e reescritas
+    completas (muito custoso ao sistema).
+<2> Saída do diff em reverso.
+
+VEJA TAMBÉM
+-----------
+diff(1), linkgit:git-difftool[1], linkgit:git-log[1],
+linkgit:gitdiffcore[7], linkgit:git-format-patch[1], linkgit:git-apply[1]
+
+GIT
+---
+Parte do linkgit:git[1] suite

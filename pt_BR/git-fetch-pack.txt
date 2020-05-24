@@ -1,0 +1,126 @@
+git-fetch-pack(1)
+=================
+
+NOME
+----
+git-fetch-pack - Recebe os objetos ausentes vindos de outro repositório
+
+
+SINOPSE
+-------
+[verse]
+'git fetch-pack' [--all] [--quiet|-q] [--keep|-k] [--thin] [--include-tag]
+	[--upload-pack=<git-upload-pack>]
+	[--depth=<n>] [--no-progress]
+	[-v] <repositório> [<refs>...]
+
+DESCRIÇÃO
+---------
+No lugar use 'git fetch' que é um wrapper de maior hierarquia deste comando.
+
+Invoca o 'git-upload-pack' em um repositório possivelmente remoto e solicita
+que ele envie os objetos ausentes deste repositório, para atualizar
+determinados `heads`.  A lista dos commits disponíveis localmente é
+descoberta examinando os 'refs/' da hierarquia local e enviada para o
+'git-upload-pack' durante a execução na outra extremidade.
+
+Este comando deteriora durante o download de tudo para concluir os `refs`
+solicitados do lado remoto quando o lado local não possui um commit com um
+ancestral comum.
+
+
+OPÇÕES
+------
+--all::
+	Busque todas os `refs` remotos.
+
+--stdin::
+	Pegue a lista dos `refs` do stdin, um por linha. Caso haja `refs` usados na
+	linha de comando, além desta opção, os `refs` do stdin serão processados
+	após as da linha de comando.
++
+Caso `--stateless-rpc` seja usado junto com esta opção, a lista de
+referências deverá estar no formato do pacote (linha-pkt). Cada `ref` deve
+estar em um pacote separado e a lista deve terminar com um pacote liberado.
+
+-q::
+--quiet::
+	Passe o flag `-q` para o 'git unpack-objects'; isso torna o processo de
+	clonagem menos detalhado.
+
+-k::
+--keep::
+	Não invoque o 'git unpack-objects' nos dados recebidos, porém crie um único
+	arquivo do pacote a partir dele e armazene-o no banco de dados do
+	objeto. Caso seja usado duas vezes, o pacote será bloqueado contra a
+	reembalagem.
+
+--thin::
+	Busque um pacote "thin", que registra os objetos em um formato "deltificado"
+	com base nos objetos não inclusos no pacote para reduzir o tráfego de rede.
+
+--include-tag::
+	Caso haja compatibilidade com o lado remoto, os objetos das tags anotadas
+	serão baixados na mesma conexão que os outros objetos, caso o objeto ao qual
+	a tag faça referência seja baixado.  Caso contrário, aquele que chama deve
+	determinar as tags que esta opção deixou disponível.
+
+--upload-pack=<git-upload-pack>::
+	Use para informar o caminho para 'git-upload-pack' no lado remoto, caso não
+	seja encontrado no seu $PATH.  As instalações do sshd ignoram os scripts de
+	configuração do ambiente do usuário para logins nas shells (.bash_profile
+	por exemplo) e o a instalação do seu git pode não ser encontrado no $PATH
+	predefinido do sistema.  A outra solução sugerida é configurar o seu $PATH
+	em ".bashrc", mas este flag são para pessoas que não desejam pagar o preço
+	da sobrecarga em shells não interativos com um arquivo ".bashrc" enxuto
+	(eles definem a maioria das coisas em .bash_profile).
+
+--exec=<git-upload-pack>::
+	O mesmo que --upload-pack=<git-upload-pack>.
+
+--depth=<n>::
+	Limite a busca para as cadeias de ancestrais não maiores que n.  O
+	'git-upload-pack' trata a profundidade especial "2147483647" como infinita,
+	mesmo que exista uma cadeia de ancestrais tão antiga.
+
+--shallow-since=<data>::
+	Aprofundar ou encurtar o histórico de um repositório raso para incluir todas
+	as confirmações alcançáveis após <data>.
+
+--shallow-exclude=<revisão>::
+	Aprofundar ou encurtar o histórico de um repositório raso para incluir todas
+	as confirmações alcançáveis após <data>.
+
+--deepen-relative::
+	O argumento `--depth` determina a quantidade de commits do limite atual da
+	superfície em vez da ponta de cada histórico da ramificação remota.
+
+--no-progress::
+	Não exiba o progresso.
+
+--check-self-contained-and-connected::
+	Exiba "connectivity-ok" caso o pacote recebido seja independente e
+	conectado.
+
+-v::
+	Rode de forma loquaz.
+
+<repositório>::
+	A URL para o repositório remoto.
+
+<refs>...::
+	Os cabeçalhos remotos que serão atualizados. Isso é relativo ao $GIT_DIR
+	("HEAD", "refs/heads/master" por exemplo).  Quando não especificado, receba
+	a atualização de todos os cabeçalhos que o lado tiver.
++
+Caso o lado remoto tenha as opções `uploadpack.allowTipSHA1InWant`,
+`uploadpack.allowReachableSHA1InWant`, ou `uploadpack.allowAnySHA1InWant`
+ativadas, eles poderão alternativamente ser sha1 com 40-hex.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-fetch[1]
+
+GIT
+---
+Parte do linkgit:git[1] suite

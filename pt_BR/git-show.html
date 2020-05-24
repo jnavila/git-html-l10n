@@ -494,10 +494,114 @@ controlar como as modificações feitas pelo commit são exibidas.</p>
 uma lista mais completa de maneiras de soletrar os nomes dos objetos,
 consulte a seção "ESPECIFICANDO AS REVISÕES" em <a href="gitrevisions.html">gitrevisions(7)</a>.</p>
 </dd>
-</dl>
+<dt class="hdlist1">--pretty[=&lt;formato&gt;]</dt>
+<dt class="hdlist1">--format=&lt;formato&gt;</dt>
+<dd>
+<p>Imprima bem o conteúdo dos registros logs do commit em um determinado
+formato, onde <em>&lt;formato&gt;</em> pode ser um dos <code>oneline</code>, <code>short</code>, <code>medium</code>,
+<code>full</code>, <code>fuller</code>, <code>reference</code>, <code>email</code>, <code>raw</code>, <code>format:&lt;string&gt;</code> e
+<code>tformat:&lt;string&gt;</code>.  Quando <code>&lt;formato&gt;</code> não é um dos itens acima e possui
+<code>%placeholder</code>, ele age como se &#8216;--pretty=tformat:&lt;format&gt;&#8217; tenha sido
+usado.</p>
+<div class="paragraph">
+<p>Consulte a seção "FORMATOS BONITOS" para obter detalhes adicionais para cada
+formato.  Quando a parte <em>=&lt;formato&gt;</em> é omitida, o valor predefinido é
+<em>medium</em>.</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-show.txt - include::pretty-options.txt[]</p>
+<p>Nota: você pode especificar o formato "pretty" padrão na configuração do
+repositório (consulte <a href="git-config.html">git-config(1)</a>).</p>
+</div>
+</dd>
+<dt class="hdlist1">--abbrev-commit</dt>
+<dd>
+<p>Em vez de exibir os 40 bytes hexadecimais do nome completo do objeto commit,
+exiba apenas um prefixo parcial.  A quantidade de dígitos não padrão pode
+ser usado com <code>--abbrev=&lt;n&gt;</code> (que também modifica a saída do "diff", se for
+exibida).</p>
+<div class="paragraph">
+<p>Isso deve tornar <code>--pretty=oneline</code> muito mais legível para pessoas que usam
+terminais com 80 colunas.</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-abbrev-commit</dt>
+<dd>
+<p>Exibe os 40 bytes hexadecimais completos do objeto commit. Isso nega a opção
+<code>--abbrev-commit</code> e quaisquer outras que o impliquem em "--oneline". Ele
+também substitui a variável <code>log.abbrevCommit</code>.</p>
+</dd>
+<dt class="hdlist1">--oneline</dt>
+<dd>
+<p>Este é um atalho para "--pretty=oneline --abbrev-commit" ser usado junto.</p>
+</dd>
+<dt class="hdlist1">--encoding=&lt;codificação&gt;</dt>
+<dd>
+<p>The commit objects record the encoding used for the log message in their
+encoding header; this option can be used to tell the command to re-code the
+commit log message in the encoding preferred by the user.  For non plumbing
+commands this defaults to UTF-8. Note that if an object claims to be encoded
+in <code>X</code> and we are outputting in <code>X</code>, we will output the object verbatim;
+this means that invalid sequences in the original commit may be copied to
+the output.</p>
+</dd>
+<dt class="hdlist1">--expand-tabs=&lt;n&gt;</dt>
+<dt class="hdlist1">--expand-tabs</dt>
+<dt class="hdlist1">--no-expand-tabs</dt>
+<dd>
+<p>Perform a tab expansion (replace each tab with enough spaces to fill to the
+next display column that is multiple of <em>&lt;n&gt;</em>)  in the log message before
+showing it in the output.  <code>--expand-tabs</code> is a short-hand for
+<code>--expand-tabs=8</code>, and <code>--no-expand-tabs</code> is a short-hand for
+<code>--expand-tabs=0</code>, which disables tab expansion.</p>
+<div class="paragraph">
+<p>A predefinição é que as guias sejam expandidas em belos formatos que recuam
+a mensagem do registro log em 4 espaços (ou seja,  <em>medium</em>, a predefinição,
+<em>full</em> e <em>fuller</em>).</p>
+</div>
+</dd>
+<dt class="hdlist1">--notes[=&lt;ref&gt;]</dt>
+<dd>
+<p>Exiba as anotações (consulte <a href="git-notes.html">git-notes(1)</a>) que acompanham o commit
+durante a exibição da mensagem de configuração do registro log.  Este é o
+padrão para os comandos <code>git log</code>, <code>git show</code> e <code>git whatchanged</code> quando não
+houver as opções <code>--pretty</code>, <code>--format</code>, ou <code>--oneline</code> na linha de comando.</p>
+<div class="paragraph">
+<p>É predefinido que as notas exibidas são das notas relocadas nas variáveis
+<em>core.notesRef</em> e <em>notes.displayRef</em> (ou substituições de ambiente
+correspondentes). Consulte <a href="git-config.html">git-config(1)</a> para obter mais detalhes.</p>
+</div>
+<div class="paragraph">
+<p>With an optional <em>&lt;ref&gt;</em> argument, use the ref to find the notes to
+display.  The ref can specify the full refname when it begins with
+<code>refs/notes/</code>; when it begins with <code>notes/</code>, <code>refs/</code> and otherwise
+<code>refs/notes/</code> is prefixed to form a full name of the ref.</p>
+</div>
+<div class="paragraph">
+<p>Multiple --notes options can be combined to control which notes are being
+displayed. Examples: "--notes=foo" will show only notes from
+"refs/notes/foo"; "--notes=foo --notes" will show both notes from
+"refs/notes/foo" and from the default notes ref(s).</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-notes</dt>
+<dd>
+<p>Do not show notes. This negates the above <code>--notes</code> option, by resetting the
+list of notes refs from which notes are shown.  Options are parsed in the
+order given on the command line, so e.g.  "--notes --notes=foo --no-notes
+--notes=bar" will only show notes from "refs/notes/bar".</p>
+</dd>
+<dt class="hdlist1">--show-notes[=&lt;ref&gt;]</dt>
+<dt class="hdlist1">--[no-]standard-notes</dt>
+<dd>
+<p>Estas opções são obsoletas. Em vez disso use as opções <code>--notes/--no-notes</code>
+acima.</p>
+</dd>
+<dt class="hdlist1">--show-signature</dt>
+<dd>
+<p>Verifique a validade de um objeto commit assinado, passando a assinatura
+para <code>gpg --verify</code> e exibe a sua saída.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
@@ -516,7 +620,7 @@ diretório ou arquivo.</p>
 </div>
 <div class="paragraph">
 <p>Existem vários formatos incorporados e você pode definir formatos adicionais
-ao definir uma opção de configuração pretty.&lt;name&gt; para um outro nome de
+ao usar uma opção de configuração pretty.&lt;nome&gt; para um outro nome de
 formato ou uma string <em>format:</em>, conforme descrito abaixo (consulte
 <a href="git-config.html">git-config(1)</a>). Aqui estão os detalhes dos formatos incorporados:</p>
 </div>
@@ -639,6 +743,14 @@ Subject: [PATCH] &lt;title line&gt;</pre>
 <div class="content">
 <pre>&lt;mensagem completa do commit&gt;</pre>
 </div>
+</div>
+</li>
+<li>
+<p><em>mboxrd</em></p>
+<div class="paragraph">
+<p>Like <em>email</em>, but lines in the commit message starting with "From "
+(preceded by zero or more "&gt;") are quoted with "&gt;" so they aren&#8217;t confused
+as starting a new commit.</p>
 </div>
 </li>
 <li>
@@ -1017,7 +1129,7 @@ se torna apenas <code>master</code>).</p>
 </dd>
 <dt class="hdlist1"><em>%gs</em></dt>
 <dd>
-<p>reflog subject</p>
+<p>assunto reflog</p>
 </dd>
 <dt class="hdlist1"><em>%(trailers[:options])</em></dt>
 <dd>
@@ -1028,39 +1140,45 @@ por vírgula:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><em>key=&lt;K&gt;</em>: only show trailers with specified key. Matching is done
-case-insensitively and trailing colon is optional. If option is given
-multiple times trailer lines matching any of the keys are shown. This option
-automatically enables the <code>only</code> option so that non-trailer lines in the
-trailer block are hidden. If that is not desired it can be disabled with
-<code>only=false</code>.  E.g., <code>%(trailers:key=Reviewed-by)</code> shows trailer lines with
-key <code>Reviewed-by</code>.</p>
+<p><em>key = &lt;K&gt;</em>: exibe apenas as linhas de atributos com determinada chave . A
+coincidência é feita sem distinção entre maiúsculas e minúsculas, os dois
+pontos à direita é opcional. Caso a opção seja usada várias vezes, os
+atributos das linhas correspondentes a qualquer uma das teclas serão
+exibidas. Esta opção ativa automaticamente a opção <code>only</code>, para que as
+linhas de bloqueio não sejam ocultadas. Se isso não for o desejado, pode ser
+desativado com <code>only = false</code>.  Por exemplo, <code>%(trailers:key=Reviewed-by)</code>
+exibe linhas de atributos com a chave <code>Reviewed-by</code> (Revisado por).</p>
 </li>
 <li>
-<p><em>only[=val]</em>: select whether non-trailer lines from the trailer block should
-be included. The <code>only</code> keyword may optionally be followed by an equal sign
-and one of <code>true</code>, <code>on</code>, <code>yes</code> to omit or <code>false</code>, <code>off</code>, <code>no</code> to show the
-non-trailer lines. If option is given without value it is enabled. If given
-multiple times the last value is used.</p>
+<p><em>only [= val]</em>: seleciona se o atributo das linhas que não são do bloco de
+atributos devem ser incluídas. A palavra-chave <code>only</code> pode opcionalmente ser
+seguida por um sinal de igual e um de <code>true</code>, <code>on</code>, <code>yes</code> para omitir ou
+<code>false</code>, <code>off</code>, <code>no</code> para exibir as linhas que não são do trailer. Caso a
+opção seja usada sem valor, ela será ativada. Caso seja usado várias vezes,
+apenas o último valor é considerado.</p>
 </li>
 <li>
-<p><em>separator=&lt;SEP&gt;</em>: specify a separator inserted between trailer lines. When
-this option is not given each trailer line is terminated with a line feed
-character. The string SEP may contain the literal formatting codes described
-above. To use comma as separator one must use <code>%x2C</code> as it would otherwise
-be parsed as next option. If separator option is given multiple times only
-the last one is used. E.g., <code>%(trailers:key=Ticket,separator=%x2C )</code> shows
-all trailer lines whose key is "Ticket" separated by a comma and a space.</p>
+<p><em>separator = &lt;SEP&gt;</em>: especifique um separador inserido entre as linhas do
+atributo. Quando essa opção não é usada, cada linha é terminada com um
+caractere de avanço de linha. A sequência <code>SEP</code> pode conter os códigos de
+formatação literal descritos acima. Para usar vírgula como separador, é
+necessário usar <code>%x2C</code>, pois, caso contrário, seria analisado como sendo a
+próxima opção. Caso a opção separadora seja usada várias vezes, apenas a
+última será considerada. Por exemplo, <code>%(trailers:key=Ticket,separator=%x2C
+)</code> exibe todas as linhas do atributo cuja chave é "Ticket" separada por
+vírgulas e espaço.</p>
 </li>
 <li>
-<p><em>unfold[=val]</em>: make it behave as if interpret-trailer&#8217;s <code>--unfold</code> option
-was given. In same way as to for <code>only</code> it can be followed by an equal sign
-and explicit value. E.g., <code>%(trailers:only,unfold=true)</code> unfolds and shows
-all trailer lines.</p>
+<p><em>unfold [= val]</em>: faça com que ele se comporte como se a opção <code>--unfold</code> do
+<code>interpret-trailer</code> tivesse sido usado. Da mesma forma que para <code>only</code>, pode
+ser seguido por um sinal de igual e um valor explícito. Por exemplo,
+<code>%(trailers:only,unfold=true)</code>, se desdobra e mostra todas as linhas do
+atributo.</p>
 </li>
 <li>
-<p><em>valueonly[=val]</em>: skip over the key part of the trailer line and only show
-the value part. Also this optionally allows explicit value.</p>
+<p><em>valueonly [= val]</em>: ignora a parte da chave principal e exibe apenas a
+parte do valor. Além disso, isso permite um valor explícito de forma
+opcional.</p>
 </li>
 </ul>
 </div>
@@ -1109,12 +1227,13 @@ non-empty string.</p>
 <li>
 <p><em>tformat:</em></p>
 <div class="paragraph">
-<p>The <em>tformat:</em> format works exactly like <em>format:</em>, except that it provides
-"terminator" semantics instead of "separator" semantics. In other words,
-each commit has the message terminator character (usually a newline)
-appended, rather than a separator placed between entries.  This means that
-the final entry of a single-line format will be properly terminated with a
-new line, just as the "oneline" format does.  For example:</p>
+<p>O formato <em>tformat:</em> funciona exatamente como <em>format:</em>, exceto pelo fato de
+fornecer a semântica "terminator" em vez da semântica "separator". Em outras
+palavras, cada commit tem o caractere terminador da mensagem (geralmente uma
+nova linha) anexada, em vez de um separador colocado entre as entradas.
+Isso significa que a entrada final de um formato de linha única será
+terminada corretamente com uma nova linha, assim como o formato "on-line".
+Por exemplo:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1130,8 +1249,9 @@ $ git log -2 --pretty=tformat:%h 4da45bef \
 </div>
 </div>
 <div class="paragraph">
-<p>In addition, any unrecognized string that has a <code>%</code> in it is interpreted as
-if it has <code>tformat:</code> in front of it.  For example, these two are equivalent:</p>
+<p>Além disso, qualquer string não reconhecida e que possua um <code>%</code> é
+interpretada como se tivesse <code>tformat:</code> à sua frente.  Por exemplo, estes
+dois são equivalentes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1145,7 +1265,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_common_diff_options">COMMON DIFF OPTIONS</h2>
+<h2 id="_opções_diff_que_são_comuns">OPÇÕES DIFF QUE SÃO COMUNS</h2>
 <div class="sectionbody">
 <div class="dlist">
 <dl>
@@ -1176,8 +1296,9 @@ Implica <code>-p</code>.</p>
 <dt class="hdlist1">--output-indicator-old=&lt;char&gt;</dt>
 <dt class="hdlist1">--output-indicator-context=&lt;char&gt;</dt>
 <dd>
-<p>Specify the character used to indicate new, old or context lines in the
-generated patch. Normally they are <em>+</em>, <em>-</em> and ' ' respectively.</p>
+<p>Informe o caractere a ser utilizado para indicar novas linhas, antigas ou de
+contexto no patch que foi gerado. Normalmente eles são <em>+</em>, <em>-</em> e ' '
+respectivamente.</p>
 </dd>
 <dt class="hdlist1">--raw</dt>
 <dd>
@@ -1194,7 +1315,7 @@ bruto, que você pode conseguir com
 <dt class="hdlist1">--indent-heuristic</dt>
 <dd>
 <p>Habilite a heurística que desloca os limites do hunk do diff para facilitar
-a leitura dos patches. Este é o padrão.</p>
+a leitura dos patches. Esta é a predefinição.</p>
 </dd>
 <dt class="hdlist1">--no-indent-heuristic</dt>
 <dd>
@@ -1235,7 +1356,8 @@ internamente.</p>
 <dl>
 <dt class="hdlist1"><code>default</code>, <code>myers</code></dt>
 <dd>
-<p>O algoritmo de diferenciação guloso básico. Atualmente, esse é o padrão.</p>
+<p>O algoritmo de diferenciação guloso básico. Atualmente, essa é a
+predefinição.</p>
 </dd>
 <dt class="hdlist1"><code>minimal</code></dt>
 <dd>
@@ -1681,16 +1803,16 @@ renomeação para outro arquivo.</p>
 <p>Se estiver gerando diffs, detectar e relatar renomeações para commit.
 Para os seguintes arquivos em renomeações ao percorrer o histórico, consulte
 <code>--follow</code>.
-Se <code>n</code> é especificado, é um limiar na semelhança
-índice (isto é, quantidade de adição/exclusões comparada com o
+Caso <code>n</code> seja usado, é um limiar na similaridade do
+índice (ou seja, a quantidade de adições/exclusões comparado com o
 tamanho do arquivo). Por exemplo, <code>-M90%</code> significa que o Git deve
-considerar um par delete/add para ser renomeado se mais de 90%
-do arquivo não mudou. Sem um sinal <code>%</code>, o número deve ser lido
+considerar um par delete/add para ser renomeado caso mais de 90%
+do arquivo não tenha mudado.  Sem um sinal <code>%</code>, o número deve ser lido
 como uma fração, com um ponto decimal antes dele. Ou seja, <code>-M5</code>
-torna-se 0.5, e é portanto, o mesmo que <code>-M50%</code>. Da mesma forma,
--M05` é o mesmo que <code>-M5%</code>. Para limitar a detecção a
-renomeações exatas, use <code>-M100%</code>. O índice de similaridade padrão
-é de 50%.</p>
+torna-se 0.5, e é portanto o mesmo que <code>-M50%</code>. Da mesma forma,
+<code>-M05</code> é o mesmo que <code>-M5%</code>.  Para limitar a detecção para
+renomeações exatas use <code>-M100%</code>. A predefinição do índice de
+similaridade padrão é de 50%.</p>
 </dd>
 <dt class="hdlist1">-C[&lt;n&gt;]</dt>
 <dt class="hdlist1">--find-copies[=&lt;n&gt;]</dt>
@@ -1943,18 +2065,19 @@ comandos linkgit:git-format-patch 1] ou diff plumbing.</p>
 </dd>
 <dt class="hdlist1">--ignore-submodules[=&lt;quando&gt;]</dt>
 <dd>
-<p>Ignore as alterações nos submódulos na geração do diff. &lt;when&gt; pode ser
-"none", "untracked", "dirty" ou "all", que é o padrão. O uso de "none"
-considerará o submódulo modificado quando ele contiver arquivos não
-rastreados ou modificados ou seu HEAD for diferente do commit gravado no
-superprojeto e pode ser usado para sobrescrever qualquer configuração da
-opção <em>ignore</em> no <a href="git-config.html">git-config(1)</a> ou <a href="gitmodules.html">gitmodules(5)</a>. Quando
-"untracked" é usado, os submódulos não são considerados sujos quando contêm
-apenas conteúdo não rastreado (mas eles ainda são verificados quanto ao
-conteúdo modificado). Usando "dirty" ignora todas as mudanças na árvore de
-trabalho de submódulos, apenas as mudanças nos commits armazenados no
-superprojeto são mostradas (este foi o comportamento até 1.7.0). Usar "all"
-oculta todas as alterações nos submódulos.</p>
+<p>Ignore as alterações nos submódulos na geração dos diffs. &lt;quando&gt; pode ser
+"none", "Untracked", "dirty" ou "all", que é a predefinição. O uso de "none"
+considerará o submódulo modificado quando ele conter os arquivos não
+rastreados ou modificados ou caso o seu <code>HEAD</code> difira do commit registrado
+no <code>superproject</code> e pode ser usado para substituir qualquer outra
+configuração da opção <em>ignore</em> no <a href="git-config.html">git-config(1)</a> or
+<a href="gitmodules.html">gitmodules(5)</a>. Quando "untracked" (não rastreado) é usado, os
+submódulos não são considerados sujos quando contêm apenas conteúdo não
+rastreado (mas ainda são verificados quanto ao conteúdo modificado). O uso
+de "dirty" ignora todas as alterações na árvore de trabalho dos submódulos,
+apenas as alterações nos commits armazenados no superprojeto são mostradas
+(esse era o comportamento até 1.7.0). Usar "todos" oculta todas as
+alterações nos submódulos.</p>
 </dd>
 <dt class="hdlist1">--src-prefix=&lt;prefixo&gt;</dt>
 <dd>
@@ -2026,17 +2149,17 @@ copia, produz, respectivamente.</p>
 <p>Ele é seguido por uma ou mais linhas de cabeçalho estendidas:</p>
 <div class="literalblock">
 <div class="content">
-<pre>modo antigo &lt;mode&gt;
-novo modo &lt;mode&gt;
-modo de arquivo excluído &lt;mode&gt;
-novo modo de arquivo &lt;mode&gt;
-copiar de &lt;path&gt;
-copiar para &lt;path&gt;
-renomear de &lt;path&gt;
-renomear para &lt;path&gt;
-índice de similaridade &lt;number&gt;
-índice de dissimilaridade &lt;number&gt;
-índice &lt;hash&gt;..&lt;hash&gt; &lt;mode&gt;</pre>
+<pre>modo antigo &lt;modo&gt;
+novo modo &lt;modo&gt;
+modo de arquivo excluído &lt;modo&gt;
+novo modo de arquivo &lt;modo&gt;
+copiar de &lt;caminho&gt;
+copiar para &lt;caminho&gt;
+renomear de &lt;caminho&gt;
+renomear para &lt;caminho&gt;
+índice de similaridade &lt;número&gt;
+índice de dissimilaridade &lt;número&gt;
+índice &lt;hash&gt;..&lt;hash&gt; &lt;modo&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -2057,7 +2180,7 @@ foi convertida no novo.</p>
 </div>
 <div class="paragraph">
 <p>A linha do índice inclui a soma da verificação SHA-1 antes e depois da
-alteração. O &lt;mode&gt; é incluso caso o modo de arquivo não mude; caso
+alteração.  O &lt;modo&gt; é incluso caso o modo de arquivo não mude; caso
 contrário, linhas separadoras indicam o modo antigo e o novo.</p>
 </div>
 </li>
@@ -2182,9 +2305,10 @@ tradicional, o <code>/dev/null</code> é usado para sinalizar arquivos criados o
 excluídos.</p>
 </div>
 <div class="paragraph">
-<p>However, if the --combined-all-paths option is provided, instead of a
-two-line from-file/to-file you get a N+1 line from-file/to-file header,
-where N is the number of parents in the merge commit</p>
+<p>No entanto, caso a opção <code>--combined-all-caminhos</code> seja usada, em vez de
+duas linhas de arquivo para arquivo, você obtém um cabeçalho <code>N+1</code> do
+cabeçalho do arquivo de "origem" para o arquivo de "destino" onde N é a
+quantidade de matrizes na mesclagem do commit</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -2195,8 +2319,9 @@ where N is the number of parents in the merge commit</p>
 </div>
 </div>
 <div class="paragraph">
-<p>This extended format can be useful if rename or copy detection is active, to
-allow you to see the original name of the file in different parents.</p>
+<p>Esse formato estendido pode ser útil caso a detecção da renomeação ou cópia
+esteja ativa, permitindo que você veja o nome original do arquivo em
+diferentes matrizes.</p>
 </div>
 </li>
 <li>
@@ -2283,7 +2408,97 @@ atualmente no décimo último commit do ramo <code>next</code>.</p>
 <h2 id="_discussão">DISCUSSÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-show.txt - include::i18n.txt[]</p>
+<p>O Git é, até certo ponto, um codificador de caracteres agnóstico.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>O conteúdo dos objetos gota são sequências de bytes não interpretados.  Não
+há tradução de codificação no nível principal.</p>
+</li>
+<li>
+<p>Os nomes do caminho são codificados na forma de normalização UTF-8 C. Isso
+se aplica a objetos nas árvore, arquivos do índice, referência de nomes e
+nomes do caminho em argumentos da linha de comando, variáveis do ambiente e
+os arquivos de configuração (<code>.git / config</code> (consulte
+<a href="git-config.html">git-config(1)</a>), <a href="gitignore.html">gitignore(5)</a>, <a href="gitattributes.html">gitattributes(5)</a> e
+<a href="gitmodules.html">gitmodules(5)</a>).</p>
+<div class="paragraph">
+<p>Observe que o Git em seu nível básico trata os nomes dos caminhos
+simplesmente como sequências de bytes não <code>NUL</code>, não há conversões de
+codificação dos nomes dos caminhos (exceto no Mac e no Windows). Portanto, o
+uso dos nomes de caminhos que não sejam <code>ASCII</code> funcionará principalmente em
+plataformas e sistemas de arquivos que se utilizem de codificações ASCII
+estendidas e herdadas. No entanto, os repositórios criados nestes sistemas
+não funcionarão corretamente em sistemas baseados em UTF-8 (por exemplo,
+Linux, Mac, Windows) e vice-versa.  Além disso, muitas ferramentas baseadas
+em Git simplesmente assumem nomes de caminho como UTF-8 e falharão ao exibir
+outros tipos de codificações corretamente.</p>
+</div>
+</li>
+<li>
+<p>As mensagens do registro log do commit geralmente são codificadas em UTF-8,
+porém há compatibilidade para outras codificações ASCII estendidas. Isso
+inclui ISO-8859-x, CP125x e muitos outros. Porém não há compatibilidade com
+codificações UTF-16/32, EBCDIC e CJK, codificações de vários bytes (GBK,
+Shift-JIS, Big5, EUC-x, CP9xx etc.).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Embora incentivemos que as mensagens do registro log do commit sejam
+codificadas em UTF-8, a Porcelana do Git e seu núcleo foram projetados para
+não impor a utilização do UTF-8 nos projetos.  Caso todos os participantes
+de um projeto em particular achem mais conveniente usar as codificações
+herdadas, o Git não o proibirá.  Porém, há algumas coisas a serem
+consideradas.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Ambos os comandos <em>git commit" e "git commit-árvore</em> emitem um aviso caso a
+mensagem do registro log do commit utilizada não se parecer com uma string
+UTF-8 válida, a menos que explicitamente queira que seu projeto use uma
+codificação do legado.  A melhor maneira de usar isso é ter uma variável
+<code>i18n.commitencoding</code> em um arquivo <code>.git/config</code>, como este:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        commitEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Os objetos commit que foram criados com a configuração acima registram o
+valor <code>i18n.commitEncoding</code> em seu cabeçalho <code>encoding</code>.  Isso é para
+auxiliar as outras pessoas que olharão para eles mais tarde.  A falta deste
+cabeçalho implica que a mensagem do registro log do commit seja codificado
+em UTF-8.</p>
+</div>
+</li>
+<li>
+<p>Os comandos <em>git log</em>, <em>git show</em>, <em>git blame</em> e relacionados fazem vista
+para o cabeçalho <code>encoding</code> de um objeto commit e tentam codificar novamente
+a mensagem do registro log em UTF-8 a menos que seja informado de outra
+maneira.  É possível especificar a codificação da saída desejada com  a
+variável <code>i18n.logOutputEncoding</code> no arquivo <code>.git/config</code>, assim:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        logOutputEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Caso não tenha essa variável de configuração, o valor de
+<code>i18n.commitEncoding</code> é utilizado em seu lugar.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Observe que decidimos deliberadamente não codificar novamente a mensagem do
+registro log do commit quando um commit for feito para forçar a codificação
+UTF-8 a nível do objeto commit, porque a re-codificação para UTF-8 não é
+necessariamente uma operação reversível.</p>
 </div>
 </div>
 </div>
@@ -2298,7 +2513,7 @@ atualmente no décimo último commit do ramo <code>next</code>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-28 17:13:37 +0200
+Last updated 2020-05-23 19:50:14 +0200
 </div>
 </div>
 </body>

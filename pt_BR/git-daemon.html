@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="generator" content="Asciidoctor 2.0.10"/>
+<title>git-daemon(1)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment @import statement to use as custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite::before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+:not(pre)>code.nobreak{word-wrap:normal}
+:not(pre)>code.nowrap{white-space:nowrap}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details>summary:first-of-type{cursor:pointer;display:list-item;outline:none;margin-bottom:.75em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class="highlight"],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+table.tableblock{max-width:100%;border-collapse:separate}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+td.tableblock>.content>:last-child.sidebarblock{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot,table.frame-ends{border-width:1px 0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>git-daemon(1) Manual Page</h1>
+<h2 id="_nome">NOME</h2>
+<div class="sectionbody">
+<p>git-daemon - Um servidor realmente simples para os repositórios Git</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_sinopse">SINOPSE</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>git daemon</em> [--verbose] [--syslog] [--export-all]
+             [--timeout=&lt;n&gt;] [--init-timeout=&lt;n&gt;] [--max-connections=&lt;n&gt;]
+             [--strict-paths] [--base-path=&lt;caminho&gt;] [--base-path-relaxed]
+             [--user-path | --user-path=&lt;caminho&gt;]
+             [--interpolated-path=&lt;modelo-de-caminho&gt;]
+             [--reuseaddr] [--detach] [--pid-file=&lt;arquivo&gt;]
+             [--enable=&lt;serviço&gt;] [--disable=&lt;serviço&gt;]
+             [--allow-override=&lt;serviço&gt;] [--forbid-override=&lt;serviço&gt;]
+             [--access-hook=&lt;path&gt;] [--[no-]informative-errors]
+             [--inetd |
+              [--listen=&lt;host_or_ipaddr&gt;] [--port=&lt;n&gt;]
+              [--user=&lt;usuário&gt; [--group=&lt;grupo&gt;]]]
+             [--log-destination=(stderr|syslog|none)]
+             [&lt;directory&gt;&#8230;&#8203;]</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_descrição">DESCRIÇÃO</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Um daemon TCP Git realmente simples e que normalmente escuta na porta
+"DEFAULT_GIT_PORT", também conhecida como 9418.  Aguarda uma conexão
+solicitando um serviço e o servirá caso esteja ativo.</p>
+</div>
+<div class="paragraph">
+<p>Ele verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e
+se recusará a exportar qualquer diretório Git que não tenha sido
+explicitamente marcado para exportação dessa maneira (a menos que o
+parâmetro <code>--export-all</code> seja usado). Caso passe alguns caminhos de
+diretórios como argumentos par ao <em>git daemon</em>, é possível restringir ainda
+mais as ofertas a uma lista de permissões composta por eles.</p>
+</div>
+<div class="paragraph">
+<p>É predefinido que apenas o serviço <code>upload-pack</code> esteja ativo, o que atende
+aos clientes são o <em>git fetch-pack</em> e <em>git ls-remote</em>, que são chamados de
+<em>git fetch</em>, <em>git pull</em> e <em>git clone</em>.</p>
+</div>
+<div class="paragraph">
+<p>Isso é o ideal para as atualizações de somente leitura, ou seja, extrair dos
+repositórios Git.</p>
+</div>
+<div class="paragraph">
+<p>Também existe um <code>upload-archive</code> para servir o <code>git archive</code> .</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_opções">OPÇÕES</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--strict-paths</dt>
+<dd>
+<p>A coincidência exata dos caminhos (ou seja, não permita "/foo/repo" quando o
+caminho real for "/foo/repo.git" ou "/foo/repo/.git"), assim como, não faça
+caminhos relativos ao usuário.  O <em>git daemon</em> se recusará a iniciar quando
+esta opção estiver ativa e nenhuma lista de permissões tenha sido
+especificada.</p>
+</dd>
+<dt class="hdlist1">--base-path=&lt;caminho&gt;</dt>
+<dd>
+<p>Remap all the path requests as relative to the given path.  This is sort of
+"Git root" - if you run <em>git daemon</em> with <em>--base-path=/srv/git</em> on
+example.com, then if you later try to pull <em>git://example.com/hello.git</em>,
+<em>git daemon</em> will interpret the path as <code>/srv/git/hello.git</code>.</p>
+</dd>
+<dt class="hdlist1">--base-path-relaxed</dt>
+<dd>
+<p>Caso <code>--base-path</code> esteja ativo e a pesquisa do repositório falhar, com esta
+opção o <em>git daemon</em> tentará procurar sem prefixar o caminho da base.  É
+útil para alternar para o uso de <code>--base-path</code>, enquanto ainda for permitido
+os caminhos antigos.</p>
+</dd>
+<dt class="hdlist1">--interpolated-path=&lt;modelo-de-caminho&gt;</dt>
+<dd>
+<p>Para dar suporte à hospedagem virtual, um modelo de caminho interpolado pode
+ser usado para construir dinamicamente os caminhos alternativos.  O modelo é
+compatível com <code>%H</code> para o nome de host do destino, fornecido pelo cliente,
+porém é convertido minúsculas, <code>%CH</code> para o nome do host canônico, <code>%IP</code>
+para o endereço IP do servidor, <code>%P</code> para o número da porta e <code>%D</code> para o
+caminho absoluto do nome do repositório.  Após a interpolação, o caminho é
+validado na lista branca de permissões do diretório.</p>
+</dd>
+<dt class="hdlist1">--export-all</dt>
+<dd>
+<p>Permite puxar de todos os diretórios que se pareçam com os repositórios Git
+(possuem os subdiretórios <em>objects</em> e <em>refs</em>), mesmo que eles não tenham o
+arquivo <em>git-daemon-export-ok</em>.</p>
+</dd>
+<dt class="hdlist1">--inetd</dt>
+<dd>
+<p>Faça o servidor funcionar como um serviço inetd. Implica no uso da opção
+<code>--syslog</code> (pode ser substituído com <code>--log-destination=</code>).  É incompatível
+com as opções <code>--detach</code>, <code>--port</code>, <code>--listen</code>, <code>--user</code> e <code>--group</code>.</p>
+</dd>
+<dt class="hdlist1">--listen=&lt;host_ou_end._IP&gt;</dt>
+<dd>
+<p>Ouça em um endereço IP ou nome de host específico.  Os endereços IP podem
+ser um endereço IPv4 ou IPv6, se for compatível.  Caso o IPv6 não seja
+compatível, a opção <code>--listen=hostname</code> também não será compatível assim
+como a opção <code>--listen</code> deverá receber um endereço IPv4.  Pode ser utilizado
+mais de um vez.  É incompatível com a opção <code>--inetd</code>.</p>
+</dd>
+<dt class="hdlist1">--port=&lt;n&gt;</dt>
+<dd>
+<p>Ouça em uma porta alternativa.  É incompatível com a opção <code>--inetd</code>.</p>
+</dd>
+<dt class="hdlist1">--init-timeout=&lt;n&gt;</dt>
+<dd>
+<p>O Tempo limite (em segundos) entre o momento em que a conexão é estabelecida
+e a solicitação do cliente é recebida (geralmente um valor bastante baixo,
+pois esse deve ser imediato).</p>
+</dd>
+<dt class="hdlist1">--timeout=&lt;n&gt;</dt>
+<dd>
+<p>Tempo limite (em segundos) para sub-solicitações específicas do
+cliente. Isso inclui o tempo que leva para o servidor processar a
+sub-solicitação e o tempo gasto aguardando a próxima solicitação do cliente.</p>
+</dd>
+<dt class="hdlist1">--max-connections=&lt;n&gt;</dt>
+<dd>
+<p>A quantidade máxima de clientes simultâneos, 32 é o valor predefinido.
+Defina como zero para não ter limites.</p>
+</dd>
+<dt class="hdlist1">--syslog</dt>
+<dd>
+<p>É um atalho para <code>--log-destination=syslog</code>.</p>
+</dd>
+<dt class="hdlist1">--log-destination=&lt;destino&gt;</dt>
+<dd>
+<p>Envie mensagens do registro log para o destino especificado.  Observe que
+esta opção não implica no uso da opção <code>--verbose</code>, portanto é predefinido
+que apenas as condições de erro sejam registradas.  O &lt;destino&gt; deve ser um
+dos seguintes:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">stderr</dt>
+<dd>
+<p>Escreva para erro predefinido.  Observe que caso <code>--detach</code> seja usado, o
+processo será desconectado do erro real predefinido, tornando esse destino
+efetivamente equivalente a <code>none</code> (nenhum).</p>
+</dd>
+<dt class="hdlist1">syslog</dt>
+<dd>
+<p>Escreva para o syslog usando o identificador <code>git-daemon</code>.</p>
+</dd>
+<dt class="hdlist1">none</dt>
+<dd>
+<p>Desativa todos os registros logs.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>A predefinição para o destino é <code>syslog</code> caso <code>--inetd</code> ou <code>--detach</code> seja
+usado, caso contrário será o <code>stderr</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">--user-path</dt>
+<dt class="hdlist1">--user-path=&lt;caminho&gt;</dt>
+<dd>
+<p>Permita que a notação do usuário{tilde) seja usada nas solicitações.  Quando
+especificado sem qualquer parâmetro, os pedidos para
+<code>git://host/{tilde}alice/foo</code> são tomados como pedidos para acessar o
+repositório <code>foo</code> no diretório inicial do usuário <code>alice</code>.  Caso
+<code>--user-path=path</code> seja usado, a mesma solicitação será aceita como a de uma
+solicitação para acessar o repositório <code>path/foo</code> no diretório inicial do
+usuário <code>alice</code>.</p>
+</dd>
+<dt class="hdlist1">--verbose</dt>
+<dd>
+<p>Registre os detalhes sobre as conexões recebidas e os arquivos solicitados.</p>
+</dd>
+<dt class="hdlist1">--reuseaddr</dt>
+<dd>
+<p>Use <code>SO_REUSEADDR</code> ao ligar o soquete de escuta.  Isso permite que o
+servidor reinicie sem aguardar o tempo limite das conexões antigas.</p>
+</dd>
+<dt class="hdlist1">--detach</dt>
+<dd>
+<p>Desanexe do shell; Implica no uso da opção <code>--syslog</code>.</p>
+</dd>
+<dt class="hdlist1">--pid-file=&lt;arquivo&gt;</dt>
+<dd>
+<p>Salva a identificação do processo em <em>arquivo</em>.  Ignorado quando o daemon é
+executado como <code>--inetd</code>.</p>
+</dd>
+<dt class="hdlist1">--user=&lt;usuário&gt;</dt>
+<dt class="hdlist1">--group=&lt;grupo&gt;</dt>
+<dd>
+<p>Altere o uid e o gid do daemon antes de entrar no loop de serviço.  Quando
+apenas o <code>--user</code> é fornecido sem o <code>--group</code>, o ID do grupo primário para o
+usuário é usado.  Os valores da opção são fornecidos para <code>getpwnam(3)</code> e
+<code>getgrnam(3)</code> e os IDs numéricos não são compatíveis.</p>
+<div class="paragraph">
+<p>Usar estas opções é um erro quando usado em conjunto com <code>--inetd</code>; use o
+recurso do inet daemon para obter o mesmo efeito antes de gerar o <em>git
+daemon</em>, caso seja necessário.</p>
+</div>
+<div class="paragraph">
+<p>Como muitos programas que alternam o ID do usuário, o daemon não redefine as
+variáveis de ambiente como <code>$ HOME</code> quando executa programas como o git, por
+exemplo, o <code>upload-pack</code> e <code>receive-pack</code>. Ao usar esta opção, você também
+pode definir e exportar <code>HOME</code> para apontar para o diretório inicial do
+<code>&lt;usuário&gt;</code> antes de iniciar o daemon e verifique se todos os arquivos de
+configuração do Git nesse diretório são legíveis pelo <code>&lt;usuário&gt;</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">--enable=&lt;serviço&gt;</dt>
+<dt class="hdlist1">--disable=&lt;serviço&gt;</dt>
+<dd>
+<p>Ativa ou desativa o serviço em todo o site por predefinição.  Observe que um
+serviço desativado em todo o site ainda pode ser ativado por repositório
+caso esteja marcado como substituível e o repositório ativar o serviço com
+um item de configuração.</p>
+</dd>
+<dt class="hdlist1">--allow-override=&lt;serviço&gt;</dt>
+<dt class="hdlist1">--forbid-override=&lt;serviço&gt;</dt>
+<dd>
+<p>Permitir ou proibir a substituição da predefinição em todo o site através da
+configuração do repositório.  É predefinido que todos os serviços possam ser
+substituídos.</p>
+</dd>
+<dt class="hdlist1">--[no-]informative-errors</dt>
+<dd>
+<p>Quando os erros informativos são ativados, o git-daemon reportará os erros
+de forma mais detalhada ao cliente, diferenciando as condições como "nenhum
+repositório desse tipo" de "repositório não exportado". Isso é mais
+conveniente para os clientes, mas pode vazar as informações sobre a
+existência de repositórios não exportados.  Quando os erros informativos não
+estão ativados, todos os erros relatam "acesso negado" ao cliente. A
+predefinição é --no-informative-errors.</p>
+</dd>
+<dt class="hdlist1">--access-hook=&lt;caminho&gt;</dt>
+<dd>
+<p>Sempre que um cliente se conectar, primeiro execute um comando externo
+especificado pelo &lt;caminho&gt; com o nome do serviço (por exemplo,
+"upload-pack"), o caminho para o repositório, nome do host (%H), nome do
+host canônico (%CH), o endereço IP (%IP) e a porta TCP (%P) como os seus
+argumentos na linha de comando. O comando externo pode decidir recusar o
+serviço saindo com uma condição diferente de zero (ou permitir com uma
+condição igual a zero).  Ele também pode examinar as variáveis do ambiente
+<code>$REMOTE_ADDR</code> e <code>$REMOTE_PORT</code> para aprender sobre o solicitante ao tomar
+essa decisão.</p>
+<div class="paragraph">
+<p>O comando externo pode, opcionalmente, gravar uma única linha em sua saída
+padrão para ser enviada ao solicitante como uma mensagem de erro quando ele
+recusar o serviço.</p>
+</div>
+</dd>
+<dt class="hdlist1">&lt;diretório&gt;</dt>
+<dd>
+<p>Um diretório a ser adicionado à lista branca dos diretórios permitidos. A
+menos que <code>--strict-paths</code> seja especificado, isso também incluirá
+subdiretórios de cada diretório nomeado.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_serviços">SERVIÇOS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Estes serviços podem ser ativados ou não globalmente usando as opções da
+linha de comando deste comando.  Caso um controle mais refinado seja
+necessário (para permitir que o <em>git archive</em> seja executado apenas em
+alguns repositórios selecionados que o daemon serve por exemplo), o arquivo
+de configuração por repositório pode ser usado para ativá-los ou não.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">upload-pack</dt>
+<dd>
+<p>Isso serve aos clientes <em>git fetch-pack</em> e <em>git ls-remote</em>.  A predefinição
+é estar sempre ativo, porém um repositório pode desativá-lo ao definir o
+item de configuração <code>daemon.uploadpack</code> como <code>false</code>.</p>
+</dd>
+<dt class="hdlist1">upload-archive</dt>
+<dd>
+<p>Isso serve ao <em>git archive --remote</em>.  A predefinição é estar desativado,
+porém um repositório pode ativá-lo definindo o item de configuração
+<code>daemon.uploadarch</code> como <code>true</code>.</p>
+</dd>
+<dt class="hdlist1">receive-pack</dt>
+<dd>
+<p>Isso serve aos clientes 'git send-pack, permitindo um envio (push) anônimo.
+A predefinição é estar desativado, pois não há autenticação no protocolo (em
+outras palavras, qualquer pessoa pode enviar algo para o repositório,
+incluindo fazer a remoção de referências).  Isso serve apenas para uma
+configuração LAN fechada, onde todos são amigáveis.  Este serviço pode ser
+ativado definindo o item de configuração <code>daemon.receivepack</code> como <code>true</code>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_exemplos">EXEMPLOS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Assumimos o seguinte em <code>/etc/services</code></dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ grep 9418 /etc/services
+git             9418/tcp                # Controle de Versão do Sistema Git</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><em>git daemon</em> como um servidor inetd</dt>
+<dd>
+<p>Para configurar o <em>git daemon</em> como um serviço inetd que lida com qualquer
+repositório no conjunto de diretórios da lista branca do /pub/foo e
+/pub/bar, coloque uma entrada em /etc/inetd, tudo em uma linha:</p>
+<div class="listingblock">
+<div class="content">
+<pre>        git stream tcp nowait nobody  /usr/bin/git
+                git daemon --inetd --verbose --export-all
+                /pub/foo /pub/bar</pre>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><em>git daemon</em> como servidor inetd para hosts virtuais</dt>
+<dd>
+<p>Para configurar o <em>git daemon</em> como um serviço inetd que lida com
+repositórios com diferentes hosts virtuais, <code>www.example.com</code> e
+<code>www.example.org</code>, coloque uma entrada como a seguinte em <code>/etc/inetd</code> tudo
+em uma linha:</p>
+<div class="listingblock">
+<div class="content">
+<pre>        git stream tcp nowait nobody /usr/bin/git
+                git daemon --inetd --verbose --export-all
+                --interpolated-path=/pub/%H%D
+                /pub/www.example.org/software
+                /pub/www.example.com/software
+                /software</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Neste exemplo, o diretório na raiz <code>/pub</code> conterá um subdiretório para cada
+nome de host virtual compatível.  Além disso, os dois hosts anunciam os
+repositórios simplesmente como <code>git://www.example.com/software/repo.git</code>.
+Para clientes anteriores à 1.4.0, um link simbólico de <code>/ software</code> para o
+repositório predefinido também pode ser feito.</p>
+</div>
+</dd>
+<dt class="hdlist1">O <em>git daemon</em> como daemon regular para hosts virtuais</dt>
+<dd>
+<p>Para configurar o <em>git daemon</em> como um serviço regular e não como inetd que
+lida com repositórios para vários hosts virtuais com base em seus endereços
+IP, inicie o daemon desta maneira:</p>
+<div class="listingblock">
+<div class="content">
+<pre>        git daemon --verbose --export-all
+                --interpolated-path=/pub/%IP/%D
+                /pub/192.168.1.200/software
+                /pub/10.10.220.23/software</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Neste exemplo, o diretório no nível raiz <code>/pub</code> conterá um subdiretório para
+cada endereço IP do host virtual compatível.  Porém, os repositórios ainda
+podem ser acessados pelo nome do host, supondo que coincidam com estes
+endereços IP.</p>
+</div>
+</dd>
+<dt class="hdlist1">ativar ou desativar seletivamente os serviços por repositório</dt>
+<dd>
+<p>Para ativar faça <code>git archive --remote</code> e desative o <code>git fetch</code> em um
+repositório, faça o seguinte no arquivo de configuração no repositório (que
+é o arquivo <em>config</em> próximo ao <code>HEAD</code>, <em>refs</em> e <em>objects</em> ).</p>
+<div class="listingblock">
+<div class="content">
+<pre>        [daemon]
+                uploadpack = false
+                uploadarch = true</pre>
+</div>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_meio_ambiente">MEIO AMBIENTE</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>O <code>git daemon</code> configurará o <code>REMOTE_ADDR</code> para o endereço IP do cliente
+conectado a ele caso o endereço IP esteja disponível. O <code>REMOTE_ADDR</code> estará
+disponível no ambiente dos chamados ganchos quando os serviços forem
+executados.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Parte do <a href="git.html">git(1)</a> suite</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2020-05-23 19:50:13 +0200
+</div>
+</div>
+</body>
+</html>

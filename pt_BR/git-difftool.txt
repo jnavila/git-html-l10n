@@ -1,0 +1,147 @@
+git-difftool(1)
+===============
+
+NOME
+----
+git-difftool - Mostra alterações usando as ferramentas comuns do diff
+
+SINOPSE
+-------
+[verse]
+'git difftool' [<opções>] [<commit> [<commit>]] [--] [<caminho>...]
+
+DESCRIÇÃO
+---------
+O 'git difftool' é um comando Git que permite comparar e editar os arquivos
+entre revisões usando ferramentas "diff" comuns. O 'git difftool' é um
+frontend para o comando 'git diff' e aceita as mesmas opções e
+argumentos. Consulte linkgit:git-diff[1].
+
+OPÇÕES
+------
+-d::
+--dir-diff::
+	Copie os arquivos modificados para um local temporário e execute um "diff"
+	neles. Este modo nunca avisa nada antes de executar a ferramenta diff.
+
+-y::
+--no-prompt::
+	Não avise antes de iniciar uma ferramenta diff.
+
+--prompt::
+	Alerta antes de cada invocação da ferramenta diff.  Este é o comportamento
+	padrão; a opção é fornecida para substituir quaisquer configurações.
+
+-t <ferramenta>::
+--tool=<ferramenta>::
+	Use a ferramenta diff especificada por <ferramenta>.  Os valores válidos
+	incluem `emerge`, `kompare`, `meld` e `vimdiff`. Execute o `git difftool
+	--tool-help` para ver uma lista de configurações válidas para <ferramenta>.
++
+Caso uma ferramenta diff não seja especificada, `git difftool` utilizará a
+variável de configuração `diff.tool`.  Caso a variável de configuração
+`diff.tool` não esteja definida, o 'git difftool' escolherá um padrão
+adequado.
++
+Você pode fornecer explicitamente um caminho completo para a ferramenta
+definindo a variável de configuração `difftool.<ferramenta>.path`. Por
+exemplo, você pode configurar o caminho absoluto para o kdiff3 configurando
+`difftool.kdiff3.path`. Caso contrário, o 'git difftool' assume que a
+ferramenta está disponível no `PATH`.
++
+Em vez de executar uma das ferramentas "diff" conhecidas, o 'git difftool'
+pode ser customizado para executar um programa alternativo, usando a linha
+de comando para chamar uma variável de configuração
+`difftool.<ferramenta>.cmd`.
++
+Quando o 'git difftool' é chamado com esta ferramenta (através da opção
+`-t`, `--tool` ou da variável de configuração `diff.tool`), a linha de
+comando configurada será chamada com as seguintes variáveis disponíveis:
+`$LOCAL` é definido como o nome do arquivo temporário que contenha o
+conteúdo da pré-imagem "diff" e `$REMOTE` é definido como o nome do arquivo
+temporário que contenha o conteúdo "diff" da pós-imagem diff.  `$MERGED` é o
+nome do arquivo que está sendo comparado. `$BASE` é disponibilizado para
+compatibilidade com comandos personalizados da ferramenta de mesclagem e tem
+o mesmo valor que `$MERGED`.
+
+--tool-help::
+	Imprima uma lista de ferramentas "diff" que podem ser usadas com `--tool`.
+
+--[no-]symlinks::
+	O comportamento padrão do `git difftool` é criar links simbólicos para a
+	árvore de trabalho quando executado no modo `--dir-diff` e o lado direito da
+	comparação produz o mesmo conteúdo que o arquivo na árvore de trabalho.
++
+Especificar `--no-symlinks` instrui o 'git difftool' para criar cópias.
+`--no-symlinks` é a predefinição no Windows.
+
+-x <comando>::
+--extcmd = <comando>::
+	Especifique um comando personalizado para exibir os "diffs".  'git-difftool'
+	executa `$command $LOCAL $REMOTE` e ignora as predefinições configuradas
+	quando esta opção é usada.  A variável `$BASE` é definido no ambiente.
+
+-g::
+--[no-]gui::
+	When 'git-difftool' is invoked with the `-g` or `--gui` option the default
+	diff tool will be read from the configured `diff.guitool` variable instead
+	of `diff.tool`. The `--no-gui` option can be used to override this
+	setting. If `diff.guitool` is not set, we will fallback in the order of
+	`merge.guitool`, `diff.tool`, `merge.tool` until a tool is found.
+
+--[no-]trust-exit-code::
+	'git-difftool' invoca uma ferramenta "diff" individualmente em cada
+	arquivo.  Os erros relatados pela ferramenta "diff" são ignorados.  Use
+	`--trust-exit-code` para fazer 'git-difftool' encerrar quando uma ferramenta
+	"diff" retornar um código de saída diferente de zero.
++
+'git-difftool' encaminhará o código de encerramento da ferramenta chamada
+quando `--trust-exit-code` for usado.
+
+Para ver a lista completa das opções compatíveis consulte
+linkgit:git-diff[1].
+
+CONFIGURAÇÃO DE VARIÁVEIS
+-------------------------
+O 'git difftool' retorna às variáveis de configuração do 'git mergetool'
+quando os equivalentes "difftool" não estiverem definidos.
+
+diff.tool::
+	A ferramenta diff predefinida que será usada.
+
+diff.guitool::
+	A ferramenta diff predefinida a ser usada quando `--gui` for usado.
+
+difftool.<ferramenta>.path::
+	Substitua o caminho para a ferramenta fornecida.  É útil caso a sua
+	ferramenta não esteja no `PATH`.
+
+difftool.<ferramenta>.cmd::
+	Especifique o comando para chamar a ferramenta diff.
++
+Consulte a opção `--tool=<tool>` acima para mais detalhes.
+
+difftool.prompt::
+	Avisar antes de cada chamada da ferramenta diff.
+
+difftool.trustExitCode::
+	Encerrar o `difftool` caso a ferramenta "diff" retorne uma condição de
+	encerramento diferente de zero.
++
+Consulte a opção `--trust-exit-code` acima para mais detalhes.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-diff[1]::
+	 Exibir as alterações entre os commits, os commits, árvore de trabalho, etc
+
+linkgit:git-mergetool[1]::
+	Execute as ferramentas de resolução de conflitos de mesclagem para resolver
+	os conflitos
+
+linkgit:git-config[1]::
+	 Obter e definir as opções globais ou as de repositório
+
+GIT
+---
+Parte do linkgit:git[1] suite

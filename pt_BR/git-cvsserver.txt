@@ -1,0 +1,446 @@
+git-cvsserver(1)
+================
+
+NOME
+----
+git-cvsserver - Um emulador CVS para o Git
+
+SINOPSE
+-------
+
+SSH:
+
+[verse]
+export CVS_SERVER="git cvsserver"
+'cvs' -d :ext:user@server/path/repo.git co <HEAD_name>
+
+pserver (/etc/inetd.conf):
+
+[verse]
+cvspserver stream tcp nowait nobody /usr/bin/git-cvsserver git-cvsserver pserver
+
+Uso:
+
+[verse]
+'git-cvsserver' [<opções>] [pserver|server] [<diretório> ...]
+
+OPÇÕES
+------
+
+Obviamente, todas essas opções só fazem sentido se aplicadas pelo lado do
+servidor.  Eles foram implementados para se parecerem o mais próximo
+possível com as opções linkgit:git-daemon[1].
+
+--base-path <caminho>::
+Acrescente o `caminho` para o CVSROOT solicitado
+
+--strict-paths::
+Não permitir a recorrência em subdiretórios
+
+--export-all::
+Não verifique por `gitcvs.enabled` na configuração. Caso queira usar esta
+opção você também precisa especificar uma lista de diretórios permitidos
+(veja abaixo).
+
+-V::
+--version::
+Imprima a informação da versão e encerre
+
+-h::
+-H::
+--help::
+Imprima a informação de uso e encerre
+
+<diretório>::
+Você pode especificar uma lista de diretórios permitidos. Caso nenhum
+diretório seja informado, todos serão permitidos. Esta é uma restrição
+adicional, o acesso ao `gitcvs` ainda precisa ser ativado pela opção de
+configuração do `gitcvs.enabled`, a menos que o `--export=all` também tenha
+sido usado.
+
+
+DESCRIÇÃO
+---------
+
+Esta aplicação é uma camada de emulação do CVS para o Git.
+
+É altamente funcional. No entanto, nem todos os métodos são implementados e
+para os métodos já implementados, nem todos as chaves estão implementadas.
+
+O teste foi realizado usando o cliente CLI CVS e o plug-in Eclipse CVS. A
+maioria das funcionalidades funciona bem com esses dois clientes.
+
+LIMITAÇÕES
+----------
+
+Os clientes CVS não podem marcar, ramificar ou executar mesclagens do Git.
+
+O comando `git-cvsserver` mapeia as ramificações do Git para os módulos
+CVS. Isso é muito diferente do que a maioria dos usuários do CVS esperariam,
+uma vez que nos módulos do CVS geralmente representam um ou mais diretórios.
+
+INSTALAÇÃO
+----------
+
+1. Caso queira oferecer acesso ao CVS via `pserver`, adicione uma linha no
+   `/etc/inetd.conf`, exemplo
++
+--
+------
+   cvspserver stream tcp nowait nobody git-cvsserver pserver
+
+------
+Alguns servidores `inetd` permite especificar o nome do executável
+independentemente do valor de `argv[0]` (ou seja, o nome com o qual o
+programa assume que foi executado). Nesse caso, a linha correta no
+`/etc/inetd.conf` se parece com
+
+------
+   cvspserver stream tcp nowait nobody /usr/bin/git-cvsserver git-cvsserver pserver
+
+------
+
+Por predefinição, o `pserve` oferece apenas o acesso anônimo. Para fazer o
+commit, você precisará criar contas `pserver`, basta adicionar uma
+configuração `gitcvs.authdb` no arquivo de configuração dos repositórios nos
+quais você deseja que o `cvsserver` tenha permissão de gravação, por
+exemplo:
+
+------
+
+   [gitcvs]
+	authdb = /etc/cvsserver/passwd
+
+------
+O formato destes arquivos é o nome do usuário seguido pela senha
+criptografada, por exemplo:
+
+------
+   myuser:$1Oyx5r9mdGZ2
+   myuser:$1$BA)@$vbnMJMDym7tA32AamXrm./
+------
+Você pode usar o recurso `htpasswd` que acompanha o Apache para criar estes
+arquivos, mas o método MD5 de criptografia do Apache difere daquele usado
+pela maioria das funções `crypt()` da biblioteca C, portanto, não use a
+opção `-m`.
+
+Como alternativa, você pode produzir a senha com o operador `crypt()` do
+perl:
+-----
+   perl -e 'my ($user, $pass) = @ARGV; printf "%s:%s\n", $user, crypt($user, $pass)' $USER senha
+-----
+
+Em seguida, forneça sua senha pelo método `pserver`, por exemplo:
+------
+   cvs -d:pserver:algum-usuário:alguma-senha <at> server/path/repo.git co <HEAD_name>
+------
+Nenhuma configuração especial é necessária para o acesso SSH, além de ter as
+ferramentas Git no PATH. Caso tenha clientes que não aceitam a variável de
+ambiente `CVS_SERVER`, é possível renomear o `git-cvsserver` para `cvs`.
+
+Nota: As versões mais recentes do CVS (>= 1.12.11) também é compatível a
+especificação do `CVS_SERVER` diretamente no `CVSROOT`, como
+
+------
+cvs -d ":ext;CVS_SERVER=git cvsserver:user@server/path/repo.git" co <HEAD_name>
+------
+Isso tem a vantagem de ser salvo nos arquivos `CVS/Root` e você não precisa
+se preocupar em sempre definir a variável do ambiente corretamente.  Os
+usuários SSH restritos ao `git shell` não precisam substituir a predefinição
+com `CVS_SERVER` (e não deveriam), pois o `git shell` entende o `cvs` como
+`git-cvsserver` e finge que a outra extremidade executa melhor o `cvs` real.
+--
+2. Para cada repositório que você queira acessar no CVS, é necessário editar a
+   configuração no repositório e adicionar a seção a seguir.
++
+--
+------
+   [gitcvs]
+        enabled=1
+        # optional for debugging
+	logFile=/caminho/para/o/logfile
+
+------
+Nota: você precisa garantir que cada usuário que invoque o comando
+`git-cvsserver` tenha acesso de gravação ao arquivo de registro log e ao
+banco de dados (consulte <<dbbackend,Database Backend>>. Caso queira
+oferecer acesso de gravação via SSH, é óbvio que os usuários também precisam
+ter acesso de gravação ao próprio repositório Git.
+
+Você também precisa garantir que cada repositório esteja "nu" (sem um
+arquivo de índice Git) para que o comando `cvs commit' funcione. Consulte
+linkgit:gitcvs-migration[7].
+
+[[configaccessmethod]]
+Todas as variáveis de configuração também podem ser substituídas por um
+método específico de acesso. Os nomes para os métodos válidos são `ext`
+(para acesso SSH) e `pserver`. O exemplo de configuração a seguir
+desabilitaria o acesso ao `pserver` enquanto ainda permita o acesso pelo
+SSH.
+------
+   [gitcvs]
+        enabled=0
+
+   [gitcvs "ext"]
+        enabled=1
+------
+--
+3. Caso não tenha especificado o `CVSROOT/CVS_SERVER` diretamente no comando do
+   checkout, salvando-o automaticamente nos arquivos 'CVS/Root', então é
+   necessário defini-los de forma explicita na sua variável de ambiente.  O
+   `CVSROOT` deve ser definido normalmente, mas o diretório deve apontar para o
+   repositório Git apropriado.  Como acima, os clientes SSH _não_ estão
+   restritos ao `git-shell`, o `CVS_SERVER` deve ser definido com o comando
+   `git cvsserver`.
++
+--
+------
+     export CVSROOT=:ext:user@server:/var/git/project.git
+     export CVS_SERVER="git cvsserver"
+------
+--
+4. Para clientes SSH que efetuam commits, verifique se os arquivos
+   `.ssh/environment` do lado do servidor (ou `.bashrc`, etc., de acordo com o
+   seu ambiente shell da sia distro) exportam os valores apropriados para
+   `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_NAME` e
+   `GIT_COMMITTER_EMAIL`.  Para clientes SSH cujo shell de login seja o bash, o
+   `.bashrc` pode ser uma alternativa razoável.
+
+5. Os clientes agora devem conseguir fazer o check-out no projeto. Use o nome
+   do 'module' do CVS para indicar qual 'head' do Git você deseja fazer o
+   check-out.  Isso também define o nome do diretório que foi feito o check-out
+   recentemente, a menos que você diga o contrário com a opção `-d`. Por
+   exemplo, isso faz check-out da ramificação 'master' no diretório `master do
+   projeto`:  Por exemplo, é verificado o ramo 'master' no diretório
+   `project-master`:
++
+------
+     cvs co -d project-master master
+------
+
+[[dbbackend]]
+ESTRUTURA DO BANCO DE DADOS
+---------------------------
+
+O comando `git-cvsserver` utiliza um banco de dados por cabeçalho Git (ou
+seja, módulo CVS) para armazenar as informações sobre o repositório, para
+manter números de revisão do CVS consistentes. O banco de dados precisa ser
+atualizado após cada commit.
+
+Caso o commit seja feito diretamente usando o `git` (em vez de usar o
+`git-cvsserver`), a atualização precisará ocorrer no próximo acesso ao
+repositório pelo `git-cvsserver`, independentemente do método de acesso e da
+operação solicitada.
+
+Isso significa que, mesmo que você ofereça apenas o acesso de leitura
+(usando o método `pserver` por exemplo), o comando `git-cvsserver` deve ter
+acesso de gravação ao banco de dados para funcionar de maneira correta (caso
+contrário, você precisa garantir que o banco de dados esteja atualizado a
+qualquer momento quando o `git-cvsserver` for executado).
+
+Por predefinição no diretório Git é utilizado o banco de dados SQLite com
+nome `gitcvs.<nome_do_módulo>.sqlite`. Observe que a estrutura do SQLite
+cria arquivos temporários no mesmo diretório que o arquivo de banco de dados
+durante a gravação, portanto, pode não ser suficiente conceder aos usuários
+que usam o `vgit-cvsserver` o acesso de gravação ao arquivo do banco de
+dados sem conceder a eles também o acesso de gravação ao diretório.
+
+The database cannot be reliably regenerated in a consistent form after the
+branch it is tracking has changed.  Example: For merged branches,
+'git-cvsserver' only tracks one branch of development, and after a 'git
+merge' an incrementally updated database may track a different branch than a
+database regenerated from scratch, causing inconsistent CVS revision
+numbers. `git-cvsserver` has no way of knowing which branch it would have
+picked if it had been run incrementally pre-merge. So if you have to fully
+or partially (from old backup) regenerate the database, you should be
+suspicious of pre-existing CVS sandboxes.
+
+Você pode configurar a estrutura do banco de dados com as seguintes
+variáveis de configuração:
+
+Configurando a estrutura do banco de dados
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+O 'git-cvsserver' utiliza o módulo Perl DBI. Leia também a sua documentação
+caso mude essas variáveis, especialmente as relacionadas com
+`DBI->connect()`.
+
+gitcvs.dbName::
+	Nome do banco de dados. O significado exato depende do driver do banco de
+	dados selecionado; para o SQLite, esse é um nome do arquivo.  É compatível
+	com a substituição da variável (veja abaixo). Não pode conter ponto e
+	vírgula (`;`).  Predefinição: '%Ggitcvs.%m.sqlite'
+
+gitcvs.dbDriver::
+	Driver DBI usado. Você pode especificar qualquer driver disponível, mas pode
+	não funcionar. O `cvsserver` é testado com 'DBD::SQLite', foi informado que
+	funciona com 'DBD::Pg' mas *não* com 'DBD::mysql'.  Considere isso como um
+	recurso experimental. Não pode conter ponto e vírgula (`;`).  Predefinição:
+	'SQLite'
+
+gitcvs.dbuser::
+	Banco de dados do usuário. Útil apenas caso o `dbDriver` esteja
+	configurando, pois o banco de dados SQLite não trabalha com usuários. É
+	compatível com a substituição da variável (veja abaixo).
+
+gitcvs.dbPass::
+	Senha do banco de dados.  Útil apenas caso o  `dbDriver` esteja
+	configurando, pois o banco de dados SQLite não trabalha com senhas.
+
+gitcvs.dbTableNamePrefix::
+	Prefixo do nome da tabela do banco de dados.  É compatível com a
+	substituição da variável (veja abaixo).  Quaisquer caracteres não
+	alfabéticos serão substituídos por sublinhados.
+
+Todas as variáveis também podem ser definidas através do método de acesso,
+consulte <<configaccessmethod,above>>.
+
+Substituição de variável
+^^^^^^^^^^^^^^^^^^^^^^^^
+Você pode utilizar as seguintes variáveis em `dbDriver` e `dbUser`:
+
+%G::
+	Nome do diretório Git
+%g::
+	O nome do diretório Git onde todos os caracteres exceto os alfanuméricos,
+	`.` e `-`, são substituídos por `_` (isso deve facilitar o uso do nome do
+	diretório em um nome de arquivo, se assim for desejado)
+%m::
+	CVS module/Git head name
+%a::
+	método de acesso (um "ext" ou "pserver")
+%u::
+	Nome do usuário que está executando o 'git-cvsserver'.  O uid numérico é
+	utilizado caso nenhum nome possa ser determinado.
+
+MEIO AMBIENTE
+-------------
+
+Essas variáveis evitam a necessidade do uso de opções na linha de comando em
+algumas circunstâncias, permitindo um uso restrito e mais fácil através do
+`git-shell`.
+
+`GIT_CVSSERVER_BASE_PATH` substitui o argumento para `--base-path`.
+
+GIT_CVSSERVER_ROOT especifica uma lista branca de diretórios únicos. O
+repositório ainda deve estar configurado para permitir o acesso através do
+`git-cvsserver`, conforme descrito acima.
+
+Quando essas variáveis do ambiente são definidas, os argumentos
+correspondentes da linha de comando não podem ser usados.
+
+NOTAS DO CLIENTE ECLIPSE CVS
+----------------------------
+
+Para conseguir um check-out com o cliente Eclipse CVS:
+
+1. Escolha "Criar um novo projeto -> Do check-ou CVS"
+2. Crie um novo local. Veja as anotações abaixo para obter mais detalhes sobre
+   como escolher o protocolo correto.
+3. Navegue pelos 'módulos' disponíveis. Ele fornecerá uma lista dos `heads` no
+   repositório. Você não poderá navegar na árvore a partir daí. Apenas os
+   `heads`.
+4. Escolha `HEAD` quando perguntar qual o ramo/tag deve ser
+   verificado. Desmarque o "assistente de inicialização do commit" para evitar
+   fazer o commit no arquivo .project.
+
+Notas sobre o protocolo: Selecione isso caso esteja usando o acesso anônimo
+via pserver.  Aqueles que usam o acesso SSH devem escolher o protocolo 'ext'
+e configurar o acesso 'ext' no painel "Preferências> Equipe> CVS>
+ExtConnection". Defina o `CVS_SERVER` para "`git cvsserver`". Observe que o
+suporte à senha não é bom quando usar o 'ext'; você definitivamente vai
+preferir usar e ter as chaves SSH configuradas.
+
+Como alternativa, você pode apenas usar o protocolo não padrão `extssh` que
+o Eclipse oferece. Neste caso o `CVS_SERVER` é ignorado e você terá que
+substituir o utilitário cvs no servidor por `git-cvsserver` ou manipular o
+seu `.bashrc` para que a chamada 'cvs' efetivamente chame o `git-cvsserver`.
+
+CLIENTES CONHECIDOS QUE FUNCIONAM
+---------------------------------
+
+- CVS 1.12.9 no Debian
+- CVS 1.11.17 no MacOSX (do pacote Fink)
+- Eclipse 3.0, 3.1.2 no MacOSX (veja notas do Cliente Eclipse CVS)
+- TortoiseCVS
+
+OPERAÇÕES COMPATÍVEIS
+---------------------
+
+Todas as operações necessárias para o uso normal são compatíveis, incluindo
+"checkout", "diff", "status", "update", "log", "add", "remove" e "commit".
+
+A maioria dos argumentos dos comandos do CVS que leem as tags CVS ou os
+números da revisão (normalmente `-r`) funcionam, e também são compatíveis
+com qualquer git "refspec" ("tag", "branch", ID do commit, etc).  No
+entanto, os números de revisão do CVS para as ramificações fora do padrão
+não são bem emuladas e o registro log do cvs não exibe as tags ou quaisquer
+ramificações.  (Os números de revisão do CVS que não são do ramo principal
+se assemelham superficialmente aos números da revisão do CVS, mas na verdade
+codificam um ID do commit diretamente, em vez de representar a quantidade de
+revisões desde o ponto da ramificação inicial.)
+
+Observe que existem duas maneiras de fazer check-out de uma determinada
+ramificação.  Conforme descrito em outra parte desta página, o parâmetro
+"module" do "cvs checkout" é interpretado como um nome do ramo e se torna o
+ramo principal.  Ele permanece o ramo principal de uma determinada caixa de
+areia, mesmo que você temporariamente torne outro ramo persistente com o
+comando "cvs update -r".  Como alternativa, o argumento `-r` pode indicar
+alguma outra ramificação para realmente efetuar o checkout, mesmo que o
+módulo ainda seja a ramificação "main" (principal).  Dilemas (conforme
+implementadas atualmente): Cada novo "module" cria um novo banco de dados em
+disco com um histórico para determinado módulo, após a criação do banco de
+dados, as operações nesse ramo principal são rápidas.  Ou, como alternativa,
+o argumento `-r` não ocupa espaço extra em disco, mas pode ser
+significativamente mais lento em muitas operações, como o comando `cvs
+update`.
+
+Caso queira se referir a um "git refspec" que possua caracteres não
+permitidos pelo CVS, você tem duas opções.  Primeiro, pode funcionar apenas
+para informar ao git "refspec" diretamente o argumento CVS `-r` apropriado;
+alguns clientes do CVS parecem não verificar a sanidade do argumento.
+Segundo, caso falhe, você pode usar um mecanismo especial de escape de
+caracteres que utiliza apenas os caracteres válidos nas tags do CVS.  Uma
+sequência de 4 ou 5 caracteres do formulário (sublinhado (`"_"`), traço
+(`"-"`), um ou dois caracteres e traço (`"-"`)) pode codificar vários
+caracteres com base em uma ou duas letras: `"s"` para a barra (`"/"`), `"p"`
+para o ponto (`"."`), `"u"` para o sublinhado (`"_"`) ou dois dígitos
+hexadecimais para qualquer valor de byte (normalmente um número ASCII ou
+talvez parte de um caractere codificado em UTF-8).
+
+As operações de monitoramento herdadas não são compatíveis edit, watch e
+related).  As exportações e as tags (tags e ramos) não são compatíveis neste
+estágio.
+
+Conversões de final de linha CRLF
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Por predefinição o servidor deixa o modo `-k` em branco para todos os
+arquivos, o que faz com que o cliente CVS os trate como arquivos de texto,
+sujeitos à conversão de fim de linha em algumas plataformas.
+
+Você pode fazer com que o servidor use os atributos de conversão do final de
+linha nos arquivos usando o modos `-k` ou definindo a variável de
+configuração` gitcvs.usecrlfattr`.  Consulte linkgit:gitattributes[5] para
+mais informações sobre a conversão do final de linha de um arquivo.
+
+Como alternativa, caso a configuração `gitcvs.usecrlfattr` não esteja ativa
+ou os atributos não permitam a detecção automática de um nome de arquivo, o
+servidor utilizará a configuração `gitcvs.allBinary` como a sua configuração
+predefinida.  Caso `gitcvs.allBinary` esteja definido, o arquivo não
+especificado de outra forma será padronizado para o modo `-kb`. Caso
+contrário, o modo `-k` é deixado em branco. No entanto, caso
+`gitcvs.allBinary` seja definido como "guess", o modo `-k` correto será
+adivinhado com base no conteúdo do arquivo..
+
+Para uma melhor compatibilidade com o 'cvs', provavelmente é melhor
+substituir os valores predefinidos configurando `gitcvs.usecrlfattr` como
+"true" e `gitcvs.allBinary` para "guess".
+
+DEPENDÊNCIAS
+------------
+'git-cvsserver' é dependente do DBD::SQLite.
+
+GIT
+---
+Parte do linkgit:git[1] suite

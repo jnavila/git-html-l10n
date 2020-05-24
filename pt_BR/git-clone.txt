@@ -15,7 +15,8 @@ SINOPSE
 	  [--dissociate] [--separate-git-dir <git dir>]
 	  [--depth <depth>] [--[no-]single-branch] [--no-tags]
 	  [--recurse-submodules[=<pathspec>]] [--[no-]shallow-submodules]
-	  [--[no-]remote-submodules] [--jobs <n>] [--sparse] [--] <repository>
+	  [--[no-]remote-submodules] [--jobs <n>] [--sparse]
+	  [--filter=<filter>] [--] <repository>
 	  [<directory>]
 
 DESCRIÇÃO
@@ -152,6 +153,15 @@ pacote dentro do repositório clonado.
 	pode ser modificado para aumentar o diretório de trabalho conforme a
 	necessidade.
 
+--filter=<filter-spec>::
+	Use the partial clone feature and request that the server sends a subset of
+	reachable objects according to a given object filter.  When using
+	`--filter`, the supplied `<filter-spec>` is used for the partial clone
+	filter. For example, `--filter=blob:none` will filter out all blobs (file
+	contents) until needed by Git. Also, `--filter=blob:limit=<size>` will
+	filter out all blobs of size at least `<size>`. For more details on filter
+	specifications, see the `--filter` option in linkgit:git-rev-list[1].
+
 --mirror::
 	Configure um espelho do repositório de origem. Isso implica `--bare`.
 	Comparado com `--bare`, `--mirror` não apenas mapeia as ramificações locais
@@ -214,12 +224,13 @@ opções correspondentes `--mirror` e `--no-tags`.
 	usada mais de uma vez.
 
 --[no-]single-branch::
-	Clone only the history leading to the tip of a single branch, either
-	specified by the `--branch` option or the primary branch remote's `HEAD`
-	points at.  Further fetches into the resulting repository will only update
-	the remote-tracking branch for the branch this option was used for the
-	initial cloning.  If the HEAD at the remote did not point at any branch when
-	`--single-branch` clone was made, no remote-tracking branch is created.
+	Clone apenas o histórico que leva à ponta de uma única ramificação,
+	especificada pela opção `--branch` ou pelo ramo primário remoto onde `HEAD`
+	aponta.  Outras buscas no repositório resultante atualizarão apenas a
+	ramificação de rastreamento remoto da ramificação em que essa opção foi
+	usada para a clonagem inicial.Caso o `HEAD` remoto não aponte para nenhuma
+	ramificação quando o clone `--single-branch` foi feito, nenhuma ramificação
+	de rastreamento remoto é criado.
 
 --no-tags::
 	Não clone quaisquer tags e defina `remote.<remote>.tagOpt=--no-tags` nas
@@ -227,27 +238,28 @@ opções correspondentes `--mirror` e `--no-tags`.
 	não sigam qualquer tag. As buscas explícitas subsequentes das tags ainda
 	funcionarão (consulte linkgit:git-fetch[1]).
 +
-Can be used in conjunction with `--single-branch` to clone and maintain a
-branch with no references other than a single cloned branch. This is useful
-e.g. to maintain minimal clones of the default branch of some repository for
-search indexing.
+Pode ser usado em conjunto com o `--single-branch` para clonar e manter um
+ramo sem referências além de um único ramo clonado. Isso é útil, por
+exemplo, para manter clones mínimos da ramificação predefinida de algum
+repositório para a indexação da pesquisa.
 
 --recurse-submodules[=<pathspec]::
-	After the clone is created, initialize and clone submodules within based on
-	the provided pathspec.  If no pathspec is provided, all submodules are
-	initialized and cloned.  This option can be given multiple times for
-	pathspecs consisting of multiple entries.  The resulting clone has
-	`submodule.active` set to the provided pathspec, or "." (meaning all
-	submodules) if no pathspec is provided.
+	Depois que o clone é criado, inicialize e clone os submódulos com base no
+	`pathspec` informado.  Caso nenhum `pathspec` seja informado, todos serão
+	inicializados e clonados.  Esta opção pode ser usada várias vezes para a
+	consulta de diversas entradas `pathspec`.O clone resultante de
+	`submodule.active` define o pathspec informado ou "." (significa todos os
+	submódulos) caso nenhum pathspec seja informado.
 +
-Submodules are initialized and cloned using their default settings. This is
-equivalent to running `git submodule update --init --recursive <pathspec>`
-immediately after the clone is finished. This option is ignored if the
-cloned repository does not have a worktree/checkout (i.e. if any of
-`--no-checkout`/`-n`, `--bare`, or `--mirror` is given)
+Os submódulos são inicializados e clonados utilizando as suas respectivas
+configurações predefinidas. Este é o equivalente a executar o comando `git
+submodule update --init --recursive <pathspec>` imediatamente após que a
+clonagem for finalizada. Esta opção é ignorada caso o repositório clonado
+não tenha uma árvore de trabalho/verificação (ou seja quaisquer dos comandos
+`--no-checkout`/`-n`, `--bare`, ou `--mirror` seja informado)
 
 --[no-]shallow-submodules::
-	All submodules which are cloned will be shallow with a depth of 1.
+	Todos os submódulos clonados serão rasos e com uma profundidade 1.
 
 --[no-]remote-submodules::
 	Todos os submódulos que forem clonados, para realizar a atualização os

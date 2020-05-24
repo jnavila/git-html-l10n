@@ -1,0 +1,71 @@
+O Git é, até certo ponto, um codificador de caracteres agnóstico.
+
+ - O conteúdo dos objetos gota são sequências de bytes não interpretados.  Não
+   há tradução de codificação no nível principal.
+
+ - Os nomes do caminho são codificados na forma de normalização UTF-8 C. Isso
+   se aplica a objetos nas árvore, arquivos do índice, referência de nomes e
+   nomes do caminho em argumentos da linha de comando, variáveis do ambiente e
+   os arquivos de configuração (`.git / config` (consulte
+   linkgit:git-config[1]), linkgit:gitignore[5], linkgit:gitattributes[5] e
+   linkgit:gitmodules[5]).
++
+Observe que o Git em seu nível básico trata os nomes dos caminhos
+simplesmente como sequências de bytes não `NUL`, não há conversões de
+codificação dos nomes dos caminhos (exceto no Mac e no Windows). Portanto, o
+uso dos nomes de caminhos que não sejam `ASCII` funcionará principalmente em
+plataformas e sistemas de arquivos que se utilizem de codificações ASCII
+estendidas e herdadas. No entanto, os repositórios criados nestes sistemas
+não funcionarão corretamente em sistemas baseados em UTF-8 (por exemplo,
+Linux, Mac, Windows) e vice-versa.  Além disso, muitas ferramentas baseadas
+em Git simplesmente assumem nomes de caminho como UTF-8 e falharão ao exibir
+outros tipos de codificações corretamente.
+
+ - As mensagens do registro log do commit geralmente são codificadas em UTF-8,
+   porém há compatibilidade para outras codificações ASCII estendidas. Isso
+   inclui ISO-8859-x, CP125x e muitos outros. Porém não há compatibilidade com
+   codificações UTF-16/32, EBCDIC e CJK, codificações de vários bytes (GBK,
+   Shift-JIS, Big5, EUC-x, CP9xx etc.).
+
+Embora incentivemos que as mensagens do registro log do commit sejam
+codificadas em UTF-8, a Porcelana do Git e seu núcleo foram projetados para
+não impor a utilização do UTF-8 nos projetos.  Caso todos os participantes
+de um projeto em particular achem mais conveniente usar as codificações
+herdadas, o Git não o proibirá.  Porém, há algumas coisas a serem
+consideradas.
+
+. Ambos os comandos 'git commit" e "git commit-árvore' emitem um aviso caso a
+  mensagem do registro log do commit utilizada não se parecer com uma string
+  UTF-8 válida, a menos que explicitamente queira que seu projeto use uma
+  codificação do legado.  A melhor maneira de usar isso é ter uma variável
+  `i18n.commitencoding` em um arquivo `.git/config`, como este:
++
+------------
+[i18n]
+	commitEncoding = ISO-8859-1
+------------
++
+Os objetos commit que foram criados com a configuração acima registram o
+valor `i18n.commitEncoding` em seu cabeçalho `encoding`.  Isso é para
+auxiliar as outras pessoas que olharão para eles mais tarde.  A falta deste
+cabeçalho implica que a mensagem do registro log do commit seja codificado
+em UTF-8.
+
+. Os comandos 'git log', 'git show', 'git blame' e relacionados fazem vista
+  para o cabeçalho `encoding` de um objeto commit e tentam codificar novamente
+  a mensagem do registro log em UTF-8 a menos que seja informado de outra
+  maneira.  É possível especificar a codificação da saída desejada com  a
+  variável `i18n.logOutputEncoding` no arquivo `.git/config`, assim:
++
+------------
+[i18n]
+	logOutputEncoding = ISO-8859-1
+------------
++
+Caso não tenha essa variável de configuração, o valor de
+`i18n.commitEncoding` é utilizado em seu lugar.
+
+Observe que decidimos deliberadamente não codificar novamente a mensagem do
+registro log do commit quando um commit for feito para forçar a codificação
+UTF-8 a nível do objeto commit, porque a re-codificação para UTF-8 não é
+necessariamente uma operação reversível.

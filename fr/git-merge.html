@@ -593,10 +593,12 @@ sortir avec un statut non nul.</p>
 </dd>
 <dt class="hdlist1">-S[&lt;idclé&gt;]</dt>
 <dt class="hdlist1">--gpg-sign[=&lt;idclé&gt;]</dt>
+<dt class="hdlist1">--no-gpg-sign</dt>
 <dd>
-<p>Signer le commit résultant de la fusion avec GPG. L&#8217;argument <code>idclé</code> est
-optionnel avec par défaut l&#8217;identité du validateur ; si spécifiée, elle doit
-être collée à l&#8217;option sans aucun espace.</p>
+<p>GPG-sign the resulting merge commit. The <code>keyid</code> argument is optional and
+defaults to the committer identity; if specified, it must be stuck to the
+option without a space. <code>--no-gpg-sign</code> is useful to countermand both
+<code>commit.gpgSign</code> configuration variable, and earlier <code>--gpg-sign</code>.</p>
 </dd>
 <dt class="hdlist1">--log[=&lt;n&gt;]</dt>
 <dt class="hdlist1">--no-log</dt>
@@ -702,6 +704,14 @@ n&#8217;est spécifié, la progression est indiquée si l&#8217;erreur standard 
 connectée à un terminal.  Notez que toutes les stratégies de fusion peuvent
 ne pas prendre en charge le rapport d&#8217;avancement.</p>
 </dd>
+<dt class="hdlist1">--autostash</dt>
+<dt class="hdlist1">--no-autostash</dt>
+<dd>
+<p>Automatically create a temporary stash entry before the operation begins,
+and apply it after the operation ends.  This means that you can run the
+operation on a dirty worktree.  However, use with care: the final stash
+application after a successful merge might result in non-trivial conflicts.</p>
+</dd>
 <dt class="hdlist1">--allow-unrelated-histories</dt>
 <dd>
 <p>Par défaut, la commande <code>git merge</code> refuse de fusionner les historiques qui
@@ -750,8 +760,8 @@ abandonner.</p>
 </dd>
 <dt class="hdlist1">--abort</dt>
 <dd>
-<p>Abandonner le processus actuel de résolution des conflits, et essayer de
-reconstruire l&#8217;état antérieur à la fusion.</p>
+<p>Abort the current conflict resolution process, and try to reconstruct the
+pre-merge state. If an autostash entry is present, apply it to the worktree.</p>
 <div class="paragraph">
 <p>S&#8217;il y avait des modifications non validées dans l&#8217;arbre de travail lorsque
 la fusion a commencé, <code>git merge --abort</code> sera dans certains cas incapable
@@ -759,13 +769,17 @@ de reconstruire ces changements. Il est donc recommandé de toujours valider
 ou remiser vos modifications avant de lancer <em>git merge</em>.</p>
 </div>
 <div class="paragraph">
-<p><em>git merge --abort</em> est équivalent à <em>git reset --merge</em> quand <code>MERGE_HEAD</code>
-est présent.</p>
+<p><em>git merge --abort</em> is equivalent to <em>git reset --merge</em> when <code>MERGE_HEAD</code>
+is present unless <code>MERGE_AUTOSTASH</code> is also present in which case <em>git merge
+--abort</em> applies the stash entry to the worktree whereas <em>git reset --merge</em>
+will save the stashed changes in the stash list.</p>
 </div>
 </dd>
 <dt class="hdlist1">--quit</dt>
 <dd>
-<p>Oublier la fusion en cours. Laisser l&#8217;index et l&#8217;arbre de travail en l&#8217;ếtat.</p>
+<p>Forget about the current merge in progress. Leave the index and the working
+tree as-is. If <code>MERGE_AUTOSTASH</code> is present, the stash entry will be saved
+to the stash list.</p>
 </dd>
 <dt class="hdlist1">--continue</dt>
 <dd>
@@ -1375,6 +1389,15 @@ différents" dans <a href="gitattributes.html">gitattributes(5)</a>.</p>
 <p>Indiquer s&#8217;il faut afficher le diffstat entre ORIG_HEAD et le résultat de la
 fusion à la fin de la fusion. Vrai par défaut.</p>
 </dd>
+<dt class="hdlist1">merge.autoStash</dt>
+<dd>
+<p>When set to true, automatically create a temporary stash entry before the
+operation begins, and apply it after the operation ends.  This means that
+you can run merge on a dirty worktree.  However, use with care: the final
+stash application after a successful merge might result in non-trivial
+conflicts.  This option can be overridden by the <code>--no-autostash</code> and
+<code>--autostash</code> options of <a href="git-merge.html">git-merge(1)</a>.  Defaults to false.</p>
+</dd>
 <dt class="hdlist1">merge.tool</dt>
 <dd>
 <p>Contrôle quel outil de fusion est utilisé par <a href="git-mergetool.html">git-mergetool(1)</a>.  La
@@ -1530,7 +1553,7 @@ actuellement pas prises en charge.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-28 17:12:57 +0200
+Last updated 2020-05-23 19:49:33 +0200
 </div>
 </div>
 </body>

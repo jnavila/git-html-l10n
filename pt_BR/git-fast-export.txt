@@ -1,0 +1,248 @@
+git-fast-export(1)
+==================
+
+NOME
+----
+git-fast-export - Exportador de dados do Git
+
+
+SINOPSE
+-------
+[verse]
+'git fast-export [<opções>]' | 'git fast-import'
+
+DESCRIÇÃO
+---------
+Este programa despeja as revisões fornecidas em um formato adequado para ser
+canalizado para o 'git fast-import'.
+
+Você pode usá-lo como uma substituição legível do pacote (consulte
+linkgit:git-bundle[1]) ou como um formato que pode ser editado antes que
+possa ser enviado ao 'git fast import' para fazer a reescrita no histórico
+(uma habilidade dependente das ferramentas como 'git filter-repo').
+
+OPÇÕES
+------
+--progress = <n>::
+	Insira instruções de 'progresso' em todos os objetos `<n>` a serem exibidos
+	por 'git fast-import' durante a importação.
+
+--signed-tags=(verbatim|warn|warn-strip|strip|abort)::
+	Determine como lidar com tags assinadas.  Como qualquer transformação após a
+	exportação pode alterar os nomes das tags (o que também pode acontecer ao
+	excluir as revisões) e as assinaturas não coincidentes.
++
+Ao pedir para abortar 'abort' (que é o padrão), este programa será terminado
+ao encontrar uma tag assinada.  With 'strip', the tags will silently be made
+unsigned, with 'warn-strip' they will be made unsigned but a warning will be
+displayed, with 'verbatim', they will be silently exported and with 'warn',
+they will be exported, but you will see a warning.
+
+--tag-of-filtered-object=(abort|drop|rewrite)::
+	Determina como manipular as tags cujo objeto marcado seja filtrado.  Como as
+	revisões e os arquivos a serem exportados podem ser limitados pelo caminho,
+	os objetos marcados podem ser filtrados por completo.
++
+Ao pedir para abortar 'abort' (que é o padrão), este programa será terminado
+ao encontrar uma tag assinada.  Com 'drop' estas tags serão omitidas da
+saída.  Com 'rewrite', caso o objeto marcado seja um commit, a tag será
+reescrita para marcar a tag de um commit anterior (através da reescrita da
+matriz; consulte linkgit:git-rev-list[1])
+
+-M::
+-C::
+	Detecta a ação de copiar e mover como descrito na página do manual
+	linkgit:git-diff[1], utilize-o para gerar comandos de copiar e renomear na
+	saída.
++
+Observe que as versões anteriores deste comando não reclamavam e produziam
+resultados incorretos caso essas opções fossem usadas.
+
+--export-marks=<arquivo>::
+	Despeja a tabela de marcações internas em <arquivo> quando concluída.  As
+	marcações são escritas uma por linha como `:markid SHA-1`. Somente as
+	marcações para as revisões são despejadas; as marcações das bolhas são
+	ignoradas.  Os back-end podem usar esse arquivo para validar as importações
+	depois de concluídas ou para salvar a tabela de marcações em execuções
+	incrementais.  Como o <arquivo> só é aberto e truncado na conclusão, o mesmo
+	caminho também pode ser passado com segurança para `--import-marks`.  O
+	arquivo não será gravado caso nenhum novo objeto tenha sido
+	marcado/exportado.
+
+--import-marks=<arquivo>::
+	Antes de processar qualquer entrada, carregue as marcações especificadas no
+	<arquivo>.  O arquivo de entrada deve existir, ser legível e usar o mesmo
+	formato produzido por `--export-marks`.
+
+--mark-tags::
+	In addition to labelling blobs and commits with mark ids, also label tags.
+	This is useful in conjunction with `--export-marks` and `--import-marks`,
+	and is also useful (and necessary) for exporting of nested tags.  It does
+	not hurt other cases and would be the default, but many fast-import
+	frontends are not prepared to accept tags with mark identifiers.
++
+Any commits (or tags) that have already been marked will not be exported
+again.  If the backend uses a similar --import-marks file, this allows for
+incremental bidirectional exporting of the repository by keeping the marks
+the same across runs.
+
+--fake-missing-tagger::
+	Alguns repositórios antigos têm tags sem um etiquetador.  O protocolo de
+	importação rápida era bastante rigoroso quanto isso.  Então, falsifique um
+	etiquetador para poder importar rapidamente a saída.
+
+--use-done-feature::
+	Inicie o fluxo com uma sub-rotina 'feature done' e finalize-o com um comando
+	'done'.
+
+--no-data::
+	Ignore a saída dos objetos bolha e, em vez disso, consulte as bolhas por
+	meio do hash SHA-1 original.  Isso é útil durante a reescrita da estrutura
+	dos diretórios ou do histórico de um repositório sem tocar no conteúdo
+	individual dos arquivos.  Observe que o fluxo resultante pode ser usado
+	apenas por um repositório que já contenha os objetos necessários.
+
+--full-tree::
+	Essa opção fará com que a exportação rápida emita uma diretiva "deleteall"
+	(apague todos) para cada commit seguida por uma lista completa de todos os
+	arquivos no commit (em vez de apenas listar os arquivos diferentes do
+	primeiro commit).
+
+--anonymize::
+	Torne os conteúdos do repositório, anônimo, mantendo a forma do histórico e
+	da árvore armazenada.  Veja a seção `ANONIMIZANDO` abaixo.
+
+--reference-excluded-parents::
+	By default, running a command such as `git fast-export master~5..master`
+	will not include the commit master{tilde}5 and will make master{tilde}4 no
+	longer have master{tilde}5 as a parent (though both the old master{tilde}4
+	and new master{tilde}4 will have all the same files).  Use
+	--reference-excluded-parents to instead have the stream refer to commits in
+	the excluded range of history by their sha1sum.  Note that the resulting
+	stream can only be used by a repository which already contains the necessary
+	parent commits.
+
+--show-original-ids::
+	Inclua uma diretiva extra na saída para commits e bolhas, `original-oid
+	<SHA1SUM>`.  Embora essas diretivas provavelmente sejam ignoradas pelos
+	importadores, como o comando `git-fast-import`, pode ser útil para os
+	filtros intermediários (para reescrever mensagens de confirmação que se
+	referem a confirmações mais antigas ou para remover as bolhas por um ID por
+	exemplo).
+
+--reencode=(yes|no|abort)::
+	Especifique como manipular o cabeçalho `encoding` nos objetos commit.  Ao
+	pedir para abortar 'abort' (que é a predefinição), este programa será
+	terminado ao encontrar tal objeto que foi feito o commit.  Com 'yes', a
+	mensagem do commit será re-codificada para UTF-8.  Com 'no', a codificação
+	original será preservada.
+
+--refspec::
+	Aplique o `refspec` especificado a cada "ref" exportado. Vários deles podem
+	ser especificados.
+
+[<git-rev-list-args>...]::
+	Uma lista de argumentos aceitáveis para o 'git rev-parse' e 'git rev-list',
+	que especifica os objetos e referências para serem exportadas.  Por exemplo,
+	`master~10..master` faz com que a referência principal atual seja exportada
+	junto com todos os objetos adicionados desde o seu décimo commit ancestral e
+	(a menos que a opção `--reference-exclusive-parents` esteja especificada)
+	todos os arquivos comuns a master{tilde}9 e master{tilde}10.
+
+EXEMPLOS
+--------
+
+-------------------------------------------------------------------
+$ git fast-export --all | (cd /empty/repository && git fast-import)
+-------------------------------------------------------------------
+
+Isso exportará o repositório inteiro e importará para o repositório vazio
+existente.  Exceto para re-codificar os commits que não estejam como UTF-8,
+seria um cópia um para um.
+
+-----------------------------------------------------
+$ git fast-export master~5..master |
+	sed "s|refs/heads/master|refs/heads/other|" |
+	git fast-import
+-----------------------------------------------------
+
+Isso cria um novo ramo chamado 'other' de 'master~5..master' (ou seja, caso
+'master' tenha um histórico linear, serão necessários então os últimos 5
+commits).
+
+Observe que isso pressupõe que nenhuma das bolhas e as mensagens dos commits
+referenciadas por esse intervalo de revisão, contenha a sequência
+`refs/heads/master`.
+
+
+ANONIMIZANDO
+------------
+
+Caso a opção `--anonymize` seja usada, o git tentará remover todas as
+informações de identificação do repositório, mantendo ainda o suficiente da
+árvore original e dos padrões do histórico para reproduzir alguns bugs. O
+objetivo é que um bug do git encontrado em um repositório privado persista
+no repositório anonimizado e este último pode ser compartilhado com os
+desenvolvedores do git para ajudar na resolução do problema.
+
+Com esta opção, o git substituirá todos os `refnames`, caminhos, conteúdo da
+bolha, commit, a tag das mensagens, nomes e endereços de email na saída por
+dados anônimos.  Duas instâncias da mesma sequência serão substituídas de
+forma equivalente (duas confirmações com o mesmo autor terão o mesmo autor
+anônimo na saída, mas não terão nenhuma semelhança com a sequência do autor
+original por exemplo). O relacionamento entre os commits, ramificações e
+tags será mantido, bem como o registro de data e hora dos commits (porém as
+mensagens dos commits e os `refnames` que não tenham nenhuma semelhança com
+os originais). A composição relativa da árvore é mantida (se você tiver uma
+árvore raiz com 10 arquivos e 3 árvores, o mesmo ocorrerá com a saída por
+exemplo), porém seus nomes e o conteúdo dos arquivos serão substituídos.
+
+Caso acredite que tenha encontrado um bug no git, pode começar exportando um
+fluxo anonimizado de todo o repositório:
+
+---------------------------------------------------
+$ git fast-export --anonymize --all >anon-stream
+---------------------------------------------------
+
+Em seguida, confirme se o bug persiste em um repositório criado a partir
+desse fluxo (muitos erros não, pois eles realmente dependem do conteúdo
+exato do repositório):
+
+---------------------------------------------------
+$ git init anon-repo
+$ cd anon-repo
+$ git fast-import <../anon-stream
+$ ... teste o seu bug ...
+---------------------------------------------------
+
+Caso o repositório anonimizado exiba o erro, pode valer a pena compartilhar
+o `anon-stream` junto com um relatório de erro tradicional. Observe que o
+fluxo anonimizado é muito bem compactado, portanto a sua compactação gzip é
+altamente recomendável. Caso deseje examinar o fluxo para ver se não contém
+dados particulares, é possível examiná-lo diretamente antes de
+enviar. Também é possível tentar:
+
+---------------------------------------------------
+$ perl -pe 's/\d+/X/g' <anon-stream | sort -u | less
+---------------------------------------------------
+
+que mostra todas as linhas exclusivas (com números convertidos em "X", para
+recolher o "Usuário 0", "Usuário 1" etc. em "Usuário X"). Isso produz uma
+saída muito menor e geralmente é de rápida confirmação já que não há dados
+privados no fluxo.
+
+
+LIMITAÇÕES
+----------
+
+Como 'git fast-import' não pode marcar as árvores, você não poderá exportar
+o repositório linux.git completamente pois ele contém uma marca que faz
+referência a uma árvore em vez de um commit.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-fast-import[1]
+
+GIT
+---
+Parte do linkgit:git[1] suite

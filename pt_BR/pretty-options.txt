@@ -1,0 +1,92 @@
+--pretty[=<formato>]::
+--format=<formato>::
+
+	Imprima bem o conteúdo dos registros logs do commit em um determinado
+	formato, onde '<formato>' pode ser um dos `oneline`, `short`, `medium`,
+	`full`, `fuller`, `reference`, `email`, `raw`, `format:<string>` e
+	`tformat:<string>`.  Quando `<formato>` não é um dos itens acima e possui
+	`%placeholder`, ele age como se `--pretty=tformat:<format>' tenha sido
+	usado.
++
+Consulte a seção "FORMATOS BONITOS" para obter detalhes adicionais para cada
+formato.  Quando a parte '=<formato>' é omitida, o valor predefinido é
+'medium'.
++
+Nota: você pode especificar o formato "pretty" padrão na configuração do
+repositório (consulte linkgit:git-config[1]).
+
+--abbrev-commit::
+	Em vez de exibir os 40 bytes hexadecimais do nome completo do objeto commit,
+	exiba apenas um prefixo parcial.  A quantidade de dígitos não padrão pode
+	ser usado com `--abbrev=<n>` (que também modifica a saída do "diff", se for
+	exibida).
++
+Isso deve tornar `--pretty=oneline` muito mais legível para pessoas que usam
+terminais com 80 colunas.
+
+--no-abbrev-commit::
+	Exibe os 40 bytes hexadecimais completos do objeto commit. Isso nega a opção
+	`--abbrev-commit` e quaisquer outras que o impliquem em "--oneline". Ele
+	também substitui a variável `log.abbrevCommit`.
+
+--oneline::
+	Este é um atalho para "--pretty=oneline --abbrev-commit" ser usado junto.
+
+--encoding=<codificação>::
+	The commit objects record the encoding used for the log message in their
+	encoding header; this option can be used to tell the command to re-code the
+	commit log message in the encoding preferred by the user.  For non plumbing
+	commands this defaults to UTF-8. Note that if an object claims to be encoded
+	in `X` and we are outputting in `X`, we will output the object verbatim;
+	this means that invalid sequences in the original commit may be copied to
+	the output.
+
+--expand-tabs=<n>::
+--expand-tabs::
+--no-expand-tabs::
+	Perform a tab expansion (replace each tab with enough spaces to fill to the
+	next display column that is multiple of '<n>')  in the log message before
+	showing it in the output.  `--expand-tabs` is a short-hand for
+	`--expand-tabs=8`, and `--no-expand-tabs` is a short-hand for
+	`--expand-tabs=0`, which disables tab expansion.
++
+A predefinição é que as guias sejam expandidas em belos formatos que recuam
+a mensagem do registro log em 4 espaços (ou seja,  'medium', a predefinição,
+'full' e 'fuller').
+
+ifndef::git-rev-list[]
+--notes[=<ref>]::
+	Exiba as anotações (consulte linkgit:git-notes[1]) que acompanham o commit
+	durante a exibição da mensagem de configuração do registro log.  Este é o
+	padrão para os comandos `git log`, `git show` e `git whatchanged` quando não
+	houver as opções `--pretty`, `--format`, ou `--oneline` na linha de comando.
++
+É predefinido que as notas exibidas são das notas relocadas nas variáveis
+'core.notesRef' e 'notes.displayRef' (ou substituições de ambiente
+correspondentes). Consulte linkgit:git-config[1] para obter mais detalhes.
++
+With an optional '<ref>' argument, use the ref to find the notes to
+display.  The ref can specify the full refname when it begins with
+`refs/notes/`; when it begins with `notes/`, `refs/` and otherwise
+`refs/notes/` is prefixed to form a full name of the ref.
++
+Multiple --notes options can be combined to control which notes are being
+displayed. Examples: "--notes=foo" will show only notes from
+"refs/notes/foo"; "--notes=foo --notes" will show both notes from
+"refs/notes/foo" and from the default notes ref(s).
+
+--no-notes::
+	Do not show notes. This negates the above `--notes` option, by resetting the
+	list of notes refs from which notes are shown.  Options are parsed in the
+	order given on the command line, so e.g.  "--notes --notes=foo --no-notes
+	--notes=bar" will only show notes from "refs/notes/bar".
+
+--show-notes[=<ref>]::
+--[no-]standard-notes::
+	Estas opções são obsoletas. Em vez disso use as opções `--notes/--no-notes`
+	acima.
+endif::git-rev-list[]
+
+--show-signature::
+	Verifique a validade de um objeto commit assinado, passando a assinatura
+	para `gpg --verify` e exibe a sua saída.

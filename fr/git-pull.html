@@ -546,9 +546,10 @@ rapports lors de la fusion.</p>
 </dd>
 <dt class="hdlist1">--[no-]recurse-submodules[=yes|on-demand|no]</dt>
 <dd>
-<p>Cette option contrôle si les nouveaux commits de tous les sous-modules
-peuplés doivent être récupérés et mis à jour également (voir
-<a href="git-config.html">git-config(1)</a> et <a href="gitmodules.html">gitmodules(5)</a>).</p>
+<p>This option controls if new commits of populated submodules should be
+fetched, and if the working trees of active submodules should be updated,
+too (see <a href="git-fetch.html">git-fetch(1)</a>, <a href="git-config.html">git-config(1)</a> and
+<a href="gitmodules.html">gitmodules(5)</a>).</p>
 <div class="paragraph">
 <p>Si l&#8217;extraction est effectuée via un rebasage, les commits des sous-module
 locaux sont également rebasés.</p>
@@ -636,10 +637,12 @@ sortir avec un statut non nul.</p>
 </dd>
 <dt class="hdlist1">-S[&lt;idclé&gt;]</dt>
 <dt class="hdlist1">--gpg-sign[=&lt;idclé&gt;]</dt>
+<dt class="hdlist1">--no-gpg-sign</dt>
 <dd>
-<p>Signer le commit résultant de la fusion avec GPG. L&#8217;argument <code>idclé</code> est
-optionnel avec par défaut l&#8217;identité du validateur ; si spécifiée, elle doit
-être collée à l&#8217;option sans aucun espace.</p>
+<p>GPG-sign the resulting merge commit. The <code>keyid</code> argument is optional and
+defaults to the committer identity; if specified, it must be stuck to the
+option without a space. <code>--no-gpg-sign</code> is useful to countermand both
+<code>commit.gpgSign</code> configuration variable, and earlier <code>--gpg-sign</code>.</p>
 </dd>
 <dt class="hdlist1">--log[=&lt;n&gt;]</dt>
 <dt class="hdlist1">--no-log</dt>
@@ -727,6 +730,14 @@ n&#8217;est pas signé avec une clé valide, la fusion est annulée.</p>
 <p>Synonymes de --stat et --no-stat ; ils sont déconseillés et seront supprimés
 à l&#8217;avenir.</p>
 </dd>
+<dt class="hdlist1">--autostash</dt>
+<dt class="hdlist1">--no-autostash</dt>
+<dd>
+<p>Automatically create a temporary stash entry before the operation begins,
+and apply it after the operation ends.  This means that you can run the
+operation on a dirty worktree.  However, use with care: the final stash
+application after a successful merge might result in non-trivial conflicts.</p>
+</dd>
 <dt class="hdlist1">--allow-unrelated-histories</dt>
 <dd>
 <p>Par défaut, la commande <code>git merge</code> refuse de fusionner les historiques qui
@@ -785,17 +796,6 @@ attentivement <a href="git-rebase.html">git-rebase(1)</a>.
 <dt class="hdlist1">--no-rebase</dt>
 <dd>
 <p>Écraser le --rebase précédent.</p>
-</dd>
-<dt class="hdlist1">--autostash</dt>
-<dt class="hdlist1">--no-autostash</dt>
-<dd>
-<p>Avant de commencer à rebaser, remiser les modifications locales (voir
-<a href="git-stash.html">git-stash(1)</a>) si nécessaire, et appliquer l&#8217;entrée de remisage une
-fois terminé. <code>--no-autostash</code> est utile pour remplacer la variable de
-configuration <code>rebase.autoStash</code> (voir <a href="git-config.html">git-config(1)</a>).</p>
-<div class="paragraph">
-<p>Cette option n&#8217;est valable que si l&#8217;option "--rebase" est utilisée.</p>
-</div>
 </dd>
 </dl>
 </div>
@@ -881,6 +881,10 @@ nom de référence correspondant.</p>
 documentée dans <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 </dd>
+<dt class="hdlist1">--dry-run</dt>
+<dd>
+<p>Montrer ce qui serait fait, sans faire de changements.</p>
+</dd>
 <dt class="hdlist1">-f</dt>
 <dt class="hdlist1">--force</dt>
 <dd>
@@ -896,6 +900,20 @@ Cette option permet de passer outre à ce contrôle.</p>
 <dd>
 <p>Conserver le paquet téléchargé.</p>
 </dd>
+<dt class="hdlist1">-p</dt>
+<dt class="hdlist1">--prune</dt>
+<dd>
+<p>Avant de récupérer, supprimer toutes les références de suivi à distance qui
+n&#8217;existent plus sur le dépôt distant.  Les étiquettes ne sont pas sujettes à
+l&#8217;élagage si elles ne sont récupérées qu&#8217;en raison du suivi automatique de
+l&#8217;étiquette par défaut ou en raison d&#8217;une option --tags.  Cependant, si les
+étiquettes sont récupérées en raison d&#8217;un spécificateur de référence
+explicite (soit en ligne de commande, soit dans la configuration distante,
+par exemple si le dépôt distant a été cloné avec l&#8217;option --mirror), alors
+elles sont également sujettes à l&#8217;élagage. La fourniture de <code>--prune-tags</code>
+est une abréviation pour la fourniture du spécificateur de référence
+d&#8217;étiquette.</p>
+</dd>
 <dt class="hdlist1">--no-tags</dt>
 <dd>
 <p>Par défaut, les étiquettes qui pointent sur des objets téléchargés à partir
@@ -904,14 +922,52 @@ désactive le suivi automatique des étiquettes. Le comportement par défaut
 d&#8217;un distant peut être spécifié avec le paramètre remote.&lt;nom&gt;.tagOpt. Voir
 <a href="git-config.html">git-config(1)</a>.</p>
 </dd>
-<dt class="hdlist1">-u</dt>
-<dt class="hdlist1">--update-head-ok</dt>
+<dt class="hdlist1">--refmap=&lt;spécificateur-de-référence&gt;</dt>
 <dd>
-<p>Par défaut, <em>git fetch</em> refuse de mettre à jour la tête qui correspond à la
-branche en cours.  Ce drapeau désactive la vérification.  C&#8217;est purement
-pour l&#8217;usage interne de <em>git pull</em> pour communiquer avec <em>git fetch</em>, et à
-moins que vous n&#8217;implémentiez votre propre Porcelaine, vous n&#8217;êtes pas censé
-l&#8217;utiliser.</p>
+<p>Lors de la récupération des références listées en ligne de commande,
+utiliser la spécification de référence (qui peut être donnée plusieurs fois)
+pour mapper les références sur les branches de suivi à distance, au lieu des
+valeurs des variables de configuration <code>remote.*.fetch</code> pour le dépôt
+distant.  Fournir un <code>&lt;spécificateur-de-référence&gt;</code> vide à l&#8217;option
+<code>--refmap</code> fait que Git ignore les spécification de référence configurées et
+se fie entièrement aux spécifications de référence fournies comme arguments
+de la ligne de commande. Voir la section sur les "Branches de suivi à
+distance configurées" pour plus de détails.</p>
+</dd>
+<dt class="hdlist1">-t</dt>
+<dt class="hdlist1">--tags</dt>
+<dd>
+<p>Récupérer toutes les étiquettes à distance (c&#8217;est-à-dire, récupérer les
+étiquettes <code>refs/tags/*</code> dans les étiquettes locales avec le même nom), en
+plus de tout ce qui serait récupéré autrement.  L&#8217;utilisation de cette seule
+option ne soumet pas les étiquettes à un élagage, même si --prune est
+utilisé (bien que les étiquettes puissent être élaguées de toute façon si
+elles sont aussi la destination d&#8217;une spécification de référence explicite ;
+voir <code>--prune</code>).</p>
+</dd>
+<dt class="hdlist1">-j</dt>
+<dt class="hdlist1">--jobs=&lt;n&gt;</dt>
+<dd>
+<p>Nombre d&#8217;enfants parallèles à utiliser pour toutes les formes d&#8217;extraction.</p>
+<div class="paragraph">
+<p>Si l&#8217;option <code>--multiple</code> a été spécifiée, les différents distants seront
+récupérés en parallèle. Si plusieurs sous-modules sont récupérés, ils seront
+récupérés en parallèle. Pour les contrôler indépendamment, utilisez les
+paramètres de configuration <code>fetch.parallel</code> et <code>submodule.fetchJobs</code> (voir
+<a href="git-config.html">git-config(1)</a>).</p>
+</div>
+<div class="paragraph">
+<p>Généralement, les recherches récursives parallèles et sur des distants
+multiples seront plus rapides. Par défaut, les recherches sont effectuées de
+manière séquentielle, et non en parallèle.</p>
+</div>
+</dd>
+<dt class="hdlist1">--set-upstream</dt>
+<dd>
+<p>Si le distant est récupéré avec succès, tirer et ajouter la référence (de
+suivi) amont , utilisée par les commandes sans argument <a href="git-pull.html">git-pull(1)</a>
+et autres. Pour plus d&#8217;informations, voir <code>branch.&lt;nom&gt;.merge</code> et
+<code>branch.&lt;nom&gt;.remote</code> dans <a href="git-config.html">git-config(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--upload-pack &lt;upload-pack&gt;</dt>
 <dd>
@@ -975,7 +1031,8 @@ GIT</a> ci-dessous) soit le nom d&#8217;un remote (voir la section
 jour.  Lorsqu&#8217;aucun &lt;spéc-de-réf&gt; n&#8217;apparaît sur la ligne de commande, les
 références à récupérer sont lues à partir des variables
 <code>remote.&lt;dépôt&gt;.fetch</code> à la place
-(voir <a href="git-fetch.html">git-fetch(1)</a>).</p>
+(voir la section "<a href="#BRANCHES DE SUIVI À DISTANCE CONFIGURÉES">[BRANCHES DE SUIVI À DISTANCE CONFIGURÉES]</a>"
+dans <a href="git-fetch.html">git-fetch(1)</a>).</p>
 <div class="paragraph">
 <p>Le format d&#8217;un paramètre &lt;spéc-de-réf&gt; est un plus <code>+</code> optionnel, suivi de
 la source &lt;src&gt;, suivi de deux points <code>:</code>, suivi de la destination ref
@@ -1110,16 +1167,16 @@ réseaux non sécurisés.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>ssh://[utilisateur@]hôte.xz[:port]/chemin/vers/le/dépôt.git/</p>
+<p>ssh://[compte@]hôte.xz[:port]/chemin/du/dépôt.git/</p>
 </li>
 <li>
-<p>git://hôte.xz[:port]/chemin/vers/le/dépôt.git/</p>
+<p>git://hôte.xz[:port]/chemin/du/dépôt.git/</p>
 </li>
 <li>
-<p>http[s]://hôte.xz[:port]/chemin/vers/le/dépôt.git/</p>
+<p>http[s]://hôte.xz[:port]/chemin/du/dépôt.git/</p>
 </li>
 <li>
-<p>ftp[s]://hôte.xz[:port]/chemin/vers/le/dépôt.git/</p>
+<p>ftp[s]://hôte.xz[:port]/chemin/du/dépôt.git/</p>
 </li>
 </ul>
 </div>
@@ -1130,7 +1187,7 @@ protocole ssh :</p>
 <div class="ulist">
 <ul>
 <li>
-<p>[utilisateur@]hôte.xz:chemin/vers/le/dépôt.git/</p>
+<p>[compte@]hôte.xz:chemin/vers/le/dépôt.git/</p>
 </li>
 </ul>
 </div>
@@ -1147,13 +1204,13 @@ d&#8217;être interprété comme une url ssh.</p>
 <div class="ulist">
 <ul>
 <li>
-<p>ssh://[utilisateur@]hôte.xz[:port]/~[utilisateur]/chemin/vers/le/dépôt.git/</p>
+<p>ssh://[compte@]hôte.xz[:port]/~[utilisateur]/chemin/du/dépôt.git/</p>
 </li>
 <li>
-<p>git://hôte.xz[:port]/~[utilisateur]/chemin/vers/le/dépôt.git/</p>
+<p>git://hôte.xz[:port]/~[compte]/chemin/du/dépôt.git/</p>
 </li>
 <li>
-<p>[utilisateur@]hôte.xz:/~[utilisateur]/chemin/vers/le/dépôt.git/</p>
+<p>[compte@]hôte.xz:/~[compte]/chemin/du/dépôt.git/</p>
 </li>
 </ul>
 </div>
@@ -1164,10 +1221,10 @@ suivantes sont aussi admises :</p>
 <div class="ulist">
 <ul>
 <li>
-<p>/chemin/vers/le/dépôt.git/</p>
+<p>/chemin/du/dépôt.git/</p>
 </li>
 <li>
-<p>file:///chemin/vers/le/dépôt.git/</p>
+<p>file:///chemin/du/dépôt.git/</p>
 </li>
 </ul>
 </div>
@@ -1644,10 +1701,9 @@ choix est déterminé par les options branch. &lt;nom&gt; .remote et branch. &lt
 </div>
 </div>
 <div class="paragraph">
-<p>Cela laisse une copie de <code>next</code> temporairement dans FETCH_HEAD, mais ne met
-pas à jour les branches de suivi à distance. En utilisant les branches de
-suivi à distance, la même chose peut être faite en invoquant fetch et merge
-:</p>
+<p>This leaves a copy of <code>next</code> temporarily in FETCH_HEAD, and updates the
+remote-tracking branch <code>origin/next</code>.  The same can be done by invoking
+fetch and merge:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1742,7 +1798,7 @@ dans une prochaine version de Git.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-28 17:12:58 +0200
+Last updated 2020-05-23 19:49:33 +0200
 </div>
 </div>
 </body>

@@ -455,7 +455,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
           [--dissociate] [--separate-git-dir &lt;git dir&gt;]
           [--depth &lt;depth&gt;] [--[no-]single-branch] [--no-tags]
           [--recurse-submodules[=&lt;pathspec&gt;]] [--[no-]shallow-submodules]
-          [--[no-]remote-submodules] [--jobs &lt;n&gt;] [--sparse] [--] &lt;repository&gt;
+          [--[no-]remote-submodules] [--jobs &lt;n&gt;] [--sparse]
+          [--filter=&lt;filter&gt;] [--] &lt;repository&gt;
           [&lt;directory&gt;]</pre>
 </div>
 </div>
@@ -618,6 +619,16 @@ apenas com os arquivos na raiz do repositório. O arquivo "checkout esparso"
 pode ser modificado para aumentar o diretório de trabalho conforme a
 necessidade.</p>
 </dd>
+<dt class="hdlist1">--filter=&lt;filter-spec&gt;</dt>
+<dd>
+<p>Use the partial clone feature and request that the server sends a subset of
+reachable objects according to a given object filter.  When using
+<code>--filter</code>, the supplied <code>&lt;filter-spec&gt;</code> is used for the partial clone
+filter. For example, <code>--filter=blob:none</code> will filter out all blobs (file
+contents) until needed by Git. Also, <code>--filter=blob:limit=&lt;size&gt;</code> will
+filter out all blobs of size at least <code>&lt;size&gt;</code>. For more details on filter
+specifications, see the <code>--filter</code> option in <a href="git-rev-list.html">git-rev-list(1)</a>.</p>
+</dd>
 <dt class="hdlist1">--mirror</dt>
 <dd>
 <p>Configure um espelho do repositório de origem. Isso implica <code>--bare</code>.
@@ -691,12 +702,13 @@ usada mais de uma vez.</p>
 </dd>
 <dt class="hdlist1">--[no-]single-branch</dt>
 <dd>
-<p>Clone only the history leading to the tip of a single branch, either
-specified by the <code>--branch</code> option or the primary branch remote&#8217;s <code>HEAD</code>
-points at.  Further fetches into the resulting repository will only update
-the remote-tracking branch for the branch this option was used for the
-initial cloning.  If the HEAD at the remote did not point at any branch when
-<code>--single-branch</code> clone was made, no remote-tracking branch is created.</p>
+<p>Clone apenas o histórico que leva à ponta de uma única ramificação,
+especificada pela opção <code>--branch</code> ou pelo ramo primário remoto onde <code>HEAD</code>
+aponta.  Outras buscas no repositório resultante atualizarão apenas a
+ramificação de rastreamento remoto da ramificação em que essa opção foi
+usada para a clonagem inicial.Caso o <code>HEAD</code> remoto não aponte para nenhuma
+ramificação quando o clone <code>--single-branch</code> foi feito, nenhuma ramificação
+de rastreamento remoto é criado.</p>
 </dd>
 <dt class="hdlist1">--no-tags</dt>
 <dd>
@@ -705,31 +717,32 @@ configurações, garantindo que as futuras operações <code>git pull</code> e <
 não sigam qualquer tag. As buscas explícitas subsequentes das tags ainda
 funcionarão (consulte <a href="git-fetch.html">git-fetch(1)</a>).</p>
 <div class="paragraph">
-<p>Can be used in conjunction with <code>--single-branch</code> to clone and maintain a
-branch with no references other than a single cloned branch. This is useful
-e.g. to maintain minimal clones of the default branch of some repository for
-search indexing.</p>
+<p>Pode ser usado em conjunto com o <code>--single-branch</code> para clonar e manter um
+ramo sem referências além de um único ramo clonado. Isso é útil, por
+exemplo, para manter clones mínimos da ramificação predefinida de algum
+repositório para a indexação da pesquisa.</p>
 </div>
 </dd>
 <dt class="hdlist1">--recurse-submodules[=&lt;pathspec]</dt>
 <dd>
-<p>After the clone is created, initialize and clone submodules within based on
-the provided pathspec.  If no pathspec is provided, all submodules are
-initialized and cloned.  This option can be given multiple times for
-pathspecs consisting of multiple entries.  The resulting clone has
-<code>submodule.active</code> set to the provided pathspec, or "." (meaning all
-submodules) if no pathspec is provided.</p>
+<p>Depois que o clone é criado, inicialize e clone os submódulos com base no
+<code>pathspec</code> informado.  Caso nenhum <code>pathspec</code> seja informado, todos serão
+inicializados e clonados.  Esta opção pode ser usada várias vezes para a
+consulta de diversas entradas <code>pathspec</code>.O clone resultante de
+<code>submodule.active</code> define o pathspec informado ou "." (significa todos os
+submódulos) caso nenhum pathspec seja informado.</p>
 <div class="paragraph">
-<p>Submodules are initialized and cloned using their default settings. This is
-equivalent to running <code>git submodule update --init --recursive &lt;pathspec&gt;</code>
-immediately after the clone is finished. This option is ignored if the
-cloned repository does not have a worktree/checkout (i.e. if any of
-<code>--no-checkout</code>/<code>-n</code>, <code>--bare</code>, or <code>--mirror</code> is given)</p>
+<p>Os submódulos são inicializados e clonados utilizando as suas respectivas
+configurações predefinidas. Este é o equivalente a executar o comando <code>git
+submodule update --init --recursive &lt;pathspec&gt;</code> imediatamente após que a
+clonagem for finalizada. Esta opção é ignorada caso o repositório clonado
+não tenha uma árvore de trabalho/verificação (ou seja quaisquer dos comandos
+<code>--no-checkout</code>/<code>-n</code>, <code>--bare</code>, ou <code>--mirror</code> seja informado)</p>
 </div>
 </dd>
 <dt class="hdlist1">--[no-]shallow-submodules</dt>
 <dd>
-<p>All submodules which are cloned will be shallow with a depth of 1.</p>
+<p>Todos os submódulos clonados serão rasos e com uma profundidade 1.</p>
 </dd>
 <dt class="hdlist1">--[no-]remote-submodules</dt>
 <dd>
@@ -767,8 +780,167 @@ apenas caso o diretório esteja vazio.</p>
 </dd>
 </dl>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git_urls">GIT URLS<a id="URLS"></a></h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-clone.txt - include::urls.txt[]</p>
+<p>Em geral as URLs contêm informações sobre o protocolo de transporte, o
+endereço do servidor remoto e o caminho para o repositório.  Dependendo do
+protocolo de transporte, algumas dessas informações podem estar ausentes.</p>
+</div>
+<div class="paragraph">
+<p>O Git suporta os protocolos ssh, git, http e https (além do ftp e ftps podem
+ser usados para buscar, porém é ineficiente e obsoleto; não use).</p>
+</div>
+<div class="paragraph">
+<p>O transporte nativo (ou seja, git:// URL) não faz a autenticação e deve ser
+usado com cuidado em redes sem segurança.</p>
+</div>
+<div class="paragraph">
+<p>As seguintes sintaxes podem ser usadas com eles:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ssh://[user@]host.xz[:port]/caminho/para/o/repositório.git/</p>
+</li>
+<li>
+<p>git://host.xz[:port]/caminho/para/o/repositório.git/</p>
+</li>
+<li>
+<p>http[s]://host.xz[:port]/caminho/para/o/repositório.git/</p>
+</li>
+<li>
+<p>ftp[s]://host.xz[:port]/caminho/para/o/repositório.git/</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Uma sintaxe alternativa como scp também pode ser usada com o protocolo ssh:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>[user@]host.xz:caminho/para/o/repositório.git/</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Essa sintaxe apenas é reconhecida caso não haja barras antes dos primeiros
+dois pontos. Isso ajuda a diferenciar um caminho local que contém dois
+pontos. Isso ajuda a diferenciar um caminho local que contém dois
+pontos. Por exemplo, o caminho local <code>foo:bar</code> pode ser usado como um
+caminho absoluto ou <code>./foo:bar</code> para evitar ser mal interpretado como uma
+url ssh.</p>
+</div>
+<div class="paragraph">
+<p>Os protocolos ssh e git também oferecem suporte à expansão do ~nome do
+usuário:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>ssh://[user@]host.xz[:port]/~[user]/caminho/para/o/repositório.git/</p>
+</li>
+<li>
+<p>git://host.xz[:port]/~[user]/caminho/para/o/repositório.git/</p>
+</li>
+<li>
+<p>[user@]host.xz:/~[user]/caminho/para/o/repositório.git/</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Para os repositórios locais, as seguintes sintaxes podem ser usadas que
+também são compatíveis de forma nativa pelo Git:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>/caminho/para/o/repositório.git/</p>
+</li>
+<li>
+<p>file:///caminho/para/o/repositório.git/</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Essas duas sintaxes são basicamente equivalentes, exceto que a primeira
+implica no uso da opção <code>--local</code>.</p>
+</div>
+<div class="paragraph">
+<p><code>git clone</code>, <code>git fetch</code> e <code>git pull</code>, mas não <code>git push</code>, também aceitarão
+um arquivo de pacote adequado. Consulte <a href="git-bundle.html">git-bundle(1)</a>.</p>
+</div>
+<div class="paragraph">
+<p>Quando o Git não sabe como lidar com um determinado protocolo de transporte,
+quando existe, ele tenta usar o auxiliar <code>remote-&lt;transporte&gt;</code>. Para os
+repositórios locais, as seguintes sintaxes podem ser usadas:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>&lt;transporte&gt;::&lt;endereço&gt;</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>onde <code>&lt;endereço&gt;</code> pode ser um caminho, um servidor e um caminho ou uma
+seqüência arbitrária semelhante a uma URL reconhecida pelo ajudante remoto
+que foi invocado. Para mais detalhes consulte <a href="gitremote-helpers.html">gitremote-helpers(7)</a>.</p>
+</div>
+<div class="paragraph">
+<p>Se houver um grande número de repositórios remotos com nomes semelhantes e
+caso queira usar um formato diferente para eles (de modo que as URLs usadas
+sejam reescritas nas URLs que funcionam), você poderá criar uma seção de
+configuração da opção:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        [url "&lt;url da base atual&gt;"]
+                insteadOf = &lt;a url de outra base&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Por exemplo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        [url "git://git.host.xz/"]
+                insteadOf = host.xz:/path/to/
+                insteadOf = work:</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>uma URL como "work:repo.git" ou como
+"host.xz:/caminho/para/o/repositório.git" será reescrito em qualquer
+contexto onde a URL seja "git://git.host.xz/repo.git".</p>
+</div>
+<div class="paragraph">
+<p>Caso queira reescrever apenas as URLs para envio por "push", é possível
+criar uma seção de configuração da opção:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        [url "&lt;url da base atual&gt;"]
+                pushInsteadOf = &lt;a url da outra base&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Por exemplo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        [url "ssh://example.org/"]
+                pushInsteadOf = git://example.org/</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>uma URL como "git://exemplo.org/caminho/para/o/repositório.git" será
+reescrito para "ssh://exemplo.org/caminho/para/o/repositório.git" para os
+"pushes", porém os "pulls" ainda usarão a URL original.</p>
 </div>
 </div>
 </div>
@@ -833,7 +1005,7 @@ $ cd my-linux</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-04-28 17:13:35 +0200
+Last updated 2020-05-23 19:50:12 +0200
 </div>
 </div>
 </body>

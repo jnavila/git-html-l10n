@@ -11,7 +11,7 @@ estiver interessado apenas em alterações relacionadas a um determinado
 diretório ou arquivo.
 
 Existem vários formatos incorporados e você pode definir formatos adicionais
-ao definir uma opção de configuração pretty.<name> para um outro nome de
+ao usar uma opção de configuração pretty.<nome> para um outro nome de
 formato ou uma string 'format:', conforme descrito abaixo (consulte
 linkgit:git-config[1]). Aqui estão os detalhes dos formatos incorporados:
 
@@ -79,6 +79,12 @@ opções como `--decorate` e `--walk-reflogs`.
 	  Subject: [PATCH] <title line>
 
 	  <mensagem completa do commit>
+
+* 'mboxrd'
++
+Like 'email', but lines in the commit message starting with "From "
+(preceded by zero or more ">") are quoted with ">" so they aren't confused
+as starting a new commit.
 
 * 'raw'
 +
@@ -229,36 +235,42 @@ endif::git-rev-list[]
 '%ge':: e-mail da identidade reflog
 '%gE':: e-mail da identidade reflog (respeitando .mailmap, consulte
 	linkgit:git-shortlog[1] ou linkgit:git-blame[1])
-'%gs':: reflog subject
+'%gs':: assunto reflog
 '%(trailers[:options])':: exiba os sinais de resposta no corpo da mensagem como
 			  interpretado por linkgit:git-interpret-trailers[1]. A carreira de caracteres
 			  de resposta pode ser seguida por dois pontos e zero ou mais opções separadas
 			  por vírgula:
-** 'key=<K>': only show trailers with specified key. Matching is done
-   case-insensitively and trailing colon is optional. If option is given
-   multiple times trailer lines matching any of the keys are shown. This option
-   automatically enables the `only` option so that non-trailer lines in the
-   trailer block are hidden. If that is not desired it can be disabled with
-   `only=false`.  E.g., `%(trailers:key=Reviewed-by)` shows trailer lines with
-   key `Reviewed-by`.
-** 'only[=val]': select whether non-trailer lines from the trailer block should
-   be included. The `only` keyword may optionally be followed by an equal sign
-   and one of `true`, `on`, `yes` to omit or `false`, `off`, `no` to show the
-   non-trailer lines. If option is given without value it is enabled. If given
-   multiple times the last value is used.
-** 'separator=<SEP>': specify a separator inserted between trailer lines. When
-   this option is not given each trailer line is terminated with a line feed
-   character. The string SEP may contain the literal formatting codes described
-   above. To use comma as separator one must use `%x2C` as it would otherwise
-   be parsed as next option. If separator option is given multiple times only
-   the last one is used. E.g., `%(trailers:key=Ticket,separator=%x2C )` shows
-   all trailer lines whose key is "Ticket" separated by a comma and a space.
-** 'unfold[=val]': make it behave as if interpret-trailer's `--unfold` option
-   was given. In same way as to for `only` it can be followed by an equal sign
-   and explicit value. E.g., `%(trailers:only,unfold=true)` unfolds and shows
-   all trailer lines.
-** 'valueonly[=val]': skip over the key part of the trailer line and only show
-   the value part. Also this optionally allows explicit value.
+** 'key = <K>': exibe apenas as linhas de atributos com determinada chave . A
+   coincidência é feita sem distinção entre maiúsculas e minúsculas, os dois
+   pontos à direita é opcional. Caso a opção seja usada várias vezes, os
+   atributos das linhas correspondentes a qualquer uma das teclas serão
+   exibidas. Esta opção ativa automaticamente a opção `only`, para que as
+   linhas de bloqueio não sejam ocultadas. Se isso não for o desejado, pode ser
+   desativado com `only = false`.  Por exemplo, `%(trailers:key=Reviewed-by)`
+   exibe linhas de atributos com a chave `Reviewed-by` (Revisado por).
+** 'only [= val]': seleciona se o atributo das linhas que não são do bloco de
+   atributos devem ser incluídas. A palavra-chave `only` pode opcionalmente ser
+   seguida por um sinal de igual e um de `true`, `on`, `yes` para omitir ou
+   `false`, `off`, `no` para exibir as linhas que não são do trailer. Caso a
+   opção seja usada sem valor, ela será ativada. Caso seja usado várias vezes,
+   apenas o último valor é considerado.
+** 'separator = <SEP>': especifique um separador inserido entre as linhas do
+   atributo. Quando essa opção não é usada, cada linha é terminada com um
+   caractere de avanço de linha. A sequência `SEP` pode conter os códigos de
+   formatação literal descritos acima. Para usar vírgula como separador, é
+   necessário usar `%x2C`, pois, caso contrário, seria analisado como sendo a
+   próxima opção. Caso a opção separadora seja usada várias vezes, apenas a
+   última será considerada. Por exemplo, `%(trailers:key=Ticket,separator=%x2C
+   )` exibe todas as linhas do atributo cuja chave é "Ticket" separada por
+   vírgulas e espaço.
+** 'unfold [= val]': faça com que ele se comporte como se a opção `--unfold` do
+   `interpret-trailer` tivesse sido usado. Da mesma forma que para `only`, pode
+   ser seguido por um sinal de igual e um valor explícito. Por exemplo,
+   `%(trailers:only,unfold=true)`, se desdobra e mostra todas as linhas do
+   atributo.
+** 'valueonly [= val]': ignora a parte da chave principal e exibe apenas a
+   parte do valor. Além disso, isso permite um valor explícito de forma
+   opcional.
 
 NOTE: Some placeholders may depend on other options given to the revision
 traversal engine. For example, the `%g*` reflog options will insert an empty
@@ -280,12 +292,13 @@ non-empty string.
 
 * 'tformat:'
 +
-The 'tformat:' format works exactly like 'format:', except that it provides
-"terminator" semantics instead of "separator" semantics. In other words,
-each commit has the message terminator character (usually a newline)
-appended, rather than a separator placed between entries.  This means that
-the final entry of a single-line format will be properly terminated with a
-new line, just as the "oneline" format does.  For example:
+O formato 'tformat:' funciona exatamente como 'format:', exceto pelo fato de
+fornecer a semântica "terminator" em vez da semântica "separator". Em outras
+palavras, cada commit tem o caractere terminador da mensagem (geralmente uma
+nova linha) anexada, em vez de um separador colocado entre as entradas.
+Isso significa que a entrada final de um formato de linha única será
+terminada corretamente com uma nova linha, assim como o formato "on-line".
+Por exemplo:
 +
 ---------------------
 $ git log -2 --pretty=format:%h 4da45bef \
@@ -299,8 +312,9 @@ $ git log -2 --pretty=tformat:%h 4da45bef \
 7134973
 ---------------------
 +
-In addition, any unrecognized string that has a `%` in it is interpreted as
-if it has `tformat:` in front of it.  For example, these two are equivalent:
+Além disso, qualquer string não reconhecida e que possua um `%` é
+interpretada como se tivesse `tformat:` à sua frente.  Por exemplo, estes
+dois são equivalentes:
 +
 ---------------------
 $ git log -2 --pretty=tformat:%h 4da45bef

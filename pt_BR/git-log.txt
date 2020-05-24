@@ -1,0 +1,239 @@
+git-log(1)
+==========
+
+NOME
+----
+git-log - Exibe os registros log do commit
+
+
+SINOPSE
+-------
+[verse]
+'git log' [<opções>] [<faixa de revisões>] [[--] <caminho>...]
+
+DESCRIÇÃO
+---------
+Exibe os registros log do commit.
+
+O comando pega as opções aplicáveis ao comando `git rev-list` para controlar
+o que é exibido e como, as opções aplicáveis aos comandos`git diff- *`
+controla como as mudanças que cada commit introduz são exibidos.
+
+
+OPÇÕES
+------
+
+--follow::
+	Continue listando o histórico de um arquivo além de o renomear (funciona
+	apenas para um único arquivo).
+
+--no-decorate::
+--decorate[=short|full|auto|no]::
+	Imprima os nomes "ref" de quaisquer commits que forem exibidos. Caso 'short'
+	seja usado, os prefixos do nome "ref" 'refs/heads/', 'refs/tags/' e
+	'refs/remotes/' não serão exibidos na tela. Caso 'full' seja usado, o nome
+	completo do "ref" (incluindo o prefixo) será exibido. Caso 'auto' seja usado
+	e se a saída estiver indo para um terminal, os nomes "ref" serão exibidos
+	como se a opção 'short' fosse usado, caso contrário, nenhum nome "ref" será
+	exibido. A predefinição da opção é 'short'.
+
+--decorate-refs=<pattern>::
+--decorate-refs-exclude=<pattern>::
+	If no `--decorate-refs` is given, pretend as if all refs were included.  For
+	each candidate, do not use it for decoration if it matches any patterns
+	given to `--decorate-refs-exclude` or if it doesn't match any of the
+	patterns given to `--decorate-refs`. The `log.excludeDecoration` config
+	option allows excluding refs from the decorations, but an explicit
+	`--decorate-refs` pattern will override a match in `log.excludeDecoration`.
+
+--source::
+	Exiba na tela o nome "ref" usado na linha de comando pela qual cada commit
+	foi alcançado.
+
+--[no-]mailmap::
+--[no-]use-mailmap::
+	Use o arquivo mailmap para mapear os nomes dos autores dos commits e
+	endereços de e-mail para nomes reais canônicos e endereços de
+	e-mail. Consulte linkgit:git-shortlog[1].
+
+--full-diff::
+	Sem essa flag, o comando `git log -p <caminho> ...` exibe os commits que
+	tocam nos caminhos determinados e difere sobre os mesmos caminhos que forem
+	determinados.  Com isso, o "diff" completo é exibido para os commits que
+	toquem determinados caminhos; isso significa que "<caminho>..." limita
+	apenas os commits mas não limita o diff para estes commits.
++
+Observe que isso afeta todos os tipos de saída baseados em "diff", como por
+exemplo os produzidos pelas opções `--stat`, etc.
+
+--log-size::
+	Inclua uma linha ``log size <quantidade>'' na saída para cada commit, onde
+	`<quantidade>` é o comprimento da mensagem deste commit em bytes.
+	Destina-se a acelerar as ferramentas que leem a mensagens do registro log na
+	saída do comando `git log`, permitindo a alocação do espaço com
+	antecedência.
+
+-L <inicio>,<fim>:<arquivo>::
+-L :<nome-da-função>:<arquivo>::
+	Rastreie a evolução do intervalo das linhas definidos em "<inicio>, <fim>"
+	(ou o nome da função regex <nome-da-função>) dentro do <arquivo>. Você não
+	pode usar qualquer limitador com o `pathspec`. No momento, está limitado a
+	um passo a partir de uma única revisão, ou seja, você pode usar zero apenas
+	ou um argumento de revisão positivo, onde <inicio> e <fim> (ou
+	<nome-da-função>) devam existir na revisão inicial. Você pode usar esta
+	opção mais de uma vez. Implica no uso da opção `--patch`. A saída do patch
+	pode ser suprimida usando o comando `--no-patch`, mas outros formatos diff
+	(nomeadamente` --raw`, `--numstat`,` --shortstat`, `--dirstat`,` --summary`,
+	No momento, `- --name-only`,` --name-status`, `--check`) ainda não foram
+	implementados.
++
+include::line-range-format.txt[]
+
+<intervalo da revisão>::
+	Exibe apenas os commits no intervalo de revisões informados. Quando nenhum
+	<intervalo de revisão> é usado, a predefinição é `HEAD` (ou seja, todo o
+	histórico que leva ao commit atual). `origin..HEAD` determina que todos os
+	commits alcançáveis a partir do commit atual (ou seja,` HEAD`), mas não de
+	`origin`. Para obter uma lista completa de como usar <intervalo de revisão>,
+	consulte a seção 'Especificando os intervalos' do linkgit:gitrevisions[7].
+
+[--] <caminho>...::
+	Exibe apenas os commits que sejam suficientes para explicar como os arquivos
+	que coincidam com os caminhos usados foram criados. Consulte 'Simplificação
+	do histórico' abaixo para obter mais detalhes e para aprender outros modos
+	de simplificação.
++
+Os caminhos podem precisar ser prefixados com um `--` para separá-los das
+opções ou do intervalo de revisões, quando um conflito surgir.
+
+include::rev-list-options.txt[]
+
+include::pretty-formats.txt[]
+
+OPÇÕES DIFF QUE SÃO COMUNS
+--------------------------
+
+:git-log: 1
+include::diff-options.txt[]
+
+include::diff-generate-patch.txt[]
+
+EXEMPLOS
+--------
+`git log --no-merges`::
+
+	Exibe todo o histórico do commit, mas ignore todas as mesclagens
+
+`git log v2.6.12.. include/scsi drivers/scsi`::
+
+	Exibe todos os commits desde a versão 'v2.6.12' que alterou qualquer arquivo
+	nos subdiretórios 'include/scsi' ou 'drivers/scsi'
+
+`git log --since="2 weeks ago" -- gitk`::
+
+	Exibe as alterações nas últimas duas semanas no arquivo 'gitk'.  O `--` é
+	necessário para evitar confusão com o *ramo* chamado 'gitk'
+
+`git log --name-status release..test`::
+
+	Exibe os commits que estão no ramo "test", mas não ainda no ramo "release",
+	junto com a lista de caminhos que cada commit modifica.
+
+`git log --follow builtin/rev-list.c`::
+
+	Exibe os commits que mudaram o arquivo `builtin/rev-list.c`, incluindo os
+	commits que ocorreram antes do arquivo receber o nome atual.
+
+`git log --branches --not --remotes=origin`::
+
+	Exibe todas os commits que estão em qualquer uma das ramificações locais,
+	mas não em quaisquer outras ramificações remotas rastreadas para 'origin' (o
+	que você tem mas na "origin" não).
+
+`git log master --not --remotes=*/master`::
+
+	Exibe todos os commits que estão no "master" local, mas não em nenhuma outra
+	ramificação "master" do repositório remoto.
+
+`git log -p -m --first-parent`::
+
+	Exibe o histórico incluindo as modificações entres os "diffs", porém apenas
+	da perspectiva da ``ramificação principal'', ignorando os commits
+	provenientes das ramificações mescladas e exibindo os "diffs" completos das
+	alterações feitas pelas mesclagens.  Isso apenas faz algum sentido caso
+	seguamos uma política estrita de mesclagem do tópico de todas as
+	ramificações quando permanecerem em um único ramo da integração.
+
+`git log -L '/int main/',/^}/:main.c`::
+
+	Exibe como a função `main()` no arquivo `main.c` evoluiu ao longo do tempo.
+
+`git log -3`::
+
+	Limita a quantidade de commits a serem exibidos em 3.
+
+DISCUSSÃO
+---------
+
+include::i18n.txt[]
+
+CONFIGURAÇÃO
+------------
+
+Para configurações relacionadas com a geração de arquivos diferenciais
+"diff" consulte linkgit:git-diff[1], para as variáveis principais consulte
+linkgit:git-config[1].
+
+format.pretty::
+	A predefinição para a opção `--format`.  (Consulte 'Formatos Bonitos'
+	acima.)   O valor predefinido é `medium`.
+
+i18n.logOutputEncoding::
+	A codificação a ser usada ao exibir os registros logs.  (Consulte
+	'Discussão' acima.) O valor predefinido reside na variável
+	`i18n.commitEncoding`, do contrário assume-se o UTF-8.
+
+log.date::
+	O formato predefinido para que as datas sejam legíveis para nós.  (Compare a
+	opção `--date`.)  O valor predefinido é "default", o que significa que as
+	datas seguirão o seguinte padrão `Sat May 8 19:35:34 2010 -0500`.
++
+Caso o formato esteja definido como "auto: foo" e o pager esteja em uso, o
+formato "foo" será usado para o formato da data. Caso contrário, o valor
+predefinido "default" será usado.
+
+log.follow::
+	Caso o valor `true` seja usado, o `git log` atuará como se a opção
+	`--follow` fosse usada quando em um único <caminho> usado. Isso tem as
+	mesmas limitações que `--follow`, ou seja, não pode ser usado para seguir
+	vários arquivos e não funciona bem no histórico não linear.
+
+log.showRoot::
+	Caso o valor `false` seja usado, o`git log` e os comandos relacionados não
+	tratarão o commit inicial como um grande evento de criação.  Qualquer commit
+	"root" na saída `git log -p` seria exibida sem um "diff" anexado.  O valor
+	predefinido é "true".
+
+log.showSignature::
+	Caso o valor `true` seja usado, o `git log` e os comandos relacionados
+	atuarão como se a opção `--show-signature` tivesse sido usada.
+
+mailmap.*::
+	Consulte linkgit:git-shortlog[1].
+
+notes.displayRef::
+	Quais refs além do padrão definido por `core.notesRef` ou `GIT_NOTES_REF`,
+	para ler as anotações de quando for exibir as mensagens de commit com a
+	família de comandos `log`.  Consulte linkgit:git-notes[1].
++
+Pode ser um nome sem abreviação ou um "glob" e pode ser especificado várias
+vezes.  Um aviso será emitido para "refs" que não existem, mas um "glob" que
+não corresponda a nenhum "ref" é silenciosamente ignorado.
++
+Essa configuração pode ser desativada pela opção `--no-notes`, ou
+substituída pela variável de ambiente`GIT_NOTES_DISPLAY_REF` e substituída
+pela opção `--notes=<ref>`.
+
+GIT
+---
+Parte do linkgit:git[1] suite
