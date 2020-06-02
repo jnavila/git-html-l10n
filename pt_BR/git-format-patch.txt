@@ -1,0 +1,723 @@
+git-format-patch(1)
+===================
+
+NOME
+----
+git-format-patch - Preparar os patches para o envio de e-mails
+
+
+SINOPSE
+-------
+[verse]
+'git format-patch' [-k] [(-o|--output-directory) <dir> | --stdout]
+		   [--no-thread | --thread[=<style>]]
+		   [(--attach|--inline)[=<boundary>] | --no-attach]
+		   [-s | --signoff]
+		   [--signature=<signature> | --no-signature]
+		   [--signature-file=<file>]
+		   [-n | --numbered | -N | --no-numbered]
+		   [--start-number <n>] [--numbered-files]
+		   [--in-reply-to=<message id>] [--suffix=.<sfx>]
+		   [--ignore-if-in-upstream]
+		   [--cover-from-description=<mode>]
+		   [--rfc] [--subject-prefix=<subject prefix>]
+		   [(--reroll-count|-v) <n>]
+		   [--to=<email>] [--cc=<email>]
+		   [--[no-]cover-letter] [--quiet]
+		   [--[no-]encode-email-headers]
+		   [--no-notes | --notes[=<ref>]]
+		   [--interdiff=<previous>]
+		   [--range-diff=<previous> [--creation-factor=<percent>]]
+		   [--progress]
+		   [<common diff options>]
+		   [ <since> | <revision range> ]
+
+DESCRIÇÃO
+---------
+
+Prepare cada commit com o seu respectivo patch em um arquivo, formatado para
+que se assemelhe com uma caixa de correio UNIX.  A saída deste comando é
+conveniente para o envio de um e-mail ou para a utilização com 'git am'.
+
+Existem duas maneiras de especificar em quais commits operar.
+
+1. Um único commit, `<since>`, determina que os commits que levem ao cume do
+   ramo atual que não estão no histórico que levem ao `<since>` para ser
+   gerado.
+
+2. Expressão genérica do <intervalo da revisão> (consulte a seção "DEFININDO AS
+   REVISÕES" no linkgit:gitrevisions[7]) define os commits no intervalo
+   especificado.
+
+A primeira regra tem precedência no caso de um único `<commit>`.  Para
+aplicar a segunda regra, formate tudo desde o início do histórico até
+`<commit>`, utilize a opção `--root`, por exemplo: `git format-patch --root
+<commit>`.  Caso queira formatar apenas o `<commit>` em si, faça com `git
+format-patch -1 <commit>`.
+
+É predefinido que cada arquivo de saída seja numerado sequencialmente à
+partir de 1 e usa a primeira linha da mensagem do commit (trabalhada para a
+segurança do pathname) como o pathname. Com a opção `--numbered-files`, os
+nomes dos arquivos na saída serão apenas números, sem a primeira linha
+anexada do commit.  Os nomes dos arquivos na saída são impressos na saída
+predefinida a menos que a opção `--stdout` seja utilizada.
+
+If `-o` is specified, output files are created in <dir>.  Otherwise they are
+created in the current working directory. The default path can be set with
+the `format.outputDirectory` configuration option.  The `-o` option takes
+precedence over `format.outputDirectory`.  To store patches in the current
+working directory even when `format.outputDirectory` points elsewhere, use
+`-o .`. All directory components will be created.
+
+É predefinido que o assunto de um único patch seja "[PATCH]" seguido da
+concatenação das linhas da mensagem do commit até a primeira linha em branco
+(consulte a seção DISCUSSÃO em linkgit:git-commit[1]).
+
+Quando vários patches são produzidos, o prefixo do assunto será "[PATCH n/m]
+".  Para forçar a adição 1/1 para um único patch, utilize `-n`.  Para omitir
+os números do assunto, utilize `-N`.
+
+Caso a opção `--thread` seja utilizada, o ` git-format-patch` irá gerar
+cabeçalhos `In-Reply-To` (Em-Resposta-Para) e `References` para fazer com
+que o e-mail do segundo e subsequentes patches apareçam como resposta ao
+primeiro e-mail; isso também gera um cabeçalho `Message-Id` para a
+referência.
+
+OPÇÕES
+------
+:git-format-patch: 1
+include::diff-options.txt[]
+
+-<n>::
+	Prepare os patches a partir do `<n>` do nível mais alto dos commits.
+
+-o <dir>::
+--output-directory <dir>::
+	Utilize `<dir>` para armazenar os arquivos resultantes em vez do diretório
+	de trabalho atual.
+
+-n::
+--numbered::
+	Nomeie a saída no formato '[PATCH n/m]', mesmo que seja com um único patch.
+
+-N::
+--no-numbered::
+	Nomeie a saída no formato '[PATCH]'.
+
+--start-number <n>::
+	Comece a enumerar os patches à partir do <n> em vez de 1.
+
+--numbered-files::
+	Os nomes dos arquivos na saída serão uma sequência numérica simples sem a
+	primeira linha predefinida do commit anexado.
+
+-k::
+--keep-subject::
+	Não retire/adicione '[PATCH]' da primeira linha da mensagem do registro log
+	do commit.
+
+-s::
+--signoff::
+	Adicione a linha `Signed-off-by:` (Assinada por:) à mensagem do commit,
+	utilizando a sua identidade.  Para mais informações sobre a assinatura na
+	saída da mensagem, consulte em linkgit:git-commit[1].
+
+--stdout::
+	Imprima todos os commits na saída predefinida no formato mbox em vez de
+	criar um arquivo individual para cada um.
+
+--attach[=<divisa>]::
+	Crie anexos com diversas partes/misto onde a primeira parte é a mensagem do
+	commit e o próprio patch na segunda parte utilizando `Content-Disposition:
+	attachment`.
+
+--no-attach::
+	Desative a criação de um anexo, substituindo a configuração predefinida.
+
+--inline[=<divisa>]::
+	Crie um anexo com diversas partes/misto onde a primeira parte é a mensagem
+	do commit e o próprio patch na segunda parte utilizando
+	`Content-Disposition: inline`.
+
+--thread[=<estilo>]::
+--no-thread::
+	Controla a adição dos cabeçalhos `In-Reply-To` (Em resposta a) e
+	`References` para fazer com que o segundo e os emails subsequentes apareçam
+	como respostas ao primeiro.  Também controla a geração do cabeçalho para a
+	referência `Message-Id`.
++
+O argumento opcional <estilo> pode ser `shallow` (superficial) ou `deep`
+(profundo).  O argumento 'shallow' (superficial) faz com que todo o e-mail
+respondido para o cabeçalho da série onde o cabeçalho é escolhido nessa
+ordem, pela carta de apresentação, pelo `--in-reply-to` e pelo primeiro
+patch.  O argumento 'deep' (profundo) faz com que cada e-mail seja uma uma
+resposta ao anterior.
++
+A predefinição é `--no-thread`, a menos que a configuração `format.thread`
+esteja definida.  Caso `--thread` seja utilizado sem um estilo, a
+predefinição será o estilo determinado em `format.thread` caso exista ou
+então, `shallow` (superficial).
++
+Lembre-se de que a predefinição para o comando 'git send-email' é encadear
+os próprios emails.  Caso queira que o comando `git format-patch` cuide do
+encadeamento, tenha certeza que o encadeamento esteja desativado para o
+comando `git send-email`.
+
+--in-reply-to=<message id>::
+	Make the first mail (or all the mails with `--no-thread`) appear as a reply
+	to the given <message id>, which avoids breaking threads to provide a new
+	patch series.
+
+--ignore-if-in-upstream::
+	Não inclua um patch que coincida a um commit em <until>..<since>
+	(até..desde).  Examina todos os patches acessíveis à partir de <since>
+	(desde), mas não a partir de <until> (até), os comparará com os patches que
+	estão sendo gerados e qualquer patch coincidente será ignorado.
+
+--cover-from-description=<mode>::
+	Controla quais as partes da carta de apresentação serão preenchidas
+	automaticamente utilizando ao descritivo do ramo.
++
+Caso `<modo>` seja `message` ou `default`, o assunto da carta de
+apresentação será preenchido com um texto em um espaço reservado. O corpo da
+carta de apresentação será preenchido com a descrição do ramo. Este é o modo
+predefinido quando nenhuma configuração ou opção na linha de comando for
+utilizada.
++
+Caso o `<modo>` seja `subject`, o primeiro parágrafo do descritivo do ramo
+preencherá o assunto da carta de apresentação. O restante do descritivo
+preencherá o corpo da carta de apresentação.
++
+Caso `<modo>` seja `auto` e se o primeiro parágrafo do descritivo do ramo
+for maior que 100 bytes, o modo será `message`, caso contrário, o `subject`
+será utilizado.
++
+Caso `<modo>` seja `none`, tanto o assunto e o corpo da carta serão
+preenchidos com o texto do espaço reservado.
+
+--subject-prefix=<subject prefix>::
+	Instead of the standard '[PATCH]' prefix in the subject line, instead use
+	'[<subject prefix>]'. This allows for useful naming of a patch series, and
+	can be combined with the `--numbered` option.
+
+--rfc::
+	É um atalho `--subject-prefix="RFC PATCH"`. O RFC significa "Solicitação de
+	Comentários"; utilize isso ao enviar um patch experimental para que ele seja
+	discutido em vez de um patch definitivo.
+
+-v <n>::
+--reroll-count=<n>::
+	Marque a série como a <n>-ésima iteração do tópico. Os nomes dos arquivos na
+	saída têm `v<n>` anexado a eles e o prefixo do assunto (a predefinição é
+	"PATCH", porém pode ser alterado através da opção `--subject-prefix`).  Por
+	exemplo. `--reroll-count=4` pode produzir o arquivo
+	`v4-0001-add-makefile.patch` que contém "Assunto: [PATCH v4 1/20] Adicione o
+	makefile".
+
+--to=<email>::
+	Adicione um cabeçalho `Para:` nos cabeçalhos do email. É um acréscimo a
+	qualquer cabeçalho configurado e pode ser utilizado várias vezes.  A forma
+	negada da opção `--no-to` descarta todos os cabeçalhos `Para:` que foram
+	adicionados até agora (seja da configuração ou da linha de comando).
+
+--cc=<email>::
+	Adicione um cabeçalho `Cc:` (Com Cópia Para) aos cabeçalhos do email. É um
+	acréscimo a qualquer cabeçalho configurado e pode ser utilizado várias
+	vezes.  A forma negada da opção `--no-cc` descarta todos os cabeçalhos `Cc:`
+	que foram adicionados até agora (seja da configuração ou da linha de
+	comando).
+
+--from::
+--from=<ident>::
+	Utilize `ident` (identidade) no cabeçalho `De:` de cada email do
+	commit. Caso o `ident` do autor do commit não seja textualmente idêntica ao
+	`ident` informado, coloque um cabeçalho `De:` no corpo da mensagem com o
+	autor original. Caso nenhum `ident` seja informado, utilize o `ident` de
+	quem fez o commit.
++
+Observe que esta opção só é útil caso esteja realmente enviando os e-mails e
+quiser se identificar como remetente mantendo o autor original (o `git am`
+pegará corretamente o cabeçalho interno). Observe também que o comando `git
+send-email` já lida com essa transformação para você, essa opção não deve
+ser utilizada caso esteja alimentando o resultado com o comando `git
+send-email`.
+
+--add-header=<cabeçalho>::
+	Adicione um cabeçalho arbitrário aos cabeçalhos do e-mail.  É um acréscimo a
+	qualquer cabeçalho configurado e pode ser utilizado várias vezes.  Por
+	exemplo, `--add-header="Organization: git-foo"`.  O formulário negado
+	`--no-add-header` descarta *todos* os cabeçalhos (`Para:`, `Cc:` e
+	customizado) adicionados até agora na configuração ou na linha de comando.
+
+--[no-]cover-letter::
+	Além dos patches, gere uma carta de apresentação contendo no arquivo a
+	descrição da ramificação, o "shortlog" e o "diffstat" geral.  Você pode
+	preencher uma descrição no arquivo antes de enviá-lo.
+
+--encode-email-headers::
+--no-encode-email-headers::
+	Encode email headers that have non-ASCII characters with "Q-encoding"
+	(described in RFC 2047), instead of outputting the headers
+	verbatim. Defaults to the value of the `format.encodeEmailHeaders`
+	configuration variable.
+
+--interdiff=<anterior>::
+	Como um auxílio ao revisor, insira um "interdiff" na carta de apresentação
+	ou como um comentário único do patch de uma série de 1, exibindo as
+	diferenças entre a versão anterior da série do patch e a série atualmente
+	sendo formatada. `previous` (anterior) é uma única revisão que nomeia a
+	ponta da série anterior que compartilha uma base comum com a série que está
+	sendo formatada (`git format-patch --cover-letter --interdiff=feature/v1 -3
+	feature/v2` por exemplo).
+
+--range-diff=<anterior>::
+	Como um assistente revisor, insira um "range-diff" (consulte
+	linkgit:git-range-diff[1]) na carta de apresentação ou apenas como um
+	comentário do patch da série de 1-patch, mostrando as diferenças entre a
+	versão anterior da série de patchs e a série atualmente sendo formatada.
+	`previous` pode ser a única revisão nomeando o topo da série anterior caso
+	compartilhem da mesma base em comparação com a série que está sendo
+	formatada (como `git format-patch --cover-letter --range-diff=feature/v1 -3
+	feature/v2` por exemplo) ou um intervalo de revisão caso ambas as revisões
+	das séries estejam em desacordo (como `git format-patch --cover-letter
+	--range-diff=feature/v1~3..feature/v1 -3 feature/v2` por exemplo).
++
+Observe que as opções diff passadas ao comando afetam como o produto
+primário do `format-patch` será gerado, não são passadas para o mecanismo
+subjacente do `range-diff` usado para gerar o material da carta de
+apresentação (isso pode mudar no futuro).
+
+--creation-factor=<percent>::
+	Ao ser utilizado com `--range-diff`, ajuste a heurística que corresponde às
+	confirmações entre as séries de patches anteriores e atuais ajustando o
+	custo do fator de correção entre criação/exclusão. (Para mais detalhes,
+	consulte linkgit:git-range-diff[1]).
+
+--notes[=<ref>]::
+--no-notes::
+	Adiciona as anotações (consulte linkgit:git-notes[1]) para o commit depois
+	da linha com três traços.
++
+É esperado que seja utilizado para escrever uma explicação de suporte para o
+commit que não pertença à mensagem do registro log do commit e seja incluída
+no envio do patch. Embora seja possível simplesmente escrever essas
+explicações após a execução do `format-patch`, antes do envio, mantê-las
+como notas do Git permite que elas sejam mantidas entre as versões da série
+de patches (ainda assim consulte a discussão das opções de configuração do
+`notes.rewrite` em linkgit:git-notes[1] para compreender este fluxo de
+trabalho).
++
+The default is `--no-notes`, unless the `format.notes` configuration is set.
+
+--[no-]signature=<assinatura>::
+	Adicione uma assinatura em cada mensagem produzida. De acordo com a RFC
+	3676, a assinatura é separada do corpo por uma linha com '-- '. Caso a opção
+	da assinatura seja omitida, a assinatura predefinida será o número da versão
+	do Git.
+
+--signature-file=<arquivo>::
+	Funciona exatamente como `--signature`, exceto que a assinatura é lida em um
+	arquivo.
+
+--suffix=.<sfx>::
+	Em vez de usar `.patch` como o sufixo dos nomes dos arquivos gerados,
+	utilize o sufixo especificado.  Uma alternativa comum é `--suffix=.txt`.
+	Deixando este campo vazio remove o sufixo `.patch`.
++
+Observe que o caractere principal não precisa ser um ponto; você pode usar
+`suffix=patch` para obter `0001-description-of-my-change-patch` por exemplo.
+
+-q::
+--quiet::
+	Não imprima os nomes dos arquivos gerados na saída predefinida.
+
+--no-binary::
+	Não reproduza o conteúdo das alterações em arquivos binários; em vez disso,
+	exiba um aviso que estes arquivos foram alterados.  Os patches gerados
+	utilizando esta opção não podem ser aplicados de forma adequada, porém ainda
+	são úteis para a revisão do código.
+
+--zero-commit::
+  Gere um hash zerado no cabeçalho "From" de cada patch em vez do hash do
+  commit.
+
+--[no-]base[=<commit>]::
+	Registre as informações da base da árvore que identifique a condição na qual
+	a série de patches se aplica.  Consulte a seção INFORMAÇÃO BASE DA ÁRVORE
+	abaixo para obter detalhes. If <commit> is "auto", a base commit is
+	automatically chosen. The `--no-base` option overrides a
+	`format.useAutoBase` configuration.
+
+--root::
+	Trate o argumento revisão como um <intervalo de revisões>, mesmo que seja
+	apenas um único commit (que normalmente seria tratado como um <since>
+	(desde)).  Observe que os commits raiz incluídos no intervalo especificado
+	são sempre formatadas como patches de criação, independentemente dessa flag.
+
+--progress::
+	Exiba o progresso dos relatórios no stderr à medida que os patches são
+	gerados.
+
+CONFIGURAÇÃO
+------------
+You can specify extra mail header lines to be added to each message,
+defaults for the subject prefix and file suffix, number patches when
+outputting more than one patch, add "To:" or "Cc:" headers, configure
+attachments, change the patch output directory, and sign off patches with
+configuration variables.
+
+------------
+[format]
+	headers = "Organization: git-foo\n"
+	subjectPrefix = CHANGE
+	suffix = .txt
+	numbered = auto
+	to = <email>
+	cc = <email>
+	attach [ = mime-boundary-string ]
+	signOff = true
+	outputDirectory = <directory>
+	coverLetter = auto
+	coverFromDescription = auto
+------------
+
+
+DISCUSSÃO
+---------
+
+O patch produzido pelo 'git format-patch' está em formato mailbox (caixa de
+correio) UNIX, fixado com uma estampa "mágica" indicando que o arquivo foi
+gerado pelo patch em vez de um mailbox real, exemplo:
+
+------------
+From 8f72bad1baf19a53459661343e21d6491c3908d3 Mon Sep 17 00:00:00 2001
+From: Tony Luck <tony.luck@intel.com>
+Date: Tue, 13 Jul 2010 11:42:54 -0700
+Subject: [PATCH] =?UTF-8?q?[IA64]=20Put=20ia64=20config=20files=20on=20the=20?=
+ =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig=20diet?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Os arquivos da configuração arch/arm foram reduzidos utilizando um script python
+(Veja o comentário c2330e286f68f1c408b4aa6515ba49d57f05beae do commit)
+
+Faça o mesmo com o ia64, para que possamos ter uma aparência elegante e ornamentada
+...
+------------
+
+Normalmente, ele é colocado na pasta de rascunhos do MUA, editado para
+adicionar os comentários oportunos que não devem entrar no changelog após os
+três hífens e enviado como uma mensagem onde o corpo, no nosso exemplo,
+começa com "arquivos da configuração arch/arm onde...".  No lado do
+recebimento, os leitores podem salvar os patches interessantes em um mailbox
+UNIX e aplicá-los com linkgit:git-am[1].
+
+Quando um patch faz parte de uma discussão em andamento, o patch gerado pelo
+'git format-patch' pode ser ajustado para aproveitar o recurso 'git am
+--scissors'.  Após a sua resposta na discussão, surge uma linha que consiste
+apenas em "`-- >8 --`"(tesoura e perfuração), seguida pelo patch com campos
+desnecessários do cabeçalho que foram removidos:
+
+------------
+...
+> Então faremos assim e assado.
+
+Faz sentido para mim.  Que tal este patch?
+
+-- >8 --
+Subject: [IA64] Put ia64 config files on the Uwe Kleine-KÃ¶nig diet
+
+Os arquivos da configuração arch/arm foram reduzidos utilizando um script python
+...
+------------
+
+Ao enviar um patch dessa forma, na maioria das vezes você está enviando o
+seu próprio patch, portanto, além do marcador "`From $SHA1
+$magic_timestamp`", você deve omitir as linhas `From:` e `Date:` do arquivo
+patch.  É provável que o título do patch seja diferente do assunto da
+discussão onde o patch é uma resposta, portanto, é provável que você queira
+manter a linha "Subject:", como no exemplo acima.
+
+Verificando o corrompimento dos patches
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Muitos clientes de e-mail se não configurados corretamente irão corromper os
+espaços em branco.  Aqui estão dois tipos comuns de corrompimento:
+
+* As linhas de contexto vazias que não possuem _qualquer_ espaço em branco.
+
+* As linhas de contexto não vazias que possuam um espaço em branco extra no
+  início.
+
+Uma maneira de testar se o seu cliente de e-mail está configurado
+corretamente é fazendo o seguinte:
+
+* Envie o patch para você mesmo exatamente como você faria se fosse enviar
+  para alguém sem adicionar a lista e o endereço do mantenedor em "To:"
+  (Para:) e "Cc:".
+
+* Salve esse patch em um arquivo no formato mailbox do UNIX.  Chame-o de
+  "a.patch".
+
+* Aplique:
+
+    $ git fetch <project> master:test-apply
+    $ git switch test-apply
+    $ git restore --source=HEAD --staged --worktree :/
+    $ git am a.patch
+
+Pode haver vários motivos caso o patch não seja aplicado corretamente.
+
+* O patch em si não está correto.  Isso é _ruim_, mas não tem muito a ver com
+  o seu cliente de e-mail.  Você pode querer refazer o patch neste caso com
+  linkgit:git-rebase[1] antes de regenerá-lo.
+
+* O seu cliente de e-mail corrompeu o seu patch; o "am" reclamaria que o patch
+  não pode ser aplicado.  Procure no subdiretório `.git/rebase-apply/` e veja
+  o conteúdo do arquivo 'patch', verifique se os padrões mais comuns de
+  corrupção mencionados acima se aplicam.
+
+* Enquanto isso, verifique os arquivos 'info' e 'final-commit' também.  Caso o
+  que estiver em 'final-commit' não seja exatamente o que você quer ver na
+  mensagem do registro log do commit, é muito provável que o destinatário
+  acabe editando manualmente a mensagem do registro log durante a aplicação do
+  seu patch.  Coisas como "Olá, este é o meu primeiro patch.\n" no e-mail do
+  patch deve vir após a linha de três traços que sinaliza o final da mensagem
+  do commit.
+
+DICAS ESPECÍFICAS PARA CLIENTES DE E-MAIL
+-----------------------------------------
+Aqui estão algumas dicas sobre como enviar os patches com sucesso utilizando
+diferentes clientes de e-mail.
+
+GMail
+~~~~~
+O GMail não tem como desativar a quebra de linha na interface da Web;
+portanto, ele altera os e-mails que você envia.  Você pode entanto usar o
+"git send-email" e enviar os seus patches através do servidor SMTP do GMail
+ou usar qualquer cliente de email IMAP para conectar-se ao servidor IMAP do
+google e encaminhar os e-mails dessa maneira.
+
+Para obter dicas sobre o uso do 'git send-email' para enviar os seus patches
+através do servidor SMTP do GMail, consulte a seção EXEMPLO do
+linkgit:git-send-email[1].
+
+Para obter dicas sobre o envio utilizando a interface IMAP, consulte a seção
+EXEMPLO do linkgit:git-send-email[1].
+
+Thunderbird
+~~~~~~~~~~~
+É predefinido que o Thunderbird agrupe os e-mails e sinalize-os como
+'format=flowed', o que tornará o e-mail resultante inutilizável pelo Git.
+
+Existem três abordagens diferentes: utilize um complemento para desativar a
+quebra de linha, configure o Thunderbird para não alterar os patches ou
+utilize um editor externo para impedir que o Thunderbird manipule os
+patches.
+
+Abordagem nº 1 (complemento)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Instale o complemento "Toggle Word Wrap" que está disponível em
+https://addons.mozilla.org/thunderbird/addon/toggle-word-wrap/. É adicionado
+uma entrada chamada "Enable Word Wrap Alt+W" (Ativar a quebra automática de
+linha Alt+W) na aba "Opções" do compositor que você pode
+de-selecionar. Agora você pode compor a mensagem da mesma maneira que você
+sempre fez (recortar + colar, 'git format-patch' | 'git imap-send', etc),
+porém é necessário inserir as quebras das linhas manualmente em qualquer
+texto que for digitado.
+
+Abordagem # 2 (configuração)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Três etapas:
+
+1. Ainda no Thunderbird, configure a redação da mensagem de e-mail como texto
+   sem formatação, vá em Editar -> Propriedades -> suaconta@email.com ->
+   Redação e Endereçamento, desmarque a opção "Usar formatação (HTML)".
+
+2. Configure a sua janela de composição geral para não quebrar as linhas.
++
+No Thunderbird 2: Vá em Ferramentas -> Opções -> Edição -> Geral, defina
+como 0 (zero) caracteres a opção "Quebrar a linha, em mensagem sem
+formatação, após"
++
+No Thunderbird 3: Vá em Ferramentas -> Avançado -> Editor de config.  No
+campo localizar pesquise por "mail.wrap_long_lines".  Clique duas vezes com
+o mouse e tenha certeza que o seu valor mudou para `false`. Pesquise também
+pela opção "mailnews.wraplength", clique duas vezes com o mouse e defina o
+seu valor para 0 (zero).
+
+3. Desative a utilização da opção "format=flowed": Vá em Ferramentas ->
+   Avançado -> Editor de config.  No campo localizar pesquise por
+   "mailnews.send_plaintext_flowed".  Clique duas vezes com o mouse e tenha
+   certeza que o seu valor mudou para `false`.
+
+Ao concluir, agora é possível compor o e-mail da mesma maneira que seria
+feito com (recortar + colar, 'git format-patch' | 'git imap-send', etc), e
+os patches não ficarão mutilados.
+
+Abordagem nº 3 (editor externo)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+As seguintes extensões do Thunderbird são necessárias: O AboutConfig
+http://aboutconfig.mozdev.org/ (Observação: o AboutConfig não é mais
+compatível com as versões mais novas do Thunderbird.) e o "External Editor"
+http://globs.org/articles.php?lng=en&pg=8
+
+1. Prepare o patch como um arquivo de texto utilizando o seu método preferido.
+
+2. Antes de abrir uma janela de composição, vá em Editar -> Propriedades ->
+   Configurações da conta -> Redação e endereçamento e desmarque a opção "Usar
+   formatação (HTML)" para que seja possível enviar o patch.
+
+3. Na janela principal do Thunderbird, 'antes' de abrir a janela de composição
+   do patch, vá em Ferramentas -> Avançado -> Editor de Configurações e defina
+   os valores como indicado abaixo:
++
+----------
+	mailnews.send_plaintext_flowed  => false
+	mailnews.wraplength             => 0
+----------
+
+4. Abra uma janela de composição e clique no ícone do editor externo.
+
+5. Na janela do editor externo, carregue o arquivo patch e saia do editor
+   normalmente.
+
+Nota: Pode ser possível executar a segunda etapa para editar as seguintes
+configurações, mas ninguém tentou ainda.
+
+----------
+	mail.html_compose                       => false
+	mail.identity.default.compose_html      => false
+	mail.identity.id?.compose_html          => false
+----------
+
+Existe um script em contrib/thunderbird-patch-inline que pode ajudá-lo a
+incluir os patches com o Thunderbird facilmente. Para usá-lo, execute as
+etapas acima e utilize o script como um editor externo.
+
+KMail
+~~~~~
+Isso deve ajudá-lo a enviar os patches em linha utilizando o KMail.
+
+1. Prepare o patch como um arquivo de texto.
+
+2. Clique em "New Mail".
+
+3. Vá em "Opções" na janela do Compositor verifique se "Quebra de linha" não
+   está definido.
+
+4. Utilize Mensagem -> Inserir arquivo -> e insira o patch.
+
+5. De volta à janela de composição: adicione qualquer outro texto que desejar,
+   preencha os campos de endereçamento, assunto e pressione Enviar.
+
+INFORMAÇÃO BASE DA ÁRVORE
+-------------------------
+
+O bloco de informação da base da árvore é utilizado para que os mantenedores
+ou os testadores de terceiros saibam a condição exata ao qual a série de
+patches se aplicam. É a 'base do commit', é um commit conhecido que faz
+parte da parte estável do histórico do projeto onde todos os outros usam
+para trabalhar. Zero ou mais 'patches de pré-requisição' são patches
+conhecidos em transição, porém ainda não fazem parte da 'base do commit' que
+precisam ser aplicados sobre o cume da 'base do commit' em ordem topológica
+antes que os patches possam ser aplicados.
+
+A 'base do commit' é exibido como "base-commit:" seguido por 40 hexadecimais
+do nome do objeto commit.  Um 'patch de pré-requisição' é exibido como
+"prerequisite-patch-id:" seguido por um 'patch id' com 40 hexadecimais, que
+pode ser obtido passando o patch pelo comando `git patch-id --stable`.
+
+Imagine que, em cima do commit público P, foi aplicado os patches conhecidos
+X, Y e Z de outra pessoa e construiu a sua série de três patches A, B, C, o
+histórico ficaria assim:
+
+................................................
+---P---X---Y---Z---A---B---C
+................................................
+
+Com o `git format-patch --base = P -3 C` (ou variantes do mesmo com
+`--cover-letter` ou utilizando `Z..C` em vez de `-3 C` para especificar o
+intervalo por exemplo), o bloco das informações da base da árvore é exibido
+no final da primeira mensagem que o comando gera (o primeiro patch ou a
+carta de apresentação), assim:
+
+------------
+base-commit: P
+prerequisite-patch-id: X
+prerequisite-patch-id: Y
+prerequisite-patch-id: Z
+------------
+
+Para uma topologia não linear, como
+
+................................................
+---P---X---A---M---C
+    \         /
+     Y---Z---B
+................................................
+
+Você também pode usar o comando `git format-patch --base = P -3 C` para
+gerar as correções para A, B e C, os identificadores para P, X, Y, Z serão
+anexados no final da primeira mensagem.
+
+Caso `--base=auto` seja definido no cmdline, ele rastreará automaticamente a
+base do commit, o commit da base será o cume do ramo do commit monitorado
+remotamente e o intervalo da revisão determinado pelo cmdline.  Antes de
+utilizar esta opção para uma ramificação local, é necessário monitorar um
+ramo remoto com o comando `git branch --set-upstream-to`.
+
+EXEMPLOS
+--------
+
+* Extraia os commits entre as revisões R1 e R2, aplique-as no cume do ramo
+  atual utilizando o comando 'git am' para selecioná-las:
++
+------------
+$ git format-patch -k --stdout R1..R2 | git am -3 -k
+------------
+
+* Extraia todos os commits que estão na ramificação atual, mas não na
+  ramificação "origin":
++
+------------
+$ git format-patch origin
+------------
++
+Para cada commit é criado um arquivo separado no diretório atual.
+
+* Extraia todos os commits que levem à 'origin' desde o início do projeto:
++
+------------
+$ git format-patch --root origin
+------------
+
+* É o mesmo que o anterior:
++
+------------
+$ git format-patch -M -B origin
+------------
++
+Além disso, ele detecta e manipula as renomeações e as reescritas
+completadas de maneira inteligente produzindo um patch de renomeação.  Um
+patch de renomeação reduz a quantidade de saída do texto e geralmente
+facilita a revisão.  Observe que os programas de "patches" que não sejam do
+Git não entenderão como renomear os patches; portanto, utilize-os apenas
+quando souber que o destinatário usa o Git para aplicar seu patch.
+
+* Extraia os três commits mais importantes do ramo atual, formate-os como
+  patches que possam ser enviados por e-mail:
++
+------------
+$ git format-patch -3
+------------
+
+VEJA TAMBÉM
+-----------
+linkgit:git-am[1], linkgit:git-send-email[1]
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

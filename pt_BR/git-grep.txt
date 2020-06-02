@@ -1,0 +1,371 @@
+git-grep(1)
+===========
+
+NOME
+----
+git-grep - Imprima linhas que coincidam com um padrão
+
+
+SINOPSE
+-------
+[verse]
+'git grep' [-a | --text] [-I] [--textconv] [-i | --ignore-case] [-w | --word-regexp]
+	   [-v | --invert-match] [-h|-H] [--full-name]
+	   [-E | --extended-regexp] [-G | --basic-regexp]
+	   [-P | --perl-regexp]
+	   [-F | --fixed-strings] [-n | --line-number] [--column]
+	   [-l | --files-with-matches] [-L | --files-without-match]
+	   [(-O | --open-files-in-pager) [<pager>]]
+	   [-z | --null]
+	   [ -o | --only-matching ] [-c | --count] [--all-match] [-q | --quiet]
+	   [--max-depth <profundidade>] [--[no-]recursive]
+	   [--color[=<quando>] | --no-color]
+	   [--break] [--heading] [-p | --show-function]
+	   [-A <post-context>] [-B <pre-context>] [-C <context>]
+	   [-W | --function-context]
+	   [--threads <num>]
+	   [-f <arquivo>] [-e] <pattern>
+	   [--and|--or|--not|(|)|-e <pattern>...]
+	   [--recurse-submodules] [--parent-basename <basename>]
+	   [ [--[no-]exclude-standard] [--cached | --no-index | --untracked] | <árvore>...]
+	   [--] [<pathspec>...]
+
+DESCRIÇÃO
+---------
+Procure por padrões especificados nos arquivos rastreados da árvore de
+trabalho, bolhas registradas no arquivo do índice ou nas bolhas de
+determinados objetos da árvore.  Os padrões são listas de uma ou mais
+expressões de pesquisa separadas por caracteres de nova linha.  Uma cadeia
+de caracteres vazia utilizada como uma expressão de pesquisa coincide com
+todas as linhas.
+
+
+CONFIGURAÇÃO
+------------
+
+grep.lineNumber::
+	Caso seja definido como `true`, é predefinido que a opção `-n` seja
+	utilizada.
+
+grep.column::
+	Caso seja definido como `true`, é predefinido que a opção `--column` seja
+	utilizada.
+
+grep.patternType::
+	Define o comportamento de correspondência predefinido. A utilização de um
+	valor 'basic', 'extended', 'fixed' ou 'perl' ativará as opções
+	`--basic-regexp`, `--extended-regexp`, `--fixed-strings`, ou
+	`--perl-regexp`, enquanto o valor 'default' retornará ao comportamento de
+	coincidências já predefinida.
+
+grep.extendedRegexp::
+	Se definido como true, é predefinido que a opção `--extended-regexp` seja
+	usada. Esta opção é ignorada quando a opção `grep.patternType` for
+	configurada para um valor diferente de 'default'.
+
+grep.threads::
+	Quantidade de threads de trabalho "grep" a serem utilizados. If unset (or
+	set to 0), Git will use as many threads as the number of logical cores
+	available.
+
+grep.fullName::
+	Caso seja definido como `true`, é predefinido que a opção `--full-name` seja
+	utilizada.
+
+grep.fallbackToNoIndex::
+	Caso seja definido como `true`, retorne para `git grep --no-index` caso o
+	`git grep` seja executado fora de um repositório Git.  É predefinido como
+	`false`.
+
+
+OPÇÕES
+------
+--cached::
+	Em vez de procurar por arquivos rastreados na árvore de trabalho, pesquisar
+	por bolhas registradas no índice do arquivo.
+
+--no-index::
+	Localize os arquivos no diretório atual que não sejam gerenciados pelo Git.
+
+--untracked::
+	Além de localizar nos arquivos rastreados da árvore de trabalho, localize
+	também nos arquivos não rastreados.
+
+--no-exclude-standard::
+	Localize também nos arquivos ignorados, ignorando o mecanismo
+	`.gitignore`. Útil apenas com a opção `--untracked`.
+
+--exclude-standard::
+	Do not pay attention to ignored files specified via the `.gitignore`
+	mechanism.  Only useful when searching files in the current directory with
+	`--no-index`.
+
+--recurse-submodules::
+	Recursively search in each submodule that is active and checked out in the
+	repository.  When used in combination with the <tree> option the prefix of
+	all submodule output will be the name of the parent project's <tree>
+	object. This option has no effect if `--no-index` is given.
+
+-a::
+--text::
+	Processe os arquivos binários como se fossem texto.
+
+--textconv::
+	Honre com as configurações do filtro "textconv".
+
+--no-textconv::
+	Não respeite as configurações do filtro 'textconv'.  Esta é a predefinição.
+
+-i::
+--ignore-case::
+	Ignore as diferenças entre maiúsculas e minúsculas entre os padrões e os
+	arquivos.
+
+-I::
+	Não coincida padrões em arquivos binários.
+
+--max-depth <profundidade>::
+	Para cada `<pathspec>` utilizado na linha de comandos, desça a
+	<profundidade> máxima dos níveis do diretório. Um valor de -1 significa sem
+	limite.  Esta opção será ignorada caso <pathspec> contenha curingas ativos.
+	Em outras palavras, caso "a*" coincida com um diretório chamado "a*", o
+	curinga "*" coincidirá literalmente para que `--max-depth` ainda seja
+	eficaz.
+
+-r::
+--recursive::
+	O mesmo que `--max-depth=-1`; Esta é a predefinição.
+
+--no-recursive::
+	O mesmo que `--max-depth=0`.
+
+-w::
+--word-regexp::
+	Coincida com o padrão apenas no limite da palavra (inicie no início de uma
+	linha ou preceda um caractere que não seja uma palavra; termine no final de
+	uma linha ou seguido por um caractere que não seja uma palavra).
+
+-v::
+--invert-match::
+	Selecione as linhas que não coincidam.
+
+-h::
+-H::
+	É predefinido que o comando exiba o nome do arquivo para cada coincidência.
+	A opção `-h` é utilizada para suprimir esta saída.  A opção `-H` existe para
+	ser completo e não faz nada exceto a substituição do `-h` utilizado
+	anteriormente na linha de comando.
+
+--full-name::
+	O comando geralmente gera caminhos relativos ao diretório atual ao ser
+	executado a partir de um subdiretório.  Esta opção impõem que os caminhos
+	saiam relativos ao topo do diretório do projeto.
+
+-E::
+--extended-regexp::
+-G::
+--basic-regexp::
+	Para os padrões, utilize uma expressão regular (regexp) POSIX
+	estendido/básico.  A predefinição é utilizar uma expressão regular (regexp)
+	básica.
+
+-p::
+--perl-regexp::
+	Para os padrões, utilize expressões regulares compatíveis com o Perl.
++
+A compatibilidade com estes tipos de expressões regulares é uma dependência
+opcional durante o período de compilação. Usar esta opção caso o Git não
+tenha sido compilado com suporte para tal, fará com que o Git seja
+encerrado.
+
+-F::
+--fixed-strings::
+	Utilize uma cadeia de caracteres fixos para os padrões (não interprete o
+	padrão como uma expressão regular "regex").
+
+-n::
+--line-number::
+	Prefixe o número da linha às linhas coincidentes.
+
+--column::
+	Prefixe o deslocamento do byte (byte-offset) indexado em 1 da primeira
+	coincidência desde o início da linha coincidente.
+
+-l::
+--files-with-matches::
+--name-only::
+-L::
+--files-without-match::
+	Em vez de exibir todas as linhas coincidentes, exiba apenas os nomes dos
+	arquivos que contenha (ou não) as coincidências.  Para uma melhor
+	compatibilidade com o comando 'git diff', a opção `--name-only` é um
+	sinônimo de `--files-with-matches`.
+
+-O[<pager>]::
+--open-files-in-pager[=<pager>]::
+	Abra os arquivos coincidentes no pager (não a saída do 'grep').  Caso o
+	pager seja "less" (menor) ou "vi" e o usuário usar apenas um padrão, o
+	primeiro arquivo será posicionado na primeira coincidência de forma
+	automática. O argumento `pager` é opcional; se utilizado, deverá estar preso
+	à opção sem um espaço. Caso `pager` não seja utilizado, a predefinição do
+	pager será utilizado (consulte `core.pager` no linkgit:git-config[1]).
+
+-z::
+--null::
+	Utilize o \0 como um delimitador para gerar os nomes do caminho e as exiba
+	de forma literal. Sem esta opção, nomes de caminho com caracteres "incomuns"
+	são citados como explicado para a variável de configuração core.quotePath
+	(veja git-config(1)).
+
+-o::
+--only-matching::
+	Imprima apenas as partes que coincidam (não vazias) de uma linha coincidente
+	com cada uma dessas partes em uma linha separada na saída.
+
+-c::
+--count::
+	Em vez de exibir todas as linhas coincidentes, exiba a quantidade de linhas
+	coincidentes.
+
+--color[=<quando>]::
+	Exibir as coincidências em cores.  Always (sempre) é o valor predefinido, as
+	outras opções são "never" ou "auto".
+
+--no-color::
+	Desative o destacamento das coincidências, mesmo quando o arquivo da
+	configuração fornecer a predefinição para a saída colorida.  O mesmo que
+	`--color=never`.
+
+--break::
+	Imprima uma linha vazia entre as coincidências dos diferentes arquivos.
+
+--heading::
+	Exiba o nome do arquivo acima das coincidências nesse arquivo em vez de
+	exibir no início de cada linha.
+
+-p::
+--show-function::
+	Exibe a linha anterior que contenha o nome da função da coincidência, a
+	menos que a linha correspondente seja o próprio nome da função.  O nome é
+	determinado da mesma maneira que o 'git diff' elabora os cabeçalhos do patch
+	hunk (consulte 'Definindo um cabeçalho personalizado do hunk' em
+	linkgit:gitattributes[5]).
+
+-<num>::
+-C <num>::
+--context <num>::
+	Exiba um `<num>` (quantidade) de linhas iniciais e finais, coloque uma linha
+	contendo `--` entre os grupos contínuos coincidentes.
+
+-A <num>::
+--after-context <num>::
+	Exibe `<num>` (quantidade) de linhas finais e coloque uma linha contendo
+	`--` entre os grupos contínuos coincidentes.
+
+-B <num>::
+--before-context <num>::
+	Exibe `<num>` (quantidade) de linhas iniciais e coloque uma linha contendo
+	`--` entre os grupos contínuos coincidentes.
+
+-W::
+--function-context::
+	Exibe o texto ao redor da linha anterior que contenha um nome da função até
+	o nome anterior ao próximo, exibindo efetivamente toda a função em que a
+	coincidência foi encontrada.
+
+--threads <num>::
+	Quantidade de threads de trabalho "grep" a serem utilizados.  Para mais
+	informações consulte `grep.threads` em 'CONFIGURAÇÃO'.
+
+-f <arquivo>::
+	Leia os padrões vindos de um `<arquivo>`, um por linha.
++
+Passing the pattern via <file> allows for providing a search pattern
+containing a \0.
++
+Not all pattern types support patterns containing \0. Git will error out if
+a given pattern type can't support such a pattern. The `--perl-regexp`
+pattern type when compiled against the PCRE v2 backend has the widest
+support for these types of patterns.
++
+In versions of Git before 2.23.0 patterns containing \0 would be silently
+considered fixed. This was never documented, there were also odd and
+undocumented interactions between e.g. non-ASCII patterns containing \0 and
+`--ignore-case`.
++
+In future versions we may learn to support patterns containing \0 for more
+search backends, until then we'll die when the pattern type in question
+doesn't support them.
+
+-e::
+	O próximo parâmetro é o padrão. Esta opção deve ser utilizada para padrões
+	que comecem com `-` e deve ser utilizado em scripts que passam a entrada do
+	usuário ao "grep".  Os vários padrões são combinados por 'or' (ou).
+
+--and::
+--or::
+--not::
+( ... )::
+	Determina como os vários padrões são combinados utilizando expressões
+	booleanas.  `--or` é o operador predefinido.  `--and` tem maior precedência
+	que `--or`.  `-e` deve ser utilizado para todos os padrões.
+
+--all-match::
+	Ao utilizar múltiplas expressões de padrões combinadas com `--or`, este flag
+	é utilizado para limitar a coincidência nos arquivos que possuam linhas que
+	coincidam com todas elas.
+
+-q::
+--quiet::
+	Não produza linhas coincidentes; em vez disso, encerre com uma condição 0
+	quando houver uma coincidência e diferente de 0 quando não houver.
+
+<árvore>...::
+	Em vez de localizar os arquivos rastreados na árvore de trabalho, localize
+	as bolhas nas árvores informadas.
+
+\--::
+	Sinaliza o fim das opções; o restante dos parâmetros são os limitadores do
+	`<pathspec>`.
+
+<pathspec>...::
+	Se utilizado, limite a localização dos caminhos que coincidam a pelo menos
+	um padrão.  Ambas são compatíveis, as coincidências dos caminhos principais
+	e os padrões bolha(7).
++
+Para mais detalhes sobre a sintaxe `<pathspec>`, consulte a entrada
+'pathspec' em linkgit:gitglossary[7].
+
+EXEMPLOS
+--------
+
+`git grep 'time_t' -- '*.[ch]'`::
+	Procura por `time_t` em todos os arquivos rastreados .c e .h no diretório de
+	trabalho e em seus subdiretórios.
+
+`git grep -e '#define' --and \( -e MAX_PATH -e PATH_MAX \)`::
+	Procura por uma linha que contenha `#define` e até mesmo `MAX_PATH` ou
+	`PATH_MAX`.
+
+`git grep --all-match -e NODE -e Unexpected`::
+	Procura por uma linha que tenha `NODE` ou `Unexpected` nos arquivos que
+	tenham linhas que coincidam com ambas.
+
+`git grep solução -- :^Documentação`::
+	Procura por `solução`, excluindo os arquivos em `Documentação`.
+
+NOTES ON THREADS
+----------------
+
+The `--threads` option (and the grep.threads configuration) will be ignored
+when `--open-files-in-pager` is used, forcing a single-threaded execution.
+
+When grepping the object store (with `--cached` or giving tree objects),
+running with multiple threads might perform slower than single threaded if
+`--textconv` is given and there're too many text conversions. So if you
+experience low performance in this case, it might be desirable to use
+`--threads=1`.
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

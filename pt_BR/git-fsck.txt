@@ -1,0 +1,175 @@
+git-fsck(1)
+===========
+
+NOME
+----
+git-fsck - Verifica a conectividade e a validade dos objetos no banco de
+dados
+
+
+SINOPSE
+-------
+[verse]
+'git fsck' [--tags] [--root] [--unreachable] [--cache] [--no-reflogs]
+	 [--[no-]full] [--strict] [--verbose] [--lost-found]
+	 [--[no-]dangling] [--[no-]progress] [--connectivity-only]
+	 [--[no-]name-objects] [<objeto>*]
+
+DESCRIÇÃO
+---------
+Verifica a conectividade e validade dos objetos em um banco de dados.
+
+OPÇÕES
+------
+<objeto>::
+	Um objeto a ser tratado como a cabeça de um rastreamento de
+	inacessibilidade.
++
+Caso nenhum objeto seja informado o comando 'git fsck' utilizará o arquivo
+do índice, todas as referências SHA-1 no "namespace" `refs` e todos os
+reflogs (a menos que --no-reflogs seja informado) serão utilizados como um
+cabeçalho.
+
+--unreachable::
+	Imprima os objetos que existam, porém que não sejam acessíveis a partir de
+	nenhum dos nós de referência.
+
+--[no-]dangling::
+	Imprima os objetos que existam porém, que nunca são utilizados 'diretamente'
+	(predefinição).  `--no-dangling` pode ser utilizado para omitir esta
+	informação na saída.
+
+--root::
+	Relatar os nós raiz.
+
+--tags::
+	Tags de relatório.
+
+--cache::
+	Considere qualquer objeto registrado no índice também como um nó principal
+	para um rastreamento de inacessibilidade.
+
+--no-reflogs::
+	Para serem alcançáveis, não considere que os commits sejam referenciados
+	apenas por uma entrada em um "reflog".  Esta opção serve apenas para
+	procurar commits que costumavam estar em um "ref", mas agora não estão mais,
+	mas ainda assim em um reflog equivalente.
+
+--full::
+	Verifique não apenas os objetos em `GIT_OBJECT_DIRECTORY`
+	(`$GIT_DIR/objects`), mas também os que forem encontrados nos conjuntos de
+	objetos alternativos listados em `GIT_ALTERNATE_OBJECT_DIRECTORIES` ou
+	`$GIT_DIR/objects/info/alternates`, nos arquivos Git encontrados em
+	`$GIT_DIR/objects/pack` e nos pacotes dos subdiretórios correspondentes nos
+	conjuntos dos objetos alternativos.  Esta é a predefinição agora; desative-o
+	com `--no-full`.
+
+--connectivity-only::
+	Check only the connectivity of reachable objects, making sure that any
+	objects referenced by a reachable tag, commit, or tree is present. This
+	speeds up the operation by avoiding reading blobs entirely (though it does
+	still check that referenced blobs exist). This will detect corruption in
+	commits and trees, but not do any semantic checks (e.g., for format
+	errors). Corruption in blob objects will not be detected at all.
++
+Unreachable tags, commits, and trees will also be accessed to find the tips
+of dangling segments of history. Use `--no-dangling` if you don't care about
+this output and want to speed it up further.
+
+--strict::
+	Ative uma verificação mais rigorosa para capturar um modo do arquivo gravado
+	em um conjunto de bits g+w, criado por versões mais antigas do Git.  Os
+	repositórios existentes, incluindo o kernel do Linux, o próprio Git e o
+	repositório esparso, possuem objetos antigos que acionam esta verificação. É
+	recomendável verificar novos projetos com essa flag.
+
+--verbose::
+	Seja tagarela.
+
+--lost-found::
+	Dependendo do tipo, escreva os objetos pendentes em .git/lost-found/commit/
+	ou .git/lost-found/other/.  O conteúdo será gravado no arquivo e não no nome
+	do objeto caso o objeto seja uma bolha.
+
+--name-objects::
+	Ao exibir os nomes dos objetos alcançáveis além do SHA-1 que descrevam
+	*como* eles são alcançáveis, é compatível com linkgit:git-rev-parse[1],
+	`HEAD@{1234567890}~25^2:src/` por exemplo.
+
+--[no-]progress::
+	A condição do progresso é relatado no fluxo de erro predefinido ao estar
+	conectado em um terminal, a menos que as opções `--no-progress` ou
+	`--verbose` sejam utilizados. A opção `--progress` impõem que a condição do
+	progresso seja exibida mesmo que o fluxo de erro predefinido não esteja
+	direcionado para um terminal.
+
+CONFIGURAÇÃO
+------------
+
+include::config/fsck.txt[]
+
+DISCUSSÃO
+---------
+
+O git-fsck testa se o SHA-1 e a sanidade geral dos objetos, faz o
+rastreamento completo da acessibilidade resultante e todo o resto. Imprime
+qualquer corrupção encontrada (objetos ausentes ou incorretos) , se utilizar
+a opção `--unreachable`, também serão impressos os objetos que existem mas
+que não estão acessíveis a partir de nenhum dos nós principais (ou da
+predefinição mencionada acima).
+
+Você precisará encontrar quaisquer outros objetos corrompidos nos backups ou
+em outros arquivos (ou seja, remova-os e faça um 'rsync' com outro site na
+esperança de que outra pessoa tenha uma cópia do objeto que você corrompeu).
+
+Caso core.commitGraph seja verdadeiro, o arquivo commit-graph também será
+inspecionado utilizando 'git commit-graph verify'. See
+linkgit:git-commit-graph[1].
+
+Diagnósticos Extraídos
+----------------------
+
+aguardar pelos commits pendentes - potenciais cabeçalhos - devido à falta de informações dos cabeçalhos::
+	Você não especificou nenhum nó como cabeçalho, portanto não será possível
+	diferenciar entre os commits sem origem e os nós raiz.
+
+diretório sem sha1 '<dir>'::
+	O diretório que contém os objetos sha1 está ausente.
+
+unreachable <tipo> <object>::
+	O objeto <tipo> <objeto>, na verdade, não tem referência direta ou indireta
+	com nenhuma das árvores ou commits já vistos. Significa que há um outro nó
+	na raiz que você ainda não está informando ou que a árvore está
+	corrompida. Caso você ainda não tenha perdido um nó na raiz, também possa
+	excluir os nós que estejam inacessíveis, pois eles não possam ser
+	utilizados.
+
+missing <tipo> <object>::
+	O objeto <tipo> <objeto>, tem referência mas não está presente no banco de
+	dados.
+
+dangling <tipo> <object>::
+	O <tipo> do objeto <objeto> está presente no banco de dados, mas nunca é
+	utilizado 'diretamente'. A dangling commit could be a root node.
+
+hash mismatch <objeto>::
+	O banco de dados tem um objeto cujo hash não coincide com o valor do banco
+	de dados do objeto.  Isso indica um sério problema de integridade de dados.
+
+Variáveis do Ambiente
+---------------------
+
+GIT_OBJECT_DIRECTORY::
+	utilize para especificar a raiz do banco de dados do objeto (geralmente
+	'$GIT_DIR/objects')
+
+GIT_INDEX_FILE::
+	utilizado para determinar o arquivo de índice do índice
+
+GIT_ALTERNATE_OBJECT_DIRECTORIES::
+	utilizado para determinar as raízes adicionais do banco de dados dos objetos
+	(geralmente não definidos)
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

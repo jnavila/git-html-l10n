@@ -344,10 +344,10 @@ Mode par défaut::
 	fusionne des branches avec le même contenu)
 
 --show-pulls::
-	Include all commits from the default mode, but also any merge commits that
-	are not TREESAME to the first parent but are TREESAME to a later
-	parent. This mode is helpful for showing the merge commits that "first
-	introduced" a change to a branch.
+	Inclure tous les commits du mode par défaut, mais aussi tous les commits de
+	fusion qui ne sont pas MEMEARBRE au premier parent mais qui sont MEMEARBRE à
+	un parent ultérieur. Ce mode est utile pour montrer les commits de fusion
+	qui ont "introduit en premier" une modification dans une branche.
 
 --full-history::
 	Identique au mode par défaut, mais ne pas élaguer l'historique.
@@ -582,13 +582,14 @@ exactement ce que fait l'option `--ancestry-path`. Appliqué à l'intervalle
 				L--M
 -----------------------------------------------------------------------
 
-Before discussing another option, `--show-pulls`, we need to create a new
-example history.
+Avant de discuter d'une autre option, `--show-pulls`, nous devons créer un
+nouvel exemple d'historique.
 +
-A common problem users face when looking at simplified history is that a
-commit they know changed a file somehow does not appear in the file's
-simplified history. Let's demonstrate a new example and show how options
-such as `--full-history` and `--simplify-merges` works in that case:
+Un problème courant auquel les utilisateurs sont confrontés lorsqu'ils
+consultent l'historique simplifié est qu'un commit dont ils savent qu'il a
+modifié un fichier n'apparaît pas dans l'historique simplifié du
+fichier. Prenons un nouvel exemple et montrons comment des options telles
+que `--full-history` et `--simplify-history` fonctionnent dans ce cas :
 +
 -----------------------------------------------------------------------
 	  .-A---M-----C--N---O---P
@@ -599,29 +600,31 @@ such as `--full-history` and `--simplify-merges` works in that case:
 	   `---X--'  `---Y--'
 -----------------------------------------------------------------------
 +
-For this example, suppose `I` created `file.txt` which was modified by `A`,
-`B`, and `X` in different ways. The single-parent commits `C`, `Z`, and `Y`
-do not change `file.txt`. The merge commit `M` was created by resolving the
-merge conflict to include both changes from `A` and `B` and hence is not
-TREESAME to either. The merge commit `R`, however, was created by ignoring
-the contents of `file.txt` at `M` and taking only the contents of `file.txt`
-at `X`. Hence, `R` is TREESAME to `X` but not `M`. Finally, the natural
-merge resolution to create `N` is to take the contents of `file.txt` at `R`,
-so `N` is TREESAME to `R` but not `C`.  The merge commits `O` and `P` are
-TREESAME to their first parents, but not to their second parents, `Z` and
-`Y` respectively.
+Pour cet exemple, supposons que `I` a créé `fichier.txt` qui a été modifié
+par `A`, `B` et `X` de différentes manières. Les commits à parent unique
+`C`, `Z` et `Y` ne modifient pas `fichier.txt`. Le commit de fusion `M` a
+été créé en résolvant le conflit de fusion pour inclure les deux
+modifications de `A` et `B` et n'est donc pas MEMEARBRE pour l'un ou
+l'autre. Le commit de fusion `R`, cependant, a été créé en ignorant le
+contenu du fichier `fichier.txt` à `M` et en prenant seulement le contenu du
+fichier `fichier.txt` à `X`. Par conséquent, `R` est MEMEARBRE à `X` mais
+pas à `M`. Enfin, la résolution de fusion naturelle pour créer `N` est de
+prendre le contenu du `fichier.txt` à `R`, donc `N` est MEMEARBRE à `R` mais
+pas à `C`.  La fusion engage `O` et `P` sont MEMEARBRE à leurs premiers
+parents, mais pas à leurs seconds parents, `Z` et `Y` respectivement.
 +
-When using the default mode, `N` and `R` both have a TREESAME parent, so
-those edges are walked and the others are ignored. The resulting history
-graph is:
+En utilisant le mode par défaut, `N` et `R` ont tous deux un parent
+MEMEARBRE, donc ces bords sont parcourus et les autres sont ignorés. Le
+graphique d'historique qui en résulte est :
 +
 -----------------------------------------------------------------------
 	I---X
 -----------------------------------------------------------------------
 +
-When using `--full-history`, Git walks every edge. This will discover the
-commits `A` and `B` and the merge `M`, but also will reveal the merge
-commits `O` and `P`. With parent rewriting, the resulting graph is:
+Lors de l'utilisation de `--full-history`, Git parcourt toutes les arêtes
+. Il découvrira les commits `A` et `B` et la fusion `M`, mais aussi les
+commits de fusion `O` et `P`. Avec la réécriture des parents, le graphe
+résultant est :
 +
 -----------------------------------------------------------------------
 	  .-A---M--------N---O---P
@@ -632,19 +635,21 @@ commits `O` and `P`. With parent rewriting, the resulting graph is:
 	   `---X--'  `------'
 -----------------------------------------------------------------------
 +
-Here, the merge commits `O` and `P` contribute extra noise, as they did not
-actually contribute a change to `file.txt`. They only merged a topic that
-was based on an older version of `file.txt`. This is a common issue in
-repositories using a workflow where many contributors work in parallel and
-merge their topic branches along a single trunk: manu unrelated merges
-appear in the `--full-history` results.
+Ici, les commits de fusion `O` et `P` apportent un bruit supplémentaire, car
+ils n'ont pas réellement apporté de modification à `fichier.txt`. Ils ont
+seulement fusionné une branche thématique qui était basée sur une ancienne
+version de `fichier.txt`. C'est un problème courant dans les dépôts
+utilisant une organisation où de nombreux contributeurs travaillent en
+parallèle et fusionnent leurs branches thématiques le long d'un seul tronc :
+de nombreuses fusions sans rapport apparaissent dans les résultats de
+`--full-history`.
 +
-When using the `--simplify-merges` option, the commits `O` and `P` disappear
-from the results. This is because the rewritten second parents of `O` and
-`P` are reachable from their first parents. Those edges are removed and then
-the commits look like single-parent commits that are TREESAME to their
-parent. This also happens to the commit `N`, resulting in a history view as
-follows:
+Lorsque l'on utilise l'option `--simplify-merges`, les valeurs `O` et `P`
+disparaissent des résultats. Cela est dû au fait que les seconds parents
+réécrits de `O` et `P` sont accessibles depuis leurs premiers parents. Ces
+arêtes sont supprimées et les commits ressemblent alors à des commits
+monoparentaux qui sont MEMEARBRE pour leur parent. C'est également le cas
+pour le commit `N`, ce qui donne l'historique suivant :
 +
 -----------------------------------------------------------------------
 	  .-A---M--.
@@ -655,41 +660,46 @@ follows:
 	   `---X--'
 -----------------------------------------------------------------------
 +
-In this view, we see all of the important single-parent changes from `A`,
-`B`, and `X`. We also see the carefully-resolved merge `M` and the
-not-so-carefully-resolved merge `R`. This is usually enough information to
-determine why the commits `A` and `B` "disappeared" from history in the
-default view. However, there are a few issues with this approach.
+Dans cette optique, nous voyons toutes les modifications monoparentales de
+`A`, `B` et `X`. Nous voyons également la fusion `M`, soigneusement résolue,
+et la fusion `R`, pas si soigneusement résolue. Ces informations sont
+généralement suffisantes pour déterminer pourquoi les commits `A` et `B` ont
+« disparu » de l'historique dans la vue par défaut. Cependant, cette
+approche pose quelques problèmes.
 +
-The first issue is performance. Unlike any previous option, the
-`--simplify-merges` option requires walking the entire commit history before
-returning a single result. This can make the option difficult to use for
-very large repositories.
+La première question est celle de la performance. Contrairement à toutes les
+options précédentes, l'option `--simplify-merges` nécessite de parcourir
+l'historique complet des commits avant de renvoyer un seul résultat. Cela
+peut rendre l'option difficile à utiliser pour les très grands dépôts.
 +
-The second issue is one of auditing. When many contributors are working on
-the same repository, it is important which merge commits introduced a change
-into an important branch. The problematic merge `R` above is not likely to
-be the merge commit that was used to merge into an important
-branch. Instead, the merge `N` was used to merge `R` and `X` into the
-important branch. This commit may have information about why the change `X`
-came to override the changes from `A` and `B` in its commit message.
+La deuxième question est celle de l'audit. Lorsque plusieurs contributeurs
+travaillent sur le même dépôt, il est important de savoir quels commits de
+fusion ont introduit un changement dans une branche importante. La fusion
+problématique `R` ci-dessus n'est probablement pas le commit de fusion qui a
+été utilisé pour fusionner dans une branche importante. Au lieu de cela, la
+fusion `N` a été utilisée pour fusionner `R` et `X` dans la branche
+importante. Ce commit peut avoir des informations sur la raison pour
+laquelle la modifcation `X` est venu remplacer les changements de `A` et `B`
+dans son message de commit.
 +
-The `--show-pulls` option helps with both of these issues by adding more
-merge commits to the history results. If a merge is not TREESAME to its
-first parent but is TREESAME to a later parent, then that merge is treated
-as if it "pulled" the change from another branch. When using `--show-pulls`
-on this example (and no other options) the resulting graph is:
+L'option `--show-pulls` aide à résoudre ces deux problèmes en ajoutant plus
+commits de fusion aux résultats de l'historique. Si une fusion n'est pas
+MEMEARBRE vers son premier parent mais est MEMEARBRE vers un parent
+ultérieur, alors cette fusion est traitée comme si elle avait "tiré" le
+changement d'une autre branche. Lorsque l'on utilise `--show-pulls` sur cet
+exemple (et aucune autre option), le graphe résultant est :
 +
 -----------------------------------------------------------------------
 	I---X---R---N
 -----------------------------------------------------------------------
 +
-Here, the merge commits `R` and `N` are included because they pulled the
-commits `X` and `R` into the base branch, respectively. These merges are the
-reason the commits `A` and `B` do not appear in the default history.
+Ici, les commits de fusion `R` et `N` sont inclus, car ils ont tiré les
+commits `X` et `R` dans la branche de base, respectivement. Ces fusions sont
+les raisons pour lesquelles les commits `A` et `B` n'apparaissent pas dans
+l'historique par défaut.
 +
-When `--show-pulls` is paired with `--simplify-merges`, the graph includes
-all of the necessary information:
+Lorsque l'option `--show-pulls` est associée à l'option `--simplify-merges`,
+le graphe comprend toutes les informations nécessaires :
 +
 -----------------------------------------------------------------------
 	  .-A---M--.   N
@@ -700,9 +710,10 @@ all of the necessary information:
 	   `---X--'
 -----------------------------------------------------------------------
 +
-Notice that since `M` is reachable from `R`, the edge from `N` to `M` was
-simplified away. However, `N` still appears in the history as an important
-commit because it "pulled" the change `R` into the main branch.
+Remarquez que puisque `M` est accessible à partir de `R`, l'arête entre `N`
+et `M` a été simplifiée. Cependant, `N` apparaît toujours dans l'historique
+comme un commit important parce qu'il a « tiré » le changement `R` dans la
+branche principale.
 
 L'option `--simplify-by-decoration` vous donne une vue d'ensemble de la
 topologie de l'historique, en omettant les commits qui ne sont pas
