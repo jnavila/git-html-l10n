@@ -584,13 +584,13 @@ exactement ce que fait l'option `--ancestry-path`. Appliqué à l'intervalle
 
 Avant de discuter d'une autre option, `--show-pulls`, nous devons créer un
 nouvel exemple d'historique.
-+
+
 Un problème courant auquel les utilisateurs sont confrontés lorsqu'ils
 consultent l'historique simplifié est qu'un commit dont ils savent qu'il a
 modifié un fichier n'apparaît pas dans l'historique simplifié du
 fichier. Prenons un nouvel exemple et montrons comment des options telles
 que `--full-history` et `--simplify-history` fonctionnent dans ce cas :
-+
+
 -----------------------------------------------------------------------
 	  .-A---M-----C--N---O---P
 	 /     / \  \  \/   /   /
@@ -599,7 +599,7 @@ que `--full-history` et `--simplify-history` fonctionnent dans ce cas :
 	  \ /      /\        /
 	   `---X--'  `---Y--'
 -----------------------------------------------------------------------
-+
+
 Pour cet exemple, supposons que `I` a créé `fichier.txt` qui a été modifié
 par `A`, `B` et `X` de différentes manières. Les commits à parent unique
 `C`, `Z` et `Y` ne modifient pas `fichier.txt`. Le commit de fusion `M` a
@@ -612,20 +612,20 @@ pas à `M`. Enfin, la résolution de fusion naturelle pour créer `N` est de
 prendre le contenu du `fichier.txt` à `R`, donc `N` est MEMEARBRE à `R` mais
 pas à `C`.  La fusion engage `O` et `P` sont MEMEARBRE à leurs premiers
 parents, mais pas à leurs seconds parents, `Z` et `Y` respectivement.
-+
+
 En utilisant le mode par défaut, `N` et `R` ont tous deux un parent
 MEMEARBRE, donc ces bords sont parcourus et les autres sont ignorés. Le
 graphique d'historique qui en résulte est :
-+
+
 -----------------------------------------------------------------------
 	I---X
 -----------------------------------------------------------------------
-+
+
 Lors de l'utilisation de `--full-history`, Git parcourt toutes les arêtes
 . Il découvrira les commits `A` et `B` et la fusion `M`, mais aussi les
 commits de fusion `O` et `P`. Avec la réécriture des parents, le graphe
 résultant est :
-+
+
 -----------------------------------------------------------------------
 	  .-A---M--------N---O---P
 	 /     / \  \  \/   /   /
@@ -634,7 +634,7 @@ résultant est :
 	  \ /      /\        /
 	   `---X--'  `------'
 -----------------------------------------------------------------------
-+
+
 Ici, les commits de fusion `O` et `P` apportent un bruit supplémentaire, car
 ils n'ont pas réellement apporté de modification à `fichier.txt`. Ils ont
 seulement fusionné une branche thématique qui était basée sur une ancienne
@@ -643,14 +643,14 @@ utilisant une organisation où de nombreux contributeurs travaillent en
 parallèle et fusionnent leurs branches thématiques le long d'un seul tronc :
 de nombreuses fusions sans rapport apparaissent dans les résultats de
 `--full-history`.
-+
+
 Lorsque l'on utilise l'option `--simplify-merges`, les valeurs `O` et `P`
 disparaissent des résultats. Cela est dû au fait que les seconds parents
 réécrits de `O` et `P` sont accessibles depuis leurs premiers parents. Ces
 arêtes sont supprimées et les commits ressemblent alors à des commits
 monoparentaux qui sont MEMEARBRE pour leur parent. C'est également le cas
 pour le commit `N`, ce qui donne l'historique suivant :
-+
+
 -----------------------------------------------------------------------
 	  .-A---M--.
 	 /     /    \
@@ -659,19 +659,19 @@ pour le commit `N`, ce qui donne l'historique suivant :
 	  \ /      /
 	   `---X--'
 -----------------------------------------------------------------------
-+
+
 Dans cette optique, nous voyons toutes les modifications monoparentales de
 `A`, `B` et `X`. Nous voyons également la fusion `M`, soigneusement résolue,
 et la fusion `R`, pas si soigneusement résolue. Ces informations sont
 généralement suffisantes pour déterminer pourquoi les commits `A` et `B` ont
 « disparu » de l'historique dans la vue par défaut. Cependant, cette
 approche pose quelques problèmes.
-+
+
 La première question est celle de la performance. Contrairement à toutes les
 options précédentes, l'option `--simplify-merges` nécessite de parcourir
 l'historique complet des commits avant de renvoyer un seul résultat. Cela
 peut rendre l'option difficile à utiliser pour les très grands dépôts.
-+
+
 La deuxième question est celle de l'audit. Lorsque plusieurs contributeurs
 travaillent sur le même dépôt, il est important de savoir quels commits de
 fusion ont introduit un changement dans une branche importante. La fusion
@@ -681,13 +681,16 @@ fusion `N` a été utilisée pour fusionner `R` et `X` dans la branche
 importante. Ce commit peut avoir des informations sur la raison pour
 laquelle la modifcation `X` est venu remplacer les changements de `A` et `B`
 dans son message de commit.
+
+--show-pulls::
+	En plus des commits indiqués dans l’historique par défaut, montrer chaque
+	commit de fusion qui n’est pas MEMEARBRE à son premier parent, mais qui est
+	MEMEARBRE à un parent ultérieur.
 +
-L'option `--show-pulls` aide à résoudre ces deux problèmes en ajoutant plus
-commits de fusion aux résultats de l'historique. Si une fusion n'est pas
-MEMEARBRE vers son premier parent mais est MEMEARBRE vers un parent
-ultérieur, alors cette fusion est traitée comme si elle avait "tiré" le
-changement d'une autre branche. Lorsque l'on utilise `--show-pulls` sur cet
-exemple (et aucune autre option), le graphe résultant est :
+Quand un commit de fusion est inclus par `--show-pulls`, cette fusion est
+traitée comme si elle avait "tiré" le changement d'une autre
+branche. Lorsque l'on utilise `--show-pulls` sur cet exemple (et aucune
+autre option), le graphe résultant est :
 +
 -----------------------------------------------------------------------
 	I---X---R---N

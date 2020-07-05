@@ -1,0 +1,63 @@
+git-patch-id(1)
+===============
+
+NOME
+----
+git-patch-id - Calcula o ID exclusivo de um patch
+
+RESUMO
+------
+[verse]
+'git patch-id' [--stable | --unstable]
+
+DESCRIÇÃO
+---------
+Carregue um patch da entrada padrão e calcule o ID para ele.
+
+Um "ID do patch" nada mais é do que uma soma do SHA-1 das diferenças dos
+arquivos associados com um patch, com espaço e os números da linha
+ignorados.  Como tal, é "razoavelmente estável", porém ao mesmo tempo também
+é razoavelmente único, ou seja, dois patches que têm o mesmo "ID de patch"
+quase garantem que sejam o mesmo.
+
+IOW, você pode utilizar isso para procurar prováveis commits duplicados.
+
+Ao lidar com a saída 'git diff-tree', tira proveito do fato que o patch é
+prefixado com o nome do objeto do commit e gera duas sequências hexadecimais
+com 40 bytes.  O primeira cadeia de caracteres é o ID do patch e a segundo é
+o ID do commit.  Isso pode ser utilizado para fazer um mapeamento do ID do
+patch para confirmar o ID.
+
+OPÇÕES
+------
+
+--stable::
+	Use uma soma "stable" (estável) de hashes como o ID do patch. Com esta
+	opção:
+	 - Reordene as diferenças do arquivo que compõem um patch não afetam o ID.  Em
+	   particular, os dois patches gerados pela comparação das mesmas duas árvores
+	   com as duas configurações diferentes para "-O<ordem-do-arquivo>" resultam na
+	   mesma assinatura ID do patch, permitindo que o resultado computado seja
+	   utilizado como uma chave para indexar algumas metainformações sobre as
+	   alterações entre as duas árvores;
+
+	 - O resultado é diferente do valor produzido pelo git 1.9 e mais antigo ou
+	   produzido quando um hash "instável" (consulte `--unstable` abaixo) é
+	   configurado - mesmo quando utilizado com um diff gerado obtido sem o uso de
+	   "-O<ordem-do-arquivo>", tornando, assim, os bancos de dados existentes
+	   armazenando esses IDs "instáveis" ou os históricos com correções inúteis.
+
+	Esta é a predefinição caso o `patchid.stable` estiver definido como 'true'.
+
+--unstable::
+	Use um hash "unstable" (instável) como o ID do patch. Com esta opção, o
+	resultado produzido é compatível com o valor da ID do patch produzido pelo
+	git 1.9 e anterior.  Usuários com bancos de dados preexistentes que
+	armazenam as IDs dos patches produzidos pelo git 1.9 e anteriores (que não
+	lidam com os patches reordenados) podem querer usar esta opção.
+
+	Esta é a predefinição.
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

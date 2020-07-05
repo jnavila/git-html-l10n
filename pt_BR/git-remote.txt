@@ -1,0 +1,269 @@
+git-remote(1)
+=============
+
+NOME
+----
+git-remote - Gerencie o conjunto dos repositórios monitorados
+
+
+RESUMO
+------
+[verse]
+'git remote' [-v | --verbose]
+'git remote add' [-t <ramo>] [-m <master>] [-f] [--[no-]tags] [--mirror=(fetch|push)] <nome> <url>
+'git remote rename' <antigo> <novo>
+'git remote remove' <nome>
+'git remote set-head' <nome> (-a | --auto | -d | --delete | <ramo>)
+'git remote set-branches' [--add] <nome> <ramo>...
+'git remote get-url' [--push] [--all] <nome>
+'git remote set-url' [--push] <nome> <newurl> [<oldurl>]
+'git remote set-url --add' [--push] <nome> <newurl>
+'git remote set-url --delete' [--push] <nome> <url>
+'git remote' [-v | --verbose] 'show' [-n] <nome>...
+'git remote prune' [-n | --dry-run] <nome>...
+'git remote' [-v | --verbose] 'update' [-p | --prune] [(<grupo> | <remoto>)...]
+
+DESCRIÇÃO
+---------
+
+Gerencie o conjunto de repositórios ("remotos") cujos ramos você monitora.
+
+
+OPÇÕES
+------
+
+-v::
+--verbose::
+	Seja um pouco mais detalhado e exiba o endereço URL remoto após o nome.
+	NOTE: This must be placed between `remote` and subcommand.
+
+
+COMANDOS
+--------
+
+Sem argumentos, exibe uma lista dos ramos remotos existentes.  Vários
+subcomandos estão disponíveis para executar as operações nos ramos remotos.
+
+'add'::
+
+Adicione um ramo remoto chamado <nome> para o repositório na <url>.  O
+comando `git fetch <nome>` pode ser utilizado para criar e atualizar os
+ramos monitorados remotamente <nome>/<ramo>.
++
+Com a opção `-f`, o comando `git fetch <nome>` é executado imediatamente a
+informação remota seja configurada.
++
+Com a opção `--tags`, o `git fetch <nome>` importa cada tag do repositório
+remoto.
++
+Com a opção `--no-tags`, o `git fetch <nome>` não importa as tags do
+repositório remoto.
++
+É predefinido que apenas as tags recolhidas dos ramos são importadas
+(consulte linkgit:git-fetch[1]).
++
+Com a opção `-t <ramo>`, em vez do 'glob refspec' predefinido para que o
+ramo remoto monitore todos os ramos sob o espaço de nomes
+`refs/remotes/<nome>/`, um "refspec" para monitorar apenas o `<ramo>` que
+foi criado.  Você pode utilizar mais de um `-t <ramo>` para monitorar várias
+ramificações sem monitorar todas.
++
+Com a opção `-m <master>`, uma "ref" simbólica `refs/remotes/<nome>/HEAD` é
+configurado para apontar para o ramo `<master>` do ramo remoto. Veja também
+o comando `set-head`.
++
+Quando um espelho de busca é criado com a opção `--mirror=fetch`, as refs
+não serão armazenados no espaço de nomes 'refs/remotes/', porém tudo nas
+'refs/' no ramo remoto será espelhado diretamente na 'refs/' em o
+repositório local. Esta opção faz sentido apenas nos repositórios vazios,
+porque uma busca substituirá quaisquer commits locais.
++
+Quando um espelho "push" é criado com a opção `--mirror=push`, então o
+comando `git push` sempre se comportará como se o `--mirror` fosse
+utilizado.
+
+'rename'::
+
+Renomeie o ramo remoto chamado `<old>` para `<novo>`. Todos os ramos
+monitorados remotamente e as suas definições de configuração para o ramo
+remoto são atualizados.
++
+Caso <antigo> e <novo> sejam iguais, e <old> seja um arquivo existente no
+`$GIT_DIR/remotes` ou `$GIT_DIR/branches`, o ramo remoto será convertido
+para o formato do arquivo de configuração.
+
+'remove'::
+'rm'::
+
+Remova o ramo remoto chamado `<nome>`. Todos os ramos monitorados
+remotamente e as suas definições de configuração para o ramo remoto são
+atualizados.
+
+'set-head'::
+
+Define ou exclui o ramo predefinido (ou seja, o destino da ref simbólica
+`refs/remotes/<nome>/HEAD`) do ramo remoto informado. Não é necessário ter
+um ramo remoto predefinido para o ramo remoto, porém permite que o nome do
+ramo remoto seja utilizado no lugar de um ramo específico. Como por exemplo,
+caso o ramo predefinido para `origin` estiver definido como `master`, então
+`origin` poderá ser definido onde quer que você normalmente definiria
+`origin/master`.
++
+Com `-d` ou `--delete`, a referência simbólica `refs/remotes/<nome>/HEAD` é
+excluída.
++
+Com `-a` ou `--auto`, o ramo remoto é consultado para determinar o seu
+`HEAD`, então a referência simbólica `refs/remotes/<nome>/HEAD` é definida
+no mesmo ramo. Como por exemplo, caso o `HEAD` remoto aponte para `next`, o
+comando `git remote set-head origin -a` definirá a referência remota
+`refs/remotes/origin/HEAD` para `refs/remotes/origin/next`. Isso só
+funcionará caso o `refs/remotes/origin/next` já existir; caso contrário,
+deve ser buscado (fetched) primeiro.
++
+Utilize o `<ramo>` para definir explicitamente a referência simbólica
+`refs/remotes/<nome>/HEAD`. Como por exemplo, o comando `git remote set-head
+origin master` definirá a referência remota `refs/remotes/origin/HEAD` para
+`refs/remotes/origin/master`. Isso só funcionará caso o
+`refs/remotes/origin/master` já existir; caso contrário, deve ser buscado
+(fetched) primeiro.
++
+
+'set-branches'::
+
+Altera a lista das ramificações monitoradas pelo ramo remoto informado.
+Pode ser utilizado para monitorar um subconjunto das ramificações remotas
+disponíveis após a configuração inicial de um ramo remoto.
++
+Os ramos informados serão interpretados como se fossem definidos com a opção
+`-t` na linha de comando `git remote add`.
++
+Com `--add`, em vez de substituir a lista das ramificações monitoradas no
+momento, será adicionada a lista.
+
+'get-url'::
+
+Recupera as URLs para um ramo remoto. As configurações para o `ratherOf` e
+`pushInsteadOf` são expandidas aqui. É predefinido que, apenas a primeira
+URL é listada.
++
+Com o `--push`, as URLs 'push' são apenas consultadas em vez de buscar as
+URLs.
++
+Com `--all`, todas as URLs para o ramo remoto serão listadas.
+
+'set-url'::
+
+Altera as URLs para o ramo remoto. Define a primeira URL para o <nome>
+remoto que coincida com à regex <oldurl> (primeira URL caso nenhuma <oldurl>
+seja informada) como <newurl>. Caso <oldurl> não coincida com nenhuma URL,
+ocorrerá um erro e nada será alterado.
++
+Com o `--push`, as URLs 'push' são manipuladas em vez de buscar as URLs.
++
+Com `--add`, em vez de alterar as URLs existentes, uma nova URL é
+adicionada.
++
+Com `--delete`, em vez de alterar as URLs existentes, todas as URLs
+coincidentes à expressão regular <url> são excluídas para o ramo remoto
+<nome>.  Tentar excluir todas as URLs 'não push' é um erro.
++
+Observe que a URL de envio e a URL de busca, mesmo que possam ser definidos
+de maneira diferente, ainda devem se referir ao mesmo local.  O que você
+impulsionou para a URL de envio deve ser o que você veria se buscasse
+imediatamente a URL de busca.  Caso esteja tentando buscar de um lugar (como
+por exemplo, a sua "upstream") e enviar para outro (como por exemplo, o seu
+repositório de publicação), utilize dois ramos remotos separados.
+
+
+'show'::
+
+Fornece algumas informações sobre o ramo remoto <nome>.
++
+Com a opção `-n`, os cabeçalhos remotos não são consultadas primeiro com o
+comando `git ls remote`; as informações em cache são utilizadas em vez
+disso.
+
+'prune'::
+
+Exclui as referências antigas associadas com <nome>. É predefinido que as
+ramificações antigas monitoradas remotamente sob <nome> são excluídas,
+porém, dependendo da configuração global e da configuração do ramo remoto,
+podemos até remover as tags locais que não foram enviadas para lá. É o
+equivalente ao comando `git fetch --prune <nome>`, exceto que nenhuma nova
+referência será buscada.
++
+Veja a seção 'PRUNING' do linkgit:git-fetch[1] para saber o que será
+removido dependendo das várias configurações.
++
+Com a opção `--dry-run`, relate quais os ramos serão eliminados, mas na
+verdade não os eliminem.
+
+'update'::
+
+A captura das atualizações remoras ou em grupos remotos no repositório como
+definido em `remotes.<grupo>`.  Caso nenhum grupo local ou remoto seja
+especificado na linha de comandos, o parâmetro `remotes.default` será
+utilizado; caso `remotes.default` não esteja definido, todos os remotos que
+não possuem o parâmetro da configuração `remote.<nome>.skipDefaultUpdate`
+definido como `true` serão atualizados.  (Consulte linkgit:git-config[1]).
++
+Com a opção `--prune`, execute a poda em todos os ramos remotos que estão
+atualizados.
+
+
+DISCUSSÃO
+---------
+
+A configuração remota é arquivada utilizando as configurações das variáveis
+`remote.origin.url` e `remote.origin.fetch`. (Consulte
+linkgit:git-config[1]).
+
+EXEMPLOS
+--------
+
+* Adicione um novo ramo remoto, busque e averigue um ramo dele
++
+------------
+$ git remote
+origin
+$ git branch -r
+  origin/HEAD -> origin/master
+  origin/master
+$ git remote add staging git://git.kernel.org/.../gregkh/staging.git
+$ git remote
+origin
+staging
+$ git fetch staging
+...
+Do git://git.kernel.org/pub/scm/linux/kernel/git/gregkh/staging
+ * [new branch]      master     -> staging/master
+ * [new branch]      staging-linus -> staging/staging-linus
+ * [new branch]      staging-next -> staging/staging-next
+$ git branch -r
+  origin/HEAD -> origin/master
+  origin/master
+  staging/master
+  staging/staging-linus
+  staging/staging-next
+$ git switch -c staging staging/master
+...
+------------
+
+* Imite o comando `git clone`, porém monitore apenas os ramos selecionados
++
+------------
+$ mkdir project.git
+$ cd project.git
+$ git init
+$ git remote add -f -t master -m master origin git://example.com/git.git/
+$ git merge origin
+------------
+
+
+VEJA TAMBÉM
+-----------
+linkgit:git-fetch[1] linkgit:git-branch[1] linkgit:git-config[1]
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

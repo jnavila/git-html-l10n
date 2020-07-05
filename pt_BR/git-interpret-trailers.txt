@@ -1,0 +1,392 @@
+git-interpret-trailers(1)
+=========================
+
+NOME
+----
+git-interpret-trailers - Adiciona ou analisa informação estruturada em
+mensagens de commit
+
+RESUMO
+------
+[verse]
+'git interpret-trailers' [<opções>] [(--trailer <token>[(=|:)<valor>])...] [<arquivo>...]
+'git interpret-trailers' [<opções>] [--parse] [<arquivo>...]
+
+DESCRIÇÃO
+---------
+Ajuda a analisar ou adicionar linhas com 'caracteres de resposta' que se
+pareçam com os cabeçalhos de e-mail segundo a norma RFC 822 no final ou na
+parte livre de uma mensagem de commit.
+
+Este comando lê alguns patches ou faz o commit das mensagens dos argumentos
+<arquivo> ou da entrada padrão se nenhum <arquivo> seja definido. Caso
+`--parse` seja definido a saída consistirá nos caracteres de resposta
+analisados.
+
+Caso contrário, este comando aplica os argumentos passados utilizando a
+opção `--trailer`, caso exista, à parte da mensagem de commit de cada
+arquivo de entrada. O resultado é emitido na saída padrão.
+
+Algumas variáveis de configuração controlam a maneira como os argumentos do
+`--trailer` são aplicados a cada mensagem de commit e a maneira como
+qualquer `trailer` existente na mensagem de commit é alterado. Eles também
+possibilitam adicionar automaticamente alguns `trailers`.
+
+É predefinido que, usando um argumento '<token>=<valor>' ou
+'<token>:<valor>' utilizando a opção `--trailer` será anexado após os
+caracteres de resposta existentes caso o último tenha um par (<token>,
+<valor>), (ou caso não exista nenhum caractere de resposta). As partes
+<token> e <valor> serão aparados para remover os espaços iniciais e finais,
+o que sobrar aparecerá na mensagem da seguinte maneira:
+
+------------------------------------------------
+token: valor
+------------------------------------------------
+
+Significa que o <token> e o <valor> ajustado será separado por um `': '`
+(dois pontos seguido por um espaço).
+
+É predefinido que o novo caractere de resposta aparecerá no final de todos
+os caracteres de resposta já existentes. Caso não exista, o novo caractere
+de resposta aparecerá na saída após a parte da mensagem do commit, caso não
+haja uma linha com apenas espaços no final da parte da mensagem do commit,
+uma linha em branco será adicionada antes do novo caractere de resposta.
+
+Os caracteres de resposta já existentes são extraídos da mensagem da entrada
+ao procurar um grupo de uma ou mais linhas onde (i) tenha todos os
+caracteres de resposta ou (ii) contenha pelo menos um caractere de resposta
+gerado através do Git ou configurado pelo usuário que consista em pelo menos
+25% dos caracteres de resposta.  O grupo deve ser precedido por uma ou mais
+linhas vazias (ou somente com espaço).  O grupo deve estar no final da
+mensagem ou ser as últimas linhas que não sejam espaços antes de uma linha
+que começa com '---' (seguida por um espaço ou o quebra da linha). Estes
+três sinais de menos (-) iniciam a parte do patch da mensagem. Consulte
+também a opção `--no-divider` abaixo.
+
+Ao ler os caracteres de resposta, podem haver espaços após o token, o
+separador e o valor. Também pode haver espaços no token e no valor. O valor
+pode ser dividido em várias linhas, com cada linha subsequente começando com
+um espaço, como a descrição "folding" (dobra) na norma RFC 822.
+
+Observe que caracteres de resposta não seguem e não se destinam a seguir
+muitas regras para os cabeçalhos da norma RFC 822. Por exemplo, eles não
+seguem as normas de codificação e muito provavelmente não sigam quaisquer
+outras.
+
+OPÇÕES
+------
+--in-place::
+	Edite os arquivos no local.
+
+--trim-empty::
+	Caso o <valor> da parte de qualquer `caractere de resposta` contenha apenas
+	espaços, o `caractere de resposta` inteiro será removido da mensagem
+	resultante.  Isso se aplica os `caracteres de resposta` já existentes, bem
+	como aos novos `caractere de resposta`.
+
+--trailer <token>[(=|:)<valor>]::
+	Defina um par (<token>, <valor>) que deve ser aplicado como um caractere de
+	resposta nas mensagens de entrada. Consulte a descrição deste comando.
+
+--where <arranjo>::
+--no-where::
+	Especifique onde todos os novos caracteres de resposta serão adicionados.
+	Uma configuração utilizada com '--where' substitui todas as variáveis de
+	configuração e se aplica a todas as opções `--trailer` até a próxima
+	ocorrência de '--where' ou '--no-where'. Os valores válidos são `after`,
+	`before`, `end` or `start`.
+
+--if-exists <ação>::
+--no-if-exists::
+	Defina qual ação será executada quando já houver pelo menos um caractere de
+	resposta com o mesmo <token> na mensagem.  Uma configuração utilizada com
+	'--if-exists' substitui todas as variáveis de configuração e se aplica a
+	todas as opções `--trailer` até a próxima ocorrência do '--if-exists' ou
+	'--no-if-exists'. As possíveis ações são `addIfDifferent`,
+	`addIfDifferentNeighbor`, `add`, `replace` e `doNothing`.
+
+--if-missing <ação>::
+--no-if-missing::
+	Especifique qual ação será executada quando não houver outro caractere de
+	resposta com o mesmo <token> na mensagem.  Uma configuração utilizada com o
+	comando `--if-missing` substitui todas as variáveis de configuração e se
+	aplica a todas as opções `--trailer` até a próxima ocorrência de
+	`--if-missing` ou `--no-if-missing`. As possíveis ações são `doNothing` ou
+	`add`.
+
+--only-trailers::
+	Exibe apenas os caracteres de resposta e não quaisquer outras partes da
+	entrada.
+
+--only-input::
+	Exibe apenas os caracteres de resposta que existam na entrada; não adicione
+	qualquer outra linha de comando ou siga as regras `trailer.*` já
+	configuradas.
+
+--unfold::
+	Remova qualquer continuação de espaço nos caracteres de resposta para que
+	cada caractere apareça em uma linha por si só, com o seu conteúdo completo.
+
+--parse::
+	É um atalho conveniente para os comandos `--only-trailers --only-input
+	--unfold`.
+
+--no-divider::
+	Não trate `---` como o final da mensagem de commit. Utilize isso quando
+	souber que a sua entrada tenha apenas a própria mensagem do commit (e não um
+	e-mail ou a saída do `git format-patch`).
+
+VARIÁVEIS DE CONFIGURAÇÃO
+-------------------------
+
+trailer.separators::
+	Esta opção informa quais os caracteres são reconhecidos como separadores dos
+	caracteres de resposta. É predefinido que apenas o `:` seja reconhecido como
+	um, a menos que `=` seja sempre aceito na linha de comando por questões de
+	compatibilidade com os outros comandos git.
++
+O primeiro caractere informado por esta opção será o caractere predefinido
+que será utilizado quando um outro separador não seja utilizado na
+configuração deste `caractere de resposta`.
++
+Como por exemplo, caso o valor desta opção seja "%=$", apenas as linhas que
+usam o formato '<token><sep><valor>' com <sep> contendo '%', '=' ou '$' e os
+espaços, serão considerados `caracteres de resposta`. É predefinido que o
+sinal '%' será utilizado como um separador; portanto, os caracteres de
+resposta aparecerão como: '<token>% <valor>' (um sinal de porcentagem e um
+espaço aparecerão entre token e o valor).
+
+trailer.where::
+	Esta opção informa onde um novo caractere de resposta será adicionado.
++
+Pode ser `end` (pré definido),` start`, `after` ou` before`.
++
+Caso seja `end`, então cada novo caractere de resposta aparecerá no final
+dos caracteres de resposta já existentes.
++
+Caso seja `start`, cada novo caractere de resposta aparecerá no início, e
+não no final, dos caracteres de resposta já existentes.
++
+Caso seja `after` , cada novo caractere de resposta aparecerá logo após o
+último caractere de resposta com o mesmo <token>.
++
+Caso seja `before`, então cada novo caractere de resposta aparecerá logo no
+começo do primeiro caractere de resposta com o mesmo <token>.
+
+trailer.ifexists::
+	Essa opção permite escolher qual ação será executada quando já houver pelo
+	menos um caractere de resposta com o mesmo <token> na mensagem.
++
+Os valores válidos para esta opção são: `addIfDifferentNeighbor`
+(predefinido), `addIfDifferent`, `add`, `replace` ou `doNothing`.
++
+Com `addIfDifferentNeighbor`, um novo caractere de resposta será adicionado
+apenas caso nenhum com o mesmo par (<token>,<valor>) esteja acima ou abaixo
+da linha onde o novo caractere de resposta será adicionado.
++
+Com `addIfDifferent`, um novo caractere de resposta será adicionado apenas
+caso nenhum com o mesmo par (<token>,<valor>) já esteja na mensagem.
++
+Com `add`, um novo caractere de resposta será adicionado mesmo que alguns
+com o mesmo par (<token>,<valor>) já estejam na mensagem.
++
+Com `replace`, um caractere de resposta existente com a mesmo <token> será
+excluído e um novo será adicionado. O caractere de resposta excluído será o
+mais próximo (com o mesmo <token>) do local onde o novo será adicionado.
++
+Com `doNothing`, nada será feito; isso é, nenhum novo caractere de resposta
+será adicionado caso já haja um com o mesmo <token> na mensagem.
+
+trailer.ifmissing::
+	Esta opção possibilita escolher qual ação será executada quando ainda não
+	houver nenhum "caractere de resposta" com o mesmo `<token>` na mensagem.
++
+Os valores válidos para esta opção são: `add` (o valor predefinido) e
+`doNothing`.
++
+Com `add`, um novo caractere de resposta será adicionado.
++
+Com `doNothing`, nada será feito.
+
+trailer.<token>.key::
+	Esta `key` será utilizada em vez do <token> no caractere de resposta. No
+	final desta chave, um separador pode aparecer e em seguida, alguns
+	caracteres de espaço. É predefinido que o único separador válido seja ':',
+	mas isso pode ser alterado utilizando a variável de configuração
+	`trailer.separators`.
++
+Caso haja um separador, a chave será utilizada no lugar do <token> e do
+separador predefinido ao adicionar o caractere de resposta.
+
+trailer.<token>.where::
+	Esta opção utiliza os mesmos valores da variável de configuração
+	'trailer.where' e substitui o que for especificado por essa opção para os
+	caracteres de resposta com o `<token>` determinado.
+
+trailer.<token>.ifexists::
+	Essa opção utiliza os mesmos valores que a variável de configuração
+	'trailer.ifexists' e substitui o que for definido por esta opção para os
+	caracteres de resposta com o <token> informado.
+
+trailer.<token>.ifmissing::
+	Esta opção utiliza os mesmos valores que a variável de configuração
+	'trailer.ifmissing' e substitui o que for definido por esta opção para os
+	caracteres de resposta com o <token> informado.
+
+trailer.<token>.command::
+	Esta opção pode ser utilizada para definir um comando shell que será chamado
+	para adicionar ou modificar automaticamente um caractere de resposta com o
+	<token> definido.
++
+Quando esta opção é utilizada, o comportamento é como se um argumento
+especial '<token>=<valor>' fosse adicionado no início da linha de comando,
+onde <valor> é considerado a saída padrão do comando utilizado, removendo
+quaisquer espaços no começo e no fim.
++
+Caso o comando tiver um texto `$ARG`, ela será substituída pela parte
+`<valor>` do caractere de resposta já existente com o mesmo `<token>`, se
+houver, antes da execução do comando.
++
+Caso alguns dos argumentos '<token>=<valor>' também forem passados na linha
+de comando, quando um 'trailer.<token>.command' estiver configurado, o
+comando também será executado para cada um destes argumentos. A parte
+`<valor>` destes argumentos, caso haja, será utilizada para substituir a
+string `$ARG` no comando.
+
+EXEMPLOS
+--------
+
+* Configure um caractere de resposta 'sign' com uma chave 'Assinada por'
+  (Signed-off-by) e adicione dois destes caracteres de resposta em uma
+  mensagem:
++
+------------
+$ git config trailer.sign.key "Assinado-por"
+$ cat msg.txt
+subject
+
+message
+$ cat msg.txt | git interpret-trailers --trailer 'sign: Alice <alice@example.com>' --trailer 'sign: Bob <bob@example.com>'
+subject
+
+mensagem
+
+Assinado-por: Alice <alice@example.com>
+Assinado-por: Bob <bob@example.com>
+------------
+
+* Utilize a opção `- in-place` para editar um arquivo da mensagem no local:
++
+------------
+$ cat msg.txt
+subject
+
+mensagem
+
+Assinado-por: Bob <bob@example.com>
+$ git interpret-trailers --trailer 'Acked-by: Alice <alice@example.com>' --in-place msg.txt
+$ cat msg.txt
+subject
+
+mensagem
+
+Assinado-por: Bob <bob@example.com>
+Reconhecido-por: Alice <alice@example.com>
+------------
+
+* Extraia o último commit como um patch e adicione um caractere de resposta
+  'Cc' com um 'Revisado por' a ele:
++
+------------
+$ git format-patch -1
+0001-foo.patch
+$ git interpret-trailers --trailer 'Cc: Alice <alice@example.com>' --trailer 'Reviewed-by: Bob <bob@example.com>' 0001-foo.patch >0001-bar.patch
+------------
+
+* Configure um caractere de resposta 'sign' com um comando para adicionar
+  automaticamente um 'Assinado-por:' com as informações do autor apenas se
+  ainda não houver um 'Assinado-por:' e exiba como ele funciona:
++
+------------
+$ git config trailer.sign.key "Assinado-por: "
+$ git config trailer.sign.ifmissing add
+$ git config trailer.sign.ifexists doNothing
+$ git config trailer.sign.command 'echo "$(git config user.name) <$(git config user.email)>"'
+$ git interpret-trailers <<EOF
+> EOF
+
+Assinado-por: Bob <bob@example.com>
+$ git interpret-trailers <<EOF
+> Signed-off-by: Alice <alice@example.com>
+> EOF
+
+Assinado-por: Alice <alice@example.com>
+------------
+
+* Configure um caracteres de resposta 'fix' com uma chave que contenha um '#',
+  sem espaço após este caractere e mostre como ele funciona:
++
+------------
+$ git config trailer.separators ":#"
+$ git config trailer.fix.key "Fix #"
+$ echo "subject" | git interpret-trailers --trailer fix=42
+subject
+
+Fix #42
+------------
+
+* Configure um caractere de resposta 'see' com um comando para exibir o
+  assunto de um commit relacionado e exibir como ele funciona:
++
+------------
+$ git config trailer.see.key "See-also: "
+$ git config trailer.see.ifExists "replace"
+$ git config trailer.see.ifMissing "doNothing"
+$ git config trailer.see.command "git log -1 --oneline --format=\"%h (%s)\" --abbrev-commit --abbrev=14 \$ARG"
+$ git interpret-trailers <<EOF
+> subject
+> 
+> message
+> 
+> see: HEAD~2
+> EOF
+subject
+
+mensagem
+
+See-also: fe3187489d69c4 (assunto do commit relacionado)
+------------
+
+* Configure um modelo do commit com alguns caracteres de resposta com valores
+  vazios (utilizando o comando sed para exibir e manter os espaços finais no
+  final dos caracteres de resposta) e configure um gancho 'commit-msg' que
+  utilize o comando 'git interpret-trailers' para remover os caracteres de
+  resposta com os valores vazios e para adicionar um 'git-version':
++
+------------
+$ sed -e 's/ Z$/ /' >commit_template.txt <<EOF
+> ***assunto***
+> 
+> ***mensagem***
+> 
+> Fixes: Z
+> Cc: Z
+> Revisado-por: Z
+> Assinado-por: Z
+> EOF
+$ git config commit.template commit_template.txt
+$ cat >.git/hooks/commit-msg <<EOF
+> #!/bin/sh
+> git interpret-trailers --trim-empty --trailer "git-version: \$(git describe)" "\$1" > "\$1.new"
+> mv "\$1.new" "\$1"
+> EOF
+$ chmod +x .git/hooks/commit-msg
+------------
+
+VEJA TAMBÉM
+-----------
+linkgit:git-commit[1], linkgit:git-format-patch[1], linkgit:git-config[1]
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

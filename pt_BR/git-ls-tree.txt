@@ -1,0 +1,106 @@
+git-ls-tree(1)
+==============
+
+NOME
+----
+git-ls-tree - Lista o conteúdo de um objeto na árvore
+
+
+RESUMO
+------
+[verse]
+'git ls-tree' [-d] [-r] [-t] [-l] [-z]
+	    [--name-only] [--name-status] [--full-name] [--full-tree] [--abbrev[=<n>]]
+	    <tree-ish> [<caminho>...]
+
+DESCRIÇÃO
+---------
+Lista o conteúdo de um determinado objeto na árvore, como o que "/bin/ls -a"
+faz no diretório de trabalho atual.  Observe que:
+
+ - o comportamento é um pouco diferente do "/bin/ls", pois o '<caminho>' indica
+   apenas uma lista de padrões para serem coincididos, portanto, especificar o
+   nome do diretório (sem `-r`) se comportará de maneira diferente e a ordem
+   dos argumentos não importa.
+
+ - o comportamento é semelhante ao do "/bin/ls" onde o '<caminho>' é
+   considerado como relativo ao diretório de trabalho atual.  Por exemplo,
+   quando você está em um diretório 'sub' que possui um diretório 'dir', é
+   possível executar o comando 'git ls-tree -r HEAD dir' para listar o conteúdo
+   da árvore (que é `sub/dir` no `HEAD`).  Você quer informar uma árvore que
+   não esteja no nível raiz (como por exemplo, `git ls-tree -r HEAD:sub dir`)
+   neste caso, pois isso resultaria na solicitação do `sub/sub/dir` no commit
+   `HEAD`.  No entanto, o diretório de trabalho atual pode ser ignorado
+   passando a opção `--full-tree`.
+
+OPÇÕES
+------
+<tree-ish>::
+	Id de uma `tree-ish`.
+
+-d::
+	Exibe apenas a entrada da árvore informada em si, não seus herdeiros.
+
+-r::
+	Recursar nas subárvores.
+
+-t::
+	Exiba as entradas da árvore mesmo quando for recursá-las. Não tem efeito
+	caso `-r` não tenha sido passado. `-d` implica no uso da opção `-t`.
+
+-l::
+--long::
+	Exibe o tamanho do objeto nas entradas da bolha (arquivo).
+
+-z::
+	A terminação \0 da linha na saída e não cita os nomes dos arquivos.
+	Consulte FORMATO DE SAÍDA abaixo para obter mais informações.
+
+--name-only::
+--name-status::
+	Liste apenas os nomes dos arquivos (em vez da saída "longa"), um por linha.
+
+--abrev[=<n>]::
+	Em vez de exibir as linhas do objeto hexadecimal com 40 bytes, exibe apenas
+	um prefixo parcial.  Um número não predefinido dos dígitos podem ser
+	definidos com `--abbrev=<n>`.
+
+--full-name::
+	Em vez de mostrar os nomes dos caminhos relativos ao diretório de trabalho
+	atual, mostre os nomes completos dos caminhos.
+
+--full-tree::
+	Não limite a listagem ao diretório de trabalho atual.  Implica no uso da
+	opção `--full-name`.
+
+[<caminho>...]::
+	Quando os caminhos forem informados, exiba-os (observe que estes nomes do
+	caminho não são realmente brutos, porém uma lista de padrões que serão
+	combinados).  Caso contrário, implicitamente utiliza o nível na raiz da
+	árvore como o único argumento do caminho.
+
+
+Formato de saída
+----------------
+        <mode> SP <tipo> SP <objeto> TAB <arquivo>
+
+Este formato gerado é compatível com o que a opção `--index-info --stdin` do
+comando 'git update-index' espera.
+
+Quando a opção `-l` é utilizada, o formato muda para
+
+        <mode> SP <tipo> SP <objeto> SP <object size> TAB <arquivo>
+
+O tamanho do objeto identificado por `<objeto>` é informado em bytes e
+justificado à direita com largura mínima de 7 caracteres.  O tamanho do
+objeto é informado apenas para as entradas das bolhas (arquivo); para as
+outras entradas, o caracter `-` é utilizado no lugar do tamanho.
+
+Sem a opção `z`, os `pathnames` com os caracteres "incomuns" são citados
+conforme explicado na variável de configuração `core.quotePath` (consulte
+linkgit:git-config[1]).  Utilizando a opção `-z`, o nome do arquivo é gerado
+literalmente e a linha é finalizada com um byte `NUL`.
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

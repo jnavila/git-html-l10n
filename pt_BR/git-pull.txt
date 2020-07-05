@@ -1,0 +1,256 @@
+git-pull(1)
+===========
+
+NOME
+----
+git-pull - Busque e integre-se a outro repositório ou em um ramo local
+
+
+RESUMO
+------
+[verse]
+'git pull' [<opções>] [<repositório> [<refspec>...]]
+
+
+DESCRIÇÃO
+---------
+
+Incorpora as alterações de um repositório remoto no ramo atual.  Em seu modo
+predefinido, o comando `git pull` é uma abreviação do comando `git fetch`
+seguido por `git merge FETCH_HEAD`.
+
+Mais precisamente, o comando 'git pull' executa o 'git fetch' com os
+parâmetros informados e chama o 'git merge' para mesclar os cabeçalhos
+recuperados da ramificação no ramo atual.  Com `--rebase`, ele executa o
+comando 'git rebase' em vez do 'git merge'.
+
+O <repositório> deve ser o nome de um repositório remoto, conforme passado
+para o linkgit:git-fetch[1].  O <refspec> pode nomear de forma arbitrária
+uma referência remota (por exemplo, o nome de uma tag) ou até mesmo uma
+coleção de referências com as ramificações dos ramos monitorados remotamente
+(`refs/heads/{asterisk}:refs/remotes/origin/{asterisk}` por exemplo), porém
+geralmente é o nome de uma ramificação no repositório remoto.
+
+Os valores predefinidos para o <repositório> e o <ramo> eles são lidos na
+configuração "remote" e "merge" do ramo atual, conforme for definido pelo
+linkgit:git-branch[1] `--track`.
+
+Suponha que exista o seguinte histórico e o ramo atual seja `master`:
+
+------------
+	  A---B---C master on origin
+	 /
+    D---E---F---G master
+	^
+	origin/master no seu repositório
+------------
+
+Então, o comando "`git pull`" fara a captura e a reprodução das alterações
+do ramo remoto `master` por ter se divergido do `master` local (ou seja,
+`E`) até o seu commit atual (`C`) no topo do `master` e registra o resultado
+em um novo commit, juntamente com os nomes dos dois commits principais e uma
+mensagem do registro log do usuário, descrevendo quais forma as alterações
+que foram feitas.
+
+------------
+	  A---B---C origin/master
+	 /         \
+    D---E---F---G---H master
+------------
+
+Para mais detalhes incluindo informações de como os conflitos são
+gerenciados e como eles são exibidos, consulte linkgit:git-merge[1].
+
+No Git 1.7.0 ou posterior, para cancelar uma mesclagem conflitante, utilize
+o comando `git reset --merge`.  *Aviso*: Nas versões mais antigas do Git, a
+execução do 'git pull' com as alterações dos commits não realizados é
+desencorajado: enquanto for possível, deixa você em uma condição onde a
+recuperação pode ser difícil no caso de um conflito.
+
+Caso alguma das alterações remotas se sobrepuser às alterações dos commits
+locais que não foram realizados, a mesclagem será automaticamente cancelada
+e a árvore de trabalho se manterá intocada.  Geralmente é melhor obter as
+alterações locais na ordem de trabalho antes de retirá-las ou escondê-las
+com o linkgit:git-stash[1].
+
+OPÇÕES
+------
+
+-q::
+--quiet::
+	Isso é passado para ambos os comandos subjacentes do `git-fetch` para abafar
+	o relatório do processo durante a transferência assim como do git-merge
+	silenciando sua saída durante a mesclagem.
+
+-v::
+--verbose::
+	Encaminhe a opção --verbose para o 'git-fetch' e 'git-merge'.
+
+--[no-]recurse-submodules[=yes|on-demand|no]::
+	Esta opção controla se os novos commits dos submódulos populados devem ser
+	buscados ou não e se as árvore de trabalho dos submódulos ativos devem ser
+	atualizados também (consulte linkgit:git-fetch[1], linkgit:git-config[1] e
+	linkgit:gitmodules[5]).
++
+Caso a averiguação seja feita através da reconstrução "rebase", os commits
+do submódulo local também serão refeitas.
++
+Caso a atualização seja feita através de uma mesclagem, os conflitos do
+sub-módulo serão resolvidos e retirados.
+
+Opções relacionadas a mesclagem
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:git-pull: 1
+
+include::merge-options.txt[]
+
+-r::
+--rebase[=false|true|merges|preserve|interactive]::
+	Quando for verdadeiro, reorganize a fundação do ramo atual no topo da
+	ramificação upstream após a busca. Caso haja uma ramificação monitorado
+	remotamente correspondente à ramificação upstream e a ramificação upstream
+	foi reconstruído desde a última busca, a reconstrução da fundação utilizará
+	estas informações para evitar reconstruir as alterações que não fora locais.
++
+Quando definido como `merges`, a reconstrução da fundação (rebase)
+utilizando o comando `git rebase --rebase-merges` para que as mesclagem dos
+commits locais sejam incluídas na reconstrução (para mais detalhes, consulte
+linkgit:git-rebase[1]).
++
+Quando definido como `preserve` (já descontinuado em favor de `merges`),
+reconstrua passando a opção `--preserve-merges` para o comando `git rebase`
+para que a mesclagem dos commits criados localmente não sejam achatadas.
++
+Quando for falso, mescle a ramificação atual na ramificação upstream.
++
+Quando `interactive` (interativo) , ative o modo interativo da reconstrução
+da fundação.
++
+Consulte `pull.rebase`, `branch.<nome>.rebase` e `branch.autoSetupRebase` no
+linkgit:git-config[1] caso queira fazer o `git pull`, sempre utilize o
+comando `--rebase` em vez de mesclar .
++
+[NOTE]
+Esse é um modo de operação potencialmente _perigoso_.  Ele reescreve o
+histórico, o que não é um bom presságio quando você já o publicou.  *Não*
+utilize esta opção, a menos que você leia o linkgit:git-rebase[1] com muita
+atenção.
+
+--no-rebase::
+	Ignora o `--rebase` anterior.
+
+Opções relacionadas à busca
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+include::fetch-options.txt[]
+
+include::pull-fetch-param.txt[]
+
+include::urls-remotes.txt[]
+
+include::merge-strategies.txt[]
+
+COMPORTAMENTO PREDEFINIDO
+-------------------------
+
+Frequentemente, as pessoas utilizam o `git pull` sem informar qualquer
+parâmetro.  Tradicionalmente, é o mesmo que dizer `git pull origin`.  No
+entanto, quando a configuração `branch.<nome>.remote` está presente enquanto
+no ramo `<nome>`, esse valor é utilizado em vez de `origin`.
+
+Para determinar de qual URL usar, o valor da configuração
+`remote.<origin>.url` é consultado e caso não haja nenhuma variável, o valor
+na linha `URL:` em `$GIT_DIR/remotes/<origin>` é utilizado.
+
+Para determinar quais ramificações remotas buscar (e opcionalmente armazenar
+nas ramificações monitoradas remotamente) quando o comando é executado sem
+nenhum parâmetro "refspec" na linha de comando, os valores da variável de
+configuração `remote.<origin>.fetch` são consultados e caso não exista
+nenhum, então `$GIT_DIR/remotes/<origin>` é consultado e as suas linhas
+`Pull:` são utilizadas.  Além dos formatos "refspec" descritos na seção
+OPÇÕES, você pode ter um englobamento do "refspec" parecido com este:
+
+------------
+refs/heads/*:refs/remotes/origin/*
+------------
+
+Um englobamento do "refspec" deve ter um RHS que não não seja vazio (ou
+seja, deve armazenar o que foi buscado nas ramificações monitoradas
+remotamente) e o seu `LHS` e `RHS` devem terminar com `/*`.  A definição
+acima determina que todas as ramificações remotas sejam monitoradas
+utilizando os ramos monitorados remotamente em `refs/remotes/origin/` com o
+mesmo nome.
+
+A regra para determinar qual a ramificação remota deve ser mesclada após a
+captura é um pouco complexo, para que não prejudique a compatibilidade com
+as versões anteriores.
+
+Caso "refspecs" explícitos sejam informados para o comando `git pull`, todos
+eles são mesclados.
+
+Quando nenhum "refspec" for informado na linha de comando, o `git pull`
+utiliza o "refspec" da configuração ou `$GIT_DIR/remotes/<origin>`.  Nestes
+casos, as seguintes regras se aplicam:
+
+. Caso a configuração `branch.<nome>.merge` para o ramo atual `<nome>` exista,
+  este é o nome do ramo no site remoto que é mesclado.
+
+. Caso o refspec seja um caractere curinga, nada será mesclado.
+
+. Caso contrário, a ramificação remota do primeiro refspec será mesclada.
+
+
+EXEMPLOS
+--------
+
+* Atualize as ramificações monitoradas remotamente para o repositório onde a
+  clonagem foi feita e em seguida, mescle uma delas na sua ramificação atual:
++
+------------------------------------------------
+$ git pull
+$ git pull origin
+------------------------------------------------
++
+Normalmente o ramo mesclado fica no `HEAD` do repositório remoto, porém a
+escolha é determinada pelas opções `branch.<nome>.remote` e
+`branch.<nome>.merge`; para mais detalhes consulte linkgit:git-config[1].
+
+* Mescle na ramificação atual o ramo remoto `next`:
++
+------------------------------------------------
+$ git pull origin next
+------------------------------------------------
++
+Isto deixa uma cópia do `next` temporariamente no `FETCH_HEAD`, porém não
+atualiza nenhum outro ramo `origin/next` monitorado remotamente.  O mesmo
+pode ser feito ao executar o `fetch` e o `merge`:
++
+------------------------------------------------
+$ git fetch origin
+$ git merge origin/next
+------------------------------------------------
+
+
+Caso você tente fazer um "pull" que resultou em conflitos complexos e queira
+recomeçar, a recuperação pode ser feita com o comando 'git reset'.
+
+
+include::transfer-data-leaks.txt[]
+
+BUGS
+----
+Com a opção `--recurse-submodules` só pode buscar novos commits nos
+submódulos que já foram averiguados no momento. Quando, por exemplo, a
+"upstream" adicionou um novo submódulo nos commits recém-buscados do
+superprojeto, o submódulo em si não pode ser buscado, tornando impossível
+verificar o submódulo sendo necessário fazer uma nova busca mais
+tarde. Espera-se que isso seja corrigido em uma versão futura do Git.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-fetch[1], linkgit:git-merge[1], linkgit:git-config[1]
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

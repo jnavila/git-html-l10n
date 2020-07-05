@@ -1,0 +1,137 @@
+ESTRATÉGIAS DE MESCLAGEM
+------------------------
+
+O mecanismo da mesclagem (comandos `git merge` e `git pull`) permite que as
+'estratégias de mesclagem' sejam escolhidas com a opção `-s`.  Algumas
+estratégias também podem ter suas próprias opções, que podem ser passadas
+usando `-X<opção>` como argumentos para o comando `git merge` e/ou `git
+pull`.
+
+resolve::
+	Isso só pode resultar em dois cabeçalhos (ou seja, a ramificação atual e uma
+	outra ramificada da que você obteve) utilizando um algoritmo de mesclagem de
+	três vias.  Ele tenta detectar cuidadosamente as ambiguidades cruzadas da
+	mesclagem e geralmente é considerado seguro e rápido.
+
+recursive::
+	Isso pode resolver apenas duas cabeças usando o algoritmo da mesclagem de 3
+	vias.  Quando há mais de um ancestral comum que pode ser usado para a
+	mesclagem de 3 vias, ele cria uma árvore mesclada dos ancestrais comuns e o
+	usa como a árvore de referência para a mesclagem de 3 vias.  Foi informado
+	que isso resulta em menos conflitos durante mesclagem sem causar distorções
+	pelos testes feitos nas mesclagens reais dos commits, retiradas do histórico
+	de desenvolvimento do Linux kernel 2.6.  Além disso, isso pode detectar e
+	manipular as mesclagens envolvendo renomeações, porém atualmente não pode
+	fazer uso das cópias detectadas.  Essa é a estratégia de mesclagem
+	predefinida ao extrair ou mesclar um ramo.
++
+A estratégia 'recursiva' pode ter as seguintes opções:
+
+ours;;
+	Esta opção impõem que os pedaços conflitantes que sejam resolvidos de forma
+	automática e de maneira limpa, favorecendo a 'nossa' versão.  As alterações
+	vindos de outra árvore que não conflitam com o nosso lado são refletidas no
+	resultado da mesclagem.  Para um arquivo binário, todo o conteúdo é retirado
+	do nosso lado.
++
+Isso não deve ser confundido com a estratégia da 'nossa' de mesclagem, que
+sequer olha para o que a outra árvore contém.  Descarta tudo o que a outra
+árvore fez, declarando que o 'nosso' histórico contém tudo o que aconteceu
+nela.
+
+theirs;;
+	Este é o oposto do 'nosso'; observe que, diferentemente do 'nosso', não
+	existe uma estratégia de mesclagem 'deles' para confundir esta opção de
+	mesclagem.
+
+patience;;
+	Com esta opção, 'merge-recursive' gasta um pouco de tempo extra para evitar
+	as distorções que às vezes ocorrem devido as coincidência das linhas sem
+	importância (como, por exemplo, chaves das funções distintas).  Use isso
+	quando os ramos que serão mesclados divergirem bastante.  Consulte também
+	linkgit:git-diff[1] `--patience`.
+
+diff-algorithm=[patience|minimal|histogram|myers];;
+	Informa ao 'merge-recursive' para usar um algoritmo diff diferente, que pode
+	ajudar a evitar as distorções que ocorrem devido as linhas coincidentes sem
+	importância (como chaves das funções distintas).  Consulte também
+	linkgit:git-diff[1] `--diff-algorithm`.
+
+ignore-space-change;;
+ignore-all-space;;
+ignore-space-at-eol;;
+ignore-cr-at-eol;;
+	Trata as linhas com o tipo indicado da mudança do espaço como inalterado por
+	uma mesclagem de três vias.  As alterações de espaço combinadas com outras
+	alterações em uma linha não são ignoradas.  Consulte também
+	linkgit:git-diff[1] `-b`, `-w`, `--ignore-space-at-eol`, e
+	`--ignore-cr-at-eol`.
++
+* Caso a versão 'their' (dele) introduzir apenas as alterações de espaço em
+  uma linha, a 'our' (nossa) versão será utilizada;
+* Caso a 'our' (nossa) versão introduzir alterações nos espaços, porém a
+  versão 'their' (dele) incluir uma alteração substancial, a versão 'their'
+  (dele) será utilizada;
+* Caso contrário, a mesclagem continuará de forma usual.
+
+renormalize;;
+	Executa uma averiguação e um check-in virtual de três estágios em um arquivo
+	ao resolver uma mesclagem de três vias.  Esta opção deve ser utilizada ao
+	mesclar os ramos com diferentes filtros que estejam limpos ou as regras
+	normais para a quebra de linha.  Para obter mais detalhes, consulte
+	"Mesclando ramificações com diferentes atributos de check-in/check-out" em
+	linkgit:gitattributes[5].
+
+no-renormalize;;
+	Desativa a opção `renormalize`.  Substitui a variável de configuração
+	`merge.renormalize`.
+
+no-renames;;
+	Desativa a detecção de renomeação. Isso substitui a variável de configuração
+	`merge.renames`.  Consulte tambémlinkgit:git-diff[1] `--no-renames`.
+
+find-renames[=<n>];;
+	Liga a detecção de renomeação, configurando opcionalmente o limite de
+	similaridade.  Esta é a predefinição. Isso substitui a configuração da
+	variável 'merge.renames'.  Consulte também linkgit:git-diff[1]
+	`--find-renames`.
+
+rename-threshold=<n>;;
+	É um sinônimo obsoleto para `find-renames=<n>`.
+
+subtree[=<caminho>];;
+	Essa opção é uma forma mais avançada da estratégia da 'subárvore', onde a
+	estratégia adivinha como as duas árvores devem ser deslocadas para
+	coincidirem uma com a outra durante a mesclagem.  Em vez disso, o caminho
+	definido é prefixado (ou removido desde o início) para criar a forma das
+	duas árvores que serão coincididas.
+
+octopus::
+	Isso resolve os casos com mais de dois cabeçalhos, porém se recusa a fazer
+	uma mesclagem complexa que precise de uma resolução manual.  Destina-se
+	primeiramente para ser usado para agrupar junto o tópico dos cabeçalhos.
+	Esra é a estratégia de mesclagem predefinida durante a extração ou a
+	mesclagem com mais de um ramo.
+
+ours::
+	Isso resolve qualquer quantidade dos cabeçalhos, porém a árvore resultante
+	da mesclagem é sempre a do cabeçalho atual do ramo, ignorando efetivamente
+	todas as alterações de todas os outros ramos.  Ele deve ser usado para
+	substituir o histórico antigo de desenvolvimento das ramificações laterais.
+	Observe que isso é diferente da opção `-Xours` da estratégia de mesclagem
+	'recursiva'.
+
+subtree::
+	Esta é uma estratégia recursiva modificada. Ao mesclar as árvores 'A' e 'B',
+	caso 'B' corresponda a uma subárvore de 'A', o 'B' será ajustado primeiro
+	para coincidir à estrutura da árvore 'A', em vez de ler as árvores no mesmo
+	nível. Esse ajuste também é feito na árvore ancestral comum.
+
+Com as estratégias que usma a mesclagem de 3 vias (incluindo a predefinição,
+'recursive'), caso uma alteração seja feita em ambas as ramificações, porém
+depois revertida em uma das ramificações, essa alteração estará presente no
+resultado mesclado; algumas pessoas acham este comportamento confuso.  Isso
+ocorre porque apenas os cabeçalhos e a base da mesclagem são consideradas ao
+fazer uma mesclagem, e não os commits individuais.  Portanto, o algoritmo da
+mesclagem considera a alteração revertida como nenhuma alteração e substitui
+a versão alterada.

@@ -1,0 +1,108 @@
+git-index-pack(1)
+=================
+
+NOME
+----
+git-index-pack - Construa um pacote do arquivo do índice para um arquivo
+compactado já existente
+
+
+RESUMO
+------
+[verse]
+'git index-pack' [-v] [-o <index-file>] <pack-file>
+'git index-pack' --stdin [--fix-thin] [--keep] [-v] [-o <index-file>]
+                 [<pack-file>]
+
+
+DESCRIÇÃO
+---------
+Faz a leitura de um arquivo compactado (.pack) do arquivo informado e cria
+um pacote do arquivo do índice (.idx) para ele.  O arquivo compactado junto
+com o pacote do índice pode ser colocado no diretório 'objects/pack/' de um
+repositório Git.
+
+
+OPÇÕES
+------
+-v::
+	Seja detalhado sobre o que está acontecendo, incluindo a condição geral do
+	progresso.
+
+-o <arquivo-índice>::
+	Escreva o índice do pacote gerado no arquivo especificado.  Sem essa opção,
+	o nome do arquivo do pacote do arquivo do índice é construído a partir do
+	nome do arquivo compactado substituindo '.pack' por '.idx' (e o programa
+	falha caso o nome do arquivo compactado não termine com '.pack').
+
+--stdin::
+	Quando esta opção é informada, o pacote é lido a partir do stdin e uma cópia
+	é gravada no <pack-file>. Caso o <pack-file> não seja informado, o pacote
+	será gravado no diretório 'objects/pack/' do repositório Git atual com um
+	nome predefinido determinado através do conteúdo do pacote.  Caso o
+	<pack-file> não seja informado, considere utilizar a opção `--keep` para
+	evitar uma condição de corrida entre este processo e o 'git repack'.
+
+--fix-thin::
+	Corrija um pacote "thin" produzido por `git pack objects thin` (para mais
+	detalhes, consulte linkgit:git-pack-objects[1]) adicionando os objetos
+	excluídos nos quais os objetos "deltificados" utilizam como base no
+	pacote. Esta opção só faz sentido caso seja utilizado em conjunto com
+	`--stdin`.
+
+--keep::
+	Antes de mover o índice para seu destino final, crie um arquivo '.keep'
+	vazio para o arquivo do pacote associado.  Essa opção geralmente é
+	necessária com '--stdin' para impedir que um processo simultâneo do 'git
+	repack' exclua o pacote e o índice recém-construídos antes que as refs
+	possam ser atualizadas para utilizar os objetos existentes no pacote.
+
+--keep=<msg>::
+	Assim como a opção `--keep`, crie um arquivo '.keep' antes de mover o índice
+	para seu destino final, em vez de criar um local do arquivo vazio '<msg>',
+	seguido de um LF no arquivo .keep.  A mensagem '<msg>' pode ser pesquisada
+	posteriormente em todos os arquivos '.keep' para localizar qualquer um que
+	tenha perdido a sua utilidade.
+
+--index-version=<version>[,<offset>]::
+	Isso foi pensado para ser utilizado apenas pelo conjunto de testes. Ele
+	permite impor a versão do índice do pacote gerado e impor as entradas no
+	índice com 64 bits nos objetos localizados acima da compensação informada.
+
+--strict::
+	Encerre, caso o pacote contenha objetos ou links quebrados.
+
+--check-self-contained-and-connected::
+	Encerre caso o pacote contenha links quebrados. Apenas para utilização
+	interna.
+
+--fsck-objects::
+	Encerre caso o pacote contenha objetos quebrados. Apenas para utilização
+	interna.
+
+--threads=<n>::
+	Determina a quantidade de "threads" a serem geradas para resolver os
+	deltas. Isso requer que os objetos do pacote sejam compilados com
+	"pthreads", caso contrário esta opção será ignorada exibindo um aviso.  Isso
+	visa reduzir o tempo do empacotamento em máquinas com multiprocessados. A
+	quantidade de memória necessária para a janela de pesquisa delta é
+	multiplicada pela quantidade de threads.  Definindo como `0` faz com que o
+	Git detecte automaticamente a quantidade de CPUs e defina a quantidade de
+	"threads" proporcionalmente e utiliza o máximo de 3 "threads".
+
+--max-input-size=<tamanho>::
+	Encerre caso o pacote seja maior que <tamanho>.
+
+OBSERVAÇÕES
+-----------
+
+Após a criação do índice a lista dos nomes dos objetos é classificada e o
+hash SHA-1 desta lista seja exibida no stdout. Caso `--stdin` também seja
+utilizado, então este é prefixado por "pack\t" ou "keep\t" caso um novo
+arquivo `.keep` seja criado com êxito. Isso é útil para remover um
+.mantenha o arquivo utilizado como uma trava para impedir uma corrida com `git repack`
+citados acima.
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

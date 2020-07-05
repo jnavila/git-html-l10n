@@ -1,0 +1,71 @@
+git-pack-refs(1)
+================
+
+NOME
+----
+git-pack-refs - Embale os cabeçalhos e a tags do pacote para acesso
+eficiente ao repositório
+
+RESUMO
+------
+[verse]
+'git pack-refs' [--all] [--no-prune]
+
+DESCRIÇÃO
+---------
+
+Tradicionalmente, o cume dos ramos e as tags (coletivamente conhecidas como
+'refs') eram armazenadas um arquivo por "ref" em um diretório (sub) no
+diretório `$GIT_DIR/refs`.  Enquanto muitos cumes dos ramos tendem a ser
+atualizadas com frequência, a maioria das tags e alguns cumes dos ramos
+nunca são atualizadas.  Quando um repositório possui centenas ou milhares de
+tags, este formato de um arquivo por referência desperdiça armazenamento e
+prejudica o desempenho.
+
+Este comando é utilizado para resolver o problema de armazenamento e
+desempenho, armazenando as refs em um único arquivo,
+`$GIT_DIR/compact-refs`.  Quando uma "ref" está ausente na hierarquia dos
+diretórios tradicionais `$GIT_DIR/refs`, ele é procurado neste arquivo e
+utilizado caso seja encontrado.
+
+Atualizações subsequentes nos ramos sempre criam novos arquivos na
+hierarquia de diretórios `$GIT_DIR/refs`.
+
+Uma prática recomendada para lidar com um repositório com muitas refs é
+empacotar as suas refs com `--all` uma vez e ocasionalmente executar o
+comando `git pack-refs`.  As tags são estacionárias por definição e não
+devem mudar.  Os cabeçalhos da ramificação serão empacotadas com os
+`pack-refs --all` iniciais, mas apenas os cabeçalhos da ramificação
+atualmente ativas, serão descompactadas e as próximas `pack-refs` (sem a
+opção `--all`) as deixarão descompactadas.
+
+
+OPÇÕES
+------
+
+--all::
+
+É predefinido que o comando empacote todas as "tags" e refs que já estão
+empacotados e deixe as outras refs em paz.  Isso ocorre porque os ramos
+devem ser desenvolvidas ativamente e embalar as suas pontas não ajudam no
+desempenho.  Essa opção também faz com que os cumes dos ramos sejam
+compactadas.  Útil para um repositório com muitos ramos de interesses
+histórico.
+
+--no-prune::
+
+O comando normalmente remove as refs soltas na hierarquia `$GIT_DIR/refs`
+após empacotá-los.  Esta opção diz para não fazê-lo.
+
+
+BUGS
+----
+
+A documentação mais antiga escrita antes da introdução do mecanismo
+"packed-refs" ainda pode dizer coisas como "o arquivo .git/refs/heads/<ramo>
+existe" quando significa "o ramo <ramo> existe".
+
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

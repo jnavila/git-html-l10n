@@ -1,0 +1,105 @@
+git-mailinfo(1)
+===============
+
+NOME
+----
+git-mailinfo - Extrai o patch e a autoria de uma única mensagem de e-mail
+
+
+RESUMO
+------
+[verse]
+'git mailinfo' [-k|-b] [-u | --encoding=<codificação> | -n] [--[no-]scissors] <msg> <patch>
+
+
+DESCRIÇÃO
+---------
+Lê uma única mensagem de email da entrada padrão, registra a mensagem do
+commit no log em um arquivo <msg>, e os patches em um arquivo <patch>.  O
+nome do autor, o assunto da mensagem e o endereço do e-mail são gravados na
+saída padrão para criar um commit que serão utilizados pelo comando 'git
+am'.  Na maioria das vezes, não é necessário usar este comando diretamente.
+Em vez disso, consulte linkgit:git-am[1].
+
+
+OPÇÕES
+------
+-k::
+	Normalmente, o programa remove a sujeira do cabeçalho do Assunto: do e-mail
+	extraindo o título da linha da mensagem do registro log do commit.  Esta
+	opção evita essa interrupção e tem mais utilidade quando utilizada para ler
+	a saída do comando 'git format-patch -k'.
++
+Especificamente, o seguinte é removido até que nenhum deles permaneça:
++
+--
+*	Os espaços à esquerda e à direita.
+
+*	Iniciando com `Re:`, `re:`, e `:`.
+
+*	As sequências dos caracteres entre colchetes à esquerda (entre `[` e `]`,
+  geralmente
+	`[PATCH]`).
+--
++
+Finalmente, as execuções do espaço são normalizadas para um único caractere
+de espaço ASCII.
+
+-b::
+	Quando -k não está em vigor, todas as cadeias iniciais entre parênteses com
+	os pares '[' e ']' são removidos.  Esta opção limita a remoção apenas aos
+	pares cuja cadeia entre os colchetes contenha a palavra "PATCH".
+
+-u::
+	A mensagem do registro log do commit, o nome do autor e seu e-mail são
+	obtidos a partir do e-mail e após a decodificação mínima da codificação de
+	transferência MIME, recodificados no conjunto de caracteres definido pela
+	opção de configuração `i18n.commitencoding` (predefinido para UTF-8),
+	transliterando-os.  Isto costumava ser opcional, agora é a predefinição.
++
+Observe que o patch é sempre utilizado como está, sem conversão do 'charset'
+(definição dos caracteres), mesmo com esta opção.
+
+--encoding=<codificação>::
+	Semelhante ao -u.  Porém, ao re-codificar, o conjunto dos caracteres
+	informados aqui é utilizado em vez do informado pelo i18n.commitencoding ou
+	o UTF-8.
+
+-n::
+	Desative toda a re-codificação do "charset" dos metadados.
+
+-m::
+--message-id::
+	Copie o cabeçalho da ID da mensagem no final da mensagem do commit.  É útil
+	para associar os commits a discussões nas listas de discussão.
+
+--scissors::
+	Remova tudo no corpo antes das marcações.  Uma linha que consiste
+	principalmente das marcas (">8" ou "8<") e a perfuração (traço "-") é
+	chamada de linha de grafo traçado, é utilizada para solicitar que o leitor
+	corte a mensagem nesta linha.  Caso esta linha apareça no corpo da mensagem
+	antes do patch, tudo o que estiver à frente (incluindo a própria linha) será
+	ignorado quando essa opção for utilizada.
++
+É útil caso queira iniciar a sua mensagem em um tópico de discussão com
+comentários e sugestões sobre a mensagem que está respondendo e concluí-la
+com um envio do patch, separando a discussão e o início da mensagem do
+registro log do commit proposta com uma linha de grafo traçado.
++
+É possível que seja predefinidamente ativada com a opção de configuração
+mailinfo.scissors.
+
+--no-scissors::
+	Ignore as linhas de grafo traçado. Útil para substituir as configurações de
+	mailinfo.scissors.
+
+<msg>::
+	Geralmente a mensagem do registro log do commit extraída do e-mail, exceto
+	quando a linha do título que vem do Assunto do email.
+
+<patch>::
+	O patch extraído do e-mail.
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

@@ -1,0 +1,251 @@
+git-ls-files(1)
+===============
+
+NOME
+----
+git-ls-files - Exiba as informações sobre os arquivos no índice e na árvore
+de trabalho
+
+
+RESUMO
+------
+[verse]
+'git ls-files' [-z] [-t] [-v] [-f]
+		(--[cached|deleted|others|ignored|stage|unmerged|killed|modified])*
+		(-[c|d|o|i|s|u|k|m])*
+		[--eol]
+		[-x <padrão>|--exclude=<padrão>]
+		[-X <arquivo>|--exclude-from=<arquivo>]
+		[--exclude-per-directory=<arquivo>]
+		[--exclude-standard]
+		[--error-unmatch] [--with-tree=<tree-ish>]
+		[--full-name] [--recurse-submodules]
+		[--abbrev] [--] [<arquivo>...]
+
+DESCRIÇÃO
+---------
+Mescla a listagem dos arquivos no índice do cache do diretório com a lista
+dos diretórios de trabalho real e exibe as diferentes combinações dos dois.
+
+Uma ou mais das opções abaixo podem ser utilizadas para determinar quais os
+arquivos serão exibidos:
+
+OPÇÕES
+------
+-c::
+--cached::
+	Exibe os arquivos no cache da saída (predefinido)
+
+-d::
+--deleted::
+	Exibe os arquivos excluídos da saída
+
+-m::
+--modified::
+	Exibe os arquivos modificados na saída
+
+-o::
+--others::
+	Exibe os outros arquivos (não monitorados) na saída
+
+-i::
+--ignored::
+	Exibe apenas os arquivos ignorados na saída. Ao exibir os arquivos no
+	índice, exiba apenas aqueles que coincidam através de um padrão de
+	exclusão. Ao exibir os "outros" arquivos, exiba apenas aqueles que coincidam
+	através de um padrão de exclusão. As regras predefinidas para ignorar não
+	estão automaticamente ativas; portanto, pelo menos uma das opções
+	`--exclude*` são necessários.
+
+-s::
+--stage::
+	Exibe os bits do modo do conteúdo escalonado, o nome do objeto e o número do
+	estágio na saída.
+
+--directory::
+	Caso um diretório inteiro seja classificado como "other" (outro), exibe
+	apenas o seu nome (com uma barra à direita) e não todo o seu conteúdo.
+
+--no-empty-directory::
+	Não liste os diretórios vazios. Não tem efeito sem a opção `--directory`.
+
+-u::
+--unmerged::
+	Exibe os arquivos não mesclados na saída (impõem a utilização da opção
+	`--stage`)
+
+-k::
+--killed::
+	Exibe os arquivos no sistema de arquivos que precisam ser removidos devido a
+	conflitos do arquivo/diretório para que o índice averiguado seja
+	bem-sucedido.
+
+-z::
+	A terminação \0 da linha na saída e não cita os nomes dos arquivos.
+	Consulte SAÍDA abaixo para obter mais informações.
+
+-x <padrão>::
+--exclude=<padrão>::
+	Ignora o padrão de correspondência dos arquivos não monitorados.  Observe
+	que o padrão é um padrão curinga do shell. Consulte EXCLUIR PADRÕES abaixo
+	para obter mais informações.
+
+-X <arquivo>::
+--exclude-from=<arquivo>::
+	Leia os padrões de exclusão do <arquivo>; 1 por linha.
+
+--exclude-per-directory=<arquivo>::
+	Leia os padrões de exclusão adicionais que se aplicam apenas ao diretório e
+	aos seus subdiretórios no <arquivo>.
+
+--exclude-standard::
+	Adicione as exclusões padrão do Git: '.git/info/exclude', '.gitignore' em
+	cada diretório e o arquivo de exclusão global do usuário.
+
+--error-unmatch::
+	Caso algum `<arquivo>` não apareça no índice, trate isso como um erro
+	(retorno 1).
+
+--with-tree=<tree-ish>::
+	Ao utilizar o comando `--error-unmatch` para expandir os argumentos
+	<arquivo> (padrão do caminho por exemplo) argumentos para os caminhos, finja
+	que os caminhos que foram removidos no índice desde que o `<tree-ish>` ainda
+	esteja presente.  Utilizar esta opção com as opções `-s` ou `-u` não faz
+	nenhum sentido.
+
+-t::
+	Esse recurso está quase obsoleto. Para fins de script, linkgit:git-status[1]
+	`--porcelain` e linkgit:git-diff-files[1] `--name-status` são quase sempre
+	as maiores alternativas, os usuários devem olhar para o
+	linkgit:git-status[1] `--short` ou linkgit:git-diff[1] `--namename-status`
+	para as alternativas mais amigáveis.
++
+--
+Esta opção identifica a condição geral do arquivo com as seguintes opções
+(seguidas por um espaço) no início de cada linha:
+
+	H::		cached
+	S::		skip-worktree
+	M::		unmerged
+	R::		removido/excluído
+	C::		modificado/alterado
+	K::		para ser encerrado
+	?::		Outros
+--
+
+-v::
+	Semelhante ao `-t`, porém utilize as letras minúsculas para os arquivos
+	marcados como 'assume unchanged' ou 'assuma que não foi alterado' (consulte
+	linkgit:git-update-index[1]).
+
+-f::
+	Semelhante ao `-t`, porém utilize as letras minúsculas para os arquivos
+	marcados como 'fsmonitor valid' ou 'fsmonitor válido' (consulte
+	linkgit:git-update-index[1]).
+
+--full-name::
+	O comando geralmente gera caminhos relativos ao diretório atual ao ser
+	executado a partir de um subdiretório.  Esta opção impõem que os caminhos
+	saiam relativos ao topo do diretório do projeto.
+
+--recurse-submodules::
+	Chama recursivamente os 'ls-files' em cada submódulo no repositório.
+	Atualmente, há apenas suporte para a opção `--cached-mode`.
+
+--abrev[=<n>]::
+	Em vez de exibir as linhas do objeto hexadecimal com 40 bytes, exibe apenas
+	um prefixo parcial.  Um número não predefinido dos dígitos podem ser
+	definidos com `--abbrev=<n>`.
+
+--debug::
+	Após cada linha que descreve um arquivo, adicione mais dados sobre a sua
+	entrada no cache.  O objetivo é exibir o máximo de informações possíveis
+	para a inspeção manual; o formato exato pode mudar a qualquer momento.
+
+--eol::
+	Exibe o `<eolinfo>` e o `<eolattr>` dos arquivos.  O `<eolinfo>` é a
+	identificação do conteúdo do arquivo utilizado pelo Git quando o atributo
+	"text" for  "auto" (ou não está definido e o `core.autocrlf` não for
+	falso).  O `<eolinfo>` é "-text", "none", "lf", "crlf", "mixed" ou "".
++
+"" significa que o arquivo não é um arquivo comum, não está no índice ou não
+está acessível na árvore de trabalho.
++
+O `<eolattr>` é o atributo utilizado ao efetuar a averiguação ou fazer o
+commit, é também "", "-text", "text", "text=auto", "text eol=lf", "text
+eol=crlf".  Desde o Git 2.10, "text=auto eol=lf" e "text=auto eol=crlf" são
+compatíveis.
++
+Ambos os `<eolinfo>` no índice ("i/<eolinfo>") e na árvore de trabalho
+("w/<eolinfo>") são exibidos para os arquivos regulares, seguidos pelo
+("attr/<eolattr>").
+
+\--::
+	Não interprete mais argumentos como opções.
+
+<arquivo>::
+	Arquivos para exibir. Caso nenhum arquivo seja informado, todos os arquivos
+	que coincidam com outros critérios informados serão mostrados.
+
+SAÍDA
+-----
+'git ls-files' apenas gera os nomes dos arquivos, a menos que a opção
+`--stage` seja utilizado; nesse caso, ele gera:
+
+        [<tag> ]<modo> <objeto> <estágio> <arquivo>
+
+'git ls-files --eol' will show
+	i/<eolinfo><SPACES>w/<eolinfo><SPACES>attr/<eolattr><SPACE*><TAB><arquivo>
+
+Os comando 'git ls-files --unmerged' e o 'git ls-files --stage' podem ser
+utilizados para examinar as informações detalhadas sobre os caminhos não
+mesclados.
+
+Para um caminho que não foi mesclado, em vez de gravar um único modo/ par
+SHA-1 pair, o índice registra até três desses pares; um da árvore O no
+estágio 1, A no estágio 2 e B no estágio 3.  Esta informação pode ser
+utilizada pelo usuário (ou pela porcelana) para ver o quê eventualmente
+deverá ser registrado no caminho. (para mais informações sobre
+estado/condição consulte linkgit:git-read-tree[1]
+
+Sem a opção `z`, os `pathnames` com os caracteres "incomuns" são citados
+conforme explicado na variável de configuração `core.quotePath` (consulte
+linkgit:git-config[1]).  Utilizando a opção `-z`, o nome do arquivo é gerado
+literalmente e a linha é finalizada com um byte `NUL`.
+
+
+EXCLUIR PADRÕES
+---------------
+
+O 'git ls-files' pode utilizar uma lista de "padrões de exclusão" ao
+percorrer a árvore dos diretórios e localizar os arquivos para exibir quando
+as opções `--others` ou `--ignored` são utilizados.  linkgit:gitignore[5]
+determina o formato dos padrões de exclusão.
+
+Estes padrões de exclusão vêm destes locais, na ordem:
+
+  1. A opção da linha de comando `--exclude=<padrão>` define um único padrão.  Os
+     padrões são ordenados na mesma ordem em que aparecem na linha de comando.
+
+  2. A opção da linha de comando `--exclude-from=<arquivo>` define um arquivo que
+     contém uma lista de padrões.  Os padrões são ordenados na mesma ordem em que
+     aparecem no arquivo.
+
+  3. A opção da linha de comando `--exclude-per-directory=<nome>` define um nome
+     do arquivo em cada diretório que o comando 'git ls-files' examina,
+     normalmente `.gitignore`.  Os arquivos nos diretórios mais profundos têm
+     precedência.  Os padrões são ordenados na mesma ordem em que aparecem nos
+     arquivos.
+
+Um padrão definido na linha de comandos com `--exclude` ou lido do arquivo
+definido com `--exclude-from` é relativo ao topo da árvore de diretórios.
+Um padrão lido de um arquivo definido com `--exclude-per-directory` é
+relativo ao diretório em que o padrão do arquivo aparece.
+
+VEJA TAMBÉM
+-----------
+linkgit:git-read-tree[1], linkgit:gitignore[5]
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

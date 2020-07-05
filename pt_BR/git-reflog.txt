@@ -1,0 +1,139 @@
+git-reflog(1)
+=============
+
+NOME
+----
+git-reflog - Gerencie informações do reflog
+
+
+RESUMO
+------
+[verse]
+'git reflog' <subcomando> <opções>
+
+DESCRIÇÃO
+---------
+O comando assume vários subcomandos das diferentes opções dependendo do
+subcomando:
+
+[verse]
+'git reflog' ['show'] [log-options] [<ref>]
+'git reflog expire' [--expire=<time>] [--expire-unreachable=<time>]
+	[--rewrite] [--updateref] [--stale-fix]
+	[--dry-run | -n] [--verbose] [--all [--single-worktree] | <refs>...]
+'git reflog delete' [--rewrite] [--updateref]
+	[--dry-run | -n] [--verbose] ref@\{specifier\}...
+'git reflog exists' <ref>
+
+Os registros log de referência ou "reflogs", registram quando o cume dos
+ramos, assim como, quais as outras referências que foram atualizadas no
+repositório local. Os "reflogs" são úteis para especificar o valor antigo de
+uma referência em vários comandos Git. Por exemplo, `HEAD@{2}` quer dizer
+"para onde HEAD costumava estar há dois movimentos atrás",
+`master@{one.week.ago}` quer dizer "para onde o "master" costumava apontar
+uma semana atrás neste repositório local" e assim por diante. Para mais
+detalhes consulte linkgit:gitrevisions[7].
+
+Este comando gerencia as informações registradas nos "reflogs".
+
+O subcomando "show" (que também é o valor predefinido na ausência dos
+subcomandos) exibe o registro log da referência informada através da linha
+de comando (ou pela predefinição, `HEAD`). O "reflog" cobre todas as ações
+recentes assim como, o reflog `HEAD` registra a alternância do ramo.  O
+comando `git reflog show` é um apelido para `git log -g --abbrev-commit
+--pretty=oneline`; Para mais informações consulte linkgit:git-log[1].
+
+O subcomando "expire" remove as entradas mais antigas do "reflog". As
+entradas serão removidas do "reflog" caso tenham o tempo anterior ao
+'expire' ou `expire-unreachable`, assim como aquelas que estiverem
+inacessíveis.  Normalmente, isso não é utilizado de forma direta pelos
+usuários finais -- em vez disso, consulte linkgit:git-gc[1].
+
+O subcomando "delete" exclui as entradas únicas do reflog. O seu argumento
+deve ser uma entrada _exata_ (como por exemplo, "`git reflog delete
+master@{2}`"). Este subcomando também não é utilizado diretamente pelos
+usuários finais.
+
+O subcomando "existe" verifica se uma "ref" tem um reflog.  Encerra com a
+condição zero, caso o "reflog" exista, e a condição seja diferente de zero
+caso não exista.
+
+OPÇÕES
+------
+
+Opções para `show`
+~~~~~~~~~~~~~~~~~~
+
+O `git reflog show` aceita qualquer uma das opções aceitas pelo` git log`.
+
+
+Opções para `expire`
+~~~~~~~~~~~~~~~~~~~~
+
+--all::
+	Processe os reflogs de todas as referências.
+
+--single-worktree::
+	É predefinido que quando `--all` seja utilizado, os reflogs de todas as
+	árvores de trabalho sejam processadas. Esta opção limita o processamento da
+	reflogs apenas na árvore de trabalho atual.
+
+--expire=<tempo>::
+	Remova os lançamentos mais antigos que o tempo informado. Caso esta opção
+	não seja definida, o tempo da expiração será obtido com a opção de
+	configuração `gc.reflogExpire`, que por sua vez a sua predefinição retorna
+	para 90 dias. A opção `--expire=all` remove as entradas independentemente da
+	idade; `--expire=never` desativa a remoção dos lançamentos acessíveis (porém
+	consulte `--expire-unreachable`).
+
+--expire-unreachable=<tempo>::
+	Remova os lançamentos mais antigos que o `<tempo>` que não sejam acessíveis
+	através do cume atual do ramo. Caso esta opção não seja definida, o tempo da
+	expiração será obtido com a opção de configuração `gc.reflogExpire`, que por
+	sua vez a sua predefinição retorna para 90 dias. A opção
+	`--expire-unreachable=all` remove as entradas não acessíveis
+	independentemente da sua idade; `--expire-unreachable=never` desativa a
+	remoção prévia dos lançamentos não acessíveis (porém consulte `--expire`).
+
+--updateref::
+	Atualize a referência ao valor da entrada do topo do "reflog" (como por
+	exemplo, <ref>@\{0\}) caso o topo do lançamento anterior tenha sido
+	removido.  (Esta opção é ignorada para referências simbólicas.)
+
+--rewrite::
+	Caso o antecessor de uma entrada reflog seja removido, ajuste o seu SHA-1
+	"antigo" para ser igual ao "novo" campo SHA-1 da entrada que agora o
+	precede.
+
+--stale-fix::
+	Elimine qualquer entradas no reflog que apontem para "commits com
+	problemas". Um commit com problema (broken commit) é um commit que não pode
+	ser acessado por nenhum topo de referência e que se tenha referência, direta
+	ou indiretamente, a um objeto commit, árvore ou bolha ausente.
++
+Este cálculo envolve percorrer todos os objetos acessíveis, ou seja, tem o
+mesmo custo que o comando 'git prune'.  Ele se destina principalmente para
+corrigir a corrupção causada pela coleta de lixo usando as versões mais
+antigas do Git, que não protegiam os objetos referidos através dos
+"reflogs".
+
+-n::
+--dry-run::
+	Na verdade, não faça a poda de nenhuma entrada; apenas exiba o que teria
+	sido podado.
+
+--verbose::
+	Imprima informações extras na tela.
+
+
+Opções para o `delete`
+~~~~~~~~~~~~~~~~~~~~~~
+
+O `git reflog delete` aceita as opções `--updateref`, `--rewrite`, `-n`,
+`--dry-run`, e `--verbose`, com os mesmos significados de quando são
+utilizadas com `expirar`.
+
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

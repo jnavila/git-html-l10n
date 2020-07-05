@@ -6,8 +6,8 @@ NOME
 git-config - Obtenha e defina opções globais ou do repositório
 
 
-SINOPSE
--------
+RESUMO
+------
 [verse]
 'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] nome [valor [value_regex]]
 'git config' [<opção-do-arquivo>] [--type=<tipo>] --add nome valor
@@ -73,36 +73,37 @@ OPÇÕES
 ------
 
 --replace-all::
-	O comportamento padrão é substituir no máximo uma linha. Isso substitui
-	todas as linhas que correspondem à chave (e, opcionalmente, ao valor_regex).
+	O comportamento predefinido é substituir pelo menos uma linha. Isso
+	substitui todas as linhas que coincidam com a chave (e opcionalmente ao
+	"value_regex").
 
 --add::
-	Adiciona uma nova linha à opção sem alterar nenhum valor existente.  Isto é
-	o mesmo que fornecer '^$' como o value_regex em `--replace-all`.
+	Adiciona uma nova linha à opção, sem alterar nenhum valor já existente.  É o
+	mesmo que informar '^$' como o `valor_regex` na opção `--replace-all`.
 
 --get::
 	Obtenha o valor para uma determinada chave (opcionalmente filtrada por uma
-	expressão regular correspondente ao valor). Retorna o código de erro 1 se a
-	chave não foi encontrada e o último valor se vários valores de chave foram
-	encontrados.
+	expressão regular que coincida com o valor). Retorna o código de erro '1'
+	caso a chave não seja encontrada e o último valor caso vários valores da
+	chave sejam encontrados.
 
 --get-all::
 	Como get, mas retorna todos os valores para uma chave com vários valores.
 
 --get-regexp::
-	Como `--get-all`, porém interpreta o nome como uma expressão regular e
-	escreve os nomes das chaves.  A correspondência de expressão regular é
-	sensível a maiúsculas e minúsculas, é feita contra uma versão canonicalizada
-	da chave na qual a seção e os nomes de variáveis são minúsculos, mas os
-	nomes das subseções não são.
+	Como a opção `--get-all`, porém interpreta o nome como uma expressão regular
+	e escreve os nomes das chaves.  A coincidência comum da expressão regular é
+	sensível a maiúsculas e minúsculas, é feita contra uma versão canonizado da
+	chave onde a seção e os nomes das variáveis são minúsculas, porém os nomes
+	das subseções não são.
 
 --get-urlmatch nome URL::
-	Quando é dado um nome de duas partes section.key, o valor para a
-	seção. <url>.key cuja parte <url> corresponde à melhor para a URL fornecida
-	é retornada (se não houver essa chave, o valor para section.key é usado como
-	um fallback).  Quando for dada apenas a seção como nome, faça isso para
-	todas as chaves na seção e liste-as. Retorna o código de erro 1 se nenhum
-	valor for encontrado.
+	Quando é utilizado em um nome com duas partes `section.key`, o valor da
+	`section.<url>.key` cuja parte da <url> coincida para o retorno da melhor
+	URL informada (caso essa chave não exista, o valor do `section.key` será
+	usado como substituto).  Quando receber apenas a seção como nome, faça-o
+	para todas as chaves da seção e liste-as.  Retorna o código de erro 1 caso
+	nenhum valor seja encontrado.
 
 --global::
 	Para escrever opções: escreva para o arquivo global `~/.gitconfig` em vez do
@@ -134,21 +135,21 @@ de todos os arquivos disponíveis.
 Consulte também <<ARQUIVOS>>.
 
 --worktree::
-	Semelhante a `--local`, exceto que `.git/config.worktree` é lido ou escrito
-	em if `extensions.worktreeConfig` está presente. Se não, é o mesmo que
-	`--local`.
+	Semelhante a opção `--local`, exceto que o a opção de configuração
+	`.git/config.worktree` é lido ou gravado caso `extensions.worktreeConfig`
+	existir. Caso não seja, é o mesmo que a opção `--local`.
 
--f config-arquivo::
---arquivo config-arquivo::
+-f arquivo-config::
+--file arquivo-config::
 	Utilize o arquivo de configuração informado em vez daquele especificado por
 	GIT_CONFIG.
 
 --blob blob::
-	Semelhante ao `--file`, mas usa o blob fornecido em vez de um arquivo.  Por
-	exemplo.  você pode usar 'mestre: .gitmodules' para ler valores do arquivo
-	'.gitmodules' no ramo mestre. Veja a seção "ESPECIFICANDO REVISÕES" em
-	linkgit:gitrevisions[7] para uma lista mais completa de maneiras de soletrar
-	nomes de blobs.
+	É semelhante a opção `--file` porém utilize a bolha informada em vez de um
+	arquivo. Como por exemplo, é possível utilizar 'master:.gitmodules' para ler
+	os valores de um arquivo '.gitmodules' no ramo "master". Para conhecer uma
+	lista completa das diferentes maneiras de soletrar os nomes das bolhas,
+	consulte a seção "DEFININDO AS REVISÕES" em linkgit:gitrevisions[7].
 
 --remove-section::
 	Remova a seção dada do arquivo de configuração.
@@ -167,29 +168,30 @@ Consulte também <<ARQUIVOS>>.
 	Lista todas as variáveis definidas no arquivo de configuração, junto com
 	seus valores.
 
---tipo <tipo>::
+--type <tipo>::
   'git config' irá assegurar que qualquer entrada ou saída é válida sob a(s)
   restrição(ões) de tipo dada, e irá canonicalizar os valores de saída na
   forma canônica do `<tipo>`'s.
 +
 Os `<tipo>`'s válidos incluem:
 +
-- 'bool': canoniza valores como "true" ou "false".
-- 'int': canoniza valores como números decimais simples. Um sufixo opcional de
-  'k', 'm' ou 'g' fará com que o valor seja multiplicado por 1024, 1048576 ou
-  1073741824 na entrada.
+- 'bool': canoniza os valores como 'true' ou 'false'.
+- 'int': canoniza os valores como números decimais simples. Um sufixo opcional
+  com 'k', 'm' ou 'g' fará com que o valor seja multiplicado por 1024, 1048576
+  ou 1073741824 na entrada.
 - 'bool-or-int': canoniza de acordo com 'bool' ou 'int', como descrito acima.
-- 'path': canonicalize adicionando um `~` ao valor de` $HOME` e `~ user` no
-  diretório home do usuário especificado. Este especificador não tem efeito ao
-  definir o valor (mas você pode usar o `git config section.variable ~ /` a
-  partir da linha de comando para permitir que o seu shell faça a expansão.)
-- 'data de expiração': canoniza convertendo de uma cadeia de data fixa ou
-  relativa para um registro de data e hora. Este especificador não tem efeito
-  ao definir o valor.
-- 'color': Ao obter um valor, canonize convertendo para uma sequência de
-  escape de cor ANSI. Ao definir um valor, uma verificação de sanidade é
-  executada para garantir que o valor fornecido seja canonizável como uma cor
-  ANSI, mas está escrito como está.
+- 'path': canonize ao adicionar um sinal `~` no começo para o valor `$HOME` e
+  `~user` no diretório home do usuário especificado. Este especificador não
+  tem efeito durante a definição do valor (porém você pode utilizar o comando
+  `git config section.variable ~ /` na linha de comando para permitir que o
+  seu shell faça a expansão.)
+- 'data validade': canoniza convertendo a partir de uma cadeia com data fixa
+  ou relativa a um registro de data e hora. Este especificador não tem efeito
+  quando for definir o valor.
+- 'color': Quando obtiver um valor, canonize através da conversão para uma
+  sequência no padrão ANSI de cor. Ao definir um valor, uma verificação é
+  realizada para garantir que o valor informado seja canonizável como uma cor
+  ANSI, porém será escrito como estiver.
 +
 
 --bool::
@@ -197,52 +199,53 @@ Os `<tipo>`'s válidos incluem:
 --bool-or-int::
 --path::
 --expiry-date::
-  Opções históricas para selecionar um especificador de tipo. Prefira, em vez
-  disso, `--type` (veja acima).
+  Opções históricas para selecionar um especificador de tipo. Em vez disso,
+  prefira opção `--type` (veja acima).
 
 --no-type::
-  Desfaz o especificador de tipo definido anteriormente (se um tiver sido
-  configurado anteriormente). Esta opção solicita que 'git config' não
-  canonize a variável recuperada.  `--não-tipo` não tem efeito sem`
-  --tipo=<tipo> `ou` - <tipo> `.
+  Indetermine o tipo do especificador definido anteriormente (caso tenha sido
+  definido anteriormente). Esta opção solicita que o comando 'git config' não
+  canonize a variável recuperada.  A opção `--no-type` não tem qualquer efeito
+  sem a opção `--type=<tipo>` ou `--<tipo>`.
 
 -z::
 --null::
-	Para todas as opções que geram valores e/ou chaves, sempre finalizar valores
-	com o caractere nulo (em vez de uma nova linha). Use a nova linha como um
-	delimitador entre chave e valor. Isto permite uma análise segura da saída
-	sem se confundir, e. por valores que contêm quebras de linha.
+	Para todas as opções que gerem valores e/ou chaves, sempre finalize os
+	valores com o caractere nulo (em vez de uma nova linha). Utilize a nova
+	linha como um delimitador entre chave e valor. Isso permite uma análise
+	segura do que for gerado sem se confundir, como por exemplo, através de
+	valores que tenham quebras de linha.
 
 --name-only::
-	Saída apenas os nomes das variáveis de configuração para `--list` ou`
-	--get-regexp`.
+	Gere apenas os nomes das variáveis de configuração para `--list` ou
+	`--get-regexp`.
 
 --show-origin::
-	Aumente a saída de todas as opções de configuração consultadas com o tipo de
-	origem (arquivo, entrada padrão, blob, linha de comando) e a origem real
-	(caminho do arquivo de configuração, ref ou ID do blob, se aplicável).
+	Aumente a geração de todas as opções de configuração consultadas com o tipo
+	da origem (arquivo, entrada padrão, blob, linha de comando) e a origem real
+	(o caminho do arquivo de configuração, da "ref" ou a ID da bolha, caso seja
+	aplicável).
 
 --show-scope::
-	Similar to `--show-origin` in that it augments the output of all queried
-	config options with the scope of that value (local, global, system,
-	command).
+	Semelhante a opção `--show-origin`, na medida em que aumenta a saída de
+	todas as opções de configuração consultadas com o escopo deste valor
+	(`local`, `global`, `system`, `command`).
 
---get-colorbool nome [stdout-é-tty]::
+--get-colorbool nome [stdout-is-tty]::
 
-	Encontre a configuração de cor para `nome` (por exemplo,`color.diff`) e a
-	saída "true" ou "false".  `stdout-é-tty` deve ser "true" ou "false", é
-	levado em conta quando a configuração diz "auto".  Caso `stdout-is-tty`
-	esteja faltando, então verifica a saída predefinida do próprio comando e sai
-	com a condição 0 caso a cor seja utilizada ou com a condição 1 caso não
-	seja.  Quando a configuração da cor para `nome` estiver indefinido, o
-	comando utiliza `color.ui` como fallback.
+	Encontre a configuração das cores para `nome` (por exemplo, `color.diff`) e
+	gere 'true' ou 'false'.  O `stdout-is-tty` deve ser 'true' ou 'false' e é
+	levado em consideração quando a configuração diz "auto".  Caso
+	`stdout-is-tty` esteja ausente, verifique a saída padrão do próprio comando
+	e encerre com a condição '0' caso a cor deva ser utilizada, ou caso
+	contrário, encerre com a condição '1'.  Quando a configuração das cores para
+	`nome` for indefinida, o comando retroage e em vez disso usa `color.ui`.
 
---get-color nome [padrão]::
+--get-color nome [default]::
 
-	Encontre a cor configurada para `nome` (por exemplo,` color.diff.new`) e
-	imprima-a como a sequência de escape de cor ANSI para a saída padrão.  O
-	parâmetro opcional `padrão` é usado em vez disso, se não houver cor
-	configurada para` nome`.
+	Localize a cor configurada para `nome` (`color.diff.new` por exemplo) e gere
+	a sequência no padrão ANSI de cor.  Em vez disso o parâmetro opcional
+	`default` é utilizado, caso não haja uma cor configurada para `nome`.
 +
 `--type=color [--default=<default>]` é preferível em vez de `--get-color`
 (porém repare que a opção `--get-color` omitirá a nova linha impressa por
@@ -250,18 +253,18 @@ Os `<tipo>`'s válidos incluem:
 
 -e::
 --edit::
-	Abre um editor para modificar o arquivo de configuração especificado; ou
-	`--sistema`,` --global` ou repositório (padrão).
+	Abre um editor para alterar o arquivo de configuração informado; ou
+	`--system`,` --global` ou repositório (predefinido).
 
 --[no-]includes::
-	Respeite as diretivas `include.*` Nos arquivos de configuração ao procurar
-	valores. O padrão é `off` quando um arquivo específico é dado (por exemplo,
-	usando` --file`, `--global`, etc) e` on` ao procurar todos os arquivos de
-	configuração.
+	Respeite as diretivas `include.*` nos arquivos de configuração ao procurar
+	pelos valores. A predefinição retorna para `off` quando determinado arquivo
+	seja informado (como por exemplo, usando os comandos `--file`, `--global`,
+	etc) e ao pesquisar por todos os arquivos de configuração.
 
---padrão <valor>::
+--default <valor>::
   Ao usar `--get` e a variável solicitada não for encontrada, comportar-se
-  como se <valor> fosse o valor atribuído à variável.
+  como se o <valor> fosse o valor atribuído à variável.
 
 CONFIGURAÇÃO
 ------------
@@ -280,54 +283,57 @@ $(prefixo)/etc/gitconfig::
 	Arquivo de configuração do sistema.
 
 $XDG_CONFIG_HOME/git/config::
-	Segundo arquivo de configuração específico do usuário. Se $ XDG_CONFIG_HOME
-	não estiver definido ou vazio, o `$HOME/.config/git/config` será
-	usado. Qualquer variável de valor único definida neste arquivo será
-	sobrescrita pelo que estiver em `~/.gitconfig`.  É uma boa ideia não criar
-	este arquivo se você, às vezes, usa versões mais antigas do Git, já que o
-	suporte para esse arquivo foi adicionado recentemente.
+	Segundo arquivo de configuração específico do usuário. Caso $XDG_CONFIG_HOME
+	não esteja definido ou esteja vazio , a opção de configuração
+	`$HOME/.config/git/config` será utilizada. Qualquer variável com valor único
+	definido neste arquivo será substituída pelo que estiver em `~/.gitconfig`.
+	É uma boa ideia não criar este arquivo no caso de você às vezes usar versões
+	mais antigas do Git, pois o suporte para este arquivo foi adicionado
+	recentemente.
 
 ~/.gitconfig::
 	Arquivo de configuração específico do usuário. Também chamado de arquivo de
 	configuração "global".
 
 $GIT_DIR/config::
-	O arquivo da configuração específica do repositório.
+	Arquivo de configuração específico do repositório.
 
-$GIT_DIR/config.árvore-de-trabalho::
+$GIT_DIR/config.worktree::
 	Isso é opcional e só é pesquisado quando o arquivo
 	`extensions.worktreeConfig` está presente em $GIT_DIR/config.
 
-Se nenhuma outra opção for fornecida, todas as opções de leitura lerão todos
-esses arquivos disponíveis. Se o arquivo de configuração global ou do
-sistema não estiver disponível, eles serão ignorados. Se o arquivo de
-configuração do repositório não estiver disponível ou legível, o 'git
-config' será encerrado com um código de erro diferente de zero. No entanto,
-em nenhum dos casos, será emitida uma mensagem de erro.
+Caso nenhuma outra opção seja utilizada, todas as opções de leitura irão ler
+todos estes arquivos que estiverem disponíveis. Caso o arquivo global ou o
+arquivo de configuração global inteiro não esteja disponível, eles serão
+ignorados. Caso o arquivo de configuração do repositório não estiver
+disponível ou legível, o comando 'git config' encerrará com um código de
+erro diferente de zero. No entanto, em nenhum dos casos será emitida uma
+mensagem de erro.
 
 Os arquivos são lidos na ordem dada acima, com o último valor encontrado
 tendo precedência sobre os valores lidos anteriormente.  Quando vários
-valores são obtidos, todos os valores de uma chave de todos os arquivos
-serão usados.
+valores são obtidos, então todos os valores de uma chave de todos os
+arquivos, serão usados.
 
-Você pode sobrescrever parâmetros de configuração individuais ao executar
-qualquer comando git usando a opção `-c`. Veja linkgit:git[1] para detalhes.
+Você pode substituir os parâmetros da configuração dos parâmetros
+individuais ao executar qualquer comando git utilizando a opção `-c`. Para
+mais detalhes, consulte linkgit:git[1].
 
-Todas as opções de gravação por padrão gravarão no arquivo de configuração
-específico do repositório. Note que isto também afeta opções como
-`--replace-all` e` --unset`. *'git config' sempre mudará apenas um arquivo
-de cada vez*.
+É predefinido que todas as opções de gravação sejam gravadas no arquivo de
+configuração específico do repositório. Observe que isso também afeta opções
+como `--replace-all` e `--sunset`. *O comando 'git config' sempre irá
+alterar um arquivo por vez*.
 
-Você pode substituir essas regras por opções de linha de comando ou por
-variáveis de ambiente. As opções `--global`,` --system` e `--árvore de
-trabalho` limitarão o arquivo usado para o arquivo global, em todo o sistema
-ou por árvore de trabalho, respectivamente.  A variável de ambiente
-`GIT_CONFIG` tem um efeito similar, mas você pode especificar qualquer nome
-de arquivo desejado.
+Estas regras podem ser substituídas através da linha de comando ou através
+das variáveis de ambiente. As opções `--global`, `--system` e `--worktree`
+limitarão o arquivo utilizado ao arquivo global, em todo o sistema ou por
+árvore de trabalho, respectivamente.  A variável de ambiente `GIT_CONFIG`
+environment variable has a similar effecttem um efeito similar, porém é
+possível definir um nome do arquivo caso queira.
 
 
-MEIO AMBIENTE
--------------
+VARIÁVEIS DO AMBIENTE
+---------------------
 
 GIT_CONFIG::
 	Pegue a configuração do arquivo informado em vez de .git/config. Usar a
@@ -335,8 +341,9 @@ GIT_CONFIG::
 	isso para $(prefixo)/etc/gitconfig.
 
 GIT_CONFIG_NOSYSTEM::
-	Se deve ignorar as configurações de leitura do arquivo $/etc/gitconfig do
-	sistema (prefixo). Veja linkgit:git[1] para detalhes.
+	Independente se você vai ignorar as configurações de leitura do arquivo
+	`$(prefix)/etc/gitconfig` do sistema. Para mais detalhes, consulte
+	linkgit:git[1].
 
 Consulte também <<ARQUIVOS>>.
 
@@ -349,14 +356,14 @@ Dado um .git/config como este:
 
 ------------
 #
-# This is the config file, and
-# a '#' or ';' character indicates
-# a comment
+# Este é o arquivo de configuração e
+# um caractere '#' ou ';' serve como
+# um comentário
 #
 
-; core variables
+; variáveis principais
 [core]
-	; Don't trust file modes
+	; Não confie nos modos dos arquivos
 	filemode = false
 
 ; Nosso próprio algorítimo diff
@@ -377,7 +384,7 @@ Dado um .git/config como este:
 	cookieFile = /tmp/cookie.txt
 ------------
 
-você pode definir o `filemode` como "true" com
+você pode definir o `filemode` como 'true' com
 
 ------------
 % git config core.filemode true
@@ -400,8 +407,8 @@ Para excluir a entrada para renomear, faça
 ------------
 
 Caso queira excluir uma entrada para um "multivar" (como `core.gitproxy`
-acima), é necessário fornecer um `regex` que corresponda ao valor de
-exatamente uma linha.
+acima), é necessário fornecer um `regex` que coincida com o valor exato de
+uma linha.
 
 Para consultar o valor para uma determinada chave, faça
 

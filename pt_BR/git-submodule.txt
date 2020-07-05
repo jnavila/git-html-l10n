@@ -6,8 +6,8 @@ NOME
 git-submodule - Inicialize, atualize ou inspecione os submódulos
 
 
-SINOPSE
--------
+RESUMO
+------
 [verse]
 'git submodule' [--quiet] [--cached]
 'git submodule' [--quiet] add [<opções>] [--] <repository> [<caminho>]
@@ -99,7 +99,7 @@ init [--] [<caminho>...]::
 	`submodule.$name.url` no `.git/config`. Ele usa a mesma configuração do
 	`.gitmodules` como um modelo. Caso a URL seja relativa, será resolvido
 	utilizando ramo remoto predefinido. Caso não nenhum ramo remoto seja
-	predefinido, o repositório atual será reconhecido como sendo a inicial.
+	predefinido, o repositório atual será reconhecido como sendo a upstream.
 +
 Os argumentos opcionais do `<caminho>` limitam quais foram os submódulos que
 serão inicializados.  Caso nenhum caminho seja informado e o
@@ -193,14 +193,14 @@ set-url [--] <caminho> <newurl>::
 	automaticamente a nova configuração da URL remota do submódulo.
 
 summary [--cached|--files] [(-n|--summary-limit) <n>] [commit] [--] [<caminho>...]::
-	Exiba o resumo do commit entre o commit informado (a predefinição é `HEAD`)
-	e a árvore de trabalho/índice. Para um submódulo em questão, são exibidas
-	uma série de commit do submódulo entre o commit do super projeto e o índice
-	ou a árvore de trabalho (alternada por `--cached`). Caso a opção `--files`
-	seja utilizada, exiba a série dos commits no submódulo entre o índice do
-	super projeto e a árvore de trabalho do submódulo (esta opção não permite a
-	utilização da opção `--cached` ou para informar um commit de forma
-	explícita).
+	Exiba o resumo do commit entre o commit informado (a predefinição retorna
+	para `HEAD`) e a árvore de trabalho/índice. Para um submódulo em questão,
+	são exibidas uma série de commit do submódulo entre o commit do super
+	projeto e o índice ou a árvore de trabalho (alternada por `--cached`). Caso
+	a opção `--files` seja utilizada, exiba a série dos commits no submódulo
+	entre o índice do super projeto e a árvore de trabalho do submódulo (esta
+	opção não permite a utilização da opção `--cached` ou para informar um
+	commit de forma explícita).
 +
 O uso da opção `--submodule=log` com linkgit:git-diff[1] também fornecerá
 estas informações.
@@ -237,7 +237,7 @@ sync [--recursive] [--] [<caminho>...]::
 	em `.gitmodules`. Afetará apenas os submódulos que já possuem uma entrada da
 	URL no `.git/config` (é o caso quando eles são inicializados ou foram
 	adicionados recentemente). É útil quando as URLs do submódulo mudam a
-	inicial e você precisa atualizar os seus repositórios locais de acordo.
+	upstream e você precisa atualizar os seus repositórios locais de acordo.
 +
 O comando `git submodule sync` sincroniza todos os submódulos enquanto o
 comando `git submodule sync - A` sincroniza apenas o submódulo "A".
@@ -247,7 +247,7 @@ submódulos registrados e sincronizará todos os submódulos aninhados.
 
 absorbgitdirs::
 	Caso um diretório git de um submódulo estiver dentro dele, mova o diretório
-	git do submódulo para o caminho `$ GIT_DIR/modules` do superprojeto, conecte
+	git do submódulo para o caminho `$GIT_DIR/modules` do superprojeto, conecte
 	o diretório git, o seu diretório de trabalho, definindo `core.worktree` e
 	adicionando um Arquivo .git apontando para o diretório git incorporado no
 	diretório git dos superprojetos.
@@ -282,8 +282,8 @@ OPÇÕES
 	é registrado como `submodule.<nome>.branch` no `.gitmodules` para `update
 	--remote`.  Um valor especial de `.` é utilizado para indicar que o nome do
 	ramo no submódulo deve ser o mesmo nome como o da ramificação atual, no
-	repositório atual.  Caso a opção não seja utilizada, a predefinição será
-	'master'.
+	repositório atual.  Caso a opção não seja utilizada, a predefinição retorna
+	para 'master'.
 
 -f::
 --force::
@@ -318,8 +318,8 @@ OPÇÕES
 	Esta opção só é válida para o comando `update`.  Em vez de utilizar o SHA-1
 	registrado no superprojeto para atualizar o submódulo, utilize a condição
 	geral do submódulo do ramo monitorado remotamente.  O ramo remoto utilizado
-	é o ramo (`branch.<name>.remote`)  predefinido para `origin`.  O ramo remoto
-	utiliza a predefinição `master`, porém o nome do ramo pode ser substituído
+	é o ramo (`branch.<nome>.remote`)  predefinido para `origin`.  O ramo remoto
+	costumava retornar para `master`, porém o nome do ramo pode ser substituído
 	ao definir a opção `submodule.<nome>.branch` ou entre `.gitmodules` ou
 	`.git/config` (onde `.git/config` tem prioridade).
 +
@@ -334,13 +334,13 @@ Para garantir uma condição de monitoramento da ramificação atual, `update
 SHA-1.  Caso não queira capturar, utilize `submodule update --remote
 --no-fetch`.
 +
-Use esta opção para integrar as alterações do subprojeto inicial ao `HEAD`
-atual do seu submódulo.  Como alternativa, você pode executar o comando `git
-pull` a partir do submódulo, que é equivalente, exceto pelo nome do ramo
-remoto: `update --remote` utiliza o repositório inicial predefinido e
-`submodule.<nome>.branch`, enquanto `git pull` utiliza o submódulo
-`branch.<name>.merge`.  Prefira o `submodule.<name>.branch` caso queira
-distribuir a ramificação inicial predefinido com o superprojeto e
+Use esta opção para integrar as alterações a partir do subprojeto upstream
+ao `HEAD` atual do seu submódulo.  Como alternativa, você pode executar o
+comando `git pull` a partir do submódulo, que é equivalente, exceto pelo
+nome do ramo remoto: `update --remote` utiliza o repositório upstream
+predefinido e `submodule.<nome>.branch`, enquanto `git pull` utiliza o
+submódulo `branch.<nome>.merge`.  Prefira o `submodule.<nome>.branch` caso
+queira distribuir a ramificação upstream predefinido com o superprojeto e
 `branch.<nome>.merge` caso queira uma sensação mais nativa ao trabalhar no
 próprio submódulo.
 
@@ -416,15 +416,15 @@ com muita atenção.
 
 --[no-]recommend-shallow::
 	Esta opção só é válida para o comando `update`.  O clone inicial de um
-	submódulo por predefinição, utilizará o `submodule.<name>.shallow`
+	submódulo por predefinição, utilizará o `submodule.<nome>.shallow`
 	recomendado conforme é fornecido pelo arquivo `.gitmodules`. Para ignorar as
 	sugestões, utilize `--no-recommend-shallow`.
 
 -j <n>::
 --jobs <n>::
 	Esta opção só é válida para o comando `update`.  Clone novos submódulos em
-	paralelo com a mesmo quantidade de trabalhos.  É predefinido na opção
-	`submodule.fetchJobs`.
+	paralelo com a mesmo quantidade de trabalhos.  A predefinição retorna para a
+	configuração existente em `submodule.fetchJobs`.
 
 --[no-]single-branch::
 	Esta opção só é válida para o comando `update`.  Clone apenas uma

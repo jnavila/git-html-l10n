@@ -1,0 +1,176 @@
+--commit::
+--no-commit::
+	Execute a mesclagem e faça o commit com o resultado. Esta opção pode ser
+	usada para substituir a opção `--no-commit`.
++
+Com a opção `--no-commit`, executa a mesclagem e para imediatamente antes de
+criar a mesclagem de um commit, para dar ao usuário a chance de inspecionar
+e ajustar ainda mais o resultado da mesclagem antes de fazer o commit.
++
+Observe que as atualizações com avanço rápido não criam a mesclagem de um
+commit e portanto, não há como interromper essas mesclagens com a opção
+`--no-commit`.  Portanto, caso queira garantir que o seu ramo não seja
+alterado ou atualizado pelo comando mesclar, utilize --no-ff with
+--no-commit.
+
+--edit::
+-e::
+--no-edit::
+	Chame um editor antes de fazer a mesclagem mecânica de um commit bem
+	sucedido para editar ainda mais a mensagem da mesclagem que foi gerada
+	automaticamente, para que o usuário possa explicar e justificar a
+	mesclagem. A opção `--no-edit` pode ser utilizada para aceitar a mensagem
+	que foi gerada automaticamente (em geral isso é desencorajado).
+ifndef::git-pull[]
+A opção `--edit` (ou `-e`) ainda é útil caso esteja enviando uma mensagem de
+rascunho com a opção `-m` na linha de comando e queira editá-la no editor.
+endif::git-pull[]
++
+Os scripts mais antigos podem depender do comportamento histórico de não
+permitir que o usuário edite a mensagem do registro log da mesclagem. Eles
+verão um editor aberto quando executar o `git merge`. Para facilitar o
+ajuste destes scripts para o comportamento que foi atualizado, a variável de
+ambiente `GIT_MERGE_AUTOEDIT` pode ser definido como `no` no início deles.
+
+--cleanup=<modo>::
+	Esta opção determina como a mensagem de mesclagem será limpa antes da
+	confirmação. Para mais detalhes consulte linkgit:git-commit[1]. Além disso,
+	caso o '<mode>' seja dado o valor de `scissors`, `scissors` (tesouras) será
+	anexada a `MERGE_MSG` antes de ser repassada para o mecanismo de commit caso
+	exista mesclagens conflitantes.
+
+--ff::
+--no-ff::
+--ff-only::
+	Especifica como uma mesclagem é manipulada quando o histórico mesclado já é
+	um descendente do histórico atual.  A predefinição é a opção `--ff` , a
+	menos que durante a mesclagem de uma tag anotada (e possivelmente assinada)
+	que não seja armazenada em seu local natural na hierarquia `refs/tags/`, no
+	caso onde a opção `--ff` não será assumida.
++
+Com `--ff`, quando for possível, resolva a mesclagem como um avanço rápido
+(atualize apenas o ponteiro do ramo para coincidir com a ramificação que foi
+mesclada; não crie um commit da mesclagem).  Quando não for possível (quando
+o histórico mesclado não for um descendente do histórico atual), crie um
+commit da mesclagem.
++
+Com `--no-ff`, crie um commit da mesclagem em todos os casos, mesmo quando a
+mesclagem puder ser resolvida como um avanço rápido.
++
+Com a opção `--ff-only`, quando for possível, resolva a mesclagem com avanço
+rápido.  Quando não for possível, recuse a mesclagem e encerre com uma
+condição diferente de zero.
+
+-S[<keyid>]::
+--gpg-sign[=<keyid>]::
+--no-gpg-sign::
+	Assine a mesclagem resultante do commit com o GPG. O argumento `keyid` é
+	opcional e a predefinição retorna para a identidade de quem fez o commit; se
+	utilizado, deve estar anexado a opção sem espaço. A opção `--no-gpg-sign` é
+	útil para revogar a variável de configuração `commit.gpgSign` e a anterior
+	`--gpg-sign`.
+
+--log[=<n>]::
+--no-log::
+	Além dos nomes dos ramos, preencha a mensagem do registro log com descrições
+	de uma linha com no máximo <n> commits atuais que estão sendo
+	mesclados. Consulte também linkgit:git-fmt-merge-msg[1].
++
+Com '--no-log', não liste as descrições de uma linha vindas do commits que
+estão atualmente sendo mescladas.
+
+--signoff::
+--no-signoff::
+	Adicionar uma linha assinado pela pessoa que fez o commit no final do
+	registro log do commit assinado.  O significado de uma aprovação depende do
+	projeto, porém normalmente certifica que a pessoa que fez o commit tem o
+	direito de enviar este trabalho sob a mesma licença e concorda com um
+	Certificado de Origem do Desenvolvedor (consulte
+	http://developercertificate.org/ para obter mais informações).
++
+A opção `--no-signoff` não adiciona a linha de assinatura "Signed-off-by".
+
+--stat::
+-n::
+--no-stat::
+	Exiba um "diffstat" no final da mesclagem. O 'diffstat' também é controlado
+	pela opção da configuração merge.stat.
++
+Com `-n` ou `--no-stat`, não mostre o 'diffstat' no final da mesclagem.
+
+--squash::
+--no-squash::
+	Produza a árvore de trabalho e a condição do índice como se uma mesclagem
+	real tivesse acontecido (exceto as informações da mesclagem), porém não
+	efetue um commit, mova o `HEAD` ou registre o `$GIT_DIR/MERGE_HEAD` (para
+	causar o próximo comando `git commit` para criar uma mesclagem).  Isso
+	permite que você crie um único commit sobre o ramo atual, cujo efeito é o
+	mesmo que mesclar um outro ramo (ou mais no caso da mesclagem "octopus").
++
+Com a opção `--no-squash`, execute a mesclagem e faça o commit com o
+resultado. Esta opção pode ser usada para substituir a opção `--squash`.
++
+Com a opção `--squash`, a opção `--commit` não é permitida e irá falhar.
+
+--no-verify::
+	Esta opção ignora os ganchos dos commits anteriores e os ganchos das
+	mensagens do commit.  Consulte também linkgit:githooks[5].
+
+-s <estratégia>::
+--strategy=<estratégia>::
+	Use a estratégia de mesclagem informada; podem ser utilizado mais de uma vez
+	para defini-los na ordem em que devem ser tentados.  Caso não haja a opção
+	`-s`, em vez disso será usada uma lista de estratégias incorporada ('git
+	merge-recursive' ao mesclar um único cabeçalho, caso contrário 'git merge
+	octopus').
+
+-X <opção>::
+--strategy-option=<opção>::
+	Passe a opção específica da estratégia através da estratégia de mesclagem.
+
+--verify-signatures::
+--no-verify-signatures::
+	Verifique se o topo do commit do lado do ramo mesclado está assinado com uma
+	chave válida, ou seja, uma chave que possua um uid válida: no modelo de
+	confiança predefinido, isso significa que a chave da assinatura foi assinada
+	através de uma chave confiável.  Caso o topo do commit do lado do ramo não
+	seja assinada com uma chave válida, a mesclagem será cancelada.
+
+--summary::
+--no-summary::
+	É um sinônimos para `--stat` e `--no-stat`; estas opções foram
+	descontinuadas e serão removidas no futuro.
+
+ifndef::git-pull[]
+-q::
+--quiet::
+	Opere em silêncio. Implica no uso da opção `--no-progress`.
+
+-v::
+--verbose::
+	Seja loquaz.
+
+--progress::
+--no-progress::
+	Ativa/desativa o progresso de maneira explicita. Se nenhum seja definido, o
+	progresso será exibido caso o erro predefinido esteja conectado a um
+	terminal.  Observe que nem todas as estratégias de mesclagem podem se
+	compatíveis com os relatórios de progresso.
+
+endif::git-pull[]
+
+--autostash::
+--no-autostash::
+	Automatically create a temporary stash entry before the operation begins,
+	and apply it after the operation ends.  This means that you can run the
+	operation on a dirty worktree.  No entanto, utilize com cuidado: conflitos
+	não triviais podem acontecer caso a aplicação final do "stash" ocorra após
+	uma mesclagem bem-sucedida.
+
+--allow-unrelated-histories::
+	É predefinido que o comando `git merge` se recuse a mesclar os históricos
+	que não compartilham de um ancestral comum.  Esta opção pode ser utilizada
+	para substituir esta segurança durante a mesclagem dos históricos dos dois
+	projetos que iniciaram as suas vidas de forma independente. Como esta é uma
+	ocasião muito rara, não existe variável de configuração para ativar isso de
+	forma predefinida e não será adicionada.

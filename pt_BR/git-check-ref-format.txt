@@ -3,11 +3,10 @@ git-check-ref-format(1)
 
 NOME
 ----
-git-verifique-o-formato-ref - Garante que um nome de referência seja bem
-formado
+git-check-ref-format - Garanta que um nome da referência esteja bem formado
 
-SINOPSE
--------
+RESUMO
+------
 [verse]
 'git check-ref-format' [--normalize]
        [--[no-]allow-onelevel] [--refspec-pattern]
@@ -19,11 +18,12 @@ DESCRIÇÃO
 Verifica se um determinado 'refnome' é aceitável e sai com um status
 diferente de zero, se não for.
 
-Uma referência é usada no Git para especificar ramificações e tags.  Um
-branch head é armazenado na hierarquia `refs/heads`, enquanto um tag é
-armazenado na hierarquia` refs/tags` do espaço de nome ref (normalmente em
-`$GIT_DIR/refs/heads` e` $GIT_DIR/refs/tags `diretórios ou, como entradas no
-arquivo` $GIT_DIR/packed-refs`, se os refs forem empacotados por `git gc`).
+Uma referência é usada no Git para definir as ramificações e as tags.  Um
+cabeçalho de um ramo é armazenado dentro da hierarquia `refs/heads`,
+enquanto uma tag é armazenada na hierarquia `refs/tags` do espaço de nomes
+da ref (geralmente nos diretórios `$GIT_DIR/refs/heads` e no
+`$GIT_DIR/refs/tags` ou nas entradas do arquivo no `$GIT_DIR/packed-refs`
+caso a "ref" tenha sido empacotada através do comando `git gc`).
 
 O Git impõe as seguintes regras sobre como as referências são nomeadas:
 
@@ -31,9 +31,9 @@ O Git impõe as seguintes regras sobre como as referências são nomeadas:
   nenhum componente separado por barras pode começar com um ponto `.` ou
   terminar com a sequência `.lock`.
 
-. Eles devem conter pelo menos um `/`. Isso impõe a presença de uma categoria
-  como `heads /`, `tags /` etc., mas os nomes reais não são restritos.  Se a
-  opção `--allow-onelevel` for usada, esta regra é dispensada.
+. Eles devem ter pelo menos um `/`. Isto reforça a presença de uma categoria
+  como `heads/`, `tags/` etc. Porém os nomes reais não são restritos.  Caso a
+  opção `--allow-onelevel` seja utilizada, esta regra será dispensada.
 
 . Eles não podem ter dois pontos consecutivos `..` em qualquer lugar.
 
@@ -41,9 +41,9 @@ O Git impõe as seguintes regras sobre como as referências são nomeadas:
   valores são menores que \040, ou \177 `DEL`), espaço, til `~ `, circunflexo
   `^ `ou dois pontos `: `em qualquer lugar.
 
-. Eles não podem ter o ponto de interrogação `?`, asterisco `*` ou colchete
-  aberto `[` em qualquer lugar.  Veja a opção `--refspec-pattern` abaixo para
-  uma exceção a esta regra.
+. Eles não podem ter ponto de interrogação `?`, asterisco `*`, ou colchete
+  aberto `[` em qualquer lugar.  Consulte a opção `--refspec-pattern` abaixo
+  para uma exceção a esta regra.
 
 . Eles não podem iniciar ou terminar com uma barra `/` ou conter múltiplas
   barras consecutivas (veja a opção `--normalize` abaixo para uma exceção a
@@ -70,10 +70,10 @@ referências (consulte linkgit:gitrevisions[7]) :
 . Um til `~` e um caractere circunflexo `^` são utilizados para introduzir a
   operação do postfix 'nth parent' e 'peel onion'.
 
-. Um ponto-e-vírgula `:` é usado como `srcref: dstref` para significar" use o
-  valor de srcref e armazene-o em dstref "em operações de busca e envio.  Ele
-  também pode ser usado para selecionar um objeto específico, como com 'git
-  cat-file': "git cat-arquivo blob v1.3.3: refs.c".
+. Os dois pontos `:` são usados no `srcref:dstref` no sentido de "use o valor
+  do srcref\ e armazene-o no dstref" nas operações "fetch" e "push".  Também
+  para ser usado para selecionar um objeto em específico como com o comando
+  `git cat-file`: "git cat-file blob v1.3.3:refs.c".
 
 . at-open-brace `@{` é utilizado como uma notação para acessar uma entrada de
   reflog.
@@ -98,22 +98,23 @@ commit quando a enésima última coisa verificada não for um ramo.
 OPÇÕES
 ------
 --[no-]allow-onelevel::
-	Controla se refnomes de um nível são aceitos (isto é, refnomes que não
-	contêm múltiplos componentes separados por `/`).  O padrão é
-	`--não-allow-onelevel`.
+	Controla se os refnames com um nível serão aceitos (isto é, refnames que não
+	tenham vários componentes separados por `/`).  A predefinição é
+	`--no-allow-onelevel`.
 
 --refspec-pattern::
-	Interprete <refnome> como um padrão de nome de referência para um refspec
-	(conforme usado com repositórios remotos). Se esta opção estiver habilitada,
-	<refnome> tem permissão para conter um único `*` no refspec (por exemplo,
-	`foo/bar*/baz` ou`foo/bar*baz/ `mas não` foo/bar*/baz*`).
+	Interprete o <refname> como um padrão do nome para um refspec (conforme é
+	utilizado com os repositórios remotos).  Caso esta opção esteja ativada, o
+	<refname> poderá conter um único `*` no refspec (como por exemplo,
+	`foo/bar*/baz` ou `foo/bar*baz/` mas não `foo/bar*/baz*`).
 
 --normalize::
-	Normalize 'refnome' removendo quaisquer caracteres de barra (`/`) e
-	reduzindo as execuções de barras adjacentes entre componentes de nomes em
-	uma única barra.  Se o refnome normalizado for válido, imprima-o na saída
-	padrão e saia com um status 0, caso contrário saia com um status diferente
-	de zero. (`--print` é uma maneira obsoleta de soletrar` --normalize`.)
+	Normalize 'refname' removendo quaisquer caracteres iniciais com barra (`/`)
+	e reduzindo as execuções das barras adjacentes entre os nomes dos
+	componentes em uma única barra.  Caso o 'refname' normalizado seja válido,
+	imprima-o na saída padrão e encerre com a condição 0, caso contrário encerre
+	com uma condição diferente de zero.  (a opção `--print` é uma maneira
+	obsoleta de soletrar `--normalize`.)
 
 
 EXEMPLOS
