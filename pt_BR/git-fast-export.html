@@ -544,9 +544,9 @@ muitos frontends de importação rápida (fast-import) não estão preparados
 para aceitar as tags com identificadores de marcação.</p>
 <div class="paragraph">
 <p>Quaisquer commits (ou tags) que já foram marcadas não serão exportadas
-novamente.  Se o processo interno utilizar um arquivo <em>--import-marks</em>
-semelhante, isso permitirá a exportação bidirecional e incremental do
-repositório, mantendo as marcas iguais durante as execuções.</p>
+novamente.  Caso a estrutura utilize um arquivo <em>--import-marks</em> semelhante,
+isto permitirá a exportação bidirecional e incremental do repositório,
+mantendo as marcas iguais durante as execuções.</p>
 </div>
 </dd>
 <dt class="hdlist1">--fake-missing-tagger</dt>
@@ -579,6 +579,12 @@ primeiro commit).</p>
 <dd>
 <p>Torne os conteúdos do repositório, anônimo, mantendo a forma do histórico e
 da árvore armazenada.  Veja a seção <code>ANONIMIZANDO</code> abaixo.</p>
+</dd>
+<dt class="hdlist1">--anonymize-map=&lt;a-partir-de&gt;[:&lt;para&gt;]</dt>
+<dd>
+<p>Converta o token <code>&lt;a-partir-de&gt;</code> para <code>&lt;para&gt;</code> na saída anônima. Caso
+<code>&lt;para&gt;</code> seja omitido, mapeie <code>&lt;a-partir-de&gt;</code> para si mesmo (ou seja, não
+anonimamente). Consulte a seção 'ANONIMIZANDO` abaixo.</p>
 </dd>
 <dt class="hdlist1">--reference-excluded-parents</dt>
 <dd>
@@ -724,6 +730,38 @@ recolher o "Usuário 0", "Usuário 1" etc. em "Usuário X"). Isso produz uma
 saída muito menor e geralmente é de rápida confirmação já que não há dados
 privados no fluxo.</p>
 </div>
+<div class="paragraph">
+<p>A reprodução de alguns bugs pode exigir a referência para alguns commits em
+particular ou caminhos específicos, o que se torna desafiador depois que os
+refnames e os caminhos sejam anonimizados. É possível solicitar que um token
+em específico seja deixado como está ou seja mapeado para um novo
+valor. Como por exemplo, caso tenha um bug que seja reproduzido com o
+comando <code>git rev-list sensitive -- secret.c</code>, é possível executar:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git fast-export --anonymize --all \
+      --anonymize-map=sensitive:foo \
+      --anonymize-map=secret.c:bar.c \
+      &gt;stream</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Depois de importar o fluxo, é possível então executar o commando <code>git
+rev-list foo -- bar.c</code> no repositório anonimizado.</p>
+</div>
+<div class="paragraph">
+<p>Observe que os caminhos e os nomes são divididos em tokens nos limites do
+corte.  O comando acima iria anonimizar <code>subdir/secret.c</code> para algo como
+<code>path123/bar.c</code>; seria possível então procurar por <code>bar.c</code> no repositório
+anonimizado para determinar o caminho final.</p>
+</div>
+<div class="paragraph">
+<p>Para tornar mais simples a referência ao pathname (nome do caminho), é
+possível mapear cada componente do caminho; então, caso também anonimize o
+<code>subdir</code> para <code>publicdir</code>, então o nome final do caminho seria
+<code>publicdir/bar.c</code>.</p>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -755,7 +793,7 @@ referência a uma árvore em vez de um commit.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-07-05 20:58:55 +0200
+Last updated 2020-08-04 16:18:03 +0200
 </div>
 </div>
 </body>

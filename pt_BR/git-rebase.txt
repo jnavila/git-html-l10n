@@ -265,10 +265,11 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 	permanecem inalterados. Caso uma entrada temporária 'stash' seja criada
 	utilizando `--autostash`, ela será salva na lista 'stash'.
 
---apply:
+--apply::
 	Utilize estratégias para aplicar o "rebase" (invocando `git-am`
-	internamente).  Esta opção poderá se tornar não operacional no futuro
-	uma vez que o processo interno da mesclagem processe tudo o que a opção '--apply' fizer.
+	internamente).  Esta opção poderá se tornar não operacional no futuro uma
+	vez que o processo interno da mesclagem processe tudo o que a opção
+	'--apply' fizer.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
@@ -657,30 +658,30 @@ Além disso, os seguintes pares de opções são incompatíveis:
 DIFERENÇAS COMPORTAMENTAIS
 -----------------------
 
-O git rebase possui dois processos internos: `apply` e `merge`.  (A aplicação
-do processo interno era informado como 'am', porém o nome causava
-confusão já que parecia um verbo em vez de um substantivo.  Além disso, o processo interno
-`merge` era informado como 'interactive backend', porém agora
-também é usado para casos não interativos.  Ambos foram renomeados com baso na
+O git rebase possui duas estruturas primárias: `apply` e `merge`.  (A aplicação
+da estrutura era conhecido como 'am', porém o nome causava
+confusão já que parecia um verbo em vez de um substantivo.  Além disso, a estrutura
+`merge` era informada como 'interactive backend', porém agora
+também é usado para casos não interativos.  Ambos foram renomeados com base na
 funcionalidade de baixo nível que sustentava cada um.) Há algumas
 diferenças sutis em como estes dois processos internos se comportam:
 
 Commits vazios
 ~~~~~~~~~~~~~
 
-O processo interno aplicado infelizmente descarta os commits vazios de forma intencional, ou seja.
+A estrutura aplicada infelizmente descarta os commits vazios de forma intencional, ou seja.
 Os commits que começaram vazios, contudo na prática, é algo raro.  Também
 descarta os commits que se tornam vazios e não há uma opção para controlar
 este comportamento.
 
-É predefinido que o processo interno da mesclagem mantenha os commits
+É predefinido que a estrutura da mesclagem mantenha os commits
 intencionalmente vazios (com `-i` são marcados como vazio no editor da lista de tarefas,
 ou podem ser descartados automaticamente com a opção `--no-keep-empty`).
 
-Semelhante ao processo interno da aplicação, é predefinido que
-o processo interno da mesclagem derrube os commits que se tornaram vazios,
+Semelhante à estrutura aplicada, é predefinido que
+a estrutura da mesclagem derrube os commits que se tornaram vazios,
 a menos que as opções `-i` ou `--interactive` sejam definidas (nesse caso, ele
-para e pergunta ao usuário o que fazer).  O processo interno da mesclagem
+para e pergunta ao usuário o que fazer).  A estrutura da mesclagem
 também possui uma opção --empty={drop,keep,ask} para alterar o comportamento
 da manipulação dos commits que ficam vazios.
 
@@ -689,20 +690,20 @@ Detecção da renomeação do diretório
 
 Devido à falta de informações precisas sobre as árvores (que surge de
 construções dos ancestrais falsos com informações limitadas disponíveis nos
-patches), a detecção da renomeação do diretório é desativado no processo interno da aplicação.
+patches), a detecção da renomeação do diretório é desativado na estrutura da aplicação.
 A desativação da detecção da renomeação do diretório, significa que se um lado do histórico
 renomear um diretório e o outro adicionar novos arquivos no diretório antigo, então
 os novos arquivos serão deixados para trás no diretório antigo sem qualquer aviso, 
 durante a reconstrução onde você possa talvez querer mover estes arquivos, 
 para o novo diretório.
 
-A detecção da renomeação do diretório funciona com o processo interno da mesclagem,
+A detecção da renomeação do diretório funciona com a estrutura da mesclagem,
 neste caso, fornecendo informações para você.
 
 Contexto
 ~~~~~~~~
 
-A aplicação do processo interno funciona ao criar uma sequencia de patches (chamando
+A aplicação da estrutura funciona ao criar uma sequencia de patches (chamando
 o `format-patch` internalmente), então se aplicam os patches em sequência
 (invocando o `am` internamente).  Os patches são compostos de vários pedaços,
 cada um com linhas numeradas, o contexto da região, e as alterações atuais.  As
@@ -717,7 +718,7 @@ Definindo o `diff.context` para um valor maior, isso pode impedir que
 estes tipos de problemas ocorram, porém aumenta a chance de conflitos espúrios (uma vez que
 exigirá mais linhas que coincidam com o contexto para serem aplicados).
 
-O processo interno da mesclagem trabalha com a cópia completa
+A estrutura da mesclagem trabalha com a cópia completa
 de casa arquivo relevante, isolando-os destes tipos de problemas.
 
 Rotulagem dos marcadores de conflitos
@@ -725,25 +726,25 @@ Rotulagem dos marcadores de conflitos
 
 Quando há conteúdos conflitantes, o mecanismo da mesclagem tenta
 anotar os marcadores de conflito de cada lado com os commits
-de onde o conteúdo veio.  Como o processo interno descarta o original, as
+de onde o conteúdo veio.  Como a estrutura descarta o original, as
 informações sobre os commits reconstruídos e seus pais (em vez disso,
 gera novos commits falsos com base nas informações limitadas no
 patches que foram gerados), estes commits não podem ser identificados;
 em vez disso tem que retornar para um resumo do commit.  Além disso, quando `merge.conflictStyle` é
-definido para 'diff3', o processo interno aplicado utilizará uma
+definido para 'diff3', a estrutura aplicada utilizará uma
 "mesclagem reconstruída da base" para rotular o conteúdo da base mesclada
 e portanto, não fornecer qualquer informações sobre o commit da base mesclada.
 
-O processo interno da mesclagem funciona com commits completos nos dois
+A estrutura da mesclagem funciona com commits completos nos dois
 lados da história e portanto, não tem tais limitações.
 
 Ganchos
 ~~~~~~~
 
-O processo interno de aplicação não chama tradicionalmente o gancho pós-commit,
-enquanto o processo interno de mesclagem chama.  Ambos chamaram o gancho pós-averiguação,
-embora o processo interno da mesclagem reduza a sua saída.  Além disso, ambos
-os processos internos chamam apenas o gancho pós-averiguação com o ponto de partida
+A estrutura da aplicação não chama tradicionalmente o gancho pós-commit,
+enquanto a estrutura da mesclagem chama.  Ambos chamaram o gancho pós-averiguação,
+embora a estrutura da mesclagem reduza a sua saída.  Além disso, ambas
+as estruturas chamam apenas o gancho pós-averiguação com o ponto de partida
 para fazer o commit da reconstrução da fundação (rebase), nem o commit intermediário,
 nem o commit final.  Em cada caso, o chamado desses ganchos foi por acidente de
 implementação em vez de design (os dois processos internos eram originalmente
@@ -756,10 +757,10 @@ chamando um destes ganchos no futuro.
 Interrupção
 ~~~~~~~~~~~
 
-A aplicação do processo interno possui problemas de segurança relacionada
+A aplicação da estrutura possui problemas de segurança relacionada
 com interrupção de tempo; caso o usuário pressione Ctrl+C no momento errado
 ao tentar interromper o processo 'rebase' (reconstrução), o processo então pode entrar
-em uma condição ele não pode ser parado posteriormente com um comando `git rebase --abort`.  O processo interno da mesclagem não
+em uma condição ele não pode ser parado posteriormente com um comando `git rebase --abort`.  A estrutura da mesclagem não
 parece sofrer da mesma deficiência.  (Consulte
 https://lore.kernel.org/git/20200207132152.GC2868@szeder.dev/
 para obter mais detalhes.)
@@ -771,8 +772,8 @@ Quando ocorre um conflito durante o processo 'rebase', o processo
 para e pergunta ao usuário para resolver o problema.  Como o usuário pode precisar fazer muitas alterações enquanto
 resolve os conflitos, depois que os conflitos forem resolvidos e o
 usuário tenha executado o comando `git rebase --continue`, o 'rebase'
-deverá abrir o editor e perguntar ao usuário para atualizar a mensagem do commit.  O processo interno da mesclagem faz isso, enquanto
-o processo interno da aplicação aplica cegamente a mensagem do commit original.
+deverá abrir o editor e perguntar ao usuário para atualizar a mensagem do commit.  A estrutura da mesclagem faz isso, enquanto
+a estrutura aplica cegamente a mensagem do commit original.
 
 Diferenças diversas
 ~~~~~~~~~~~~~~~~~~~
@@ -781,17 +782,17 @@ Existem mais algumas diferenças comportamentais que a maioria das
 pessoas considerariam fazer de forma inconsequente, porém são mencionadas
 por questões de integridade:
 
-* Reflog: os dois processos internos que utilizarão palavras diferentes durante a descrição
+* Reflog: As duas estruturas que utilizarão palavras diferentes durante a descrição
   das alterações feitas no reflog, embora ambos façam a utilização da
   palavra "rebase"
 
-* Mensagens de progresso, informacionais e de erro: Os dois processo internos
+* Mensagens de progresso, informacionais e de erro: As duas estruturas
   fornecem um progresso ligeiramente diferente das mensagens informantes.
-  Além disso, o processo interno aplicante grava uma mensagens de erro (como "Os seus arquivos
-  serão substituídos...") para o stdout, enquanto a mesclagem do processo interno escrevem
+  Além disso, a estrutura aplicada grava uma mensagens de erro (como "Os seus arquivos
+  serão substituídos...") para o stdout, enquanto a mesclagem da estrutura escrevem
   eles no stderr.
 
-* Diretórios de estado: os dois processos internos mantêm a sua condição em diferentes
+* Diretórios de estado: As duas estruturas mantêm a sua condição em diferentes
   diretórios dentro do `.git/`
 
 include::merge-strategies.txt[]

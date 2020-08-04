@@ -84,9 +84,9 @@ resultados incorretos caso essas opções fossem utilizadas.
 	para aceitar as tags com identificadores de marcação.
 +
 Quaisquer commits (ou tags) que já foram marcadas não serão exportadas
-novamente.  Se o processo interno utilizar um arquivo '--import-marks'
-semelhante, isso permitirá a exportação bidirecional e incremental do
-repositório, mantendo as marcas iguais durante as execuções.
+novamente.  Caso a estrutura utilize um arquivo '--import-marks' semelhante,
+isto permitirá a exportação bidirecional e incremental do repositório,
+mantendo as marcas iguais durante as execuções.
 
 --fake-missing-tagger::
 	Alguns repositórios antigos têm tags sem um etiquetador.  O protocolo de
@@ -113,6 +113,11 @@ repositório, mantendo as marcas iguais durante as execuções.
 --anonymize::
 	Torne os conteúdos do repositório, anônimo, mantendo a forma do histórico e
 	da árvore armazenada.  Veja a seção `ANONIMIZANDO` abaixo.
+
+--anonymize-map=<a-partir-de>[:<para>]::
+	Converta o token `<a-partir-de>` para `<para>` na saída anônima. Caso
+	`<para>` seja omitido, mapeie `<a-partir-de>` para si mesmo (ou seja, não
+	anonimamente). Consulte a seção 'ANONIMIZANDO` abaixo.
 
 --reference-excluded-parents::
 	É predefinido que ao executar um comando como `git fast-export
@@ -234,6 +239,32 @@ recolher o "Usuário 0", "Usuário 1" etc. em "Usuário X"). Isso produz uma
 saída muito menor e geralmente é de rápida confirmação já que não há dados
 privados no fluxo.
 
+A reprodução de alguns bugs pode exigir a referência para alguns commits em
+particular ou caminhos específicos, o que se torna desafiador depois que os
+refnames e os caminhos sejam anonimizados. É possível solicitar que um token
+em específico seja deixado como está ou seja mapeado para um novo
+valor. Como por exemplo, caso tenha um bug que seja reproduzido com o
+comando `git rev-list sensitive -- secret.c`, é possível executar:
+
+---------------------------------------------------
+$ git fast-export --anonymize --all \
+      --anonymize-map=sensitive:foo \
+      --anonymize-map=secret.c:bar.c \
+      >stream
+---------------------------------------------------
+
+Depois de importar o fluxo, é possível então executar o commando `git
+rev-list foo -- bar.c` no repositório anonimizado.
+
+Observe que os caminhos e os nomes são divididos em tokens nos limites do
+corte.  O comando acima iria anonimizar `subdir/secret.c` para algo como
+`path123/bar.c`; seria possível então procurar por `bar.c` no repositório
+anonimizado para determinar o caminho final.
+
+Para tornar mais simples a referência ao pathname (nome do caminho), é
+possível mapear cada componente do caminho; então, caso também anonimize o
+`subdir` para `publicdir`, então o nome final do caminho seria
+`publicdir/bar.c`.
 
 LIMITAÇÕES
 ----------
