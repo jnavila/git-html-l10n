@@ -1,0 +1,194 @@
+Rohdaten-Ausgabe-Format
+-----------------------
+
+Die rohen Ausgabeformate von "git-diff-index", "git-diff-tree",
+"git-diff-files" und "git diff --raw" sind sehr ähnlich.
+
+Die Befehle vergleichen alle zwei Sätze von Dingen; was verglichen wird,
+unterscheidet sich:
+
+git-diff-index <baumartig>::
+        vergleicht <baumartig> mit den Dateien auf dem Dateisystem.
+
+git-diff-index --cached <baumartig>::
+        vergleicht <baumartig> mit dem Index.
+
+git-diff-tree [-r] <tree-ish-1> <tree-ish-2> [<Muster>...]::
+        vergleicht die Verzeichnis-Bäume, die durch die beiden Argumente bestimmt
+        wurden.
+
+git-diff-files [<Muster>...]::
+        vergleicht den Index mit den Dateien auf dem Dateisystem.
+
+Der "git-diff-tree"-Befehl beginnt seine Ausgabe mit dem Ausgeben des Hashes
+von dem, was verglichen wird. Danach geben alle Befehle eine Ausgabezeile
+pro geänderter Datei aus.
+
+Eine Ausgabezeile ist so formatiert:
+
+------------------------------------------------
+direkt-bearbeiten      :100644 100644 bcd1234 0123456 M Datei0
+kopieren-bearbeiten    :100644 100644 abcd123 1234567 C68 Datei1 Datei2
+umbenennen-bearbeiten  :100644 100644 abcd123 1234567 R86 Datei1 Datei3
+erstellen              :000000 100644 0000000 1234567 A Datei4
+löschen                :100644 000000 1234567 0000000 D Datei5
+nicht gemergt          :000000 000000 0000000 0000000 U Datei6
+------------------------------------------------
+
+Das Folgende bedeutet (von links nach rechts):
+
+. ein Doppelpunkt.
+. Modus für "src"; 000000 falls erstellt oder nicht gemergt.
+. ein Leerzeichen.
+. Modus für "dst"; 000000, falls gelöscht oder nicht gemergt.
+. ein Leerzeichen.
+. SHA1-Hash für "src"; 0\{40\} falls erstellt oder nicht gemergt.
+. ein Leerzeichen.
+. SHA1-Hash für "dst"; 0\{40\}falls erstellt, nicht gemergt oder
+  "Arbeitsbereich überprüfen".
+. ein Leerzeichen.
+. Status, gefolgt von optionaler "score"-Nummer.
+. ein Tab oder ein NUL, wenn die `-z`-Option benutzt wird.
+. Pfad für "src"
+. ein Tab oder ein NUL, wenn die `-z`-Option benutzt wird; existiert nur für C
+  oder R.
+. Pfad für "dst"; existiert nur für C oder R.
+. ein LF oder ein NUL, wenn die `-z`-Option benutzt wird, um den Datensatz zu
+  beenden.
+
+Mögliche Status-Buchstaben sind:
+
+- A: Hinzufügen einer Datei
+- C: Kopieren einer Datei in eine neue
+- D: Löschung einer Datei
+- M: Modifikation des Inhalts oder Modus einer Datei
+- R: Umbenennen einer Datei
+- T: Änderungen in dem Typ der Datei
+- U: Datei ist nicht zusammengeführt (du musst die Zusammenführung
+  abschließen, bevor es commited werden kann)
+- X: "unbekannt" Änderungstyp (höchstwahrscheinlich ein Bug, bitte melde ihn)
+
+Die Status-Buchstaben C und R werden immer von einer Punktzahl gefolgt (die
+den Prozentsatz der Ähnlichkeit zwischen Quelle und Ziel des Verschiebens
+oder des Kopierens angibt).  Auf den Status-Buchstaben M kann eine Punktzahl
+(die den Prozentsatz der Unähnlichkeit angibt) für das Umschreiben von
+Dateien folgen.
+
+<sha1> wird als alle 0 angezeigt, wenn eine Datei neu auf dem Dateisystem
+ist und sie nicht synchron mit dem Index ist.
+
+Beispiel:
+
+------------------------------------------------
+:100644 100644 5be4a4a 0000000 M Datei.c
+------------------------------------------------
+
+Ohne die Option `-z` werden Pfadnamen mit „ungewöhnlichen“ Zeichen in
+Anführungszeichen gesetzt, wie für die Konfigurationsvariable
+`core.quotePath` erklärt (siehe linkgit:git-config[1]).  Mit `-z` wird der
+Dateiname wortwörtlich ausgegeben und die Zeile mit einem NUL-Byte
+abgeschlossen.
+
+diff-Format bei Merges
+----------------------
+
+„git-diff-tree“, „git-diff-files“ und „git-diff --raw“ können die Option
+`-c` oder `--cc` benutzen, um Diff-Ausgaben auch für Merge-Commits zu
+erzeugen.  Die Ausgabe unterscheidet sich von dem oben beschriebenen Format
+in der folgenden Weise:
+
+. für jedes Elternteil ist ein Doppelpunkt vorhanden
+. Es gibt weitere „src“-Modi und „src“-SHA1-Hashes
+. Für jedes Elternteil ist der Status als verkettete Statuszeichen dargestellt
+. Es gibt keine optionale „Score“-Zahl
+. Pfadnamen der Datei werden durch Tabulatoren getrennt
+
+For `-c` and `--cc`, only the destination or final path is shown even if the
+file was renamed on any side of history.  With `--combined-all-paths`, the
+name of the path in each parent is shown followed by the name of the path in
+the merge commit.
+
+Examples for `-c` and `--cc` without `--combined-all-paths`:
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	phooey.c
+------------------------------------------------
+
+Examples when `--combined-all-paths` added to either `-c` or `--cc`:
+
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c	desc.c	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	foo.sh	bar.sh	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	fooey.c	fuey.c	phooey.c
+------------------------------------------------
+
+Beachten Sie bitte, dass 'combined diff' nur Dateien auflistet, die von
+allen Elternteilen modifiziert wurden.
+
+
+include::diff-generate-patch.txt[]
+
+
+andere diff-Formate
+-------------------
+
+Die Option `--summary` beschreibt neu hinzugefügte, gelöschte, umbenannte
+und kopierte Dateien.  Die Option `--stat` fügt ein diffstat(1)-Diagramm zur
+Ausgabe hinzu.  Diese Optionen können mit anderen Optionen, wie z.B. `-p`,
+kombiniert werden und sind für den Gebrauch durch Personen gedacht.
+
+Wenn eine Änderung angezeigt wird, die eine Umbenennung oder eine Kopie
+beinhaltet, formatiert `--stat` die Pfadnamen kompakt, indem es gemeinsame
+Präfixe und Suffixe der Pfadnamen vereint.  Zum Beispiel wird eine Änderung,
+die `arch/i386/Makefile` nach `arch/x86/Makefile` verschiebt, wobei noch 4
+Zeilen modifiziert werden, wie folgt dargestellt:
+
+------------------------------------
+arch/{i386 => x86}/Makefile    |   4 +--
+------------------------------------
+
+Die Option `--numstat` liefert die diffstat(1)-Informationen, ist aber
+hauptsächlich die maschinelle Verarbeitung gedacht.  Ein solcher Einsatz in
+der `--numstat`-Ausgabe sieht wie folgt aus:
+
+----------------------------------------
+1	2	README
+3	1	arch/{i386 => x86}/Makefile
+----------------------------------------
+
+Das Folgende bedeutet (von links nach rechts):
+
+. die Anzahl der eingefügten Zeilen;
+. ein Tabulator;
+. die Anzahl der gelöschten Zeilen;
+. ein Tabulator;
+. Pfadname (eventuell mit Informationen zum Umbenennen/Kopieren);
+. eine neue Zeile.
+
+Wenn die Ausgabeoption `-z` aktiv ist, wird die Ausgabe so formatiert:
+
+----------------------------------------
+1	2	README NUL
+3	1	NUL arch/i386/Makefile NUL arch/x86/Makefile NUL
+----------------------------------------
+
+Das bedeutet:
+
+. die Anzahl der eingefügten Zeilen;
+. ein Tabulator;
+. die Anzahl der gelöschten Zeilen;
+. ein Tabulator;
+. ein NUL (nur dann, falls umbenannt oder kopiert);
+. Pfadname im Pre-Image;
+. ein NUL (nur dann, falls umbenannt oder kopiert);
+. Pfadname im Post-Image (existiert nur, falls umbenannt oder kopiert);
+. ein NUL.
+
+Die zusätzliche `NUL` vor dem Pre-Image-Pfad (falls eine Umbenennung
+vorliegt) soll es auslesenden Skripten ermöglichen zu erkennen, ob bei dem
+aktuell gelesenen Datensatz ein Single-Path-Datensatz oder ein Datensatz zum
+Umbenennen/Kopieren vorliegt, ohne ihn vorab lesen zu müssen.  Nach dem
+Lesen von hinzugefügten und gelöschten Zeilen würde das Lesen bis zur `NUL`
+den Pfadnamen ergeben, wenn aber dieser `NUL` ist, zeigt der Datensatz zwei
+Pfade an.
