@@ -506,11 +506,55 @@ BONITOS" do <a href="git-log.html">git-log(1)</a>.)</p>
 </div>
 </div>
 </dd>
+<dt class="hdlist1">--group=&lt;tipo&gt;</dt>
+<dd>
+<p>Grupo dos commits com base no <code>&lt;tipo&gt;</code>. Caso nenhuma opção <code>--group</code> seja
+usada a predefinição é <code>author</code>. <code>&lt;tipo&gt;</code> é um dos:</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><code>author</code>, os commits são agrupados pelo autor</p>
+</li>
+<li>
+<p><code>committer</code>, os commits são agrupados por aquele que faz os commits (o mesmo
+que <code>-c</code>)</p>
+</li>
+<li>
+<p><code>trailer:&lt;campo&gt;</code>, o <code>&lt;campo&gt;</code> é interpretado como um trecho da mensagem do
+commit indiferente se for maiúsculas ou minúsculas (consulte
+<a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>). Por exemplo, caso o seu projeto use
+trechos <code>Revisados por</code> (<code>Reviewed-by</code>), é possível ver quem tem feito a
+revisão através do comando <code>git shortlog -ns --group=trailer:reviewed-by</code>.</p>
+<div class="paragraph">
+<p>Observe que os commits não serão contados caso não incluam os trechos.  Da
+mesma maneira que os commits com vários trechos (por exemplo, diversos
+signoffs) podem ser contados mais de uma vez (porém apenas uma vez com o
+valor de um trecho único naquele commit).</p>
+</div>
+<div class="paragraph">
+<p>Shortlog will attempt to parse each trailer value as a <code>name &lt;email&gt;</code>
+identity. If successful, the mailmap is applied and the email is omitted
+unless the <code>--email</code> option is specified. If the value cannot be parsed as
+an identity, it will be taken literally and completely.</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If <code>--group</code> is specified multiple times, commits are counted under each
+value (but again, only once per unique value in that commit). For example,
+<code>git shortlog --group=author --group=trailer:co-authored-by</code> counts both
+authors and co-authors.</p>
+</div>
+</dd>
 <dt class="hdlist1">-c</dt>
 <dt class="hdlist1">--committer</dt>
 <dd>
-<p>Colete e exiba as identidades de quem realizou os commits em vez dos
-autores.</p>
+<p>É um apelido para <code>--group=committer</code>.</p>
 </dd>
 <dt class="hdlist1">-w[&lt;largura&gt;[,&lt;recuo1&gt;[,&lt;recuo2&gt;]]]</dt>
 <dd>
@@ -694,8 +738,7 @@ Essa opção pode lhe fornecer uma melhor visão geral durante a visualização
 da evolução de um tópico específico no ramo, pois faz a mesclagem em um
 tópico no ramo e tende a ser apenas sobre o ajuste das atualizações upstream
 de tempos em tempos, esta opção permite ignorar os commits individuais
-trazidas para o seu histórico feitas por essa mesclagem. Não pode ser
-combinado com <code>--bisect</code>.</p>
+trazidas para o seu histórico feitas por essa mesclagem.</p>
 </dd>
 <dt class="hdlist1">--not</dt>
 <dd>
@@ -781,7 +824,7 @@ não foi informada.</p>
 <dd>
 <p>Finja como se uma bisseção ruim "ref" <code>refs/bisect/bad</code> estivesse listada e
 como se fosse seguida por <code>--not</code> e a boa bisseção refs <code>refs/bisect/good-*</code>
-na linha de comando. Não pode ser combinado com <code>--first-parent</code>.</p>
+na linha de comando.</p>
 </dd>
 <dt class="hdlist1">--stdin</dt>
 <dd>
@@ -804,9 +847,9 @@ simétrica.</p>
 de listar todos os commits em apenas um lado deles é com a opção
 <code>--left-right</code> (veja o exemplo abaixo na descrição da opção
 <code>--left-right</code>). No entanto, exibe os commits que foram selecionados de
-forma seletiva no outro ramo (como por exemplo, &#8220;3º no b&#8221; pode ser a
-escolha seletiva do ramo <code>A</code>). Com esta opção, estes pares de commits são
-excluídos da saída.</p>
+forma seletiva no outro ramo (por exemplo, &#8220;3º no b&#8221; pode ser a escolha
+seletiva do ramo <code>A</code>). Com esta opção, estes pares de commits são excluídos
+da saída.</p>
 </div>
 </dd>
 <dt class="hdlist1">--left-only</dt>
@@ -895,11 +938,11 @@ commits são prefixados com <code>-</code>.</p>
 <div class="sect2">
 <h3 id="_simplificação_do_histórico">Simplificação do histórico</h3>
 <div class="paragraph">
-<p>Às vezes, você está interessado apenas nas partes da história, como por
-exemplo, os commit que alteraram um determinado &lt;caminho&gt;. Porém existem
-duas partes da <em>Simplificação do Histórico</em>, uma parte é a seleção dos
-commits e a outra é como fazê-lo, pois existem várias estratégias para
-simplificar o histórico.</p>
+<p>Às vezes, você está interessado apenas nas partes da história, por exemplo,
+os commit que alteraram um determinado &lt;caminho&gt;. Porém existem duas partes
+da <em>Simplificação do Histórico</em>, uma parte é a seleção dos commits e a outra
+é como fazê-lo, pois existem várias estratégias para simplificar o
+histórico.</p>
 </div>
 <div class="paragraph">
 <p>As seguintes opções selecionam os commits que serão exibidos:</p>
@@ -960,11 +1003,11 @@ contribuindo para essa mesclagem.</p>
 </dd>
 <dt class="hdlist1">--ancestry-path</dt>
 <dd>
-<p>Quando um intervalo dos commits é exibido (como por exemplo,
-<em>commit1..commit2</em> ou <em>commit2 ^commit1</em>), apenas exibe os commits que
-existem diretamente na cadeia de ancestralidade entre o <em>commit1</em> e o
-<em>commit1</em>, ou seja, os commits que são ambos descendentes doe <em>commit1</em> e os
-ancestrais do <em>commit2</em>.</p>
+<p>Quando um intervalo dos commits é exibido (por exemplo, <em>commit1..commit2</em>
+ou <em>commit2 ^commit1</em>), apenas exibe os commits que existem
+diretamente na cadeia de ancestralidade entre o <em>commit1</em> e o <em>commit1</em>, ou
+seja, os commits que são ambos descendentes doe <em>commit1</em> e os ancestrais do
+<em>commit2</em>.</p>
 </dd>
 </dl>
 </div>
@@ -1239,7 +1282,7 @@ os commits, exceto <code>A</code> e <code>B</code> (e <code>D</code>, obviamente
 <p>Quando queremos descobrir o qual commit em <code>M</code> está contaminado com o bug
 introduzido por <code>D</code> e precisa ser corrigido, contudo, podemos querer
 visualizar apenas o subconjunto <em>D..M</em> que são realmente descendentes do
-<code>D</code>, como por exemplo, excluindo <code>C</code> e <code>K</code>. É exatamente isso que a opção
+<code>D</code>, por exemplo, excluindo <code>C</code> e <code>K</code>. É exatamente isso que a opção
 <code>--ancestry-path</code> faz. Aplicado à faixa <em>D..M</em>, resulta em:</p>
 </div>
 <div class="listingblock">
@@ -1373,10 +1416,10 @@ do commit.</p>
 commit que não seja <em>TREESAME</em> para o primeiro parente, porém que seja
 <em>TREESAME</em> para um parente posterior.</p>
 <div class="paragraph">
-<p>Quando a mesclagem de um commit é incluso pela opção <code>--show-pulls</code>, a
+<p>Quando a mesclagem de um commit é incluso através da opção <code>--show-pulls</code>, a
 mesclagem é tratada como tivesse "capturado" as alterações de um outro
 ramo. Ao usar a opção <code>--show-pulls</code> nest exemplo (e em nenhuma outra opção)
-o grafo resultante é:</p>
+o grafo resultante será:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1564,7 +1607,7 @@ própria linha ou após o endereço de email.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-08-04 16:18:04 +0200
+Last updated 2020-10-20 22:50:36 +0200
 </div>
 </div>
 </body>

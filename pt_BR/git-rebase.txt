@@ -208,6 +208,7 @@ CONFIGURAÇÃO
 ------------
 
 include::config/rebase.txt[]
+include::config/sequencer.txt[]
 
 OPÇÕES
 ------
@@ -266,10 +267,10 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 	utilizando `--autostash`, ela será salva na lista "stash".
 
 --apply::
-	Utilize estratégias para aplicar o "rebase" (invocando `git-am`
-	internamente).  Esta opção poderá se tornar não operacional no futuro uma
-	vez que o processo interno da mesclagem processe tudo o que a opção
-	'--apply' fizer.
+	Utilize estratégias para aplicar a reestruturação da base "rebase"
+	(invocando `git-am` internamente).  Esta opção poderá se tornar não
+	operacional no futuro uma vez que o processo interno da mesclagem processe
+	tudo o que a opção '--apply' fizer.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
@@ -470,16 +471,36 @@ seu ramo.
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 --ignore-whitespace::
+Ignore whitespace differences when trying to reconcile
+differences. Currently, each backend implements an approximation of this
+behavior:
++
+apply backend: When applying a patch, ignore changes in whitespace in
+context lines. Unfortunately, this means that if the "old" lines being
+replaced by the patch differ only in whitespace from the existing file, you
+will get a merge conflict instead of a successful patch application.
++
+merge backend: Treat lines with only whitespace changes as unchanged when
+merging. Unfortunately, this means that any patch hunks that were intended
+to modify whitespace and nothing else will be dropped, even if the other
+side had no changes that conflicted.
+
 --whitespace=<opção>::
-	Estas opções são repassados para o comando 'git apply' que aplica o patch
+	Esta opção é repassada para o comando 'git apply' que aplica o patch
 	(consulte  linkgit:git-apply[1]).  Implica no uso da opção --apply.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 --committer-date-is-author-date::
+	Em vez de usar a hora atual como a data de quem fez o commit, utilize a data
+	do autor que fez o rebase do commit como a data do commit. Esta opção
+	implica no uso de `--force-rebase`.
+
 --ignore-date::
-	Estas opções são passados para o comando 'git am' para alterar facilmente as
-	datas dos commits onde o "rebase" foi feito (consulte linkgit:git-am[1]).
+--reset-author-date::
+	Instead of using the author date of the original commit, use the current
+	time as the	author date of the rebased commit.  This option implies
+	`--force-rebase`.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
@@ -622,9 +643,6 @@ OPÇÕES INCOMPATÍVEIS
 As seguintes opções:
 
  * --apply
- * --committer-date-is-author-date
- * --ignore-date
- * --ignore-whitespace
  * --whitespace
  * -C
 
@@ -651,6 +669,9 @@ Além disso, os seguintes pares de opções são incompatíveis:
  * --preserve-merges e --signoff
  * --preserve-merges e --rebase-merges
  * --preserve-merges e --empty=
+ * --preserve-merges e --ignore-whitespace
+ * --preserve-merges e --committer-date-is-author-date
+ * --preserve-merges e --ignore-date
  * --keep-base e --onto
  * --keep-base e --root
  * --fork-point e --root

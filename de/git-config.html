@@ -492,7 +492,7 @@ Ausrufezeichen davor (siehe auch <a href="#BEISPIELE">[BEISPIELE]</a>).</p>
 <div class="paragraph">
 <p>Die Option <code>--type=&lt;Typ&gt;</code> veranlasst <em>git config</em> zu überprüfen, ob ein- und
 ausgehende Werte unter den angegebenen &lt;Typ&gt; zulässig sind.  Wenn kein
-<code>--type=&lt;Typ&gt;</code> angegeben wird, wird keine Kanonisierung
+<code>--type=&lt;Typ&gt;</code> angegeben ist, wird keine Kanonisierung
 durchgeführt. Benutzer können einen bestehenden <code>--type</code> Bezeichner mit
 <code>--no-type</code> aufheben.</p>
 </div>
@@ -585,7 +585,7 @@ nicht.</p>
 </dd>
 <dt class="hdlist1">--get-urlmatch Name URL</dt>
 <dd>
-<p>Wenn ein zweiteiliger Name section.key angegeben wird, wird der Wert für
+<p>Wenn ein zweiteiliger Name section.key angegeben ist, wird der Wert für
 section.&lt;URL&gt;.key zurückgegeben, dessen &lt;URL&gt;-Teil am besten zu der
 angegebenen URL passt (wenn kein solcher Schlüssel existiert, wird der Wert
 für section.key als Fallback verwendet). Wenn nur der Abschnitt als Name
@@ -858,11 +858,11 @@ genannt.</p>
 </dl>
 </div>
 <div class="paragraph">
-<p>Falls keine weiteren Optionen gegeben werden, werden alle Leseoperationen
-auf allen verfügbaren Dateien ausgeführt. Wenn die globale oder die
-systemweite Konfigurationsdateien fehlen, werden sie ignoriert. Falls die
+<p>Falls keine weiteren Optionen gegeben sind, werden alle Leseoperationen auf
+allen verfügbaren Dateien ausgeführt. Wenn die globale oder die systemweite
+Konfigurationsdateien fehlen, werden sie ignoriert. Falls die
 Konfigurationsdatei des Repositorys nicht verfügbar oder lesbar ist, wird
-<em>git config</em> mit einem Fehlercode, der nicht null ist, beendet.  In beiden
+<em>git config</em> mit einem Fehlercode, der nicht null ist, beendet. In beiden
 Fällen jedoch wird keine Fehlermeldung ausgegeben.</p>
 </div>
 <div class="paragraph">
@@ -1084,8 +1084,642 @@ http.cookieFile /tmp/cookie.txt
 http.sslverify false</pre>
 </div>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_konfigurationsdatei">KONFIGURATIONSDATEI</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-config.txt - include::config.txt[]</p>
+<p>Die Git-Konfigurationsdatei enthält eine Reihe von Variablen, die das
+Verhalten der Git-Befehle beeinflussen. Die Dateien <code>.git/config</code> und
+optional <code>config.worktree</code> (siehe den Abschnitt „KONFIGURATIONSDATEI“ in
+<a href="git-worktree.html">git-worktree(1)</a>) in jedem Repository werden verwendet, um die
+Konfiguration für dieses Repository zu speichern. Mit <code>$HOME/.gitconfig</code>
+wird außerdem pro Benutzer eine Konfiguration als Fallback-Werte für die
+Datei <code>.git/config</code> gespeichert. Die Datei <code>/etc/gitconfig</code> kann verwendet
+werden, um eine systemweite Standardkonfiguration zu sichern.</p>
+</div>
+<div class="paragraph">
+<p>Die Konfigurationsvariablen werden sowohl von den "Plumbing"- als auch von
+den "Porcelain"-Befehlen verwendet. Die Variablen sind in Gruppen
+unterteilt, wobei der vollqualifizierte Variablenname das Segment nach dem
+letzten Punkt ist und der Gruppenname alles vor dem letzten Punkt. Die
+Variablennamen unterscheiden nicht zwischen Groß- und Kleinschreibung,
+erlauben nur alphanumerische Zeichen und <em>-</em> und müssen mit einem
+alphanumerischen Zeichen beginnen. Einige Variablen dürfen mehrmals
+vorkommen; wir sagen dann, die Variable ist mehrwertig.</p>
+</div>
+<div class="sect2">
+<h3 id="_syntax">Syntax</h3>
+<div class="paragraph">
+<p>Die Syntax ist ziemlich flexibel und tolerant; Leerzeichen werden
+größtenteils ignoriert. Die Zeichen <em>#</em> und <em>;</em> beginnen Kommentare bis zum
+Zeilenende, Leerzeilen werden ignoriert.</p>
+</div>
+<div class="paragraph">
+<p>Die Datei besteht aus Gruppen und Variablen. Eine Gruppe beginnt mit dem
+Gruppennamen in eckigen Klammern und geht bis zum nächsten
+Gruppenanfang. Gruppennamen unterscheiden keine Groß- und
+Kleinschreibung. Nur alphanumerische Zeichen, <em>-</em> und <em>.</em> sind in
+Gruppennamen erlaubt. Jede Variable muss zu einer Gruppe gehören, was
+bedeutet, dass eine Gruppenüberschrift vor der ersten Variablenzuweisung
+zwingend ist.</p>
+</div>
+<div class="paragraph">
+<p>Gruppen können weiter in Untergruppen unterteilt werden. Um eine Untergruppe
+zu beginnen, schreiben Sie ihren Namen in doppelten Anführungszeichen, durch
+ein Leerzeichen vom Gruppentitel getrennt, wie in folgendem Beispiel:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        [Gruppe "Untergruppe"]</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Die Namen der Untergruppen unterscheiden zwischen Groß- und Kleinschreibung
+und können beliebige Zeichen enthalten, außer Zeilenumbruch und
+Null-Byte. Doppelte Anführungszeichen <em>"</em> und Rückwärtsschrägstriche <em>\</em>
+können mit Escaping verwenden werden, also <em>\"</em> und
+<em>\\</em>. Rückwärtsschrägstriche vor anderen Zeichen werden beim Lesen
+weggelassen; <em>\t</em> wird beispielsweise als <em>t</em> gelesen und <em>\0</em> als
+<em>0</em>. Gruppentitel können nicht über mehrere Zeilen gehen. Variablen können
+direkt zu einer Gruppe oder zu einer Untergruppe gehören. Sie können
+<em>[Gruppe]</em> haben, wenn Sie <em>[Gruppe "Untergruppe"]</em> haben, aber es ist nicht
+zwingend nötig.</p>
+</div>
+<div class="paragraph">
+<p>Es gibt außerdem die veraltete <em>[Gruppe.Untergruppe]</em>-Syntax. Mit dieser
+Syntax wird der Untergruppenname in Kleinbuchstaben konvertiert und
+unterscheidet dann auch zwischen Groß- und Kleinschreibung. Diese
+Untergruppennamen folgen den gleichen Einschränkungen wie Gruppennamen.</p>
+</div>
+<div class="paragraph">
+<p>Alle anderen Zeilen (und der Rest der Zeile nach der Gruppenüberschrift)
+werden als Einstellungsvariablen erkannt, in der Form <em>Name = Wert</em> (oder
+nur <em>Name</em>, was bedeutet, der Wert der Variable ist "true").  Die
+Variablennamen unterscheiden zwischen Groß- und Kleinschreibung, dürfen nur
+alphanumerische Zeichen und <em>-</em> enthalten und müssen mit einem
+alphanumerischen Zeichen beginnen.</p>
+</div>
+<div class="paragraph">
+<p>Eine Zeile, die einen Wert definiert, kann auf der nächsten Zeile
+weitergehen, indem sie mit <em>\</em> aufhört; der Rückwärtsschrägstrich und das
+Zeilenende werden verworfen. Leerzeichen nach <em>Name=</em>, der Rest einer Zeile
+nach dem ersten Kommentarzeichen <em>#</em> oder <em>;</em> und Leerzeichen am Zeilenende
+werden verworfen, außer sie stehen zwischen doppelten
+Anführungszeichen. Leerzeichen im Innern des Werts werden im Wortlaut
+beibehalten.</p>
+</div>
+<div class="paragraph">
+<p>Zwischen doppelten Anführungszeichen müssen doppelte Anführungszeichen <em>"</em>
+und Rückwärtsschrägstriche <em>\</em> escaped werden: <em>\"</em> für <em>"</em> und <em>\\</em> für
+<em>\</em>.</p>
+</div>
+<div class="paragraph">
+<p>Die folgenden Escape-Sequenzen (neben <em>\"</em> und <em>\\</em>) werden erkannt: <em>\n</em>
+als Zeilenumbruch (NL), <em>\t</em> für Tab (HT, TAB) und <em>\b</em> für Backspace
+(BS). Andere Escape-Sequenzen (auch oktale Escape-Sequenzen) sind ungültig.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_includes_dateieinbettungen">Includes (Dateieinbettungen)</h3>
+<div class="paragraph">
+<p>Die Abschnitte <code>include</code> und <code>includeIf</code> erlauben es Ihnen,
+Konfigurationsanweisungen aus einer anderen Quelle einzubinden. Diese
+Abschnitte verhalten sich identisch zueinander mit der Ausnahme, dass die
+Abschnitte <code>includeIf</code> ignoriert werden können, wenn ihre Bedingung nicht
+als „true“ erkannt wird; siehe „Bedingte Includes“ weiter unten.</p>
+</div>
+<div class="paragraph">
+<p>Sie können eine Konfigurationsdatei aus einer anderen Quelle einbinden,
+indem Sie die spezielle Variable <code>include.path</code> (oder <code>includeIf.*.path</code>)
+auf den Namen der einzubindenden Datei setzen. Die Variable nimmt einen
+Pfadnamen als Wert an und berücksichtigt die Tilde-Erweiterung. Diese
+Variablen können mehrfach angegeben werden.</p>
+</div>
+<div class="paragraph">
+<p>Der Inhalt der eingebundenen Datei wird sofort eingefügt, so als ob er an
+der Stelle der Include-Anweisung gefunden worden wäre. Wenn der Wert der
+Variablen ein relativer Pfad ist, wird der Pfad als relativ zu der
+Konfigurationsdatei angesehen, in der die Include-Anweisung gefunden wurde.
+Siehe Beispiele weiter unten.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_bedingte_includes">Bedingte Includes</h3>
+<div class="paragraph">
+<p>Sie können eine Konfigurationsdatei aus einer anderen bedingt einbinden,
+indem Sie eine <code>includeIf.&lt;Bedingung&gt;.path</code> Variable auf den Namen der
+einzubindenden Datei setzen.</p>
+</div>
+<div class="paragraph">
+<p>Die Bedingung beginnt mit einem Schlüsselwort, gefolgt von einem Doppelpunkt
+und einigen Daten, deren Format und Bedeutung vom Schlüsselwort
+abhängt. Gültige Schlüsselwörter sind:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>gitdir</code></dt>
+<dd>
+<p>Die Daten, die dem Schlüsselwort <code>gitdir:</code> folgen, werden als Glob-Pattern
+verwendet. Wenn die Position des Verzeichnisses .git mit dem Pattern
+übereinstimmt, ist die Include-Bedingung erfüllt.</p>
+<div class="paragraph">
+<p>Die .git-Position kann automatisch ermittelt werden oder aus der
+Umgebungsvariablen <code>$GIT_DIR</code> abgeleitet werden. Wenn das Repository über
+eine .git-Datei automatisch erkannt wird (z.B. aus Untermodulen oder einem
+verknüpften Arbeitsverzeichnis), wäre der Speicherort von .git der finale
+Ort, an dem sich das .git-Verzeichnis befindet, nicht der Ort, an dem sich
+die
+.git-Datei befindet.</p>
+</div>
+<div class="paragraph">
+<p>Das Suchmuster kann Standard-Globbing-Platzhalter und zwei zusätzliche
+Platzhalter, <code>**/</code> und <code>/**</code>, enthalten, die mit mehreren Pfadkomponenten
+übereinstimmen könnten. Bitte lesen Sie <a href="gitignore.html">gitignore(5)</a> für weitere
+Details. Der Einfachheit halber:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Beginnt das Pattern mit <code>~/</code>, so wird das <code>~</code> durch den Inhalt der
+Umgebungsvariablen <code>HOME</code> ersetzt.</p>
+</li>
+<li>
+<p>Beginnt das Pattern mit <code>./</code>, so wird es durch das Verzeichnis ersetzt, das
+die aktuelle Konfigurationsdatei enthält.</p>
+</li>
+<li>
+<p>Beginnt das Pattern weder mit <code>~/</code>, <code>./</code> noch mit <code>/</code>, wird automatisch ein
+<code>**/</code> vorangestellt. Zum Beispiel wird das Suchmuster <code>foo/bar</code> zu
+<code>**/foo/bar</code> und würde mit <code>/irgendein/Pfad/zu/foo/bar</code> übereinstimmen.</p>
+</li>
+<li>
+<p>Endet das Pattern mit <code>/</code>, so wird automatisch <code>**</code>
+hinzugefügt. Beispielsweise wird das Suchmuster <code>foo/</code> zu <code>foo/**</code>. Mit
+anderen Worten, es stimmt rekursiv mit „foo“ und allem, was sich darin
+befindet, überein.</p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1"><code>gitdir/i</code></dt>
+<dd>
+<p>Das entspricht <code>gitdir</code>, außer dass der Abgleich ohne Berücksichtigung von
+Groß- und Kleinschreibung erfolgt (z.B. auf Dateisystemen ohne diese
+Unterscheidung)</p>
+</dd>
+<dt class="hdlist1"><code>onbranch</code></dt>
+<dd>
+<p>Die Daten, die dem Schlüsselwort <code>onbranch:</code> folgen, werden als ein Pattern
+mit Standard-Globbing-Platzhaltern und zwei zusätzlichen Platzhaltern, <code>**/</code>
+und <code>/**</code>, verstanden, die mit mehreren Pfadkomponenten übereinstimmen
+könnten.  Wenn wir uns in einem Arbeitsbereich befinden, in dem der Name des
+Branches, der gerade ausgecheckt wird, mit dem Suchmuster übereinstimmt, ist
+die Include-Bedingung erfüllt.</p>
+<div class="paragraph">
+<p>Endet das Pattern mit <code>/</code>, wird automatisch <code>**</code> hinzugefügt. Zum Beispiel
+wird das Muster <code>foo/</code> zu <code>foo/**</code>. Mit anderen Worten, es passt auf alle
+Branches, die mit <code>foo/</code> beginnen. Das ist dann hilfreich, wenn Ihre
+Branches hierarchisch organisiert sind und Sie eine Konfiguration auf alle
+Branches in dieser Hierarchie anwenden möchten.</p>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Noch ein paar Anmerkungen zum Vergleichen über <code>gitdir</code> und <code>gitdir/i</code>:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Symlinks in <code>$GIT_DIR</code> werden vor dem Abgleich nicht ausgewertet.</p>
+</li>
+<li>
+<p>Sowohl die Symlink- als auch die Realpfad-Versionen der Pfadangaben werden
+außerhalb von <code>$GIT_DIR</code> abgeglichen. Wenn z.B. ~/git ein Symlink zu
+/mnt/storage/git wäre, dann würden beide Versionen von <code>gitdir:~/git</code> und
+<code>gitdir:/mnt/storage/git</code> übereinstimmen.</p>
+<div class="paragraph">
+<p>Dies war bei der ursprünglichen Version dieses Features in v2.13.0 nicht der
+Fall, welche nur der realpath-Version entsprochen hat. Eine Konfiguration,
+die mit der ursprünglichen Version dieses Features kompatibel sein will,
+muss entweder nur die realpath-Version oder beide Versionen angeben.</p>
+</div>
+</li>
+<li>
+<p>Beachten Sie, dass "../" nichts Besonderes ist und wortwörtlich
+übereinstimmen wird, was vermutlich nicht das ist, was Sie erreichen wollen.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_beispiel">Beispiel</h3>
+<div class="listingblock">
+<div class="content">
+<pre># Kernvariablen
+[core]
+        ; Vertraue den Dateimodi nicht
+        filemode = false
+
+# Unser diff-Algorithmus
+[diff]
+        external = /usr/local/bin/diff-wrapper
+        renames = true
+
+[branch "devel"]
+        remote = origin
+        merge = refs/heads/devel
+
+# Proxyeinstellungen
+[core]
+        gitProxy="ssh" for kernel.org
+        gitProxy=default-proxy ; für den Rest
+
+[include]
+        path = /path/to/foo.inc ; über den absoluten Pfad einbinden
+        path = foo.inc ; finde "foo.inc" relativ zur aktuellen Datei
+        path = ~/foo.inc ; finde "foo.inc" im `$HOME` Verzeichnis
+
+; einbinden, falls $GIT_DIR /Pfad/zu/foo/.git ist
+[includeIf "gitdir:/Pfad/zu/foo/.git"]
+        path = /Pfad/zu/foo.inc
+
+; alle Repositories innerhalb von /Pfad/zur/Gruppe einbinden
+[includeIf "gitdir:/Pfad/zur/Gruppe"]
+        path = /Pfad/zu/foo.inc
+
+; einbinden, für alle Repositorys innerhalb von $HOME/zur/Gruppe
+[includeIf "gitdir:~/zur/Gruppe/"]
+        path = /Pfad/zu/foo.inc
+
+; relative Pfade sind immer relativ zu der einschließenden
+; Datei (wenn die Bedingung wahr ist); ihr Speicherort
+; wird von der Bedingung nicht beeinflusst
+[includeIf "gitdir:/Pfad/zur/Gruppe/"]
+        path = foo.inc
+
+; nur dann einbinden, wenn wir uns in einem Arbeitsbereich
+; befinden, in dem foo-branch gerade ausgecheckt wird
+[includeIf "onbranch:foo-branch"]
+        path = foo.inc</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_werte">Werte</h3>
+<div class="paragraph">
+<p>Die Werte vieler Variablen werden als einfache Zeichenfolge behandelt, aber
+es gibt Variablen, die Werte bestimmter Typen annehmen und es gibt
+Richtlinien, wie sie zu formulieren sind.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">boolean</dt>
+<dd>
+<p>Wenn eine Variable einen Wahrheitswert annehmen soll, werden viele Synonyme
+für <em>true</em> oder <em>false</em> akzeptiert; Groß- und Kleinschreibung wird dabei
+nicht beachtet.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">true</dt>
+<dd>
+<p>Boolesche Werte für „true“ können alternativ auch <code>yes</code>, <code>on</code>, <code>true</code>
+und <code>1</code> sein. Auch eine Variable, die ohne <code>= &lt;Wert&gt;</code>
+definiert ist, wird als wahr angenommen.</p>
+</dd>
+<dt class="hdlist1">false</dt>
+<dd>
+<p>Boolesche Werte für „false“ können alternativ auch <code>no</code>, <code>off</code>, <code>false</code>,
+<code>0</code> und eine leere Zeichenkette sein.</p>
+<div class="paragraph">
+<p>Bei der Konvertierung eines Wertes in seine kanonische Form unter Verwendung
+des <code>--type=bool</code> Typ-Bezeichners wird <em>git config</em> die Ausgabe "true" oder
+"false" (in Kleinbuchstaben geschrieben) ausgeben.</p>
+</div>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">integer</dt>
+<dd>
+<p>Der Wert für viele Variablen, die unterschiedliche Größen angeben, kann mit
+den Suffixen <code>k</code>, <code>M</code>, &#8230;&#8203; versehen werden. Das bedeutet, dass die Zahl "mit
+1024", "mit 1024x1024", &#8230;&#8203; skaliert wird.</p>
+</dd>
+<dt class="hdlist1">color</dt>
+<dd>
+<p>Der Wert für eine Variable, die eine Farbe darstellt, ist eine durch
+Leerzeichen getrennte Liste von Farben (maximal zwei, einmal Vordergrund und
+einmal Hintergrund) und von Attributen (unbegrenzt viele).</p>
+<div class="paragraph">
+<p>Die akzeptierten Grundfarben sind <code>normal</code>, <code>black</code>, <code>red</code>, <code>green</code>,
+<code>yellow</code>, <code>blue</code>, <code>magenta</code>, <code>cyan</code> und <code>white</code>.  Die erste angegebene Farbe
+ist der Vordergrund, die zweite bestimmt den Hintergrund.  Alle Grundfarben
+mit Ausnahme von <code>normal</code> haben eine helle Variante, die durch Voranstellen
+von <code>bright</code> vor der Farbe spezifiziert werden kann, wie z.B. <code>brightred</code>.</p>
+</div>
+<div class="paragraph">
+<p>Farben können auch als Zahlen zwischen 0 und 255 angegeben werden; diese
+verwenden den ANSI-256-Farbmodus (beachten Sie jedoch, dass dies
+möglicherweise nicht von allen Terminals unterstützt wird).  Wenn Ihr
+Terminal dies unterstützt, können Sie auch 24-bit RGB-Werte als Hex-Wert
+angeben, wie z.B. <code>#ff0ab3</code>.</p>
+</div>
+<div class="paragraph">
+<p>Die akzeptierten Attribute sind <code>bold</code>, <code>dim</code>, <code>ul</code>, <code>blink</code>, <code>reverse</code>,
+<code>italic</code> und <code>strike</code> (für durchgekreuzte oder durchgestrichene Zeichen).
+Die Position jeglicher Attribute in Bezug auf die Farben (vor, nach oder
+zwischen den Farben) spielt keine Rolle. Bestimmte Attribute können
+abgeschaltet werden, indem man ihnen <code>no</code> oder <code>no-</code> voranstellt
+(z.B. <code>noreverse</code>, <code>no-ul</code>, usw.).</p>
+</div>
+<div class="paragraph">
+<p>Ein leerer Farb-String erzeugt überhaupt keinen Farbeffekt. Damit kann das
+Einfärben bestimmter Elemente vermieden werden, ohne die Farbe vollständig
+zu deaktivieren.</p>
+</div>
+<div class="paragraph">
+<p>Für die vordefinierten Farbslots von Git sollen die Attribute am Anfang
+jedes Elements in der farbigen Ausgabe zurückgesetzt werden. Wenn Sie also
+<code>color.decorate.branch</code> auf <code>black</code> setzen, wird dieser Branch-Name in
+schlichtem „schwarz“ dargestellt, selbst wenn die vorherige Sache in der
+gleichen Ausgabezeile (z.B. öffnende Klammer vor der Liste der Branch-Namen
+in der <code>log --decorate</code> Ausgabe) mit <code>bold</code> oder einem anderen Attribut
+dargestellt wird.  Benutzerdefinierte Protokollformate können jedoch eine
+kompliziertere und überlagerte Farbgebung bewirken, und die negierten Formen
+könnten dort nützlich sein.</p>
+</div>
+</dd>
+<dt class="hdlist1">pathname</dt>
+<dd>
+<p>Einer Variablen, die einen Pfadnamen-Wert annimmt, kann ein String übergeben
+werden, der mit "<code>~/</code>" oder "<code>~user/</code>" beginnt. Die übliche
+Tilde-Erweiterung kommt bei einem solchen String zur Anwendung: <code>~/</code> wird
+auf den Wert von <code>$HOME</code> erweitert, und <code>~user/</code> auf das Home-Verzeichnis
+des angegebenen Benutzers.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_variablen">Variablen</h3>
+<div class="paragraph">
+<p>Beachten Sie, dass diese Liste nicht ausführlich und nicht unbedingt
+vollständig ist.  Für kommando-spezifische Variablen finden Sie eine
+ausführlichere Beschreibung in der entsprechenden Manpage.</p>
+</div>
+<div class="paragraph">
+<p>Andere Git-Tools können und werden ihre eigenen Variablen verwenden.  Wenn
+Sie neue Variablen für die Verwendung in Ihrem eigenen Dienstprogramm
+entwickeln, stellen Sie sicher, dass deren Namen nicht in Konflikt mit denen
+stehen, die von Git selbst und anderen beliebten Hilfsprogrammen verwendet
+werden. Beschreiben Sie diese Variablen in Ihrer Dokumentation.</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/advice.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/core.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/add.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/alias.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/am.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/apply.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/blame.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/branch.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/browser.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/checkout.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/clean.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/color.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/column.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/commit.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/commitgraph.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/credential.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/completion.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/diff.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/difftool.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/extensions.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/fastimport.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/feature.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/fetch.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/format.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/filter.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/fsck.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/gc.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/gitcvs.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/gitweb.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/grep.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/gpg.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/gui.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/guitool.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/help.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/http.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/i18n.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/imap.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/index.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/init.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/instaweb.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/interactive.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/log.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/mailinfo.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/mailmap.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/maintenance.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/man.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/merge.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/mergetool.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/notes.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/pack.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/pager.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/pretty.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/protocol.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/pull.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/push.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/rebase.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/receive.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/remote.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/remotes.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/repack.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/rerere.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/reset.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/sendemail.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/sequencer.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/showbranch.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/splitindex.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/ssh.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/status.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/stash.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/submodule.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/tag.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/tar.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/trace2.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/transfer.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/uploadarchive.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/uploadpack.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/url.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/user.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/versionsort.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/web.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/worktree.txt[]</p>
+</div>
 </div>
 </div>
 </div>
@@ -1128,7 +1762,7 @@ folgt aussieht</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-08-04 16:17:06 +0200
+Last updated 2020-10-20 22:49:34 +0200
 </div>
 </div>
 </body>

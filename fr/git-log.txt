@@ -15,10 +15,13 @@ DESCRIPTION
 -----------
 Affiche les journaux de validation.
 
-La commande prend les options applicables à la commande 'git rev-list' pour
-contrôler ce qui est montré et comment, et les options applicables aux
-commandes 'git diff'' pour contrôler la façon dont les modifications que
-chaque validation introduit sont affichées.
+:git-log: 1
+include::rev-list-description.txt[]
+
+La commande prend les options applicables à la commande
+linkgit:git-rev-list[1] pour contrôler ce qui est montré et comment, et les
+options applicables aux commandes linkgit:git-diff[1] pour contrôler la
+façon dont les modifications que chaque validation introduit sont affichées.
 
 
 OPTIONS
@@ -112,8 +115,53 @@ include::rev-list-options.txt[]
 
 include::pretty-formats.txt[]
 
-OPTIONS COMMUNES DE DIFF
-------------------------
+MISE EN FORME DIFF
+------------------
+
+Par défaut, `git log` ne génère aucune sortie de diff. Les options
+ci-dessous peuvent être utilisées pour afficher les modifications faites par
+chaque commit.
+
+Notez que sauf si une des options `-c`, `--cc`, ou `-m` est donnée, les
+commits de fusion ne vont pas afficher de diff, même si un format de diff
+tel que `--patch` est sélectionné, et ils ne correspondront pas aux options
+telles que `-S`. L'exception sera l'utilisation de `--first-parent`, pour
+laquelle les fusions sont traités comme des commits normaux à un seul parent
+(ceci peut être modifié en donnant une option de diff combiné ou avec
+`--no-diff-merges`).
+
+-c::
+	Avec cette option, la sortie de diff pour un commit de fusion montre les
+	différences de chacun des parents vers le résultat de la fusion
+	simultanément au lieu de montrer une à une les différences par paires entre
+	un parent et le résultat. De plus, il ne répertorie que les fichiers qui ont
+	été modifiés par tous les parents.
+
+--cc::
+	Ce drapeau implique l'option `-c` et compresse davantage la sortie du patch
+	en omettant les morceaux inintéressants dont le contenu dans les parents n'a
+	que deux variantes et le résultat de la fusion choisit l'une d'entre elles
+	sans modification.
+
+--combined-all-paths::
+	Cet indicateur fait en sorte que les diffs combinés (utilisés pour les
+	commits de fusion) listent le nom du fichier de tous les parents.  Il n'a
+	donc d'effet que lorsque -c ou --cc sont spécifiés, et n'est probablement
+	utile que si des changements de nom de fichier sont détectés
+	(c.-à-d. lorsque la détection de renommage ou de copie a été demandée).
+
+-m::
+	Ce drapeau fait que les commits de fusion montrent la différence complète
+	comme les commits réguliers ; pour chaque parent de la fusion, une entrée de
+	journal et une différence séparées sont générées. Une exception est que
+	seule la différence par rapport au premier parent est affichée quand
+	l'option `--first-parent` est donnée ; dans ce cas, la sortie représente les
+	modifications que la fusion a apportées _dans_ la branche alors courante.
+
+--diff-merges=off::
+--no-diff-merges::
+	Désactive la sortie des diffs pour des commits de fusion (par défaut). Utile
+	pour passer outre `-m`, `-c`, ou `--cc`.
 
 :git-log: 1
 include::diff-options.txt[]

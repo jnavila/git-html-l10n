@@ -11,7 +11,7 @@ RESUMO
 'git for-each-ref' [--count=<count>] [--shell|--perl|--python|--tcl]
 		   [(--sort=<chave>)...] [--format=<formato>] [<padrão>...]
 		   [--points-at=<objeto>]
-		   (--merged[=<objeto>] | --no-merged[=<objeto>])
+		   [--merged[=<objeto>]] [--no-merged[=<objeto>]]
 		   [--contains[=<objeto>]] [--no-contains[=<objeto>]]
 
 DESCRIÇÃO
@@ -74,13 +74,11 @@ OPÇÕES
 
 --merged[=<objeto>]::
 	Liste apenas as referências cujas dicas são acessíveis a partir do commit
-	especificado (ou HEAD caso nenhum seja especificado). A opção é incompatível
-	com `--no-merged`.
+	especificado (ou HEAD caso nenhum seja especificado).
 
 --no-merged[=<objeto>]::
 	Liste apenas as referências cujas dicas não podem ser acessadas a partir do
-	commit especificado (ou HEAD caso nenhum seja especificado). A opção é
-	incompatível com `--merged`.
+	commit especificado (ou HEAD caso nenhum seja especificado).
 
 --contains[=<objeto>]::
 	Liste apenas as referências que contenham os commits especificados (ou HEAD
@@ -215,7 +213,9 @@ worktreepath::
 
 Além do que foi dito acima para os objetos commit e tag, os nomes dos campos
 do cabeçalho (`tree`, `parent`, `object`, `type`, e `tag`) podem ser
-utilizados para especificar o valor no campo do cabeçalho.
+utilizados para especificar o valor no campo do cabeçalho.  Os campos `tree`
+e `parent` também podem ser utilizado com um modificador `:short` e
+`:short=<comprimento>` assim como `objectname`.
 
 Para os objetos commit e tag, os campos especiais `creatordate` e `creator`
 coincidirão com a data apropriada ou ao termo ordenado nome-email-data dos
@@ -224,23 +224,42 @@ destinados para trabalhar com uma mistura de tags anotadas e leves.
 
 Os campos que possuam um termo ordenado nome-email-data como o valor
 (`autor`, `committer` e `tagger`) podem ser sufixados com `nome`, `email` e
-`data` para extrair o componente informado.
+`data` para extrair o componente informado.  Para campos do email
+(`authoremail`, `committeremail` e `taggeremail`), o `:trim` pode ser
+anexado para obter o e-mail sem os colchetes e`:localpart` para obter a
+parte antes do símbolo `@` do endereço do e-mail.
 
-A mensagem completa em um objeto commit e tag são `conteúdos`.  A sua
-primeira linha é `contents:subject` onde "subject" (assunto) é a
-concatenação de todas as linhas da mensagem do commit até a primeira linha
-em branco.  A próxima linha é `contents:body`, onde "body" (corpo da
-mensagem) são todas as linhas após a primeira linha em branco.  A assinatura
-opcional GPG é `contents:signature`.  As primeiras `N` linhas da mensagem
-são obtidas usando `contents:lines=N`.  Além disso, os trailers
-interpretados através do linkgit:git-interpret-trailers[1] são obtidos como
-`caractere de resposta` (ou utilizando o alias do histórico
-`contents:trailers`).  As linhas que não forem caractere de resposta do
-bloco dos caracteres de resposta, podem ser omitidos com `trailers:only`. As
-continuações dos espaços podem ser removidos dos caracteres de resposta,
-para que cada caractere apareça em uma linha por si só e com o seu conteúdo
-completo, utilizando `trailers:unfold`. Ambos podem ser utilizados juntos
-como `trailers:unfold,only`.
+The message in a commit or a tag object is `contents`, from which
+`contents:<part>` can be used to extract various parts out of:
+
+contents:size::
+	O tamanho em bytes da mensagem do commit ou da tag.
+
+contents:subject::
+	The first paragraph of the message, which typically is a single line, is
+	taken as the "subject" of the commit or the tag message.  Instead of
+	`contents:subject`, field `subject` can also be used to obtain same
+	results. `:sanitize` can be appended to `subject` for subject line suitable
+	for filename.
+
+contents:body::
+	The remainder of the commit or the tag message that follows the "subject".
+
+contents:signature::
+	A assinatura GPG opcional da tag.
+
+contents:lines=N::
+	As primeiras `N` linhas da mensagem.
+
+Além disso, os trailers interpretados através do
+linkgit:git-interpret-trailers[1] são obtidos como `caractere de resposta`
+(ou utilizando o alias do histórico `contents:trailers`).  As linhas que não
+forem caractere de resposta do bloco dos caracteres de resposta, podem ser
+omitidos com `trailers:only`. As continuações dos espaços podem ser
+removidos dos caracteres de resposta, para que cada caractere apareça em uma
+linha por si só e com o seu conteúdo completo, utilizando
+`trailers:unfold`. Ambos podem ser utilizados juntos como
+`trailers:unfold,only`.
 
 Para fins de classificação, os campos com os valores numéricos são
 classificados em ordem numérica (`objectsize`, `authordate`,
@@ -384,6 +403,11 @@ delta é arbitrária e está sujeita a alterações durante um reempacotamento.
 Observe também que as várias cópias de um objeto podem estar presentes no
 banco de dados dos objetos; neste caso, é indefinido qual o tamanho da cópia
 ou da base delta que será relatada.
+
+OBSERVAÇÕES
+-----------
+
+include::ref-reachability-filters.txt[]
 
 VEJA TAMBÉM
 -----------

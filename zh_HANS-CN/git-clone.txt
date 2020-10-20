@@ -25,10 +25,8 @@ git-clone - 将存储库克隆到新目录
 将存储库克隆到新创建的目录中，为克隆存储库中的每个分支创建远程跟踪分支（使用`git branch
 --remotes`可见），并创建、签出从克隆存储库当前活动的分支派生的初始分支。
 
-After the clone, a plain `git fetch` without arguments will update all the
-remote-tracking branches, and a `git pull` without arguments will in
-addition merge the remote master branch into the current master branch, if
-any (this is untrue when "--single-branch" is given; see below).
+克隆后，执行不带参数的`git fetch`命令将更新所有远程跟踪的分支，执行不带参数的`git
+pull`命令将另把远程master分支合并到当前master分支（如果存在）（如果附加“--single-branch”参数，则情况不同；请参阅下文）。
 
 通过在 `refs / remotes / origin` 下创建对远程分支头的引用，并通过初始化 `remote.origin.url` 和
 `remote.origin.fetch` 配置变量来创建此默认配置。
@@ -58,8 +56,8 @@ URL，则忽略此标志（不使用本地优化）。指定 `--no-local` 将在
 然后在源存储库中删除分支
 （或使用任何其他使现有提交解除引用的 Git 命令），
 某些对象可能会变得未引用（或悬空）。
-这些对象可以通过常规的 Git 操作（例如 `git commit`）删除。
-它会自动调用 `git gc --auto`。（请参阅linkgit:git-gc [1]。）
+这些对象可能被常规的 Git 操作（例如 `git commit`）删除。
+它会自动调用 `git maintenance run --auto`。（请参阅linkgit:git-maintenance[1]。）
 如果这些对象已删除并被克隆的存储库引用，
 那么克隆的存储库将损坏。
 +
@@ -84,7 +82,7 @@ URL，则忽略此标志（不使用本地优化）。指定 `--no-local` 将在
 
 -q::
 --quiet::
-	Operate quietly.  Progress is not reported to the standard error stream.
+	静默操作。进度不会报告给标准错误流。
 
 -v::
 --verbose::
@@ -99,29 +97,22 @@ URL，则忽略此标志（不使用本地优化）。指定 `--no-local` 将在
 
 -n::
 --no-checkout::
-	No checkout of HEAD is performed after the clone is complete.
+	克隆完成后，不执行HEAD检出操作。
 
 --bare::
-	Make a 'bare' Git repository.  That is, instead of creating `<directory>`
-	and placing the administrative files in `<directory>/.git`, make the
-	`<directory>` itself the `$GIT_DIR`. This obviously implies the
-	`--no-checkout` because there is nowhere to check out the working tree.
-	Also the branch heads at the remote are copied directly to corresponding
-	local branch heads, without mapping them to `refs/remotes/origin/`.  When
-	this option is used, neither remote-tracking branches nor the related
-	configuration variables are created.
+	创建一个“纯”Git存储库。也就是说，不要创建 `<directory>` 并将管理文件放在 `<directory>/.git`，而是将
+	`<directory>` 本身设为`$GIT_DIR`。这显然暗含着 `--no-checkout`
+	选项，因为没有地方可以检出工作树。此外，远程的分支头直接复制到相应的本地分支头，而不将它们映射到
+	`refs/remotes/origin/`。使用此选项时，不会创建远程跟踪分支或相关配置变量。
 
 --sparse::
 	初始化稀疏检出文件，以便工作目录仅从存储库根目录中的文件开始。可以修改稀疏签出文件以根据需要扩展工作目录。
 
 --filter=<过滤器定义>::
-	Use the partial clone feature and request that the server sends a subset of
-	reachable objects according to a given object filter.  When using
-	`--filter`, the supplied `<filter-spec>` is used for the partial clone
-	filter. For example, `--filter=blob:none` will filter out all blobs (file
-	contents) until needed by Git. Also, `--filter=blob:limit=<size>` will
-	filter out all blobs of size at least `<size>`. For more details on filter
-	specifications, see the `--filter` option in linkgit:git-rev-list[1].
+	使用部分克隆功能，要求服务器根据给定的对象过滤器发送一个可到达的对象的子集。当使用 `--filter` 选项时，提供的 `<filter-spec>`
+	将被用于部分克隆过滤器。例如，`--filter=blob:none` 将过滤掉所有的数据对象（文件内容），直到 Git
+	需要相应的数据。另外，`--filter=blob:limit=<size>` 将过滤掉所有文件大小至少为 `<size>`
+	的数据对象。关于过滤器定义的更多细节，请参阅 linkgit:git-rev-list[1] 中的 `--filter` 选项。
 
 --mirror::
 	Set up a mirror of the source repository.  This implies `--bare`.  Compared
@@ -255,4 +246,4 @@ $ git clone --bare -l /home/proj/.git /pub/scm/proj.git
 
 GIT
 ---
-Part of the linkgit:git[1] suite
+linkgit:git[1] 组件的一部分

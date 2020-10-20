@@ -452,7 +452,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="content"><em>git for-each-ref</em> [--count=&lt;count&gt;] [--shell|--perl|--python|--tcl]
                    [(--sort=&lt;chave&gt;)&#8230;&#8203;] [--format=&lt;formato&gt;] [&lt;padrão&gt;&#8230;&#8203;]
                    [--points-at=&lt;objeto&gt;]
-                   (--merged[=&lt;objeto&gt;] | --no-merged[=&lt;objeto&gt;])
+                   [--merged[=&lt;objeto&gt;]] [--no-merged[=&lt;objeto&gt;]]
                    [--contains[=&lt;objeto&gt;]] [--no-contains[=&lt;objeto&gt;]]</pre>
 </div>
 </div>
@@ -531,14 +531,12 @@ ser diretamente "avaliado".</p>
 <dt class="hdlist1">--merged[=&lt;objeto&gt;]</dt>
 <dd>
 <p>Liste apenas as referências cujas dicas são acessíveis a partir do commit
-especificado (ou HEAD caso nenhum seja especificado). A opção é incompatível
-com <code>--no-merged</code>.</p>
+especificado (ou HEAD caso nenhum seja especificado).</p>
 </dd>
 <dt class="hdlist1">--no-merged[=&lt;objeto&gt;]</dt>
 <dd>
 <p>Liste apenas as referências cujas dicas não podem ser acessadas a partir do
-commit especificado (ou HEAD caso nenhum seja especificado). A opção é
-incompatível com <code>--merged</code>.</p>
+commit especificado (ou HEAD caso nenhum seja especificado).</p>
 </dd>
 <dt class="hdlist1">--contains[=&lt;objeto&gt;]</dt>
 <dd>
@@ -705,7 +703,9 @@ sequência vazia.</p>
 <div class="paragraph">
 <p>Além do que foi dito acima para os objetos commit e tag, os nomes dos campos
 do cabeçalho (<code>tree</code>, <code>parent</code>, <code>object</code>, <code>type</code>, e <code>tag</code>) podem ser
-utilizados para especificar o valor no campo do cabeçalho.</p>
+utilizados para especificar o valor no campo do cabeçalho.  Os campos <code>tree</code>
+e <code>parent</code> também podem ser utilizado com um modificador <code>:short</code> e
+<code>:short=&lt;comprimento&gt;</code> assim como <code>objectname</code>.</p>
 </div>
 <div class="paragraph">
 <p>Para os objetos commit e tag, os campos especiais <code>creatordate</code> e <code>creator</code>
@@ -716,24 +716,53 @@ destinados para trabalhar com uma mistura de tags anotadas e leves.</p>
 <div class="paragraph">
 <p>Os campos que possuam um termo ordenado nome-email-data como o valor
 (<code>autor</code>, <code>committer</code> e <code>tagger</code>) podem ser sufixados com <code>nome</code>, <code>email</code> e
-<code>data</code> para extrair o componente informado.</p>
+<code>data</code> para extrair o componente informado.  Para campos do email
+(<code>authoremail</code>, <code>committeremail</code> e <code>taggeremail</code>), o <code>:trim</code> pode ser
+anexado para obter o e-mail sem os colchetes e`:localpart` para obter a
+parte antes do símbolo <code>@</code> do endereço do e-mail.</p>
 </div>
 <div class="paragraph">
-<p>A mensagem completa em um objeto commit e tag são <code>conteúdos</code>.  A sua
-primeira linha é <code>contents:subject</code> onde "subject" (assunto) é a
-concatenação de todas as linhas da mensagem do commit até a primeira linha
-em branco.  A próxima linha é <code>contents:body</code>, onde "body" (corpo da
-mensagem) são todas as linhas após a primeira linha em branco.  A assinatura
-opcional GPG é <code>contents:signature</code>.  As primeiras <code>N</code> linhas da mensagem
-são obtidas usando <code>contents:lines=N</code>.  Além disso, os trailers
-interpretados através do <a href="git-interpret-trailers.html">git-interpret-trailers(1)</a> são obtidos como
-<code>caractere de resposta</code> (ou utilizando o alias do histórico
-<code>contents:trailers</code>).  As linhas que não forem caractere de resposta do
-bloco dos caracteres de resposta, podem ser omitidos com <code>trailers:only</code>. As
-continuações dos espaços podem ser removidos dos caracteres de resposta,
-para que cada caractere apareça em uma linha por si só e com o seu conteúdo
-completo, utilizando <code>trailers:unfold</code>. Ambos podem ser utilizados juntos
-como <code>trailers:unfold,only</code>.</p>
+<p>The message in a commit or a tag object is <code>contents</code>, from which
+<code>contents:&lt;part&gt;</code> can be used to extract various parts out of:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">contents:size</dt>
+<dd>
+<p>O tamanho em bytes da mensagem do commit ou da tag.</p>
+</dd>
+<dt class="hdlist1">contents:subject</dt>
+<dd>
+<p>The first paragraph of the message, which typically is a single line, is
+taken as the "subject" of the commit or the tag message.  Instead of
+<code>contents:subject</code>, field <code>subject</code> can also be used to obtain same
+results. <code>:sanitize</code> can be appended to <code>subject</code> for subject line suitable
+for filename.</p>
+</dd>
+<dt class="hdlist1">contents:body</dt>
+<dd>
+<p>The remainder of the commit or the tag message that follows the "subject".</p>
+</dd>
+<dt class="hdlist1">contents:signature</dt>
+<dd>
+<p>A assinatura GPG opcional da tag.</p>
+</dd>
+<dt class="hdlist1">contents:lines=N</dt>
+<dd>
+<p>As primeiras <code>N</code> linhas da mensagem.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Além disso, os trailers interpretados através do
+<a href="git-interpret-trailers.html">git-interpret-trailers(1)</a> são obtidos como <code>caractere de resposta</code>
+(ou utilizando o alias do histórico <code>contents:trailers</code>).  As linhas que não
+forem caractere de resposta do bloco dos caracteres de resposta, podem ser
+omitidos com <code>trailers:only</code>. As continuações dos espaços podem ser
+removidos dos caracteres de resposta, para que cada caractere apareça em uma
+linha por si só e com o seu conteúdo completo, utilizando
+<code>trailers:unfold</code>. Ambos podem ser utilizados juntos como
+<code>trailers:unfold,only</code>.</p>
 </div>
 <div class="paragraph">
 <p>Para fins de classificação, os campos com os valores numéricos são
@@ -900,6 +929,14 @@ ou da base delta que será relatada.</p>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_observações">OBSERVAÇÕES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unresolved directive in git-for-each-ref.txt - include::ref-reachability-filters.txt[]</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_veja_também">VEJA TAMBÉM</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -918,7 +955,7 @@ ou da base delta que será relatada.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-08-04 16:18:03 +0200
+Last updated 2020-10-20 22:50:35 +0200
 </div>
 </div>
 </body>

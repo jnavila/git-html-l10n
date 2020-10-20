@@ -966,9 +966,9 @@ manière séquentielle, et non en parallèle.</p>
 </dd>
 <dt class="hdlist1">--set-upstream</dt>
 <dd>
-<p>Si le distant est récupéré avec succès, tirer et ajouter la référence (de
-suivi) amont , utilisée par les commandes sans argument <a href="git-pull.html">git-pull(1)</a>
-et autres. Pour plus d&#8217;informations, voir <code>branch.&lt;nom&gt;.merge</code> et
+<p>Si le distant est récupéré avec succès, ajouter la référence (de suivi)
+amont , utilisée par les commandes sans argument <a href="git-pull.html">git-pull(1)</a> et
+autres. Pour plus d&#8217;informations, voir <code>branch.&lt;nom&gt;.merge</code> et
 <code>branch.&lt;nom&gt;.remote</code> dans <a href="git-config.html">git-config(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--upload-pack &lt;upload-pack&gt;</dt>
@@ -1043,17 +1043,43 @@ typiquement une réf, mais cela peut aussi être un nom d&#8217;objet hexadécim
 entier.</p>
 </div>
 <div class="paragraph">
-<p><code>tag &lt;étiquette&gt;</code> signifie la même chose que
+<p>Un &lt;spec-de-réf&gt; peut contenir un <code>*</code> dans son &lt;src&gt; pour indiquer une
+simple correspondance de motif. Un tel refspec fonctionne comme un motif qui
+correspond à n&#8217;importe quelle ref avec le même préfixe. Un motif
+&lt;spec-de-réf&gt; doit avoir un <code>*</code> dans les deux &lt;src&gt; et &lt;dst&gt;. Il va faire
+correspondre les références à la destination en remplaçant le <code>*</code> par le
+contenu correspondant de la source.</p>
+</div>
+<div class="paragraph">
+<p>Si un spécificateur de référence est préfixé par <code>^</code>, il sera interprété
+comme un spécificateur de référence négatif. Plutôt que de spécifier les
+références à récupérer ou les références locales à mettre à jour, un tel
+spécificateur de référence spécifiera les références à exclure. Une
+référence sera considérée comme correspondante si elle correspond à au moins
+une référence positive, et ne correspond à aucune référence négative. Les
+spécificateurs de référence négatifs peuvent être utiles pour restreindre le
+champ d&#8217;application d&#8217;un spécificateur modèle de référence afin qu&#8217;il
+n&#8217;inclue pas de références spécifiques.  Les spécificateurs de référence
+négatifs peuvent eux-mêmes être des spécificateurs modèles de référence
+. Cependant, ils ne peuvent contenir qu&#8217;un &lt;src&gt; et ne peuvent pas spécifier
+un &lt;dst&gt;. Les noms d&#8217;objets hexagonaux complets ne sont pas non plus pris en
+charge.</p>
+</div>
+<div class="paragraph">
+<p>+
+<code>tag &lt;étiquette&gt;</code> signifie la même chose que
 <code>refs/tags/&lt;tag&gt;:refs/tags/&lt;tag&gt;</code> ; cela demande de tout récupérer jusqu&#8217;à
 l&#8217;étiquette donnée.</p>
 </div>
 <div class="paragraph">
-<p>La référence distante qui correspond à &lt;src&gt; est récupérée, et si &lt;dst&gt;
+<p>+
+La référence distante qui correspond à &lt;src&gt; est récupérée, et si &lt;dst&gt;
 n&#8217;est pas une chaîne vide, une tentative est faite pour mettre à jour la
 référence locale qui lui correspond.</p>
 </div>
 <div class="paragraph">
-<p>Le fait que cette mise à jour soit autorisée sans <code>---force</code> dépend de
+<p>+
+Le fait que cette mise à jour soit autorisée sans <code>---force</code> dépend de
 l&#8217;espace de noms de référence vers lequel elle est récupérée, du type
 d&#8217;objet récupéré, et si la mise à jour est considérée comme une avance
 rapide. Généralement, les mêmes règles s&#8217;appliquent pour la récupération que
@@ -1062,7 +1088,8 @@ pour les connaître. Les exceptions à ces règles particulières à <em>git fet
 sont notées ci-dessous.</p>
 </div>
 <div class="paragraph">
-<p>Jusqu&#8217;à la version 2.20 de Git, et contrairement à ce qui se passe avec
+<p>+
+Jusqu&#8217;à la version 2.20 de Git, et contrairement à ce qui se passe avec
 <a href="git-push.html">git-push(1)</a>, toute mise à jour de <code>refs/tags/*</code> serait acceptée sans
 <code>+</code> dans la spéc-de-réf (ou <code>--force</code>). Lors de la récupération, nous
 considérons sans distinction toutes les mises à jour d&#8217;étiquettes depuis un
@@ -1072,24 +1099,30 @@ même manière que lors de la poussée. C&#8217;est-à-dire que toute mise à jo
 rejetée sans "+" dans le spécificateur de référence (ou <code>--force</code>).</p>
 </div>
 <div class="paragraph">
-<p>Contrairement à une poussée avec <a href="git-push.html">git-push(1)</a>, toute mise à jour en
+<p>+
+Contrairement à une poussée avec <a href="git-push.html">git-push(1)</a>, toute mise à jour en
 dehors de <code>refs/{tags,heads}/*</code> sera acceptée sans <code>+</code> dans le spéc-de-réf
 (ou <code>--force</code>), que ce soit en échangeant par exemple un objet arbre pour un
 blob, ou un commit pour un autre commit qui n&#8217;a pas le commit précédent
 comme ancêtre etc.</p>
 </div>
 <div class="paragraph">
-<p>Contrairement à une poussée avec <a href="git-push.html">git-push(1)</a>, il n&#8217;y a pas de
+<p>+
+Contrairement à une poussée avec <a href="git-push.html">git-push(1)</a>, il n&#8217;y a pas de
 configuration qui modifie ces règles, et rien de tel qu&#8217;un crochet
 pré-récupération <code>pre-fetch</code> analogue à celui de pré-réception`pre-receive`.</p>
 </div>
 <div class="paragraph">
-<p>Comme pour la poussée avec <a href="git-push.html">git-push(1)</a>, toutes les règles décrites
+<p>+
+Comme pour la poussée avec <a href="git-push.html">git-push(1)</a>, toutes les règles décrites
 ci-dessus concernant ce qui n&#8217;est pas autorisé comme une mise à jour,
 peuvent être annulées en ajoutant un "+" optionnel à un spécificateur de
 référence (ou en utilisant l&#8217;option de ligne de commande <code>--force</code>). La
 seule exception à cette règle est qu&#8217;aucun forçage ne fera accepter à
 l&#8217;espace de noms <code>refs/heads/*</code> un objet non commit.</p>
+</div>
+<div class="paragraph">
+<p>+</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1111,6 +1144,9 @@ branche.
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>+</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -1808,7 +1844,7 @@ dans une prochaine version de Git.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-08-04 16:17:20 +0200
+Last updated 2020-10-20 22:49:48 +0200
 </div>
 </div>
 </body>
