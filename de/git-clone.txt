@@ -22,54 +22,27 @@ git-clone – Klont ein Repository in ein neues Verzeichnis
 BESCHREIBUNG
 ------------
 
-Klont ein Repository in ein neu erzeugtes Verzeichnis, erzeugt
-Remote-Tracking-Branches zum Nachverfolgen aller Branches des geklonten
-Repositorys (sichtbar durch `git branch --remotes`). Zusätzlich wird der
-gerade aktive Branch des geklonten Projektarchivs lokal angelegt und dessen
-Inhalte geholt.
+Klont ein Repository in ein neu erzeugtes Verzeichnis, erzeugt Remote-Tracking-Branches zum Nachverfolgen aller Branches des geklonten Repositorys (sichtbar durch `git branch --remotes`). Zusätzlich wird der gerade aktive Branch des geklonten Projektarchivs lokal angelegt und dessen Inhalte geholt.
 
-Nach dem Klonen aktualisiert ein einfaches `git fetch` (ohne weitere
-Argumente) alle Remote-Tracking-Branches und ein Aufruf von `git pull` (ohne
-weitere Argumente) wird zusätzlich die Änderungen der Remote-Branch ‚master‘
-in den lokalen Master-Branch mergen (das gilt nicht, wenn „--single-branch“
-angegeben wird; siehe unten).
+Nach dem Klonen aktualisiert ein einfaches `git fetch` (ohne weitere Argumente) alle Remote-Tracking-Branches und ein Aufruf von `git pull` (ohne weitere Argumente) wird zusätzlich die Änderungen der Remote-Branch ‚master‘ in den lokalen Master-Branch mergen (das gilt nicht, wenn „--single-branch“ angegeben wird; siehe unten).
 
-Diese Standard-Konfiguration wird durch Anlegen einer Referenz auf den
-'HEAD' der Remote-Branch unter `refs/remotes/origin` und der Einrichtung der
-Konfigurations-Variablen `remote.origin.url` und `remote.origin.fetch`
-erreicht.
+Diese Standard-Konfiguration wird durch Anlegen einer Referenz auf den 'HEAD' der Remote-Branch unter `refs/remotes/origin` und der Einrichtung der Konfigurations-Variablen `remote.origin.url` und `remote.origin.fetch` erreicht.
 
 
 OPTIONEN
 --------
 -l::
 --local::
-	Ist das zu klonende Projektarchiv lokal auf der Maschine, kann durch dieses
-	Flag der normale Git-Transportmechanismus umgangen werden und es wird ein
-	einfacher Kopiervorgang von 'HEAD' und allen unter den 'objects' und 'refs'
-	Verzeichnissen gelegenen Daten durchgeführt.  Die Dateien unter
-	'.git/objects/' werden zum Platzsparen mittels hard link referenziert
-	anstatt sie physikalisch zu kopieren.
+	Ist das zu klonende Projektarchiv lokal auf der Maschine, kann durch dieses Flag der normale Git-Transportmechanismus umgangen werden und es wird ein einfacher Kopiervorgang von 'HEAD' und allen unter den 'objects' und 'refs' Verzeichnissen gelegenen Daten durchgeführt. Die Dateien unter '.git/objects/' werden zum Platzsparen mittels hard link referenziert anstatt sie physikalisch zu kopieren.
 +
-Wenn das Repository als lokaler Pfad angegeben wird (z.B. `/Pfad/zum/Repo`),
-das ist ja die Voreinstellung und --local ist eigentlich überflüssig
-(Nulloperation). Sobald das Repository als URL angegeben wird, dann wird
-dieses Flag ignoriert (und wird niemals die lokalen Optimierungen
-anwenden). Die Angabe von `--no-local` wird die Vorgabe überschreiben, wenn
-`/Pfad/zum/Repo` angegeben wird, und stattdessen den regulären Git-Transport
-verwenden.
+Wenn das Repository als lokaler Pfad angegeben wird (z.B. `/Pfad/zum/Repo`), das ist ja die Voreinstellung und --local ist eigentlich überflüssig (Nulloperation). Sobald das Repository als URL angegeben wird, dann wird dieses Flag ignoriert (und wird niemals die lokalen Optimierungen anwenden). Die Angabe von `--no-local` wird die Vorgabe überschreiben, wenn `/Pfad/zum/Repo` angegeben wird, und stattdessen den regulären Git-Transport verwenden.
 
 --no-hardlinks::
-	Erzwingt ein physikalisches Kopieren aller Dateien im `.git/objects/`
-	Verzeichnis anstelle von Hard-Links. Dies kann erwünscht sein, wenn eine
-	Sicherung des Repositorys erstellt werden soll.
+	Erzwingt ein physikalisches Kopieren aller Dateien im `.git/objects/` Verzeichnis anstelle von Hard-Links. Dies kann erwünscht sein, wenn eine Sicherung des Repositorys erstellt werden soll.
 
 -s::
 --shared::
-	Befindet sich das zu klonende Repository lokal auf der Maschine (anstatt
-	Hard-Links zu verwenden), dann werden automatisch alle Objekte mittels
-	`.git/objects/info/alternates` gemeinsam verwendet. Das erzeugte Repository
-	enthält initial keine eigenen Objekte.
+	Befindet sich das zu klonende Repository lokal auf der Maschine (anstatt Hard-Links zu verwenden), dann werden automatisch alle Objekte mittels `.git/objects/info/alternates` gemeinsam verwendet. Das erzeugte Repository enthält initial keine eigenen Objekte.
 +
 *NOTE*: this is a possibly dangerous operation; do *not* use
 it unless you understand what it does. If you clone your
@@ -81,230 +54,110 @@ which automatically call `git maintenance run --auto`. (See
 linkgit:git-maintenance[1].) If these objects are removed and were referenced
 by the cloned repository, then the cloned repository will become corrupt.
 +
-Man sollte beachten, dass das Ausführen von `git repack` ohne die Option
-`--local` in einem Repository, das mit `--shared` geklont wurde, Objekte aus
-dem Quell-Repository in ein Paket im geklonten Repository kopiert und so den
-von `clone --shared` eingesparten Plattenplatz entfernt. Dagegen kann `git
-gc` sicher ausgeführt werden, das standardmäßig die Option `--local`
-verwendet.
+Man sollte beachten, dass das Ausführen von `git repack` ohne die Option `--local` in einem Repository, das mit `--shared` geklont wurde, Objekte aus dem Quell-Repository in ein Paket im geklonten Repository kopiert und so den von `clone --shared` eingesparten Plattenplatz entfernt. Dagegen kann `git gc` sicher ausgeführt werden, das standardmäßig die Option `--local` verwendet.
 +
-Wenn die Abhängigkeit eines mit `--shared` geklonten Repositorys von seinem
-Quell-Repository gebrochen werden soll, kann einfach `git repack -a`
-ausgeführt werden, um alle Objekte aus dem Quell-Repository „in einem
-Rutsch“ in das geklonte Repository zu kopieren.
+Wenn die Abhängigkeit eines mit `--shared` geklonten Repositorys von seinem Quell-Repository gebrochen werden soll, kann einfach `git repack -a` ausgeführt werden, um alle Objekte aus dem Quell-Repository „in einem Rutsch“ in das geklonte Repository zu kopieren.
 
 --reference[-if-able] <Repository>::
-	Wenn sich das Referenz-Repository auf dem lokalen Rechner befindet, wird
-	automatisch `.git/objects/info/alternates` eingerichtet, um Objekte aus dem
-	Referenz-Repository zu erhalten. Wenn, alternativ, ein bereits vorhandenes
-	Repository verwendet wird, müssen weniger Objekte aus dem zu klonenden
-	Repository kopiert werden, was die Belastung für Netzwerk und lokale
-	Sicherung reduziert. Bei der Anwendung von `--reference-if-able` wird ein
-	nicht existierendes Verzeichnis mit einer Warnung übersprungen, anstatt den
-	Klon abzubrechen.
+	Wenn sich das Referenz-Repository auf dem lokalen Rechner befindet, wird automatisch `.git/objects/info/alternates` eingerichtet, um Objekte aus dem Referenz-Repository zu erhalten. Wenn, alternativ, ein bereits vorhandenes Repository verwendet wird, müssen weniger Objekte aus dem zu klonenden Repository kopiert werden, was die Belastung für Netzwerk und lokale Sicherung reduziert. Bei der Anwendung von `--reference-if-able` wird ein nicht existierendes Verzeichnis mit einer Warnung übersprungen, anstatt den Klon abzubrechen.
 +
 *HINWEIS*: Siehe den HINWEIS für die Option `--shared` 
 und auch für die Option `--dissociate`.
 
 --dissociate::
-	Objekte, die mit der Option `--reference` spezifiziert sind, von
-	Referenz-Repositorys entlehnen. Dadurch wird der Netzwerktransfer reduziert
-	und die Überführung von Objekten aus diesen Repositorys beendet, nachdem ein
-	Klon mit den notwendigen lokalen Kopien der entlehnten Objekte erstellt
-	wurden. Diese Option kann auch verwendet werden, wenn lokal von einem
-	Repository geklont wird, das schon Objekte von einem anderen Repository
-	übernimmt – das neue Repository wird wiederum Objekte vom selben Repository
-	entlehnen. Diese Option kann verwendet werden, um die Übernahme zu stoppen.
+	Objekte, die mit der Option `--reference` spezifiziert sind, von Referenz-Repositorys entlehnen. Dadurch wird der Netzwerktransfer reduziert und die Überführung von Objekten aus diesen Repositorys beendet, nachdem ein Klon mit den notwendigen lokalen Kopien der entlehnten Objekte erstellt wurden. Diese Option kann auch verwendet werden, wenn lokal von einem Repository geklont wird, das schon Objekte von einem anderen Repository übernimmt – das neue Repository wird wiederum Objekte vom selben Repository entlehnen. Diese Option kann verwendet werden, um die Übernahme zu stoppen.
 
 -q::
 --quiet::
-	'stille' Ausführung. Auf dem Standardfehlerstrom wird kein Fortschritt
-	ausgegeben.
+	'stille' Ausführung. Auf dem Standardfehlerstrom wird kein Fortschritt ausgegeben.
 
 -v::
 --verbose::
-	„Wortreich“ ausführen. Beeinflusst nicht die Fortschrittsmeldung an den
-	Standardfehlerstrom.
+	„Wortreich“ ausführen. Beeinflusst nicht die Fortschrittsmeldung an den Standardfehlerstrom.
 
 --progress::
-	Der Fortschritt wird nur standardmäßig auf der Standardfehlerausgabe
-	angezeigt, wenn diese an ein Terminal angebunden ist, wenn nicht auch
-	`--quiet` angegeben wird. Dieses Flag erzwingt die Fortschrittsanzeige auch
-	ohne Terminalanbindung.
+	Der Fortschritt wird nur standardmäßig auf der Standardfehlerausgabe angezeigt, wenn diese an ein Terminal angebunden ist, wenn nicht auch `--quiet` angegeben wird. Dieses Flag erzwingt die Fortschrittsanzeige auch ohne Terminalanbindung.
 
 --server-option=<Option>::
-	Übertragen Sie die angegebene Zeichenfolge an den Server, wenn Sie mit
-	Protokollversion 2 kommunizieren.  Die angegebene Zeichenfolge darf kein
-	NUL- oder LF-Zeichen enthalten.  Die Behandlung von Server-Optionen,
-	einschließlich unbekannter, durch den Server ist serverspezifisch.  Wenn
-	mehrmals `--server-option=<Option>` angegeben wird, werden sie alle, wie in
-	angegebenen Reihenfolge, an die andere Seite gesendet.
+	Übertragen Sie die angegebene Zeichenfolge an den Server, wenn Sie mit Protokollversion 2 kommunizieren. Die angegebene Zeichenfolge darf kein NUL- oder LF-Zeichen enthalten. Die Behandlung von Server-Optionen, einschließlich unbekannter, durch den Server ist serverspezifisch. Wenn mehrmals `--server-option=<Option>` angegeben wird, werden sie alle, wie in angegebenen Reihenfolge, an die andere Seite gesendet.
 
 -n::
 --no-checkout::
 	Unterdrückt das Abrufen (checkout) von HEAD, nachdem das Klonen fertig ist.
 
 --bare::
-	Erstellt ein `bare` Git-Repository.  D.h. anstatt ein `<Directory>` zu
-	erstellen und die Verwaltungsdateien in `<Directory>/.git` abzulegen, wird
-	aus dem `<Directory>` selbst das `$GIT_DIR`. Dies impliziert offensichtlich
-	`--no-checkout`, weil es nirgendwo eine Möglichkeit gibt, das Arbeitsbereich
-	auszuchecken.  Auch die Branch-Heads auf der Remote-Seite werden direkt auf
-	die entsprechenden lokalen Branch-Heads kopiert, ohne sie auf
-	`refs/remotes/origin/` abzubilden.  Wenn diese Option verwendet wird, werden
-	weder Remote-Tracking-Branches noch die zugehörigen Konfigurationsvariablen
-	erstellt.
+	Erstellt ein `bare` Git-Repository. D.h. anstatt ein `<Directory>` zu erstellen und die Verwaltungsdateien in `<Directory>/.git` abzulegen, wird aus dem `<Directory>` selbst das `$GIT_DIR`. Dies impliziert offensichtlich `--no-checkout`, weil es nirgendwo eine Möglichkeit gibt, das Arbeitsbereich auszuchecken. Auch die Branch-Heads auf der Remote-Seite werden direkt auf die entsprechenden lokalen Branch-Heads kopiert, ohne sie auf `refs/remotes/origin/` abzubilden. Wenn diese Option verwendet wird, werden weder Remote-Tracking-Branches noch die zugehörigen Konfigurationsvariablen erstellt.
 
 --sparse::
-	Initialisiert die Sparse-Checkout-Datei so, dass das Arbeitsverzeichnis nur
-	mit den Dateien im Stammverzeichnis (root) des Repositorys beginnt. Die
-	Sparse-Checkout-Datei kann modifiziert werden, um das Arbeitsverzeichnis
-	nach Bedarf zu vergrößern.
+	Initialisiert die Sparse-Checkout-Datei so, dass das Arbeitsverzeichnis nur mit den Dateien im Stammverzeichnis (root) des Repositorys beginnt. Die Sparse-Checkout-Datei kann modifiziert werden, um das Arbeitsverzeichnis nach Bedarf zu vergrößern.
 
 --filter=<Filter-Spezifikation>::
-	Verwendet die Funktion des partiellen Klonens und fordert den Server auf,
-	eine Teilmenge der verfügbaren Objekte, entsprechend einem vorgegebenen
-	Objektfilter, zu senden.  Bei der Verwendung von `--filter` wird die mit
-	angegebene `<filter-spec>` für den partiellen Klon-Filter verwendet. Zum
-	Beispiel wird `--filter=blob:none` alle Blobs (Dateiinhalte) herausfiltern,
-	bis sie von Git benötigt werden. Außerdem wird `--filter=blob:limit=<size>`
-	alle BLOBs herausfiltern, die mindestens die Größe `<size>` haben. Weitere
-	Details zu den Filterspezifikationen finden Sie unter der Option `--filter`
-	in linkgit:git-rev-list[1].
+	Verwendet die Funktion des partiellen Klonens und fordert den Server auf, eine Teilmenge der verfügbaren Objekte, entsprechend einem vorgegebenen Objektfilter, zu senden. Bei der Verwendung von `--filter` wird die mit angegebene `<filter-spec>` für den partiellen Klon-Filter verwendet. Zum Beispiel wird `--filter=blob:none` alle Blobs (Dateiinhalte) herausfiltern, bis sie von Git benötigt werden. Außerdem wird `--filter=blob:limit=<size>` alle BLOBs herausfiltern, die mindestens die Größe `<size>` haben. Weitere Details zu den Filterspezifikationen finden Sie unter der Option `--filter` in linkgit:git-rev-list[1].
 
 --mirror::
-	Erstellt einen Spiegel des Quell-Repositorys. Das enthält auch `--bare`. Im
-	Vergleich zu `--bare` bildet `--mirror` nicht nur lokale Branches der Quelle
-	auf lokale Branches des Ziel-Repositorys ab, sondern bildet auch alle Refs
-	ab (einschließlich der Remote-Tracking-Branches, Notizen usw.). Es richtet
-	eine refspec-Konfiguration ein, sodass alle diese Refs durch ein `git remote
-	update` im Ziel-Repository überschrieben werden können.
+	Erstellt einen Spiegel des Quell-Repositorys. Das enthält auch `--bare`. Im Vergleich zu `--bare` bildet `--mirror` nicht nur lokale Branches der Quelle auf lokale Branches des Ziel-Repositorys ab, sondern bildet auch alle Refs ab (einschließlich der Remote-Tracking-Branches, Notizen usw.). Es richtet eine refspec-Konfiguration ein, sodass alle diese Refs durch ein `git remote update` im Ziel-Repository überschrieben werden können.
 
 -o <Name>::
 --origin <Name>::
-	Verwendet den Namen `<Name>` statt `origin` zum Tracken der Änderungen des
-	Upstream-Repository.
+	Verwendet den Namen `<Name>` statt `origin` zum Tracken der Änderungen des Upstream-Repository.
 
 -o <Name>::
 --branch <Name>::
-	Anstatt dass der neu erstellte HEAD auf den Branch zeigt, auf den der HEAD
-	des geklonten Repositorys zeigt, verweist er stattdessen auf den Branch
-	`<Name>`. In einem „non-bare“ Repository ist dies der Branch, der
-	ausgecheckt wird. `--branch` kann auch Tags übernehmen und HEAD im
-	resultierenden Repository von diesem Commit abtrennen.
+	Anstatt dass der neu erstellte HEAD auf den Branch zeigt, auf den der HEAD des geklonten Repositorys zeigt, verweist er stattdessen auf den Branch `<Name>`. In einem „non-bare“ Repository ist dies der Branch, der ausgecheckt wird. `--branch` kann auch Tags übernehmen und HEAD im resultierenden Repository von diesem Commit abtrennen.
 
 -u <Upload-Pack>::
 --upload-pack <Upload-Pack>::
-	Wurde diese Option angegeben und der Zugriff auf das zu klonende Repository
-	erfolgt über SSH, so wird damit ein Nicht-Standardpfad für den Befehlsaufruf
-	am anderen Ende angegeben.
+	Wurde diese Option angegeben und der Zugriff auf das zu klonende Repository erfolgt über SSH, so wird damit ein Nicht-Standardpfad für den Befehlsaufruf am anderen Ende angegeben.
 
 --template=<Template_Directory>::
-	Bestimmt das Verzeichnis, aus dem Templates ausgelesen werden sollen; (Siehe
-	den Abschnitt "TEMPLATE DIRECTORY" in linkgit:git-init[1].)
+	Bestimmt das Verzeichnis, aus dem Templates ausgelesen werden sollen; (Siehe den Abschnitt "TEMPLATE DIRECTORY" in linkgit:git-init[1].)
 
 -c <Schlüssel>=<Wert>::
 --config <Schlüssel>=<Wert>::
-	Setzt eine Konfigurations-Variable im neu angelegten Repository; die sofort
-	nach der Initialisierung des Repositorys wirksam wird, noch bevor der
-	Remote-Verlauf geholt oder irgendwelche Dateien ausgecheckt werden. Der
-	Schlüssel hat das gleiche Format wie es von linkgit:git-config[1] erwartet
-	wird (z.B. `core.eol=true`). Wenn für den gleichen Schlüssel mehrere Werte
-	angegeben werden, wird jeder Wert in die Konfigurationsdatei
-	geschrieben. Auf diese Weise ist es z.B. möglich, zusätzliche
-	Fetch-Referenzen zum Ursprungs-Remote hinzuzufügen.
+	Setzt eine Konfigurations-Variable im neu angelegten Repository; die sofort nach der Initialisierung des Repositorys wirksam wird, noch bevor der Remote-Verlauf geholt oder irgendwelche Dateien ausgecheckt werden. Der Schlüssel hat das gleiche Format wie es von linkgit:git-config[1] erwartet wird (z.B. `core.eol=true`). Wenn für den gleichen Schlüssel mehrere Werte angegeben werden, wird jeder Wert in die Konfigurationsdatei geschrieben. Auf diese Weise ist es z.B. möglich, zusätzliche Fetch-Referenzen zum Ursprungs-Remote hinzuzufügen.
 +
-Aufgrund von Einschränkungen der aktuellen Implementierung werden einige
-Konfigurations-Variablen erst *nach* dem initialen Fetchen und Checkout
-wirksam.  Bekanntermaßen nicht wirksame Konfigurations-Variablen sind:
-`remote.<Name>.mirror` und `remote.<Name>.tagOpt`.  Verwenden Sie
-stattdessen die entsprechenden Optionen `---mirror` und `--no-tags`.
+Aufgrund von Einschränkungen der aktuellen Implementierung werden einige Konfigurations-Variablen erst *nach* dem initialen Fetchen und Checkout wirksam. Bekanntermaßen nicht wirksame Konfigurations-Variablen sind: `remote.<Name>.mirror` und `remote.<Name>.tagOpt`. Verwenden Sie stattdessen die entsprechenden Optionen `---mirror` und `--no-tags`.
 
 --depth <Tiefe>::
-	Erstellt einen „flachen“ Klon mit einem auf die angegebene Anzahl von
-	Commits gekürzten Verlauf. Das impliziert `--single-branch`, es sei denn, es
-	wird `--no-single-branch` angegeben, um den Verlauf nahe der Spitzen aller
-	Branches zu fetchen. Wenn Submodule gekürzt geklont werden sollen, geben Sie
-	zusätzlich `--shallow-submodules` an.
+	Erstellt einen „flachen“ Klon mit einem auf die angegebene Anzahl von Commits gekürzten Verlauf. Das impliziert `--single-branch`, es sei denn, es wird `--no-single-branch` angegeben, um den Verlauf nahe der Spitzen aller Branches zu fetchen. Wenn Submodule gekürzt geklont werden sollen, geben Sie zusätzlich `--shallow-submodules` an.
 
 --shallow-since=<Datum>::
-	Erstellt einen „flachen“, gekürzten Klon mit einem Verlauf nach dem
-	festgelegten Zeitpunkt.
+	Erstellt einen „flachen“, gekürzten Klon mit einem Verlauf nach dem festgelegten Zeitpunkt.
 
 --shallow-exclude=<Revision>::
-	Erstellt einen flachen Klon mit einem Verlauf, der Commits ausschließt, die
-	von einem angegebenen Remote-Branch oder Tag erreichbar sind.  Diese Option
-	kann mehrfach angegeben werden.
+	Erstellt einen flachen Klon mit einem Verlauf, der Commits ausschließt, die von einem angegebenen Remote-Branch oder Tag erreichbar sind. Diese Option kann mehrfach angegeben werden.
 
 --[no-]single-branch::
-	Klont nur die Historie, die zur Spitze eines einzelnen Branchs gehört,
-	entweder spezifiziert durch die `--branch`-Option oder den primären Branch
-	auf den der Remote-`HEAD` zeigt.  Nachfolgende Fetches in das resultierende
-	Repository werden nur den Remote-Tracking-Branch für den Branch
-	aktualisieren, auf dem diese Option für das anfängliche Klonen verwendet
-	wurde.  Wenn der HEAD des Remote-Repositorys auf keinen Branch zeigte, als
-	mit `--single-branch` geklont wurde, wird kein Remote-Tracking-Branch
-	erzeugt.
+	Klont nur die Historie, die zur Spitze eines einzelnen Branchs gehört, entweder spezifiziert durch die `--branch`-Option oder den primären Branch auf den der Remote-`HEAD` zeigt. Nachfolgende Fetches in das resultierende Repository werden nur den Remote-Tracking-Branch für den Branch aktualisieren, auf dem diese Option für das anfängliche Klonen verwendet wurde. Wenn der HEAD des Remote-Repositorys auf keinen Branch zeigte, als mit `--single-branch` geklont wurde, wird kein Remote-Tracking-Branch erzeugt.
 
 --no-tags::
-	Klont keine Tags und setzt in der Konfiguration
-	`remote.<Remote>.tagOpt=--no-tags`, um sicherzustellen, dass zukünftige `git
-	pull` und `git fetch` Operationen keinen Tags folgen. Nachfolgende explizite
-	Tag-Fetches werden trotzdem funktionieren (siehe linkgit:git-fetch[1]).
+	Klont keine Tags und setzt in der Konfiguration `remote.<Remote>.tagOpt=--no-tags`, um sicherzustellen, dass zukünftige `git pull` und `git fetch` Operationen keinen Tags folgen. Nachfolgende explizite Tag-Fetches werden trotzdem funktionieren (siehe linkgit:git-fetch[1]).
 +
-Kann in Verbindung mit `--single-branch` verwendet werden, um einen Branch
-zu klonen und zu verwalten, der außer einem einzelnen geklonten Branch keine
-Referenzen enthält. Das ist z.B. nützlich, um minimale Klone des
-Standard-Branchs eines Repositorys für die Indexierung von Suchvorgängen zu
-erhalten.
+Kann in Verbindung mit `--single-branch` verwendet werden, um einen Branch zu klonen und zu verwalten, der außer einem einzelnen geklonten Branch keine Referenzen enthält. Das ist z.B. nützlich, um minimale Klone des Standard-Branchs eines Repositorys für die Indexierung von Suchvorgängen zu erhalten.
 
 --recurse-submodules[=<pathspec>]::
-	Initialisiert und klont nach der Erstellung des Klons Submodule auf der
-	Basis der angegebenen Pfadspezifikation.  Wenn keine Pfadspezifikation
-	angegeben wird, werden alle Submodule initialisiert und geklont.  Diese
-	Option kann für Pfadspezifikationen, die aus mehreren Einträgen bestehen,
-	mehrfach angegeben werden.  Der resultierende Klon hat `submodule.active`
-	oder "." (d.h. alle Submodule) auf die angegebene Pfadspezifikation gesetzt,
-	wenn keine Pfadspezifikation vorhanden ist.
+	Initialisiert und klont nach der Erstellung des Klons Submodule auf der Basis der angegebenen Pfadspezifikation. Wenn keine Pfadspezifikation angegeben wird, werden alle Submodule initialisiert und geklont. Diese Option kann für Pfadspezifikationen, die aus mehreren Einträgen bestehen, mehrfach angegeben werden. Der resultierende Klon hat `submodule.active` oder "." (d.h. alle Submodule) auf die angegebene Pfadspezifikation gesetzt, wenn keine Pfadspezifikation vorhanden ist.
 +
-Submodule werden mit ihren Standardeinstellungen initialisiert und
-geklont. Dies entspricht dem Ausführen von `git submodule update --init
---recursive <Pfadspezifikation>` unmittelbar, nachdem der Klon beendet
-ist. Diese Option wird ignoriert, wenn das geklonte Repository keinen
-Arbeitsbereich/Checkout hat (d.h. wenn eine der Optionen
-`--no-checkout`/`-n`, `--bare` oder `--mirror` angegeben wurde)
+Submodule werden mit ihren Standardeinstellungen initialisiert und geklont. Dies entspricht dem Ausführen von `git submodule update --init --recursive <Pfadspezifikation>` unmittelbar, nachdem der Klon beendet ist. Diese Option wird ignoriert, wenn das geklonte Repository keinen Arbeitsbereich/Checkout hat (d.h. wenn eine der Optionen `--no-checkout`/`-n`, `--bare` oder `--mirror` angegeben wurde)
 
 --[no-]shallow-submodules::
 	Alle zu klonenden Submodule werden auf eine Tiefe von 1 gekürzt.
 
 --[no-]remote-submodules::
-	Alle geklonten Submodule verwenden den Status der Remote-Tracking-Branch des
-	Submoduls, um das Submodul zu aktualisieren, aber nicht den registrierten
-	SHA-1 des Hauptprojekts. Das entspricht der Option von `--remote` mit dem
-	Befehl `git submodule update`.
+	Alle geklonten Submodule verwenden den Status der Remote-Tracking-Branch des Submoduls, um das Submodul zu aktualisieren, aber nicht den registrierten SHA-1 des Hauptprojekts. Das entspricht der Option von `--remote` mit dem Befehl `git submodule update`.
 
 --separate-git-dir=<Git-Dir>::
-	Verwendet das angegebene Verzeichnis als Speicherort für das geklonte
-	Repository, anstatt das übliche Verzeichnis zu verwenden. Dann wird ein
-	Dateisystem-unabhängiger, symbolischer Git-Link dorthin erstellt. Das führt
-	dazu, dass das Git-Repository vom Arbeitsbereich getrennt werden kann.
+	Verwendet das angegebene Verzeichnis als Speicherort für das geklonte Repository, anstatt das übliche Verzeichnis zu verwenden. Dann wird ein Dateisystem-unabhängiger, symbolischer Git-Link dorthin erstellt. Das führt dazu, dass das Git-Repository vom Arbeitsbereich getrennt werden kann.
 
 -j <Anz>::
 --jobs <Anz>::
-	Anzahl der gleichzeitig abgerufenen Submodule.  Standardmäßig wird die
-	Option `submodule.fetchJobs` verwendet.
+	Anzahl der gleichzeitig abgerufenen Submodule. Standardmäßig wird die Option `submodule.fetchJobs` verwendet.
 
 <Repository>::
-	Bezeichnet das (möglicherweise externe) Repository, das geklont werden
-	soll.  Siehe unten den Abschnitt <<URLS,GIT URLS>> für weiterführende
-	Informationen zum Bestimmen von Repositorys.
+	Bezeichnet das (möglicherweise externe) Repository, das geklont werden soll. Siehe unten den Abschnitt <<URLS,GIT URLS>> für weiterführende Informationen zum Bestimmen von Repositorys.
 
 <Directory>::
-	Der Name eines neuen Verzeichnisses, in das geklont werden soll.  Der
-	„menschenfreundliche“ Teil des Quell-Repositorys wird verwendet, wenn kein
-	Verzeichnis explizit angegeben wird (`repo` für `/path/to/repo.git` und
-	`foo` für `host.xz:foo/.git`).  Das Klonen in ein bestehendes Verzeichnis
-	ist nur erlaubt, wenn das Verzeichnis leer ist.
+	Der Name eines neuen Verzeichnisses, in das geklont werden soll. Der „menschenfreundliche“ Teil des Quell-Repositorys wird verwendet, wenn kein Verzeichnis explizit angegeben wird (`repo` für `/path/to/repo.git` und `foo` für `host.xz:foo/.git`). Das Klonen in ein bestehendes Verzeichnis ist nur erlaubt, wenn das Verzeichnis leer ist.
 
 :git-clone: 1
 include::urls.txt[]
@@ -321,8 +174,7 @@ $ make
 ------------
 
 
-* Erstellt einen lokalen Klon, der vom aktuellen Verzeichnis entlehnt wird,
-  ohne die Daten auszuchecken:
+* Erstellt einen lokalen Klon, der vom aktuellen Verzeichnis entlehnt wird, ohne die Daten auszuchecken:
 +
 ------------
 $ git clone -l -s -n . ../copy
@@ -331,8 +183,7 @@ $ git show-branch
 ------------
 
 
-* Klonen eines Upstream-Repositorys wobei Objekte von einem lokalen Repository
-  entlehnt werden:
+* Klonen eines Upstream-Repositorys wobei Objekte von einem lokalen Repository entlehnt werden:
 +
 ------------
 $ git clone --reference /git/linux.git \
@@ -342,8 +193,7 @@ $ cd my-linux
 ------------
 
 
-* Erzeugt ein „leeres“ (bare) Repository um Ihre Änderungen zu
-  veröffentlichen:
+* Erzeugt ein „leeres“ (bare) Repository um Ihre Änderungen zu veröffentlichen:
 +
 ------------
 $ git clone --bare -l /home/proj/.git /pub/scm/proj.git

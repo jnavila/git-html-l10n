@@ -18,136 +18,65 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Alguns fluxos de trabalho requerem que um ou mais ramificações do
-desenvolvimento em uma máquina sejam replicadas em uma outra máquina, porém
-as duas máquinas não podem ser conectadas diretamente, portanto, os
-protocolos interativos do Git (git, ssh, http) não podem ser utilizados.
+Alguns fluxos de trabalho requerem que um ou mais ramificações do desenvolvimento em uma máquina sejam replicadas em uma outra máquina, porém as duas máquinas não podem ser conectadas diretamente, portanto, os protocolos interativos do Git (git, ssh, http) não podem ser utilizados.
 
-O comando 'git bundle' empacota os objetos e as referências em um arquivo na
-máquina de origem, que pode ser importado para um outro repositório
-utilizando o comando 'git fetch', 'git pull' ou 'git clone', depois de mover
-o arquivo de alguma maneira (através do "sneakernet" por exemplo).
+O comando 'git bundle' empacota os objetos e as referências em um arquivo na máquina de origem, que pode ser importado para um outro repositório utilizando o comando 'git fetch', 'git pull' ou 'git clone', depois de mover o arquivo de alguma maneira (através do "sneakernet" por exemplo).
 
-Como não existe conexão direta entre os repositórios o usuário deve informar
-uma base para o pacote que é mantido pelo repositório no destino: o pacote
-assume que todos os objetos na base já estão no repositório no destino.
+Como não existe conexão direta entre os repositórios o usuário deve informar uma base para o pacote que é mantido pelo repositório no destino: o pacote assume que todos os objetos na base já estão no repositório no destino.
 
 OPÇÕES
 ------
 
 create [options] <arquivo> <git-rev-list-args>::
-	Utilize para criar um pacote chamado 'arquivo'.  Isso requer a utilização
-	dos argumentos '<git-rev-list-args>' para definir o conteúdo do pacote.
-	'options' contém as opções específicas para o subcomando 'git bundle
-	create'.
+	Utilize para criar um pacote chamado 'arquivo'. Isso requer a utilização dos argumentos '<git-rev-list-args>' para definir o conteúdo do pacote. 'options' contém as opções específicas para o subcomando 'git bundle create'.
 
 verify <arquivo>::
-	Utilizado para verificar se um arquivo do pacote é válido e se será aplicado
-	de forma limpa ao repositório atual.  Isso incluí as verificações no formato
-	do pacote e também a que verificação dos pré-requisitos dos commits existam
-	e estejam totalmente vinculados ao repositório atual.  O comando 'git
-	bundle' exibe uma lista dos commits que faltam, caso haja, e encerra com uma
-	condição diferente de zero.
+	Utilizado para verificar se um arquivo do pacote é válido e se será aplicado de forma limpa ao repositório atual. Isso incluí as verificações no formato do pacote e também a que verificação dos pré-requisitos dos commits existam e estejam totalmente vinculados ao repositório atual. O comando 'git bundle' exibe uma lista dos commits que faltam, caso haja, e encerra com uma condição diferente de zero.
 
 list-heads <arquivo>::
-	Lista as referências definidas no pacote.  Caso seja seguido por uma lista
-	de referências, apenas as referências que coincidam com as informadas são
-	exibidas.
+	Lista as referências definidas no pacote. Caso seja seguido por uma lista de referências, apenas as referências que coincidam com as informadas são exibidas.
 
 unbundle <arquivo>::
-	Passa os objetos no pacote para o para armazenamento no repositório com o
-	comando 'git index-pack' e depois imprime os nomes de todas as referências
-	que foram definidas. Se uma lista de referências for informada, apenas as
-	referências que coincidam às da lista serão exibidas. Este comando é
-	realmente "plumbing", feito para ser chamado apenas através do 'git fetch'.
+	Passa os objetos no pacote para o para armazenamento no repositório com o comando 'git index-pack' e depois imprime os nomes de todas as referências que foram definidas. Se uma lista de referências for informada, apenas as referências que coincidam às da lista serão exibidas. Este comando é realmente "plumbing", feito para ser chamado apenas através do 'git fetch'.
 
 <git-rev-list-args>::
-	Uma lista de argumentos aceitáveis para o comando 'git rev-parse' e 'git
-	rev-list' (contendo uma determinada referência, consulte ESPECIFICANDO AS
-	REFERÊNCIAS logo abaixo), que determina quais os objetos e as referências
-	específicas que serão transportados.  Por exemplo, `master~10..master` faz
-	com que a referência principal seja empacotada juntamente com todos os
-	objetos que foram adicionados desde o seu décimo commit ancestral.  Não há
-	um limite explícito para a quantidade de referências e dos objetos que podem
-	ser empacotados.
+	Uma lista de argumentos aceitáveis para o comando 'git rev-parse' e 'git rev-list' (contendo uma determinada referência, consulte ESPECIFICANDO AS REFERÊNCIAS logo abaixo), que determina quais os objetos e as referências específicas que serão transportados. Por exemplo, `master~10..master` faz com que a referência principal seja empacotada juntamente com todos os objetos que foram adicionados desde o seu décimo commit ancestral. Não há um limite explícito para a quantidade de referências e dos objetos que podem ser empacotados.
 
 
 [<refname>...]::
-	Uma lista de referências utilizadas para limitar as referências relatadas
-	como disponíveis. É muito útil para ser utilizado com o 'git fetch' que
-	espera receber apenas as referências solicitadas e não necessariamente tudo
-	no pacote (nesse caso, 'git bundle' age como 'git fetch-pack').
+	Uma lista de referências utilizadas para limitar as referências relatadas como disponíveis. É muito útil para ser utilizado com o 'git fetch' que espera receber apenas as referências solicitadas e não necessariamente tudo no pacote (nesse caso, 'git bundle' age como 'git fetch-pack').
 
 --progress::
-	É predefinido que a condição geral do progresso seja relatada no fluxo de
-	erros quando estiver conectado em um terminal, a menos que `-q` seja
-	utilizado. Esta opção impõem a condição geral do progresso, mesmo que o
-	fluxo de erro predefinido não seja direcionado para um terminal.
+	É predefinido que a condição geral do progresso seja relatada no fluxo de erros quando estiver conectado em um terminal, a menos que `-q` seja utilizado. Esta opção impõem a condição geral do progresso, mesmo que o fluxo de erro predefinido não seja direcionado para um terminal.
 
 --all-progress::
-	Quando o `--stdout` é utilizado, o relatório do progresso é exibido durante
-	as fases da contagem e da compactação dos objetos, porém inibido durante a
-	fase de gravação. A razão é que em alguns casos, o fluxo da saída está
-	diretamente vinculada a um outro comando que possa querer exibir a sua
-	própria condição do progresso à medida que os dados do pacote vão sendo
-	processados.  Esta opção é semelhante ao `--progress`, exceto que impõem
-	também que um relatório do progresso seja feito na fase de gravação, mesmo
-	que a opção `--stdout` seja utilizado.
+	Quando o `--stdout` é utilizado, o relatório do progresso é exibido durante as fases da contagem e da compactação dos objetos, porém inibido durante a fase de gravação. A razão é que em alguns casos, o fluxo da saída está diretamente vinculada a um outro comando que possa querer exibir a sua própria condição do progresso à medida que os dados do pacote vão sendo processados. Esta opção é semelhante ao `--progress`, exceto que impõem também que um relatório do progresso seja feito na fase de gravação, mesmo que a opção `--stdout` seja utilizado.
 
 --all-progress-implied::
-	Isso é utilizado para impor a opção `--all-progress` sempre que a exibição
-	do progresso estiver ativo.  Ao contrário da opção `--all-progress`, esta
-	opção por si só não impõem que a exibição do progresso seja exibida.
+	Isso é utilizado para impor a opção `--all-progress` sempre que a exibição do progresso estiver ativo. Ao contrário da opção `--all-progress`, esta opção por si só não impõem que a exibição do progresso seja exibida.
 
 --version=<versão>::
-	Specify the bundle version.  Version 2 is the older format and can only be
-	used with SHA-1 repositories; the newer version 3 contains capabilities that
-	permit extensions. The default is the oldest supported format, based on the
-	hash algorithm in use.
+	Specify the bundle version. Version 2 is the older format and can only be used with SHA-1 repositories; the newer version 3 contains capabilities that permit extensions. The default is the oldest supported format, based on the hash algorithm in use.
 
 -q::
 --quiet::
-	Esta opção faz com que o comando não relate o seu progresso em meio ao fluxo
-	de erros já predefinido.
+	Esta opção faz com que o comando não relate o seu progresso em meio ao fluxo de erros já predefinido.
 
 ESPECIFICANDO AS REFERÊNCIAS
 ----------------------------
 
-O comando 'git bundle' apenas empacotará as referências que são exibidas
-através do comando 'git show-ref': isso inclui os cabeçalhos, tags e
-cabeçalhos remotos.  As referências como `master~1` não podem ser
-empacotadas porém são perfeitamente adequadas para definir a base.  Mais de
-uma referência pode ser empacotada assim como mais de uma base pode ser
-definida.  Os objetos empacotados são aqueles que não estão existentes na
-união das bases informadas.  Cada base pode ser definida de forma explicita
-(`^master~10` por exemplo) ou de forma implícita (`master~10..master`,
-`--since=10.days.ago master` por exemplo).
+O comando 'git bundle' apenas empacotará as referências que são exibidas através do comando 'git show-ref': isso inclui os cabeçalhos, tags e cabeçalhos remotos. As referências como `master~1` não podem ser empacotadas porém são perfeitamente adequadas para definir a base. Mais de uma referência pode ser empacotada assim como mais de uma base pode ser definida. Os objetos empacotados são aqueles que não estão existentes na união das bases informadas. Cada base pode ser definida de forma explicita (`^master~10` por exemplo) ou de forma implícita (`master~10..master`, `--since=10.days.ago master` por exemplo).
 
-É muito importante que a base utilizada seja mantida pelo destino.  É bom
-errar pelo excesso de zelo, fazendo com que o arquivo do pacote contenha os
-objetos já no destino, pois eles são ignorados durante a descompactação no
-destino.
+É muito importante que a base utilizada seja mantida pelo destino. É bom errar pelo excesso de zelo, fazendo com que o arquivo do pacote contenha os objetos já no destino, pois eles são ignorados durante a descompactação no destino.
 
-O comando `git clone` pode utilizar qualquer pacote criado sem os
-"refespecs" negativos (`new`, mas não `old..new` por exemplo).  Caso queira
-combinar o comando `git clone --mirror`, que incluiria os seus refs como
-`refs/remotes/*`, utilize `--all`.  Caso queira informar o mesmo conjunto de
-referências que um clone vindo direto do repositório da origem teria,
-utilize `--branches --tags` para o `<git-rev-list-args>`.
+O comando `git clone` pode utilizar qualquer pacote criado sem os "refespecs" negativos (`new`, mas não `old..new` por exemplo). Caso queira combinar o comando `git clone --mirror`, que incluiria os seus refs como `refs/remotes/*`, utilize `--all`. Caso queira informar o mesmo conjunto de referências que um clone vindo direto do repositório da origem teria, utilize `--branches --tags` para o `<git-rev-list-args>`.
 
 EXEMPLOS
 --------
 
-Suponha que você queira transferir o histórico de um repositório R1 na
-máquina A para outro repositório R2 na máquina B.  Por algum motivo, a
-conexão direta entre A e B não é permitida, mas podemos mover os dados de A
-para B através de algum mecanismo (CD , e-mail, etc.).  Porém queremos
-atualizar o R2 com o desenvolvimento feito na ramificação master em R1.
+Suponha que você queira transferir o histórico de um repositório R1 na máquina A para outro repositório R2 na máquina B. Por algum motivo, a conexão direta entre A e B não é permitida, mas podemos mover os dados de A para B através de algum mecanismo (CD , e-mail, etc.). Porém queremos atualizar o R2 com o desenvolvimento feito na ramificação master em R1.
 
-Para inicializar o processo, você pode primeiro criar um pacote que não
-exista qualquer base. Você pode usar uma tag para ser lembrado até o último
-commit que for processado, serve para facilitar a atualização posterior do
-outro repositório com um pacote incremental:
+Para inicializar o processo, você pode primeiro criar um pacote que não exista qualquer base. Você pode usar uma tag para ser lembrado até o último commit que for processado, serve para facilitar a atualização posterior do outro repositório com um pacote incremental:
 
 ----------------
 machineA$ cd R1
@@ -155,17 +84,13 @@ machineA$ git bundle create file.bundle master
 machineA$ git tag -f lastR2bundle master
 ----------------
 
-Em seguida, você transfere `file.bundle` para a máquina no destino B. Como
-esse pacote não requer que nenhum objeto existente seja extraído, você pode
-criar um novo repositório na máquina B clonando a partir dele:
+Em seguida, você transfere `file.bundle` para a máquina no destino B. Como esse pacote não requer que nenhum objeto existente seja extraído, você pode criar um novo repositório na máquina B clonando a partir dele:
 
 ----------------
 machineB$ git clone -b master /home/me/tmp/file.bundle R2
 ----------------
 
-Isso irá definir um ponto remoto chamado "origin" (origem) no repositório
-que permite que você capture e extraia do pacote. O arquivo
-`$GIT_DIR/config` no R2 terá uma entrada como esta:
+Isso irá definir um ponto remoto chamado "origin" (origem) no repositório que permite que você capture e extraia do pacote. O arquivo `$GIT_DIR/config` no R2 terá uma entrada como esta:
 
 ------------------------
 [remote "origin"]
@@ -173,12 +98,9 @@ que permite que você capture e extraia do pacote. O arquivo
     fetch = refs/heads/*:refs/remotes/origin/*
 ------------------------
 
-Para atualizar o repositório `mine.git`, você pode capturar ou extrair após
-a reposição do pacote armazenado em `/home/me/tmp/file.bundle` com as
-atualizações incrementais.
+Para atualizar o repositório `mine.git`, você pode capturar ou extrair após a reposição do pacote armazenado em `/home/me/tmp/file.bundle` com as atualizações incrementais.
 
-Depois de trabalhar um pouco mais no repositório original, você pode criar
-um pacote incremental para atualizar um outro repositório:
+Depois de trabalhar um pouco mais no repositório original, você pode criar um pacote incremental para atualizar um outro repositório:
 
 ----------------
 machineA$ cd R1
@@ -186,20 +108,14 @@ machineA$ git bundle create file.bundle lastR2bundle..master
 machineA$ git tag -f lastR2bundle master
 ----------------
 
-Em seguida, você transfere o pacote para uma outra máquina para substituir o
-`/home/me/tmp/file.bundle` e captura dele.
+Em seguida, você transfere o pacote para uma outra máquina para substituir o `/home/me/tmp/file.bundle` e captura dele.
 
 ----------------
 machineB$ cd R2
 machineB$ git pull
 ----------------
 
-Caso saiba até qual commit do repositório nos destinatários pretendidos
-devem ter os objetos necessários, você poderá utilizar este conhecimento
-para definir a base, informando um ponto de corte para limitar as revisões e
-os objetos inclusos no pacote. O exemplo anterior utilizou a tag
-`lastR2bundle` para essa finalidade, porém é possível utilizar outras opções
-que você daria ao comando linkgit:git-log[1]. Aqui mais alguns exemplos:
+Caso saiba até qual commit do repositório nos destinatários pretendidos devem ter os objetos necessários, você poderá utilizar este conhecimento para definir a base, informando um ponto de corte para limitar as revisões e os objetos inclusos no pacote. O exemplo anterior utilizou a tag `lastR2bundle` para essa finalidade, porém é possível utilizar outras opções que você daria ao comando linkgit:git-log[1]. Aqui mais alguns exemplos:
 
 Você pode utilizar uma tag que esteja presente em ambos:
 
@@ -219,19 +135,15 @@ Você pode utilizar a quantidade dos commits:
 $ git bundle create mybundle -10 master
 ----------------
 
-Você pode executar o comando `git-bundle verify` para ver se você consegue
-extrair de um pacote que criado com um fundamento:
+Você pode executar o comando `git-bundle verify` para ver se você consegue extrair de um pacote que criado com um fundamento:
 
 ----------------
 $ git bundle verify mybundle
 ----------------
 
-Isso listará quais os commits você deve ter para extrair do pacote e
-encerrará com um erro caso você não os tenha.
+Isso listará quais os commits você deve ter para extrair do pacote e encerrará com um erro caso você não os tenha.
 
-Um pacote do ponto de vista de um repositório do destinatário é como um
-repositório regular do qual ele captura ou extrai. Você pode, por exemplo,
-durante a captura é possível mapear quais são as referências:
+Um pacote do ponto de vista de um repositório do destinatário é como um repositório regular do qual ele captura ou extrai. Você pode, por exemplo, durante a captura é possível mapear quais são as referências:
 
 ----------------
 $ git fetch mybundle master:localRef

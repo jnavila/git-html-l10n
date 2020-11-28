@@ -12,67 +12,35 @@ RESUMO
 
 DESCRIÇÃO
 ---------
-Um simples programa CGI para servir o conteúdo de um repositório Git para os
-clientes Git acessando o repositório nos protocolos http:// e https://.  O
-programa suporta a busca de clientes utilizando o protocolo HTTP inteligente
-e o protocolo HTTP antigo compatível com as versões anteriores, bem como os
-clientes impulsionando através do protocolo HTTP inteligente.
+Um simples programa CGI para servir o conteúdo de um repositório Git para os clientes Git acessando o repositório nos protocolos http:// e https://. O programa suporta a busca de clientes utilizando o protocolo HTTP inteligente e o protocolo HTTP antigo compatível com as versões anteriores, bem como os clientes impulsionando através do protocolo HTTP inteligente.
 
-Verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se
-recusará a exportar qualquer diretório Git que não tenha sido explicitamente
-marcado para exportação (a menos que a variável ambiental
-`GIT_HTTP_EXPORT_ALL` esteja definida) .
+Verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação (a menos que a variável ambiental `GIT_HTTP_EXPORT_ALL` esteja definida) .
 
-É predefinido que apenas o serviço `upload-pack` esteja ativo, o que atende
-aos clientes 'git fetch-pack' e 'git ls-remote', que são chamados através do
-comando 'git fetch', 'git pull' e 'git clone' .  Caso o cliente seja
-autenticado, o serviço `receive-pack` é ativado, que oferece o 'git
-send-pack' aos clientes, que é chamado a partir do comando 'git push'.
+É predefinido que apenas o serviço `upload-pack` esteja ativo, o que atende aos clientes 'git fetch-pack' e 'git ls-remote', que são chamados através do comando 'git fetch', 'git pull' e 'git clone' . Caso o cliente seja autenticado, o serviço `receive-pack` é ativado, que oferece o 'git send-pack' aos clientes, que é chamado a partir do comando 'git push'.
 
 SERVIÇOS
 --------
-Estes serviços podem ser ativados/desativados usando o arquivo de
-configuração por repositório:
+Estes serviços podem ser ativados/desativados usando o arquivo de configuração por repositório:
 
 http.getanyfile::
-	Isso atende aos clientes Git anteriores à versão 1.6.6 que não conseguem
-	utilizar o serviço do pacote de upload.  Quando ativado, os clientes podem
-	ler qualquer arquivo no repositório, incluindo os objetos que não são mais
-	acessíveis a partir de um ramo, mas ainda estão presentes.  É predefinido
-	que esteja ativo, porém um repositório pode desativá-lo definindo este item
-	de configuração como `false`.
+	Isso atende aos clientes Git anteriores à versão 1.6.6 que não conseguem utilizar o serviço do pacote de upload. Quando ativado, os clientes podem ler qualquer arquivo no repositório, incluindo os objetos que não são mais acessíveis a partir de um ramo, mas ainda estão presentes. É predefinido que esteja ativo, porém um repositório pode desativá-lo definindo este item de configuração como `false`.
 
 http.uploadpack::
-	Isso serve aos clientes 'git fetch-pack' e 'git ls-remote'.  A predefinição
-	é estar sempre ativo, porém um repositório pode desativá-lo ao definir este
-	item de configuração como `false`.
+	Isso serve aos clientes 'git fetch-pack' e 'git ls-remote'. A predefinição é estar sempre ativo, porém um repositório pode desativá-lo ao definir este item de configuração como `false`.
 
 http.receivepack::
-	Serve aos clientes o 'git send-pack', permitindo impulsionamento "push".  É
-	predefinido que esteja inativo para os usuários anônimos e ativado para os
-	usuários autenticados através do servidor da web.  Pode ser inativado caso
-	este item seja definido como `false` ou ativado para todos os usuários,
-	incluindo os usuários anônimos, caso seja definido como `true`.
+	Serve aos clientes o 'git send-pack', permitindo impulsionamento "push". É predefinido que esteja inativo para os usuários anônimos e ativado para os usuários autenticados através do servidor da web. Pode ser inativado caso este item seja definido como `false` ou ativado para todos os usuários, incluindo os usuários anônimos, caso seja definido como `true`.
 
 TRADUÇÃO DE URL
 ---------------
-Para determinar a localização do repositório no disco, o comando 'git
-http-backend' concatena as variáveis do ambiente `PATH_INFO`, que são
-definidas automaticamente através do servidor web, e o `GIT_PROJECT_ROOT`,
-que deve ser definido manualmente na configuração do servidor da web.  Caso
-o `GIT_PROJECT_ROOT` não esteja definido, o comando 'git http-backend'
-exibirá o `PATH_TRANSLATED`, que também é definido automaticamente através
-do servidor web.
+Para determinar a localização do repositório no disco, o comando 'git http-backend' concatena as variáveis do ambiente `PATH_INFO`, que são definidas automaticamente através do servidor web, e o `GIT_PROJECT_ROOT`, que deve ser definido manualmente na configuração do servidor da web. Caso o `GIT_PROJECT_ROOT` não esteja definido, o comando 'git http-backend' exibirá o `PATH_TRANSLATED`, que também é definido automaticamente através do servidor web.
 
 EXEMPLOS
 --------
-Todos os exemplos a seguir mapeiam o `http://$hostname/git/foo/bar.git` para
-`/var/www/git/foo/bar.git`.
+Todos os exemplos a seguir mapeiam o `http://$hostname/git/foo/bar.git` para `/var/www/git/foo/bar.git`.
 
 Apache 2.x::
-	Certifique-se que o 'mod_cgi', 'mod_alias' e 'mod_env' estejam ativos,
-	defina o `GIT_PROJECT_ROOT` (ou 'DocumentRoot') adequadamente e crie um
-	"ScriptAlias" para o CGI:
+	Certifique-se que o 'mod_cgi', 'mod_alias' e 'mod_env' estejam ativos, defina o `GIT_PROJECT_ROOT` (ou 'DocumentRoot') adequadamente e crie um "ScriptAlias" para o CGI:
 +
 ----------------------------------------------------------------
 SetEnv GIT_PROJECT_ROOT /var/www/git
@@ -80,10 +48,7 @@ SetEnv GIT_HTTP_EXPORT_ALL
 ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/
 ----------------------------------------------------------------
 +
-Para habilitar o acesso de leitura anônima, porém com acesso de gravação
-autenticado, exija a autorização para o anúncio da "ref" inicial (que
-detectamos como um "push" por meio do parâmetro "service" na cadeia de
-consulta) e a própria chamada do pacote de recebimento:
+Para habilitar o acesso de leitura anônima, porém com acesso de gravação autenticado, exija a autorização para o anúncio da "ref" inicial (que detectamos como um "push" por meio do parâmetro "service" na cadeia de consulta) e a própria chamada do pacote de recebimento:
 +
 ----------------------------------------------------------------
 RewriteCond %{QUERY_STRING} service=git-receive-pack [OR]
@@ -102,9 +67,7 @@ RewriteRule ^/git/ - [E=AUTHREQUIRED:yes]
 </LocationMatch>
 ----------------------------------------------------------------
 +
-Caso não tenha o `mod_rewrite` disponível para coincidir com o texto sob
-consulta é suficiente apenas para proteger o próprio` git-receive-pack`,
-como:
+Caso não tenha o `mod_rewrite` disponível para coincidir com o texto sob consulta é suficiente apenas para proteger o próprio `git-receive-pack`, como:
 +
 ----------------------------------------------------------------
 <LocationMatch "^/git/.*/git-receive-pack$">
@@ -115,18 +78,9 @@ como:
 </LocationMatch>
 ----------------------------------------------------------------
 +
-Nesse modo, o servidor não solicitará uma autenticação até que o cliente
-realmente inicie a fase de negociação do objeto impulsionado (push) e não
-durante o contato inicial.  Por este motivo, você também deve ativar a opção
-da configuração `http.receivepack` em qualquer repositório que aceite um
-impulsionamento "push". O comportamento predefinido, caso a variável
-`http.receivepack` não esteja definida, é rejeitar qualquer impulsionamento
-"push" feito pelos usuários não autenticados; a solicitação inicial
-reportará, '403 Proibido' ao cliente, sem qualquer chance para uma
-autenticação.
+Nesse modo, o servidor não solicitará uma autenticação até que o cliente realmente inicie a fase de negociação do objeto impulsionado (push) e não durante o contato inicial. Por este motivo, você também deve ativar a opção da configuração `http.receivepack` em qualquer repositório que aceite um impulsionamento "push". O comportamento predefinido, caso a variável `http.receivepack` não esteja definida, é rejeitar qualquer impulsionamento "push" feito pelos usuários não autenticados; a solicitação inicial reportará, '403 Proibido' ao cliente, sem qualquer chance para uma autenticação.
 +
-Para exigir a autenticação para ambas as leituras e gravações, utilize uma
-diretiva local ao redor do repositório ou um dos seus diretórios upstream:
+Para exigir a autenticação para ambas as leituras e gravações, utilize uma diretiva local ao redor do repositório ou um dos seus diretórios upstream:
 +
 ----------------------------------------------------------------
 <Location /git/private>
@@ -137,9 +91,7 @@ diretiva local ao redor do repositório ou um dos seus diretórios upstream:
 </Location>
 ----------------------------------------------------------------
 +
-Para veicular o gitweb na mesma URL, utilize um 'ScriptAliasMatch' apenas
-para ss URLs que o 'git http-backend' pode manipular e encaminhe o restante
-para o gitweb:
+Para veicular o gitweb na mesma URL, utilize um 'ScriptAliasMatch' apenas para ss URLs que o 'git http-backend' pode manipular e encaminhe o restante para o gitweb:
 +
 ----------------------------------------------------------------
 ScriptAliasMatch \
@@ -154,8 +106,7 @@ ScriptAliasMatch \
 ScriptAlias /git/ /var/www/cgi-bin/gitweb.cgi/
 ----------------------------------------------------------------
 +
-Para servir os vários repositórios vindos de diferentes
-linkgit:gitnamespaces[7] em um único repositório:
+Para servir os vários repositórios vindos de diferentes linkgit:gitnamespaces[7] em um único repositório:
 +
 ----------------------------------------------------------------
 SetEnvIf Request_URI "^/git/([^/]*)" GIT_NAMESPACE=$1
@@ -163,10 +114,7 @@ ScriptAliasMatch ^/git/[^/]*(.*) /usr/libexec/git-core/git-http-backend/storage.
 ----------------------------------------------------------------
 
 Apache estático acelerado 2.x::
-	Semelhante ao anterior, porém o Apache pode ser usado para retornar arquivos
-	estáticos armazenados no disco.  Isso pode ser mais eficiente em muitos
-	sistemas, pois o Apache pode solicitar ao kernel que copie o conteúdo do
-	arquivo do sistema de arquivos diretamente para a rede:
+	Semelhante ao anterior, porém o Apache pode ser usado para retornar arquivos estáticos armazenados no disco. Isso pode ser mais eficiente em muitos sistemas, pois o Apache pode solicitar ao kernel que copie o conteúdo do arquivo do sistema de arquivos diretamente para a rede:
 +
 ----------------------------------------------------------------
 SetEnv GIT_PROJECT_ROOT /var/www/git
@@ -193,9 +141,7 @@ ScriptAlias /git/ /var/www/cgi-bin/gitweb.cgi/
 ----------------------------------------------------------------
 
 Lighttpd::
-	Certifique-se de que `mod_cgi`, `mod_alias`, `mod_auth`, `mod_setenv`
-	estejam carregados, então defina a variável `GIT_PROJECT_ROOT` adequadamente
-	e redirecione todas as solicitações para o CGI:
+	Certifique-se de que `mod_cgi`, `mod_alias`, `mod_auth`, `mod_setenv` estejam carregados, então defina a variável `GIT_PROJECT_ROOT` adequadamente e redirecione todas as solicitações para o CGI:
 +
 ----------------------------------------------------------------
 alias.url += ( "/git" => "/usr/lib/git-core/git-http-backend" )
@@ -208,8 +154,7 @@ $HTTP["url"] =~ "^/git" {
 }
 ----------------------------------------------------------------
 +
-Para ativar o acesso de leitura anônima porém o acesso de gravação
-autenticado:
+Para ativar o acesso de leitura anônima porém o acesso de gravação autenticado:
 +
 ----------------------------------------------------------------
 $HTTP["querystring"] =~ "service=git-receive-pack" {
@@ -244,39 +189,22 @@ $HTTP["url"] =~ "^/git/private" {
 
 VARIÁVEIS DO AMBIENTE
 ---------------------
-O 'git http-backend' conta com as variáveis do ambiente `CGI` definidas pelo
-servidor da Web que está sendo invocado, incluindo:
+O 'git http-backend' conta com as variáveis do ambiente `CGI` definidas pelo servidor da Web que está sendo invocado, incluindo:
 
-* `PATH_INFO` (caso `GIT_PROJECT_ROOT` seja definido, caso contrário utilize
-  `PATH_TRANSLATED`)
+* `PATH_INFO` (caso `GIT_PROJECT_ROOT` seja definido, caso contrário utilize `PATH_TRANSLATED`)
 * REMOTE_USER
 * REMOTE_ADDR
 * CONTENT_TYPE
 * QUERY_STRING
 * REQUEST_METHOD
 
-A variável de ambiente `GIT_HTTP_EXPORT_ALL` pode ser passada para o comando
-'git-http-backend' para ignorar a verificação do arquivo
-"git-daemon-export-ok" em cada repositório antes de permitir a exportação
-desse repositório.
+A variável de ambiente `GIT_HTTP_EXPORT_ALL` pode ser passada para o comando 'git-http-backend' para ignorar a verificação do arquivo "git-daemon-export-ok" em cada repositório antes de permitir a exportação desse repositório.
 
-A variável de ambiente `GIT_HTTP_MAX_REQUEST_BUFFER` (ou a variável de
-configuração `http.maxRequestBuffer`) pode ser configurada para alterar a
-maior solicitação de negociação "ref" que o git será capaz de manipular
-durante uma busca; qualquer busca que exija um buffer maior não terá êxito.
-Normalmente, esse valor não precisa ser alterado, mas pode ser útil caso
-você esteja buscando um repositório com uma quantidade de refs extremamente
-grande.  O valor pode ser definido como uma unidade (`100M` para 100
-megabytes por exemplo). O valor predefinido é de 10 megabytes.
+A variável de ambiente `GIT_HTTP_MAX_REQUEST_BUFFER` (ou a variável de configuração `http.maxRequestBuffer`) pode ser configurada para alterar a maior solicitação de negociação "ref" que o git será capaz de manipular durante uma busca; qualquer busca que exija um buffer maior não terá êxito. Normalmente, esse valor não precisa ser alterado, mas pode ser útil caso você esteja buscando um repositório com uma quantidade de refs extremamente grande. O valor pode ser definido como uma unidade (`100M` para 100 megabytes por exemplo). O valor predefinido é de 10 megabytes.
 
-A estrutura define o `GIT_COMMITTER_NAME` como '$REMOTE_USER' e
-`GIT_COMMITTER_EMAIL` como '$\{REMOTE_USER}@http.$\{REMOTE_ADDR\}',
-garantindo que quaisquer reflogs que forem criados através do comando
-'git-receive-pack' contenham algumas informações de identificação do ramo
-remoto do usuário que executou o push.
+A estrutura define o `GIT_COMMITTER_NAME` como '$REMOTE_USER' e `GIT_COMMITTER_EMAIL` como '$\{REMOTE_USER}@http.$\{REMOTE_ADDR\}', garantindo que quaisquer reflogs que forem criados através do comando 'git-receive-pack' contenham algumas informações de identificação do ramo remoto do usuário que executou o push.
 
-Todas as variáveis do ambiente `CGI` estão disponíveis para cada um dos
-ganchos invocados pelo comando 'git-receive-pack'.
+Todas as variáveis do ambiente `CGI` estão disponíveis para cada um dos ganchos invocados pelo comando 'git-receive-pack'.
 
 GIT
 ---

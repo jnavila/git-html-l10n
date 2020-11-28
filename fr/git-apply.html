@@ -5,7 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="generator" content="Asciidoctor 2.0.12"/>
-<title>git-reflog(1)</title>
+<title>git-apply(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,117 +440,244 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="manpage">
 <div id="header">
-<h1>git-reflog(1) Manual Page</h1>
-<h2 id="_nome">NOME</h2>
+<h1>git-apply(1) Manual Page</h1>
+<h2 id="_nom">NOM</h2>
 <div class="sectionbody">
-<p>git-reflog - Gerencie informações do reflog</p>
+<p>git-apply - Applique une rustine à des fichiers et/ou à l'index</p>
 </div>
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_resumo">RESUMO</h2>
+<h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git reflog</em> &lt;subcomando&gt; &lt;opções&gt;</pre>
+<pre class="content"><em>git apply</em> [--stat] [--numstat] [--summary] [--check] [--index | --intent-to-add] [--3way]
+          [--apply] [--no-add] [--build-fake-ancestor=&lt;fichier&gt;] [-R | --reverse]
+          [--allow-binary-replacement | --binary] [--reject] [-z]
+          [-p&lt;n&gt;] [-C&lt;n&gt;] [--inaccurate-eof] [--recount] [--cached]
+          [--ignore-space-change | --ignore-whitespace]
+          [--whitespace=(nowarn|warn|fix|error|error-all)]
+          [--exclude=&lt;chemin&gt;] [--include=&lt;chemin&gt;] [--directory=&lt;racine&gt;]
+          [--verbose] [--unsafe-paths] [&lt;rustine&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_descrição">DESCRIÇÃO</h2>
+<h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>O comando assume vários subcomandos das diferentes opções dependendo do subcomando:</p>
-</div>
-<div class="verseblock">
-<pre class="content"><em>git reflog</em> [<em>show</em>] [log-options] [&lt;ref&gt;]
-<em>git reflog expire</em> [--expire=&lt;time&gt;] [--expire-unreachable=&lt;time&gt;]
-        [--rewrite] [--updateref] [--stale-fix]
-        [--dry-run | -n] [--verbose] [--all [--single-worktree] | &lt;refs&gt;&#8230;&#8203;]
-<em>git reflog delete</em> [--rewrite] [--updateref]
-        [--dry-run | -n] [--verbose] ref@{specifier}&#8230;&#8203;
-<em>git reflog exists</em> &lt;ref&gt;</pre>
+<p>Lit la sortie diff fournie (c&#8217;est-à-dire "une rustine") et l&#8217;applique aux fichiers. Lors de l&#8217;exécution à partir d&#8217;un sous-répertoire dans un dépôt, les chemins patchés en dehors du répertoire sont ignorés. Avec l&#8217;option <code>--index</code>, la rustine est également appliquée à l&#8217;index, et avec l&#8217;option <code>--cached</code>, la rustine est seulement appliquée à l&#8217;index. Sans ces options, la commande applique la rustine uniquement aux fichiers, et n&#8217;exige pas qu&#8217;ils soient dans un dépôt Git.</p>
 </div>
 <div class="paragraph">
-<p>Os registros log de referência ou "reflogs", registram quando o cume dos ramos, assim como, quais as outras referências que foram atualizadas no repositório local. Os "reflogs" são úteis para especificar o valor antigo de uma referência em vários comandos Git. Por exemplo, <code>HEAD@{2}</code> quer dizer "para onde HEAD costumava estar há dois movimentos atrás", <code>master@{one.week.ago}</code> quer dizer "para onde o "master" costumava apontar uma semana atrás neste repositório local" e assim por diante. Para mais detalhes consulte <a href="gitrevisions.html">gitrevisions(7)</a>.</p>
-</div>
-<div class="paragraph">
-<p>Este comando gerencia as informações registradas nos "reflogs".</p>
-</div>
-<div class="paragraph">
-<p>O subcomando "show" (que também é o valor predefinido na ausência dos subcomandos) exibe o registro log da referência informada através da linha de comando (ou pela predefinição, <code>HEAD</code>). O "reflog" cobre todas as ações recentes assim como, o reflog <code>HEAD</code> registra a alternância do ramo. O comando <code>git reflog show</code> é um apelido para <code>git log -g --abbrev-commit --pretty=oneline</code>; Para mais informações consulte <a href="git-log.html">git-log(1)</a>.</p>
-</div>
-<div class="paragraph">
-<p>O subcomando "expire" remove as entradas mais antigas do "reflog". As entradas serão removidas do "reflog" caso tenham o tempo anterior ao <em>expire</em> ou <code>expire-unreachable</code>, assim como aquelas que estiverem inacessíveis. Normalmente, isso não é utilizado de forma direta pelos usuários finais&#8201;&#8212;&#8201;em vez disso, consulte <a href="git-gc.html">git-gc(1)</a>.</p>
-</div>
-<div class="paragraph">
-<p>O subcomando "delete" exclui as entradas únicas do reflog. O seu argumento deve ser uma entrada <em>exata</em> (por exemplo, "<code>git reflog delete master@{2}</code>"). Este subcomando também não é utilizado diretamente pelos usuários finais.</p>
-</div>
-<div class="paragraph">
-<p>O subcomando "existe" verifica se uma "ref" tem um reflog. Encerra com a condição zero, caso o "reflog" exista, e a condição seja diferente de zero caso não exista.</p>
+<p>Cette commande applique la rustine mais ne crée pas de commit. Utilisez <a href="git-am.html">git-am(1)</a> pour créer des commits à partir des rustines générées par <a href="git-format-patch.html">git-format-patch(1)</a> et/ou reçus par courrier électronique.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_opções">OPÇÕES</h2>
+<h2 id="_options">OPTIONS</h2>
 <div class="sectionbody">
-<div class="sect2">
-<h3 id="_opções_para_show">Opções para <code>show</code></h3>
-<div class="paragraph">
-<p>O <code>git reflog show</code> aceita qualquer uma das opções aceitas pelo comando <code>git log</code>.</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_opções_para_expire">Opções para <code>expire</code></h3>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--all</dt>
+<dt class="hdlist1">&lt;rustine&gt;&#8230;&#8203;</dt>
 <dd>
-<p>Processe os reflogs de todas as referências.</p>
+<p>Prendre le message de validation depuis le fichier indiqué. Utilisez <em>-</em> pour lire le message depuis l&#8217;entrée standard.</p>
 </dd>
-<dt class="hdlist1">--single-worktree</dt>
+<dt class="hdlist1">--stat</dt>
 <dd>
-<p>É predefinido que quando <code>--all</code> seja utilizado, os reflogs de todas as árvores de trabalho sejam processadas. Esta opção limita o processamento da reflogs apenas na árvore de trabalho atual.</p>
+<p>Au lieu d&#8217;appliquer la rustine, afficher le diffstat de l&#8217;entrée. Désactiver "appliquer".</p>
 </dd>
-<dt class="hdlist1">--expire=&lt;tempo&gt;</dt>
+<dt class="hdlist1">--numstat</dt>
 <dd>
-<p>Remova os lançamentos mais antigos que o tempo informado. Caso esta opção não seja definida, o tempo da expiração será obtido com a opção de configuração <code>gc.reflogExpire</code>, que por sua vez a sua predefinição retorna para 90 dias. A opção <code>--expire=all</code> remove as entradas independentemente da idade; <code>--expire=never</code> desativa a remoção dos lançamentos acessíveis (porém consulte <code>--expire-unreachable</code>).</p>
+<p>Similaire à <code>--stat</code>, mais afficher le nombre de lignes ajoutées ou supprimées en notation décimale et le nom de chemin sans abréviation, pour le rendre plus facile à traiter automatiquement. Pour les fichiers binaires, affiche deux <code>-</code> au lieu de <code>0 0</code>. Désactive "apply".</p>
 </dd>
-<dt class="hdlist1">--expire-unreachable=&lt;tempo&gt;</dt>
+<dt class="hdlist1">--summary</dt>
 <dd>
-<p>Remova os lançamentos mais antigos que o <code>&lt;tempo&gt;</code> que não sejam acessíveis através do cume atual do ramo. Caso esta opção não seja definida, o tempo da expiração será obtido com a opção de configuração <code>gc.reflogExpire</code>, que por sua vez a sua predefinição retorna para 90 dias. A opção <code>--expire-unreachable=all</code> remove as entradas não acessíveis independentemente da sua idade; <code>--expire-unreachable=never</code> desativa a remoção prévia dos lançamentos não acessíveis (porém consulte <code>--expire</code>).</p>
+<p>Au lieu d&#8217;appliquer la rustine, produire un résumé condensé des informations obtenues à partir des en-têtes étendus de git diff, tels que les créations, les renommages et les changements de mode. Désactive "apply".</p>
 </dd>
-<dt class="hdlist1">--updateref</dt>
+<dt class="hdlist1">--check</dt>
 <dd>
-<p>Atualize a referência ao valor da entrada do topo do "reflog" (por exemplo, &lt;ref&gt;@{0}) caso o topo do lançamento anterior tenha sido removido. (Esta opção é ignorada para referências simbólicas.)</p>
+<p>Au lieu d&#8217;appliquer la rustine, voir si la rustine est applicable à l&#8217;arbre de travail actuel et/ou au fichier d&#8217;index et détecte les erreurs. Désactive "apply".</p>
 </dd>
-<dt class="hdlist1">--rewrite</dt>
+<dt class="hdlist1">--index</dt>
 <dd>
-<p>Caso o antecessor de uma entrada reflog seja removido, ajuste o seu SHA-1 "antigo" para ser igual ao "novo" campo SHA-1 da entrada que agora o precede.</p>
+<p>Appliquer la rustine à la fois à l&#8217;index et à l&#8217;arbre de travail (ou vérifier simplement qu&#8217;il s&#8217;appliquerait proprement aux deux si <code>--check</code> est en vigueur). Notez que <code>--index</code> s&#8217;attend à ce que les entrées de l&#8217;index et les copies de l&#8217;arbre de travail pour les chemins pertinents soient identiques (leur contenu et leurs métadonnées telles que le mode de fichier doivent correspondre), et qu&#8217;il générera une erreur si ce n&#8217;est pas le cas, même si la rustine s&#8217;applique proprement à l&#8217;index et à l&#8217;arbre de travail de manière isolée.</p>
 </dd>
-<dt class="hdlist1">--stale-fix</dt>
+<dt class="hdlist1">--cached</dt>
 <dd>
-<p>Elimine qualquer entradas no reflog que apontem para "commits com problemas". Um commit com problema (broken commit) é um commit que não pode ser acessado por nenhum topo de referência e que se tenha referência, direta ou indiretamente, a um objeto commit, árvore ou bolha ausente.</p>
+<p>Appliquer la rustine uniquement sur l&#8217;index, sans toucher l&#8217;arbre de travail. Si la fonction <code>--check</code> est activée, vérifier simplement qu&#8217;elle s&#8217;applique correctement à l&#8217;entrée de l&#8217;index.</p>
+</dd>
+<dt class="hdlist1">--intent-to-add</dt>
+<dd>
+<p>Lorsque de l&#8217;application de la rustine uniquement à l&#8217;arbre de travail, marquer les nouveaux fichiers à ajouter à l&#8217;index plus tard (voir l&#8217;option <code>--intent-to-add</code> dans <a href="git-add.html">git-add(1)</a>). Cette option est ignorée sauf si elle est exécutée dans un dépôt Git et que <code>--index</code> n&#8217;est pas spécifié. Notez que <code>--index</code> peut être implicite par d&#8217;autres options telles que <code>--cached</code> ou <code>--3way</code>.</p>
+</dd>
+<dt class="hdlist1">-3</dt>
+<dt class="hdlist1">--3way</dt>
+<dd>
+<p>Lorsque la rustine ne s&#8217;applique pas proprement, on a recours à la fusion à trois points si la rustine enregistre l&#8217;identité des blobs auxquels elle est censée s&#8217;appliquer, et que ces blobs sont disponibles localement, laissant éventuellement les marqueurs de conflit dans les fichiers de l&#8217;arbre de travail pour que l&#8217;utilisateur puisse les résoudre. Cette option implique l&#8217;option <code>--index</code>, et est incompatible avec les options <code>--reject</code> et <code>--cached</code>.</p>
+</dd>
+<dt class="hdlist1">--build-fake-ancestor=&lt;fichier&gt;</dt>
+<dd>
+<p>La nouvelle sortie <em>git diff</em> contient des <em>informations d&#8217;index</em> pour chaque blob afin d&#8217;identifier la version originale à laquelle la rustine s&#8217;applique. Lorsque ce drapeau est donné, et si les versions originales des blobs sont disponibles localement, construire un index temporaire contenant ces blobs.</p>
 <div class="paragraph">
-<p>Este cálculo envolve percorrer todos os objetos acessíveis, ou seja, tem o mesmo custo que o comando <em>git prune</em>. Ele se destina principalmente para corrigir a corrupção causada pela coleta de lixo usando as versões mais antigas do Git, que não protegiam os objetos referidos através dos "reflogs".</p>
+<p>Lorsqu&#8217;un changement de mode pur est rencontré (qui n&#8217;a pas d&#8217;information d&#8217;index), l&#8217;information est lue à partir de l&#8217;index actuel à la place.</p>
 </div>
 </dd>
-<dt class="hdlist1">-n</dt>
-<dt class="hdlist1">--dry-run</dt>
+<dt class="hdlist1">-R</dt>
+<dt class="hdlist1">--reverse</dt>
 <dd>
-<p>Na verdade, não faça a poda de nenhuma entrada; apenas exiba o que teria sido podado.</p>
+<p>Appliquer la rustine à rebours.</p>
 </dd>
+<dt class="hdlist1">--reject</dt>
+<dd>
+<p>Pour l&#8217;atomicité, <em>git apply</em> par défaut ne fonctionne pas sur l&#8217;ensemble de la rustine et ne touche pas l&#8217;arbre de travail lorsque certaines des sections ne s&#8217;appliquent pas. Cette option permet d&#8217;appliquer les parties de la rustine qui sont applicables et de laisser les sections rejetées dans les fichiers *.rej correspondants.</p>
+</dd>
+<dt class="hdlist1">-z</dt>
+<dd>
+<p>Lorsque le <code>--numstat</code> a été donné, ne pas changer les noms de chemin, mais utiliser un format lisible par machine et terminé par NUL.</p>
+<div class="paragraph">
+<p>Sans cette option, les noms de chemin avec des caractères « inhabituels » sont cités comme expliqué pour la variable de configuration <code>core.quotePath</code> (voir <a href="git-config.html">git-config(1)</a>).</p>
+</div>
+</dd>
+<dt class="hdlist1">-p&lt;n&gt;</dt>
+<dd>
+<p>Supprimer les composants &lt;n&gt; du chemin d&#8217;accès principal (séparés par des barres obliques) des chemins de diff traditionnels. Par exemple, avec <code>-p2</code>, une rustine contre <code>a/dir/fichier</code> sera appliquée directement à <code>fichier</code>. La valeur par défaut est 1.</p>
+</dd>
+<dt class="hdlist1">-C&lt;n&gt;</dt>
+<dd>
+<p>S&#8217;assurer qu&#8217;au moins &lt;n&gt; lignes du contexte environnant correspondent avant et après chaque modification. Lorsqu&#8217;il y a moins de lignes de contexte environnant, elles doivent toutes correspondre. Par défaut, aucun contexte n&#8217;est jamais ignoré.</p>
+</dd>
+<dt class="hdlist1">--unidiff-zero</dt>
+<dd>
+<p>Par défaut, <em>git apply</em> s&#8217;attend à ce que la rustine appliquée soit un diff unifié avec au moins une ligne de contexte. Ceci fournit de bonnes mesures de sécurité, mais s&#8217;effondre lorsque l&#8217;on applique un diff généré avec <code>--unified=0</code>. Pour contourner ces vérifications, utilisez <code>--unidiff-zero</code>.</p>
+<div class="paragraph">
+<p>Notez que, pour les raisons mentionnées ci-dessus, l&#8217;utilisation de rustines sans contexte est découragée.</p>
+</div>
+</dd>
+<dt class="hdlist1">--apply</dt>
+<dd>
+<p>Si vous utilisez l&#8217;une des options marquées "Désactiver <em>apply</em>" ci-dessus, <em>git apply</em> lit et produit les informations demandées sans appliquer la rustine. Donnez ce drapeau après ces drapeaux pour appliquer également la rustine.</p>
+</dd>
+<dt class="hdlist1">--no-add</dt>
+<dd>
+<p>Lors de l&#8217;application d&#8217;une rustine, ignorer les ajouts faits par la rustine. Cette option peut être utilisée pour extraire la partie commune entre deux fichiers en exécutant d&#8217;abord <em>diff</em> sur ceux-ci et en appliquant le résultat avec cette option, ce qui appliquerait la partie de suppression mais pas la partie d&#8217;ajout.</p>
+</dd>
+<dt class="hdlist1">--allow-binary-replacement</dt>
+<dt class="hdlist1">--binary</dt>
+<dd>
+<p>Historiquement, nous n&#8217;autorisions pas l&#8217;application de rustines binaires sans une autorisation explicite de l&#8217;utilisateur, et ce drapeau était le moyen de le faire. Actuellement, nous autorisons toujours l&#8217;application de rustines binaires, donc c&#8217;est un non-op.</p>
+</dd>
+<dt class="hdlist1">--exclude=&lt;motif-de-chemin&gt;</dt>
+<dd>
+<p>Don&#8217;t apply changes to files matching the given path pattern. This can be useful when importing patchsets, where you want to exclude certain files or directories.</p>
+</dd>
+<dt class="hdlist1">--include=&lt;path-pattern&gt;</dt>
+<dd>
+<p>Apply changes to files matching the given path pattern. This can be useful when importing patchsets, where you want to include certain files or directories.</p>
+<div class="paragraph">
+<p>When <code>--exclude</code> and <code>--include</code> patterns are used, they are examined in the order they appear on the command line, and the first match determines if a patch to each path is used. A patch to a path that does not match any include/exclude pattern is used by default if there is no include pattern on the command line, and ignored if there is any include pattern.</p>
+</div>
+</dd>
+<dt class="hdlist1">--ignore-space-change</dt>
+<dt class="hdlist1">--ignore-whitespace</dt>
+<dd>
+<p>When applying a patch, ignore changes in whitespace in context lines if necessary. Context lines will preserve their whitespace, and they will not undergo whitespace fixing regardless of the value of the <code>--whitespace</code> option. New lines will still be fixed, though.</p>
+</dd>
+<dt class="hdlist1">--whitespace=&lt;action&gt;</dt>
+<dd>
+<p>When applying a patch, detect a new or modified line that has whitespace errors. What are considered whitespace errors is controlled by <code>core.whitespace</code> configuration. By default, trailing whitespaces (including lines that solely consist of whitespaces) and a space character that is immediately followed by a tab character inside the initial indent of the line are considered whitespace errors.</p>
+<div class="paragraph">
+<p>By default, the command outputs warning messages but applies the patch. When <code>git-apply</code> is used for statistics and not applying a patch, it defaults to <code>nowarn</code>.</p>
+</div>
+<div class="paragraph">
+<p>You can use different <code>&lt;action&gt;</code> values to control this behavior:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>nowarn</code> turns off the trailing whitespace warning.</p>
+</li>
+<li>
+<p><code>warn</code> outputs warnings for a few such errors, but applies the patch as-is (default).</p>
+</li>
+<li>
+<p><code>fix</code> outputs warnings for a few such errors, and applies the patch after fixing them (<code>strip</code> is a synonym --- the tool used to consider only trailing whitespace characters as errors, and the fix involved <em>stripping</em> them, but modern Gits do more).</p>
+</li>
+<li>
+<p><code>error</code> outputs warnings for a few such errors, and refuses to apply the patch.</p>
+</li>
+<li>
+<p><code>error-all</code> is similar to <code>error</code> but shows all errors.</p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1">--inaccurate-eof</dt>
+<dd>
+<p>Under certain circumstances, some versions of <em>diff</em> do not correctly detect a missing new-line at the end of the file. As a result, patches created by such <em>diff</em> programs do not record incomplete lines correctly. This option adds support for applying such patches by working around this bug.</p>
+</dd>
+<dt class="hdlist1">-v</dt>
 <dt class="hdlist1">--verbose</dt>
 <dd>
-<p>Imprima informações extras na tela.</p>
+<p>Report progress to stderr. By default, only a message about the current patch being applied will be printed. This option will cause additional information to be reported.</p>
+</dd>
+<dt class="hdlist1">--recount</dt>
+<dd>
+<p>Do not trust the line counts in the hunk headers, but infer them by inspecting the patch (e.g. after editing the patch without adjusting the hunk headers appropriately).</p>
+</dd>
+<dt class="hdlist1">--directory=&lt;racine&gt;</dt>
+<dd>
+<p>Prepend &lt;root&gt; to all filenames. If a "-p" argument was also passed, it is applied before prepending the new root.</p>
+<div class="paragraph">
+<p>For example, a patch that talks about updating <code>a/git-gui.sh</code> to <code>b/git-gui.sh</code> can be applied to the file in the working tree <code>modules/git-gui/git-gui.sh</code> by running <code>git apply --directory=modules/git-gui</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">--unsafe-paths</dt>
+<dd>
+<p>Par défaut, une rustine qui affecte l&#8217;extérieur de la zone de travail (soit une arborescence de travail contrôlée par Git, soit le répertoire de travail actuel lorsque "git apply" est utilisé en remplacement de patch de GNU) est rejeté comme une erreur (ou un méfait).</p>
+<div class="paragraph">
+<p>Lorsque <code>git apply</code> est utilisé comme « meilleur patch GNU », l&#8217;utilisateur peut passer l&#8217;option <code>--unsafe-paths</code> pour passer outre cette vérification de sécurité. Cette option n&#8217;a aucun effet lorsque <code>--index</code> ou <code>--cached</code> est utilisé.</p>
+</div>
 </dd>
 </dl>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_opções_para_o_delete">Opções para o <code>delete</code></h3>
-<div class="paragraph">
-<p>O <code>git reflog delete</code> aceita as opções <code>--updateref</code>, <code>--rewrite</code>, <code>-n</code>, <code>--dry-run</code>, e <code>--verbose</code>, com os mesmos significados de quando são utilizadas com <code>expirar</code>.</p>
 </div>
+<div class="sect1">
+<h2 id="_configuration">CONFIGURATION</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">apply.ignoreWhitespace</dt>
+<dd>
+<p>Sélectionnez <em>change</em> si vous souhaitez que les modifications dans les espaces soient ignorées par défaut. Choisissez l&#8217;une des options suivantes : no, none, never, false si vous souhaitez que les modifications apportées aux espaces soient significatives.</p>
+</dd>
+<dt class="hdlist1">apply.whitespace</dt>
+<dd>
+<p>Lorsqu&#8217;aucun drapeau <code>--whitespace</code> n&#8217;est donné en ligne de commande, cet élément de configuration est utilisé par défaut.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sous_modules">SOUS-MODULES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Si la rustine contient des modifications de sous-modules, alors <em>git apply</em> traite ces modifications comme suit.</p>
+</div>
+<div class="paragraph">
+<p>Si <code>--index</code> est spécifié (explicitement ou implicitement), alors les commits du sous-module doivent correspondre exactement à l&#8217;index pour que la rustine s&#8217;applique. Si l&#8217;un des sous-modules est extrait, alors ces vérifications sont complètement ignorées, c&#8217;est-à-dire qu&#8217;il n&#8217;est pas nécessaire qu&#8217;il soit à jour ou propre et qu&#8217;il n&#8217;est pas mis à jour.</p>
+</div>
+<div class="paragraph">
+<p>Si <code>--index</code> n&#8217;est pas spécifié, alors les commits de sous-module dans la rustine sont ignorées et seule l&#8217;absence ou la présence du sous-répertoire correspondant est vérifiée et (si possible) mise à jour.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_voir_aussi">VOIR AUSSI</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="git-am.html">git-am(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -558,14 +685,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Parte do conjunto <a href="git.html">git(1)</a></p>
+<p>Fait partie de la suite <a href="git.html">git(1)</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_traduction">TRADUCTION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cette  page de manuel a été traduite par Jean-Noël Avila &lt;jn.avila AT free DOT fr&gt; et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site <a href="https://github.com/jnavila/git-manpages-l10n" class="bare">https://github.com/jnavila/git-manpages-l10n</a> .</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2020-11-28 16:05:46 +0100
+Last updated 2020-11-28 15:58:31 +0100
 </div>
 </div>
 </body>
