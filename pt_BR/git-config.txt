@@ -9,15 +9,15 @@ git-config - Obtenha e defina opções globais ou do repositório
 RESUMO
 ------
 [verse]
-'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] nome [valor [value_regex]]
+'git config' [<opção-do-arquivo>] [--type=<tipo>] [--fixed-value] [--show-origin] [--show-scope] [-z|--null] nome [valor [value-pattern]]
 'git config' [<opção-do-arquivo>] [--type=<tipo>] --add nome valor
-'git config' [<opção-do-arquivo>] [--type=<tipo>] --replace-all nome valor [value_regex]
-'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] --get nome [value_regex]
-'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] --get-all nome [value_regex]
-'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] [--name-only] --get-regexp name_regex [value_regex]
+'git config' [<opção-do-arquivo>] [--type=<tipo>] [--fixed-value] --replace-all nome valor [value-pattern]
+'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] [--fixed-value] --get nome [value-pattern]
+'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] [--fixed-value] --get-all nome [value-pattern]
+'git config' [<opção-do-arquivo>] [--type=<tipo>] [--show-origin] [--show-scope] [-z|--null] [--fixed-value] [--name-only] --get-regexp name_regex [value-pattern]
 'git config' [<opção-do-arquivo>] [--type=<tipo>] [-z|--null] --get-urlmatch nome URL
-'git config' [<opção-do-arquivo>] --unset nome [value_regex]
-'git config' [<opção-do-arquivo>] --unset-all nome [value_regex]
+'git config' [<opção-do-arquivo>] [--fixed-value] --unset nome [value-pattern]
+'git config' [<opção-do-arquivo>] [--fixed-value] --unset-all nome [value-pattern]
 'git config' [<opção-do-arquivo>] --rename-section nome_antigo novo_nome
 'git config' [<opção-do-arquivo>] --remove-section nome
 'git config' [<opção-do-arquivo>] [--show-origin] [--show-scope] [-z|--null] [--name-only] -l | --list
@@ -29,7 +29,7 @@ DESCRIÇÃO
 ---------
 Você pode consultar, definir, substituir e remover opções com este comando. Na verdade o nome é a seção e a chave são separadas por um ponto, e seu valor será escapado.
 
-Várias linhas podem ser adicionadas a uma opção utilizando a opção `--add`. Caso queira atualizar ou remover alguma opção que pode ocorrer em várias linhas, é necessário usar um POSIX regexp `value_regex`. Apenas os valores existentes que correspondam à um regexp são atualizados ou não definidos. Caso queira manipular as linhas que *não* correspondam ao regex, basta colocar um único ponto de exclamação na frente (consulte também <<EXEMPLOS>>).
+Várias linhas podem ser adicionadas utilizando a opção `--add`. Caso queira atualizar ou remover alguma opção que pode ocorrer em várias linhas, um `value-pattern` (que é uma expressão regular extendida a menos que a opção `--fixed-value` seja usada) precisa ser utilizado. Apenas os valores existentes que correspondam à um pattern são atualizados ou não definidos. Caso queira manipular as linhas que *não* correspondam com o pattern, basta colocar um único ponto de exclamação na frente (consulte também <<EXEMPLOS>>), observe porém que isso só funciona quando a opção `--fixed-value` não estiver em uso.
 
 A opção `--type=<tipo>` instrui o 'git config' para garantir que os valores que chegam e os que saem sejam canonicamente compatíveis com o <tipo>. Caso nenhum `--type=<tipo>` seja utilizado, nenhuma canonização será realizada. Os autores dos chamados podem desconfigurar um `--type` existente com a opção `--no-type`.
 
@@ -53,10 +53,10 @@ OPÇÕES
 ------
 
 --replace-all::
-	O comportamento predefinido é substituir pelo menos uma linha. Isso substitui todas as linhas que coincidam com a chave (e opcionalmente ao "value_regex").
+	O comportamento predefinido é substituir pelo menos uma linha. Isso substitui todas as linhas que coincidam com a chave (e opcionalmente ao `value-pattern`).
 
 --add::
-	Adiciona uma nova linha à opção, sem alterar nenhum valor já existente. É o mesmo que informar '^$' como o `valor_regex` na opção `--replace-all`.
+	Adiciona uma nova linha à opção, sem alterar nenhum valor já existente. É o mesmo que informar '^$' como o `value-pattern` na opção `--replace-all`.
 
 --get::
 	Obtenha o valor para uma determinada chave (opcionalmente filtrada por uma expressão regular que coincida com o valor). Retorna o código de erro '1' caso a chave não seja encontrada e o último valor caso vários valores da chave sejam encontrados.
@@ -116,6 +116,9 @@ Consulte também <<ARQUIVOS>>.
 -l::
 --list::
 	Lista todas as variáveis definidas no arquivo de configuração, junto com seus valores.
+
+--fixed-value::
+	When used with the `value-pattern` argument, treat `value-pattern` as an exact string instead of a regular expression. This will restrict the name/value pairs that are matched to only those where the value is exactly equal to the `value-pattern`.
 
 --type <tipo>::
   'git config' irá assegurar que qualquer entrada ou saída é válida sob a(s) restrição(ões) de tipo dada, e irá canonicalizar os valores de saída na forma canônica do `<tipo>`'s.

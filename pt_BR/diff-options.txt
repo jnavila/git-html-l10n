@@ -29,9 +29,9 @@ endif::git-format-patch[]
 
 -U<n>::
 --unified=<n>::
-	Gere diffs com uma quantidade de `<n>` linhas de contexto em vez das três usuais. Implica no uso da opção `--patch`.
+	Gere diffs com uma quantidade de `<n>` linhas de contexto em vez das três usuais.
 ifndef::git-format-patch[]
-	Implica no uso da opção `-p`.
+	Implica no uso da opção `--patch`.
 endif::git-format-patch[]
 
 --output=<arquivo>::
@@ -87,7 +87,7 @@ endif::git-log[]
 --anchored=<texto>::
 	Gere um diff utilizando o algoritmo "anchored diff" (ou diff ancorado).
 +
-Esta opção pode ser especificada mais de uma vez.
+Esta opção pode ser usada mais de uma vez.
 +
 Caso uma linha exista na origem e no destino, exista apenas uma vez e comece com este texto, este algoritmo tenta impedir que apareça como uma exclusão ou adição na saída. O algoritmo "patience diff" é utilizado internamente.
 
@@ -290,10 +290,13 @@ endif::git-format-patch[]
 	Em vez do primeiro punhado de caracteres, exiba os nomes completos dos objetos bolha antes e depois da imagem na linha "index" ao produzir a saída no formato patch.
 
 --binary::
-	Além de `--full-index`, gere um diff binário que possa ser aplicado com o comando `git-apply`. Implica no uso da opção `--patch`.
+	Além de `--full-index`, gere um diff binário que possa ser aplicado com o comando `git-apply`.
+ifndef::git-format-patch[]
+	Implica no uso da opção `--patch`.
+endif::git-format-patch[]
 
 --abrev[=<n>]::
-	Em vez de exibir o nome completo do objeto hexadecimal com 40 bytes na produção do formato diff-raw e nas linhas do cabeçalho da árvore diff, exiba apenas um prefixo parcial. No formato da produção da saída do diff-patch, a opção `--full-index` tem maior prioridade, ou seja, caso `--full-index` seja especificado o nome completo da bolha será exibido independente da opção `--abbrev`. A quantidade dos dígitos fora do preestabelecido pode ser especificado através da opção `--abbrev=<n>`.
+	Em vez de exibir o nome completo do objeto hexadecimal com 40 bytes na produção do formato diff-raw e nas linhas do cabeçalho da árvore diff, exibe o prefixo mais curto que se refira de forma única ao objeto e que tenha até '<n>' hexdigits. No formato da produção da saída do diff-patch, a opção `--full-index` tem maior prioridade, ou seja, caso `--full-index` seja especificado o nome completo da bolha será exibido independente da opção `--abbrev`. A quantidade dos dígitos fora do preestabelecido pode ser especificado através da opção `--abbrev=<n>`.
 
 -B[<n>][/<m>]::
 --break-rewrites[=[<n>][/<m>]]::
@@ -337,7 +340,7 @@ endif::git-log[]
 Quando utilizado em conjunto com a opção `-B`, omita também a pré-imagem na parte da exclusão de um par excluir/criar.
 
 -l<num>::
-	As opções `-M` e `-C` requerem um tempo de processamento O(n^2) em que n é a quantidade de possíveis alvos para renomeações/cópia. Esta opção impede que a detecção da ação de renomear/cópia seja executada se a quantidade dos alvos a serem renomeados/copiados exceda o a quantidade especificada.
+	As opções `-M` e `-C` requerem um tempo de processamento O(n^2) em que n é a quantidade de possíveis alvos para renomeações/cópia. Esta opção impede que a detecção da ação de renomear/cópia seja executada se a quantidade dos alvos a serem renomeados/copiados exceda o a quantidade usada.
 
 ifndef::git-format-patch[]
 --diff-filter=[(A|C|D|M|R|T|U|X|B)...[*]]::
@@ -348,7 +351,7 @@ Além disso, estas letras maiúsculas podem ser transformadas em minusculas para
 Observe que nem todas as diferenças diff podem apresentar todos os tipos. Por exemplo, diffs do índice para a árvore de trabalho nunca podem ter entradas adicionadas (porque o conjunto dos caminhos inclusos no diff é limitado pelo que está no índice). Da mesma forma, as entradas copiadas e renomeadas não podem aparecer caso a detecção para estes tipos estiverem desativados.
 
 -S<texto>::
-	Procure por diferenças que alterem a quantidade de ocorrências da cadeia de caracteres especificada (ou seja, adição/exclusão) em um arquivo. Destinado ao uso do scripter.
+	Procure por diferenças que alterem a quantidade de ocorrências da cadeia de caracteres usada (ou seja, adição/exclusão) em um arquivo. Destinado ao uso do scripter.
 +
 Útil durante a produra por um bloco de código exato (como uma "struct"), e quera saber o histórico deste bloco desde que ele surgiu: utilize o recurso de forma iterativa para alimentar o bloco de interesse na pré-imagem de volta `-S` e continue até você obter a primeira versão do bloco.
 +
@@ -431,12 +434,16 @@ endif::git-format-patch[]
 --ignore-blank-lines::
 	Ignore as alterações cujas linhas estejam todas em branco.
 
+-I<expressão-regular>::
+--ignore-matching-lines=<expressão-regular>::
+	Ignore as alterações cujas linhas coincidam com a <expressão-regular>. Esta opção pode ser usada mais de uma vez.
+
 --inter-hunk-context=<linhas>::
-	Exiba o contexto entre as diferenças, até a quantidade de linhas especificada, fundindo assim as que estão próximas umas das outras. A predefinição retorna para `diff.interHunkContext` ou 0 caso a opção de configuração não esteja definida.
+	Exiba o contexto entre as diferenças, até a quantidade de linhas usada, fundindo assim as que estão próximas umas das outras. A predefinição retorna para `diff.interHunkContext` ou 0 caso a opção de configuração não esteja definida.
 
 -W::
 --function-context::
-	Exiba todas as funções ao redor das alterações.
+	Exiba toda a função como linhas de contexto para cada alteração. O nome da função é determinada da mesma maneira que o 'git diff' lida com os pedaços do cabeçalhos do patch (consulte 'Definindo um cabeçalho personalizado do hunk' em linkgit:gitattributes[5]).
 
 ifndef::git-format-patch[]
 ifndef::git-log[]

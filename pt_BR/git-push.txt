@@ -13,7 +13,7 @@ RESUMO
 	   [--repo=<repositório>] [-f | --force] [-d | --delete] [--prune] [-v | --verbose]
 	   [-u | --set-upstream] [-o <texto> | --push-option=<texto>]
 	   [--[no-]signed|--signed=(true|false|if-asked)]
-	   [--force-with-lease[=<refname>[:<expect>]]]
+	   [--force-with-lease[=<refname>[:<expect>]]] [--force-if-includes]]
 	   [--no-verify] [<repositório> [<refspec>...]]
 
 DESCRIÇÃO
@@ -156,6 +156,8 @@ Irá falhar a menos que você execute manualmente o comando `git fetch origin-pu
 	git push --force-with-lease=master:base master:master
 +
 Crie uma tag `base` para as versões do código upstream que você viu e está disposto a sobrescrever por exemplo, depois reescreva o histórico e finalmente, imponha um impulsionamento "push" com as alterações para `master` caso a versão remota ainda esteja na `base`, independentemente se os seus ramos `remotes/origin/master` locais foram atualizados em segundo plano ou não.
++
+Alternativamente, ao usar a opção `--force-if-includes` como uma opção auxiliar em conjunto com `--force-with-lease[=<refname>]` (sem dizer qual o ref exato do commit remoto, ou quais os refs remotos que estão sendo protegidos por exemplo) no momento do "push", irá verificar se as atualizações a partir dos refs monitorados remotamente tenham sido atualizados de forma implicita em segundo plano e se estão sendo integrados localmente antes de permitir uma atualização forçada.
 
 -f::
 --force::
@@ -164,6 +166,15 @@ Crie uma tag `base` para as versões do código upstream que você viu e está d
 Esta opção desativa estas verificações e pode causar a perda do commit no repositório remoto; utilize com cuidado.
 +
 Observe que a opção `--force` se aplica a todos os refs que são impulsionados, portanto, utilizá-lo com `push.default` definido como `matching` ou com os vários impulsionamentos nos destinos configurados com `remote.*.push`, pode substituir as outras refs que não sejam o ramo atual (incluindo as refs locais que estão estritamente por trás de sua contraparte remota). Para impor um impulsionamento "push" em apenas um ramo, utilize um `+` na frente do "refspec" que será impulsionado (como `git push origin +master` para impor um impulsionamento "push" no ramo `master` por exemplo). Consulte a seção `<refspec>...` acima para obter mais detalhes.
+
+--[no-]force-if-includes::
+	Impõem uma atualização apenas se o topo da ref monitorada remotamente estiver integrada localmente.
++
+Esta opção permite uma checagem que verifica se o topo da referência monitorada remotamente é alcançável a partir de uma das entradas "reflog" do ramo local e feita com base nela para uma reescrita. A verificação assegura que quaisquer atualizações do ramo remoto foram incorporadas localmente, rejeitando a atualização forçada se não for esse o caso.
++
+Nenhuma operação será feita caso a opção seja usada sem definir `--force-with-lease` ou se definir junto com `--force-with-lease=<refname>:<expect>`.
++
+Usando a opção `--no-force-if-includes` desativa este comportamento.
 
 --repo=<repositório>::
 	Esta opção é equivalente ao argumento <repositório>. Caso ambos sejam utilizados, o argumento da linha de comandos terá a prioridade.

@@ -318,7 +318,7 @@ Caso o seu ramo teve como base no <upstream>, porém <upstream> foi retrocedido 
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 --ignore-whitespace::
-Ignore whitespace differences when trying to reconcile differences. Currently, each backend implements an approximation of this behavior:
+Ignore as diferenças dos espaços ao tentar reconciliar as diferenças. Atualmente, cada estrutura implementa uma aproximação deste comportamento:
 +
 apply backend: When applying a patch, ignore changes in whitespace in context lines. Unfortunately, this means that if the "old" lines being replaced by the patch differ only in whitespace from the existing file, you will get a merge conflict instead of a successful patch application.
 +
@@ -339,7 +339,7 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 --signoff::
-	Adicione uma resposta Assinado-por: a todos os commits que tiveram a sua fundação reconstruída. Observe que caso a opção `--interactive` seja utilizada, apenas os commit marcados para serem selecionados, editados ou reformulados terão um caracteres de resposta adicionado.
+	Adicione uma resposta `Assinado-por` em todos os commits que tiveram a sua fundação reconstruída. Observe que caso a opção `--interactive` seja utilizada, apenas os commit marcados para serem selecionados, editados ou reformulados terão um caracteres de resposta adicionado.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
@@ -452,7 +452,7 @@ Além disso, os seguintes pares de opções são incompatíveis:
 DIFERENÇAS COMPORTAMENTAIS
 --------------------------
 
-O git rebase possui duas estruturas primárias: `apply` e `merge`. (A aplicação da estrutura era conhecido como 'am', porém o nome causava confusão já que parecia um verbo em vez de um substantivo. Além disso, a estrutura `merge` era informada como 'interactive backend', porém agora também é usado para casos não interativos. Ambos foram renomeados com base na funcionalidade de baixo nível que sustentava cada um.) Há algumas diferenças sutis em como estes dois processos internos se comportam:
+O git rebase possui duas estruturas primárias: `apply` e `merge`. (A aplicação da estrutura era conhecido como 'am', porém o nome causava confusão já que parecia um verbo em vez de um substantivo. Além disso, a estrutura `merge` era informada como uma estrutura interativa, porém agora também é usado para casos não interativos. Ambos foram renomeados com base na funcionalidade de baixo nível que sustentava cada um.) Há algumas diferenças sutis em como estes dois processos internos se comportam:
 
 Os commits vazios
 ~~~~~~~~~~~~~~~~~
@@ -480,19 +480,19 @@ A estrutura da mesclagem trabalha com a cópia completa de casa arquivo relevant
 A rotulagem dos marcadores de conflitos
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Quando há conteúdos conflitantes o mecanismo da mesclagem tenta anotar os marcadores de conflito de cada lado com os commits de onde o conteúdo veio. Como a estrutura descarta o original, as informações sobre os commits reconstruídos e seus pais (em vez disso, gera novos commits falsos com base nas informações limitadas no patches que foram gerados), estes commits não podem ser identificados; em vez disso tem que retornar para um resumo do commit. Além disso, quando `merge.conflictStyle` é definido para 'diff3', a estrutura aplicada utilizará uma "mesclagem reconstruída da base" para rotular o conteúdo da base mesclada e portanto, não fornecer qualquer informações sobre o commit da base mesclada.
+Quando há conteúdos conflitantes o mecanismo da mesclagem tenta anotar os marcadores de conflito de cada lado com os commits de onde o conteúdo veio. Como a estrutura descarta o original, as informações sobre os commits reconstruídos e seus pais (em vez disso, gera novos commits falsos com base nas informações limitadas no patches que foram gerados), estes commits não podem ser identificados; em vez disso tem que retornar para um resumo do commit. Além disso, quando `merge.conflictStyle` é definido para 'diff3', a estrutura aplicada utilizará uma "mesclagem reconstruída da base" para rotular o conteúdo da base mesclada e portanto, não fornece qualquer informações sobre o commit da base mesclada.
 
 A estrutura da mesclagem funciona com commits completos nos dois lados da história e portanto não possuem tais limitações.
 
 Hooks
 ~~~~~
 
-A estrutura da aplicação não chama tradicionalmente o gancho pós-commit, enquanto a estrutura da mesclagem chama. Ambos chamaram o gancho pós-averiguação, embora a estrutura da mesclagem reduza a sua saída. Além disso, ambas as estruturas chamam apenas o gancho pós-averiguação com o ponto de partida para fazer o commit da reconstrução da fundação (rebase), nem o commit intermediário, nem o commit final. Em cada caso, o chamado desses ganchos foi por acidente de implementação em vez de design (os dois processos internos eram originalmente implementados como scripts shell e passaram a chamar outros comandos como o 'git checkout' ou o 'git commit' que seriam chamados de ganchos). Ambos os processos internos devem ter o mesmo comportamento, embora não seja inteiramente claro qual (caso existam), está correto. Provavelmente faremos a reconstrução (rebase) parar chamando um destes ganchos no futuro.
+A estrutura da aplicação não chama tradicionalmente o gancho pós-commit, enquanto a estrutura da mesclagem chama. Ambos chamaram o gancho pós-averiguação, embora a estrutura da mesclagem reduza a sua saída. Além disso, ambas as estruturas chamam apenas o gancho pós-averiguação com o ponto de partida para fazer o commit da reconstrução da fundação (rebase), nem o commit intermediário, nem o commit final. Em cada caso, o chamado desses ganchos foi por acidente de implementação em vez de design (os dois processos internos eram originalmente implementados como scripts shell e passaram a chamar outros comandos como o 'git checkout' ou o 'git commit' que seriam chamados de ganchos). Ambos os processos internos devem ter o mesmo comportamento, embora não seja totalmente claro qual (caso existam), está correto. Provavelmente faremos o rebase parar chamando um destes ganchos no futuro.
 
 Interruptabilidade
 ~~~~~~~~~~~~~~~~~~
 
-A aplicação da estrutura possui problemas de segurança relacionada com interrupção de tempo; caso o usuário pressione Ctrl+C no momento errado ao tentar interromper o processo 'rebase' (reconstrução), o processo então pode entrar em uma condição ele não pode ser parado posteriormente com um comando `git rebase --abort`. A estrutura da mesclagem não parece sofrer da mesma deficiência. (Consulte https://lore.kernel.org/git/20200207132152.GC2868@szeder.dev/ para obter mais detalhes.)
+A aplicação da estrutura possui problemas de segurança relacionada com interrupção de tempo; caso o usuário pressione Ctrl+C no momento errado ao tentar interromper o processo rebase, o processo então pode entrar em uma condição ele não pode ser parado posteriormente com um comando `git rebase --abort`. A estrutura da mesclagem não parece sofrer da mesma deficiência. (Consulte https://lore.kernel.org/git/20200207132152.GC2868@szeder.dev/ para obter mais detalhes.)
 
 Reescrevendo os Commits
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -506,7 +506,7 @@ Existem mais algumas diferenças comportamentais que a maioria das pessoas consi
 
 * Reflog: As duas estruturas que utilizarão palavras diferentes durante a descrição das alterações feitas no reflog, embora ambos façam a utilização da palavra "rebase".
 
-* As mensagens de progresso, informacionais e de erro: As duas estruturas fornecem um progresso ligeiramente diferente das mensagens informantes. Além disso, a estrutura aplicada grava uma mensagens de erro (como "Os seus arquivos serão substituídos...") para o stdout, enquanto a mesclagem da estrutura escrevem eles no stderr.
+* As mensagens de progresso, informacionais e de erro: As duas estruturas fornecem um progresso ligeiramente diferente das mensagens de informação. Além disso, a estrutura aplicada grava uma mensagens de erro (como "Os seus arquivos serão substituídos...") para o stdout, enquanto a mesclagem da estrutura escrevem eles no stderr.
 
 * Diretórios de estado: As duas estruturas mantêm a sua condição em diferentes diretórios dentro do `.git/`
 
@@ -792,7 +792,7 @@ O comando `label` associa um rótulo ao `HEAD` atual quando este comando for exe
 
 O comando `reset` redefine o `HEAD`, o índice e a árvore de trabalho para a revisão específica. É semelhante a um comando `exec git reset --hard <label>`, porém se recusa a sobrescrever os arquivos que não sejam monitorados. Se o comando `reset` falhar, ele será imediatamente reagendado, com uma mensagem útil sobre como editar a lista de tarefas (normalmente acontece quando um comando `reset` foi inserido manualmente na lista de tarefas e contém um erro de digitação).
 
-O comando `merge` mesclará revisões especificadas no que seja `HEAD` naquele momento. Com `-C <original-commit>`, a mensagem do commit de um determinada mesclagem será usada. Quando o `C` é alterado para minúsculo `-c`, a mensagem será aberta em um editor após uma mesclagem bem-sucedida, para que o usuário possa edita-lá.
+O comando `merge` mesclará revisões usadas no que seja `HEAD` naquele momento. Com `-C <original-commit>`, a mensagem do commit de um determinada mesclagem será usada. Quando o `C` é alterado para minúsculo `-c`, a mensagem será aberta em um editor após uma mesclagem bem-sucedida, para que o usuário possa edita-lá.
 
 Caso um comando `merge` falhar por qualquer motivo que não seja um conflito da mesclagem (ou seja, quando a operação da mesclagem sequer iniciou), ele será reagendado imediatamente.
 

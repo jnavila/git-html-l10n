@@ -10,8 +10,8 @@ SYNOPSIS
 --------
 [verse]
 'git diff' [<options>] [<commit>] [--] [<chemin>...]
-'git diff' [<options>] --cached [<commit>] [--] [<chemin>...]
-'git diff' [<options>] <commit> [<commit>...]<commit> [--] [<chemin>...]
+'git diff' [<options>] --cached [--merge-base] [<commit>] [--] [<chemin>...]
+'git diff' [<options>] [--merge-base] <commit> [<commit>...]<commit> [--] [<chemin>...]
 'git diff' [<options>] <commit>...<commit> [--] [<chemin>...]
 'git diff' [<options>] <blob> <blob>
 'git diff' [<options>] --no-index [--] <chemin> <chemin>
@@ -28,33 +28,37 @@ Affiche les modifications entre l'arbre de travail et l'index ou un arbre, les m
 
 	Cette forme sert à comparer les deux chemins indiqués sur le système de fichiers. Vous pouvez omettre l'option `--no-index` si la commande est lancée dans un arbre de travail contrôlé par Git et qu'au moins un des chemins pointe hors de l'arbre de travail ou si la commande est lancée hors d'un arbre de travail contrôlé par Git. Cette forme implique `--exit-code`.
 
-'git diff' [<options>] --cached [<commit>] [--] [<chemin>...]::
+'git diff' [<options>] --cached [--merge-base] [<commit>] [--] [<chemin>...]::
 
 	Cette forme sert à visualiser les modifications que vous avez indexées pour la prochaine validation vis-à-vis du <commit> nommé. Typiquement, vous voudriez comparer avec le commit le plus récent (HEAD), ce qui est fait automatiquement si vous ne spécifiez pas <commit>. Si HEAD n'existe pas (par exemple, des branches à naître) et si <commit> n'est pas fourni, les modifications indexées sont affichées. --staged est synonyme de --cached.
++
+If --merge-base is given, instead of using <commit>, use the merge base of <commit> and HEAD. `git diff --merge-base A` is equivalent to `git diff $(git merge-base A HEAD)`.
 
 'git diff' [<options>] <commit> [--] [<chemin>...]::
 
 	Cette forme sert à visualiser les modifications présentes dans l'arbre de travail par rapport au <commit> indiqué. Vous pouvez utiliser HEAD pour le comparer au commit le plus récent ou un nom de branche pour le comparer avec le sommet d'une branche différente.
 
-'git diff' [<options>] <commit> <commit> [--] [<chemin>...]::
+'git diff' [<options>] [--merge-base] <commit> <commit> [--] [<chemin>...]::
 
 	Ceci sert à visualiser les modifications entre deux <commit> arbitraires.
++
+If --merge-base is given, use the merge base of the two commits for the "before" side. `git diff --merge-base A B` is equivalent to `git diff $(git merge-base A B) B`.
 
 'git diff' [<options>] <commit> <commit>...<commit> [--] [<chemin>...]::
 
-	Cette forme permet de visualiser les résultats d'un commit de fusion. Le premier <commit> indiqué doit être la fusion elle-même ; les deux autres commits ou plus doivent être ses parents. Une façon pratique de produire l'ensemble des révisions souhaitées est d'utiliser le suffixe {caret}@. Par exemple, si `master` nomme un commit de fusion, `git diff master^@` donne la même différence combinée que `git show master`.
+	Cette forme permet de visualiser les résultats d'un commit de fusion. Le premier <commit> indiqué doit être la fusion elle-même ; les deux autres commits ou plus doivent être ses parents. Une façon pratique de produire l'ensemble des révisions souhaitées est d'utiliser le suffixe `^@`. Par exemple, si `master` nomme un commit de fusion, `git diff master^@` donne la même différence combinée que `git show master`.
 
 'git diff' [<options>] <commit>..<commit> [--] [<chemin>...]::
 
-	Cette forme est synonyme de la forme précédente (sans le "..") pour visualiser les modification entre deux <commit>s arbirtraires. Si <commit> est omis d'un côté, cela aura le même effet que de spécifier HEAD à la place.
+	Cette forme est synonyme de la forme précédente (sans le `..`) pour visualiser les modification entre deux <commit>s arbirtraires. Si <commit> est omis d'un côté, cela aura le même effet que de spécifier HEAD à la place.
 
 'git diff' [<options>] <commit>\...<commit> [--] [<chemin>...]::
 
-	Cette forme sert à visualiser les modifications sur la branche contenant et jusqu'au second <commit>, en débutant à l'ancêtre commun au deux <commit>. "git diff A\...B" est équivalent à "git diff $(git merge-base A B) B". Vous pouvez omettre l'un ou l'autre <commit>, ce qui a le même effet que de spécifier HEAD à la place.
+	Cette forme sert à visualiser les modifications sur la branche contenant et jusqu'au second <commit>, en débutant à l'ancêtre commun au deux <commit>. `git diff A\...B` est équivalent à `git diff $(git merge-base A B) B`. Vous pouvez omettre l'un ou l'autre <commit>, ce qui a le même effet que de spécifier HEAD à la place.
 
-Juste au cas où vous feriez quelque chose d'exotique, il doit être noté que tous les <commit> dans la description ci-dessus, excepté dans les deux dernières formes qui utilisent les notations "..", peuvent être n'importe quel <tree>.
+Juste au cas où vous feriez quelque chose d'exotique, il doit être noté que tous les <commit> dans la description ci-dessus, excepté dans le cas de `--merge-base` et dans les deux dernières formes qui utilisent les notations `..`, peuvent être n'importe quel <arbre>.
 
-Pour une liste plus complète des moyens de spécifier <commit>, voir la section « SPÉCIFIER LES RÉVISIONS » dans linkgit:gitrevisions[7]. Cependant, "diff" concerne la comparaison de deux _point finaux_, et non d'intervalles, et les notations d'intervalle ("<commit>..<commit>" et "<commit>\...<commit>") ne réfèrent pas un intervalle tel que défini dans la section « SPÉCIFIER LES RÉVISIONS » de linkgit:gitrevisions[7].
+Pour une liste plus complète des moyens de spécifier <commit>, voir la section « SPÉCIFIER LES RÉVISIONS » dans linkgit:gitrevisions[7]. Cependant, "diff" concerne la comparaison de deux _point finaux_, et non d'intervalles, et les notations d'intervalle (`<commit>..<commit>` et `<commit>\...<commit>`) ne réfèrent pas un intervalle tel que défini dans la section « SPÉCIFIER LES RÉVISIONS » de linkgit:gitrevisions[7].
 
 'git diff' [<options>] <blob> <blob>::
 
@@ -91,8 +95,8 @@ $ git diff HEAD       <3>
 ------------
 +
 <1> Modifications dans l'arbre de travail pas encore indexées pour la prochaine validation.
-<2> Modifications entre l'index et votre dernier commit ; ce que vous valideriez si vous lanciez "git commit" sans l'option "-a".
-<3> Modifications dans l'arbre de travail depuis votre dernier commit ; ce que vous valideriez si vous lanciez "git commit -a"
+<2> Modifications entre l'index et votre dernier commit ; ce que vous valideriez si vous lanciez `git commit` sans l'option `-a`.
+<3> Modifications dans l'arbre de travail depuis votre dernier commit ; ce que vous valideriez si vous lanciez `git commit -a`
 
 Comparaison de deux commits arbitraires::
 +
