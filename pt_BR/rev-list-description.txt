@@ -1,0 +1,48 @@
+Liste os commits que podem ser acessadas seguindo os links `parent` de determinados commits, porém exclua os commits acessíveis das que receberam um '{caret}' na frente deles. Por predefinição, a saída é informada em ordem cronológica reversa.
+
+Você pode pensar nisso como uma operação conjunta. Os commits acessíveis a partir de qualquer um dos commits passados na linha de comando formam um conjunto e então os commits acessíveis a partir de qualquer um dos passados com '{caret}' na frente, são subtraídos desse conjunto. Os commits restantes são os que saem do comando. Várias outras opções e parâmetros dos caminhos podem ser usados para limitar ainda mais o resultado.
+
+Assim, o seguinte comando:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list foo bar ^baz
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log foo bar ^baz
+-----------------------------------------------------------------------
+endif::git-log[]
+
+significa "listar todos os commits acessíveis a partir do 'foo' ou 'bar', porém não de 'baz'".
+
+Uma notação especial "'<commit1>'..'<commit2>'" pode ser usada como uma abreviação para "^'<commit1>' '<commit2>'". Por exemplo, qualquer um dos seguintes podem ser usados de forma intercambiável:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list origin..HEAD
+$ git rev-list HEAD ^origin
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log origin..HEAD
+$ git log HEAD ^origin
+-----------------------------------------------------------------------
+endif::git-log[]
+
+Outra notação especial é "'<commit1>'...'<commit2>'", útil para mesclagens. O conjunto resultante dos commits é a diferença simétrica entre dois operandos. Os dois comandos a seguir são equivalentes:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list A B --not $(git merge-base --all A B)
+$ git rev-list A...B
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log A B --not $(git merge-base --all A B)
+$ git log A...B
+-----------------------------------------------------------------------
+endif::git-log[]

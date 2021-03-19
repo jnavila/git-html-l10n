@@ -13,7 +13,7 @@ RESUMO
     [--exec-path[=<caminho>]] [--html-path] [--man-path] [--info-path]
     [-p|--paginate|-P|--no-pager] [--no-replace-objects] [--bare]
     [--git-dir=<caminho>] [--work-tree=<caminho>] [--namespace=<nome>]
-    [--super-prefix=<caminho>]
+    [--super-prefix=<caminho>][--config-env <nome>=<envvar>]
     <comando> [<args>]
 
 DESCRIÇÃO
@@ -22,7 +22,7 @@ O Git é um sistema de controle de revisão distribuído, rápido, escalável e 
 
 Para começar, consulte linkgit:gittutorial[7] e depois linkgit:giteveryday[7] para conhecer um conjunto mínimo de comandos uteis. Para uma introdução mais aprofundada acesse o link:user-manual.html[Manual do Usuário do Git].
 
-Depois de dominar os conceitos básicos, é possível voltar para esta página para aprender quais os outros comandos o Git oferece. É possível aprender mais sobre os comandos individuais do Git com o comando "git help nome-do-comando". A página do manual linkgit:gitcli[7] fornece uma visão geral da sintaxe de comandos da linha de comando.
+Depois de dominar os conceitos básicos, é possível voltar para esta página para aprender quais os outros comandos o Git oferece. É possível aprender mais sobre os comandos individuais do Git com o comando "git help nome-do-comando". A página do manual linkgit:gitcli[7] fornece uma visão geral da sintaxe dos comandos na linha de comando.
 
 Uma cópia formatada e com hiperlink da documentação mais recente do Git pode ser visualizada em https://git.github.io/htmldocs/git.html ou https://git-scm.com/docs.
 
@@ -49,6 +49,13 @@ Esta opção afeta as opções que esperam o nome do caminho, como `--git-dir` e
 	Encaminhe um parâmetro de configuração para o comando O valor informado substituirá os valores dos arquivos de configuração. Um `<nome>` é esperado no mesmo formato listado pelo comando 'git config' (sub chaves separadas por pontos).
 +
 Note que ao omitir `=` no comando `git -c foo.bar ...` é permitido e define `foo.bar` com o valor booleano verdadeiro (assim como`[foo]bar` faria em um arquivo de configuração). Incluindo os iguais, porém com um valor vazio (como `git -c foo.bar= ...`) define `foo.bar` para a string vazia que `git config --type=bool` converterá para `false`.
+
+--config-env=<nome>=<envvar>::
+	Como `-c <nome>=<valor>`, dê à variável de configuração '<nome>' um valor onde <envvar> é o nome de uma variável de ambiente por onde o valor será recuperado. Ao contrário de `-c`, não há atalho para definir diretamente o valor para uma string vazia, em vez disso, a própria variável de ambiente deve ser definida como uma string vazia. É um erro caso o `<envvar>` não exista no ambiente. O `<envvar>` não pode ter um sinal de igual para evitar um equívoco com `<nome>` contendo um.
++
+Isso é útil para casos onde você deseja passar opções de configuração transitórias para o git, porém está fazendo isso em sistemas operacionais onde outros processos possam ser capazes de ler o seu cmdline (`/proc/self/cmdline` por exemplo), mas não o seu ambiente (`/proc/self/Environment` por exemplo). Este é comportamento normal no Linux, mas pode não estar no seu sistema.
++
+Observe que isso pode adicionar segurança para variáveis como `http.extraHeader` onde as informações confidenciais fazem parte do valor, mas não `url.<base>.insteadOf` por exemplo onde as informações confidenciais podem fazer parte da chave.
 
 --exec-path[=<caminho>]::
 	O caminho para onde os seus principais programas Git estão instalados. Isso também pode ser controlado configurando a variável de ambiente `GIT_EXEC_PATH`. Caso nenhum caminho seja informado, o 'git' imprimirá a configuração atual e encerrará.
@@ -200,7 +207,7 @@ include::cmds-purehelpers.txt[]
 Guias
 -----
 
-The following documentation pages are guides about Git concepts.
+As páginas da documentação a seguir são os guias sobre os conceitos do Git.
 
 include::cmds-guide.txt[]
 
@@ -244,7 +251,7 @@ Terminologia do Identificador
 <commit>::
 	Indica um nome de um objeto commit.
 
-<tree-ish>::
+<árvore>::
 	Indica uma árvore, nome de um objeto commit ou tag. Um comando que aceite um argumento <commit-ish> e queira operar em um objeto <commit>, porém remove a referência automaticamente dos objetos <tag> que apontem para um <commit>.
 
 <commit-ish>::
@@ -396,7 +403,7 @@ Outros
 	Essa variável de ambiente substitui o `$EDITOR` e o `$VISUAL`. É usado por vários comandos Git quando, no modo interativo, um editor deve ser iniciado. Consulte também linkgit:git-var[1] e a opção `core.editor` no linkgit:git-config[1].
 
 `GIT_SEQUENCE_EDITOR`::
-	Essa variável de ambiente substitui a configuração do editor Git durante a edição da lista de tarefas de uma reestruturação interativa da base (rebase). Veja também linkit::git-rebase[1] e a opção `sequence.editor` em linkit::git-config[1].
+	Esta variável de ambiente substitui a configuração do editor do Git ao editar a lista de tarefas de um rebase interativo. Consulte também o comando linkgit:git-rebase[1] e a opção `sequence.editor` em linkgit:git-config[1].
 
 `GIT_SSH`::
 `GIT_SSH_COMMAND`::

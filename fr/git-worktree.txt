@@ -49,7 +49,7 @@ Si `<commit-esque>` est omis et que ni `-b` ni `-B` ni `--detach` ne sont utilis
 
 list::
 
-Lister les détails de chaque arbre de travail. L'arbre de travail principal est listé en premier, suivi de chacun des arbres de travail liés. Les détails de sortie comprennent si l'arbre de travail est nu, la révision actuellement extraite, la branche en cours (ou « HEAD détachée » s'il n'y en a pas), et "verrouillé" si l'arbre de travail est verrouillé.
+Lister les détails de chaque arbre de travail. L'arbre de travail principal est listé en premier, suivi de chacun des arbres de travail liés. Les détails de sortie comprennent si l'arbre de travail est nu, la révision actuellement extraite, la branche en cours (ou « HEAD détachée » s'il n'y en a pas), et "verrouillé" si l'arbre de travail est verrouillé, "prunable" si l'arbre de travail peut être éliminé par la commande `prune`.
 
 lock::
 
@@ -74,6 +74,8 @@ Réparer les fichiers administratifs de l'arbre de travail, si possible, s'ils s
 Par exemple, si l'arbre de travail principal (ou le dépôt nu) est déplacé, les arbres de travail liés seront incapables de le localiser. L'exécution de `repair` dans l'arbre de travail principal rétablira la connexion entre les arbres de travail liés et l'arbre de travail principal.
 +
 De même, si un arbre de travail lié est déplacé sans utiliser `git worktree move`, l'arbre de travail principal (ou le dépôt nu) ne pourra pas le localiser. L'exécution de `repair` dans l'arbre de travail récemment déplacé rétablira la connexion. Si plusieurs arbres de travail liés sont déplacés, l'exécution de `repair` à partir de n'importe quel arbre de travail avec le nouveau `<chemin>` de chaque arbre comme argument, rétablira la connexion à tous les chemins spécifiés.
++
+Si l'arbre de travail principal et les arbres de travail liés ont été déplacés manuellement, alors l'exécution de `repair` dans l'arbre de travail principal et la spécification du nouveau `<chemin>` de chaque arbre de travail lié rétablira toutes les connexions dans les deux directions.
 
 unlock::
 
@@ -126,9 +128,13 @@ Cela peut également être configuré comme le comportement par défaut en utili
 -v::
 --verbose::
 	Avec `prune`, signaler toutes les suppressions.
++
+Avec `list`, afficher des informations supplémentaires sur les arbres de travail (voir ci-dessous).
 
 --expire <date>::
 	Avec `prune`, n'expirer que les arbres de travail inutilisés plus vieux que `<temps>`.
++
+Avec `list`, annoter les arbres de travail manquant comme élagable s'ils sont plus vieux que `<temps>`.
 
 --reason <chaîne>::
 	Avec `lock`, une explication de la raison pour laquelle l'arbre de travail est verrouillé.
@@ -195,9 +201,35 @@ $ git worktree list
 /chemin/vers/autre-arbre-de-travail-lié  1234abc  (detached HEAD)
 ------------
 
+La commande affiche également des annotations pour chaque arbre de travail, en fonction de son état. Ces annotations sont :
+
+ * `locked`, si l'arbre de travail est verrouillé.
+ * `prunable`, si l'arbre de travail peut être élagué via` git worktree prune`.
+
+------------
+$ git worktree list
+/chemin/vers/arbre-de-travail-lié        abcd1234 [master]
+/chemin/vers/arbre-de-travail-verrouillé        abcd568 (branche-a) locked
+/chemin/vers/arbre-de-travail-élagable  5678abcd  (detached HEAD) prunable
+------------
+
+Pour ces annotations, une raison peut également être disponible et cela peut être vu en utilisant le mode verbeux. L'annotation est alors déplacée à la ligne suivante en retrait, suivie des informations complémentaires.
+
+------------
+$ git worktree list --verbose
+/chemin/vers/arbre-de-travail-lié              abcd1234 [master]
+/chemin/vers/arbre-de-travail-verrouillé-pas-de-raison    abcd5678 (HEAD détachée) locked
+chemin/vers/arbre-de-travail-verrouillé-avec-raison  1234abcd (branche-a)
+	locked: working tree path is mounted on a portable device
+chemin/vers/arbre-de-travail-elagable            5678abc1 (HEAD détachée)
+	prunable: gitdir file points to non-existent location
+------------
+
+Notez que l'annotation est déplacée à la ligne suivante si les informations supplémentaires sont disponibles, sinon elle reste sur la même ligne que l'arbre de travail lui-même.
+
 Format de la porcelaine
 ~~~~~~~~~~~~~~~~~~~~~~~
-Le format de porcelaine comporte une ligne par attribut. Les attributs sont énumérés avec une étiquette et une valeur séparées par un seul espace. Les attributs booléens (comme `bare` et `detached`) sont énumérés sous forme d'étiquette uniquement, et ne sont présents que si la valeur est vraie. Le premier attribut d'un arbre de travail est toujours `worktree`, une ligne vide indique la fin de l'enregistrement. Par exemple :
+Le format de porcelaine comporte une ligne par attribut. Les attributs sont énumérés avec une étiquette et une valeur séparées par un seul espace. Les attributs booléens (comme `bare` et `detached`) sont énumérés sous forme d'étiquette uniquement, et ne sont présents que si la valeur est vraie. Certains attributs (comme `locked`) peuvent être listés comme étiquette seule ou avec une valeur si la raison de cet attribut est disponible Le premier attribut d'un arbre de travail est toujours `worktree`, une ligne vide indique la fin de l'enregistrement. Par exemple :
 
 ------------
 $ git worktree list --porcelain
@@ -212,6 +244,30 @@ worktree /chemin/vers/autre-arbre-de-travail-lié
 HEAD 1234abc1234abc1234abc1234abc1234abc1234a
 detached
 
+worktree /path/to/linked-worktree-locked-no-reason
+HEAD 5678abc5678abc5678abc5678abc5678abc5678c
+branch refs/heads/locked-no-reason
+locked
+
+worktree /chemin/vers/arbre-de-travail-lié-verrouillé-avec-raison
+HEAD 3456def3456def3456def3456def3456def3456b
+branch refs/heads/verrrouille-avec-raison
+raison pourquoi l'arbre est verrouillé
+
+worktree /path/to/linked-worktree-prunable
+HEAD 1233def1234def1234def1234def1234def1234b
+detached
+prunable gitdir file points to non-existent location
+
+------------
+
+Si la raison du verrouillage contient des caractères « inhabituels » tels que des retours chariot, ils sont échappés et la raison est entièrement citée comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Par exemple :
+
+------------
+$ git worktree list --porcelain
+...
+locked "reason\nwhy is locked"
+...
 ------------
 
 EXEMPLES

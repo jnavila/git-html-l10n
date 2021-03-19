@@ -49,7 +49,7 @@ Caso o `<commit-ish>` seja omitido e nem a opção `-b`, `-B` ou `--detach` seja
 
 list::
 
-Liste os detalhes de cada árvore de trabalho. A árvore de trabalho principal é listada primeiro, seguida por cada uma das árvores de trabalho vinculadas. Os detalhes gerados incluem se a árvore de trabalho está vazia e se a revisão, o ramo que foi averiguado no momento (ou tem o "HEAD desanexado", caso não haja) e o bloqueio (locked) caso a árvore de trabalho esteja bloqueada.
+Liste os detalhes de cada árvore de trabalho. A árvore de trabalho principal é listada primeiro seguida por cada uma das árvores de trabalho que estejam vinculadas a ela. Nos detalhes de saída incluí se a árvore de trabalho está vazia, se a revisão foi averiguada, se o ramo atual foi averiguado (ou "HEAD desanexado" caso nenhum), "bloqueado" caso a árvore de trabalho esteja bloqueada, "podável" caso a árvore de trabalho puder ser podada pelo comando `prune`.
 
 lock::
 
@@ -74,6 +74,8 @@ Faz o reparo dos arquivos administrativos da árvore de trabalho caso tenham se 
 Por exemplo, caso a árvore de trabalho principal (ou o repositório vazio) seja movida, as árvores de trabalho vinculadas não serão capazes de localizá-la. Ao executar o comando `repair` na árvore de trabalho principal, isso restabelecerá a conexão das árvores de trabalho vinculadas de volta para a árvore de trabalho principal.
 +
 Da mesma forma, caso uma árvore de trabalho vinculada seja movida sem usar o comando `git worktree move`, a árvore de trabalho principal (ou o repositório vazio) não será capaz de localizá-la. Executando o comando `repair` dentro da árvore de trabalho recém-movida reestabelece conexão. Caso várias árvores de trabalho viculadas sejam movidas, ao executar o `repair` a partir de qualquer árvore de trabalho usando o novo `<caminho>` de cada árvore como argumento, o vínculo será reestabelecido com todos os caminhos especificados.
++
+Caso a árvore de trabalho principal e as árvores de trabalho vinculadas tenham sido movidas manualmente, ao executar `repair` na árvore de trabalho principal e ao definir um novo `<caminho>` de cada árvore de trabalho vinculada irá restabelecer todas as conexões em todas as direções.
 
 unlock::
 
@@ -126,9 +128,13 @@ Isso também pode ser definido como um comportamento predefinido ao usar a opç�
 -v::
 --verbose::
 	Com `prune`, relate todas as remoções.
++
+Com `list`, produza informações adicionais sobre as árvores de trabalho (veja abaixo).
 
 --expire <tempo>::
 	Com `prune`, expire apenas as árvores de trabalho não utilizadas mais velhas que `<tempo>`.
++
+Com `list`, anote as árvores de trabalho ausentes como podáveis caso sejam mais antigas do que `<tempo>`.
 
 --reason <texto>::
 	Com `lock`, uma explicação é dada do por quê a árvore está "locked" (travada).
@@ -195,9 +201,35 @@ $ git worktree list
 /path/to/other-linked-worktree  1234abc  (HEAD desanexado)
 ------------
 
+O comando também mostra anotações para cada árvore de trabalho, de acordo com seu estado. Estas anotações são:
+
+ * `locked`, caso a árvore de trabalho esteja bloqueada.
+ * `prunable`, caso a árvore de trabalho possa ser podada através do comando `git worktree prune`.
+
+------------
+$ git worktree list
+/path/to/linked-worktree    abcd1234 [master]
+/path/to/locked-worktreee   acbd5678 (brancha) bloqueado
+/path/to/prunable-worktree  5678abc  (HEAD desanexada) podável
+------------
+
+Para essas anotações, um motivo também pode estar disponível e isso pode ser visto usando o modo detalhado. A anotação é então movida para a próxima linha recuada seguida pelas informações adicionais.
+
+------------
+$ git worktree list --verbose
+/path/to/linked-worktree              abcd1234 [master]
+/path/to/locked-worktree-no-reason    abcd5678 (HEAD desanexado) bloqueado
+/path/to/locked-worktree-with-reason  1234abcd (brancha)
+	bloqueado: a árvore de trabalho está montando em um dispositivo portátil
+/path/to/prunable-worktree            5678abc1 (HEAD desanexado)
+	podável: o arquivo gitdir aponta para um local que não existe
+------------
+
+Observe que a anotação é movida para a próxima linha caso a informação adicional esteja disponível, caso contrário, ela permanece na mesma linha que a própria árvore de trabalho.
+
 Formato Porcelana
 ~~~~~~~~~~~~~~~~~
-O formato porcelana possui uma linha por atributo. Os atributos são listados através de um valor e um rótulo separadas por um espaço. Os atributos booleanos (como `bare` e `detached`) são listados apenas com um rótulo e estão presente apenas e somente caso o valor seja verdadeiro. O primeiro atributo da árvore de trabalho será sempre `worktree`, uma linha vazia indica o fim do registro. Por exemplo:
+O formato porcelana possui uma linha por atributo. Os atributos são listados com um rótulo e o valor são separados por um único espaço. Atributos booleanos (como `bare` e `detached`) são listados apenas como um rótulo e estão presentes apenas caso o valor seja verdadeiro. Alguns atributos (como `locked`) podem ser listados apenas como um rótulo ou com um valor, dependendo caso um motivo esteja disponível. O primeiro atributo de uma árvore de trabalho sempre é `worktree`, uma linha em branco indica o fim do registro. Por exemplo:
 
 ------------
 $ git worktree list --porcelain
@@ -212,6 +244,30 @@ worktree /path/to/other-linked-worktree
 HEAD 1234abc1234abc1234abc1234abc1234abc1234a
 detached
 
+worktree /path/to/linked-worktree-locked-no-reason
+HEAD 5678abc5678abc5678abc5678abc5678abc5678c
+branch refs/heads/locked-no-reason
+locked
+
+worktree /path/to/linked-worktree-locked-with-reason
+HEAD 3456def3456def3456def3456def3456def3456b
+branch refs/heads/locked-with-reason
+locked reason why is locked
+
+worktree /path/to/linked-worktree-prunable
+HEAD 1233def1234def1234def1234def1234def1234b
+detached
+prunable gitdir file points to non-existent location
+
+------------
+
+Caso o motivo do bloqueio contenha caracteres "incomuns" como uma nova linha, eles serão ignorados conforme é explicado na variável de configuração `core.quotePath` (consulte linkgit:git-config[1]). Por exemplo:
+
+------------
+$ git worktree list --porcelain
+...
+locked "reason\nwhy is locked"
+...
 ------------
 
 EXEMPLOS

@@ -27,6 +27,38 @@ endif::git-diff[]
 	Supprimer la sortie diff. Utile pour les commandes telles que `git show` qui affichent la rustine par défaut, ou pour supprimer l'effet de `--patch`.
 endif::git-format-patch[]
 
+ifdef::git-log[]
+--diff-merges=(off|none|first-parent|1|separate|m|combined|c|dense-combined|cc)::
+--no-diff-merges::
+	Préciser le format de diff à utiliser pour les commits de fusion. La valeur par défaut est {diff-merges-default} sauf si `--first-parent` est utilisé, auquel cas `first-parent` est la valeur par défaut.
++
+--diff-merges=(off|none):::
+--no-diff-merges:::
+	Désactive la sortie des diffs pour des commits de fusion. Utile pour passer outre la valeur sous-entendue.
++
+--diff-merges=first-parent:::
+--diff-merges=1:::
+	Cette option fait en sorte que les commits de fusion montrent les différences complètes, mais seulement par rapport au premier parent.
++
+--diff-merges=separate:::
+--diff-merges=m:::
+-m:::
+	Cela fait que les commits de fusion montrent la différence complète par rapport à chacun des parents. Une entrée de journal et une différence séparées sont générées pour chaque parent. `-m` ne produit aucune sortie sans `-p`.
++
+--diff-merges=combined:::
+--diff-merges=c:::
+-c:::
+	Avec cette option, la sortie de diff pour un commit de fusion montre les différences de chacun des parents vers le résultat de la fusion simultanément au lieu de montrer une à une les différences par paires entre un parent et le résultat. De plus, il ne répertorie que les fichiers qui ont été modifiés par tous les parents.`-c` implique `-p`.
++
+--diff-merges=dense-combined:::
+--diff-merges=cc:::
+--cc:::
+	Avec cette option, la sortie produite par `--diff-merges=combined` est encore compressée en omettant les sections inintéressantes dont le contenu dans les parents n'a que deux variantes et le résultat de la fusion choisit l'une d'entre elles sans modification. `--cc` implique `-p`.
+
+--combined-all-paths::
+	Cet drapeau fait en sorte que les diffs combinés (utilisés pour les commits de fusion) listent le nom du fichier de tous les parents. Il n'a donc d'effet que lorsque `--diff-merges=[dense-]combined` est utilisé, et n'est probablement utile que si des changements de nom de fichier sont détectés (c.-à-d. lorsque la détection de renommage ou de copie a été demandée).
+endif::git-log[]
+
 -U<n>::
 --unified=<n>::
 	Générer des diffs avec <n> lignes de contexte au lieu des trois habituelles.
@@ -404,6 +436,10 @@ L'ordre en sortie est déterminé par l'ordre des motifs glob dans <fichier-d-or
 +
 Les motifs ont la même syntaxe et sémantique que les motifs utilisés pour fnmatch(3) sans le drapeau FNM_PATHNAME, sauf qu'un nom de chemin correspond aussi à un motif si la suppression de n'importe quel nombre de composants finaux du nom de chemin correspond au motif. Par exemple, le motif "`foo*bar`" correspond à "`fooasdfbar`" et "`foo/bar/baz/asdf`" mais pas à "`foobarx`".
 
+--skip-to=<fichier>::
+--rotate-to=<fichier>::
+	Supprimer les noms des fichiers avant <fichier> dans la sortie (c'est-à-dire "skip to"), ou les déplacer à la fin de la sortie (c'est-à-dire "rotate to"). Ces options servent principalement lors de la commande `git difftool`, et peuvent ne pas être très utiles ailleurs.
+
 ifndef::git-format-patch[]
 -R::
 	Échanger deux entrées ; c'est-à-dire afficher les différences depuis l'index ou avec un fichier sur disque avec le contenu de l'arbre.
@@ -443,7 +479,7 @@ endif::git-format-patch[]
 
 -W::
 --function-context::
-	Show whole function as context lines for each change. The function names are determined in the same way as `git diff` works out patch hunk headers (see 'Defining a custom hunk-header' in linkgit:gitattributes[5]).
+	Afficher l’ensemble de la fonction comme lignes de contexte pour chaque modification. Les noms de fonction sont déterminés de la même manière que 'git diff' génère sur les en-têtes de sections de rustines(voir 'Définir un en-tête personnalisé' dans linkgit:gitattributes[5]).
 
 ifndef::git-format-patch[]
 ifndef::git-log[]

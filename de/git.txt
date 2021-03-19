@@ -9,12 +9,12 @@ git - der stupide Content-Tracker
 ÜBERSICHT
 ---------
 [verse]
-'git' [--version] [--help] [-C <Pfad>] [-c <Name>=<Wert>]
-    [--exec-path[=<Pfad>]] [--html-path] [--man-path] [--info-path]
+'git' [--version] [--help] [-C <path>] [-c <name>=<value>]
+    [--exec-path[=<path>]] [--html-path] [--man-path] [--info-path]
     [-p|--paginate|-P|--no-pager] [--no-replace-objects] [--bare]
-    [--git-dir=<Pfad>] [--work-tree=<Pfad>] [--namespace=<Name>]
-    [--super-prefix=<Pfad>]
-    <Befehl> [<Argumente>]
+    [--git-dir=<path>] [--work-tree=<path>] [--namespace=<name>]
+    [--super-prefix=<path>] [--config-env <name>=<envvar>]
+    <command> [<args>]
 
 BESCHREIBUNG
 ------------
@@ -49,6 +49,13 @@ Diese Option beeinflusst andere Optionen, die Pfade erwarten, wie `--git-dir`und
 	Übergibt einen Konfigurationsparameter an den Befehl. Der übergebene Wert Überschreibt Werte aus Konfigurationsdateien. Der <Name> wird im gleichen Format erwartet, das von 'git config' ausgegeben wird. (Unterschlüssel durch Punkte getrennt).
 +
 Beachten Sie, dass das Weglassen des `=` in `git -c foo.bar ...` erlaubt ist und `foo.bar` auf `true` setzt (genau wie `[foo]bar` in einer Konfigurationsdatei). Ein Gleichheitszeichen ohne Wert (wie `git -c foo.bar= ...`) setzt `foo.bar` auf einen leeren String, den `git config --type=bool` in `false` konvertiert.
+
+--config-env=<name>=<envvar>::
+	Like `-c <name>=<value>`, give configuration variable '<name>' a value, where <envvar> is the name of an environment variable from which to retrieve the value. Unlike `-c` there is no shortcut for directly setting the value to an empty string, instead the environment variable itself must be set to the empty string. It is an error if the `<envvar>` does not exist in the environment. `<envvar>` may not contain an equals sign to avoid ambiguity with `<name>` containing one.
++
+This is useful for cases where you want to pass transitory configuration options to git, but are doing so on OS's where other processes might be able to read your cmdline (e.g. `/proc/self/cmdline`), but not your environ (e.g. `/proc/self/environ`). That behavior is the default on Linux, but may not be on your system.
++
+Note that this might add security for variables such as `http.extraHeader` where the sensitive information is part of the value, but not e.g. `url.<base>.insteadOf` where the sensitive information can be part of the key.
 
 --exec-path[=<Pfad>]::
 	Installationspfad Ihrer Git-Programme. Dies kann auch durch Setzen der Umgebungsvariable GIT_EXEC_PATH. Wenn kein Pfad angegeben ist, gibt git die aktuelle Einstellung aus.
@@ -396,7 +403,7 @@ Sonstiges
 	Diese Umgebungsvariable überschreibt `$EDITOR` und `$VISUAL`. Sie wird von mehreren Git-Befehlen verwendet, um im interaktiven Modus einen Editor zu öffnen. Siehe auch linkgit:git-var[1] und die Option `core.editor` in linkgit:git-config[1].
 
 `GIT_SEQUENCE_EDITOR`::
-	This environment variable overrides the configured Git editor when editing the todo list of an interactive rebase. See also linkit::git-rebase[1] and the `sequence.editor` option in linkit::git-config[1].
+	This environment variable overrides the configured Git editor when editing the todo list of an interactive rebase. See also linkgit:git-rebase[1] and the `sequence.editor` option in linkgit:git-config[1].
 
 `GIT_SSH`::
 `GIT_SSH_COMMAND`::

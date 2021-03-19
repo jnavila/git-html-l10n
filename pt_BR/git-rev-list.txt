@@ -27,6 +27,83 @@ include::rev-list-options.txt[]
 
 include::pretty-formats.txt[]
 
+EXEMPLOS
+--------
+
+* Imprime a lista dos commits acessíveis a partir do ramo atual.
++
+----------
+git rev-list HEAD
+----------
+
+* Imprime a lista de commits neste ramo, mas não está presente no ramo upstream.
++
+----------
+git rev-list @{upstream}..HEAD
+----------
+
+* Formate os commits com o autor e a mensagem de commit (consulte também a porcelana linkgit:git-log[1]).
++
+----------
+git rev-list --format=medium HEAD
+----------
+
+* Formate os commits junto com os seus diffs (consulte também a porcelana linkgit:git-log[1], que pode fazer isso em um único processo).
++
+----------
+git rev-list HEAD |
+git diff-tree --stdin --format=medium -p
+----------
+
+* Imprime a lista dos commits no ramo atual que tenha tocado em qualquer arquivo no diretório `Documentação`.
++
+----------
+git rev-list HEAD -- Documentação/
+----------
+
+* Imprima a lista dos commits da sua autoria no ano passado, em qualquer ramo, tag ou outra ref.
++
+----------
+git rev-list --author=you@example.com --since=1.year.ago --all
+----------
+
+* Imprima a lista dos objetos alcançáveis a partir do ramo atual (ou seja, todos os commits que contenha todos os objetos bolha e as árvores).
++
+----------
+git rev-list --objects HEAD
+----------
+
+* Compare o tamanho do disco de todos os objetos alcançáveis, versus aqueles alcançáveis a partir dos reflogs, versus o tamanho compactado total. Isso pode informar se a execução do comando `git repack -ad` pode reduzir o tamanho do repositório (eliminando objetos inacessíveis) e se os reflogs que estão para expirar podem servir de alguma assistência.
++
+----------
+# objetos acessíveis
+git rev-list --disk-usage --objects --all
+# mais os reflogs
+git rev-list --disk-usage --objects --all --reflog
+# tamanho total da utilização do disco
+du -c .git/objects/pack/*.pack .git/objects/??/*
+# é uma alternativa para du: add up "size" e os campos "size-pack"
+git count-objects -v
+----------
+
+* Relata o tamanho do disco de cada ramificação, não incluindo os objetos usados pela ramificação atual. Isso pode descobrir valores atípicos que estão contribuindo para um repositório inchado (porque alguém por acidente enviou um commit de algo muito grande por exemplo).
++
+----------
+git for-each-ref --format='%(refname)' |
+while read branch
+do
+	size=$(git rev-list --disk-usage --objects HEAD..$branch)
+	echo "$size $branch"
+done |
+sort -n
+----------
+
+* Compare o tamanho das ramificações no disco em um conjunto de refs, excluindo outro. Caso misture objetos de vários repositórios remotos em um único repositório, isso pode mostrar quais deles estão contribuindo para o aumento do tamanho do repositório (tomando o tamanho de `origin` como base).
++
+----------
+git rev-list --disk-usage --objects --remotes=$suspect --not --remotes=origin
+----------
+
 GIT
 ---
 Parte do conjunto linkgit:git[1]

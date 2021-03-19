@@ -81,7 +81,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 +
 Caso queira garantir que a saída realmente nomeie um objeto no banco de dados dos objetos e/ou possam ser utilizados como um tipo específico que você precisa, é possível adicionar o operador de remoção `^{type}` ao parâmetro. Por exemplo, `git rev-parse" $VAR^{commit}"` garantirá que `$VAR` nomeie um objeto já existente que seja um "commit-ish" (ou seja, um commit ou uma tag anotada que aponte para um commit). Para garantir que o '$VAR` nomeie um objeto já existente de qualquer tipo, `git rev-parse "$VAR^{object}"` pode ser utilizado.
 +
-Note that if you are verifying a name from an untrusted source, it is wise to use `--end-of-options` so that the name argument is not mistaken for another option.
+Note que se você estiver verificando um nome de uma fonte não confiável, é prudente usar a opção `--end-of-options` para que o argumento relacionado ao nome não seja confundido com uma outra opção.
 
 -q::
 --quiet::
@@ -135,16 +135,40 @@ Opções para os Arquivos
 --local-env-vars::
 	Liste as variável de ambiente do GIT_* que são locais no repositório (`GIT_DIR` ou `GIT_WORK_TREE`, mas não o `GIT_EDITOR` por exemplo). Somente os nomes das variáveis são listadas, não o seu valor, mesmo que estejam definidos.
 
+--path-format=(absolute|relative)::
+	Controla o comportamento de algumas outras opções. Caso seja definido como absoluto, os caminhos impressos por estas opções serão absolutas e canônicas. Caso seja definido como relativo, os caminhos serão relativos ao diretório de trabalho atual, caso seja possível. A predefinição é opção específica.
++
+Esta opção pode ser usada várias vezes e afeta apenas os argumentos seguintes na linha de comando, seja no final da linha de comando ou na próxima instância desta opção.
+
+As seguintes opções são modificadas pela opção `--path-format`:
+
 --git-dir::
 	Exibe o `$GIT_DIR` caso seja definido. Caso contrário, exibe o caminho para o diretório .git. O caminho exibido, quando relativo, é relativo ao diretório de trabalho atual.
 +
 Caso o `$GIT_DIR` não esteja definido e o diretório atual não for detectado como estando em um repositório Git ou na árvore de trabalho, imprima uma mensagem para stderr e encere com uma condição diferente de zero.
 
---absolute-git-dir::
-	Como `--git-dir`, porém sua saída é sempre o caminho absoluto canonizado.
-
 --git-common-dir::
 	Exibe o `$GIT_COMMON_DIR` caso seja definido, senão `$GIT_DIR`.
+
+--resolve-git-dir <caminho>::
+	Verifique se o <caminho> é um repositório válido ou um 'gitfile' que aponte para um repositório válido e imprima o local do repositório. Caso o <caminho> seja um gitfile, o caminho resolvido para o repositório real será impresso.
+
+--git-path <caminho>::
+	Resolva "$GIT_DIR/<caminho>" e leve em consideração as outras variáveis de realocação do caminho, como `$GIT_OBJECT_DIRECTORY`, `$GIT_INDEX_FILE`, etc. Caso `$GIT_OBJECT_DIRECTORY` seja definido para '/foo/bar' por exemplo, então o comando "git rev-parse --git-path objects/abc" returna '/foo/bar/abc'.
+
+--show-toplevel::
+	Mostra o caminho (absoluto) do cume do diretório da árvore de trabalho. Caso não haja uma árvore de trabalho, relate um erro.
+
+--show-superproject-working-tree::
+	Exibe o caminho absoluto da raiz da árvore de trabalho do superprojeto (caso exista) que usa o repositório atual como sendo o seu submódulo. Não produz nada caso o repositório atual não eja usado como um submódulo por nenhum projeto.
+
+--shared-index-path::
+	Exibe o caminho para o arquivo do índice compartilhado no modo de índice dividido ou vazio caso não esteja no modo do índice dividido.
+
+As seguintes opções não são afetadas pela opção `--path-format`:
+
+--absolute-git-dir::
+	Como `--git-dir`, porém sua saída é sempre o caminho absoluto canonizado.
 
 --is-inside-git-dir::
 	Quando o diretório de trabalho atual estiver abaixo do diretório do repositório, imprima 'true', caso contrário, 'false'.
@@ -158,26 +182,11 @@ Caso o `$GIT_DIR` não esteja definido e o diretório atual não for detectado c
 --is-shallow-repository::
 	Quando o repositório é raso, imprima 'true', caso contrário, 'false'.
 
---resolve-git-dir <caminho>::
-	Verifique se o <caminho> é um repositório válido ou um 'gitfile' que aponte para um repositório válido e imprima o local do repositório. Caso o <caminho> seja um gitfile, o caminho resolvido para o repositório real será impresso.
-
---git-path <caminho>::
-	Resolva "$GIT_DIR/<caminho>" e leve em consideração as outras variáveis de realocação do caminho, como `$GIT_OBJECT_DIRECTORY`, `$GIT_INDEX_FILE`, etc. Caso `$GIT_OBJECT_DIRECTORY` seja definido para '/foo/bar' por exemplo, então o comando "git rev-parse --git-path objects/abc" returna '/foo/bar/abc'.
-
 --show-cdup::
 	Quando o comando é chamado a partir de um subdiretório, exiba o caminho do diretório do nível mais alto em relação ao diretório atual (geralmente uma sequência de "../" ou uma sequência vazia).
 
 --show-prefix::
 	Quando o comando é invocado a partir de um subdiretório, exiba o caminho do diretório atual em relação ao nível mais alto do diretório.
-
---show-toplevel::
-	Exibe o caminho absoluto do diretório no nível mais da árvore de trabalho. Caso não haja uma árvore em funcionamento, relate um erro.
-
---show-superproject-working-tree::
-	Exibe o caminho absoluto da raiz da árvore de trabalho do superprojeto (caso exista) que usa o repositório atual como sendo o seu submódulo. Não produz nada caso o repositório atual não eja usado como um submódulo por nenhum projeto.
-
---shared-index-path::
-	Exibe o caminho para o arquivo do índice compartilhado no modo de índice dividido ou vazio caso não esteja no modo do índice dividido.
 
 --show-object-format[=(storage|input|output)]::
 	Exiba o formato do objeto (algoritmo hash) usado no repositório para o armazenamento dentro do diretório `.git`, entrada ou saída. Para a entrada, vários algoritmos podem ser impressos, separados por espaço. Caso não seja definido, a predefinição retorna para "storage".
