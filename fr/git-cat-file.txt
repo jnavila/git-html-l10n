@@ -1,0 +1,225 @@
+git-cat-file(1)
+===============
+
+NOM
+---
+git-cat-file - Fournir le contenu ou l'information de type et taille pour les objets du dépôt
+
+
+SYNOPSIS
+--------
+[verse]
+'git cat-file' (-t [--allow-unknown-type]| -s [--allow-unknown-type]| -e | -p | <type> | --textconv | --filters ) [--path=<chemin>] <objet>
+'git cat-file' (--batch[=<format>] | --batch-check[=<format>]) [ --textconv | --filters ] [--follow-symlinks]
+
+DESCRIPTION
+-----------
+Dans sa première forme, la commande fournit le contenu ou le type d'un objet dans le référentiel. Le type est obligatoire sauf si `-t` ou `-p` est utilisé pour trouver le type de l'objet, ou `-s` est utilisé pour trouver la taille de l'objet, ou `--textconv` ou `--filters` est utilisé (ce qui implique le type "blob").
+
+Dans la seconde forme, une liste d'objets (séparés par des sauts de ligne) est fournie sur stdin, et le SHA-1, le type et la taille de chaque objet sont imprimés sur la sortie standard. Le format de sortie peut être modifié en utilisant l'argument optionnel `<format>`. Si `--textconv` ou `--filters` a été spécifié, l'entrée est censée lister les noms d'objets suivis du nom du chemin, séparés par un simple espace, afin que les pilotes appropriés puissent être déterminés.
+
+OPTIONS
+-------
+<objet>::
+	Le nom de l'objet à afficher. Pour une liste plus complète des façons d'épeler les noms d'objets, voir la section « SPÉCIFICATION DE RÉVISIONS" dans linkgit:gitrevisions[7].
+
+-t::
+	Au lieu du contenu, afficher le type d'objet identifié par `<objet>`.
+
+-s::
+	Au lieu du contenu, afficher la taille de l'objet identifié par `<objet>`.
+
+-e::
+	Sortir avec un statut nul si `<objet>` existe et est un objet valide. Si `<objet>` est d'un format invalide, sortir avec un état non-zéro et émettre une erreur sur stderr.
+
+-p::
+	Formater l'affichage du contenu de `<objet>` en fonction de son type.
+
+<type>::
+	Typiquement, cela correspond au type réel de `<objet>` mais la demande d'un type qui peut trivialement être déréférencé à partir du `<objet>` donné est également autorisée. Un exemple est de demander un "tree" avec `<objet>` étant un objet commit qui le contient, ou de demander un "blob" avec `<objet>` étant un objet tag qui le pointe.
+
+--textconv::
+	Afficher le contenu tel que transformé par un filtre textconv. Dans ce cas, `<objet>` doit être de la forme `<arbre-esque>:<chemin>`, ou `:<chemin>` afin d'appliquer le filtre au contenu enregistré dans l'index à `<chemin>`.
+
+--filters::
+	Afficher le contenu tel qu'il a été converti par les filtres configurés dans l'arbre de travail actuel pour le `<chemin>` donné (c'est-à-dire les filtres de maculage, la conversion de fin de ligne, etc). Dans ce cas, `<objet>` doit être de la forme `<arbre-esque>:<chemin>`, ou `:<chemin>`.
+
+--path=<chemin>::
+	À utiliser avec `--textconv` ou `--filters`, pour permettre de spécifier un nom d'objet et un chemin séparément, par exemple lorsqu'il est difficile de déterminer la révision d'où provient le blob.
+
+--batch::
+--batch=<format>::
+	Afficher les informations et le contenu des objets pour chaque objet fourni sur stdin. Ne peut être combiné avec aucune autre option ou argument sauf `--textconv` ou `--filters`, auquel cas les lignes d'entrée doivent aussi spécifier le chemin, séparé par des espaces. Voir la section `SORTIE PAR LOT` ci-dessous pour plus de détails.
+
+--batch-check::
+--batch-check=<format>::
+	Afficher les informations sur les objets pour chaque objet fourni sur stdin. Ne peut être combiné avec aucune autre option ou argument sauf `--textconv` ou `--filters`, auquel cas les lignes d'entrée doivent aussi spécifier le chemin, séparé par des espaces. Voir la section `SORTIE PAR LOT` ci-dessous pour plus de détails.
+
+--batch-all-objects::
+	Au lieu de lire une liste d'objets sur stdin, exécuter l'opération par lot demandée sur tous les objets du dépôt et de tous les magasins d'objets alternatifs (pas seulement les objets accessibles). Nécessite que `--batch` ou `--batch-check` soit spécifié. Notez que les objets sont visités dans l'ordre trié par leurs empreintes.
+
+--buffer::
+	Normalement, la sortie par lot est vidée après la sortie de chaque objet, afin qu'un processus puisse lire et écrire de manière interactive depuis `cat-file`. Avec cette option, la sortie utilise la mise en tampon normale de stdio ; c'est beaucoup plus efficace quand on invoque `--batch-check` sur un grand nombre d'objets.
+
+--unordered::
+	Lorsque `--batch-all-objects` est utilisé, visiter les objets dans un ordre qui peut être plus efficace pour accéder au contenu des objets que l'ordre de hachage. Les détails exacts de l'ordre ne sont pas spécifiés, mais si vous n'avez pas besoin d'un ordre spécifique, ceci devrait généralement résulter en une sortie plus rapide, particulièrement avec `--batch`. Notez que `cat-file` ne montrera chaque objet qu'une seule fois, même s'il est stocké plusieurs fois dans le dépôt.
+
+--allow-unknown-type::
+	Permettre à `-s` ou `-t` d'interroger les objets cassés/corrompus de type inconnu.
+
+--follow-symlinks::
+	Avec `--batch` ou `--batch-check`, suivre les liens symboliques à l'intérieur du dépôt lors de la recherche des objets avec des expressions SHA-1 étendues de la forme arbre-esque:chemin-dans-l-arbre. Au lieu de fournir une sortie sur le lien lui-même, fournir une sortie sur l'objet lié. Si un lien symbolique pointe en dehors de l'arbre (par exemple un lien vers `/foo` ou un lien au niveau de la racine vers `../foo`), la partie du lien qui est en dehors de l'arbre sera affichée.
++
+Cette option ne fonctionne pas (actuellement) correctement lorsqu'un objet dans l'index est spécifié (par exemple `:link` au lieu de `HEAD:link`) plutôt qu'un objet dans l'arbre.
++
+Cette option ne peut (actuellement) être utilisée que si `--batch` ou `--batch-check` est utilisé.
++
+Par exemple, considérons un dépôt git contenant :
++
+--
+	f : un fichier contenant "hello\n".
+	link : un lien symbolique vers f
+	dir/link : un lien symbolique vers ../f
+	plink : un lien symbolique vers ../f
+	alink : un lien symbolique vers /etc/passwd
+--
++
+Pour un fichier régulier `f`, `echo HEAD:f | git cat-file --batch` afficherait
++
+--
+	ce013625030ba8dba906f756967f9e9ca394464a blob 6
+--
++
+Et `echo HEAD:link | git cat-file --batch --follow-symlinks` imprimerait la même chose, tout comme `HEAD:dir/link`, puisqu'ils pointent tous deux vers `HEAD:f`.
++
+Sans `--follow-symlinks`, ils afficheraient des données sur le lien symbolique lui-même. Dans le cas de `HEAD:link`, vous verrez
++
+--
+	4d1ae35ba2c8ec712fa2a379db44ad639ca277bd blob 1
+--
++
+Les deux `plink` et` alink` pointent en dehors de l'arbre, donc ils afficheraient respectivement :
++
+--
+	symlink 4
+	../f
+
+	symlink 11
+	/etc/passwd
+--
+
+
+SORTIE
+------
+Si `-t` est spécifié, un des `<type>`.
+
+Si `-s` est spécifié, la taille de l'`<objet>` en octets.
+
+Si `-e` est spécifié, aucune sortie, à moins que le `<objet>` soit malformé.
+
+Si `-p` est spécifié, le contenu de `<objet>` est formatté à l'affichage.
+
+Si `<type>` est spécifié, le contenu brut (mais non compressé) de l'`<objet>` sera retourné.
+
+SORTIE DE LOT
+-------------
+
+Si `--batch` ou `--batch-check` est donné, `cat-file` lira les objets depuis stdin, un par ligne, et affichera les informations les concernant. Par défaut, la ligne entière est considérée comme un objet, comme si elle était envoyée à linkgit:git-rev-parse[1].
+
+Vous pouvez spécifier les informations affichées pour chaque objet en utilisant un `<format>` personnalisé. Le `<format>` est copié littéralement sur stdout pour chaque objet, avec des variables de la forme `%(atome)` développés, suivi d'une nouvelle ligne. Les atomes disponibles sont :
+
+`objectname`::
+	La représentation hexadécimale complète du nom de l'objet.
+
+`objecttype`::
+	Le type de l'objet (le même que ce que `cat-file -t` renvoie).
+
+`objectsize`::
+	La taille, en octets, de l'objet (la même que celle que `cat-file -s` renvoie).
+
+`objectsize:disk`::
+	La taille, en octets, que l'objet occupe sur le disque. Voir la note sur les tailles sur disque dans la section `MISES EN GARDES` ci-dessous.
+
+`deltabase`::
+	Si l'objet est stocké en tant que delta sur le disque, il se développe en représentation hexadécimale complète du nom de l'objet de base delta. Sinon, il se développe jusqu'à l'OID nul (tout à zéro). Voir `MISES EN GARDE` ci-dessous.
+
+`rest`::
+	Si cet atome est utilisé dans la chaîne de sortie, les lignes d'entrée sont coupées à la première limite de caractères d'espace. Tous les caractères avant cet espace sont considérés comme le nom de l'objet ; les caractères après ce premier espace (c'est-à-dire le "reste" de la ligne) sont émis à la place de l'atome `%(rest)`.
+
+Si aucun format n'est spécifié, le format par défaut est `%(objectname) %(objecttype) %(objectsize)`.
+
+Si `--batch` est spécifié, les informations sur l'objet sont suivies du contenu de l'objet (consistant en `%(objectsize)` octets), suivi d'une nouvelle ligne.
+
+Par exemple, `--batch` sans un format personnalisé produirait :
+
+------------
+<oid> SP <type> SP <taille> LF
+<contenu> LF
+------------
+
+Alors que `--batch-check='%(objectname) %(objecttype)'` produirait :
+
+------------
+<oid> SP <type> LF
+------------
+
+Si un nom est spécifié sur stdin qui ne peut pas être résolu en un objet dans le dépôt, alors `cat-file` ignorera tout format personnalisé et affichera :
+
+------------
+<objet> SP missing LF
+------------
+
+Si un nom est spécifié qui pourrait faire référence à plus d'un objet (un sha court ambigu), alors `cat-file` ignorera tout format personnalisé et affichera :
+
+------------
+<objet> SP ambiguous LF
+------------
+
+Si `--follow-symlinks` est utilisé, et qu'un lien symbolique dans le dépôt pointe en dehors du dépôt, alors `cat-file` ignorera tout format personnalisé et affichera :
+
+------------
+symlink SP <taille> LF
+<lien-symbolique> LF
+------------
+
+Le lien symbolique sera soit absolu (commençant par un `/`), soit relatif à la racine de l'arbre. Par exemple, si rép/lien pointe vers `../../foo`, alors `<lien-symbolique>` sera `../foo`. `<taille>` est la taille du lien symbolique en octets.
+
+Si `--follow-symlinks` est utilisé, les messages d'erreur suivants seront affichés :
+
+------------
+<objet> SP missing LF
+------------
+est imprimé lorsque le lien symbolique initial demandé n'existe pas.
+
+------------
+dangling SP <taille> LF
+<objet> LF
+------------
+est affiché lorsque le lien symbolique initial existe, mais que ce vers quoi il pointe (transitivement) n'existe pas.
+
+------------
+loop SP <taille> LF
+<objet> LF
+------------
+est affiché pour les boucles de liens symboliques (ou tous les liens symboliques qui nécessitent plus de 40 résolutions de liens pour être résolus).
+
+------------
+notdir SP <taille> LF
+<objet> LF
+------------
+est affiché lorsque, pendant la résolution des liens symboliques, un fichier est utilisé comme nom de répertoire.
+
+MISES EN GARDE
+--------------
+
+Notez que les tailles des objets sur le disque sont rapportées avec précision, mais il faut faire attention avant de tirer des conclusions sur les références ou les objets qui sont responsables de l'utilisation du disque. La taille d'un objet non-delta empaqueté peut être beaucoup plus grande que la taille des objets qui sont delta par rapport à lui, mais le choix de l'objet de base et de l'objet delta est arbitraire et peut être modifié lors d'un repack.
+
+Notez également que plusieurs copies d'un objet peuvent être présentes dans la base de données des objets ; dans ce cas, il n'est pas défini quelle taille ou base delta de la copie sera rapportée.
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

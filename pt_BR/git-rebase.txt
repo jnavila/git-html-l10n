@@ -158,12 +158,6 @@ Como alternativa, você pode desfazer o 'git rebase' com
 
     git rebase --abort
 
-CONFIGURAÇÃO
-------------
-
-include::config/rebase.txt[]
-include::config/sequencer.txt[]
-
 OPÇÕES
 ------
 --onto <nova-base>::
@@ -396,7 +390,7 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 --autosquash::
 --no-autosquash::
-	Quando a mensagem do registro log do commit começar com "squash! ..." (ou "fixup! ..."),e já existe um commit na lista de tarefas que coincidem com o mesmo `...`, altera a lista de tarefas automaticamente do 'rebase -i' para que o commit marcado para ser comprimido venha logo após o commit que será modificado e altere a ação do commit movido de `pick` para `squash` (ou `fixup`). Um commit coincide com `...` caso haja a coincidência do assunto do commit ou se o `...` se referir ao hash do commit. Como alternativa, as coincidências que forem parciais ao assunto do commit, também funcionam. A maneira recomendada para se criar os commits para correção/compressão é utilizando as opções `--fixup`/`--squash` do comando linkgit:git-commit[1].
+	Quando a mensagem do registro log do commit começar com "squash! ..." ou "fixup! ...", já existe um commit na lista de tarefas que coincidem com o mesmo `...`, altera a lista de tarefas automaticamente do `rebase -i` para que o commit marcado para ser comprimido venha logo após o commit que será modificado e altere a ação do commit movido de `pick` para `squash`, `fixup` ou `fixup -C` respectivamente. Um commit coincide com `...` caso haja a coincidência do assunto do commit ou se o `...` se referir ao hash do commit. Como alternativa, as coincidências que forem parciais ao assunto do commit, também funcionam. A maneira recomendada para se criar os commits para fixup/amend/squash é utilizando as opções `--fixup`, `--fixup=amend:` ou `--fixup=reword:` e `--squash` respectivamente do comando linkgit:git-commit[1].
 +
 Caso a opção `--autosquash` esteja predefinitivamente ativada utilizando a variável de configuração `rebase.autoSquash`, esta opção poderá ser utilizada para substituir e desativar esta configuração.
 +
@@ -409,6 +403,8 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 --reschedule-failed-exec::
 --no-reschedule-failed-exec::
 	Reagende automaticamente os comandos `exec` que falharam. Isso só faz sentido no modo interativo (ou quando uma opção `--exec` for utilizada).
++
+Ainda que esta opção se aplique quando uma reconstrução for iniciada, é definido para que toda a reconstrução no início, tenha como base a configuração `rebase.rescheduleFailedExec` (consulte linkgit:git-config[1] ou a "CONFIGURAÇÃO" abaixo) ou se esta opção é oferecida. Caso contrário, uma opção explícita `--no-reschedule-failed-exec` no início no início seria sobrescrito pela presença da configuração `rebase.rescheduleFailedExec=true`.
 
 OPÇÕES INCOMPATÍVEIS
 --------------------
@@ -570,7 +566,8 @@ Caso apenas queira editar a mensagem do commit para um commit, substitua o coman
 
 Para eliminar um commit, substitua o comando "pick" por "drop" ou apenas exclua a linha coincidente.
 
-Caso queira dobrar dois ou mais commits em um, substitua o comando "pick" da segunda e os commits subsequentes por "squash" ou "fixup". Caso os commits tenham autores diferentes, o commit dobrado será atribuído ao autor do primeiro commit. A mensagem do commit sugerido para o commit que foi dobrado é a concatenação das mensagens dos commits do primeiro commit e daquelas feitas com o comando "squash", porém omite as mensagens dos commits feitas com o comando "fixup".
+Caso queira juntar dois ou mais commits em um, substitua o comando "pick" para o segundo commit e os commits subsequentes por "squash" ou "fixup". Caso os commits tenham diferentes autores, o commit que foi juntado será atribuído ao autor do primeiro commit. A mensagem sugerida do commit para o commit que foi juntado, é a concatenação da mensagem do primeiro commit com aquelas identificadas pelos comandos "squash", omitindo as mensagens dos commits identificados pelos comandos "fixup", a menos que a opção `fixup -c` seja utilizado. Nesse caso, a mensagem do commit sugerido é apenas a mensagem do commit `fixup -c` onde um editor é aberto permitindo que você edite a mensagem. O conteúdo (patch) do commit `fixup -c` ainda está incorporado ao commit que foi juntado. Caso haja mais de um commit `fixup -c`, a mensagem do último será usada. Você também pode usar a opção `fixup -C` para obter o mesmo comportamento que a opção `fixup -c`, sem a opção de abrir um editor.
+
 
 O comando 'git rebase' será interrompido quando o "pick" for substituído por "edit" ou quando um comando falhar devido aos erros da mesclagem. Quando você terminar de editar e/ou resolver os conflitos, será possível continuar utilizando `git rebase --continue`.
 
@@ -829,6 +826,12 @@ reset onto
 merge tlsv1.3
 merge cmake
 ------------
+
+CONFIGURAÇÃO
+------------
+
+include::config/rebase.txt[]
+include::config/sequencer.txt[]
 
 BUGS
 ----

@@ -9,12 +9,13 @@ RESUMO
 ------
 [verse]
 'git commit' [-a | --interactive | --patch] [-s] [-v] [-u<modo>] [--amend]
-	   [--dry-run] [(-c | -C | --fixup | --squash) <commit>]
-	   [-F <arquivo> | -m <msg>] [--reset-author] [--allow-empty]
+	   [--dry-run] [(-c | -C | --squash) <commit> | --fixup [(amend|reword):]<commit>)]
+	   [-F <file> | -m <msg>] [--reset-author] [--allow-empty]
 	   [--allow-empty-message] [--no-verify] [-e] [--author=<autor>]
 	   [--date=<data>] [--cleanup=<modo>] [--[no-]status]
-	   [-i | -o] [--pathspec-from-file=<arquivo> [--pathspec-file-nul]]
-	   [-S[<keyid>]] [--] [<pathspec>...]
+	   [-i | -o] [--pathspec-from-file=<file> [--pathspec-file-nul]]
+	   [(--trailer <token>[(=|:)<value>])...] [-S[<keyid>]]
+	   [--] [<pathspec>...]
 
 DESCRIÇÃO
 ---------
@@ -56,8 +57,16 @@ OPÇÕES
 --reedit-message=<commit>::
 	Como `-C`, porém com `-c` o editor é chamado para que o usuário possa editar ainda mais a mensagem do commit.
 
---fixup=<commit>::
-	Constrói a mensagem de um commit para utilizar com `rebase --autosquash`. A mensagem do commit será o assunt da linha a partir de um determinado commit com um prefixo "fixup! ". Para mais detalhes, consulte linkgit:git-rebase[1].
+--fixup=[(amend|reword):]<commit>::
+	Crie um novo commit que "corrija" o `<commit>` quando for aplicado com o comando `git rebase --autosquash`. Somente a opção `-fixup=<commit>` cria um "fixup!" (correção) que altera o conteúdo de um `<commit>` contudo deixa a mensagem de registro intacta. `-fixup=amend:<commit>` é semelhante, porém, cria um commit "amend!" que também substitui a mensagem do registro do `<commit>` pela mensagem de registro do commit "amend!". A opção `-fixup=reword:<commit>` cria um commit "amend!" que substitui a mensagem do registro do `<commit>` por sua própria mensagem de registro, mas não faz quaisquer alterações no conteúdo do `<commit>`.
++
+O commit criado somente com a opção `-fixup=<commit>` tem o assunto da mensagem composto por "fixup!" seguido pela linha do assunto do <commit>, também é reconhecido especialmente através do comando `git rebase --autosquash`. A opção `-m` pode ser usada para complementar o registro da mensagem do commit criado, porém o comentário adicional será jogado fora assim que o commit "fixup!" for aplicado ao `<commit>` através do comando `git rebase --autosquash`.
++
+O commit criado através da opção `--fixup=amend:<commit>` é semelhante porém seu assunto é prefixado com "amend!". A mensagem do log do <commit> é copiada para a mensagem de log do commit "amend!" e aberto em um editor para que possa ser refinado. Quando o comando `git rebase --autosquash` comprime o commit "amend!" no `<commit>`, a mensagem de log do `<commit>` é substituída pela mensagem de log refinada do commit "amend!". É considerado um erro quando o registro da mensagem do commit "amend!" esteja vazia, a menos que a opção `--allow-empty-message` seja definida.
++
+`--fixup=reword:<commit>` é uma abreviação para `--fixup=amend:<commit> --only`. Isso cria um commit "amend!" com apenas uma mensagem log (ignorando quaisquer alterações preparadas no índice). Quando é comprimido através do comando `git rebase --autosquash`, ele substitui a mensagem do log do `<commit>` sem fazer quaisquer outras alterações.
++
+Nem os commits "fixup!" tampouco os commits "amend!" alteram a autoria do `<commit>` quando aplicadas através do comando `git rebase --autosquash`. Para mais detalhes, consulte linkgit:git-rebase[1].
 
 --squash=<commit>::
 	Constrói a mensagem de um commit para utilizar com `rebase --autosquash`. A linha do assunto da mensagem do commit é retirada de um determinado commit com um prefixo "squash! ". Pode ser usado com as opções adicionais das mensagens dos commits (`-m`/`-c`/`-C`/`-F`). Para mais detalhes, consulte linkgit:git-rebase[1].
@@ -102,6 +111,9 @@ A opção `-m` é utilizado em conjunto exclusivamente com `-c`, `-C` e `-F`.
 	Ao editar a mensagem do commit, inicie o editor com o conteúdo do arquivo informado. A variável de configuração `commit.template` é frequentemente utilizada para fornecer esta opção de forma implícita ao comando. Esse mecanismo pode ser utilizado por projetos que desejam orientar os participantes com algumas dicas sobre o que escrever na mensagem e em qual ordem. Aborte o commit caso o usuário saia do editor sem editar a mensagem. Não qualquer efeito quando uma mensagem é dada por outros meios, por exemplo, com as opções `-m` ou `-F`.
 
 include::signoff-option.txt[]
+
+--trailer <token>[(=|:)<valor>]::
+	Determine um par (<token>, <valor>) que deve ser aplicado como um caracteres de resposta. (por exemplo, `git commit --trailer "Auxiliado por:C O Mitter \ <committer@example.com>" --trailer "Auxiliado por:C O Mitter \ <committer@example.com>"` será atrelado o "Auxiliado por" e o "Auxiliado por" à mensagem do commit.) A variável de configuração do `trailer.*` (linkgit:git-interpret-trailers[1]) pode ser usado para definir se um atrelado duplicado será omitido, onde na rodada de atrelados cada atrelado apareceria em conjunto com outros detalhes.
 
 -n::
 --no-verify::

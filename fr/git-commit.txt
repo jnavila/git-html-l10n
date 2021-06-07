@@ -9,12 +9,13 @@ SYNOPSIS
 --------
 [verse]
 'git commit' [-a | --interactive | --patch] [-s] [-v] [-u<mode>] [--amend]
-	   [--dry-run] [(-c | -C | --fixup | --squash) <commit>]
+	   [--dry-run] [(-c | -C | -squash) <commit>] | --fixup [(amend|reword):]<commit>)]
 	   [-F <fichier> | -m <msg>] [--reset-author] [--allow-empty]
 	   [--allow-empty-message] [--no-verify] [-e] [--author=<auteur>]
 	   [--date=<date>] [--cleanup=<mode>] [--[no-]status]
 	   [-i | -o] [--pathspec-from-file=<fichier> [--pathspec-file-nul]]
-	   [-S[<idclé>]] [--] [<spec-de-chemin>...]
+	   [(--trailer <token>[(=|:)<valeur>])...] [-S[<idclé>]] 
+	[--] [<spec-de-chemin>...]
 
 DESCRIPTION
 -----------
@@ -56,8 +57,16 @@ OPTIONS
 --reedit-message=<commit>::
 	Comme '-C', mais avec '-c', l'éditeur est appelé pour permettre à l'utilisateur de modifier le message de validation.
 
---fixup=<commit>::
-	Construire un message de validation pour une utilisation avec `rebase --autosquash`. Le message de validation sera la ligne de titre du commit spécifié préfixée de « fixup !  ». Référez-vous à linkgit:git-rebase[1] pour de plus amples détails.
+--fixup=[(amend|reword):]<commit>::
+	Créer un nouveau commit qui « répare » `<commit>` quand il est appliqué avec `git rebase --autosquash``. Un simple `--fixup=<commit>` crée un commit "fixup !" qui change le contenu de `<commit>` mais laisse son message de validation inchangé. `-fixup=amend:<commit>` est similaire mais crée un commit "amend !" qui remplace aussi le message de validation de `<commit>` par le message de validation du commit "amend !". `--fixup=reword:<commit>` crée un commit "amend !" qui remplace le message de validation de `<commit>` par son propre message de log mais ne fait aucun changement au contenu de `<commit>`.
++
+Le commit créé par le simple `--fixup=<commit>` a un sujet composé de "fixup !" suivi de la ligne de sujet de <commit>, et est reconnu spécialement par `git rebase --autosquash`. L'option `-m` peut être utilisée pour compléter le message du journal du commit créé, mais le commentaire supplémentaire sera jeté une fois que le commit "fixup !" sera écrasé dans `<commit>` par `git rebase --autosquash`.
++
+Le commit créé par `--fixup=amend:<commit>` est similaire mais son sujet est à la place préfixé par "amend !". Le message de validation de <commit> est copié dans le message de validation du commit "amend !" et ouvert dans un éditeur afin qu'il puisse être affiné. Lorsque `git rebase --autosquash` écrase le commit "amend !" dans `<commit>`, le message de validation de `<commit>` est remplacé par le message de validation raffiné du commit "amend !". C'est une erreur si le message du journal du commit "amend !" est vide, à moins que `--allow-empty-message` soit spécifié.
++
+`--fixup=reword:<commit>` est un raccourci pour `--fixup=amend:<commit> --only`. Il crée un commit "amend !" qui touche seulement au message de validation (en ignorant les changements mis en place dans l'index). Lorsqu'il est écrasé par `git rebase --autosquash`, il remplace le message du validation de `<commit>` sans faire d'autres changements.
++
+Ni les commits "fixup !" ni les commits "amend !" ne changent la paternité de `<commit>` quand ils sont appliqués par `git rebase --autosquash`. Voir linkgit:git-rebase[1] pour plus de détails.
 
 --squash=<commit>::
 	Construire un message de validation pour une utilisation avec `rebase --autosquash`. La ligne de titre du message de validation est tirée du commit spécifié préfixée par « squash! ». Peut être utilisée avec d'autres options de 'commit' (`-m`/`-c`/`-C`/`-F`). Référez-vous à linkgit:git-rebase[1] pour plus de détails.
@@ -102,6 +111,9 @@ L'option `-m` est incompatible avec `-c`, `-C` ou `-F`.
 	À l'édition du message de validation, démarrer l'éditeur avec le contenu du fichier indiqué. La variable de configuration `commit.template` est souvent utilisée pour fournir implicitement cette option à la commande. Ce mécanisme peut être utilisé par les projets qui souhaitent guider les collaborateurs avec une aide sur ce qu'il faut écrire dans le message et dans quel ordre. Si l'utilisateur sort de l'éditeur sans changer le message, la validation est annulée. Ceci n'a aucun effet quand un message est fourni par un autre moyen, par exemple par les options `-m` ou `-F`.
 
 include::signoff-option.txt[]
+
+--trailer <jeton>[(=| :)<valeur>]::
+	Spécifier une paire (<jeton>, <valeur>) qui doit être appliquée comme une ligne terminale (par exemple, `git commit --trailer "Signed-off-by:C O Mitter \ <committer@example.com>" --trailer "Helped-by:C O Mitter \ <committer@example.com>"` ajoutera la ligne terminale "Signed-off-by" et la ligne terminale "Helped-by" au message de validation). Les variables de configuration `trailer.*` (linkgit:git-interpret-trailers[1]) peuvent être utilisées pour définir si une ligne terminale dupliquée est omise, ou où chaque ligne terminale apparaîtrait dans la série de lignes terminales, et d'autres détails.
 
 -n::
 --no-verify::

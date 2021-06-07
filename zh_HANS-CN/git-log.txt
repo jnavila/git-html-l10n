@@ -1,0 +1,164 @@
+git-log(1)
+==========
+
+名称
+--
+git-log - 显示提交日志
+
+
+概述
+--
+[verse]
+'git log' [<options>] [<revision range>] [[--] <path>...]
+
+描述
+--
+显示提交日志。
+
+:git-log: 1
+include::rev-list-description.txt[]
+
+该命令采用适用于 linkgit:git-rev-list[1] 命令的选项来控制显示的内容和方式，以及适用于 linkgit:git-diff[1] 命令的选项来控制每次提交引入的更改的显示方式。
+
+
+选项
+--
+
+--follow::
+	继续列出一个文件的历史，超过重命名（只对单个文件有效）。
+
+--no-decorate::
+--装饰[=短|全|自动|无]::
+	打印出显示的任何提交的参考名称。如果指定了'short'，将不打印 ref name 的前缀'refs/heads/'、'refs/tags/'和'refs/remotes/'。如果指定'full'，完整的参考文献名称（包括前缀）将被打印。如果指定了'auto'，那么如果输出到终端，参考文献的名称将被显示，就像给了'short'一样，否则不显示参考文献的名称。默认选项是'short'。
+
+--decorate-refs=<pattern>::
+--decorate-refs-exclude=<pattern>::
+	如果没有给定`--decorate-refs`，就假装所有的参考文献都被包括在内。 对于每个候选者，如果它与`--decorate-refs-exclude`给出的任何模式相匹配，或者它与`--decorate-refs`给出的任何模式不匹配，就不要将其用于装饰。`log.excludeDecoration`配置选项允许从装饰中排除参考文献，但明确的`--decorate-refs`模式将覆盖`log.excludeDecoration`的匹配。
+
+--source::
+	打印出命令行上给出的每一次提交所依据的参考名称。
+
+--[no-]mailmap::
+--[no-]use-mailmap::
+	使用 mailmap 文件将作者和提交者的名字和电子邮件地址映射为规范的真实姓名和电子邮件地址。参见 linkgit:git-shortlog[1]。
+
+--full-diff::
+	没有这个标志，`git log -p <path>...`会显示触及指定路径的提交，以及关于相同指定路径的差异。 有了这个，就会显示触及指定路径的提交的全部差异；这意味着"<path>... "只限制提交，而不限制这些提交的差异。
++
+请注意，这将影响所有基于diff的输出类型，例如那些由`--stat`产生的输出。
+
+--log-size::
+	在每次提交的输出中包括一行"`日志大小<number>'"，其中<number>是该提交信息的长度，单位为字节。 旨在加快从`git log`输出中读取日志信息的工具的速度，允许它们提前分配空间。
+
+include::line-range-options.txt[]
+
+<修订版范围>。::
+	只显示指定修订范围内的提交。 当没有指定<修订范围>时，默认为`HEAD`（即导致当前提交的整个历史）。 `origin...HEAD`指定从当前提交（即`HEAD`）开始的所有提交，但不是从`origin`开始。关于<revision range>的完整拼写方式，请参见linkgit:gitrevisions[7]的 "指定范围 "部分。
+
+[--] <路径>...::
+	只显示那些足以解释符合指定路径的文件是如何形成的提交。 有关细节和其他简化模式，请参见下面的'历史简化'。
++
+当出现混淆时，路径可能需要以`--`为前缀，以便将其与选项或修订范围分开。
+
+include::rev-list-options.txt[]
+
+include::pretty-formats.txt[]
+
+差异格式化
+-----
+
+默认情况下，`git log`不会产生任何差异输出。下面的选项可以用来显示每次提交所做的修改。
+
+注意，除非明确给出`--diff-merges`的变体（包括短的`-m`，`-c`和`-cc`选项），否则合并提交不会显示差异，即使选择了`--patch`这样的差异格式，也不会匹配`-S`这样的搜索选项。例外情况是当`--first-parent`被使用时，在这种情况下，`first-parent`是默认格式。
+
+:git-log: 1
+:diff-merges-default: `off`
+include::diff-options.txt[]
+
+include::diff-generate-patch.txt[]
+
+EXAMPLES
+--------
+`git log --no-merges`。::
+
+	显示整个提交历史，但跳过任何合并内容
+
+`git log v2.6.12.. include/scsi drivers/scsi`::
+
+	显示自版本'v2.6.12'以来改变`include/scsi`或`drivers/scsi`子目录中任何文件的所有提交。
+
+`git log --since="2 weeks ago" -- gitk`。::
+
+	显示过去两周内对文件'gitk'的修改。 `--`是必要的，以避免与名为'gitk'的*分支相混淆。
+
+`git log --name-status release..test`::
+
+	显示在 "test "分支中但尚未在 "release "分支中的提交，以及每个提交修改的路径列表。
+
+`git log --follow builtin/rev-list.c`。::
+
+	显示改变`builtin/rev-list.c`的提交，包括那些在文件被赋予现在名字之前发生的提交。
+
+`git log --branches --not --remotes=origin`。::
+
+	显示所有在本地分支中但不在 "origin "的远程跟踪分支中的提交（你有而origin没有的东西）。
+
+`git log master --not --remotes=*/master`。::
+
+	显示所有在本地主库但不在任何远程仓库主库分支中的提交。
+
+`git log -p -m -first-parent`。::
+
+	显示包括变化差异的历史，但只从 "主分支 "的角度，跳过来自合并分支的提交，并显示合并带来的全部变化差异。 这只有在遵循严格的政策，在停留在一个集成分支时合并所有主题分支时才有意义。
+
+`git log -L '/int main/',/^}/:main.c`。::
+
+	显示了文件`main.c`中的函数`main()`是如何随时间演变的。
+
+`git log -3`::
+
+	将显示的提交数量限制在3个。
+
+DISCUSSION
+----------
+
+include::i18n.txt[]
+
+配置
+--
+
+核心变量见 linkgit:git-config[1] ，与 diff 生成相关的设置见 linkgit:git-diff[1] 。
+
+format.pretty::
+	`--format`选项的默认值。 (见上面的 "漂亮的格式"。)默认为 "中等"。
+
+i18n.logOutputEncoding::
+	显示日志时要使用的编码。 (见上面的 "讨论"。)如果设置了，默认为`i18n.commitEncoding`的值，否则为UTF-8。
+
+log.date::
+	人类可读日期的默认格式。 (比较`--date`选项。)默认为 "default"，即写成`Sat May 8 19:35:34 2010 -0500`这样的日期。
++
+如果格式被设置为 "auto:foo"，并且正在使用呼叫器，那么格式 "foo "将被用于日期格式。否则将使用 "默认"。
+
+log.follow::
+	如果`true`，`git log`将像使用`--follow`选项一样，当给出一个<路径>时。 这与`--follow`有相同的限制，即它不能用于跟踪多个文件，并且在非线性历史上不能很好地工作。
+
+log.showRoot::
+	如果`false`，`git log`和相关命令将不把初始提交作为一个大的创建事件。 `git log -p`输出中的任何根提交都会被显示出来，而不附加差异。 默认是`true`。
+
+log.showSignature::
+	如果 "true"，"git log "和相关命令将像"--显示签名 "选项一样行事。
+
+mailmap.*::
+	See linkgit:git-shortlog[1].
+
+笔记.displayRef::
+	除了由`core.notesRef`或`GIT_NOTES_REF`设置的默认值外，在用`log`系列命令显示提交信息时，还要从哪些参考文献中读取注释。 参见linkgit:git-notes[1]。
++
+可以是一个非缩写的 ref 名称或一个 glob，并且可以多次指定。 对于不存在的参考文献将发出警告，但不匹配任何参考文献的glob将被沉默地忽略。
++
+这个设置可以由`--no-notes`选项禁用，由`GIT_NOTES_DISPLAY_REF`环境变量覆盖，并由`--notes=<ref>`选项覆盖。
+
+GIT
+---
+Part of the linkgit:git[1] suite

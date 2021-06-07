@@ -137,13 +137,18 @@ trailer.<token>.ifmissing::
 	Esta opção utiliza os mesmos valores que a variável de configuração 'trailer.ifmissing' e substitui o que for definido por esta opção para os caracteres de resposta com o <token> informado.
 
 trailer.<token>.command::
-	Esta opção pode ser utilizada para definir um comando shell que será chamado para adicionar ou modificar automaticamente um caractere de resposta com o <token> definido.
+	Esta opção se comporta da mesma maneira que o 'trailer.<token>.cmd', exceto que nada é oferecido como argumento para o comando informado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo valor que seria passado como argumento.
 +
-Quando esta opção é utilizada, o comportamento é como se um argumento especial '<token>=<valor>' fosse adicionado no início da linha de comando, onde <valor> é considerado a saída padrão do comando utilizado, removendo quaisquer espaços no começo e no fim.
+A opção 'trailer.<token>.command' foi substituída por 'trailer.<token>.cmd' pois o $ARG no comando do usuário ser substituído apenas uma vez e a maneira anterior de se substituir o $ARG não era segura.
 +
-Caso o comando tiver um texto `$ARG`, ela será substituída pela parte `<valor>` do caractere de resposta já existente com o mesmo `<token>`, se houver, antes da execução do comando.
+Quando ambos 'trailer.<token>.cmd' e 'trailer.<token>.command' são oferecidos para o mesmo <token>, o 'trailer.<token>.cmd' é usado e o 'trailer.<token>.command' é ignorado.
+
+trailer.<token>.cmd::
+	Esta opção pode ser usada para definir um comando shell que será invocado: uma vez para adicionar um atrelado de forma automática com o <token> informado e, a seguir, a cada opção '--trailer <token>=<valor>' para alterar o <valor> do atrelado que esta opção produziria.
 +
-Caso alguns dos argumentos '<token>=<valor>' também forem passados na linha de comando, quando um 'trailer.<token>.command' estiver configurado, o comando também será executado para cada um destes argumentos. A parte `<valor>` destes argumentos, caso haja, será utilizada para substituir a string `$ARG` no comando.
+Quando o comando informado é chamado pela primeira vez para adicionar um atrelado com o <token> definido, o comportamento é como se um argumento especial '--trailer <token>=<valor>' fosse adicionado no início do comando "git interpret-trailers", onde o <valor> é considerado a saída padrão do comando com qualquer espaço em branco eliminado à esquerda e à direita.
++
+Caso algumas opção '--trailer <token>=<valor>' também sejam passadosna linha de comando, o comando é invocado novamente uma vez para cada um destes argumentos que tenham o mesmo <token>. E a parte <valor> desses argumentos, caso hajam, será passada ao comando como sendo o seu primeiro argumento. Desta forma, o comando pode produzir um <valor> calculado a partir do <valor> informado na opção '--trailer <token>=<valor>'.
 
 EXEMPLOS
 --------
@@ -219,6 +224,51 @@ $ echo "subject" | git interpret-trailers --trailer fix=42
 subject
 
 Fix #42
+------------
+
+* Configure um atrelado de 'ajuda' com um cmd usando um script `glog-find-author` que pesquisa a identidade do autor informado no log do git no repositório e mostre como funciona:
++
+------------
+$ cat ~/bin/glog-find-author
+#!/bin/sh
+test -n "$1" && git log --author="$1" --pretty="%an <%ae>" -1 || true
+$ git config trailer.help.key "Auxiliado por: "
+$ git config trailer.help.ifExists "addIfDifferentNeighbor"
+$ git config trailer.help.cmd "~/bin/glog-find-author"
+$ git interpret-trailers --trailer="help:Junio" --trailer="help:Couder" <<EOF
+> assunto
+>
+> mensagem
+>
+> EOF
+assunto
+
+mensagem
+
+Auxiliado por: Junio C Hamano <gitster@pobox.com>
+Auxiliado por: Christian Couder <christian.couder@gmail.com>
+------------
+
+* Configure um atrelado 'ref' com um cmd, use um script `glog-grep` para fazer um "grep" (captura) do último commit relevante do log do git no repositório e mostre como funciona:
++
+------------
+$ cat ~/bin/glog-grep
+#!/bin/sh
+test -n "$1" && git log --grep "$1" --pretty=reference -1 || true
+$ git config trailer.ref.key "Referência para: "
+$ git config trailer.ref.ifExists "substitua"
+$ git config trailer.ref.cmd "~/bin/glog-grep"
+$ git interpret-trailers --trailer="ref:Add copyright notices." <<EOF
+> assunto
+>
+> mensagem
+>
+> EOF
+assunto
+
+mensagem
+
+Refere-se ao: 8bc9a0c769 (Adicionado avisos de ireitos autorais., 2005-04-07)
 ------------
 
 * Configure um caractere de resposta 'see' com um comando para exibir o assunto de um commit relacionado e exibir como ele funciona:

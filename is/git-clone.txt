@@ -15,7 +15,7 @@ SAMANTEKT
 	  [--dissociate] [--separate-git-dir <git skrá>]
 	  [--depth <dýpt>] [--[no-]single-branch] [--no-tags]
 	  [--recurse-submodules[=<slóðatilgreining>]] [--[no-]shallow-submodules]
-	  [--[no-]remote-submodules] [--jobs <n>] [--sparse]
+	  [--[no-]remote-submodules] [--jobs <n>] [--sparse][--[no-]reject-shallow]
 	  [--filter=<sía>] [--] <hirsla>
 	  [<skrá>]
 
@@ -37,9 +37,7 @@ VALMÖGULEIKAR
 +
 Ef hirslan er skilgreind sem sértæk slóð (t.d. `/slóð/að/hirslu`) þá er þetta forstillt hegðurn, og --local er í eðli sínu slæpi (ofaukið). Ef hirslan er skilgreind sem URL (vefslóð) þá er þessi valmöguleiki hunsaður (og staðbundnar fínstillingar eru aldrei notaðar). Að tiltaka `--no-local` (ekkert staðbundið) mun valda því að skipunin tekur ekki tillit til forstillinga þegar `/slóð/að/hirslu` er uppgefin, og nota hinn hefðbundna Git milliflutning í staðinn.
 +
-*NOTE*: this operation can race with concurrent modification to the
-source repository, similar to running `cp -r src dst` while modifying
-`src`.
+*ATHUGIÐ*: þessi aðgerð getur keppt við samhliða breytingar á upprunahirslunni, svipað og að framkvæma `cp -r src dst`á sama tíma og `src` er breytt.
 
 --no-hardlinks::
 	Þvinga einitunarferli hirslu á staðbundnu skráakerfi til að afrita skjöl undir `.git/objects`(git viðföng) skránni í stað þess að nota harðhlekki. Þetta gæti verið æskilegt ef þú ert að reyna að taka varaafrit af hirslunni þinni.
@@ -48,15 +46,15 @@ source repository, similar to running `cp -r src dst` while modifying
 --shared::
 	Þegar hirslan sem á að einrita er á staðbundinni vél, setjið sjálfkrafa upp `.git/objects/info/alternates`(git viðföng upplýsingar staðgenglar) í stað þess að nota harðhlekki til að deila viðföngum með upptakahirslunni. Hirslan sem verður til byrjar án nokkurra eigin viðfanga.
 +
-*NOTE*: this is a possibly dangerous operation; do *not* use
-it unless you understand what it does. If you clone your
-repository using this option and then delete branches (or use any
-other Git command that makes any existing commit unreferenced) in the
-source repository, some objects may become unreferenced (or dangling).
-These objects may be removed by normal Git operations (such as `git commit`)
-which automatically call `git maintenance run --auto`. (See
-linkgit:git-maintenance[1].) If these objects are removed and were referenced
-by the cloned repository, then the cloned repository will become corrupt.
+*ATHUGIÐ*: þetta er mögulega hættuleg aðgerð; *ekki* nota
+hana nema þú vitir hvað hún gerir. Ef þú einritar hirsluna þína
+með þessum valmöguleika og eyðir síðan greinum (eða notar einhverja
+aðra Git skipun sem gerir það að verkum að tilvísanir í innlegg sem eru til hverfa) í 
+upprunahirslunni, geta sum viðföng týnt tilvísunum sínum (þau lafa). 
+Þessi viðföng er hægt að fjarlægja með venjulegum Git aðgerðum (svo sem `git commit`(git inlegg))
+sem sjálfkrafa kallar á `git maintainance run --auto` (git viðhald sjálfkrafa). (Sjá linkgit:git-maintainance[1].)
+Ef þessi viðföng eru fjarlægð og hafa tilvísun í afrituðu hirslunni 
+þá skrumskælist afritaða hirslan.
 +
 Athugaðu að nota skipunina `git repack`(git endurpakka) án `--local` (staðbundinn) valmöguleikans í hirslu sem hefur verið einrituð með `--shared` (deildur) mun afrita viðföng úr upptakahirslunni inn í pakka í einrituðu hirslunni og fjarlæga diskplássið sem sparaðist með `clone --shared` (einrita deildur). Það er hins vegar öruggt að nota `git gc`(garbace collection, git ruslasöfnun) sem notar `--local`(staðbundinn) valmöguleikann sem forstillingu.
 +
@@ -89,6 +87,9 @@ Ef þú vilt rifta ákvæðatengslum hirslu við upptakahirsluna sem var einritu
 --no-checkout::
 	Endurupptaka HAUS er ekki framkvæmd eftir að einritið er fullgert.
 
+--[no-]reject-shallow::
+	Misfarast ef upptakahirslan er grunn hirlsa. Hægt er að nota stillingabreytuna 'clone.rejectShallow' til þess að tiltaka sjálfgefinn valmöguleika.
+
 --bare::
 	Þessi valmöguleiki býr til 'nakta' Git hirslu. Það er að segja, í stað þess að búa til `<skrá>` og setja stjórnunarskrárnar í `<skrá>/git.` gerir hann `<skrá>` sjálfa `$GIT_DIR`skrána. Þetta felur augljóslega í sér `--no-checkout`(engin endurupptaka) vegna þess að það er ekki neinn staður til þar sem hægt er að endurupptaka verktréð. Einnig eru greinahausarnir sem eru fjarlægir afritaðir beint yfir í samsvarandi staðbundna greinahausa, án þess að kortleggja þá í `refs/remotes/origin/`(tilvísanir fjarlægjur uppruni). Þegar þessi valmöguleiki er notaður eru hvorki búnar til greinarnar sem eru undir fjareftirliti né tilheyrandi stillingabreytur.
 
@@ -103,7 +104,7 @@ Ef þú vilt rifta ákvæðatengslum hirslu við upptakahirsluna sem var einritu
 
 -o <nafn>::
 --origin <nafn>::
-	Instead of using the remote name `origin` to keep track of the upstream repository, use `<name>`. Overrides `clone.defaultRemoteName` from the config.
+	Tiltakið `<nafn>` í staðinn fyrir að nota fjarlægjunafnið `origin`(uppruni) til þess að fylgjast með hirslunni í bakáttina. Ógildir `clone.defaultRemoteName`(einrita sjálfgefið fjarlægjunafn) úr stillingaskránni.
 
 -b <nafn>::
 --branch <nafn>::
@@ -139,7 +140,7 @@ Vegna takmarkana í þeirri útfærslu sem er í notkun byrja sumar stillingabre
 +
 Hægt er að nota þennan valmöguleika í samfloti við `--single-branch` (ein grein) til þess að einrita og viðhalda grein sem hefur engar tilvísanir aðrar en ein einrituð grein. Þetta er nytsamlegt t.d. til þess að viðhalda lágmarkseinritum af forstilltri grein í einhverri hirslu svo hægt sé að leita í henni eftir atriðaskrá.
 
---recurse-submodules[=<pathspec>]::
+--recurse-submodules[=<slóðartilgreining>]::
 	Frumstilla og einrita undirverkeiningar innan einrits byggt á uppgefinni slóðartilgreiningu eftir að einritið hefur verið búið til. Ef engin slóðatilgreining er gefin upp eru allar undirverkeiningar frumstilltar og einritaðar. Hægt er að tilgreina þennan valmöguleika oftar en einu sinni fyrir slóðatilgreiningar sem innihalda fleiri en eina færslu. Einritið sem verður til fær`submodule.active`(undirverkeining virk) stillt á viðkomandi slóðatilgreiningu, eða "." (þ.e. allar verkeiningar) ef engin slóðatilgreining er gefin upp.
 +
 Undirverkeiningar eru frumstilltar og einritaðar með sínum forstillingum. Þetta jafngildir því að nota `git submodule update --init --recursive <slóðatilgreining>` (git undirverkeining uppfæra frumstilla endurkvæmt) um leið og einritið er tilbúið. Þessi valmöguleiki er hunsaður er einritaða hirslan hefur ekki verktré/endurupptöku (þ.e. ef einver af valmöguleikunum `--no-checkout`/`-n` (engin endurupptaka), `--bare` (nakinn), eða `--mirror`(spegilmynd) eru gefnir upp)

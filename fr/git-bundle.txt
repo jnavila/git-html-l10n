@@ -1,0 +1,164 @@
+git-bundle(1)
+=============
+
+NOM
+---
+git-bundle - Déplace les objets et les références par archive
+
+
+SYNOPSIS
+--------
+[verse]
+'git bundle' create [-q | --quiet | --progress | --all-progress] [--all-progress-implied]
+		    [--version=<version>] <fichier> <arguments-git-rev-list>
+'git bundle' verify [-q | --quiet] <fichier>
+'git bundle' list-heads <fichier> [<nom-de-ref>...]
+'git bundle' unbundle <fichier> [<nom-de-ref>...]
+
+DESCRIPTION
+-----------
+
+Certains flux de travail exigent qu'une ou plusieurs branches de développement sur une machine soient répliquées sur une autre machine, mais les deux machines ne peuvent pas être connectées directement, et donc les protocoles interactifs de Git (git, ssh, http) ne peuvent pas être utilisés.
+
+La commande 'git bundle' regroupe les objets et les références dans une archive sur la machine d'origine, qui peut ensuite être importée dans un autre dépôt en utilisant 'git fetch', 'git pull' ou 'git clone', après avoir déplacé l'archive par un moyen quelconque (par exemple, par sneakernet).
+
+Comme il n'existe pas de connexion directe entre les dépôts, l'utilisateur doit spécifier une base pour le regroupement qui est détenue par le dépôt de destination : le regroupement suppose que tous les objets de la base sont déjà dans le dépôt de destination.
+
+OPTIONS
+-------
+
+create [options] <fichier> <git-rev-list-args>::
+	Utilisé pour créer un regroupement nommé 'fichier'. Cela nécessite les arguments '<arguments-git-rev-list>' pour définir le contenu du regroupement. options' contient les options spécifiques à la sous-commande 'git bundle create'.
+
+verify <fichier>::
+	Utilisé pour vérifier qu'un fichier regroupement est valide et s'appliquera proprement au dépôt actuel. Cela inclut des vérifications sur le format du regroupement lui-même ainsi que la vérification que les commits pré-requis existent et sont complètement liés dans le dépôt actuel. 'git bundle' affiche une liste des commits manquants, s'il y en a, et sort avec un statut non nul.
+
+list-heads <fichier>::
+	Liste les références définies dans le regroupement. Si elle est suivie d'une liste de références, seules les références correspondant à celles données sont imprimées.
+
+unbundle <fichier>::
+	Passe les objets du groupement à 'git index-pack' pour qu'ils soient stockés dans le dépôt, puis affiche les noms de toutes les références définies. Si une liste de références est donnée, seules les références correspondant à celles de la liste sont imprimées. Cette commande est vraiment de plomberie et n'est définie que pour être appelée par 'git fetch'.
+
+<git-rev-list-args>::
+	Une liste d'arguments, acceptable pour 'git rev-parse' et 'git rev-list' (et contenant une référence nommée, voir SPECIFICATION DES REFERENCES ci-dessous), qui spécifie les objets et références spécifiques à transporter. Par exemple, `master~10..master` fait en sorte que la référence master actuelle soit regroupée avec tous les objets ajoutés depuis le dixième commit de son ancêtre. Il n'y a pas de limite explicite au nombre de références et d'objets qui peuvent être regroupés.
+
+
+[<nom-de-réf>...]::
+	Une liste de références utilisée pour limiter les références signalées comme disponibles. Ceci est principalement utile à 'git fetch', qui s'attend à ne recevoir que les références demandées et pas nécessairement tout le contenu du pack (dans ce cas, 'git bundle' agit comme 'git fetch-pack').
+
+--progress::
+	L'état d'avancement est affiché sur la sortie d'erreur standard quand elle est attachée à un terminal, à moins que -q soit spécifié. Ce drapeau force l'état d'avancement même si le flux d'erreur standard n'est pas dirigé vers un terminal.
+
+--all-progress::
+	Lorsque --stdout est spécifié, le rapport de progression est affiché pendant les phases de comptage d'objets et de compression, mais il est inhibé pendant la phase d'écriture. La raison en est que dans certains cas, le flux de sortie est directement lié à une autre commande qui peut souhaiter afficher son propre état d'avancement pendant qu'elle traite les données du paquet entrant. Ce drapeau est comme --progress sauf qu'il force le rapport de progression pour la phase d'écriture même si --stdout est utilisé.
+
+--all-progress-implied::
+	C'est utilisé pour impliquer --all-progress lorsque l'affichage de la progression est activé. Contrairement à --all-progress, ce drapeau ne force pas l'affichage de la progression par lui-même.
+
+--version[=<version>]::
+	Spécifier la version du regroupement. La version 2 est l'ancien format et ne peut être utilisée qu'avec les dépôts SHA-1 ; la version 3, plus récente, contient des capacités qui permettent des extensions. La valeur par défaut est le plus ancien format pris en charge, en fonction de l'algorithme de hachage utilisé.
+
+-q::
+--quiet::
+	Ce drapeau permet à la commande de ne pas signaler sa progression sur le flux d'erreur standard.
+
+SPÉCIFICATION DES RÉFÉRENCES
+----------------------------
+
+'git bundle' empaquettera seulement les références qui sont montrées par 'git show-ref' : cela inclut les têtes, les étiquettes et les têtes distantes. Des références telles que `master~1` ne peuvent pas être empaquetées, mais sont parfaitement adaptées pour définir la base. Plus d'une référence peut être empaquetée, et plus d'une base peut être spécifiée. Les objets empaquetés sont ceux qui ne sont pas contenus dans l'union des bases données. Chaque base peut être spécifiée explicitement (par exemple `^master~10`), ou implicitement (par exemple `master~10..master`, `--since=10.days.ago master`).
+
+Il est très important que la base utilisée soit détenue par la destination. Il n'y a pas de problème à être prudent et faire en sorte que le fichier regroupement contienne des objets déjà présents dans la destination, car ceux-ci sont ignorés lors du déballage à la destination.
+
+`git clone` peut utiliser tout paquet créé sans refspecs négatifs (par exemple, `nouveau`, mais pas `ancien..nouveau`). Si vous voulez imiter `git clone --mirror`, qui inclurait vos refs comme `refs/remotes/*`, utilisez `--all`. Si vous voulez fournir le même ensemble de références qu'un clone directement depuis le dépôt source, utilisez `--branches --tags` pour les `<arguments-git-rev-list>`.
+
+EXEMPLES
+--------
+
+Supposons que vous vouliez transférer l'historique d'un dépôt R1 sur la machine A vers un autre dépôt R2 sur la machine B. Pour une raison quelconque, la connexion directe entre A et B n'est pas autorisée, mais nous pouvons déplacer les données de A à B via un mécanisme quelconque (CD, email, etc.). Nous voulons mettre à jour R2 avec le développement fait sur la branche master dans R1.
+
+Pour amorcer le processus, vous pouvez d'abord créer un paquet qui n'a pas de base. Vous pouvez utiliser une étiquette pour vous rappeler jusqu'à quel commit le dernier traitement a été fait, afin de faciliter la mise à jour ultérieure de l'autre dépôt avec un paquet incrémental :
+
+----------------
+machineA$ cd R1
+machineA$ git bundle create fichier.paquet master
+machineA$ git tag -f dernierpaquetR2 master
+----------------
+
+Ensuite, vous transférez fichier.paquet sur la machine cible B. Comme ce paquet ne nécessite pas l'extraction d'un objet existant, vous pouvez créer un nouveau déôt sur la machine B en le clonant :
+
+----------------
+machineB$ git clone -b master /home/moi/tmp/fichier.paquet R2
+----------------
+
+Cela définira un répertoire distant appelé "origin" dans le dépôt résultant qui vous permettra de récupérer et de tirer du paquet. Le fichier $GIT_DIR/config dans R2 aura une entrée comme celle-ci :
+
+------------------------
+[remote "origin"]
+    url = /home/moi/tmp/fichier.paquet
+    fetch = refs/heads/*:refs/remotes/origin/*
+------------------------
+
+Pour mettre à jour le dépôt mine.git résultant, vous pouvez récupérer ou tirer après avoir remplacé le paquet stocké dans /home/moi/tmp/fichier.paquet par des mises à jour incrémentales.
+
+Après avoir travaillé un peu plus dans le dépôt d'origine, vous pouvez créer un paquet incrémental pour mettre à jour l'autre dépôt :
+
+----------------
+machineA$ cd R1
+machineA$ git bundle create fichier.paquetdernierpaquetR2..master
+machineA$ git tag -f dernierpaquetR2 master
+----------------
+
+Vous transférez ensuite le paquet sur l'autre machine pour remplacer /home/moi/tmp/fichier.paquet, et vous tirez à partir de celui-ci.
+
+----------------
+machineB$ cd R2
+machineB$ git pull
+----------------
+
+Si vous savez jusqu'à quel commit le dépôt destinataire devrait avoir les objets nécessaires, vous pouvez utiliser cette connaissance pour spécifier la base, en donnant un point de coupure pour limiter les révisions et les objets qui vont dans le paquet résultant. L'exemple précédent a utilisé l'étiquette dernierpaquetR2 dans ce but, mais vous pouvez utiliser toute autre option que vous donneriez à la commande linkgit:git-log[1]. Voici d'autres exemples :
+
+Vous pouvez utiliser une étiquette qui est présente dans les deux dépôts :
+
+----------------
+$ git bundle create monpaquet v1.0.0..master
+----------------
+
+Vous pouvez utiliser une base définie par le temps :
+
+----------------
+$ git bundle create monpaquet --since=10.days master
+----------------
+
+Vous pouvez utiliser le nombre de commits :
+
+----------------
+$ git bundle create monpaquet -10 master
+----------------
+
+Vous pouvez lancer `git-bundle verify` pour voir si vous pouvez extraire d'un paquet qui a été créé avec une base :
+
+----------------
+$ git bundle verify monpaquet
+----------------
+
+Cela permettra d’énumérer ce que vous devez avoir pour extraire du paquet et fera une erreur si vous ne les avez pas.
+
+Du point de vue du dépôt destinataire, un paquet est exactement comme un dépôt ordinaire dont il extrait ou tire des données. Vous pouvez, par exemple, aligner les références lors de l'extraction :
+
+----------------
+$ git fetch monpaquet master:localRef
+----------------
+
+Vous pouvez également voir quelles références il offre :
+
+----------------
+$ git ls-remote monpaquet
+----------------
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

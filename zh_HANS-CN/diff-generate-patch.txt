@@ -1,0 +1,134 @@
+使用选项 `-p` 生成补丁文本
+----------------
+
+Running linkgit:git-diff[1], linkgit:git-log[1], linkgit:git-show[1], linkgit:git-diff-index[1], linkgit:git-diff-tree[1], or linkgit:git-diff-files[1] with the `-p` option produces patch text. You can customize the creation of patch text via the `GIT_EXTERNAL_DIFF` and the `GIT_DIFF_OPTS` environment variables (see linkgit:git[1]), and the `diff` attribute (see linkgit:gitattributes[5]).
+
+-p 选项产生的内容与传统的差异格式略有不同：
+
+1.   它前面有一个 `git diff` 头，如下所示：
+
+       diff --git a/file1 b/file2
++
+`a/` 和 `b/` 的文件名相同，除非涉及到重命名/复制。特别地，即使是创建或删除，也 _不_ 使用 `/dev/null` 来代替 `a/` 或 `b/` 文件名。
++
+当涉及到重命名/复制时，`file1` 和 `file2` 分别显示重命名/复制的源文件的名称和重命名/复制产生的文件的名称。
+
+2.   它的后面是一个或多个扩展头信息行：
+
+       old mode <模式>
+       new mode <模式>
+       deleted file mode <模式>
+       new file mode <模式>
+       copy from <路径>
+       copy to <路径>
+       rename from <路径>
+       rename to <路径>
+       similarity index <数字>
+       dissimilarity index <数字>
+       index <哈希>..<哈希> <模式>
++
+文件模式被打印为6位八进制数字，包括文件类型和文件权限位。
++
+扩展头信息中的路径名称不包括 `a/` 和 `b/` 前缀。
++
+相似性指数是未改变的行占比，而不相似性指数是改变的行占比。它是四舍五入的整数，后有百分号。因此，100%的相似度指数指为两个文件相等，而 100% 的不相似度意味着入新文件中没有旧文件中的行。
++
+索引行包括改变前和改变后的 blob 对象名称。如果文件模式没有变化，则包含 <模式>；否则，分别显示新旧模式。
+
+3.  含有 "不常见" 字符的路径名会被引用，这一点在配置变量` core.quotePath` 中有所解释（见 linkgit:git-config[1]）。
+
+4.  输出中所有的 `file1` 文件都是指提交前的文件，而所有的 `file2` 文件都是指提交后的文件。按顺序对每个文件进行修改是不正确的。例如，这个补丁将交换文件 a 和 b：
+
+      diff --git a/a b/b
+      rename from a
+      rename to b
+      diff --git a/b b/a
+      rename from b
+      rename to a
+
+5.  块头提到了块头所适用的函数的名称。 参见 linkgit:gitattributes[5] 中的 "定义自定义 hunk-header"，以了解如何针对特定语言进行定制。
+
+
+合并的差异格式
+-------
+
+任何生成差异的命令都可以使用 `-c` 或 `-cc` 选项，在显示合并时产生一个 "合并差异"。当用 linkgit:git-diff[1] 或 linkgit:git-show[1] 显示合并时，这默认格式。还需要注意的是，你可以给这些命令适当的 `--diff-merges` 选项来强制生成特定格式的差异。
+
+"合并的差异" 的格式如下：
+
+------------
+diff --combined describe.c
+index fabadb8,cc95eb0..4866510
+--- a/describe.c
++++ b/describe.c
+@@@ -98,20 -98,12 +98,20 @@@
+	return (a_date > b_date) ? -1 : (a_date == b_date) ? 0 : 1;
+  }
+
+- static void describe(char *arg)
+ -static void describe(struct commit *cmit, int last_one)
+++static void describe(char *arg, int last_one)
+  {
+ +	unsigned char sha1[20];
+ +	struct commit *cmit;
+	struct commit_list *list;
+	static int initialized = 0;
+	struct commit_name *n;
+
+ +	if (get_sha1(arg, sha1) < 0)
+ +		usage(describe_usage);
+ +	cmit = lookup_commit_reference(sha1);
+ +	if (!cmit)
+ +		usage(describe_usage);
+ +
+	if (!initialized) {
+		initialized = 1;
+		for_each_ref(get_name);
+------------
+
+1.   它前面有 "git diff" 头，如下（当使用 `c` 选项时）：
+
+       diff --combined file
++
+或如下（当使用 `--cc` 选项时）：
+
+       diff --cc file
+
+2.   它的后面是一个或多个扩展头信息行（本例显示的是与两个父提交的合并）：
+
+       index <哈希>,<哈希>..<哈希>
+       mode <模式>,<模式>..<模式>
+       new file mode <模式>
+       deleted file mode <模式>,<模式>
++
+The `mode <mode>,<mode>..<mode>` line appears only if at least one of the <mode> is different from the rest. Extended headers with information about detected contents movement (renames and copying detection) are designed to work with diff of two <tree-ish> and are not used by combined diff format.
+
+3.   它的后面是两行源文件/目标文件的头信息
+
+       --- Index.pg
+       +++ b/file
++
+类似于传统的 "统一" 差异格式的双行头，`/dev/null` 用来表示创建或删除的文件。
++
+但是，如果提供了 --combined-all-paths 选项，你就会得到一个 N+1 行的源文件/目标文件头，其中 N 是合并提交中的父提交数量
+
+       --- Index.pg
+       --- Index.pg
+       --- Index.pg
+       +++ b/file
++
+如果重命名或复制检测处于活动状态，这种扩展格式可能很有用，可以让你在不同的父提交中看到文件的原始名称。
+
+4.   修改了文件块头信息的格式，以防止不小心将其送入 `patch -p1`。合并的差异格式是为审查合并提交的修改而创建的，并不是为了应用。这个变化类似于扩展的 "索引" 头信息的变化：
+
+       @@@ <from-file-range> <from-file-range> <to-file-range> @@@
++
+块中有（父提交数量+1）`@` 字符，用于合并的差异格式。
+
+与传统的 "统一" 差异格式不同，这种格式显示两个文件 A 和 B 的列，其中有 `-`（减号 -- 在 A 中出现，但在 B 中删除），`+`（加号 -- 在 A 中缺少，但在 B 中增加），或 `" "`（空格 -- 不变）前缀，这种格式比较两个或多个文件与一个文件 X，并显示 X 与其中每个文件的差异。文件中的每一个都有一列被前置在输出行中，以指出 X 的行与它的不同之处。
+
+第 N 列中的 `-` 字符意味着该行出现在文件 N 中，但它没有出现在结果文件中。第 N 列中的 `+` 字符意味着该行出现在结果文件中，而文件 N 中没有该行（换句话说，从该父提交的角度来看，该行是被添加的）。
+
+在上面的输出示例中，两个文件中的函数签名都被改变了（因此从文件 1 和文件 2 中都有表示删除的 `-`，而 `++` 表示被添加的一行没有出现在文件 1 或文件 2 中）。另外还有 8 行与文件 1 中的相同，但没有出现在文件 2 中（因此前缀为 `+`）。
+
+当用 `git diff-tree -c` 显示时，它将合并提交的父提交文件与合并结果进行比较（即文件 1 ... 文件 N 是父提交文件）。当用 `git diff-files -c` 显示时，它将两个未解决的合并父提交文件与工作树文件进行比较（即文件 1 是阶段 2 ，又称 "我们的版本"，文件 2 是阶段 3，又称 "他们的版本"）。

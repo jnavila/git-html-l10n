@@ -36,7 +36,17 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Prepare cada commit com o seu respectivo patch em um arquivo, formatado para que se assemelhe com uma caixa de correio UNIX. A saída deste comando é conveniente para o envio de um e-mail ou para a utilização com 'git am'.
+Prepare cada commit não mesclado com o seu respectivo "patch" em uma mensagem por commit, formatado para que se assemelhe com uma caixa de correio UNIX. A saída deste comando é conveniente para o envio de um e-mail ou para a utilização com 'git am'.
+
+Uma "mensagem" gerada pelo comando consiste em três partes:
+
+* Um breve cabeçalho de metadados que começa com `From <commit>` com um registro de data e hora fixo, como `Seg Set 17 00:00:00 2001` para auxiliar programas como "arquivo(1)" a reconhecer que o arquivo foi gerado deste comando, campos que registrem a identidade do autor, a data da autoria e o título da alteração (retirado do primeiro parágrafo da mensagem do log do commit).
+
+* O segundo ou o parágrafo subsequente da mensagem do registro do commit.
+
+* O "patch", que é gerado com o comando "diff -p --stat" (consulte linkgit:git-diff[1]) entre o commit e a fonte principal.
+
+A mensagem de registro e o patch são separados por uma linha com três traços.
 
 Existem duas maneiras de especificar em quais commits operar.
 
@@ -140,7 +150,7 @@ Caso `<modo>` seja `none`, tanto o assunto e o corpo da carta serão preenchidos
 
 -v <n>::
 --reroll-count=<n>::
-	Marque a série como a <n>-ésima iteração do tópico. Os nomes dos arquivos na saída têm `v<n>` anexado a eles e o prefixo do assunto (a predefinição retorna para "PATCH", porém pode ser alterado através da opção `--subject-prefix`). Por exemplo. `--reroll-count=4` pode produzir o arquivo `v4-0001-add-makefile.patch` que contém "Assunto: [PATCH v4 1/20] Adicione o makefile".
+	Marque a série como a e<n>ésima iteração do tópico. Os nomes de arquivo que são gerados têm `v<n>` prefixado neles, o prefixo do assunto (é predefinido como "PATCH", mas pode ser configurável através da opção `--subject-prefix`) tem `v<n>` anexado nele. Por exemplo, `--reroll-count=4` poderá gerar o arquivo `v4-0001-add-makefile.patch` que contém "Assunto: [PATCH v4 1/20] Adicione um makefile" nele. Um `<n>` não precisa ser um inteiro (por exemplo, "--reroll-count=4.4", ou "--reroll-count=4rev2" são permitidos), porém a desvantagem de usar tal contagem de reroll é que o range-diff/interdiff com a versão anterior não indica exatamente com qual versão a nova interação acabou sendo comparada.
 
 --to=<e-mail>::
 	Adicione um cabeçalho `Para:` nos cabeçalhos do email. É um acréscimo a qualquer cabeçalho configurado e pode ser utilizado várias vezes. A forma negada da opção `--no-to` descarta todos os cabeçalhos `Para:` que foram adicionados até agora (seja da configuração ou da linha de comando).
@@ -456,6 +466,11 @@ Além disso, ele detecta e manipula as renomeações e as reescritas completadas
 ------------
 $ git format-patch -3
 ------------
+
+RESSALVAS
+---------
+
+Observe que `format-patch` irá omitir a mesclagem dos commits que forem gerados, ainda que eles façam parte do intervalo solicitado. Um simples "patch" não inclui informações suficientes para que a parte receptora reproduza a mesma mesclagem do commit.
 
 VEJA TAMBÉM
 -----------
