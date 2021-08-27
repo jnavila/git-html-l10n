@@ -480,12 +480,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Cette forme sert à visualiser les modifications que vous avez indexées pour la prochaine validation vis-à-vis du &lt;commit&gt; nommé. Typiquement, vous voudriez comparer avec le commit le plus récent (HEAD), ce qui est fait automatiquement si vous ne spécifiez pas &lt;commit&gt;. Si HEAD n&#8217;existe pas (par exemple, des branches à naître) et si &lt;commit&gt; n&#8217;est pas fourni, les modifications indexées sont affichées. --staged est synonyme de --cached.</p>
 <div class="paragraph">
-<p>Si --merge-base est donné, au lieu d&#8217;utiliser &lt;commit&gt;, utiliser la base de fusion de &lt;commit&gt; et HEAD. <code>git diff --merge-base A</code> est équivalent à <code>git diff $(git merge-base A HEAD)</code>.</p>
+<p>Si --merge-base est donné, au lieu d&#8217;utiliser &lt;commit&gt;, utiliser la base de fusion de &lt;commit&gt; et HEAD. <code>git diff --cached --merge-base A</code> est équivalent à <code>git diff --cached $(git merge-base A HEAD)</code>.</p>
 </div>
 </dd>
-<dt class="hdlist1"><em>git diff</em> [&lt;options&gt;] &lt;commit&gt; [--] [&lt;chemin&gt;&#8230;&#8203;]</dt>
+<dt class="hdlist1"><em>git diff</em> [&lt;options&gt;] [--merge-base] &lt;commit&gt; [--] [&lt;chemin&gt;&#8230;&#8203;]</dt>
 <dd>
 <p>Cette forme sert à visualiser les modifications présentes dans l&#8217;arbre de travail par rapport au &lt;commit&gt; indiqué. Vous pouvez utiliser HEAD pour le comparer au commit le plus récent ou un nom de branche pour le comparer avec le sommet d&#8217;une branche différente.</p>
+<div class="paragraph">
+<p>Si --merge-base est donné, au lieu d&#8217;utiliser &lt;commit&gt;, utiliser la base de fusion de &lt;commit&gt; et HEAD. <code>git diff --merge-base A</code> est équivalent à <code>git diff $(git merge-base A HEAD)</code>.</p>
+</div>
 </dd>
 <dt class="hdlist1"><em>git diff</em> [&lt;options&gt;] [--merge-base] &lt;commit&gt; &lt;commit&gt; [--] [&lt;chemin&gt;&#8230;&#8203;]</dt>
 <dd>
@@ -707,11 +710,11 @@ ne pas modifier les noms de chemin et utiliser des NULs comme terminateurs de ch
 </dd>
 <dt class="hdlist1">--name-only</dt>
 <dd>
-<p>N&#8217;afficher que les noms des fichiers modifiés.</p>
+<p>Afficher uniquement les noms des fichiers modifiés. Les noms de fichiers sont souvent encodés en UTF-8. Le définir sur <code>none</code> rend la sortie de blâme des données non converties. Pour plus d’informations, voir la discussion sur l’encodage dans la page manuelle <a href="git-log.html">git-log(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--name-status</dt>
 <dd>
-<p>N&#8217;afficher que les noms et statuts des fichiers modifiés. Voir la description de l&#8217;option <code>--diff-filter</code> pour la signification des lettres de statut.</p>
+<p>N&#8217;afficher que les noms et statuts des fichiers modifiés. Voir la description de l&#8217;option <code>--diff-filter</code> pour la signification des lettres de statut. Tout comme <code>--name-only</code>, les noms de fichiers sont souvent encodés en UTF-8.</p>
 </dd>
 <dt class="hdlist1">--submodule[=&lt;format&gt;]</dt>
 <dd>
@@ -932,7 +935,7 @@ utilisez <code>-M100%</code>. L&#8217;index de similarité par défaut est <code
 </dd>
 <dt class="hdlist1">-l&lt;num&gt;</dt>
 <dd>
-<p>Les options <code>-M</code> et <code>-C</code> nécessitent un temps de traitement en O(n²) où n est le nombre de cibles potentielles renommage/copie. Cette option empêche l&#8217;utilisation de la détection de renommage/copie si le nombre de cibles de renommage/copie excède le nombre indiqué.</p>
+<p>Les options <code>-M</code> et <code>-C</code> impliquent quelques étapes préliminaires qui peuvent détecter des sous-ensembles de renommages/copies à moindre coût, suivies d&#8217;une partie pour le reste qui compare toutes les destinations non appariées restantes à toutes les sources pertinentes. (Pour les renommages, seules les sources non appariées restantes sont pertinentes ; pour les copies, toutes les sources originales sont pertinentes). Pour N sources et destinations, cette vérification exhaustive est en O(N^2). Cette option empêche la partie exhaustive de la détection des renommages/copies de s&#8217;exécuter si le nombre de fichiers source/destination impliqués dépasse le nombre spécifié. La valeur par défaut est diff.renameLimit. Notez qu&#8217;une valeur de 0 est traitée comme illimitée.</p>
 </dd>
 <dt class="hdlist1">--diff-filter=[(A|C|D|M|R|T|U|X|B)&#8230;&#8203;[*]]</dt>
 <dd>
@@ -1351,7 +1354,7 @@ non fusionnné     :000000 000000 0000000 0000000 U fichier6</pre>
 <h2 id="_génération_du_texte_de_rustine_avec_p">Génération du texte de rustine avec -p</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Exécuter <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a> ou <a href="git-diff-files.html">git-diff-files(1)</a> avec l&#8217;option <code>-p</code> produit le texte de rustine. Vous pouvez personnaliser la création du texte de rustine via les variables d&#8217;environnement <code>GIT_EXTERNAL_DIFF</code> et <code>GIT_DIFF_OPTS</code> (voir <a href="git.html">git(1)</a>).</p>
+<p>Exécuter <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a> ou <a href="git-diff-files.html">git-diff-files(1)</a> avec l&#8217;option <code>-p</code> produit le texte de rustine. Vous pouvez personnaliser la création du texte de rustine via les variables d&#8217;environnement <code>GIT_EXTERNAL_DIFF</code> et <code>GIT_DIFF_OPTS</code> (voir <a href="git.html">git(1)</a>), et l&#8217;attribut <code>diff</code> (voir <a href="gitattributes.html">gitattributes(5)</a>).</p>
 </div>
 <div class="paragraph">
 <p>L&#8217;option produit quelque chose légèrement différent du format diff traditionnel :</p>
@@ -1417,6 +1420,9 @@ rename from b
 rename to a</pre>
 </div>
 </div>
+</li>
+<li>
+<p>Les en-têtes de section mentionnent le nom de la fonction à laquelle la section s&#8217;applique. Voir "Définition d&#8217;un entête de section personnalisé" dans <a href="gitattributes.html">gitattributes(5)</a> pour des détails sur la façon d&#8217;adapter cela à des langages spécifiques.</p>
 </li>
 </ol>
 </div>
@@ -1790,7 +1796,7 @@ $ git diff -R                          <b class="conum">(2)</b></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:05:22 +0200
+Last updated 2021-08-27 14:24:05 +0200
 </div>
 </div>
 </body>

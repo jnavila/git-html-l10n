@@ -135,6 +135,8 @@ Ao especificar várias revisões significa que o conjunto dos commits acessívei
 
 O conjunto acessível de um commit é o próprio commit e o commit em sua cadeia de ancestrais.
 
+Existem várias notações para definir um conjunto de commits associados (chamado de "intervalo de revisão"), ilustrado abaixo.
+
 
 Exclusões de Commits
 ~~~~~~~~~~~~~~~~~~~~
@@ -152,6 +154,17 @@ A notação da diferença simétrica '...' (três pontos)::
  Uma notação semelhante 'r1\...r2' é chamada de uma diferença simétrica de 'r1' e 'r2' sendo definida como 'r1 r2 --not $(git merge-base --all r1 r2)'. É o conjunto dos commits que são acessíveis a partir do 'r1' (lado esquerdo) ou 'r2' (lado direito), porém, não de ambos.
 
 Nestas duas notações abreviadas, é possível omitir uma extremidade e deixá-la como predefinido no `HEAD`. Como por exemplo, 'origin..' é uma abreviação de 'origin..HEAD' e pergunta "O que eu fiz desde que peguei a bifurcação no ramo de origem?" Da mesma forma, '..origin' é uma abreviação de 'HEAD..origin' e pergunta "O que a origem fez desde que eu as peguei?" Observe que '..' significaria 'HEAD..HEAD', que é um intervalo vazio acessível e inacessível a partir do `HEAD`.
+
+Existem comandos que são concebidos de forma específica para tomar dois intervalos distintos (por exemplo, "git range-diff R1 R2" que compara dois intervalos), porém são exceções. A menos que seja observado o contrário, todos os comandos "git" que operam em um conjunto de commits funcionam em uma única faixa da revisão. Em outras palavras, escrever duas notações de "dois intervalos de pontos" um ao lado do outro, e.g.
+
+    $ git log A..B C..D
+
+*não* especifica dois intervalos de revisão para a maioria dos comandos. Em vez disso, ele nomeará um único conjunto de commits conectados, ou seja, aqueles que são acessíveis a partir de B ou D, mas que não são acessíveis a partir de A ou C. Em um histórico linear como este:
+
+    ---A---B---o---o---C---D
+
+porque A e B são alcançáveis a partir de C, o intervalo da faixa de revisão definido por estes dois intervalos pontilhados é um único commit D.
+
 
 Outras <rev>{caret} Notações Abreviadas dos pais
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

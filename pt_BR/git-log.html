@@ -513,7 +513,7 @@ $ git log A...B</pre>
 <dt class="hdlist1">--no-decorate</dt>
 <dt class="hdlist1">--decorate[=short|full|auto|no]</dt>
 <dd>
-<p>Imprima os nomes das refs de quaisquer commits que estão sendo exibidos. Caso <code>short</code> seja definido, os prefixos do nome das refs <code>refs/heads/</code>, <code>refs/tags/</code> e <code>refs/remotes/</code> não serão impressos. Caso <code>full</code> seja definido, o nome completo da "ref" (incluindo o prefixo) será impresso. Caso <em>auto</em> seja definido, caso a saída seja para um terminal, os nomes das referências serão exibidas como se <em>short</em> tenha sido utilizado, caso contrário, nenhum nome da referência será exibido. A opção predefinida é <em>short</em>.</p>
+<p>Exiba os nomes das refs de quaisquer commits que estão sendo exibidos. Caso <code>short</code> seja definido, os prefixos do nome das refs <code>refs/heads/</code>, <code>refs/tags/</code> e <code>refs/remotes/</code> não serão exibidas. Já se <code>full</code> for definido, o nome completo da "ref" (incluindo o prefixo) será exibida. Se <em>auto</em> for definido e se a saída seja para um terminal, os nomes das referências serão exibidas como se a opção <em>short</em> tenha sido utilizada, caso contrário, nenhuma referência de nome será exibida. A opção <code>--decorate</code> é um atalho para <code>--decorate=short</code>. Caso seja configurado, o valor de <code>log.decorate</code> é utilizado, caso contrário a predefinição é <code>auto</code>.</p>
 </dd>
 <dt class="hdlist1">--decorate-refs=&lt;padrão&gt;</dt>
 <dt class="hdlist1">--decorate-refs-exclude=&lt;padrão&gt;</dt>
@@ -1768,6 +1768,10 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <dd>
 <p>data do autor, formato curto (<code>AAAA-MM-DD</code>)</p>
 </dd>
+<dt class="hdlist1"><em>%ah</em></dt>
+<dd>
+<p>data da autoria, compreensível para pessoas (como a opção <code>--date=human</code> do <a href="git-rev-list.html">git-rev-list(1)</a>)</p>
+</dd>
 <dt class="hdlist1"><em>%cn</em></dt>
 <dd>
 <p>nome de quem fez o commit</p>
@@ -1820,6 +1824,10 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <dd>
 <p>data do commit, formato curto (<code>AAAA-MM-DD</code>)</p>
 </dd>
+<dt class="hdlist1"><em>%ch</em></dt>
+<dd>
+<p>a data de quem fez o commit, compreensível para pessoas (como a opção <code>--date=human</code> do <a href="git-rev-list.html">git-rev-list(1)</a>)</p>
+</dd>
 <dt class="hdlist1"><em>%d</em></dt>
 <dd>
 <p>nomes de referência "ref", como a opção --decorate do <a href="git-log.html">git-log(1)</a></p>
@@ -1827,6 +1835,20 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <dt class="hdlist1"><em>%D</em></dt>
 <dd>
 <p>nomes de referência "ref" sem quebra automática " (", ")".</p>
+</dd>
+<dt class="hdlist1"><em>%(describe[:options])</em></dt>
+<dd>
+<p>nome legível para as pessoas, como <a href="git-describe.html">git-describe(1)</a>; uma expressão vazia para os commits sem descrição. A expressão <code>describe</code> pode ser seguida por dois pontos e zero ou mais opções separadas por vírgulas. As descrições podem ser inconsistentes quando as etiquetas são adicionadas ou removidas ao mesmo tempo.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><em>match=&lt;pattern&gt;</em>: Considere apenas as etiquetas que coincidam com o padrão <code>glob(7)</code> informado, excluindo o prefixo "refs/tags/".</p>
+</li>
+<li>
+<p><em>exclude=&lt;pattern&gt;</em>: Desconsidere as etiquetas que coincidam com o padrão <code>glob(7)</code> informado, excluindo o prefixo "refs/tags/".</p>
+</li>
+</ul>
+</div>
 </dd>
 <dt class="hdlist1"><em>%S</em></dt>
 <dd>
@@ -2029,7 +2051,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dd>
 <p>Suprime a saída diff. Útil para comandos como <code>git show</code> que por predefinição exibem a correção ou para cancelar o efeito de <code>--patch</code>.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=(off|none|first-parent|1|separate|m|combined|c|dense-combined|cc)</dt>
+<dt class="hdlist1">--diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc)</dt>
 <dt class="hdlist1">--no-diff-merges</dt>
 <dd>
 <p>Define o formato diff que será usado para a mesclagem dos commits. A predefinição é `off` a menos que a opção <code>--first-parent</code> esteja em uso, nesse caso a predefinição será <code>first-parent</code>.</p>
@@ -2040,16 +2062,20 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dd>
 <p>Desativa a saída dos diffs para a mesclagem dos commits. Útil para substituir valores implícitos.</p>
 </dd>
+<dt class="hdlist1">--diff-merges=on</dt>
+<dt class="hdlist1">--diff-merges=m</dt>
+<dt class="hdlist1">-m</dt>
+<dd>
+<p>Essa opção faz com que o diff gerado para a mesclagem dos commits seja mostrada no formato padrão. O formato predefinido pode ser alterado usando o parâmetro de configuração <code>log.diffMerges</code>, onde o valor predefinido é <code>separate</code>. A opção <code>-m</code> implica no uso de <code>-p</code>.</p>
+</dd>
 <dt class="hdlist1">--diff-merges=first-parent</dt>
 <dt class="hdlist1">--diff-merges=1</dt>
 <dd>
 <p>Esta opção faz com que os commits mesclados mostrem a diferença total apenas com ao que estiver relacionado com a primeira origem.</p>
 </dd>
 <dt class="hdlist1">--diff-merges=separate</dt>
-<dt class="hdlist1">--diff-merges=m</dt>
-<dt class="hdlist1">-m</dt>
 <dd>
-<p>Faz com que os commits mesclados mostrem a diferença total com relação a cada uma das suas origens. É gerado uma entrada de registro separada e um diff para cada um dos commits relacionados. O <code>-m</code> não gera nenhuma saída sem <code>-p</code>.</p>
+<p>Faz com que os commits mesclados mostrem a diferença total com relação a cada uma das suas origens. É gerado uma entrada de registro separada e um diff para cada um dos commits relacionados. Este é o formato que a opção <code>-m</code> historicamente produz.</p>
 </dd>
 <dt class="hdlist1">--diff-merges=combined</dt>
 <dt class="hdlist1">--diff-merges=c</dt>
@@ -2246,11 +2272,11 @@ a opção <code>--format=raw</code>.</p>
 </dd>
 <dt class="hdlist1">--name-only</dt>
 <dd>
-<p>Exiba apenas os nomes dos arquivos que foram alterados.</p>
+<p>Mostre apenas os nomes dos arquivos que foram alterados. Os nomes dos arquivos são frequentemente codificados em UTF-8. Para mais informações, consulte a discussão sobre codificação na página do manual <a href="git-log.html">git-log(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--name-status</dt>
 <dd>
-<p>Exiba apenas os nomes e a condição atual dos arquivos que foram alterados. Consulte a descrição da opção <code>--diff-filter</code> sobre o significado das letras de condição.</p>
+<p>Exiba apenas os nomes e a condição atual dos arquivos que foram alterados. Consulte a descrição da opção <code>--diff-filter</code> sobre o significado das letras de condição. Assim como os nomes dos arquivos com <code>--name-only</code> geralmente são codificados em UTF-8.</p>
 </dd>
 <dt class="hdlist1">--submodule[=&lt;formato&gt;]</dt>
 <dd>
@@ -2468,7 +2494,7 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 </dd>
 <dt class="hdlist1">-l&lt;num&gt;</dt>
 <dd>
-<p>As opções <code>-M</code> e <code>-C</code> requerem um tempo de processamento O(n^2) em que n é a quantidade de possíveis alvos para renomeações/cópia. Esta opção impede que a detecção da ação de renomear/cópia seja executada se a quantidade dos alvos a serem renomeados/copiados exceda o a quantidade usada.</p>
+<p>As opções <code>-M</code> e <code>-C</code> precisa de algumas ações preliminares que podem detectar os subconjuntos das renomeações/cópias simples, seguidos por uma exaustiva porção de recursos que compara o resto de todos os destinos que ainda não foram reparados com todas as fontes relevantes. (Para as renomeações, apenas as fontes restantes que não foram pareadas são relevantes; nas cópias, todas as fontes originais são relevantes). Para N fontes e destinos, esta verificação exaustiva é O(N^2). Esta opção impede que a parte exaustiva da detecção de renomeamento/cópia seja executada caso a quantidade dos arquivos de origem/destino envolvidos exceda a quantidade definida. Caso contrário, retorna para o valor definido em <code>diff.renameLimit</code>. Observe que o valor 0 é tratado como ilimitado.</p>
 </dd>
 <dt class="hdlist1">--diff-filter=[(A|C|D|M|R|T|U|X|B)&#8230;&#8203;[*]]</dt>
 <dd>
@@ -2661,7 +2687,7 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 <h2 id="_gerando_a_correção_em_um_formato_texto_com_a_opção_p">Gerando a correção em um formato texto com a opção <code>-p</code></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Executando <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a>, ou <a href="git-diff-files.html">git-diff-files(1)</a> com a opção <code>-p</code> produz um patch em formato texto. É possível personalizar a criação do patch em um formato texto através das variáveis de ambiente <code>GIT_EXTERNAL_DIFF</code> e <code>GIT_DIFF_OPTS</code> (consulte <a href="git.html">git(1)</a>).</p>
+<p>Executando <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a>, ou <a href="git-diff-files.html">git-diff-files(1)</a> com a opção <code>-p</code> produz um patch em formato texto. É possível personalizar a criação do patch em um formato texto através das variáveis de ambiente <code>GIT_EXTERNAL_DIFF</code>, <code>GIT_DIFF_OPTS</code> (consulte <a href="git.html">git(1)</a>) e o atributo <code>diff</code> (consulte <a href="gitattributes.html">gitattributes(5)</a>).</p>
 </div>
 <div class="paragraph">
 <p>O que a opção <code>-p</code> produz é um pouco diferente do formato diff tradicional:</p>
@@ -2727,6 +2753,9 @@ renomeie a partir do b
 renomeie para a</pre>
 </div>
 </div>
+</li>
+<li>
+<p>Os cabeçalhos "hunk" mencionam o nome da função à qual o "hunk" se aplica. Consulte "Definindo um cabeçalho personalizado do hunk" em <a href="gitattributes.html">gitattributes(5)</a> para detalhes de como adaptar a isto e para linguagens específicas.</p>
 </li>
 </ol>
 </div>
@@ -3028,7 +3057,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:06:07 +0200
+Last updated 2021-08-27 14:24:53 +0200
 </div>
 </div>
 </body>

@@ -457,7 +457,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
           [--dissociate] [--separate-git-dir &lt;git skrá&gt;]
           [--depth &lt;dýpt&gt;] [--[no-]single-branch] [--no-tags]
           [--recurse-submodules[=&lt;slóðatilgreining&gt;]] [--[no-]shallow-submodules]
-          [--[no-]remote-submodules] [--jobs &lt;n&gt;] [--sparse]
+          [--[no-]remote-submodules] [--jobs &lt;n&gt;] [--sparse][--[no-]reject-shallow]
           [--filter=&lt;sía&gt;] [--] &lt;hirsla&gt;
           [&lt;skrá&gt;]</pre>
 </div>
@@ -490,9 +490,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Ef hirslan er skilgreind sem sértæk slóð (t.d. <code>/slóð/að/hirslu</code>) þá er þetta forstillt hegðurn, og --local er í eðli sínu slæpi (ofaukið). Ef hirslan er skilgreind sem URL (vefslóð) þá er þessi valmöguleiki hunsaður (og staðbundnar fínstillingar eru aldrei notaðar). Að tiltaka <code>--no-local</code> (ekkert staðbundið) mun valda því að skipunin tekur ekki tillit til forstillinga þegar <code>/slóð/að/hirslu</code> er uppgefin, og nota hinn hefðbundna Git milliflutning í staðinn.</p>
 </div>
 <div class="paragraph">
-<p><strong>NOTE</strong>: this operation can race with concurrent modification to the
-source repository, similar to running <code>cp -r src dst</code> while modifying
-<code>src</code>.</p>
+<p><strong>ATHUGIÐ</strong>: þessi aðgerð getur keppt við samhliða breytingar á upprunahirslunni, svipað og að framkvæma <code>cp -r src dst`á sama tíma og `src</code> er breytt.</p>
 </div>
 </dd>
 <dt class="hdlist1">--no-hardlinks</dt>
@@ -504,15 +502,15 @@ source repository, similar to running <code>cp -r src dst</code> while modifying
 <dd>
 <p>Þegar hirslan sem á að einrita er á staðbundinni vél, setjið sjálfkrafa upp <code>.git/objects/info/alternates</code>(git viðföng upplýsingar staðgenglar) í stað þess að nota harðhlekki til að deila viðföngum með upptakahirslunni. Hirslan sem verður til byrjar án nokkurra eigin viðfanga.</p>
 <div class="paragraph">
-<p><strong>NOTE</strong>: this is a possibly dangerous operation; do <strong>not</strong> use
-it unless you understand what it does. If you clone your
-repository using this option and then delete branches (or use any
-other Git command that makes any existing commit unreferenced) in the
-source repository, some objects may become unreferenced (or dangling).
-These objects may be removed by normal Git operations (such as <code>git commit</code>)
-which automatically call <code>git maintenance run --auto</code>. (See
-<a href="git-maintenance.html">git-maintenance(1)</a>.) If these objects are removed and were referenced
-by the cloned repository, then the cloned repository will become corrupt.</p>
+<p><strong>ATHUGIÐ</strong>: þetta er mögulega hættuleg aðgerð; <strong>ekki</strong> nota
+hana nema þú vitir hvað hún gerir. Ef þú einritar hirsluna þína
+með þessum valmöguleika og eyðir síðan greinum (eða notar einhverja
+aðra Git skipun sem gerir það að verkum að tilvísanir í innlegg sem eru til hverfa) í
+upprunahirslunni, geta sum viðföng týnt tilvísunum sínum (þau lafa).
+Þessi viðföng er hægt að fjarlægja með venjulegum Git aðgerðum (svo sem <code>git commit</code>(git inlegg))
+sem sjálfkrafa kallar á <code>git maintainance run --auto</code> (git viðhald sjálfkrafa). (Sjá <a href="git-maintainance.html">git-maintainance(1)</a>.)
+Ef þessi viðföng eru fjarlægð og hafa tilvísun í afrituðu hirslunni
+þá skrumskælist afritaða hirslan.</p>
 </div>
 <div class="paragraph">
 <p>Athugaðu að nota skipunina <code>git repack</code>(git endurpakka) án <code>--local</code> (staðbundinn) valmöguleikans í hirslu sem hefur verið einrituð með <code>--shared</code> (deildur) mun afrita viðföng úr upptakahirslunni inn í pakka í einrituðu hirslunni og fjarlæga diskplássið sem sparaðist með <code>clone --shared</code> (einrita deildur). Það er hins vegar öruggt að nota <code>git gc</code>(garbace collection, git ruslasöfnun) sem notar <code>--local</code>(staðbundinn) valmöguleikann sem forstillingu.</p>
@@ -556,6 +554,10 @@ by the cloned repository, then the cloned repository will become corrupt.</p>
 <dd>
 <p>Endurupptaka HAUS er ekki framkvæmd eftir að einritið er fullgert.</p>
 </dd>
+<dt class="hdlist1">--[no-]reject-shallow</dt>
+<dd>
+<p>Misfarast ef upptakahirslan er grunn hirlsa. Hægt er að nota stillingabreytuna <em>clone.rejectShallow</em> til þess að tiltaka sjálfgefinn valmöguleika.</p>
+</dd>
 <dt class="hdlist1">--bare</dt>
 <dd>
 <p>Þessi valmöguleiki býr til <em>nakta</em> Git hirslu. Það er að segja, í stað þess að búa til <code>&lt;skrá&gt;</code> og setja stjórnunarskrárnar í <code>&lt;skrá&gt;/git.</code> gerir hann <code>&lt;skrá&gt;</code> sjálfa <code>$GIT_DIR`skrána. Þetta felur augljóslega í sér `--no-checkout</code>(engin endurupptaka) vegna þess að það er ekki neinn staður til þar sem hægt er að endurupptaka verktréð. Einnig eru greinahausarnir sem eru fjarlægir afritaðir beint yfir í samsvarandi staðbundna greinahausa, án þess að kortleggja þá í <code>refs/remotes/origin/</code>(tilvísanir fjarlægjur uppruni). Þegar þessi valmöguleiki er notaður eru hvorki búnar til greinarnar sem eru undir fjareftirliti né tilheyrandi stillingabreytur.</p>
@@ -575,7 +577,7 @@ by the cloned repository, then the cloned repository will become corrupt.</p>
 <dt class="hdlist1">-o &lt;nafn&gt;</dt>
 <dt class="hdlist1">--origin &lt;nafn&gt;</dt>
 <dd>
-<p>Instead of using the remote name <code>origin</code> to keep track of the upstream repository, use <code>&lt;name&gt;</code>. Overrides <code>clone.defaultRemoteName</code> from the config.</p>
+<p>Tiltakið <code>&lt;nafn&gt;</code> í staðinn fyrir að nota fjarlægjunafnið <code>origin</code>(uppruni) til þess að fylgjast með hirslunni í bakáttina. Ógildir <code>clone.defaultRemoteName</code>(einrita sjálfgefið fjarlægjunafn) úr stillingaskránni.</p>
 </dd>
 <dt class="hdlist1">-b &lt;nafn&gt;</dt>
 <dt class="hdlist1">--branch &lt;nafn&gt;</dt>
@@ -622,7 +624,7 @@ by the cloned repository, then the cloned repository will become corrupt.</p>
 <p>Hægt er að nota þennan valmöguleika í samfloti við <code>--single-branch</code> (ein grein) til þess að einrita og viðhalda grein sem hefur engar tilvísanir aðrar en ein einrituð grein. Þetta er nytsamlegt t.d. til þess að viðhalda lágmarkseinritum af forstilltri grein í einhverri hirslu svo hægt sé að leita í henni eftir atriðaskrá.</p>
 </div>
 </dd>
-<dt class="hdlist1">--recurse-submodules[=&lt;pathspec&gt;]</dt>
+<dt class="hdlist1">--recurse-submodules[=&lt;slóðartilgreining&gt;]</dt>
 <dd>
 <p>Frumstilla og einrita undirverkeiningar innan einrits byggt á uppgefinni slóðartilgreiningu eftir að einritið hefur verið búið til. Ef engin slóðatilgreining er gefin upp eru allar undirverkeiningar frumstilltar og einritaðar. Hægt er að tilgreina þennan valmöguleika oftar en einu sinni fyrir slóðatilgreiningar sem innihalda fleiri en eina færslu. Einritið sem verður til fær`submodule.active`(undirverkeining virk) stillt á viðkomandi slóðatilgreiningu, eða "." (þ.e. allar verkeiningar) ef engin slóðatilgreining er gefin upp.</p>
 <div class="paragraph">
@@ -854,7 +856,7 @@ $ cd mitt-línux</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:05:34 +0200
+Last updated 2021-08-27 14:24:18 +0200
 </div>
 </div>
 </body>

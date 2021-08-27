@@ -1,0 +1,154 @@
+Format de ieșire brut
+---------------------
+
+Formatul de ieșire brut de la "git-diff-index", "git-diff-tree", "git-diff-files" și "git diff --raw" sunt foarte asemănătoare.
+
+Toate aceste comenzi compară două seturi de lucruri; ceea ce este comparat diferă:
+
+git-diff-index <tree-ish>::
+        compară <tree-ish> și fișierele din sistemul de fișiere.
+
+git-diff-index --cached <tree-ish>::
+        compară <arborele> și indexul.
+
+git-diff-tree [-r] <tree-ish-1> <tree-ish-2> [<model>...]::
+        compară arborii numiți de cele două argumente.
+
+git-diff-files [<model>...]::
+        compară indexul și fișierele din sistemul de fișiere.
+
+Comanda "git-diff-tree" își începe ieșirea prin tipărirea hash-ului a ceea ce se compară. După aceea, toate comenzile tipăresc câte o linie de ieșire pentru fiecare fișier modificat.
+
+O linie de ieșire este formatată în felul următor:
+
+------------------------------------------------
+in-place edit  :100644 100644 bcd1234 0123456 M file0
+copy-edit      :100644 100644 abcd123 1234567 C68 file1 file2
+rename-edit    :100644 100644 abcd123 1234567 R86 file1 file3
+create         :000000 100644 0000000 1234567 A file4
+delete         :100644 000000 1234567 0000000 D file5
+unmerged       :000000 000000 0000000 0000000 U file6
+------------------------------------------------
+
+Adică, de la stânga la dreapta:
+
+. un colon.
+. modul pentru "src"; 000000 dacă este vorba de creație sau de nefuziune.
+. un spațiu.
+. modul pentru "dst"; 000000 dacă este vorba de ștergere sau de nefuziune.
+. un spațiu.
+. sha1 pentru "src"; 0\{40\} în cazul în care este vorba de o creație sau nu a fost fuzionată.
+. un spațiu.
+. sha1 pentru "dst"; 0\{40\} în cazul în care este vorba de creație, fără fuziune sau " uita-te la configurația de lucru".
+. un spațiu.
+. statutul, urmat de numărul opțional "scor".
+. o tabulație sau un NUL atunci când se utilizează opțiunea `-z`.
+. calea pentru "src"
+. o tabulație sau un NUL atunci când se utilizează opțiunea `-z`; există numai pentru C sau R.
+. calea pentru "dst"; există numai pentru C sau R.
+. un LF sau un NUL atunci când se utilizează opțiunea `-z`, pentru a încheia înregistrarea.
+
+Scrisorile de stare posibile sunt:
+
+- A: adăugarea unui fișier
+- C: copierea unui fișier într-unul nou
+- D: ștergerea unui fișier
+- M: modificarea conținutului sau a modului unui fișier
+- R: redenumirea unui fișier
+- T: schimbarea tipului de fișier
+- U: fișierul nu este fuzionat (trebuie să finalizați fuziunea înainte de a putea fi confirmat)
+- X: tip de modificare "necunoscut" (cel mai probabil o eroare, vă rugăm să o raportați)
+
+Literele de stare C și R sunt întotdeauna urmate de un scor (care indică procentul de similitudine dintre sursa și ținta mutării sau a copiei). Litera de stare M poate fi urmată de un scor (care indică procentul de disimilaritate) pentru rescrierea fișierelor.
+
+<sha1> este afișat cu toate 0 dacă un fișier este nou în sistemul de fișiere și nu este sincronizat cu indexul.
+
+Exemplu:
+
+------------------------------------------------
+:100644 100644 5be4a4a 0000000 M file.c
+------------------------------------------------
+
+Fără opțiunea `-z`, numele de cale cu caractere "neobișnuite" sunt citate așa cum se explică pentru variabila de configurare `core.quotePath` (vezi linkgit:git-config[1]). Folosind `-z` numele fișierului este redat textual, iar linia este terminată cu un byte NUL.
+
+format diff pentru fuziuni
+--------------------------
+
+"git-diff-tree", "git-diff-files" și "git-diff --raw" pot primi opțiunile `-c` sau `--cc` pentru a genera o ieșire diff și pentru comenzi de fuziune. Ieșirea diferă de formatul descris mai sus în felul următor:
+
+. există o coloană pentru fiecare părinte
+. există mai multe moduri "src" și "src" sha1
+. status reprezintă caracterele de status concaternate pentru fiecare ascendent
+. niciun număr opțional de "scor"
+. numele traseului (traseele) fișierului, separate prin tabulare
+
+Pentru `-c` și `--cc`, este afișată numai calea de destinație sau finală, chiar dacă fișierul a fost redenumit în orice parte a istoricului. Cu `--combined-all-paths`, se afișează numele căii de acces din fiecare sursă , urmat de numele căii de acces din comisionul de fuziune.
+
+Exemple pentru `-c` și `--cc` fără `--combined-all-paths`:
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	phooey.c
+------------------------------------------------
+
+Exemple atunci când se adaugă `--combined-all-paths` la `-c` sau `--cc`:
+
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c	desc.c	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	foo.sh	bar.sh	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	fooey.c	fuey.c	phooey.c
+------------------------------------------------
+
+Rețineți că "combined diff" listează numai fișierele care au fost modificate de la fiecare sursă.
+
+
+include::diff-generate-patch.txt[]
+
+
+alte formate diff
+-----------------
+
+Opțiunea `--summary` descrie fișierele nou adăugate, șterse, redenumite și copiate. Opțiunea `--stat` adaugă graficul diffstat(1) la ieșire. Aceste opțiuni pot fi combinate cu alte opțiuni, cum ar fi `-p`, și sunt destinate consumului uman.
+
+Atunci când se afișează o modificare care implică o redenumire sau o copiere, ieșirea `--stat` formatează compact numele căilor de acces prin combinarea prefixului și sufixului comun al numelor de acces. De exemplu, o modificare care mută `arch/i386/Makefile` în `arch/x86/Makefile`, modificând 4 linii, va fi afișată în felul următor:
+
+------------------------------------
+arch/{i386 => x86}/Makefile    |   4 +--
+------------------------------------
+
+Opțiunea `--numstat` oferă informațiile din diffstat(1), dar este concepută pentru un consum mai ușor al mașinii. O intrare în ieșirea `--numstat` arată astfel:
+
+----------------------------------------
+1	2	README
+3	1	arch/{i386 => x86}/Makefile
+----------------------------------------
+
+Adică, de la stânga la dreapta:
+
+. numărul de linii adăugate;
+. o filă;
+. numărul de linii șterse;
+. o filă;
+. pathname (eventual cu informații de redenumire/copiere);
+. o linie nouă.
+
+Atunci când opțiunea de ieșire `-z` este în vigoare, ieșirea este formatată în acest mod:
+
+----------------------------------------
+1	2	README NUL
+3	1	NUL arch/i386/Makefile NUL arch/x86/Makefile NUL
+----------------------------------------
+
+Asta este:
+
+. numărul de linii adăugate;
+. o filă;
+. numărul de linii șterse;
+. o filă;
+. un NUL (există numai dacă este redenumit/copiat);
+. pathname în preimagine;
+. un NUL (există numai dacă este redenumit/copiat);
+. pathname în postimage (există doar dacă este redenumit/copiat);
+. un NUL.
+
+Introducerea unui `NUL` suplimentar înaintea căii de preimagine în cazul redenumirii este pentru a permite scripturilor care citesc ieșirea să afle dacă înregistrarea curentă citită este o înregistrare cu o singură cale sau o înregistrare de redenumire/copiere fără a citi înainte. După citirea liniilor adăugate și șterse, citirea până la `NUL` ar produce numele căii de acces, dar dacă acesta este `NUL`, înregistrarea va afișa două căi de acces.

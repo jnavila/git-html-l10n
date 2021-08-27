@@ -642,15 +642,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">trailer.&lt;token&gt;.command</dt>
 <dd>
-<p>Esta opção pode ser utilizada para definir um comando shell que será chamado para adicionar ou modificar automaticamente um caractere de resposta com o &lt;token&gt; definido.</p>
+<p>Esta opção se comporta da mesma maneira que o <em>trailer.&lt;token&gt;.cmd</em>, exceto que nada é oferecido como argumento para o comando informado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo valor que seria passado como argumento.</p>
 <div class="paragraph">
-<p>Quando esta opção é utilizada, o comportamento é como se um argumento especial <em>&lt;token&gt;=&lt;valor&gt;</em> fosse adicionado no início da linha de comando, onde &lt;valor&gt; é considerado a saída padrão do comando utilizado, removendo quaisquer espaços no começo e no fim.</p>
+<p>A opção <em>trailer.&lt;token&gt;.command</em> foi substituída por <em>trailer.&lt;token&gt;.cmd</em> pois o $ARG no comando do usuário ser substituído apenas uma vez e a maneira anterior de se substituir o $ARG não era segura.</p>
 </div>
 <div class="paragraph">
-<p>Caso o comando tiver um texto <code>$ARG</code>, ela será substituída pela parte <code>&lt;valor&gt;</code> do caractere de resposta já existente com o mesmo <code>&lt;token&gt;</code>, se houver, antes da execução do comando.</p>
+<p>Quando ambos <em>trailer.&lt;token&gt;.cmd</em> e <em>trailer.&lt;token&gt;.command</em> são oferecidos para o mesmo &lt;token&gt;, o <em>trailer.&lt;token&gt;.cmd</em> é usado e o <em>trailer.&lt;token&gt;.command</em> é ignorado.</p>
+</div>
+</dd>
+<dt class="hdlist1">trailer.&lt;token&gt;.cmd</dt>
+<dd>
+<p>Esta opção pode ser usada para definir um comando shell que será invocado: uma vez para adicionar um atrelado de forma automática com o &lt;token&gt; informado e, a seguir, a cada opção <em>--trailer &lt;token&gt;=&lt;valor&gt;</em> para alterar o &lt;valor&gt; do atrelado que esta opção produziria.</p>
+<div class="paragraph">
+<p>Quando o comando informado é chamado pela primeira vez para adicionar um atrelado com o &lt;token&gt; definido, o comportamento é como se um argumento especial <em>--trailer &lt;token&gt;=&lt;valor&gt;</em> fosse adicionado no início do comando "git interpret-trailers", onde o &lt;valor&gt; é considerado a saída padrão do comando com qualquer espaço em branco eliminado à esquerda e à direita.</p>
 </div>
 <div class="paragraph">
-<p>Caso alguns dos argumentos <em>&lt;token&gt;=&lt;valor&gt;</em> também forem passados na linha de comando, quando um <em>trailer.&lt;token&gt;.command</em> estiver configurado, o comando também será executado para cada um destes argumentos. A parte <code>&lt;valor&gt;</code> destes argumentos, caso haja, será utilizada para substituir a string <code>$ARG</code> no comando.</p>
+<p>Caso algumas opção <em>--trailer &lt;token&gt;=&lt;valor&gt;</em> também sejam passadosna linha de comando, o comando é invocado novamente uma vez para cada um destes argumentos que tenham o mesmo &lt;token&gt;. E a parte &lt;valor&gt; desses argumentos, caso hajam, será passada ao comando como sendo o seu primeiro argumento. Desta forma, o comando pode produzir um &lt;valor&gt; calculado a partir do &lt;valor&gt; informado na opção <em>--trailer &lt;token&gt;=&lt;valor&gt;</em>.</p>
 </div>
 </dd>
 </dl>
@@ -746,6 +753,55 @@ Fix #42</pre>
 </div>
 </li>
 <li>
+<p>Configure um atrelado de <em>ajuda</em> com um cmd usando um script <code>glog-find-author</code> que pesquisa a identidade do autor informado no log do git no repositório e mostre como funciona:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cat ~/bin/glog-find-author
+#!/bin/sh
+test -n "$1" &amp;&amp; git log --author="$1" --pretty="%an &lt;%ae&gt;" -1 || true
+$ git config trailer.help.key "Auxiliado por: "
+$ git config trailer.help.ifExists "addIfDifferentNeighbor"
+$ git config trailer.help.cmd "~/bin/glog-find-author"
+$ git interpret-trailers --trailer="help:Junio" --trailer="help:Couder" &lt;&lt;EOF
+&gt; assunto
+&gt;
+&gt; mensagem
+&gt;
+&gt; EOF
+assunto
+
+mensagem
+
+Auxiliado por: Junio C Hamano &lt;gitster@pobox.com&gt;
+Auxiliado por: Christian Couder &lt;christian.couder@gmail.com&gt;</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Configure um atrelado <em>ref</em> com um cmd, use um script <code>glog-grep</code> para fazer um "grep" (captura) do último commit relevante do log do git no repositório e mostre como funciona:</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ cat ~/bin/glog-grep
+#!/bin/sh
+test -n "$1" &amp;&amp; git log --grep "$1" --pretty=reference -1 || true
+$ git config trailer.ref.key "Referência para: "
+$ git config trailer.ref.ifExists "substitua"
+$ git config trailer.ref.cmd "~/bin/glog-grep"
+$ git interpret-trailers --trailer="ref:Add copyright notices." &lt;&lt;EOF
+&gt; assunto
+&gt;
+&gt; mensagem
+&gt;
+&gt; EOF
+assunto
+
+mensagem
+
+Refere-se ao: 8bc9a0c769 (Adicionado avisos de ireitos autorais., 2005-04-07)</pre>
+</div>
+</div>
+</li>
+<li>
 <p>Configure um caractere de resposta <em>see</em> com um comando para exibir o assunto de um commit relacionado e exibir como ele funciona:</p>
 <div class="listingblock">
 <div class="content">
@@ -815,7 +871,7 @@ $ chmod +x .git/hooks/commit-msg</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:06:07 +0200
+Last updated 2021-08-27 14:24:53 +0200
 </div>
 </div>
 </body>

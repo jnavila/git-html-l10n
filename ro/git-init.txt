@@ -1,0 +1,129 @@
+git-init(1)
+===========
+
+NUME
+----
+git-init - Creează un depozit Git gol sau reinitializează unul existent
+
+
+REZUMAT
+-------
+[verse]
+'git init' [-q | --quiet] [--bare] [--template=<directorul_șablon>]]
+	  [--separate-git-dir <git dir>] [--object-format=<format>]
+	  [-b <branch-name> | --initial-branch=<branch-name>]
+	  [--shared[=<permissions>]]] [director]
+
+
+DESCRIERE
+---------
+
+Această comandă creează un depozit Git gol - practic un director `.git` cu subdirectoare pentru `objects`, `refs/heads`, `refs/tags` și fișiere șablon. Va fi creată o branșă inițială fără nici un angajament (a se vedea opțiunea `--initial-branch` de mai jos pentru numele acesteia).
+
+Dacă variabila de mediu `$GIT_DIR` este setată, atunci aceasta specifică o cale care să fie utilizată în locul lui `./.git` pentru baza depozitului.
+
+Dacă directorul de stocare a obiectelor este specificat prin intermediul variabilei de mediu `$GIT_OBJECT_DIRECTORY`, atunci directoarele sha1 sunt create dedesubt - în caz contrar, se utilizează directorul implicit `$GIT_DIR/objects`.
+
+Rularea 'git init' într-un depozit existent este sigură. Nu va suprascrie lucruri care există deja. Motivul principal pentru care se reia "git init" este pentru a prelua șabloanele nou adăugate (sau pentru a muta depozitul în alt loc dacă se indică --separate-git-dir).
+
+OPȚIUNI
+-------
+
+-q::
+--quiet::
+
+Imprimă numai mesajele de eroare și de avertizare; toate celelalte mesaje de ieșire vor fi suprimate.
+
+--bare::
+
+Creați un depozit gol. Dacă mediul `GIT_DIR` nu este setat, acesta este setat la directorul de lucru curent.
+
+--object-format=<format>::
+
+Specifică formatul obiectului dat (algoritmul hash) pentru depozit. Valorile valide sunt "sha1" și (dacă este activat) "sha256". 'sha1' este valoarea implicită.
++
+include::object-format-disclaimer.txt[]
+
+--template=<template_directory>::
+
+Specificați directorul din care vor fi utilizate șabloanele. (A se vedea secțiunea "REPERTORIUL DE MODELE" de mai jos)
+
+--separate-git-dir=<git dir>::
+
+În loc să inițializați depozitul ca un director în `$GIT_DIR` sau `./.git/`, creați un fișier text care să conțină calea către depozitul real. Acest fișier acționează ca o legătură simbolică Git agnostică pentru sistemul de fișiere către depozit.
++
+Dacă este vorba de o reinitializare, depozitul va fi mutat în calea specificată.
+
+-b <branch-name>::
+--initial-branch=<branch-name>::
+
+Utilizați numele specificat pentru branșa inițială din depozitul nou creat. Dacă nu este specificat, se revine la numele implicit (în prezent `master`, dar acesta poate fi modificat în viitor; numele poate fi personalizat prin intermediul variabilei de configurare `init.defaultBranch`).
+
+--shared[=(false|true|umask|group|all|world|everybody|0xxx)]::
+
+Specificați că depozitul Git trebuie partajat între mai mulți utilizatori. Acest lucru permite utilizatorilor care aparțin aceluiași grup să facă push în acest depozit. Atunci când este specificată, variabila de configurare "core.sharedRepository" este setată astfel încât fișierele și directoarele din `$GIT_DIR` să fie create cu permisiunile solicitate. Atunci când nu este specificată, Git va utiliza permisiunile raportate de umask(2).
++
+Opțiunea poate avea următoarele valori, valoarea implicită fiind "group" în cazul în care nu se dă nicio valoare:
++
+--
+'umask' (or 'false')::
+
+Utilizați permisiunile raportate de umask(2). Valoarea implicită, atunci când nu este specificat `--shared`.
+
+'group' (or 'true')::
+
+Faceți ca depozitul să poată fi scris în grup (și g+sx, deoarece este posibil ca grupul git să nu fie grupul principal al tuturor utilizatorilor). Acest lucru este utilizat pentru a slăbi permisiunile unei valori umask(2), care altfel ar fi sigură. Rețineți că umask-ul se aplică în continuare celorlalți bits de permisiune (de exemplu, dacă umask este "0022", utilizarea "group" nu va elimina privilegiile de citire pentru alți utilizatori (care nu fac parte din grup)). Consultați "0xxx" pentru a afla cum să specificați cu exactitate permisiunile depozitului.
+
+'all' (or 'world' or 'everybody')::
+
+La fel ca "group", dar face ca depozitul să poată fi citit de toți utilizatorii.
+
+'0xxx'::
+
+"0xxx" este un număr octal și fiecare fișier va avea modul "0xxx". '0xxx' va anula valoarea umask(2) a utilizatorilor (și nu doar va slăbi permisiunile, așa cum fac 'group' și 'all'). '0640' va crea un depozit care poate fi citit de grup, dar nu poate fi scris de grup sau accesibil altora. '0660' va crea un depozit care poate fi citit și scris de către utilizatorul și grupul curent, dar care este inaccesibil altora.
+--
+
+În mod implicit, marcajul de configurație `receive.denyNonFastForwards` este activat în depozitele partajate, astfel încât să nu puteți forța un push care nu este de tip fast-forwarding în acestea.
+
+Dacă furnizați un "director", comanda este executată în interiorul acestuia. Dacă acest director nu există, va fi creat.
+
+DIRECTOR DE ȘABLOANE
+--------------------
+
+Fișierele și directoarele din directorul șablon al căror nume nu începe cu un punct vor fi copiate în `$GIT_DIR` după ce acesta este creat.
+
+Directorul șablonului va fi unul dintre următoarele (în ordine):
+
+ - argumentul dat cu opțiunea `--template`;
+
+ - conținutul variabilei de mediu `$GIT_TEMPLATE_DIR`;
+
+ - variabila de configurare `init.templateDir`; sau
+
+ - directorul de șabloane implicit: `/usr/share/git-core/templates`.
+
+Directorul șablon implicit include o anumită structură de directoare, "modele de excludere" sugerate (a se vedea linkgit:gitignore[5]) și exemple de fișiere hook.
+
+Probele de tip hook sunt toate dezactivate în mod implicit. Pentru a activa unul dintre cârligele de probă, redenumiți-l prin eliminarea sufixului `.sample`.
+
+Consultați linkgit:githooks[5] pentru mai multe informații generale despre executarea Consultați linkgit:githooks[5] pentru mai multe informații generale despre executarea hook-urilor..
+
+EXEMPLE
+-------
+
+Începeți un nou depozit Git pentru o bază de cod existentă::
++
+----------------
+$ cd /path/to/my/codebase
+$ git init      <1>
+$ git add .     <2>
+$ git commit    <3>
+----------------
++
+<1> Creați un director /path/to/my/codebase/.git.
+<2> Adăugați toate fișierele existente la index.
+<3> Înregistrează starea inițială ca prima confirmare în cursul depozitului.
+
+GIT
+---
+Parte a suitei linkgit:git[1]

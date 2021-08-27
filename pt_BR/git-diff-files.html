@@ -646,11 +646,11 @@ utilizado, não una os nomes do caminho e utilize caracteres <code>NUL</code> co
 </dd>
 <dt class="hdlist1">--name-only</dt>
 <dd>
-<p>Exiba apenas os nomes dos arquivos que foram alterados.</p>
+<p>Mostre apenas os nomes dos arquivos que foram alterados. Os nomes dos arquivos são frequentemente codificados em UTF-8. Para mais informações, consulte a discussão sobre codificação na página do manual <a href="git-log.html">git-log(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--name-status</dt>
 <dd>
-<p>Exiba apenas os nomes e a condição atual dos arquivos que foram alterados. Consulte a descrição da opção <code>--diff-filter</code> sobre o significado das letras de condição.</p>
+<p>Exiba apenas os nomes e a condição atual dos arquivos que foram alterados. Consulte a descrição da opção <code>--diff-filter</code> sobre o significado das letras de condição. Assim como os nomes dos arquivos com <code>--name-only</code> geralmente são codificados em UTF-8.</p>
 </dd>
 <dt class="hdlist1">--submodule[=&lt;formato&gt;]</dt>
 <dd>
@@ -866,7 +866,7 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 </dd>
 <dt class="hdlist1">-l&lt;num&gt;</dt>
 <dd>
-<p>As opções <code>-M</code> e <code>-C</code> requerem um tempo de processamento O(n^2) em que n é a quantidade de possíveis alvos para renomeações/cópia. Esta opção impede que a detecção da ação de renomear/cópia seja executada se a quantidade dos alvos a serem renomeados/copiados exceda o a quantidade usada.</p>
+<p>As opções <code>-M</code> e <code>-C</code> precisa de algumas ações preliminares que podem detectar os subconjuntos das renomeações/cópias simples, seguidos por uma exaustiva porção de recursos que compara o resto de todos os destinos que ainda não foram reparados com todas as fontes relevantes. (Para as renomeações, apenas as fontes restantes que não foram pareadas são relevantes; nas cópias, todas as fontes originais são relevantes). Para N fontes e destinos, esta verificação exaustiva é O(N^2). Esta opção impede que a parte exaustiva da detecção de renomeamento/cópia seja executada caso a quantidade dos arquivos de origem/destino envolvidos exceda a quantidade definida. Caso contrário, retorna para o valor definido em <code>diff.renameLimit</code>. Observe que o valor 0 é tratado como ilimitado.</p>
 </dd>
 <dt class="hdlist1">--diff-filter=[(A|C|D|M|R|T|U|X|B)&#8230;&#8203;[*]]</dt>
 <dd>
@@ -1290,7 +1290,7 @@ não mesclado     :000000 000000 0000000 0000000 U   arquivo6</pre>
 <h2 id="_gerando_a_correção_em_um_formato_texto_com_a_opção_p">Gerando a correção em um formato texto com a opção <code>-p</code></h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Executando <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a>, ou <a href="git-diff-files.html">git-diff-files(1)</a> com a opção <code>-p</code> produz um patch em formato texto. É possível personalizar a criação do patch em um formato texto através das variáveis de ambiente <code>GIT_EXTERNAL_DIFF</code> e <code>GIT_DIFF_OPTS</code> (consulte <a href="git.html">git(1)</a>).</p>
+<p>Executando <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a>, ou <a href="git-diff-files.html">git-diff-files(1)</a> com a opção <code>-p</code> produz um patch em formato texto. É possível personalizar a criação do patch em um formato texto através das variáveis de ambiente <code>GIT_EXTERNAL_DIFF</code>, <code>GIT_DIFF_OPTS</code> (consulte <a href="git.html">git(1)</a>) e o atributo <code>diff</code> (consulte <a href="gitattributes.html">gitattributes(5)</a>).</p>
 </div>
 <div class="paragraph">
 <p>O que a opção <code>-p</code> produz é um pouco diferente do formato diff tradicional:</p>
@@ -1356,6 +1356,9 @@ renomeie a partir do b
 renomeie para a</pre>
 </div>
 </div>
+</li>
+<li>
+<p>Os cabeçalhos "hunk" mencionam o nome da função à qual o "hunk" se aplica. Consulte "Definindo um cabeçalho personalizado do hunk" em <a href="gitattributes.html">gitattributes(5)</a> para detalhes de como adaptar a isto e para linguagens específicas.</p>
 </li>
 </ol>
 </div>
@@ -1593,7 +1596,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:06:07 +0200
+Last updated 2021-08-27 14:24:52 +0200
 </div>
 </div>
 </body>

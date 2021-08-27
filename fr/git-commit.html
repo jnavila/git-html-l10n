@@ -452,12 +452,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git commit</em> [-a | --interactive | --patch] [-s] [-v] [-u&lt;mode&gt;] [--amend]
-           [--dry-run] [(-c | -C | --fixup | --squash) &lt;commit&gt;]
+           [--dry-run] [(-c | -C | -squash) &lt;commit&gt;] | --fixup [(amend|reword):]&lt;commit&gt;)]
            [-F &lt;fichier&gt; | -m &lt;msg&gt;] [--reset-author] [--allow-empty]
            [--allow-empty-message] [--no-verify] [-e] [--author=&lt;auteur&gt;]
            [--date=&lt;date&gt;] [--cleanup=&lt;mode&gt;] [--[no-]status]
            [-i | -o] [--pathspec-from-file=&lt;fichier&gt; [--pathspec-file-nul]]
-           [-S[&lt;idclé&gt;]] [--] [&lt;spec-de-chemin&gt;&#8230;&#8203;]</pre>
+           [(--trailer &lt;token&gt;[(=|:)&lt;valeur&gt;])&#8230;&#8203;] [-S[&lt;idclé&gt;]]
+        [--] [&lt;spec-de-chemin&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -522,9 +523,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Comme <em>-C</em>, mais avec <em>-c</em>, l&#8217;éditeur est appelé pour permettre à l&#8217;utilisateur de modifier le message de validation.</p>
 </dd>
-<dt class="hdlist1">--fixup=&lt;commit&gt;</dt>
+<dt class="hdlist1">--fixup=[(amend|reword):]&lt;commit&gt;</dt>
 <dd>
-<p>Construire un message de validation pour une utilisation avec <code>rebase --autosquash</code>. Le message de validation sera la ligne de titre du commit spécifié préfixée de « fixup !  ». Référez-vous à <a href="git-rebase.html">git-rebase(1)</a> pour de plus amples détails.</p>
+<p>Créer un nouveau commit qui « répare » <code>&lt;commit&gt;</code> quand il est appliqué avec <code>git rebase --autosquash`</code>. Un simple <code>--fixup=&lt;commit&gt;</code> crée un commit "fixup !" qui change le contenu de <code>&lt;commit&gt;</code> mais laisse son message de validation inchangé. <code>-fixup=amend:&lt;commit&gt;</code> est similaire mais crée un commit "amend !" qui remplace aussi le message de validation de <code>&lt;commit&gt;</code> par le message de validation du commit "amend !". <code>--fixup=reword:&lt;commit&gt;</code> crée un commit "amend !" qui remplace le message de validation de <code>&lt;commit&gt;</code> par son propre message de log mais ne fait aucun changement au contenu de <code>&lt;commit&gt;</code>.</p>
+<div class="paragraph">
+<p>Le commit créé par le simple <code>--fixup=&lt;commit&gt;</code> a un sujet composé de "fixup !" suivi de la ligne de sujet de &lt;commit&gt;, et est reconnu spécialement par <code>git rebase --autosquash</code>. L&#8217;option <code>-m</code> peut être utilisée pour compléter le message du journal du commit créé, mais le commentaire supplémentaire sera jeté une fois que le commit "fixup !" sera écrasé dans <code>&lt;commit&gt;</code> par <code>git rebase --autosquash</code>.</p>
+</div>
+<div class="paragraph">
+<p>Le commit créé par <code>--fixup=amend:&lt;commit&gt;</code> est similaire mais son sujet est à la place préfixé par "amend !". Le message de validation de &lt;commit&gt; est copié dans le message de validation du commit "amend !" et ouvert dans un éditeur afin qu&#8217;il puisse être affiné. Lorsque <code>git rebase --autosquash</code> écrase le commit "amend !" dans <code>&lt;commit&gt;</code>, le message de validation de <code>&lt;commit&gt;</code> est remplacé par le message de validation raffiné du commit "amend !". C&#8217;est une erreur si le message du journal du commit "amend !" est vide, à moins que <code>--allow-empty-message</code> soit spécifié.</p>
+</div>
+<div class="paragraph">
+<p><code>--fixup=reword:&lt;commit&gt;</code> est un raccourci pour <code>--fixup=amend:&lt;commit&gt; --only</code>. Il crée un commit "amend !" qui touche seulement au message de validation (en ignorant les changements mis en place dans l&#8217;index). Lorsqu&#8217;il est écrasé par <code>git rebase --autosquash</code>, il remplace le message du validation de <code>&lt;commit&gt;</code> sans faire d&#8217;autres changements.</p>
+</div>
+<div class="paragraph">
+<p>Ni les commits "fixup !" ni les commits "amend !" ne changent la paternité de <code>&lt;commit&gt;</code> quand ils sont appliqués par <code>git rebase --autosquash</code>. Voir <a href="git-rebase.html">git-rebase(1)</a> pour plus de détails.</p>
+</div>
 </dd>
 <dt class="hdlist1">--squash=&lt;commit&gt;</dt>
 <dd>
@@ -587,8 +600,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Ajouter une ligne finale <code>Signed-off-by</code> du validateur à la fin du message de validation. La signification de signoff dépend du projet sur lequel vous validez. Par exemple, cela peut certifier que le validateur a le droit de soumettre son travail sous la licence du projet ou accepte une certaine représentation du contributeur, tel qu&#8217;un Certificat d&#8217;Origine de Développeur. (Voir <a href="http://developercertificate.org/" class="bare">http://developercertificate.org/</a> pour celui utilisé par les projet du noyau Linux ou de Git). Consultez la documentation ou la direction du projet auquel vous contribuez pour comprendre comment les signatures sont utilisées dans ce projet.</p>
 <div class="paragraph">
-<p>The --no-signoff option can be used to countermand an earlier --signoff option on the command line.</p>
+<p>L&#8217;option --no-signoff peut être utilisée pour contrecarrer une option --signoff précédente sur la ligne de commande.</p>
 </div>
+</dd>
+<dt class="hdlist1">--trailer &lt;jeton&gt;[(=| :)&lt;valeur&gt;]</dt>
+<dd>
+<p>Spécifier une paire (&lt;jeton&gt;, &lt;valeur&gt;) qui doit être appliquée comme une ligne terminale (par exemple, <code>git commit --trailer "Signed-off-by:C O Mitter \ &lt;committer@example.com&gt;" --trailer "Helped-by:C O Mitter \ &lt;committer@example.com&gt;"</code> ajoutera la ligne terminale "Signed-off-by" et la ligne terminale "Helped-by" au message de validation). Les variables de configuration <code>trailer.*</code> (<a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>) peuvent être utilisées pour définir si une ligne terminale dupliquée est omise, ou où chaque ligne terminale apparaîtrait dans la série de lignes terminales, et d&#8217;autres détails.</p>
 </dd>
 <dt class="hdlist1">-n</dt>
 <dt class="hdlist1">--no-verify</dt>
@@ -1037,7 +1054,7 @@ De plus, la partie date est acceptée dans les formats suivants : <code>AAAA.MM
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:05:21 +0200
+Last updated 2021-08-27 14:24:05 +0200
 </div>
 </div>
 </body>

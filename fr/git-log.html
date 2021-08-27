@@ -462,7 +462,39 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Affiche les journaux de validation.</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-log.txt - include::rev-list-description.txt[]</p>
+<p>Liste les commits qui sont accessibles en suivant les liens <code>parents</code> du ou des commits donnés, mais exclut les commits qui sont accessibles depuis le ou les commits donnés avec un <em>^</em> devant eux. La sortie est donnée dans l&#8217;ordre chronologique inverse par défaut.</p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez considérer cela comme une opération sur un ensemble. Les commits accessibles à partir de n&#8217;importe lequel des commits donnés sur la ligne de commande forment un ensemble, puis les commits accessibles à partir de n&#8217;importe lequel de ceux donnés avec <em>^</em> devant sont soustraits de cet ensemble. Les commits restants sont ceux qui apparaissent dans la sortie de la commande. Diverses autres options et paramètres de chemins peuvent être utilisés pour limiter davantage le résultat.</p>
+</div>
+<div class="paragraph">
+<p>Ainsi, la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git log foo bar ^baz</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>signifie "liste tous les commits qui sont accessibles depuis <em>foo</em> ou <em>bar</em>, mais pas depuis <em>baz</em>".</p>
+</div>
+<div class="paragraph">
+<p>Une notation spéciale "<em>&lt;commit1&gt;</em>..<em>&lt;commit2&gt;</em>" peut être utilisée comme raccourci pour "^<em>&lt;commit1&gt;</em> <em>&lt;commit2&gt;</em>". Par exemple, l&#8217;un ou l&#8217;autre des éléments suivants peut être utilisé de manière interchangeable :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git log origin..HEAD
+$ git log HEAD ^origin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Une autre notation spéciale est "<em>&lt;commit1&gt;</em>&#8230;&#8203;<em>&lt;commit2&gt;</em>" qui est utile pour les fusions. L&#8217;ensemble de commits résultant est la différence symétrique entre les deux opérandes. Les deux commandes suivantes sont équivalentes :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git log A B --not $(git merge-base --all A B)
+$ git log A...B</pre>
+</div>
 </div>
 <div class="paragraph">
 <p>La commande prend les options applicables à la commande <a href="git-rev-list.html">git-rev-list(1)</a> pour contrôler ce qui est montré et comment, et les options applicables aux commandes <a href="git-diff.html">git-diff(1)</a> pour contrôler la façon dont les modifications que chaque validation introduit sont affichées.</p>
@@ -481,7 +513,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--no-decorate</dt>
 <dt class="hdlist1">--decorate[=short|full|auto|no]</dt>
 <dd>
-<p>Imprimer les noms de réference des commits affichés. Si <em>short</em> est spécifié, les préfixes des noms de référence <em>refs/heads/</em>, <em>refs/tags/</em> et <em>refs/remotes/</em> ne seront pas affichés. Si <em>full</em> est spécifié, le nom complet de la référence (y compris le préfixe) sera imprimé. Si <em>auto</em> est spécifié, alors si la sortie va à un terminal, les noms de référence sont affichés comme si <em>short</em> ont été donné, sinon aucun nom de référence n&#8217;est affiché. L&#8217;option par défaut est <em>short</em>.</p>
+<p>Imprimer les noms de réference des commits affichés. Si <em>short</em> est spécifié, les préfixes des noms de référence <em>refs/heads/</em>, <em>refs/tags/</em> et <em>refs/remotes/</em> ne seront pas affichés. Si <em>full</em> est spécifié, le nom complet de la référence (y compris le préfixe) sera imprimé. Si <em>auto</em> est spécifié, alors si la sortie va à un terminal, les noms de référence sont affichés comme si <em>short</em> ont été donné, sinon aucun nom de référence n&#8217;est affiché. L&#8217;option <code>--decorate</code> est l&#8217;abréviation de <code>--decorate=short</code>. La valeur par défaut est la valeur de configuration de <code>log.decorate</code> si elle est configurée, sinon, <code>auto</code>.</p>
 </dd>
 <dt class="hdlist1">--decorate-refs=&lt;motif&gt;</dt>
 <dt class="hdlist1">--decorate-refs-exclude=&lt;motif&gt;</dt>
@@ -1736,6 +1768,10 @@ L'entête était &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional d
 <dd>
 <p>date d&#8217;auteur, format court (<code>AAAA-MM-JJ</code>)</p>
 </dd>
+<dt class="hdlist1"><em>%ah</em></dt>
+<dd>
+<p>date de l&#8217;auteur, style humain (comme l&#8217;option <code>--date=human</code> de <a href="git-rev-list.html">git-rev-list(1)</a>)</p>
+</dd>
 <dt class="hdlist1"><em>%cn</em></dt>
 <dd>
 <p>nom du validateur</p>
@@ -1788,6 +1824,10 @@ L'entête était &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional d
 <dd>
 <p>date de validation, format court (<code>AAAA-MM-JJ</code>)</p>
 </dd>
+<dt class="hdlist1"><em>%ch</em></dt>
+<dd>
+<p>date du validateur, style humain (comme l&#8217;option <code>--date=human</code> de <a href="git-rev-list.html">git-rev-list(1)</a>)</p>
+</dd>
 <dt class="hdlist1"><em>%d</em></dt>
 <dd>
 <p>les noms de ref, comme l&#8217;option --decorate de <a href="git-log.html">git-log(1)</a>.</p>
@@ -1795,6 +1835,20 @@ L'entête était &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional d
 <dt class="hdlist1"><em>%D</em></dt>
 <dd>
 <p>les noms des refs, sans encadrement par « ( » et « ) ».</p>
+</dd>
+<dt class="hdlist1"><em>%(describe[:options])</em></dt>
+<dd>
+<p>nom lisible par l&#8217;homme, comme <a href="git-describe.html">git-describe(1)</a> ; chaîne vide pour les commits non descriptibles. La chaîne <code>describe</code> peut être suivie de deux points et de zéro ou plusieurs options séparées par des virgules. Les descriptions peuvent être incohérentes lorsque des étiquettes sont ajoutées ou supprimées en même temps.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><em>match=&lt;motif&gt;</em> : Ne considère que les étiquettes correspondant au motif <code>glob(7)</code> donné, à l&#8217;exclusion du préfixe "refs/tags/".</p>
+</li>
+<li>
+<p>exclude=&lt;motif&gt;' : Ne pas prendre en compte les étiquettes correspondant au motif <code>glob(7)</code> donné, en excluant le préfixe "refs/tags/".</p>
+</li>
+</ul>
+</div>
 </dd>
 <dt class="hdlist1"><em>%S</em></dt>
 <dd>
@@ -1997,7 +2051,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dd>
 <p>Supprimer la sortie diff. Utile pour les commandes telles que <code>git show</code> qui affichent la rustine par défaut, ou pour supprimer l&#8217;effet de <code>--patch</code>.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=(off|none|first-parent|1|separate|m|combined|c|dense-combined|cc)</dt>
+<dt class="hdlist1">--diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc)</dt>
 <dt class="hdlist1">--no-diff-merges</dt>
 <dd>
 <p>Préciser le format de diff à utiliser pour les commits de fusion. La valeur par défaut est `off` sauf si <code>--first-parent</code> est utilisé, auquel cas <code>first-parent</code> est la valeur par défaut.</p>
@@ -2008,16 +2062,20 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dd>
 <p>Désactive la sortie des diffs pour des commits de fusion. Utile pour passer outre la valeur sous-entendue.</p>
 </dd>
+<dt class="hdlist1">--diff-merges=on</dt>
+<dt class="hdlist1">--diff-merges=m</dt>
+<dt class="hdlist1">-m</dt>
+<dd>
+<p>Cette option permet d&#8217;afficher la sortie diff pour les commits de fusion dans le format par défaut. Le format par défaut peut être modifié en utilisant le paramètre de configuration <code>log.diffMerges</code>, dont la valeur par défaut est <code>separate</code>. <code>-m</code> implique <code>-p</code>.</p>
+</dd>
 <dt class="hdlist1">--diff-merges=first-parent</dt>
 <dt class="hdlist1">--diff-merges=1</dt>
 <dd>
 <p>Cette option fait en sorte que les commits de fusion montrent les différences complètes, mais seulement par rapport au premier parent.</p>
 </dd>
 <dt class="hdlist1">--diff-merges=separate</dt>
-<dt class="hdlist1">--diff-merges=m</dt>
-<dt class="hdlist1">-m</dt>
 <dd>
-<p>Cela fait que les commits de fusion montrent la différence complète par rapport à chacun des parents. Une entrée de journal et une différence séparées sont générées pour chaque parent. <code>-m</code> ne produit aucune sortie sans <code>-p</code>.</p>
+<p>Cela fait que les commits de fusion montrent la différence complète par rapport à chacun des parents. Une entrée de journal et une différence séparées sont générées pour chaque parent. C&#8217;est le format que <code>-m</code> a produit historiquement.</p>
 </dd>
 <dt class="hdlist1">--diff-merges=combined</dt>
 <dt class="hdlist1">--diff-merges=c</dt>
@@ -2214,11 +2272,11 @@ journal en format brut, que vous pouvez obtenir avec
 </dd>
 <dt class="hdlist1">--name-only</dt>
 <dd>
-<p>N&#8217;afficher que les noms des fichiers modifiés.</p>
+<p>Afficher uniquement les noms des fichiers modifiés. Les noms de fichiers sont souvent encodés en UTF-8. Le définir sur <code>none</code> rend la sortie de blâme des données non converties. Pour plus d’informations, voir la discussion sur l’encodage dans la page manuelle <a href="git-log.html">git-log(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--name-status</dt>
 <dd>
-<p>N&#8217;afficher que les noms et statuts des fichiers modifiés. Voir la description de l&#8217;option <code>--diff-filter</code> pour la signification des lettres de statut.</p>
+<p>N&#8217;afficher que les noms et statuts des fichiers modifiés. Voir la description de l&#8217;option <code>--diff-filter</code> pour la signification des lettres de statut. Tout comme <code>--name-only</code>, les noms de fichiers sont souvent encodés en UTF-8.</p>
 </dd>
 <dt class="hdlist1">--submodule[=&lt;format&gt;]</dt>
 <dd>
@@ -2436,7 +2494,7 @@ utilisez <code>-M100%</code>. L&#8217;index de similarité par défaut est <code
 </dd>
 <dt class="hdlist1">-l&lt;num&gt;</dt>
 <dd>
-<p>Les options <code>-M</code> et <code>-C</code> nécessitent un temps de traitement en O(n²) où n est le nombre de cibles potentielles renommage/copie. Cette option empêche l&#8217;utilisation de la détection de renommage/copie si le nombre de cibles de renommage/copie excède le nombre indiqué.</p>
+<p>Les options <code>-M</code> et <code>-C</code> impliquent quelques étapes préliminaires qui peuvent détecter des sous-ensembles de renommages/copies à moindre coût, suivies d&#8217;une partie pour le reste qui compare toutes les destinations non appariées restantes à toutes les sources pertinentes. (Pour les renommages, seules les sources non appariées restantes sont pertinentes ; pour les copies, toutes les sources originales sont pertinentes). Pour N sources et destinations, cette vérification exhaustive est en O(N^2). Cette option empêche la partie exhaustive de la détection des renommages/copies de s&#8217;exécuter si le nombre de fichiers source/destination impliqués dépasse le nombre spécifié. La valeur par défaut est diff.renameLimit. Notez qu&#8217;une valeur de 0 est traitée comme illimitée.</p>
 </dd>
 <dt class="hdlist1">--diff-filter=[(A|C|D|M|R|T|U|X|B)&#8230;&#8203;[*]]</dt>
 <dd>
@@ -2629,7 +2687,7 @@ utilisez <code>-M100%</code>. L&#8217;index de similarité par défaut est <code
 <h2 id="_génération_du_texte_de_rustine_avec_p">Génération du texte de rustine avec -p</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Exécuter <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a> ou <a href="git-diff-files.html">git-diff-files(1)</a> avec l&#8217;option <code>-p</code> produit le texte de rustine. Vous pouvez personnaliser la création du texte de rustine via les variables d&#8217;environnement <code>GIT_EXTERNAL_DIFF</code> et <code>GIT_DIFF_OPTS</code> (voir <a href="git.html">git(1)</a>).</p>
+<p>Exécuter <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a> ou <a href="git-diff-files.html">git-diff-files(1)</a> avec l&#8217;option <code>-p</code> produit le texte de rustine. Vous pouvez personnaliser la création du texte de rustine via les variables d&#8217;environnement <code>GIT_EXTERNAL_DIFF</code> et <code>GIT_DIFF_OPTS</code> (voir <a href="git.html">git(1)</a>), et l&#8217;attribut <code>diff</code> (voir <a href="gitattributes.html">gitattributes(5)</a>).</p>
 </div>
 <div class="paragraph">
 <p>L&#8217;option produit quelque chose légèrement différent du format diff traditionnel :</p>
@@ -2695,6 +2753,9 @@ rename from b
 rename to a</pre>
 </div>
 </div>
+</li>
+<li>
+<p>Les en-têtes de section mentionnent le nom de la fonction à laquelle la section s&#8217;applique. Voir "Définition d&#8217;un entête de section personnalisé" dans <a href="gitattributes.html">gitattributes(5)</a> pour des détails sur la façon d&#8217;adapter cela à des langages spécifiques.</p>
 </li>
 </ol>
 </div>
@@ -3004,7 +3065,7 @@ deleted file mode &lt;mode&gt;,&lt;mode&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:05:22 +0200
+Last updated 2021-08-27 14:24:05 +0200
 </div>
 </div>
 </body>

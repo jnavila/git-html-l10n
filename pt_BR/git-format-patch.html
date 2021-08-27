@@ -481,7 +481,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_descrição">DESCRIÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Prepare cada commit com o seu respectivo patch em um arquivo, formatado para que se assemelhe com uma caixa de correio UNIX. A saída deste comando é conveniente para o envio de um e-mail ou para a utilização com <em>git am</em>.</p>
+<p>Prepare cada commit não mesclado com o seu respectivo "patch" em uma mensagem por commit, formatado para que se assemelhe com uma caixa de correio UNIX. A saída deste comando é conveniente para o envio de um e-mail ou para a utilização com <em>git am</em>.</p>
+</div>
+<div class="paragraph">
+<p>Uma "mensagem" gerada pelo comando consiste em três partes:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Um breve cabeçalho de metadados que começa com <code>From &lt;commit&gt;</code> com um registro de data e hora fixo, como <code>Seg Set 17 00:00:00 2001</code> para auxiliar programas como "arquivo(1)" a reconhecer que o arquivo foi gerado deste comando, campos que registrem a identidade do autor, a data da autoria e o título da alteração (retirado do primeiro parágrafo da mensagem do log do commit).</p>
+</li>
+<li>
+<p>O segundo ou o parágrafo subsequente da mensagem do registro do commit.</p>
+</li>
+<li>
+<p>O "patch", que é gerado com o comando "diff -p --stat" (consulte <a href="git-diff.html">git-diff(1)</a>) entre o commit e a fonte principal.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>A mensagem de registro e o patch são separados por uma linha com três traços.</p>
 </div>
 <div class="paragraph">
 <p>Existem duas maneiras de especificar em quais commits operar.</p>
@@ -733,7 +752,7 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 </dd>
 <dt class="hdlist1">-l&lt;num&gt;</dt>
 <dd>
-<p>As opções <code>-M</code> e <code>-C</code> requerem um tempo de processamento O(n^2) em que n é a quantidade de possíveis alvos para renomeações/cópia. Esta opção impede que a detecção da ação de renomear/cópia seja executada se a quantidade dos alvos a serem renomeados/copiados exceda o a quantidade usada.</p>
+<p>As opções <code>-M</code> e <code>-C</code> precisa de algumas ações preliminares que podem detectar os subconjuntos das renomeações/cópias simples, seguidos por uma exaustiva porção de recursos que compara o resto de todos os destinos que ainda não foram reparados com todas as fontes relevantes. (Para as renomeações, apenas as fontes restantes que não foram pareadas são relevantes; nas cópias, todas as fontes originais são relevantes). Para N fontes e destinos, esta verificação exaustiva é O(N^2). Esta opção impede que a parte exaustiva da detecção de renomeamento/cópia seja executada caso a quantidade dos arquivos de origem/destino envolvidos exceda a quantidade definida. Caso contrário, retorna para o valor definido em <code>diff.renameLimit</code>. Observe que o valor 0 é tratado como ilimitado.</p>
 </dd>
 <dt class="hdlist1">-O&lt;ordem-do-arquivo&gt;</dt>
 <dd>
@@ -966,7 +985,7 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 <dt class="hdlist1">-v &lt;n&gt;</dt>
 <dt class="hdlist1">--reroll-count=&lt;n&gt;</dt>
 <dd>
-<p>Marque a série como a &lt;n&gt;-ésima iteração do tópico. Os nomes dos arquivos na saída têm <code>v&lt;n&gt;</code> anexado a eles e o prefixo do assunto (a predefinição retorna para "PATCH", porém pode ser alterado através da opção <code>--subject-prefix</code>). Por exemplo. <code>--reroll-count=4</code> pode produzir o arquivo <code>v4-0001-add-makefile.patch</code> que contém "Assunto: [PATCH v4 1/20] Adicione o makefile".</p>
+<p>Marque a série como a e&lt;n&gt;ésima iteração do tópico. Os nomes de arquivo que são gerados têm <code>v&lt;n&gt;</code> prefixado neles, o prefixo do assunto (é predefinido como "PATCH", mas pode ser configurável através da opção <code>--subject-prefix</code>) tem <code>v&lt;n&gt;</code> anexado nele. Por exemplo, <code>--reroll-count=4</code> poderá gerar o arquivo <code>v4-0001-add-makefile.patch</code> que contém "Assunto: [PATCH v4 1/20] Adicione um makefile" nele. Um <code>&lt;n&gt;</code> não precisa ser um inteiro (por exemplo, "--reroll-count=4.4", ou "--reroll-count=4rev2" são permitidos), porém a desvantagem de usar tal contagem de reroll é que o range-diff/interdiff com a versão anterior não indica exatamente com qual versão a nova interação acabou sendo comparada.</p>
 </dd>
 <dt class="hdlist1">--to=&lt;e-mail&gt;</dt>
 <dd>
@@ -1430,6 +1449,14 @@ prerequisite-patch-id: Z</pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_ressalvas">RESSALVAS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Observe que <code>format-patch</code> irá omitir a mesclagem dos commits que forem gerados, ainda que eles façam parte do intervalo solicitado. Um simples "patch" não inclui informações suficientes para que a parte receptora reproduza a mesma mesclagem do commit.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_veja_também">VEJA TAMBÉM</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -1448,7 +1475,7 @@ prerequisite-patch-id: Z</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-04-21 22:06:07 +0200
+Last updated 2021-08-27 14:24:53 +0200
 </div>
 </div>
 </body>
