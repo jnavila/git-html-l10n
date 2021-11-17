@@ -459,7 +459,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_descrição">DESCRIÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Um simples programa CGI para servir o conteúdo de um repositório Git para os clientes Git acessando o repositório nos protocolos http:// e https://. O programa suporta a busca de clientes utilizando o protocolo HTTP inteligente e o protocolo HTTP antigo compatível com as versões anteriores, bem como os clientes impulsionando através do protocolo HTTP inteligente.</p>
+<p>A simple CGI program to serve the contents of a Git repository to Git clients accessing the repository over http:// and https:// protocols. The program supports clients fetching using both the smart HTTP protocol and the backwards-compatible dumb HTTP protocol, as well as clients pushing using the smart HTTP protocol. It also supports Git&#8217;s more-efficient "v2" protocol if properly configured; see the discussion of <code>GIT_PROTOCOL</code> in the ENVIRONMENT section below.</p>
 </div>
 <div class="paragraph">
 <p>Verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação (a menos que a variável ambiental <code>GIT_HTTP_EXPORT_ALL</code> esteja definida) .</p>
@@ -516,7 +516,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="content">
 <pre>SetEnv GIT_PROJECT_ROOT /var/www/git
 SetEnv GIT_HTTP_EXPORT_ALL
-ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/</pre>
+ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/
+
+# This is not strictly necessary using Apache and a modern version of
+# git-http-backend, as the webserver will pass along the header in the
+# environment as HTTP_GIT_PROTOCOL, and http-backend will copy that into
+# GIT_PROTOCOL. But you may need this line (or something similar if you
+# are using a different webserver), or if you want to support older Git
+# versions that did not do that copying.
+#
+# Having the webserver set up GIT_PROTOCOL is perfectly fine even with
+# modern versions (and will take precedence over HTTP_GIT_PROTOCOL,
+# which means it can be used to override the client's request).
+SetEnvIf Git-Protocol ".*" GIT_PROTOCOL=$0</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -720,6 +732,9 @@ $HTTP["url"] =~ "^/git/.*/git-receive-pack$" {
 <p>A variável de ambiente <code>GIT_HTTP_MAX_REQUEST_BUFFER</code> (ou a variável de configuração <code>http.maxRequestBuffer</code>) pode ser configurada para alterar a maior solicitação de negociação "ref" que o git será capaz de manipular durante uma busca; qualquer busca que exija um buffer maior não terá êxito. Normalmente, esse valor não precisa ser alterado, mas pode ser útil caso você esteja buscando um repositório com uma quantidade de refs extremamente grande. O valor pode ser definido como uma unidade (<code>100M</code> para 100 megabytes por exemplo). O valor predefinido é de 10 megabytes.</p>
 </div>
 <div class="paragraph">
+<p>Clients may probe for optional protocol capabilities (like the v2 protocol) using the <code>Git-Protocol</code> HTTP header. In order to support these, the contents of that header must appear in the <code>GIT_PROTOCOL</code> environment variable. Most webservers will pass this header to the CGI via the <code>HTTP_GIT_PROTOCOL</code> variable, and <code>git-http-backend</code> will automatically copy that to <code>GIT_PROTOCOL</code>. However, some webservers may be more selective about which headers they&#8217;ll pass, in which case they need to be configured explicitly (see the mention of <code>Git-Protocol</code> in the Apache config from the earlier EXAMPLES section).</p>
+</div>
+<div class="paragraph">
 <p>A estrutura define o <code>GIT_COMMITTER_NAME</code> como <em>$REMOTE_USER</em> e <code>GIT_COMMITTER_EMAIL</code> como <em>${REMOTE_USER}@http.${REMOTE_ADDR}</em>, garantindo que quaisquer reflogs que forem criados através do comando <em>git-receive-pack</em> contenham algumas informações de identificação do ramo remoto do usuário que executou o push.</p>
 </div>
 <div class="paragraph">
@@ -738,7 +753,7 @@ $HTTP["url"] =~ "^/git/.*/git-receive-pack$" {
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-08-27 14:24:53 +0200
+Last updated 2021-10-31 17:59:02 +0100
 </div>
 </div>
 </body>

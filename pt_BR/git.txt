@@ -31,6 +31,8 @@ OPÇÕES
 ------
 --version::
 	Imprime a versão do pacote Git exibindo a sua origem.
++
+Esta opção é convertida internamente para `git version ...` e aceita as mesmas opções que o comando linkgit:git-version[1]. Se a opção `--help' também for usada, ela tem precedência sobre a opção `--version`.
 
 --help::
 	Imprime a sinopse e uma lista dos comandos mais usados. Caso a opção `--all` ou `-a` seja usada, todos os comandos disponíveis serão impressos. Caso um comando Git seja informado, esta opção exibirá a página do manual deste comando.
@@ -524,7 +526,7 @@ Para mais detalhes, consulte link:technical/api-trace2.html[Trace2 documentation
 	Quando uma "ref" é atualizada, são criadas as entradas do reflog para acompanhar a razão da "ref" ter sido atualizada (que geralmente é o nome do comando de alto nível que atualizou a "ref"), além dos valores antigos e novos da "ref". Um comando Porcelana com script pode usar a função auxiliar 'set_reflog_action' no comando `git sh setup` para definir o seu nome para essa variável quando é invocado como o comando de alto nível pelo usuário final, que será registrado no corpo do reflog.
 
 `GIT_REF_PARANOIA`::
-	Caso seja definido como `1`, inclua as referências quebradas ou com nomes incorretos ao se iterar sobre as listas das referências. Em um repositório normal, não corrompido, isso não faz nada. No entanto, habilitá-lo pode ajudar o git a detectar e abortar algumas operações na presença de referências quebradas. O Git define essa variável de forma automática durante a execução das operações destrutivas como linkgit:git-prune[1]. Você não precisa configurá-lo sozinho, a menos que queira ser paranóico para garantir que uma operação toque em cada "ref" (caso esteja clonando um repositório para fazer uma cópia de segurança por exemplo).
+	Caso seja definido como `0`, ignore os refs quebrados ou mal nomeados ao iterar sobre as listas dos refs. Normalmente o Git tentará incluir qualquer um desses refs, o que pode causar a falha de algumas operações. Isto normalmente é preferível, já que as operações potencialmente destrutivas (como linkgit:git-prune[1]) são melhores abortando em vez de ignorar os refs quebrados (e assim considerando o histórico que eles apontam como não valendo a pena salvar). O valor predefinido é `1` (ou seja, ser paranoico ao detectar e abortar todas as operações). Normalmente não é preciso definir isso como `0`, mas pode ser útil ao tentar salvar os dados de um repositório corrompido.
 
 `GIT_ALLOW_PROTOCOL`::
 	Caso seja definido como uma lista de protocolos separados por dois pontos, comporte-se como se a opção de configuração `protocol.allow` esteja definida como `never`, e cada um dos protocolos listados possua `protocol.<nome>.allow` definido como `always` (substituindo qualquer configuração já existente). Em outras palavras, qualquer protocolo não mencionado será proibido (ou seja, esta é uma lista de permissões e não uma lista negra). Consulte a descrição do `protocol.allow` no linkgit:git-config[1] para mais detalhes.
@@ -534,6 +536,10 @@ Para mais detalhes, consulte link:technical/api-trace2.html[Trace2 documentation
 
 `GIT_PROTOCOL`::
 	Apenas para utilização interna. Used in handshaking the wire protocol. Contains a colon ':' separated list of keys with optional values 'key[=value]'. Presence of unknown keys and values must be ignored.
++
+Observe que os servidores podem precisar ser configurados para permitir que esta variável passe por alguns transportes. Ele será propagado automaticamente ao acessar os repositórios locais (ou seja, `file://` ou um caminho do sistema de arquivos), bem como sobre o protocolo `git://`. Para 'git-over-http', ele deve funcionar automaticamente na maioria das configurações, porém consulte linkgit:git-http-backend[1]. Para 'git-over-ssh', o servidor ssh pode precisar ser configurado para permitir que os clientes passem esta variável (por exemplo, usando `AcceptEnv GIT_PROTOCOL` com o OpenSSH).
++
+Esta configuração é opcional. Caso a variável não seja propagada, os clientes voltarão ao protocolo "v0" original (mas podem perder algumas melhorias de desempenho ou de recursos). Atualmente esta variável afeta apenas os clones e as buscas (fetch); ainda não é usado para envios "push" (mas pode ser no futuro).
 
 `GIT_OPTIONAL_LOCKS`::
 	Caso seja definido como 0, o Git concluirá qualquer operação solicitada sem executar outra operação opcional onde se exija um bloqueio. Como um efeito colateral isso impedirá que o comando `git status` atualize o índice por exemplo. É útil para os processos que estão em execução no segundo plano que não queiram causar contenção do bloqueio com as outras operações no repositório. A predefinição retorna para `1`.

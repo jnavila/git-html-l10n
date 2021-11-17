@@ -31,6 +31,8 @@ OPTIONEN
 --------
 --version::
 	Gibt die Version der Git-Suite, aus der das 'git'-Programm stammt, aus.
++
+This option is internally converted to `git version ...` and accepts the same options as the linkgit:git-version[1] command. If `--help` is also given, it takes precedence over `--version`.
 
 --help::
 	Gibt eine Übersicht und eine Liste der gebräuchlichsten Befehle aus. Wenn die Option `--all` oder `-a` angegeben wurde, werden alle verfügbaren Befehle ausgegeben. Falls der Name eines Git-Befehls angegeben wurde, wird die Handbuchseite für diesen Befehl geöffnet.
@@ -524,7 +526,7 @@ See link:technical/api-trace2.html[Trace2 documentation] for full details.
 	Wenn eine Referenz aktualisiert wird, werden Reflog-Einträge erstellt, um den Grund, dass die Referenz aktualisiert wurde (üblicherweise ist das die Bezeichnung des hochrangigen Befehls, der die Referenz aktualisiert hat), sowie den alten und neuen Wert der Referenz nachvollziehen zu können. Geskriptete Porcelain-Befehle können die Hilfsfunktion set_reflog_action in `git-sh-setup` um ihren Namen in diese Variable einzutragen, wenn sie vom Endbenutzer als Befehl der obersten Ebene aufgerufen werden, damit dieser im Reflog festgehalten wird.
 
 `GIT_REF_PARANOIA`::
-	If set to `1`, include broken or badly named refs when iterating over lists of refs. In a normal, non-corrupted repository, this does nothing. However, enabling it may help git to detect and abort some operations in the presence of broken refs. Git sets this variable automatically when performing destructive operations like linkgit:git-prune[1]. You should not need to set it yourself unless you want to be paranoid about making sure an operation has touched every ref (e.g., because you are cloning a repository to make a backup).
+	If set to `0`, ignore broken or badly named refs when iterating over lists of refs. Normally Git will try to include any such refs, which may cause some operations to fail. This is usually preferable, as potentially destructive operations (e.g., linkgit:git-prune[1]) are better off aborting rather than ignoring broken refs (and thus considering the history they point to as not worth saving). The default value is `1` (i.e., be paranoid about detecting and aborting all operations). You should not normally need to set this to `0`, but it may be useful when trying to salvage data from a corrupted repository.
 
 `GIT_ALLOW_PROTOCOL`::
 	If set to a colon-separated list of protocols, behave as if `protocol.allow` is set to `never`, and each of the listed protocols has `protocol.<name>.allow` set to `always` (overriding any existing configuration). In other words, any protocol not mentioned will be disallowed (i.e., this is a whitelist, not a blacklist). See the description of `protocol.allow` in linkgit:git-config[1] for more details.
@@ -534,6 +536,10 @@ See link:technical/api-trace2.html[Trace2 documentation] for full details.
 
 `GIT_PROTOCOL`::
 	Nur zum internen Gebrauch. Wird beim Handshake des Git Wire Protokolls verwendet. Enthält eine durch Doppelpunkte ':' getrennte Liste von Schlüsseln mit optionalen Werten 'schlüssel[=wert]'. Unbekannte Schlüssel und Werte müssen ignoriert werden.
++
+Note that servers may need to be configured to allow this variable to pass over some transports. It will be propagated automatically when accessing local repositories (i.e., `file://` or a filesystem path), as well as over the `git://` protocol. For git-over-http, it should work automatically in most configurations, but see the discussion in linkgit:git-http-backend[1]. For git-over-ssh, the ssh server may need to be configured to allow clients to pass this variable (e.g., by using `AcceptEnv GIT_PROTOCOL` with OpenSSH).
++
+This configuration is optional. If the variable is not propagated, then clients will fall back to the original "v0" protocol (but may miss out on some performance improvements or features). This variable currently only affects clones and fetches; it is not yet used for pushes (but may be in the future).
 
 `GIT_OPTIONAL_LOCKS`::
 	If set to `0`, Git will complete any requested operation without performing any optional sub-operations that require taking a lock. For example, this will prevent `git status` from refreshing the index as a side effect. This is useful for processes running in the background which do not want to cause lock contention with other operations on the repository. Defaults to `1`.

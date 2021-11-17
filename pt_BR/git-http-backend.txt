@@ -12,9 +12,9 @@ RESUMO
 
 DESCRIÇÃO
 ---------
-Um simples programa CGI para servir o conteúdo de um repositório Git para os clientes Git acessando o repositório nos protocolos http:// e https://. O programa suporta a busca de clientes utilizando o protocolo HTTP inteligente e o protocolo HTTP antigo compatível com as versões anteriores, bem como os clientes impulsionando através do protocolo HTTP inteligente.
+Um simples programa CGI para servir o conteúdo de um repositório Git para os clientes Git acessando o repositório nos protocolos http:// e https://. O programa suporta a busca de clientes utilizando o protocolo HTTP inteligente e o protocolo HTTP antigo compatível com as versões anteriores, bem como os clientes impulsionando através do protocolo HTTP inteligente. Ele também é compatível com o protocolo "v2" mais eficiente do Git caso seja configurado corretamente; consulte o `GIT_PROTOCOL` na seção AMBIENTE abaixo.
 
-Verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação (a menos que a variável ambiental `GIT_HTTP_EXPORT_ALL` esteja definida) .
+Verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação (a menos que a variável de ambiente `GIT_HTTP_EXPORT_ALL` esteja definida) .
 
 É predefinido que apenas o serviço `upload-pack` esteja ativo, o que atende aos clientes 'git fetch-pack' e 'git ls-remote', que são chamados através do comando 'git fetch', 'git pull' e 'git clone' . Caso o cliente seja autenticado, o serviço `receive-pack` é ativado, que oferece o 'git send-pack' aos clientes, que é chamado a partir do comando 'git push'.
 
@@ -31,7 +31,7 @@ http.uploadpack::
 http.receivepack::
 	Serve aos clientes o 'git send-pack', permitindo impulsionamento "push". É predefinido que esteja inativo para os usuários anônimos e ativado para os usuários autenticados através do servidor da web. Pode ser inativado caso este item seja definido como `false` ou ativado para todos os usuários, incluindo os usuários anônimos, caso seja definido como `true`.
 
-TRADUÇÃO DE URL
+TRADUÇÃO DA URL
 ---------------
 Para determinar a localização do repositório no disco, o comando 'git http-backend' concatena as variáveis do ambiente `PATH_INFO`, que são definidas automaticamente através do servidor web, e o `GIT_PROJECT_ROOT`, que deve ser definido manualmente na configuração do servidor da web. Caso o `GIT_PROJECT_ROOT` não esteja definido, o comando 'git http-backend' exibirá o `PATH_TRANSLATED`, que também é definido automaticamente através do servidor web.
 
@@ -46,6 +46,18 @@ Apache 2.x::
 SetEnv GIT_PROJECT_ROOT /var/www/git
 SetEnv GIT_HTTP_EXPORT_ALL
 ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/
+
+# Isso não é estritamente necessário ao usar o apache e uma versão moderna do
+# git-http-backend, como o servidor web vai passar através do cabeçalho no
+# ambiente como HTTP_GIT_PROTOCOL e o http-backend vai copiar isso no
+# GIT_PROTOCOL. Mas você pode precisar desta linha (ou algo semelhante caso
+# esteja usando um servidor web diferente) ou caso queira que seja compatível com um
+# git mais antigo que não fizeram essa cópia.
+#
+# Ter o servidor web configurado GIT_PROTOCOL é suficiente mesmo com
+# versões mais modernas (que terá precedência sobre o HTTP_GIT_PROTOCOL,
+# o que significa que pode ser usado para substituir o pedido do cliente).
+SetEnvIf Git-Protocol ".*" GIT_PROTOCOL=$0
 ----------------------------------------------------------------
 +
 Para habilitar o acesso de leitura anônima, porém com acesso de gravação autenticado, exija a autorização para o anúncio da "ref" inicial (que detectamos como um "push" por meio do parâmetro "service" na cadeia de consulta) e a própria chamada do pacote de recebimento:
@@ -201,6 +213,8 @@ O 'git http-backend' conta com as variáveis do ambiente `CGI` definidas pelo se
 A variável de ambiente `GIT_HTTP_EXPORT_ALL` pode ser passada para o comando 'git-http-backend' para ignorar a verificação do arquivo "git-daemon-export-ok" em cada repositório antes de permitir a exportação desse repositório.
 
 A variável de ambiente `GIT_HTTP_MAX_REQUEST_BUFFER` (ou a variável de configuração `http.maxRequestBuffer`) pode ser configurada para alterar a maior solicitação de negociação "ref" que o git será capaz de manipular durante uma busca; qualquer busca que exija um buffer maior não terá êxito. Normalmente, esse valor não precisa ser alterado, mas pode ser útil caso você esteja buscando um repositório com uma quantidade de refs extremamente grande. O valor pode ser definido como uma unidade (`100M` para 100 megabytes por exemplo). O valor predefinido é de 10 megabytes.
+
+Os clientes podem sondar por capacidades opcionais do protocolo (como o protocolo v2) utilizando o cabeçalho HTTP `Git-Protocol`. Para ser compatível com eles, o conteúdo desse cabeçalho deve aparecer na variável de ambiente `GIT_PROTOCOL`. A maioria dos servidores web passará esse cabeçalho para o CGI através da variável `HTTP_GIT_PROTOCOL` e o `git-http-backend` copiará automaticamente para a variável `GIT_PROTOCOL`. Entretanto, alguns servidores web podem ser mais seletivos sobre quais os cabeçalhos eles passarão, nesse caso, eles precisam ser configurados de forma explícita (veja a menção do `Git-Protocol` na configuração do Apache, a partir da seção EXEMPLOS mais recentes).
 
 A estrutura define o `GIT_COMMITTER_NAME` como '$REMOTE_USER' e `GIT_COMMITTER_EMAIL` como '$\{REMOTE_USER}@http.$\{REMOTE_ADDR\}', garantindo que quaisquer reflogs que forem criados através do comando 'git-receive-pack' contenham algumas informações de identificação do ramo remoto do usuário que executou o push.
 

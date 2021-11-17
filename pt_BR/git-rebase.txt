@@ -54,7 +54,7 @@ seria:
 seguido por `git rebase master`. Quando a reconstrução (rebase) sair do `topic` será
 mantido o ramo que foi averiguado.
 
-Caso a ramificação upstream já contiver uma alteração que você fez (porque você enviou um patch que foi aplicado na upstream por exemplo), então este commit será ignorado. Por exemplo, executando o comando `git rebase master` no histórico a seguir (onde `A'` e `A` introduzem o mesmo conjunto de alterações, mas possuem informações diferentes de quem fez o commit):
+Caso a ramificação upstream já contiver uma alteração que você fez (porque você enviou um patch que foi aplicado na upstream por exemplo), então este commit será ignorado e avisos serão emitidos (caso `merge` seja utilizado). Por exemplo, executando o comando `git rebase master` no histórico a seguir (onde `A'` e `A` introduzem o mesmo conjunto de alterações, mas possuem informações diferentes de quem fez o commit):
 
 ------------
           A---B---C topic
@@ -215,7 +215,7 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 --no-reapply-cherry-picks::
 	Reaplique todas as escolhas seletivas que estejam limpas de qualquer commit "upstream" em vez inviabilizá-los por completo. (Então, caso estes commits se tornem vazios depois da reconstrução, por conter um subconjunto de alterações da "upstream", o comportamento em direção à eles é controlado através da opção `--empty`.)
 +
-É predefinido que (ou se `--no-reapply-cherry-picks 'for fornecido), estes commits serão automaticamente eliminados. Como isso requer a leitura de todos os commits upstream, isso pode custar caro nos repositórios com uma grande quantidade de commits na upstream que precisam ser lidos.
+É predefinido que (ou se `--no-reapply-cherry-picks 'for fornecido), estes commits serão automaticamente eliminados. Como isso requer a leitura de todos os commits upstream, isso pode custar caro nos repositórios com uma grande quantidade de commits na upstream que precisam ser lidos. Ao utilizar `merge`, avisos serão emitidos para cada commit abandonado (a menos que `--quiet` seja usado). Os avisos também serão emitidos a menos que a variável `advice.skippedCherryPicks` seja definida como falso (consulte linkgit:git-config[1]).
 +
 A opção `--reapply-cherry-picks` permite que a reconstrução anteceda a leitura de todos os commits "upstream", melhorando muito o desempenho.
 +
@@ -237,7 +237,7 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 -m::
 --merge::
-	Utilize estratégias de mesclagem para fazer o `rebase`. Quando a estratégia de mesclagem recursiva (predefinida) for utilizada, permite que o `rebase` esteja ciente das renomeações no lado upstream. Esta é a predefinição.
+	Usando estratégias de mesclagem para o rebase (padrão).
 +
 Observe que uma mesclagem de reconstrução (rebase) funciona repetindo cada commit da ramificação de trabalho na parte do topo <upstream>. Por esse motivo, quando ocorre um conflito na mesclagem, o lado relatado como 'nosso' é a série até agora reformulada, começando com <upstream> e 'deles' é o ramo de trabalho. Em outras palavras, os lados são trocados.
 +
@@ -245,7 +245,7 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 -s <estratégia>::
 --strategy=<estratégia>::
-	Use a estratégia de mesclagem informada. Caso não haja a opção `-s ', o git merge-recursive' será utilizado em seu lugar. implica no uso da opção '--merge'.
+	Use a estratégia de mesclagem informada, em vez do padrão `ort`. Isso implica no uso da opção `--merge`.
 +
 Como o 'git rebase' repete cada commit do ramo de trabalho no cume do ramo <upstream> utilizando a estratégia informada, o uso da estratégia 'our' simplesmente esvazia todos os patches do <ramo>, que faz pouco sentido.
 +
@@ -253,7 +253,7 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 -X <opção-da-estratégia>::
 --strategy-option=<opção-da-estratégia>::
-	Encaminhe a <opção-de-estratégia> para a estratégia da mesclagem. implica no uso da opção `--merge` e, se nenhuma estratégia foi definida, `-s recursive`. Observe a reversão do 'ours' (nossos) e 'theirs' (deles), conforme observado acima para a opção `-m`.
+	Encaminhe a <opção-de-estratégia> para a estratégia da mesclagem. implica no uso da opção `--merge` e caso nenhuma estratégia tenha sido definida, `-s ort`. Observe a reversão do 'ours' (nossos) e 'theirs' (deles), conforme observado acima para a opção `-m`.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
@@ -305,7 +305,7 @@ Pode ser útil depois de reverter uma mesclagem do ramo "topic", pois esta opç�
 +
 Quando "--fork-point" está ativo o 'fork_point' será utilizado em vez do `<upstream>` calcular o conjunto dos commits para fazer o "rebase" onde 'fork_point' é o resultado do comando `git merge-base --fork-point <upstream> <ramo>` (consulte linkgit:git-merge-base[1]). Caso o 'fork_point' termine vazio, o `<upstream>` será utilizado como substituto.
 +
-Caso a <upstream> seja utilizada na linha de comando, a predefinição será `--no-fork-point`, caso contrário, a predefinição será `--fork-point`.
+Caso a <upstream> seja utilizada na linha de comando, a predefinição será `--no-fork-point`, caso contrário, a predefinição será `--fork-point`. Consulte também `rebase.forkpoint` em linkgit:git-config[1].
 +
 Caso o seu ramo teve como base no <upstream>, porém <upstream> foi retrocedido e o seu ramo contém commits que foram eliminados, esta opção pode ser utilizada com a opção `--keep-base` para eliminar estes commits do seu ramo.
 +
@@ -351,19 +351,9 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 +
 É predefinido que ou quando `no-rebase-cousins` seja utilizado, os commits que não possuam `<upstream>` como ancestral direto, manterão o seu ponto do ramo original, ou seja, os commits que seriam excluídos pela opção linkgit:git-log[1] `--ancestry-path`, por predefinição manterá a sua ancestralidade original. Caso o modo `rebase-cousins` esteja ativo, estes commits serão reconstruídos para a `<upstream>` (ou `<onto>`, caso seja utilizado).
 +
-O modo `--rebase-merges` é semelhante (em espírito) a opção descontinuada `--preserve-merges` porém trabalha com reconstrução interativa (rebases), onde os commits possam ser reordenados, inseridos ou eliminados a vontade.
-+
-Atualmente, só é possível recriar a mesclagem dos commits utilizando a estratégia de mesclagem `recursive` (recursiva); Diferentes estratégias de mesclagem podem ser utilizada apenas através dos comandos explícitos como `exec git merge -s <strategy> [...]`.
+Atualmente, só é possível recriar a mesclagem dos commits utilizando a estratégia de mesclagem `ort`; diferentes estratégias de mesclagem podem ser utilizadas somente através dos comandos explícitos como `exec git merge -s <strategy> [...]`.
 +
 Consulte também 'RECONSTRUINDO AS MESCLAGENS' e 'OPÇÕES INCOMPATÍVEIS' abaixo.
-
--p::
---preserve-merges::
-	[DESCONTINUADO: utilize `--rebase-merges`] Recrie os commits mesclados em vez de achatar o histórico, reproduzindo os commits introduzidos por uma mesclagem do commit. As resoluções dos conflitos da mesclagem ou das emendas manuais para mesclar os commits não são preservadas.
-+
-Utiliza o mecanismo `--interactive` internamente, porém ao combiná-lo com a opção `--interactive` de forma explícita, em geral não é uma boa ideia a menos que saiba o que está fazendo (consulte 'BUGS' abaixo).
-+
-Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 -x <cmd>::
 --exec <cmd>::
@@ -384,7 +374,7 @@ Utiliza o mecanismo `--interactive` internamente, porém pode ser executado sem 
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 --root::
-	Reconstrói todos os commits acessíveis a partir do <ramo>, em vez de limitá-los com a <upstream>. Permite a reestruturação dos commit da raiz em um ramo. Quando utilizado com a opção `--onto`, será ignorado as alterações já contidas em <newbase> (em vez de <upstream>) enquanto que sem a opção `--onto` a operação ocorrerá em todas as alterações. Quando utilizado junto com ambas as opções `--onto` e `--preserve-merges`, 'todos' os commits das raízes serão reescritos para ter o <newbase> como a sua origem.
+	Reconstrói todos os commits acessíveis a partir do <ramo>, em vez de limitá-los com a <upstream>. Permite a reestruturação dos commit da raiz em um ramo. Quando utilizado com a opção `--onto`, será ignorado as alterações já contidas em <newbase> (em vez de <upstream>) enquanto que sem a opção `--onto` a operação ocorrerá em todas as alterações.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
@@ -423,7 +413,6 @@ são incompatíveis com as seguintes opções:
  * --allow-empty-message
  * --[no-]autosquash
  * --rebase-merges
- * --preserve-merges
  * --interactive
  * --exec
  * --no-keep-empty
@@ -434,13 +423,6 @@ são incompatíveis com as seguintes opções:
 
 Além disso, os seguintes pares de opções são incompatíveis:
 
- * --preserve-merges e --interactive
- * --preserve-merges e --signoff
- * --preserve-merges e --rebase-merges
- * --preserve-merges e --empty=
- * --preserve-merges e --ignore-whitespace
- * --preserve-merges e --committer-date-is-author-date
- * --preserve-merges e --ignore-date
  * --keep-base e --onto
  * --keep-base e --root
  * --fork-point e --root
@@ -793,7 +775,7 @@ O comando `merge` mesclará revisões usadas no que seja `HEAD` naquele momento.
 
 Caso um comando `merge` falhar por qualquer motivo que não seja um conflito da mesclagem (ou seja, quando a operação da mesclagem sequer iniciou), ele será reagendado imediatamente.
 
-Neste momento, o comando `merge` *sempre* utilizará a estratégia da mesclagem `recursiva` para as mesclagens regulares, e `octopus` para mesclagens "polvo", sem nenhuma maneira de escolher uma diferente. Para contornar isso, um comando `exec` pode ser utilizado para chamar o comando `git merge` de forma explicita, utilizando o fato onde os rótulos são as 'refs' locais da área de trabalho (o ref `refs/rewritten/onto` corresponderia ao rótulo `onto` , por exemplo).
+É predefinido que o comando `merge` utiliza a estratégia `ort` para mesclagens regulares e `octopus` para fusões "octopus" (polvo). É possível especificar uma estratégia padrão para todas as mesclagens utilizando a opção `--strategy` ao invocar um "rebase" ou é possível substituir mesclagens específicas na lista interativa dos comandos utilizando um comando `exec` para invocar explicitamente o comando `git merge` com a opção `--strategy`. Note que ao invocar explicitamente o comando `git merge`, é possível fazer uso do fato que as etiquetas são refs das árvores de trabalho locais (o ref `refs/rewritten/onto' corresponderiam à etiqueta `onto`, por exemplo) para se referir aos ramos que você deseja mesclar.
 
 Observação: o primeiro comando (`label onto`) rotula a revisão onde os commits são refeitos; O nome `onto` é apenas uma convenção, como um aceno para a opção `--onto`.
 
@@ -832,25 +814,6 @@ CONFIGURAÇÃO
 
 include::config/rebase.txt[]
 include::config/sequencer.txt[]
-
-BUGS
-----
-A lista de tarefas apresentada pela opção descontinuada `--preserve-merges --interactive` não representa a topologia do grafo da revisão (em vez disso use a opção `--rebase-merges`). A edição dos commits e a reformulação das suas mensagens devem funcionar bem, porém as tentativas de reordenar os commits tendem a produzir resultados contra-intuitivos. Em vez disso, use a opção `--rebase-merges` em tais cenários.
-
-Por exemplo, uma tentativa para reorganizar
-------------
-1 --- 2 --- 3 --- 4 --- 5
-------------
-para
-------------
-1 --- 2 --- 4 --- 3 --- 5
-------------
-movendo a linha "pick 4" resultará no seguinte histórico:
-------------
-	3
-       /
-1 --- 2 --- 4 --- 5
-------------
 
 GIT
 ---

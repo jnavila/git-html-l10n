@@ -84,7 +84,7 @@ Alguns servidores `inetd` permite especificar o nome do executável independente
 
 ------
 
-Por predefinição, o `pserve` oferece apenas o acesso anônimo. Para fazer o commit, você precisará criar contas `pserver`, basta adicionar uma configuração `gitcvs.authdb` no arquivo de configuração dos repositórios nos quais você deseja que o `cvsserver` tenha permissão de gravação, por exemplo:
+Por predefinição, o `pserver` oferece apenas o acesso anônimo. Para fazer o commit, você precisará criar contas `pserver`, basta adicionar uma configuração `gitcvs.authdb` no arquivo de configuração dos repositórios nos quais você deseja que o `cvsserver` tenha permissão de gravação, por exemplo:
 
 ------
 
@@ -95,26 +95,24 @@ Por predefinição, o `pserve` oferece apenas o acesso anônimo. Para fazer o co
 O formato destes arquivos é o nome do usuário seguido pela senha criptografada, por exemplo:
 
 ------
-   myuser:$1Oyx5r9mdGZ2
-   myuser:$1$BA)@$vbnMJMDym7tA32AamXrm./
+   myuser:sqkNi8zPf01HI
+   myuser:$1$9K7FzU28$VfF6EoPYCJEYcVQwATgOP/
+   myuser:$5$.NqmNH1vwfzGpV8B$znZIcumu1tNLATgV2l6e1/mY8RzhUDHMOaVOeL1cxV3
 ------
-Você pode usar o recurso `htpasswd` que acompanha o Apache para criar estes arquivos, mas o método MD5 de criptografia do Apache difere daquele utilizado pela maioria das funções `crypt()` da biblioteca C, portanto, não utilize a opção `-m`.
+Você pode usar o recurso `htpasswd` que acompanha o Apache para criar estes arquivos, porém apenas com a opção -d (ou -B caso haja suporte no seu sistema).
 
-Como alternativa, você pode produzir a senha com o operador `crypt()` do perl:
------
-   perl -e 'my ($user, $pass) = @ARGV; printf "%s:%s\n", $user, crypt($user, $pass)' $USER password
------
+De preferência use o utilitário específico do sistema responsável pelo gerenciamento da criação do hash da senha da sua plataforma (por exemplo, mkpasswd no Linux, encrypt no OpenBSD ou pwhash no NetBSD) e cole-o no local apropriado.
 
 Em seguida, forneça sua senha pelo método `pserver`, por exemplo:
 ------
-   cvs -d:pserver:algum-usuário:alguma-senha <at> server/path/repo.git co <HEAD_name>
+   cvs -d:pserver:someuser:somepassword@server:/path/repo.git co <nome_do_HEAD>
 ------
 Nenhuma configuração especial é necessária para o acesso SSH, além de ter as ferramentas Git no PATH. Caso tenha clientes que não aceitam a variável de ambiente `CVS_SERVER`, é possível renomear o `git-cvsserver` para `cvs`.
 
 Observação: As versões mais recentes do CVS (>= 1.12.11) também é compatível a especificação do `CVS_SERVER` diretamente no `CVSROOT`, como
 
 ------
-cvs -d ":ext;CVS_SERVER=git cvsserver:user@server/path/repo.git" co <HEAD_name>
+   cvs -d ":ext;CVS_SERVER=git cvsserver:user@server/path/repo.git" co <HEAD_name>
 ------
 Isso tem a vantagem de ser salvo nos arquivos `CVS/Root` e você não precisa se preocupar em sempre definir a variável do ambiente corretamente. Os usuários SSH restritos ao `git shell` não precisam substituir a predefinição com `CVS_SERVER` (e não deveriam), pois o `git shell` entende o `cvs` como `git-cvsserver` e finge que a outra extremidade executa melhor o `cvs` real.
 --
@@ -146,8 +144,8 @@ Todas as variáveis de configuração também podem ser substituídas por um mé
 +
 --
 ------
-     export CVSROOT=:ext:user@server:/var/git/project.git
-     export CVS_SERVER="git cvsserver"
+   export CVSROOT=:ext:user@server:/var/git/project.git
+   export CVS_SERVER="git cvsserver"
 ------
 --
 4. Para clientes SSH que efetuam commits, verifique se os arquivos `.ssh/environment` do lado do servidor (ou `.bashrc`, etc., de acordo com o seu ambiente shell da sia distro) exportam os valores apropriados para `GIT_AUTHOR_NAME`, `GIT_AUTHOR_EMAIL`, `GIT_COMMITTER_NAME` e `GIT_COMMITTER_EMAIL`. Para clientes SSH cujo shell de login seja o bash, o `.bashrc` pode ser uma alternativa razoável.
@@ -155,7 +153,7 @@ Todas as variáveis de configuração também podem ser substituídas por um mé
 5. Os clientes agora devem conseguir fazer a averiguação no projeto. Utilize o nome do 'module' do CVS para indicar qual 'head' do Git você deseja fazer a averiguação. Isso também define o nome do diretório que foi feito a averiguação recentemente, a menos que você diga o contrário com a opção `-d`. Por exemplo, isso faz check-out do ramo 'master' no diretório `master do projeto`: Por exemplo, é verificado o ramo 'master' no diretório `project-master`:
 +
 ------
-     cvs co -d project-master master
+   cvs co -d project-master master
 ------
 
 [[dbbackend]]

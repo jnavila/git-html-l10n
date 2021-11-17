@@ -515,7 +515,7 @@ seguido por <code>git rebase master</code>. Quando a reconstrução (rebase) sai
 mantido o ramo que foi averiguado.</p>
 </div>
 <div class="paragraph">
-<p>Caso a ramificação upstream já contiver uma alteração que você fez (porque você enviou um patch que foi aplicado na upstream por exemplo), então este commit será ignorado. Por exemplo, executando o comando <code>git rebase master</code> no histórico a seguir (onde <code>A'</code> e <code>A</code> introduzem o mesmo conjunto de alterações, mas possuem informações diferentes de quem fez o commit):</p>
+<p>If the upstream branch already contains a change you have made (e.g., because you mailed a patch which was applied upstream), then that commit will be skipped and warnings will be issued (if the <code>merge</code> backend is used). For example, running <code>git rebase master</code> on the following history (in which <code>A'</code> and <code>A</code> introduce the same set of changes, but have different committer information):</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -738,7 +738,7 @@ mantido o ramo que foi averiguado.</p>
 <dd>
 <p>Reaplique todas as escolhas seletivas que estejam limpas de qualquer commit "upstream" em vez inviabilizá-los por completo. (Então, caso estes commits se tornem vazios depois da reconstrução, por conter um subconjunto de alterações da "upstream", o comportamento em direção à eles é controlado através da opção <code>--empty</code>.)</p>
 <div class="paragraph">
-<p>É predefinido que (ou se `--no-reapply-cherry-picks 'for fornecido), estes commits serão automaticamente eliminados. Como isso requer a leitura de todos os commits upstream, isso pode custar caro nos repositórios com uma grande quantidade de commits na upstream que precisam ser lidos.</p>
+<p>By default (or if <code>--no-reapply-cherry-picks</code> is given), these commits will be automatically dropped. Because this necessitates reading all upstream commits, this can be expensive in repos with a large number of upstream commits that need to be read. When using the <code>merge</code> backend, warnings will be issued for each dropped commit (unless <code>--quiet</code> is given). Advice will also be issued unless <code>advice.skippedCherryPicks</code> is set to false (see <a href="git-config.html">git-config(1)</a>).</p>
 </div>
 <div class="paragraph">
 <p>A opção <code>--reapply-cherry-picks</code> permite que a reconstrução anteceda a leitura de todos os commits "upstream", melhorando muito o desempenho.</p>
@@ -769,7 +769,7 @@ mantido o ramo que foi averiguado.</p>
 <dt class="hdlist1">-m</dt>
 <dt class="hdlist1">--merge</dt>
 <dd>
-<p>Utilize estratégias de mesclagem para fazer o <code>rebase</code>. Quando a estratégia de mesclagem recursiva (predefinida) for utilizada, permite que o <code>rebase</code> esteja ciente das renomeações no lado upstream. Esta é a predefinição.</p>
+<p>Using merging strategies to rebase (default).</p>
 <div class="paragraph">
 <p>Observe que uma mesclagem de reconstrução (rebase) funciona repetindo cada commit da ramificação de trabalho na parte do topo &lt;upstream&gt;. Por esse motivo, quando ocorre um conflito na mesclagem, o lado relatado como <em>nosso</em> é a série até agora reformulada, começando com &lt;upstream&gt; e <em>deles</em> é o ramo de trabalho. Em outras palavras, os lados são trocados.</p>
 </div>
@@ -780,7 +780,7 @@ mantido o ramo que foi averiguado.</p>
 <dt class="hdlist1">-s &lt;estratégia&gt;</dt>
 <dt class="hdlist1">--strategy=&lt;estratégia&gt;</dt>
 <dd>
-<p>Use a estratégia de mesclagem informada. Caso não haja a opção `-s <em>, o git merge-recursive</em> será utilizado em seu lugar. implica no uso da opção <em>--merge</em>.</p>
+<p>Use the given merge strategy, instead of the default <code>ort</code>. This implies <code>--merge</code>.</p>
 <div class="paragraph">
 <p>Como o <em>git rebase</em> repete cada commit do ramo de trabalho no cume do ramo &lt;upstream&gt; utilizando a estratégia informada, o uso da estratégia <em>our</em> simplesmente esvazia todos os patches do &lt;ramo&gt;, que faz pouco sentido.</p>
 </div>
@@ -791,7 +791,7 @@ mantido o ramo que foi averiguado.</p>
 <dt class="hdlist1">-X &lt;opção-da-estratégia&gt;</dt>
 <dt class="hdlist1">--strategy-option=&lt;opção-da-estratégia&gt;</dt>
 <dd>
-<p>Encaminhe a &lt;opção-de-estratégia&gt; para a estratégia da mesclagem. implica no uso da opção <code>--merge</code> e, se nenhuma estratégia foi definida, <code>-s recursive</code>. Observe a reversão do <em>ours</em> (nossos) e <em>theirs</em> (deles), conforme observado acima para a opção <code>-m</code>.</p>
+<p>Pass the &lt;strategy-option&gt; through to the merge strategy. This implies <code>--merge</code> and, if no strategy has been specified, <code>-s ort</code>. Note the reversal of <em>ours</em> and <em>theirs</em> as noted above for the <code>-m</code> option.</p>
 <div class="paragraph">
 <p>Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.</p>
 </div>
@@ -858,7 +858,7 @@ mantido o ramo que foi averiguado.</p>
 <p>Quando "--fork-point" está ativo o <em>fork_point</em> será utilizado em vez do <code>&lt;upstream&gt;</code> calcular o conjunto dos commits para fazer o "rebase" onde <em>fork_point</em> é o resultado do comando <code>git merge-base --fork-point &lt;upstream&gt; &lt;ramo&gt;</code> (consulte <a href="git-merge-base.html">git-merge-base(1)</a>). Caso o <em>fork_point</em> termine vazio, o <code>&lt;upstream&gt;</code> será utilizado como substituto.</p>
 </div>
 <div class="paragraph">
-<p>Caso a &lt;upstream&gt; seja utilizada na linha de comando, a predefinição será <code>--no-fork-point</code>, caso contrário, a predefinição será <code>--fork-point</code>.</p>
+<p>If &lt;upstream&gt; is given on the command line, then the default is <code>--no-fork-point</code>, otherwise the default is <code>--fork-point</code>. See also <code>rebase.forkpoint</code> in <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 <div class="paragraph">
 <p>Caso o seu ramo teve como base no &lt;upstream&gt;, porém &lt;upstream&gt; foi retrocedido e o seu ramo contém commits que foram eliminados, esta opção pode ser utilizada com a opção <code>--keep-base</code> para eliminar estes commits do seu ramo.</p>
@@ -922,24 +922,10 @@ mantido o ramo que foi averiguado.</p>
 <p>É predefinido que ou quando <code>no-rebase-cousins</code> seja utilizado, os commits que não possuam <code>&lt;upstream&gt;</code> como ancestral direto, manterão o seu ponto do ramo original, ou seja, os commits que seriam excluídos pela opção <a href="git-log.html">git-log(1)</a> <code>--ancestry-path</code>, por predefinição manterá a sua ancestralidade original. Caso o modo <code>rebase-cousins</code> esteja ativo, estes commits serão reconstruídos para a <code>&lt;upstream&gt;</code> (ou <code>&lt;onto&gt;</code>, caso seja utilizado).</p>
 </div>
 <div class="paragraph">
-<p>O modo <code>--rebase-merges</code> é semelhante (em espírito) a opção descontinuada <code>--preserve-merges</code> porém trabalha com reconstrução interativa (rebases), onde os commits possam ser reordenados, inseridos ou eliminados a vontade.</p>
-</div>
-<div class="paragraph">
-<p>Atualmente, só é possível recriar a mesclagem dos commits utilizando a estratégia de mesclagem <code>recursive</code> (recursiva); Diferentes estratégias de mesclagem podem ser utilizada apenas através dos comandos explícitos como <code>exec git merge -s &lt;strategy&gt; [...]</code>.</p>
+<p>It is currently only possible to recreate the merge commits using the <code>ort</code> merge strategy; different merge strategies can be used only via explicit <code>exec git merge -s &lt;strategy&gt; [...]</code> commands.</p>
 </div>
 <div class="paragraph">
 <p>Consulte também <em>RECONSTRUINDO AS MESCLAGENS</em> e <em>OPÇÕES INCOMPATÍVEIS</em> abaixo.</p>
-</div>
-</dd>
-<dt class="hdlist1">-p</dt>
-<dt class="hdlist1">--preserve-merges</dt>
-<dd>
-<p>[DESCONTINUADO: utilize <code>--rebase-merges</code>] Recrie os commits mesclados em vez de achatar o histórico, reproduzindo os commits introduzidos por uma mesclagem do commit. As resoluções dos conflitos da mesclagem ou das emendas manuais para mesclar os commits não são preservadas.</p>
-<div class="paragraph">
-<p>Utiliza o mecanismo <code>--interactive</code> internamente, porém ao combiná-lo com a opção <code>--interactive</code> de forma explícita, em geral não é uma boa ideia a menos que saiba o que está fazendo (consulte <em>BUGS</em> abaixo).</p>
-</div>
-<div class="paragraph">
-<p>Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.</p>
 </div>
 </dd>
 <dt class="hdlist1">-x &lt;cmd&gt;</dt>
@@ -974,7 +960,7 @@ mantido o ramo que foi averiguado.</p>
 </dd>
 <dt class="hdlist1">--root</dt>
 <dd>
-<p>Reconstrói todos os commits acessíveis a partir do &lt;ramo&gt;, em vez de limitá-los com a &lt;upstream&gt;. Permite a reestruturação dos commit da raiz em um ramo. Quando utilizado com a opção <code>--onto</code>, será ignorado as alterações já contidas em &lt;newbase&gt; (em vez de &lt;upstream&gt;) enquanto que sem a opção <code>--onto</code> a operação ocorrerá em todas as alterações. Quando utilizado junto com ambas as opções <code>--onto</code> e <code>--preserve-merges</code>, <em>todos</em> os commits das raízes serão reescritos para ter o &lt;newbase&gt; como a sua origem.</p>
+<p>Rebase all commits reachable from &lt;branch&gt;, instead of limiting them with an &lt;upstream&gt;. This allows you to rebase the root commit(s) on a branch. When used with --onto, it will skip changes already contained in &lt;newbase&gt; (instead of &lt;upstream&gt;) whereas without --onto it will operate on every change.</p>
 <div class="paragraph">
 <p>Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.</p>
 </div>
@@ -1050,9 +1036,6 @@ mantido o ramo que foi averiguado.</p>
 <p>--rebase-merges</p>
 </li>
 <li>
-<p>--preserve-merges</p>
-</li>
-<li>
 <p>--interactive</p>
 </li>
 <li>
@@ -1080,27 +1063,6 @@ mantido o ramo que foi averiguado.</p>
 </div>
 <div class="ulist">
 <ul>
-<li>
-<p>--preserve-merges e --interactive</p>
-</li>
-<li>
-<p>--preserve-merges e --signoff</p>
-</li>
-<li>
-<p>--preserve-merges e --rebase-merges</p>
-</li>
-<li>
-<p>--preserve-merges e --empty=</p>
-</li>
-<li>
-<p>--preserve-merges e --ignore-whitespace</p>
-</li>
-<li>
-<p>--preserve-merges e --committer-date-is-author-date</p>
-</li>
-<li>
-<p>--preserve-merges e --ignore-date</p>
-</li>
 <li>
 <p>--keep-base e --onto</p>
 </li>
@@ -1195,111 +1157,9 @@ mantido o ramo que foi averiguado.</p>
 </li>
 </ul>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_estratégias_de_mesclagem">ESTRATÉGIAS DE MESCLAGEM</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>O mecanismo da mesclagem (comandos <code>git merge</code> e <code>git pull</code>) permite que as estruturas das <em>estratégias de mesclagem</em> sejam escolhidas com a opção <code>-s</code>. Algumas estratégias também podem ter suas próprias opções, que podem ser passadas usando <code>-X&lt;opção&gt;</code> como argumentos para o comando <code>git merge</code> e/ou <code>git pull</code>.</p>
+<p>Unresolved directive in git-rebase.txt - include::merge-strategies.txt[]</p>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">resolve</dt>
-<dd>
-<p>Isso só pode resultar em dois cabeçalhos (ou seja, a ramificação atual e uma outra ramificada da que você obteve) utilizando um algoritmo de mesclagem de três vias. Ele tenta detectar cuidadosamente as ambiguidades cruzadas da mesclagem e geralmente é considerado seguro e rápido.</p>
-</dd>
-<dt class="hdlist1">recursive</dt>
-<dd>
-<p>Isso pode resolver apenas duas cabeças usando o algoritmo da mesclagem de 3 vias. Quando há mais de um ancestral comum que pode ser usado para a mesclagem de 3 vias, ele cria uma árvore mesclada dos ancestrais comuns e o usa como a árvore de referência para a mesclagem de 3 vias. Foi informado que isso resulta em menos conflitos durante mesclagem sem causar distorções pelos testes feitos nas mesclagens reais dos commits, retiradas do histórico de desenvolvimento do Linux kernel 2.6. Além disso, isso pode detectar e manipular as mesclagens envolvendo renomeações, porém atualmente não pode fazer uso das cópias detectadas. Essa é a estratégia de mesclagem predefinida ao extrair ou mesclar um ramo.</p>
-<div class="paragraph">
-<p>A estratégia <em>recursiva</em> pode ter as seguintes opções:</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">ours</dt>
-<dd>
-<p>Esta opção impõem que os pedaços conflitantes que sejam resolvidos de forma automática e de maneira limpa, favorecendo a <em>nossa</em> versão. As alterações vindos de outra árvore que não conflitam com o nosso lado são refletidas no resultado da mesclagem. Para um arquivo binário, todo o conteúdo é retirado do nosso lado.</p>
-<div class="paragraph">
-<p>Isso não deve ser confundido com a estratégia da <em>nossa</em> de mesclagem, que sequer olha para o que a outra árvore contém. Descarta tudo o que a outra árvore fez, declarando que o <em>nosso</em> histórico contém tudo o que aconteceu nela.</p>
-</div>
-</dd>
-<dt class="hdlist1">theirs</dt>
-<dd>
-<p>Este é o oposto do <em>nosso</em>; observe que, diferentemente do <em>nosso</em>, não existe uma estratégia de mesclagem <em>deles</em> para confundir esta opção de mesclagem.</p>
-</dd>
-<dt class="hdlist1">patience</dt>
-<dd>
-<p>Com esta opção, <em>merge-recursive</em> gasta um pouco de tempo extra para evitar as distorções que às vezes ocorrem devido as coincidência das linhas sem importância (por exemplo, chaves das funções distintas). Use isso quando os ramos que serão mesclados divergirem bastante. Consulte também <a href="git-diff.html">git-diff(1)</a> <code>--patience</code>.</p>
-</dd>
-<dt class="hdlist1">diff-algorithm=[patience|minimal|histogram|myers]</dt>
-<dd>
-<p>Informa ao <em>merge-recursive</em> para usar um algoritmo diff diferente, que pode ajudar a evitar as distorções que ocorrem devido as linhas coincidentes sem importância (como chaves das funções distintas). Consulte também <a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>.</p>
-</dd>
-<dt class="hdlist1">ignore-space-change</dt>
-<dt class="hdlist1">ignore-all-space</dt>
-<dt class="hdlist1">ignore-space-at-eol</dt>
-<dt class="hdlist1">ignore-cr-at-eol</dt>
-<dd>
-<p>Trata as linhas com o tipo indicado da mudança do espaço como inalterado por uma mesclagem de três vias. As alterações de espaço combinadas com outras alterações em uma linha não são ignoradas. Consulte também <a href="git-diff.html">git-diff(1)</a> <code>-b</code>, <code>-w</code>, <code>--ignore-space-at-eol</code>, e <code>--ignore-cr-at-eol</code>.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Caso a versão <em>their</em> (dele) introduzir apenas as alterações de espaço em uma linha, a <em>our</em> (nossa) versão será utilizada;</p>
-</li>
-<li>
-<p>Caso a <em>our</em> (nossa) versão introduzir alterações nos espaços, porém a versão <em>their</em> (dele) incluir uma alteração substancial, a versão <em>their</em> (dele) será utilizada;</p>
-</li>
-<li>
-<p>Caso contrário, a mesclagem continuará de forma usual.</p>
-</li>
-</ul>
-</div>
-</dd>
-<dt class="hdlist1">renormalize</dt>
-<dd>
-<p>Executa uma averiguação e um check-in virtual de três estágios em um arquivo ao resolver uma mesclagem de três vias. Esta opção deve ser utilizada ao mesclar os ramos com diferentes filtros que estejam limpos ou as regras normais para a quebra de linha. Para obter mais detalhes, consulte "Mesclando ramificações com diferentes atributos de check-in/check-out" em <a href="gitattributes.html">gitattributes(5)</a>.</p>
-</dd>
-<dt class="hdlist1">no-renormalize</dt>
-<dd>
-<p>Desativa a opção <code>renormalize</code>. Substitui a variável de configuração <code>merge.renormalize</code>.</p>
-</dd>
-<dt class="hdlist1">no-renames</dt>
-<dd>
-<p>Desativa a detecção de renomeação. Isso substitui a variável de configuração <code>merge.renames</code>. Consulte também<a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>.</p>
-</dd>
-<dt class="hdlist1">find-renames[=&lt;n&gt;]</dt>
-<dd>
-<p>Liga a detecção de renomeação, configurando opcionalmente o limite de similaridade. Esta é a predefinição. Isso substitui a configuração da variável <em>merge.renames</em>. Consulte também <a href="git-diff.html">git-diff(1)</a> <code>--find-renames</code>.</p>
-</dd>
-<dt class="hdlist1">rename-threshold=&lt;n&gt;</dt>
-<dd>
-<p>É um sinônimo obsoleto para <code>find-renames=&lt;n&gt;</code>.</p>
-</dd>
-<dt class="hdlist1">subtree[=&lt;caminho&gt;]</dt>
-<dd>
-<p>Essa opção é uma forma mais avançada da estratégia da <em>subárvore</em>, onde a estratégia adivinha como as duas árvores devem ser deslocadas para coincidirem uma com a outra durante a mesclagem. Em vez disso, o caminho definido é prefixado (ou removido desde o início) para criar a forma das duas árvores que serão coincididas.</p>
-</dd>
-</dl>
-</div>
-</dd>
-<dt class="hdlist1">octopus</dt>
-<dd>
-<p>Isso resolve os casos com mais de dois cabeçalhos, porém se recusa a fazer uma mesclagem complexa que precise de uma resolução manual. Destina-se primeiramente para ser usado para agrupar junto o tópico dos cabeçalhos. Esra é a estratégia de mesclagem predefinida durante a extração ou a mesclagem com mais de um ramo.</p>
-</dd>
-<dt class="hdlist1">ours</dt>
-<dd>
-<p>Isso resolve qualquer quantidade dos cabeçalhos, porém a árvore resultante da mesclagem é sempre a do cabeçalho atual do ramo, ignorando efetivamente todas as alterações de todas os outros ramos. Ele deve ser usado para substituir o histórico antigo de desenvolvimento das ramificações laterais. Observe que isso é diferente da opção <code>-Xours</code> da estratégia de mesclagem <em>recursiva</em>.</p>
-</dd>
-<dt class="hdlist1">subtree</dt>
-<dd>
-<p>Esta é uma estratégia recursiva modificada. Ao mesclar as árvores <em>A</em> e <em>B</em>, caso <em>B</em> corresponda a uma subárvore de <em>A</em>, o <em>B</em> será ajustado primeiro para coincidir à estrutura da árvore <em>A</em>, em vez de ler as árvores no mesmo nível. Esse ajuste também é feito na árvore ancestral comum.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>Com as estratégias que usma a mesclagem de 3 vias (incluindo a predefinição, <em>recursive</em>), caso uma alteração seja feita em ambas as ramificações, porém depois revertida em uma das ramificações, essa alteração estará presente no resultado mesclado; algumas pessoas acham este comportamento confuso. Isso ocorre porque apenas os cabeçalhos e a base da mesclagem são consideradas ao fazer uma mesclagem, e não os commits individuais. Portanto, o algoritmo da mesclagem considera a alteração revertida como nenhuma alteração e substitui a versão alterada.</p>
 </div>
 </div>
 </div>
@@ -1724,7 +1584,7 @@ merge -C 6f5e4d report-a-bug # Mescla o 'report-a-bug'</pre>
 <p>Caso um comando <code>merge</code> falhar por qualquer motivo que não seja um conflito da mesclagem (ou seja, quando a operação da mesclagem sequer iniciou), ele será reagendado imediatamente.</p>
 </div>
 <div class="paragraph">
-<p>Neste momento, o comando <code>merge</code> <strong>sempre</strong> utilizará a estratégia da mesclagem <code>recursiva</code> para as mesclagens regulares, e <code>octopus</code> para mesclagens "polvo", sem nenhuma maneira de escolher uma diferente. Para contornar isso, um comando <code>exec</code> pode ser utilizado para chamar o comando <code>git merge</code> de forma explicita, utilizando o fato onde os rótulos são as <em>refs</em> locais da área de trabalho (o ref <code>refs/rewritten/onto</code> corresponderia ao rótulo <code>onto</code> , por exemplo).</p>
+<p>By default, the <code>merge</code> command will use the <code>ort</code> merge strategy for regular merges, and <code>octopus</code> for octopus merges. One can specify a default strategy for all merges using the <code>--strategy</code> argument when invoking rebase, or can override specific merges in the interactive list of commands by using an <code>exec</code> command to call <code>git merge</code> explicitly with a <code>--strategy</code> argument. Note that when calling <code>git merge</code> explicitly like this, you can make use of the fact that the labels are worktree-local refs (the ref <code>refs/rewritten/onto</code> would correspond to the label <code>onto</code>, for example) in order to refer to the branches you want to merge.</p>
 </div>
 <div class="paragraph">
 <p>Observação: o primeiro comando (<code>label onto</code>) rotula a revisão onde os commits são refeitos; O nome <code>onto</code> é apenas uma convenção, como um aceno para a opção <code>--onto</code>.</p>
@@ -1775,40 +1635,6 @@ Unresolved directive in git-rebase.txt - include::config/sequencer.txt[]</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_bugs">BUGS</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>A lista de tarefas apresentada pela opção descontinuada <code>--preserve-merges --interactive</code> não representa a topologia do grafo da revisão (em vez disso use a opção <code>--rebase-merges</code>). A edição dos commits e a reformulação das suas mensagens devem funcionar bem, porém as tentativas de reordenar os commits tendem a produzir resultados contra-intuitivos. Em vez disso, use a opção <code>--rebase-merges</code> em tais cenários.</p>
-</div>
-<div class="paragraph">
-<p>Por exemplo, uma tentativa para reorganizar</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>1 --- 2 --- 3 --- 4 --- 5</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>para</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>1 --- 2 --- 4 --- 3 --- 5</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>movendo a linha "pick 4" resultará no seguinte histórico:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>        3
-       /
-1 --- 2 --- 4 --- 5</pre>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -1819,7 +1645,7 @@ Unresolved directive in git-rebase.txt - include::config/sequencer.txt[]</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-08-27 14:24:54 +0200
+Last updated 2021-10-31 17:59:03 +0100
 </div>
 </div>
 </body>

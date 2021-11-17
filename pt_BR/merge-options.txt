@@ -1,6 +1,9 @@
 --commit::
 --no-commit::
 	Execute a mesclagem e faça o commit com o resultado. Esta opção pode ser usada para substituir a opção `--no-commit`.
+ifdef::git-pull[]
+	Útil apenas quando for mesclar.
+endif::git-pull[]
 +
 Com a opção `--no-commit`, executa a mesclagem e para imediatamente antes de criar a mesclagem de um commit, para dar ao usuário a chance de inspecionar e ajustar ainda mais o resultado da mesclagem antes de fazer o commit.
 +
@@ -19,16 +22,28 @@ Os scripts mais antigos podem depender do comportamento histórico de não permi
 --cleanup=<modo>::
 	Esta opção determina como a mensagem da mesclagem será limpa antes da confirmação. Para mais detalhes consulte linkgit:git-commit[1]. Além disso, caso o valor de `scissors` seja dado ao '<mode>' , o `scissors` (tesouras) será anexada ao `MERGE_MSG` antes de ser repassada para o mecanismo de commit caso exista mesclagens conflitantes.
 
+ifdef::git-merge[]
 --ff::
 --no-ff::
 --ff-only::
 	Especifica como uma mesclagem é manipulada quando o histórico mesclado já é um descendente do histórico atual. A predefinição é a opção `--ff` , a menos que durante a mesclagem de uma tag anotada (e possivelmente assinada) que não seja armazenada em seu local natural na hierarquia `refs/tags/`, no caso onde a opção `--ff` não será assumida.
+endif::git-merge[]
+ifdef::git-pull[]
+--ff-only::
+	Somente atualize para o novo histórico caso não haja um histórico local divergente. Este é a predefinição quando nenhum método para reconciliar os históricos divergentes for fornecido (por meio dos sinalizadores --rebase=*).
+
+--ff::
+--no-ff::
+	Ao fazer uma mesclagem em vez do um "rebasing", especifica como uma mesclagem é manipulada quando o histórico mesclado já é um descendente do histórico atual. A predefinição é a opção `--ff` , a menos que durante a mesclagem de uma tag anotada (e possivelmente assinada) que não seja armazenada em seu local natural na hierarquia `refs/tags/`, no caso onde a opção `--ff` não será assumida.
+endif::git-pull[]
 +
 Com `--ff`, quando for possível, resolva a mesclagem como um avanço rápido (atualize apenas o ponteiro do ramo para coincidir com a ramificação que foi mesclada; não crie um commit da mesclagem). Quando não for possível (quando o histórico mesclado não for um descendente do histórico atual), crie um commit da mesclagem.
 +
 Com `--no-ff`, crie um commit da mesclagem em todos os casos, mesmo quando a mesclagem puder ser resolvida como um avanço rápido.
+ifdef::git-merge[]
 +
 Com a opção `--ff-only`, quando for possível, resolva a mesclagem com avanço rápido. Quando não for possível, recuse a mesclagem e encerre com uma condição diferente de zero.
+endif::git-merge[]
 
 -S[<keyid>]::
 --gpg-sign[=<keyid>]::
@@ -38,6 +53,9 @@ Com a opção `--ff-only`, quando for possível, resolva a mesclagem com avanço
 --log[=<n>]::
 --no-log::
 	Além dos nomes dos ramos, preencha a mensagem do registro log com descrições de uma linha com no máximo <n> commits atuais que estão sendo mesclados. Consulte também linkgit:git-fmt-merge-msg[1].
+ifdef::git-pull[]
+	Útil apenas quando for mesclar.
+endif::git-pull[]
 +
 Com '--no-log', não liste as descrições de uma linha vindas do commits que estão atualmente sendo mescladas.
 
@@ -57,13 +75,20 @@ Com `-n` ou `--no-stat`, não mostre o 'diffstat' no final da mesclagem.
 Com a opção `--no-squash`, execute a mesclagem e faça o commit com o resultado. Esta opção pode ser usada para substituir a opção `--squash`.
 +
 Com a opção `--squash`, a opção `--commit` não é permitida e irá falhar.
+ifdef::git-pull[]
++
+Útil apenas quando for mesclar.
+endif::git-pull[]
 
 --no-verify::
 	Esta opção ignora os ganchos dos commits anteriores e os ganchos das mensagens do commit. Consulte também linkgit:githooks[5].
+ifdef::git-pull[]
+	Útil apenas quando for mesclar.
+endif::git-pull[]
 
 -s <estratégia>::
 --strategy=<estratégia>::
-	Use a estratégia de mesclagem informada; podem ser utilizado mais de uma vez para defini-los na ordem em que devem ser tentados. Caso não haja a opção `-s`, em vez disso será usada uma lista de estratégias incorporada ('git merge-recursive' ao mesclar um único cabeçalho, caso contrário 'git merge octopus').
+	Use a estratégia de mesclagem informada; podem ser utilizado mais de uma vez para defini-los na ordem em que devem ser tentados. Caso não haja a opção `-s`, em vez disso será usada uma lista de estratégias incorporada (`ort` ao mesclar um único cabeçalho, caso contrário `octopus`).
 
 -X <opção>::
 --strategy-option=<opção>::
@@ -72,6 +97,10 @@ Com a opção `--squash`, a opção `--commit` não é permitida e irá falhar.
 --verify-signatures::
 --no-verify-signatures::
 	Verifique se o topo do commit do lado do ramo mesclado está assinado com uma chave válida, ou seja, uma chave que possua um uid válida: no modelo de confiança predefinido, isso significa que a chave da assinatura foi assinada através de uma chave confiável. Caso o topo do commit do lado do ramo não seja assinada com uma chave válida, a mesclagem será cancelada.
+ifdef::git-pull[]
++
+Útil apenas quando for mesclar.
+endif::git-pull[]
 
 --summary::
 --no-summary::
@@ -94,7 +123,11 @@ endif::git-pull[]
 
 --autostash::
 --no-autostash::
-	Crie automaticamente uma entrada "stash" temporária ante que a operação inicie e aplique-a depois que a operação terminar. Isto significa que seja possível rodar operações em uma árvore de trabalho suja. No entanto, utilize com cuidado: conflitos não triviais podem acontecer caso a aplicação final do "stash" ocorra após uma mesclagem bem-sucedida.
+	Crie automaticamente uma entrada "stash" temporária antes do inicio da operação, registre na ref especial `MERGE_AUTOSTASH` e aplique-a depois que a operação terminar. Isto significa que seja possível rodar operações em uma árvore de trabalho suja. No entanto, utilize com cuidado: conflitos não triviais podem acontecer caso a aplicação final do "stash" ocorra após uma mesclagem bem-sucedida.
 
 --allow-unrelated-histories::
 	É predefinido que o comando `git merge` se recuse a mesclar os históricos que não compartilham de um ancestral comum. Esta opção pode ser utilizada para substituir esta segurança durante a mesclagem dos históricos dos dois projetos que iniciaram as suas vidas de forma independente. Como esta é uma ocasião muito rara, não existe variável de configuração para ativar isso de forma predefinida e não será adicionada.
+ifdef::git-pull[]
++
+Útil apenas quando for mesclar.
+endif::git-pull[]

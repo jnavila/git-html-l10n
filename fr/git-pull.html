@@ -459,10 +459,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Intègre les modifications d&#8217;un dépôt distant dans la branche actuelle. Dans son mode par défaut, <code>git pull</code> est l&#8217;abréviation de <code>git fetch</code> suivi de <code>git merge FETCH_HEAD</code>.</p>
+<p>Incorporates changes from a remote repository into the current branch. If the current branch is behind the remote, then by default it will fast-forward the current branch to match the remote. If the current branch and the remote have diverged, the user needs to specify how to reconcile the divergent branches with <code>--rebase</code> or <code>--no-rebase</code> (or the corresponding configuration option in <code>pull.rebase</code>).</p>
 </div>
 <div class="paragraph">
-<p>Plus précisément, <em>git pull</em> lance <em>git fetch</em> avec les paramètres donnés et appelle <em>git merge</em> pour fusionner les têtes de branche récupérées dans la branche courante. Avec <code>--rebase</code>, il lance <em>git rebase</em> au lieu de <em>git merge</em>.</p>
+<p>More precisely, <code>git pull</code> runs <code>git fetch</code> with the given parameters and then depending on configuration options or command line flags, will call either <code>git rebase</code> or <code>git merge</code> to reconcile diverging branches.</p>
 </div>
 <div class="paragraph">
 <p>&lt;dépôt&gt; doit être le nom d&#8217;un dépôt distant tel que passé à <a href="git-fetch.html">git-fetch(1)</a>. &lt;spéc-de-réf&gt; peut nommer une réf distante arbitraire (par exemple, le nom d&#8217;une étiquette) ou même une collection de réfs avec les branches de suivi à distance correspondantes (par exemple, refs/heads/*:refs/remotes/origin/*), mais c&#8217;est généralement le nom d&#8217;une branche du dépôt distant.</p>
@@ -537,7 +537,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--commit</dt>
 <dt class="hdlist1">--no-commit</dt>
 <dd>
-<p>Effectuer la fusion et valider le résultat. Cette option peut être utilisée pour passer outre --no-commit.</p>
+<p>Effectuer la fusion et valider le résultat. Cette option peut être utilisée pour passer outre --no-commit.
+Only useful when merging.</p>
 <div class="paragraph">
 <p>Avec --no-commit, effectuer la fusion et s&#8217;arrêter juste avant de créer un commit de fusion, pour donner à l&#8217;utilisateur une chance d&#8217;inspecter et de peaufiner le résultat de la fusion avant de valider.</p>
 </div>
@@ -558,19 +559,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Cette option détermine comment le message de fusion sera nettoyé avant d&#8217;être envoyé. Voir <a href="git-commit.html">git-commit(1)</a> pour plus de détails. De plus, si le <em>&lt;mode&gt;</em> a la valeur <code>scissors</code>, les ciseaux seront ajoutés à <em>MERGE_MSG</em> avant d&#8217;être transmis à la machinerie de commit dans le cas d&#8217;un conflit de fusion.</p>
 </dd>
-<dt class="hdlist1">--ff</dt>
-<dt class="hdlist1">--no-ff</dt>
 <dt class="hdlist1">--ff-only</dt>
 <dd>
-<p>Précise comment une fusion est traitée lorsque l&#8217;historique fusionné est déjà un descendant de l&#8217;historique actuel. <code>--ff</code> est la valeur par défaut, sauf si l&#8217;on fusionne une étiquette annotée (et éventuellement signée) qui n&#8217;est pas stockée à sa place naturelle dans la hiérarchie <code>refs/tags/</code>, auquel cas <code>--no-ff</code> est supposé.</p>
+<p>Only update to the new history if there is no divergent local history. This is the default when no method for reconciling divergent histories is provided (via the --rebase=* flags).</p>
+</dd>
+<dt class="hdlist1">--ff</dt>
+<dt class="hdlist1">--no-ff</dt>
+<dd>
+<p>When merging rather than rebasing, specifies how a merge is handled when the merged-in history is already a descendant of the current history. If merging is requested, <code>--ff</code> is the default unless merging an annotated (and possibly signed) tag that is not stored in its natural place in the <code>refs/tags/</code> hierarchy, in which case <code>--no-ff</code> is assumed.</p>
 <div class="paragraph">
 <p>Avec <code>--ff</code>, lorsque c&#8217;est possible, résoudre la fusion comme une avance rapide (ne mettre à jour le pointeur de branche que pour qu&#8217;il corresponde à la branche fusionnée ; ne pas créer de commit de fusion). Lorsque ce n&#8217;est pas possible (lorsque l&#8217;historique fusionné n&#8217;est pas un descendant de l&#8217;historique actuel), créer un commit de fusion.</p>
 </div>
 <div class="paragraph">
 <p>Avec <code>--no-ff</code>, créer un commit de fusion dans tous les cas, même si la fusion peut être résolue en avance rapide.</p>
-</div>
-<div class="paragraph">
-<p>Dans le cas <code>--ff-only</code>, il faut résoudre la fusion en avance rapide lorsque c&#8217;est possible. Lorsque ce n&#8217;est pas possible, refuser de fusionner et sortir avec un statut non nul.</p>
 </div>
 </dd>
 <dt class="hdlist1">-S[&lt;idclé&gt;]</dt>
@@ -582,7 +583,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--log[=&lt;n&gt;]</dt>
 <dt class="hdlist1">--no-log</dt>
 <dd>
-<p>En plus des noms de branches, remplir le message du journal avec les descriptions d&#8217;une ligne depuis au maximum &lt;n&gt; commits réels qui sont en train d&#8217;être fusionnés. Voir aussi <a href="git-fmt-merge-msg.html">git-fmt-merge-msg(1)</a>.</p>
+<p>En plus des noms de branches, remplir le message du journal avec les descriptions d&#8217;une ligne depuis au maximum &lt;n&gt; commits réels qui sont en train d&#8217;être fusionnés. Voir aussi <a href="git-fmt-merge-msg.html">git-fmt-merge-msg(1)</a>.
+Only useful when merging.</p>
 <div class="paragraph">
 <p>Avec --no-log, ne pas indiquer les descriptions d&#8217;une ligne des commits réels qui sont fusionnés.</p>
 </div>
@@ -614,15 +616,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Avec --squash, --commit n&#8217;est pas permis, et échouera.</p>
 </div>
+<div class="paragraph">
+<p>Only useful when merging.</p>
+</div>
 </dd>
 <dt class="hdlist1">--no-verify</dt>
 <dd>
-<p>Cette option court-circuite les crochets pre-merge et commit-msg. Voir aussi <a href="githooks.html">githooks(5)</a>.</p>
+<p>Cette option court-circuite les crochets pre-merge et commit-msg. Voir aussi <a href="githooks.html">githooks(5)</a>.
+Only useful when merging.</p>
 </dd>
 <dt class="hdlist1">-s &lt;stratégie&gt;</dt>
 <dt class="hdlist1">--strategy=&lt;strategie&gt;</dt>
 <dd>
-<p>Utiliser la stratégie de fusion donnée ; peut être fourni plus d&#8217;une fois pour spécifier l&#8217;ordre dans lequel elles doivent être essayées. S&#8217;il n&#8217;y a pas d&#8217;option <code>-s</code>, une liste intégrée de stratégies est utilisée à la place (<em>git merge-recursive</em> lors de la fusion d&#8217;une seule tête, <em>git merge-octopus</em> sinon).</p>
+<p>Use the given merge strategy; can be supplied more than once to specify them in the order they should be tried. If there is no <code>-s</code> option, a built-in list of strategies is used instead (<code>ort</code> when merging a single head, <code>octopus</code> otherwise).</p>
 </dd>
 <dt class="hdlist1">-X &lt;option&gt;</dt>
 <dt class="hdlist1">--strategy-option=&lt;option&gt;</dt>
@@ -633,6 +639,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--no-verify-signatures</dt>
 <dd>
 <p>Vérifier que le commit sommet de la branche latérale à fusionner est signé avec une clé valide, c&#8217;est-à-dire une clé qui a un uid valide : dans le modèle de confiance par défaut, cela signifie que la clé de signature a été signée par une clé de confiance. Si le commit sommet de la branche latérale n&#8217;est pas signé avec une clé valide, la fusion est annulée.</p>
+<div class="paragraph">
+<p>Only useful when merging.</p>
+</div>
 </dd>
 <dt class="hdlist1">--summary</dt>
 <dt class="hdlist1">--no-summary</dt>
@@ -642,21 +651,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--autostash</dt>
 <dt class="hdlist1">--no-autostash</dt>
 <dd>
-<p>Créer automatiquement une entrée temporaire de remisage avant le début de l&#8217;opération et l&#8217;appliquer après la fin de l&#8217;opération. Cela signifie que vous pouvez exécuter l&#8217;opération sur un arbre de travail sale. Cependant, utilisez-le avec précaution : l&#8217;application finale du remisage après une fusion réussie peut entraîner des conflits non négligeables.</p>
+<p>Automatically create a temporary stash entry before the operation begins, record it in the special ref <code>MERGE_AUTOSTASH</code> and apply it after the operation ends. This means that you can run the operation on a dirty worktree. However, use with care: the final stash application after a successful merge might result in non-trivial conflicts.</p>
 </dd>
 <dt class="hdlist1">--allow-unrelated-histories</dt>
 <dd>
 <p>Par défaut, la commande <code>git merge</code> refuse de fusionner les historiques qui ne partagent pas un ancêtre commun. Cette option peut être utilisée pour passer outre cette sécurité lors de la fusion des historiques de deux projets qui ont commencé leur vie indépendamment l&#8217;un de l&#8217;autre. Comme c&#8217;est une occasion très rare, il n&#8217;existe pas de variable de configuration pour activer cette option par défaut et elle ne sera pas ajoutée.</p>
+<div class="paragraph">
+<p>Only useful when merging.</p>
+</div>
 </dd>
 <dt class="hdlist1">-r</dt>
-<dt class="hdlist1">--rebase[=false|true|merges|preserve|interactive]</dt>
+<dt class="hdlist1">--rebase[=false|true|merges|interactive]</dt>
 <dd>
 <p>Lorsque c&#8217;est le cas, rebaser la branche actuelle sur la branche amont après l&#8217;avoir récupérée. S&#8217;il existe une branche de suivi à distance correspondant à la branche en amont et que la branche en amont a été rebasée depuis la dernière extraction, le rebasage utilise cette information pour éviter de rebaser des modifications non locales.</p>
 <div class="paragraph">
 <p>Lorsqu&#8217;il est défini sur <code>merges</code>, rebaser en utilisant <code>git rebase --rebase-merges</code> de sorte que les commits de fusion locaux soient inclus dans le rebasage (voir <a href="git-rebase.html">git-rebase(1)</a> pour plus de détails).</p>
-</div>
-<div class="paragraph">
-<p>Lorsqu&#8217;il est défini sur <code>preserve</code> (déconseillé en faveur de <code>merges</code>), rebaser avec l&#8217;option <code>--preserve-merges</code> passée à <code>git rebase</code> afin que les commits de fusion créés localement ne soient pas aplaties.</p>
 </div>
 <div class="paragraph">
 <p>Lorsqu&#8217;elle est fausse, fusionner la branche amont dans la branche actuelle.</p>
@@ -682,7 +691,7 @@ C&#8217;est un mode de fonctionnement potentiellement <em>dangereux</em>. Il ré
 </dd>
 <dt class="hdlist1">--no-rebase</dt>
 <dd>
-<p>Écraser le --rebase précédent.</p>
+<p>This is shorthand for --rebase=false.</p>
 </dd>
 </dl>
 </div>
@@ -1130,111 +1139,9 @@ Il y a une différence entre le fait de lister plusieurs &lt;spéc-de-réf&gt; d
 <pre>        HEAD:refs/heads/&lt;tête&gt;</pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_les_stratégies_de_fusion">LES STRATÉGIES DE FUSION</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>Le mécanisme de fusion (commandes <code>git merge</code> et <code>git pull</code>) permet de choisir les <em>stratégies de fusion</em> du backend avec l&#8217;option <code>-s</code>. Certaines stratégies peuvent également prendre leurs propres options, qui peuvent être passées en donnant des arguments <code>-X&lt;option&gt;</code> à <code>git merge</code> et/ou <code>git pull</code>.</p>
+<p>Unresolved directive in git-pull.txt - include::merge-strategies.txt[]</p>
 </div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">resolve</dt>
-<dd>
-<p>Cela ne peut résoudre que deux têtes (c&#8217;est-à-dire la branche actuelle et une autre branche dont vous avez tiré) en utilisant un algorithme de fusion à trois points. Cela essaie de détecter avec soin les ambiguïtés de la fusion croisée et est considéré comme généralement sûr et rapide.</p>
-</dd>
-<dt class="hdlist1">recursive</dt>
-<dd>
-<p>Cela ne peut résoudre que deux têtes en utilisant un algorithme de fusion à trois voies. Lorsqu&#8217;il y a plus d&#8217;un ancêtre commun qui peut être utilisé pour la fusion à trois, il crée un arbre fusionné des ancêtres communs et l&#8217;utilise comme arbre de référence pour la fusion à trois. Il a été rapporté que cela permettait de réduire les conflits de fusion sans provoquer de fausses fusions, grâce à des tests effectués sur de vraies fusions tirées de l&#8217;historique de développement du noyau Linux 2.6. En outre, cela permet de détecter et de gérer les fusions impliquant des renommages, mais ne peut actuellement pas utiliser les copies détectées. C&#8217;est la stratégie de fusion par défaut lors de l&#8217;extraction ou de la fusion d&#8217;une branche.</p>
-<div class="paragraph">
-<p>La stratégie <em>recursive</em> peut prendre les options suivantes :</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">ours</dt>
-<dd>
-<p>Cette option oblige à résoudre les sections en conflit de manière autonome et propre en favorisant notre version (<em>our</em>). Les modifications par rapport à l&#8217;autre arbre qui n&#8217;entrent pas en conflit avec notre version se reflètent dans le résultat de la fusion. Pour un fichier binaire, tout le contenu est pris de notre côté.</p>
-<div class="paragraph">
-<p>Il ne faut pas la confondre avec la stratégie de fusion <em>ours</em>, qui ne tient même pas compte de ce que contient l&#8217;autre arbre. Elle rejette tout ce que l&#8217;autre arbre a fait, déclarant que "notre" historique (<em>our</em>) contient tout ce qui s&#8217;y est passé.</p>
-</div>
-</dd>
-<dt class="hdlist1">theirs</dt>
-<dd>
-<p>C&#8217;est le contraire de <em>ours</em> ; notez que, contrairement à <em>ours</em>, il n&#8217;y a pas de stratégie de fusion <em>theirs</em> avec laquelle confondre cette option de fusion.</p>
-</dd>
-<dt class="hdlist1">patience</dt>
-<dd>
-<p>Avec cette option, la <em>merge-recursive</em> prend un peu plus de temps pour éviter les erreurs de fusion qui se produisent parfois en raison de lignes de correspondance sans importance (par exemple, des accolades de fonctions distinctes). Utilisez cette option lorsque les branches à fusionner ont divergé de manière importante. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--patience</code>.</p>
-</dd>
-<dt class="hdlist1">diff-algorithm=[patience|minimal|histogram|myers]</dt>
-<dd>
-<p>Indiquer à la fonction <em>merge-recursive</em> d&#8217;utiliser un algorithme de diff différent, ce qui peut aider à éviter les erreurs de fusion dues à des lignes de correspondance sans importance (comme des accolades de fonctions distinctes). Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>.</p>
-</dd>
-<dt class="hdlist1">ignore-space-change</dt>
-<dt class="hdlist1">ignore-all-space</dt>
-<dt class="hdlist1">ignore-space-at-eol</dt>
-<dt class="hdlist1">ignore-cr-at-eol</dt>
-<dd>
-<p>Traiter les lignes avec le type de changement d&#8217;espace indiqué comme inchangées dans l&#8217;intérêt d&#8217;une fusion à trois points. Les changements d&#8217;espacement mélangés à d&#8217;autres changements de ligne ne sont pas ignorés. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>-b</code>, <code>-w</code>, <code>--ignore-space-at-eol</code>, et <code>--ignore-cr-at-eol</code>.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Si "leur" version (<em>theirs</em>) n&#8217;introduit que des changements d&#8217;espacement sur une ligne, "notre" version (<em>our</em>) est utilisée ;</p>
-</li>
-<li>
-<p>Si "notre" version introduit des modifications dans l&#8217;espace blanc mais que "leur" version inclut un changement substantiel, "leur" version est utilisée ;</p>
-</li>
-<li>
-<p>Dans le cas contraire, la fusion se déroule de la manière habituelle.</p>
-</li>
-</ul>
-</div>
-</dd>
-<dt class="hdlist1">renormalize</dt>
-<dd>
-<p>Il s&#8217;agit d&#8217;une extraction et d&#8217;un validation virtuelle des trois étapes d&#8217;un fichier lors de la résolution d&#8217;une fusion à trois points. Cette option est destinée à être utilisée lors de la fusion de branches avec différents filtres clean ou règles de normalisation de fin de ligne. Voir "Fusion de branches avec différents attributs de validation/extraction" dans <a href="gitattributes.html">gitattributes(5)</a> pour plus de détails.</p>
-</dd>
-<dt class="hdlist1">no-renormalize</dt>
-<dd>
-<p>Désactiver l&#8217;option <code>renormalize</code>. Cela surcharge la variable de configuration <code>merge.renormalize</code> .</p>
-</dd>
-<dt class="hdlist1">no-renames</dt>
-<dd>
-<p>Désactiver la détection de renommage. Ceci annule la variable de configuration <code>merge.renames</code>. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>.</p>
-</dd>
-<dt class="hdlist1">find-renames[=&lt;n&gt;]</dt>
-<dd>
-<p>Activer la détection de renommage, en fixant éventuellement le seuil de similarité. C&#8217;est la valeur par défaut. Cela surcharge la variable de configuration <code>merge.renames</code>. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--find-renames</code>.</p>
-</dd>
-<dt class="hdlist1">rename-threshold=&lt;n&gt;</dt>
-<dd>
-<p>Synonyme obsolète pour <code>find-renames=&lt;n&gt;</code>.</p>
-</dd>
-<dt class="hdlist1">subtree[=&lt;chemin&gt;]</dt>
-<dd>
-<p>Cette option est une forme plus avancée de stratégie <em>subtree</em>, où la stratégie fait une estimation de la façon dont deux arbres doivent être déplacés pour correspondre l&#8217;un à l&#8217;autre lors de la fusion. Au lieu de cela, le chemin spécifié est préfixé (ou tronqué au debut) pour faire correspondre la forme de deux arbres.</p>
-</dd>
-</dl>
-</div>
-</dd>
-<dt class="hdlist1">octopus</dt>
-<dd>
-<p>Cela permet de résoudre les cas à plus de deux têtes, mais refuse de faire une fusion complexe qui nécessite une résolution manuelle. C&#8217;est principalement destiné à être utilisé pour regrouper les têtes de branches thématiques. C&#8217;est la stratégie de fusion par défaut lorsque l&#8217;on tire ou fusionne plusieurs branches.</p>
-</dd>
-<dt class="hdlist1">ours</dt>
-<dd>
-<p>Cela résout un nombre quelconque de têtes, mais l&#8217;arbre résultant de la fusion est toujours celui de la tête de la branche actuelle, ignorant effectivement toutes les modifications provenant de toutes les autres branches. C&#8217;est censé être utilisé pour remplacer l&#8217;ancienne historique du développement des branches latérales. Notez que cette stratégie est différente de l&#8217;option -Xours de la stratégie de fusion <em>recursive</em>.</p>
-</dd>
-<dt class="hdlist1">subtree</dt>
-<dd>
-<p>Il s&#8217;agit d&#8217;une stratégie récursive modifiée. Lors de la fusion des arbres A et B, si B correspond à un sous-arbre de A, B est d&#8217;abord ajusté pour correspondre à la structure arborescente de A, au lieu de lire les arbres au même niveau. Cet ajustement est également effectué sur l&#8217;arbre de l&#8217;ancêtre commun.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>Avec les stratégies qui utilisent la fusion à trois points (y compris la fusion par défaut, <em>recursive</em>), si une modification est effectuée sur les deux branches, mais qu&#8217;elle est ensuite inversée sur l&#8217;une des branches, ce changement sera présent dans le résultat de la fusion ; certaines personnes trouvent ce comportement déroutant. Cela se produit parce que seules les têtes et la base de la fusion sont prises en compte lors d&#8217;une fusion, et non le commit individuel. L&#8217;algorithme de fusion considère donc le changement inversé comme n&#8217;étant pas un changement du tout, et substitue la version modifiée à la place.</p>
 </div>
 </div>
 </div>
@@ -1379,7 +1286,7 @@ $ git merge origin/next</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-08-27 14:24:06 +0200
+Last updated 2021-10-31 17:58:16 +0100
 </div>
 </div>
 </body>

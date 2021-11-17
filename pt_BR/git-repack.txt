@@ -9,7 +9,7 @@ git-repack - Empacota os objetos descompactados em um repositório
 RESUMO
 ------
 [verse]
-'git repack' [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [--window=<n>] [--depth=<n>] [--threads=<n>] [--keep-pack=<nome-do-pacote>]
+'git repack' [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m] [--window=<n>] [--depth=<n>] [--threads=<n>] [--keep-pack=<nome-do-pacote>] [--write-midx]
 
 DESCRIÇÃO
 ---------
@@ -68,7 +68,7 @@ O valor predefinido para a opção `--window` é 10 e o `--thp` é 50. O valor d
 
 -b::
 --write-bitmap-index::
-	Escreva um índice bitmap de acessibilidade como parte do reempacotamento. Isso só faz sentido quando utilizado com `-a` ou `-A`, pois os bitmaps devem poder se referir para todos os objetos que sejam acessíveis. Esta opção substitui a configuração da variável de ambiente `GIT_CURL_VERBOSE`. Esta opção não tem efeito caso vários arquivos de pacotes sejam criados.
+	Escreva um índice bitmap de acessibilidade como parte do reempacotamento. Isso só faz sentido quando utilizado com `-a`, `-A` ou `-m`, pois os bitmaps devem poder se referir para todos os objetos que sejam acessíveis. Esta opção substitui a configuração da variável de ambiente `GIT_CURL_VERBOSE`. Esta opção não tem efeito caso vários arquivos de pacotes sejam criados. a não ser que seja escrito um MIDX (neste caso é criado um bitmap multi-pack).
 
 --pack-kept-objects::
 	Inclua os objetos no arquivo `.keep` durante o reempacotamento. Observe que nós anda não excluímos os pacotes `.keep` depois da finalização dos objetos empacotados (`pack-objects`). Significa que podemos duplicar os objetos, porém isso torna a opção segura para ser utilizada quando existem impulsionamentos ou buscas simultâneos. Esta opção geralmente é útil apenas caso esteja escrevendo bitmaps com `-b` ou `repack.writeBitmaps`, pois garante que o pacote de bitmap tenha os objetos necessários.
@@ -96,6 +96,12 @@ O comando `git repack` garante isso determinando um "corte" dos packfiles que pr
 Ao contrário dos outros modos de reembalagem, o conjunto dos objetos que serão embalados é determinado exclusivamente pelo conjunto dos pacotes sendo "juntados"; em outras palavras, os pacotes determinados precisam ser combinados para restaurar uma progressão geométrica.
 +
 Quando a opção `--unpacked` é usada, os objetos soltos são implicitamente incluídos neste "ajuntamento", sem respeito à sua acessibilidade. Isso está sujeito a alterações no futuro. Esta opção (que implica num modo de repack drasticamente diferente) não tem garantia de funcionar com todas as outras combinações de opções para o comando `git repack`.
++
+Ao escrever um bitmap multi-pack, o comando `git repack` seleciona o maior pacote resultante como o pacote preferido para a seleção dos objetos pelo MIDX (consulte linkgit:git-multi-pack-index[1]).
+
+-m::
+--write-midx::
+	Escreva um índice multi-pack (consulte linkgit:git-multi-pack-index[1]) contendo pacotes não redundantes.
 
 CONFIGURAÇÃO
 ------------

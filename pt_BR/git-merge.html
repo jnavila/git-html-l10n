@@ -592,7 +592,7 @@ A opção <code>--edit</code> (ou <code>-e</code>) ainda é útil caso esteja en
 <dt class="hdlist1">-s &lt;estratégia&gt;</dt>
 <dt class="hdlist1">--strategy=&lt;estratégia&gt;</dt>
 <dd>
-<p>Use a estratégia de mesclagem informada; podem ser utilizado mais de uma vez para defini-los na ordem em que devem ser tentados. Caso não haja a opção <code>-s</code>, em vez disso será usada uma lista de estratégias incorporada (<em>git merge-recursive</em> ao mesclar um único cabeçalho, caso contrário <em>git merge octopus</em>).</p>
+<p>Use the given merge strategy; can be supplied more than once to specify them in the order they should be tried. If there is no <code>-s</code> option, a built-in list of strategies is used instead (<code>ort</code> when merging a single head, <code>octopus</code> otherwise).</p>
 </dd>
 <dt class="hdlist1">-X &lt;opção&gt;</dt>
 <dt class="hdlist1">--strategy-option=&lt;opção&gt;</dt>
@@ -627,7 +627,7 @@ A opção <code>--edit</code> (ou <code>-e</code>) ainda é útil caso esteja en
 <dt class="hdlist1">--autostash</dt>
 <dt class="hdlist1">--no-autostash</dt>
 <dd>
-<p>Crie automaticamente uma entrada "stash" temporária ante que a operação inicie e aplique-a depois que a operação terminar. Isto significa que seja possível rodar operações em uma árvore de trabalho suja. No entanto, utilize com cuidado: conflitos não triviais podem acontecer caso a aplicação final do "stash" ocorra após uma mesclagem bem-sucedida.</p>
+<p>Automatically create a temporary stash entry before the operation begins, record it in the special ref <code>MERGE_AUTOSTASH</code> and apply it after the operation ends. This means that you can run the operation on a dirty worktree. However, use with care: the final stash application after a successful merge might result in non-trivial conflicts.</p>
 </dd>
 <dt class="hdlist1">--allow-unrelated-histories</dt>
 <dd>
@@ -900,110 +900,8 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 </li>
 </ul>
 </div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_estratégias_de_mesclagem">ESTRATÉGIAS DE MESCLAGEM</h2>
-<div class="sectionbody">
 <div class="paragraph">
-<p>O mecanismo da mesclagem (comandos <code>git merge</code> e <code>git pull</code>) permite que as estruturas das <em>estratégias de mesclagem</em> sejam escolhidas com a opção <code>-s</code>. Algumas estratégias também podem ter suas próprias opções, que podem ser passadas usando <code>-X&lt;opção&gt;</code> como argumentos para o comando <code>git merge</code> e/ou <code>git pull</code>.</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">resolve</dt>
-<dd>
-<p>Isso só pode resultar em dois cabeçalhos (ou seja, a ramificação atual e uma outra ramificada da que você obteve) utilizando um algoritmo de mesclagem de três vias. Ele tenta detectar cuidadosamente as ambiguidades cruzadas da mesclagem e geralmente é considerado seguro e rápido.</p>
-</dd>
-<dt class="hdlist1">recursive</dt>
-<dd>
-<p>Isso pode resolver apenas duas cabeças usando o algoritmo da mesclagem de 3 vias. Quando há mais de um ancestral comum que pode ser usado para a mesclagem de 3 vias, ele cria uma árvore mesclada dos ancestrais comuns e o usa como a árvore de referência para a mesclagem de 3 vias. Foi informado que isso resulta em menos conflitos durante mesclagem sem causar distorções pelos testes feitos nas mesclagens reais dos commits, retiradas do histórico de desenvolvimento do Linux kernel 2.6. Além disso, isso pode detectar e manipular as mesclagens envolvendo renomeações, porém atualmente não pode fazer uso das cópias detectadas. Essa é a estratégia de mesclagem predefinida ao extrair ou mesclar um ramo.</p>
-<div class="paragraph">
-<p>A estratégia <em>recursiva</em> pode ter as seguintes opções:</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">ours</dt>
-<dd>
-<p>Esta opção impõem que os pedaços conflitantes que sejam resolvidos de forma automática e de maneira limpa, favorecendo a <em>nossa</em> versão. As alterações vindos de outra árvore que não conflitam com o nosso lado são refletidas no resultado da mesclagem. Para um arquivo binário, todo o conteúdo é retirado do nosso lado.</p>
-<div class="paragraph">
-<p>Isso não deve ser confundido com a estratégia da <em>nossa</em> de mesclagem, que sequer olha para o que a outra árvore contém. Descarta tudo o que a outra árvore fez, declarando que o <em>nosso</em> histórico contém tudo o que aconteceu nela.</p>
-</div>
-</dd>
-<dt class="hdlist1">theirs</dt>
-<dd>
-<p>Este é o oposto do <em>nosso</em>; observe que, diferentemente do <em>nosso</em>, não existe uma estratégia de mesclagem <em>deles</em> para confundir esta opção de mesclagem.</p>
-</dd>
-<dt class="hdlist1">patience</dt>
-<dd>
-<p>Com esta opção, <em>merge-recursive</em> gasta um pouco de tempo extra para evitar as distorções que às vezes ocorrem devido as coincidência das linhas sem importância (por exemplo, chaves das funções distintas). Use isso quando os ramos que serão mesclados divergirem bastante. Consulte também <a href="git-diff.html">git-diff(1)</a> <code>--patience</code>.</p>
-</dd>
-<dt class="hdlist1">diff-algorithm=[patience|minimal|histogram|myers]</dt>
-<dd>
-<p>Informa ao <em>merge-recursive</em> para usar um algoritmo diff diferente, que pode ajudar a evitar as distorções que ocorrem devido as linhas coincidentes sem importância (como chaves das funções distintas). Consulte também <a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>.</p>
-</dd>
-<dt class="hdlist1">ignore-space-change</dt>
-<dt class="hdlist1">ignore-all-space</dt>
-<dt class="hdlist1">ignore-space-at-eol</dt>
-<dt class="hdlist1">ignore-cr-at-eol</dt>
-<dd>
-<p>Trata as linhas com o tipo indicado da mudança do espaço como inalterado por uma mesclagem de três vias. As alterações de espaço combinadas com outras alterações em uma linha não são ignoradas. Consulte também <a href="git-diff.html">git-diff(1)</a> <code>-b</code>, <code>-w</code>, <code>--ignore-space-at-eol</code>, e <code>--ignore-cr-at-eol</code>.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>Caso a versão <em>their</em> (dele) introduzir apenas as alterações de espaço em uma linha, a <em>our</em> (nossa) versão será utilizada;</p>
-</li>
-<li>
-<p>Caso a <em>our</em> (nossa) versão introduzir alterações nos espaços, porém a versão <em>their</em> (dele) incluir uma alteração substancial, a versão <em>their</em> (dele) será utilizada;</p>
-</li>
-<li>
-<p>Caso contrário, a mesclagem continuará de forma usual.</p>
-</li>
-</ul>
-</div>
-</dd>
-<dt class="hdlist1">renormalize</dt>
-<dd>
-<p>Executa uma averiguação e um check-in virtual de três estágios em um arquivo ao resolver uma mesclagem de três vias. Esta opção deve ser utilizada ao mesclar os ramos com diferentes filtros que estejam limpos ou as regras normais para a quebra de linha. Para obter mais detalhes, consulte "Mesclando ramificações com diferentes atributos de check-in/check-out" em <a href="gitattributes.html">gitattributes(5)</a>.</p>
-</dd>
-<dt class="hdlist1">no-renormalize</dt>
-<dd>
-<p>Desativa a opção <code>renormalize</code>. Substitui a variável de configuração <code>merge.renormalize</code>.</p>
-</dd>
-<dt class="hdlist1">no-renames</dt>
-<dd>
-<p>Desativa a detecção de renomeação. Isso substitui a variável de configuração <code>merge.renames</code>. Consulte também<a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>.</p>
-</dd>
-<dt class="hdlist1">find-renames[=&lt;n&gt;]</dt>
-<dd>
-<p>Liga a detecção de renomeação, configurando opcionalmente o limite de similaridade. Esta é a predefinição. Isso substitui a configuração da variável <em>merge.renames</em>. Consulte também <a href="git-diff.html">git-diff(1)</a> <code>--find-renames</code>.</p>
-</dd>
-<dt class="hdlist1">rename-threshold=&lt;n&gt;</dt>
-<dd>
-<p>É um sinônimo obsoleto para <code>find-renames=&lt;n&gt;</code>.</p>
-</dd>
-<dt class="hdlist1">subtree[=&lt;caminho&gt;]</dt>
-<dd>
-<p>Essa opção é uma forma mais avançada da estratégia da <em>subárvore</em>, onde a estratégia adivinha como as duas árvores devem ser deslocadas para coincidirem uma com a outra durante a mesclagem. Em vez disso, o caminho definido é prefixado (ou removido desde o início) para criar a forma das duas árvores que serão coincididas.</p>
-</dd>
-</dl>
-</div>
-</dd>
-<dt class="hdlist1">octopus</dt>
-<dd>
-<p>Isso resolve os casos com mais de dois cabeçalhos, porém se recusa a fazer uma mesclagem complexa que precise de uma resolução manual. Destina-se primeiramente para ser usado para agrupar junto o tópico dos cabeçalhos. Esra é a estratégia de mesclagem predefinida durante a extração ou a mesclagem com mais de um ramo.</p>
-</dd>
-<dt class="hdlist1">ours</dt>
-<dd>
-<p>Isso resolve qualquer quantidade dos cabeçalhos, porém a árvore resultante da mesclagem é sempre a do cabeçalho atual do ramo, ignorando efetivamente todas as alterações de todas os outros ramos. Ele deve ser usado para substituir o histórico antigo de desenvolvimento das ramificações laterais. Observe que isso é diferente da opção <code>-Xours</code> da estratégia de mesclagem <em>recursiva</em>.</p>
-</dd>
-<dt class="hdlist1">subtree</dt>
-<dd>
-<p>Esta é uma estratégia recursiva modificada. Ao mesclar as árvores <em>A</em> e <em>B</em>, caso <em>B</em> corresponda a uma subárvore de <em>A</em>, o <em>B</em> será ajustado primeiro para coincidir à estrutura da árvore <em>A</em>, em vez de ler as árvores no mesmo nível. Esse ajuste também é feito na árvore ancestral comum.</p>
-</dd>
-</dl>
-</div>
-<div class="paragraph">
-<p>Com as estratégias que usma a mesclagem de 3 vias (incluindo a predefinição, <em>recursive</em>), caso uma alteração seja feita em ambas as ramificações, porém depois revertida em uma das ramificações, essa alteração estará presente no resultado mesclado; algumas pessoas acham este comportamento confuso. Isso ocorre porque apenas os cabeçalhos e a base da mesclagem são consideradas ao fazer uma mesclagem, e não os commits individuais. Portanto, o algoritmo da mesclagem considera a alteração revertida como nenhuma alteração e substitui a versão alterada.</p>
+<p>Unresolved directive in git-merge.txt - include::merge-strategies.txt[]</p>
 </div>
 </div>
 </div>
@@ -1065,7 +963,7 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 </dd>
 <dt class="hdlist1">merge.autoStash</dt>
 <dd>
-<p>Quando definido como <em>true</em>, crie automaticamente uma entrada "stash" temporária antes do início da operação e aplique-a após o término. Significa que você pode executar a mesclagem em uma árvore de trabalho "dirty" (suja). No entanto, utilize com cuidado: os conflitos não triviais podem acontecer caso a aplicação final do "stash" ocorra após uma mesclagem bem-sucedida. Esta opção pode ser substituída pelas opções <code>--no-autostash</code> e <code>--autostash</code> do <a href="git-merge.html">git-merge(1)</a>. A predefinição retorna para o valor <code>false</code>.</p>
+<p>Quando definido como <em>true</em>, crie automaticamente uma entrada "stash" temporária antes do início da operação e aplique-a ao concluir. Significa que você pode executar a mesclagem em uma árvore de trabalho "dirty" (suja). No entanto, utilize com cuidado: os conflitos não triviais podem acontecer caso a aplicação final do "stash" ocorra após uma mesclagem bem-sucedida. Esta opção pode ser substituída pelas opções <code>--no-autostash</code> e <code>--autostash</code> do <a href="git-merge.html">git-merge(1)</a>. A predefinição retorna para o valor <code>false</code>.</p>
 </dd>
 <dt class="hdlist1">merge.tool</dt>
 <dd>
@@ -1221,7 +1119,7 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-08-27 14:24:53 +0200
+Last updated 2021-10-31 17:59:02 +0100
 </div>
 </div>
 </body>
