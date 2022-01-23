@@ -455,7 +455,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                     [--version=&lt;version&gt;] &lt;fichier&gt; &lt;arguments-git-rev-list&gt;
 <em>git bundle</em> verify [-q | --quiet] &lt;fichier&gt;
 <em>git bundle</em> list-heads &lt;fichier&gt; [&lt;nom-de-ref&gt;&#8230;&#8203;]
-<em>git bundle</em> unbundle &lt;fichier&gt; [&lt;nom-de-ref&gt;&#8230;&#8203;]</pre>
+<em>git bundle</em> unbundle [--progress] &lt;fichier&gt; [&lt;nom-de-ref&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -463,13 +463,36 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_description">DESCRIPTION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Certains flux de travail exigent qu&#8217;une ou plusieurs branches de développement sur une machine soient répliquées sur une autre machine, mais les deux machines ne peuvent pas être connectées directement, et donc les protocoles interactifs de Git (git, ssh, http) ne peuvent pas être utilisés.</p>
+<p>Créer, décompresser et manipuler des fichiers "bundle". Les colis sont utilisés pour le transfert "hors ligne" d&#8217;objets Git sans qu&#8217;un "serveur" actif se trouve de l&#8217;autre côté de la connexion réseau.</p>
 </div>
 <div class="paragraph">
-<p>La commande <em>git bundle</em> regroupe les objets et les références dans une archive sur la machine d&#8217;origine, qui peut ensuite être importée dans un autre dépôt en utilisant <em>git fetch</em>, <em>git pull</em> ou <em>git clone</em>, après avoir déplacé l&#8217;archive par un moyen quelconque (par exemple, par sneakernet).</p>
+<p>Ils peuvent être utilisés pour créer des sauvegardes incrémentielles et complètes d&#8217;un dépôt, et pour relayer l&#8217;état des références d&#8217;un dépôt à un autre.</p>
 </div>
 <div class="paragraph">
-<p>Comme il n&#8217;existe pas de connexion directe entre les dépôts, l&#8217;utilisateur doit spécifier une base pour le regroupement qui est détenue par le dépôt de destination : le regroupement suppose que tous les objets de la base sont déjà dans le dépôt de destination.</p>
+<p>Les commandes Git qui récupèrent ou autrement "lisent" via des protocoles tels que <code>ssh://</code> et <code>https://</code> peuvent aussi opérer sur des fichiers cois. Il est possible de <a href="git-clone.html">git-clone(1)</a> un nouveau dépôt à partir d&#8217;un colis, d&#8217;utiliser <a href="git-fetch.html">git-fetch(1)</a> pour en récupérer, et de lister les références qu&#8217;il contient avec <a href="git-ls-remote.html">git-ls-remote(1)</a>. Il n&#8217;y a pas de support d'"écriture" correspondant, c&#8217;est-à-dire qu&#8217;un <em>git push</em> dans un colis n&#8217;est pas supporté.</p>
+</div>
+<div class="paragraph">
+<p>Voir la section "EXEMPLES" ci-dessous pour plus des exemples d&#8217;utilisation des colis.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_formats_des_colis">FORMATS DES COLIS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Les colis sont des fichiers <code>.pack</code> (voir <a href="git-pack-objects.html">git-pack-objects(1)</a>) avec un en-tête indiquant quelles références sont contenues dans le colis.</p>
+</div>
+<div class="paragraph">
+<p>Comme le format d&#8217;archive packed lui-même, les colis peuvent être soit autonomes, soit créés à l&#8217;aide d&#8217;exclusions. Voir la section "PRÉREQUIS D&#8217;OBJET" ci-dessous.</p>
+</div>
+<div class="paragraph">
+<p>Les colis créés en utilisant les exclusions de révision sont des "paquets minces" créés en utilisant l&#8217;option <code>--thin</code> de <a href="git-pack-objects.html">git-pack-objects(1)</a>, et dépaquetés en utilisant l&#8217;option <code>--fix-thin</code> de <a href="git-index-pack.html">git-index-pack(1)</a>.</p>
+</div>
+<div class="paragraph">
+<p>There is no option to create a "thick pack" when using revision exclusions, and users should not be concerned about the difference. By using "thin packs", bundles created using exclusions are smaller in size. That they&#8217;re "thin" under the hood is merely noted here as a curiosity, and as a reference to other documentation.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="technical/bundle-format.html">the <code>bundle-format</code> documentation</a> for more details and the discussion of "thin pack" in <a href="technical/pack-format.html">the pack format documentation</a> for further details.</p>
 </div>
 </div>
 </div>
@@ -531,13 +554,80 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_spécification_des_références">SPÉCIFICATION DES RÉFÉRENCES</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><em>git bundle</em> empaquettera seulement les références qui sont montrées par <em>git show-ref</em> : cela inclut les têtes, les étiquettes et les têtes distantes. Des références telles que <code>master~1</code> ne peuvent pas être empaquetées, mais sont parfaitement adaptées pour définir la base. Plus d&#8217;une référence peut être empaquetée, et plus d&#8217;une base peut être spécifiée. Les objets empaquetés sont ceux qui ne sont pas contenus dans l&#8217;union des bases données. Chaque base peut être spécifiée explicitement (par exemple <code>^master~10</code>), ou implicitement (par exemple <code>master~10..master</code>, <code>--since=10.days.ago master</code>).</p>
+<p>Revisions must be accompanied by reference names to be packaged in a bundle.</p>
 </div>
 <div class="paragraph">
-<p>Il est très important que la base utilisée soit détenue par la destination. Il n&#8217;y a pas de problème à être prudent et faire en sorte que le fichier regroupement contienne des objets déjà présents dans la destination, car ceux-ci sont ignorés lors du déballage à la destination.</p>
+<p>More than one reference may be packaged, and more than one set of prerequisite objects can be specified. The objects packaged are those not contained in the union of the prerequisites.</p>
 </div>
 <div class="paragraph">
-<p><code>git clone</code> peut utiliser tout paquet créé sans refspecs négatifs (par exemple, <code>nouveau</code>, mais pas <code>ancien..nouveau</code>). Si vous voulez imiter <code>git clone --mirror</code>, qui inclurait vos refs comme <code>refs/remotes/*</code>, utilisez <code>--all</code>. Si vous voulez fournir le même ensemble de références qu&#8217;un clone directement depuis le dépôt source, utilisez <code>--branches --tags</code> pour les <code>&lt;arguments-git-rev-list&gt;</code>.</p>
+<p>The <em>git bundle create</em> command resolves the reference names for you using the same rules as <code>git rev-parse --abbrev-ref=loose</code>. Each prerequisite can be specified explicitly (e.g. <code>^master~10</code>), or implicitly (e.g. <code>master~10..master</code>, <code>--since=10.days.ago master</code>).</p>
+</div>
+<div class="paragraph">
+<p>All of these simple cases are OK (assuming we have a "master" and "next" branch):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git bundle create master.bundle master
+$ echo master | git bundle create master.bundle --stdin
+$ git bundle create master-and-next.bundle master next
+$ (echo master; echo next) | git bundle create master-and-next.bundle --stdin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And so are these (and the same but omitted <code>--stdin</code> examples):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git bundle create recent-master.bundle master~10..master
+$ git bundle create recent-updates.bundle master~10..master next~5..next</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A revision name or a range whose right-hand-side cannot be resolved to a reference is not accepted:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git bundle create HEAD.bundle $(git rev-parse HEAD)
+fatal: Refusing to create empty bundle.
+$ git bundle create master-yesterday.bundle master~10..master~5
+fatal: Refusing to create empty bundle.</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_object_prerequisites">OBJECT PREREQUISITES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>When creating bundles it is possible to create a self-contained bundle that can be unbundled in a repository with no common history, as well as providing negative revisions to exclude objects needed in the earlier parts of the history.</p>
+</div>
+<div class="paragraph">
+<p>Feeding a revision such as <code>new</code> to <code>git bundle create</code> will create a bundle file that contains all the objects reachable from the revision <code>new</code>. That bundle can be unbundled in any repository to obtain a full history that leads to the revision <code>new</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git bundle create complet.bundle nouveau</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A revision range such as <code>old..new</code> will produce a bundle file that will require the revision <code>old</code> (and any objects reachable from it) to exist for the bundle to be "unbundle"-able:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git bundle create complet.bundle ancien..nouveau</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A self-contained bundle without any prerequisites can be extracted into anywhere, even into an empty repository, or be cloned from (i.e., <code>new</code>, but not <code>old..new</code>).</p>
+</div>
+<div class="paragraph">
+<p>Il n&#8217;y a pas de problème à être prudent et faire en sorte que le fichier regroupement contienne des objets déjà présents dans la destination, car ceux-ci sont ignorés lors du déballage à la destination.</p>
+</div>
+<div class="paragraph">
+<p>Si vous voulez imiter <code>git clone --mirror</code>, qui inclurait vos refs comme <code>refs/remotes/*</code>, utilisez <code>--all</code>. Si vous voulez fournir le même ensemble de références qu&#8217;un clone directement depuis le dépôt source, utilisez <code>--branches --tags</code> pour les <code>&lt;arguments-git-rev-list&gt;</code>.</p>
+</div>
+<div class="paragraph">
+<p>The <em>git bundle verify</em> command can be used to check whether your recipient repository has the required prerequisite commits for a bundle.</p>
 </div>
 </div>
 </div>
@@ -548,7 +638,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Supposons que vous vouliez transférer l&#8217;historique d&#8217;un dépôt R1 sur la machine A vers un autre dépôt R2 sur la machine B. Pour une raison quelconque, la connexion directe entre A et B n&#8217;est pas autorisée, mais nous pouvons déplacer les données de A à B via un mécanisme quelconque (CD, email, etc.). Nous voulons mettre à jour R2 avec le développement fait sur la branche master dans R1.</p>
 </div>
 <div class="paragraph">
-<p>Pour amorcer le processus, vous pouvez d&#8217;abord créer un paquet qui n&#8217;a pas de base. Vous pouvez utiliser une étiquette pour vous rappeler jusqu&#8217;à quel commit le dernier traitement a été fait, afin de faciliter la mise à jour ultérieure de l&#8217;autre dépôt avec un paquet incrémental :</p>
+<p>Pour amorcer le processus, vous pouvez d&#8217;abord créer un paquet qui n&#8217;a pas de prérequis. Vous pouvez utiliser une étiquette pour vous rappeler jusqu&#8217;à quel commit le dernier traitement a été fait, afin de faciliter la mise à jour ultérieure de l&#8217;autre dépôt avec un paquet incrémental :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -598,7 +688,7 @@ machineB$ git pull</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Si vous savez jusqu&#8217;à quel commit le dépôt destinataire devrait avoir les objets nécessaires, vous pouvez utiliser cette connaissance pour spécifier la base, en donnant un point de coupure pour limiter les révisions et les objets qui vont dans le paquet résultant. L&#8217;exemple précédent a utilisé l&#8217;étiquette dernierpaquetR2 dans ce but, mais vous pouvez utiliser toute autre option que vous donneriez à la commande <a href="git-log.html">git-log(1)</a>. Voici d&#8217;autres exemples :</p>
+<p>Si vous savez jusqu&#8217;à quel commit le dépôt destinataire devrait avoir les objets nécessaires, vous pouvez utiliser cette connaissance pour spécifier le prérequis, en donnant un point de coupure pour limiter les révisions et les objets qui vont dans le paquet résultant. L&#8217;exemple précédent a utilisé l&#8217;étiquette dernierpaquetR2 dans ce but, mais vous pouvez utiliser toute autre option que vous donneriez à la commande <a href="git-log.html">git-log(1)</a>. Voici d&#8217;autres exemples :</p>
 </div>
 <div class="paragraph">
 <p>Vous pouvez utiliser une étiquette qui est présente dans les deux dépôts :</p>
@@ -609,7 +699,7 @@ machineB$ git pull</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Vous pouvez utiliser une base définie par le temps :</p>
+<p>Vous pouvez utiliser un prérequis défini par le temps :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -625,7 +715,7 @@ machineB$ git pull</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Vous pouvez lancer <code>git-bundle verify</code> pour voir si vous pouvez extraire d&#8217;un paquet qui a été créé avec une base :</p>
+<p>Vous pouvez lancer <code>git-bundle verify</code> pour voir si vous pouvez extraire d&#8217;un paquet qui a été créé avec un prérequis :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -672,7 +762,7 @@ machineB$ git pull</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-08-27 14:24:04 +0200
+Last updated 2021-12-10 17:16:58 +0100
 </div>
 </div>
 </body>

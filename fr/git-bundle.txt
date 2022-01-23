@@ -35,9 +35,9 @@ Comme le format d'archive packed lui-même, les colis peuvent être soit autonom
 
 Les colis créés en utilisant les exclusions de révision sont des "paquets minces" créés en utilisant l'option `--thin` de linkgit:git-pack-objects[1], et dépaquetés en utilisant l'option `--fix-thin` de linkgit:git-index-pack[1].
 
-There is no option to create a "thick pack" when using revision exclusions, and users should not be concerned about the difference. By using "thin packs", bundles created using exclusions are smaller in size. That they're "thin" under the hood is merely noted here as a curiosity, and as a reference to other documentation.
+Il n'y a pas d'option pour créer un "paquet épais" lors de l'utilisation des exclusions de révision, et les utilisateurs ne doivent pas s'inquiéter de la différence. En utilisant des "paquets minces", les paquets créés à l'aide d'exclusions sont plus petits en taille. Le fait qu'ils soient "minces" sous le capot est simplement noté ici comme une curiosité, et comme une référence à d'autres documents.
 
-See link:technical/bundle-format.html[the `bundle-format` documentation] for more details and the discussion of "thin pack" in link:technical/pack-format.html[the pack format documentation] for further details.
+Voir link:technical/bundle-format.html[la documentation `bundle-format`] pour plus de détails et la discussion sur le "paquets fins" dans link:technical/pack-format.html[la documentation sur le format du pack] pour plus de détails.
 
 OPTIONS
 -------
@@ -80,13 +80,13 @@ unbundle <fichier>::
 SPÉCIFICATION DES RÉFÉRENCES
 ----------------------------
 
-Revisions must be accompanied by reference names to be packaged in a bundle.
+Les révisions doivent être accompagnées de noms de référence pour être regroupées dans un colis.
 
-More than one reference may be packaged, and more than one set of prerequisite objects can be specified. The objects packaged are those not contained in the union of the prerequisites.
+Plus d'une référence peut être empaquetée, et plus d'un ensemble d'objets prérequis peut être spécifié. Les objets empaquetés sont ceux qui ne sont pas contenus dans l'union des prérequis.
 
-The 'git bundle create' command resolves the reference names for you using the same rules as `git rev-parse --abbrev-ref=loose`. Each prerequisite can be specified explicitly (e.g. `^master~10`), or implicitly (e.g. `master~10..master`, `--since=10.days.ago master`).
+La commande 'git bundle create' résout les noms de référence pour vous en utilisant les mêmes règles que `git rev-parse --abbrev-ref=loose`. Chaque pré-requis peut être spécifié explicitement (par exemple `^master~10`), ou implicitement (par exemple `master~10..master`, `--since=10.days.ago master`).
 
-All of these simple cases are OK (assuming we have a "master" and "next" branch):
+Tous ces cas simples sont OK (en supposant que nous avons des branches "master" et "next") :
 
 ----------------
 $ git bundle create master.bundle master
@@ -95,46 +95,46 @@ $ git bundle create master-and-next.bundle master next
 $ (echo master; echo next) | git bundle create master-and-next.bundle --stdin
 ----------------
 
-And so are these (and the same but omitted `--stdin` examples):
+Et il en est de même pour ces exemples (et le même mais avec `--stdin` omis) :
 
 ----------------
 $ git bundle create recent-master.bundle master~10..master
 $ git bundle create recent-updates.bundle master~10..master next~5..next
 ----------------
 
-A revision name or a range whose right-hand-side cannot be resolved to a reference is not accepted:
+Un nom de révision ou un intervalle dont le côté droit ne peut être résolu en une référence n'est pas accepté :
 
 ----------------
 $ git bundle create HEAD.bundle $(git rev-parse HEAD)
-fatal: Refusing to create empty bundle.
+fatal: Refus de créer un colis vide.
 $ git bundle create master-yesterday.bundle master~10..master~5
-fatal: Refusing to create empty bundle.
+fatal: Refus de créer un colis vide.
 ----------------
 
-OBJECT PREREQUISITES
---------------------
+PRÉ-REQUIS D'OBJET
+------------------
 
-When creating bundles it is possible to create a self-contained bundle that can be unbundled in a repository with no common history, as well as providing negative revisions to exclude objects needed in the earlier parts of the history.
+Lors de la création de colis, il est possible de créer un colis autonome qui peut être dégroupé dans un dépôt sans historique commun, ainsi que de fournir des révisions négatives pour exclure les objets nécessaires dans les parties antérieures de l'historique.
 
-Feeding a revision such as `new` to `git bundle create` will create a bundle file that contains all the objects reachable from the revision `new`. That bundle can be unbundled in any repository to obtain a full history that leads to the revision `new`:
+Fournir une révision telle que `nouveau` à `git bundle create` créera un fichier colis qui contient tous les objets accessibles depuis la révision `nouveau`. Ce colis peut être dégroupé dans n'importe quel dépôt pour obtenir un historique complet qui mène à la révision `nouveau` :
 
 ----------------
 $ git bundle create complet.bundle nouveau
 ----------------
 
-A revision range such as `old..new` will produce a bundle file that will require the revision `old` (and any objects reachable from it) to exist for the bundle to be "unbundle"-able:
+Une plage de révision telle que `ancien..nouveau` produira un fichier colis qui nécessitera l'existence de la révision `ancien` (et de tout objet pouvant être atteint à partir de celle-ci) pour que le colis puisse être "dégroupé" :
 
 ----------------
 $ git bundle create complet.bundle ancien..nouveau
 ----------------
 
-A self-contained bundle without any prerequisites can be extracted into anywhere, even into an empty repository, or be cloned from (i.e., `new`, but not `old..new`).
+Un colis autonome sans pré-requis peut être extrait n'importe où, même dans un dépôt vide, ou peut être cloné (c-à-d, `nouveau`, mais pas `ancien..nouveau`).
 
 Il n'y a pas de problème à être prudent et faire en sorte que le fichier regroupement contienne des objets déjà présents dans la destination, car ceux-ci sont ignorés lors du déballage à la destination.
 
 Si vous voulez imiter `git clone --mirror`, qui inclurait vos refs comme `refs/remotes/*`, utilisez `--all`. Si vous voulez fournir le même ensemble de références qu'un clone directement depuis le dépôt source, utilisez `--branches --tags` pour les `<arguments-git-rev-list>`.
 
-The 'git bundle verify' command can be used to check whether your recipient repository has the required prerequisite commits for a bundle.
+La commande 'git bundle verify' peut être utilisée pour vérifier si votre dépôt destinataire possède les commits pré-requis nécessaires pour un colis.
 
 EXEMPLES
 --------

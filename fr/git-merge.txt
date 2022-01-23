@@ -12,7 +12,8 @@ SYNOPSIS
 'git merge' [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
 	[--no-verify] [-s <strategie>] [-X <option-de-strategie>] [-S[<id-clé>]]
 	[--[no-]allow-unrelated-histories]
-	[--[no-]rerere-autoupdate] [-m <msg>] [-F <fichier>] [<commit>...]
+	[--[no-]rerere-autoupdate] [-m <msg>] [-F <fichier>]
+	[--into-name <branche>] [<commit>...]
 'git merge' (--continue | --abort | --quit)
 
 DESCRIPTION
@@ -55,6 +56,9 @@ include::merge-options.txt[]
 Si `--log` est spécifié, un journal court des commits en cours de fusion sera ajouté au message spécifié.
 +
 La commande 'git fmt-merge-msg' peut être utilisée pour donner une bonne valeur par défaut pour les invocations automatisées de 'git merge'. Le message automatisé peut inclure la description de la branche.
+
+--into-branch <branche>::
+	Préparer le message de fusion par défaut comme si la fusion se faisait vers la branche `<branche>`, au lieu du nom de la branche réelle vers laquelle la fusion est faite.
 
 -F <fichier>::
 --file=<fichier>::
@@ -149,7 +153,8 @@ Par défaut, Git utilise le même style que celui utilisé par le programme "mer
 
 ------------
 Voici des lignes qui sont soit inchangées par rapport à l'ancêtre
-commun, ou résolues proprement car un seul côté a changé.
+commun, ou résolues proprement parce qu'un seul côté a changé,
+ou parce que les deux côtés ont changé de la même manière.
 <<<<<<< yours : exemple.txt
 La résolution des conflits est difficile ;
 allons faire du shopping.
@@ -163,15 +168,36 @@ La zone où une paire de modifications contradictoires s'est produite est marqu�
 
 Le format par défaut ne montre pas ce que l'original a dit dans la zone de conflit. Vous ne pouvez pas savoir combien de lignes sont supprimées et remplacées par la remarque de Barbie à votre côté. La seule chose que vous pouvez dire, c'est que votre côté veut dire que c'est difficile et que vous préférez faire du shopping, alors que l'autre côté veut prétendre que c'est facile.
 
-Un autre style peut être utilisé en réglant la variable de configuration "merge.conflictStyle" sur "diff3". Dans le style "diff3", le conflit ci-dessus peut ressembler à ceci :
+Un autre style peut être utilisé en réglant la variable de configuration "merge.conflictStyle" sur "diff3" ou "zdiff3". Dans le style "diff3", le conflit ci-dessus peut ressembler à ceci :
 
 ------------
 Voici les lignes qui sont soit inchangées par rapport à l'ancêtre
-commun, ou proprement résolu parce qu'un seul côté a changé.
+commun, ou proprement résolues parce qu'un seul côté a changé,
+<<<<<<<< yours:exemple.txt
+ou parce que les deux côtés ont changé de la même façon.
+La résolution des conflits est difficile ;
+Allons faire du shopping.
+||||||| base:sample.txt
+ou parce que les deux côtés ont changé de la même façon.
+La résolution des conflits est difficile.
+=======
+ou parce que les deux côtés ont changé de la même façon.
+Git facilite la résolution des conflits.
+>>>>>>> theirs:exemple.txt
+Et voici une autre ligne qui est proprement résolue ou non modifiée.
+------------
+
+alors que dans le style "zdiff3", cela peut ressembler à ceci :
+
+------------
+Voici les lignes qui sont soit inchangées par rapport à l'ancêtre
+commun, ou proprement résolu parce qu'un seul côté a changé,
+ou parce que les deux côtés ont changé de la même manière.
 <<<<<<<< yours:exemple.txt
 La résolution des conflits est difficile ;
 Allons faire du shopping.
-|||||||
+||||||| base:sample.txt
+ou parce que les deux côtés ont changé de la même manière.
 La résolution des conflits est difficile.
 =======
 Git facilite la résolution des conflits.

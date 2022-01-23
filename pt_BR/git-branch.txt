@@ -16,7 +16,7 @@ RESUMO
 	[--points-at <objeto>] [--format=<formato>]
 	[(-r | --remotes) | (-a | --all)]
 	[--list] [<padrão>...]
-'git branch' [--track | --no-track] [-f] <nome-do-ramo> [<ponto-de-partida>]
+'git branch' [--track [direct|inherit] | --no-track] [-f] <nome-do-ramo> [<ponto-de-partida>]
 'git branch' (--set-upstream-to=<upstream> | -u <upstream>) [<nome-do-ramo>]
 'git branch' --unset-upstream [<nome-do-ramo>]
 'git branch' (-m | -M) [<ramo-antigo>] <nome-do-ramo>
@@ -127,13 +127,17 @@ Esta opção é aplicável apenas no modo não detalhado.
 	Exibe o sha1 completo na saída da listagem em vez de abreviá-los.
 
 -t::
---track::
-	Ao criar uma nova ramificação, configure as entradas da configuração `branch.<nome>.remote` e `branch.<nome>.merge` para marcar a ramificação do ponto do início como "upstream" partindo da nova ramificação. Esta configuração instruirá o git a exibir o relacionamento entre as duas ramificações com o `git status` e com o `git branch -v`. Além disso, ele direciona o `git pull` sem argumentos para extrair do "upstream" quando o novo ramo for retirado.
+--track [inherit|direct]::
+	Ao criar uma nova ramificação, configure as entradas da configuração `branch.<nome>.remote` e `branch.<nome>.merge` para definir a configuração do monitoramento "upstream" partindo da nova ramificação. Esta configuração instruirá o git a exibir o relacionamento entre as duas ramificações com o `git status` e com o `git branch -v`. Além disso, ele direciona o `git pull` sem argumentos para extrair do "upstream" quando o novo ramo for retirado.
 +
-Este é o comportamento predefinido quando o ponto inicial for uma ramificação rastreada remotamente. Defina a variável de configuração `branch.autoSetupMerge` como `false` caso queira que o `git switch`, `git checkout` e o `git branch` sempre se comportem como se a opção `--no-track` fosse utilizada. Defina-o como `always` caso queira que este comportamento quando o ponto de partida for uma ramificação local ou rastreada remotamente.
+O exato ramo "upstream" é escolhido dependendo do argumento opcional: `--track` ou `--track direct`, significa usar o próprio ramo do ponto inicial como o "upstream"; já a opção `--track inherit` significa copiar a configuração "upstream" da ramificação do ponto inicial.
++
+A opção `--track direct` é a opção predefinida quando o ponto inicial for uma ramificação rastreada remotamente. Defina a variável de configuração `branch.autoSetupMerge` como `false` caso queira que o `git switch`, `git checkout` e o `git branch` sempre se comportem como se a opção `--no-track` fosse utilizada. Defina-o como `always` caso queira que este comportamento quando o ponto de partida for uma ramificação local ou rastreada remotamente. Defina-o como `inherit` caso queira copiar a configuração de rastreamento a partir do ponto da ramificação.
++
+Consulte linkgit:git-pull[1] e linkgit:git-config[1] para uma discussão adicional sobre como as opções `branch.<nome>.remote` e `branch.<nome>.merge` são utilizadas.
 
 --no-track::
-	Não configure o "upstream", ainda que a variável de configuração `branch.autoSetupMerge` seja verdadeira.
+	Não configure o "upstream", ainda que a variável de configuração `branch.autoSetupMerge` seja definida.
 
 --set-upstream::
 	Como esta opção tinha a sintaxe confusa, agora ela é obsoleta. Utilize `--track` ou `--set-upstream-to`.

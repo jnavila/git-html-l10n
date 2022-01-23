@@ -13,7 +13,7 @@ RESUMO
 'git stash' drop [-q|--quiet] [<stash>]
 'git stash' ( pop | apply ) [--index] [-q|--quiet] [<stash>]
 'git stash' branch <nome-do-ramo> [<stash>]
-'git stash' [push [-p|--patch] [-k|--[no-]keep-index] [-q|--quiet]
+'git stash' [push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-q|--quiet]
 	     [-u|--include-untracked] [-a|--all] [-m|--message <mensagem>]
 	     [--pathspec-from-file=<arquivo> [--pathspec-file-nul]]
 	     [--] [<pathspec>...]]
@@ -33,13 +33,13 @@ O último "stash" que você criou é armazenado em `refs/stash`; os "stash" mais
 COMANDOS
 --------
 
-push [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message <mensagem>] [--pathspec-from-file=<arquivo> [--pathspec-file-nul]] [--] [<pathspec>...]::
+push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message <mensagem>] [--pathspec-from-file=<arquivo> [--pathspec-file-nul]] [--] [<pathspec>...]::
 
 	Salva as suas alterações locais em um nova entrada 'stash' e reverta-as para `HEAD` (na árvore de trabalho e no índice). A parte da <mensagem> é opcional e dá a descrição junto com a condição do empilhamento.
 +
 Para fazer um instantâneo de forma rápida, você pode omitir o "push". Neste modo, os argumentos não opcionais não são permitidos, visam impedir que um subcomando com erro de ortografia faça uma entrada na pilha indesejada. As duas exceções são `stash -p`, que atua como um alias para o `stash push -p` e os elementos pathspec, que são permitidos após um hífen duplo `--` para desambiguação.
 
-save [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [<mensagem>]::
+save [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [<mensagem>]::
 
 	Esta opção já está obsoleta em favor da opção 'git stash push'. Difere do "stash push", pois não pode lidar com o pathspec. Em vez disso, todos os argumentos não opcionais são concatenados para formar a mensagem "stash".
 
@@ -128,6 +128,14 @@ Todas as alterações que já foram adicionadas ao índice não são alteradas.
 Selecione a diferença entre os blocos interativamente entre HEAD e a árvore de trabalho a serem armazenados. A entrada "stash" é construída de maneira que a condição geral do índice seja a mesma que a condição geral do índice do seu repositório e a sua árvore de trabalho contenha apenas as alterações que você selecionou de forma interativa. As alterações selecionadas serão revertidas a partir da sua árvore de trabalho. Consulte a seção ``Modo Interativo'' do linkgit:git-add[1] para aprender como operar o modo `--patch`.
 +
 A opção `--patch` implica no uso da opção `--keep-index`. Você pode usar a `--no-keep-index` para substituir isso.
+
+-S::
+--staged::
+	Esta opção só é válida para os comandos `push` e `save`.
++
+Armazene apenas as alterações que estão sendo preparadas atualmente. Isto é similar ao comando `git commit` básico, exceto que o estado do commit é feito na pilha armazenada em vez do ramo atual.
++
+A opção `--patch` tem prioridade sobre esta.
 
 --pathspec-from-file=<arquivo>::
 	Esta opção só é válida para o comando `push`.
@@ -233,6 +241,20 @@ $ git stash pop                  # prepare para trabalhar em todas as outras mod
 # ... repita os cinco passos acima até que sobre apenas um commit ...
 $ edit/build/test remaining parts
 $ git commit foo -m 'Partes resultantes'
+----------------------------------------------------------------
+
+Salvando as alterações não relacionadas para utilização futura::
+
+Quando estiver no meio de grandes alterações e encontre algum problema não relacionado que você não queira deixar de corrigir, você pode fazer as alterações, organizá-las e usar o comando `git stash push --staged` deixando guardado para uso posterior. Isso se assemelha ao fazer o commit das alterações acumuladas, apenas o commit acaba ficando armazenado e não no ramo atual.
++
+----------------------------------------------------------------
+# ... hack hack hack ...
+$ git add --patch foo           # adiciona alterações não relacionadas ao índice
+$ git stash push --staged       # salva estas alterações nos arquivos que foram armazenados
+# ... hack hack hack, concluí as alterações atuais ...
+$ git commit -m 'Massive'       # faz o commit das alterações que foram totalmente testados
+$ git switch fixup-branch       # alterna para outro ramo
+$ git stash pop                 # para concluir o trabalho nas alterações que foram salvas
 ----------------------------------------------------------------
 
 Recuperando entradas "stash" que foram limpas/eliminadas erroneamente::

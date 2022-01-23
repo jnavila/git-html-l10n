@@ -13,7 +13,7 @@ SYNOPSIS
 'git stash' drop [-q|--quiet] [<remisage>]
 'git stash' ( pop | apply ) [--index] [-q|--quiet] [<remisage>]
 'git stash' branch <nom-de-branche> [<remisage>]
-'git stash' [push [-p|--patch] [-k|--[no-]keep-index] [-q|--quiet]
+'git stash' [push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-q|--quiet]
 	     [-u|--include-untracked] [-a|--all] [-m|--message <message>]
 	     [--pathspec-from-file=<fichier> [--pathspec-file-nul]]
 	     [--] [<spéc-de-chemin>...]]
@@ -33,13 +33,13 @@ Le dernier remisage que vous avez créé est stocké dans `refs/stash` ; les anc
 COMMANDES
 ---------
 
-push [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message <message>] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [--] [<spéc-de-chemin>...]::
+push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message <message>] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [--] [<spéc-de-chemin>...]::
 
 	Enregistre vos modifications locales dans une nouvelle "entrée de remisage" et les ramène dans HEAD (dans l'arbre de travail et dans l'index). La partie <message> est facultative et donne la description ainsi que l'état du remisage.
 +
 Pour faire rapidement un instantané, vous pouvez omettre "push". Dans ce mode, les arguments de non-optionnels ne sont pas autorisés pour empêcher une sous-commande mal orthographiée de faire une entrée indésirable dans le remisage. Les deux exceptions sont `stash -p` qui agit comme alias pour `push -p` et les éléments spéc-de-chemin, qui sont autorisés après un double trait d'union `--` pour la désambiguïsation.
 
-save [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [<message>]::
+save [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [<message>]::
 
 	Cette option est déconseillée au profit de l'option 'git stash push". Elle diffère de "stash push" en ce qu'elle ne peut pas prendre de spéc-de-chemin. Au lieu de cela, tous les arguments non liés à une option sont concaténés pour former le message de remisage.
 
@@ -128,6 +128,14 @@ Tous les changements déjà ajoutés à l'index sont laissés intacts.
 Sélectionner interactivement les section à remiser à partir de la différence entre HEAD et l'arbre de travail. L'entrée de remisage est construite de manière à ce que son état d'index soit le même que celui de votre dépôt, et son arbre de travail ne contient que les modifications que vous avez sélectionnées de manière interactive. Les modifications sélectionnées sont ensuite inversées à partir de votre arbre de travail. Voir la section "Mode interactif" de linkgit:git-add[1] pour savoir comment utiliser le mode `--patch`.
 +
 L'option `--patch` implique `--keep-index`. Vous pouvez utiliser l'option `--no keep-index` pour passer outre.
+
+-S::
+--staged::
+	Cette option n'est valable que pour les commandes `push` et `save`.
++
+Stocker uniquement les modifications actuellement indexés. Ceci est similaire au 'git commit' de base, sauf que l’état est validé dans la remise au lieu de la branche actuelle.
++
+L’option '--patch' a la priorité sur celle-ci.
 
 --pathspec-from-file=<fichier>::
 	Cette option n'est valide que pour la commande `push`.
@@ -233,6 +241,20 @@ $ git stash pop                  # préparer à travailler sur les autres modifi
 # ... répéter les cinq tâches ci-dessus jusqu'à ce qu'il ne reste qu'un commit ...
 $ éditer/construire/tester le restant
 $ git commit foo -m 'Partie restante'
+----------------------------------------------------------------
+
+Sauvegarde de modifications sans relation pour une utilisation future::
+
+Lorsque vous êtes au milieu de changements massifs et que vous trouvez un problème sans rapport que vous ne voulez pas oublier de corriger, vous pouvez faire le ou les changements, les indexer et utiliser `git stash push --staged` pour les remiser pour une utilisation future. Ceci est similaire à la validation des modifications indexées, sauf que la validation se retrouve dans la remise et non sur la branche courante.
++
+----------------------------------------------------------------
+# ... travail, travail, travail ...
+$ git add --patch foo            # ajouter des modifications sans relation à l'index
+$ git stash push --keep-staged    # remiser toutes les autres modifications
+$ #... code, code, code, pour finir les modifications actuelles
+$ git commit -m 'Massive'     # valider une modification complètement testée
+$ git switch branch-correctif                  # basculer sur une autre branche
+$ git stash pop                 # pour terminer de travailler sur les modifications enregistrées
 ----------------------------------------------------------------
 
 Récupération des entrées de remisage qui ont été effacées/abandonnées par erreur::

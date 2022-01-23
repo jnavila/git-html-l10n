@@ -592,7 +592,7 @@ L&#8217;option <code>--edit</code> (ou <code>-e</code>) est toujours utile si vo
 <dt class="hdlist1">-s &lt;stratégie&gt;</dt>
 <dt class="hdlist1">--strategy=&lt;strategie&gt;</dt>
 <dd>
-<p>Use the given merge strategy; can be supplied more than once to specify them in the order they should be tried. If there is no <code>-s</code> option, a built-in list of strategies is used instead (<code>ort</code> when merging a single head, <code>octopus</code> otherwise).</p>
+<p>Utiliser la stratégie de fusion donnée ; peut être fourni plus d&#8217;une fois pour spécifier l&#8217;ordre dans lequel elles doivent être essayées. S&#8217;il n&#8217;y a pas d&#8217;option <code>-s</code>, une liste intégrée de stratégies est utilisée à la place (<code>ort</code> lors de la fusion d&#8217;une seule tête, <code>octopus</code> sinon).</p>
 </dd>
 <dt class="hdlist1">-X &lt;option&gt;</dt>
 <dt class="hdlist1">--strategy-option=&lt;option&gt;</dt>
@@ -627,7 +627,7 @@ L&#8217;option <code>--edit</code> (ou <code>-e</code>) est toujours utile si vo
 <dt class="hdlist1">--autostash</dt>
 <dt class="hdlist1">--no-autostash</dt>
 <dd>
-<p>Automatically create a temporary stash entry before the operation begins, record it in the special ref <code>MERGE_AUTOSTASH</code> and apply it after the operation ends. This means that you can run the operation on a dirty worktree. However, use with care: the final stash application after a successful merge might result in non-trivial conflicts.</p>
+<p>Créer automatiquement une entrée temporaire de remisage avant le début de l&#8217;opération, l&#8217;enregistrer dans la réf spéciale <code>MERGE_AUTOSTASH</code> et l&#8217;appliquer après la fin de l&#8217;opération. Cela signifie que vous pouvez exécuter l&#8217;opération sur un arbre de travail sale. Cependant, utilisez-le avec précaution : l&#8217;application finale du remisage après une fusion réussie peut entraîner des conflits non négligeables.</p>
 </dd>
 <dt class="hdlist1">--allow-unrelated-histories</dt>
 <dd>
@@ -900,8 +900,121 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 </li>
 </ul>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_les_stratégies_de_fusion">LES STRATÉGIES DE FUSION</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-merge.txt - include::merge-strategies.txt[]</p>
+<p>Le mécanisme de fusion (commandes <code>git merge</code> et <code>git pull</code>) permet de choisir les <em>stratégies de fusion</em> du backend avec l&#8217;option <code>-s</code>. Certaines stratégies peuvent également prendre leurs propres options, qui peuvent être passées en donnant des arguments <code>-X&lt;option&gt;</code> à <code>git merge</code> et/ou <code>git pull</code>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">ort</dt>
+<dd>
+<p>C&#8217;est la stratégie de fusion par défaut lors du tirage ou de la fusion d&#8217;une branche. Cette stratégie ne peut résoudre que deux têtes en utilisant un algorithme de fusion à trois voies. Lorsqu&#8217;il y a plus d&#8217;un ancêtre commun qui peut être utilisé pour la fusion à trois, il crée un arbre fusionné des ancêtres communs et l&#8217;utilise comme arbre de référence pour la fusion à trois. Il a été rapporté que cela permettait de réduire les conflits de fusion sans provoquer de fausses fusions, grâce à des tests effectués sur de vraies fusions tirées de l&#8217;historique de développement du noyau Linux 2.6. En outre, cette stratégie permet de détecter et de gérer les fusions impliquant des renommages. Elle ne peut actuellement pas utiliser les copies détectées. Le nom de cet algorithme est un acronyme ("Ostensibly Recursive&#8217;s Twin" : Jumeau ostensible de recurse) et vient du fait qu&#8217;il a été écrit pour remplacer l&#8217;algorithme par défaut précédent, <code>recursive</code>.</p>
+<div class="paragraph">
+<p>La stratégie <em>ort</em> peut prendre les options suivantes :</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">ours</dt>
+<dd>
+<p>Cette option oblige à résoudre les sections en conflit de manière autonome et propre en favorisant notre version (<em>our</em>). Les modifications par rapport à l&#8217;autre arbre qui n&#8217;entrent pas en conflit avec notre version se reflètent dans le résultat de la fusion. Pour un fichier binaire, tout le contenu est pris de notre côté.</p>
+<div class="paragraph">
+<p>Il ne faut pas la confondre avec la stratégie de fusion <em>ours</em>, qui ne tient même pas compte de ce que contient l&#8217;autre arbre. Elle rejette tout ce que l&#8217;autre arbre a fait, déclarant que "notre" historique (<em>our</em>) contient tout ce qui s&#8217;y est passé.</p>
+</div>
+</dd>
+<dt class="hdlist1">theirs</dt>
+<dd>
+<p>C&#8217;est le contraire de <em>ours</em> ; notez que, contrairement à <em>ours</em>, il n&#8217;y a pas de stratégie de fusion <em>theirs</em> avec laquelle confondre cette option de fusion.</p>
+</dd>
+<dt class="hdlist1">ignore-space-change</dt>
+<dt class="hdlist1">ignore-all-space</dt>
+<dt class="hdlist1">ignore-space-at-eol</dt>
+<dt class="hdlist1">ignore-cr-at-eol</dt>
+<dd>
+<p>Traiter les lignes avec le type de changement d&#8217;espace indiqué comme inchangées dans l&#8217;intérêt d&#8217;une fusion à trois points. Les changements d&#8217;espacement mélangés à d&#8217;autres changements de ligne ne sont pas ignorés. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>-b</code>, <code>-w</code>, <code>--ignore-space-at-eol</code>, et <code>--ignore-cr-at-eol</code>.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Si "leur" version (<em>theirs</em>) n&#8217;introduit que des changements d&#8217;espacement sur une ligne, "notre" version (<em>our</em>) est utilisée ;</p>
+</li>
+<li>
+<p>Si "notre" version introduit des modifications dans l&#8217;espace blanc mais que "leur" version inclut un changement substantiel, "leur" version est utilisée ;</p>
+</li>
+<li>
+<p>Dans le cas contraire, la fusion se déroule de la manière habituelle.</p>
+</li>
+</ul>
+</div>
+</dd>
+<dt class="hdlist1">renormalize</dt>
+<dd>
+<p>Il s&#8217;agit d&#8217;une extraction et d&#8217;un validation virtuelle des trois étapes d&#8217;un fichier lors de la résolution d&#8217;une fusion à trois points. Cette option est destinée à être utilisée lors de la fusion de branches avec différents filtres clean ou règles de normalisation de fin de ligne. Voir "Fusion de branches avec différents attributs de validation/extraction" dans <a href="gitattributes.html">gitattributes(5)</a> pour plus de détails.</p>
+</dd>
+<dt class="hdlist1">no-renormalize</dt>
+<dd>
+<p>Désactiver l&#8217;option <code>renormalize</code>. Cela surcharge la variable de configuration <code>merge.renormalize</code> .</p>
+</dd>
+<dt class="hdlist1">find-renames[=&lt;n&gt;]</dt>
+<dd>
+<p>Activer la détection de renommage, en fixant éventuellement le seuil de similarité. C&#8217;est la valeur par défaut. Cela surcharge la variable de configuration <code>merge.renames</code>. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--find-renames</code>.</p>
+</dd>
+<dt class="hdlist1">rename-threshold=&lt;n&gt;</dt>
+<dd>
+<p>Synonyme obsolète pour <code>find-renames=&lt;n&gt;</code>.</p>
+</dd>
+<dt class="hdlist1">subtree[=&lt;chemin&gt;]</dt>
+<dd>
+<p>Cette option est une forme plus avancée de stratégie <em>subtree</em>, où la stratégie fait une estimation de la façon dont deux arbres doivent être déplacés pour correspondre l&#8217;un à l&#8217;autre lors de la fusion. Au lieu de cela, le chemin spécifié est préfixé (ou tronqué au debut) pour faire correspondre la forme de deux arbres.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">recursive</dt>
+<dd>
+<p>Cela ne peut résoudre que deux têtes en utilisant un algorithme de fusion à trois voies. Lorsqu&#8217;il y a plus d&#8217;un ancêtre commun qui peut être utilisé pour la fusion à trois, il crée un arbre fusionné des ancêtres communs et l&#8217;utilise comme arbre de référence pour la fusion à trois. Il a été rapporté que cela permettait de réduire les conflits de fusion sans provoquer de fausses fusions, grâce à des tests effectués sur de vraies fusions tirées de l&#8217;historique de développement du noyau Linux 2.6. En outre, cela permet de détecter et de gérer les fusions impliquant des renommages. Cela n&#8217;utilise les copies détectées. C&#8217;était la stratégie par défaut lors de la résolution de deux sommets pour Git depuis la version v0.99.9k jusqu&#8217;à v2.33.0.</p>
+<div class="paragraph">
+<p>La stratégie <em>recursive</em> utilise les mêmes options que <em>ort</em>. Cependant, il y a trois options supplémentaires que <em>ort</em> ignore (non documentées ci-dessus) et qui sont potentiellement utiles avec la stratégie <em>recursive</em> :</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">patience</dt>
+<dd>
+<p>Synonyme obsolète pour <code>diff-algorithm=patience</code>.</p>
+</dd>
+<dt class="hdlist1">diff-algorithm=[patience|minimal|histogram|myers]</dt>
+<dd>
+<p>Utiliser un algorithme de diff différent lors des fusions, ce qui peut aider à éviter les erreurs de fusion dues à des lignes de correspondance sans importance (comme des accolades de fonctions distinctes). Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>. Notez que <code>ort</code> utilise spécifiquement <code>diff-algorithm=histogram</code>, alors que <code>recursive</code> utilise par défaut le paramètre de configuration <code>diff.algorithm</code>.</p>
+</dd>
+<dt class="hdlist1">no-renames</dt>
+<dd>
+<p>Désactiver la détection de renommage. Ceci annule la variable de configuration <code>merge.renames</code>. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">resolve</dt>
+<dd>
+<p>Cela ne peut résoudre que deux têtes (c&#8217;est-à-dire la branche actuelle et une autre branche dont vous avez tiré) en utilisant un algorithme de fusion à trois points. Cela essaie de détecter avec soin les ambiguïtés de la fusion croisée. Les renommages ne sont pas gérés.</p>
+</dd>
+<dt class="hdlist1">octopus</dt>
+<dd>
+<p>Cela permet de résoudre les cas à plus de deux têtes, mais refuse de faire une fusion complexe qui nécessite une résolution manuelle. C&#8217;est principalement destiné à être utilisé pour regrouper les têtes de branches thématiques. C&#8217;est la stratégie de fusion par défaut lorsque l&#8217;on tire ou fusionne plusieurs branches.</p>
+</dd>
+<dt class="hdlist1">ours</dt>
+<dd>
+<p>Cela résout un nombre quelconque de têtes, mais l&#8217;arbre résultant de la fusion est toujours celui de la tête de la branche actuelle, ignorant effectivement toutes les modifications provenant de toutes les autres branches. C&#8217;est censé être utilisé pour remplacer l&#8217;ancienne historique du développement des branches latérales. Notez que cette stratégie est différente de l&#8217;option -Xours de la stratégie de fusion <em>recursive</em>.</p>
+</dd>
+<dt class="hdlist1">subtree</dt>
+<dd>
+<p>Il s&#8217;agit d&#8217;une stratégie <code>ort</code> modifiée. Lors de la fusion des arbres A et B, si B correspond à un sous-arbre de A, B est d&#8217;abord ajusté pour correspondre à la structure arborescente de A, au lieu de lire les arbres au même niveau. Cet ajustement est également effectué sur l&#8217;arbre de l&#8217;ancêtre commun.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Avec les stratégies qui utilisent la fusion à trois points (y compris la fusion par défaut, <em>ort</em>), si une modification est effectuée sur les deux branches, mais qu&#8217;elle est ensuite inversée sur l&#8217;une des branches, ce changement sera présent dans le résultat de la fusion ; certaines personnes trouvent ce comportement déroutant. Cela se produit parce que seules les têtes et la base de la fusion sont prises en compte lors d&#8217;une fusion, et non le commit individuel. L&#8217;algorithme de fusion considère donc le changement inversé comme n&#8217;étant pas un changement du tout, et substitue la version modifiée à la place.</p>
 </div>
 </div>
 </div>
@@ -1127,7 +1240,7 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-10-31 17:58:16 +0100
+Last updated 2021-12-10 17:16:59 +0100
 </div>
 </div>
 </body>
