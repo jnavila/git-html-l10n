@@ -16,7 +16,8 @@ RESUMO
 	[--points-at <objeto>] [--format=<formato>]
 	[(-r | --remotes) | (-a | --all)]
 	[--list] [<padrão>...]
-'git branch' [--track [direct|inherit] | --no-track] [-f] <nome-do-ramo> [<ponto-de-partida>]
+'git branch' [--track[=(direct|inherit)] | --no-track] [-f]
+	[--recurse-submodules] <nome-do-ramo> [<ponto-de-partida>]
 'git branch' (--set-upstream-to=<upstream> | -u <upstream>) [<nome-do-ramo>]
 'git branch' --unset-upstream [<nome-do-ramo>]
 'git branch' (-m | -M) [<ramo-antigo>] <nome-do-ramo>
@@ -39,7 +40,7 @@ O segundo formulário do comando cria um novo cabeçalho do ramo informado `<nom
 
 Observe que isso criará a nova ramificação mas não mudará a árvore de trabalho para ela; para alternar para a nova ramificação utilize "git switch <novo-ramo>".
 
-Quando uma ramificação local é iniciada em uma ramificação remotamente monitorada, o Git define a ramificação (especificamente as entradas da configuração `branch.<nome>.remote` e `branch.<nome>.merge`) para que o comando 'git pull' mescle adequadamente a partir do ramo monitorado remotamente. Este comportamento pode ser alterado através da variável de configuração global `branch.autoSetupMerge`. Esta configuração pode ser substituída utilizando as opções `--track` e `--no-track`, podendo ser alterada posteriormente utilizando o comando `git branch --set-upstream-to`.
+Quando uma ramificação local é iniciada numa ramificação remotamente monitorada, o Git define a ramificação (especificamente as entradas da configuração `branch.<nome>.remote` e `branch.<nome>.merge`) para que o comando 'git pull' mescle adequadamente a partir do ramo monitorado remotamente. Este comportamento pode ser alterado através da variável de configuração global `branch.autoSetupMerge`. Esta configuração pode ser substituída utilizando as opções `--track` e `--no-track`, podendo ser alterada posteriormente utilizando o comando `git branch --set-upstream-to`.
 
 Com uma opção `-m` ou `-M`, o ramo antigo `<ramo-antigo>` será renomeado para o novo ramo `<novo-ramo>`. Caso o `<ramo-antigo>` tenha um reflog correspondente, ele será renomeado para coincidir com o `<novo-ramo>`, uma entrada de reflog será criada para lembrar da renomeação do ramo. Caso `<novo-ramo>` exista, -M deve ser utilizado para impor que a renomeação aconteça.
 
@@ -127,17 +128,22 @@ Esta opção é aplicável apenas no modo não detalhado.
 	Exibe o sha1 completo na saída da listagem em vez de abreviá-los.
 
 -t::
---track [inherit|direct]::
+--track[=(direct|inherit)]::
 	Ao criar uma nova ramificação, configure as entradas da configuração `branch.<nome>.remote` e `branch.<nome>.merge` para definir a configuração do monitoramento "upstream" partindo da nova ramificação. Esta configuração instruirá o git a exibir o relacionamento entre as duas ramificações com o `git status` e com o `git branch -v`. Além disso, ele direciona o `git pull` sem argumentos para extrair do "upstream" quando o novo ramo for retirado.
 +
-O exato ramo "upstream" é escolhido dependendo do argumento opcional: `--track` ou `--track direct`, significa usar o próprio ramo do ponto inicial como o "upstream"; já a opção `--track inherit` significa copiar a configuração "upstream" da ramificação do ponto inicial.
+O exato ramo "upstream" é escolhido dependendo do argumento opcional: `-t`, `--track` ou `--track=direct`, significa usar o próprio ramo do ponto inicial como o "upstream"; já a opção `--track=inherit` significa copiar a configuração "upstream" da ramificação do ponto inicial.
 +
-A opção `--track direct` é a opção predefinida quando o ponto inicial for uma ramificação rastreada remotamente. Defina a variável de configuração `branch.autoSetupMerge` como `false` caso queira que o `git switch`, `git checkout` e o `git branch` sempre se comportem como se a opção `--no-track` fosse utilizada. Defina-o como `always` caso queira que este comportamento quando o ponto de partida for uma ramificação local ou rastreada remotamente. Defina-o como `inherit` caso queira copiar a configuração de rastreamento a partir do ponto da ramificação.
+A opção `--track=direct` é a opção predefinida quando o ponto inicial for uma ramificação rastreada remotamente. Defina a variável de configuração `branch.autoSetupMerge` como `false` caso queira que o `git switch`, `git checkout` e o `git branch` sempre se comportem como se a opção `--no-track` fosse utilizada. Defina-o como `always` caso queira que este comportamento quando o ponto de partida for uma ramificação local ou rastreada remotamente. Defina-o como `inherit` caso queira copiar a configuração de rastreamento a partir do ponto da ramificação.
 +
 Consulte linkgit:git-pull[1] e linkgit:git-config[1] para uma discussão adicional sobre como as opções `branch.<nome>.remote` e `branch.<nome>.merge` são utilizadas.
 
 --no-track::
 	Não configure o "upstream", ainda que a variável de configuração `branch.autoSetupMerge` seja definida.
+
+--recurse-submodules::
+	ESSA OPÇÃO É EXPERIMENTAL! Faz com que o comando atual se repita no submódulos caso `submodule.propagateBranches` esteja ativado. Consulte `submodule.propagateBranches` em linkgit:git-config[1]. No momento, há apenas suporte para a criação do ramo.
++
+Quando usado na criação dos ramos, um novo ramo <nome-do-ramo> será criado no super projeto (superproject) e todos os submódulos no super projeto <ponto-de-início>. Nos submódulos, o ramo irá apontar para o commit do submódulo no <ponto-de-inicio> do super projeto, porém a informação do rastreamento do ramo será configurado com base no submódulo's dos ramos locais e remotos por exemplo. O ramo `git --recurse-submodules topic origin/main` irá criar o ramo do submódulo "topic" que aponta para o commit do submódulo no super projeto "origin/main", contudo rastreia o submódulos "origin/main".
 
 --set-upstream::
 	Como esta opção tinha a sintaxe confusa, agora ela é obsoleta. Utilize `--track` ou `--set-upstream-to`.
@@ -202,7 +208,7 @@ $ git branch my2.6.14 v2.6.14   <1>
 $ git switch my2.6.14
 ------------
 +
-<1> Esta etapa e a próxima poderiam ser combinadas em uma única etapa com "checkout -b my2.6.14 v2.6.14".
+<1> Esta etapa e a próxima poderiam ser combinadas numa única etapa com "checkout -b my2.6.14 v2.6.14".
 
 Exclua um ramo que seja desnecessário::
 +

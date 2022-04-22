@@ -16,7 +16,7 @@ git-clone - リポジトリを新しいディレクトリにクローンする
 	  [--depth <depth>] [--[no-]single-branch] [--no-tags]
 	  [--recurse-submodules[=<pathspec>]] [--[no-]shallow-submodules]
 	  [--[no-]remote-submodules] [--jobs <n>] [--sparse] [--[no-]reject-shallow]
-	  [--filter=<filter>] [--] <repository>
+	  [--filter=<filter> [--also-filter-submodules]] [--] <repository>
 	  [<directory>]
 
 説明
@@ -96,10 +96,13 @@ linkgit:git-maintenance[1].) もしこれらのオブジェクトが削除され
 	「ベア」Git リポジトリを作成します。 つまり、`<directory>` を作成して管理用のファイルを `<directory>/.git` に置くのではなく、`<directory>` 自体を `$GIT_DIR` にするのです。これは明らかに、作業ツリーをチェックアウトする場所がないため、`--no-checkout` を意味します。 また、リモートのブランチヘッドは、`refs/remotes/origin/` にマッピングされることなく、対応するローカルのブランチヘッドに直接コピーされます。 このオプションを使用すると、リモートトラッキングブランチも関連する設定変数も作成されません。
 
 --sparse::
-	Employ a sparse-checkout, with only files in the toplevel directory initially being present. The linkgit:git-sparse-checkout[1] command can be used to grow the working directory as needed.
+	sparse-checkout を採用し、最初にトップレベル・ディレクトリのファイルのみが存在するようにします。linkgit:git-sparse-checkout[1] コマンドを使うと、必要に応じて作業ディレクトリを増やすことができます。
 
 --filter=<filter-spec>::
 	パーシャルクローン機能を使って、与えられたオブジェクト・フィルタにしたがって、到達可能なオブジェクトのサブセットを送るようにサーバに要求します。 `--filter` を使う場合、パーシャルクローンのフィルタには、与えられた `<filter-spec>` が使われます。たとえば、 `--filter=blob:none` とすると、Gitが必要とするまで、すべてのblob（ファイルの内容）をフィルタリングします。また、 `--filter=blob:limit=<size>` とすると、少なくとも `<size>` 以上のサイズのblobをすべてフィルタリングします。フィルターの仕様についての詳細は、 linkgit:git-rev-list[1] の `--filter` オプションを参照してください。
+
+--also-filter-submodules::
+	また、リポジトリ内の任意のサブモジュールにパーシャルクローンフィルタを適用します。 `--filter` と `--recurse-submodules` が必要です。これは、 `clone.filterSubmodules` 設定オプションで、デフォルトで有効にすることができます。
 
 --mirror::
 	ソースリポジトリのミラーを設定します。これは `--bare` を意味します。 `--bare` と比較して、 ` --mirror` は、ソースのローカルブランチをターゲットのローカルブランチにマップするだけでなく、すべての参照（リモートトラッキングブランチ、メモなどを含む）をマップし、ターゲットリポジトリの `git remote update` によってこれらのrefがすべて上書きされるようにrefspecの設定を行います。
@@ -145,7 +148,7 @@ linkgit:git-maintenance[1].) もしこれらのオブジェクトが削除され
 --recurse-submodules[=<pathspec>]::
 	クローンが作成されると、与えられたpathspecに基づいて、その中のサブモジュールを初期化し、クローンを作成します。 pathspecが指定されていない場合は、すべてのサブモジュールが初期化され、クローンが作成されます。 このオプションは、複数のエントリからなる pathspec に対して複数回指定できます。 できあがったクローンは、`submodule.active` に与えられた pathspec が、あるいは "." (すべてのサブモジュールを意味する)が pathspec が与えられなかった場合に設定されます。
 +
-サブモジュールは初期化され、デフォルトの設定でクローンされます。これは、クローンが終了した直後に、`git submodule update --init --recursive <pathspec>` を実行するのと同じです。このオプションは、クローンされるリポジトリに worktree/checkout がない場合(つまり、`--no-checkout`/`-n`, `--bare`, `--mirror` のいずれかが与えられた場合)には無視されます
+サブモジュールは初期化され、デフォルトの設定でクローンされます。これは、クローンが終了した直後に、`git submodule update --init --recursive <pathspec>` を実行するのと同じです。このオプションは、クローンされるリポジトリに worktree/checkout がない場合(つまり、`--no-checkout` / `-n`、 `--bare`、 `--mirror` のいずれかが与えられた場合)には無視されます
 
 --[no-]shallow-submodules::
 	複製されたすべてのサブモジュールは、深さが1の浅いものになります。

@@ -149,7 +149,7 @@ USANDO A OPÇÃO --REFRESH
 ------------------------
 A opção `--refresh` não calcula um novo arquivo sha1 ou atualiza o índice para as alterações do modo/conteúdo. Porém o que é *feito* é "repetir a coincidência" das informações estatísticas de um arquivo ao índice, para que você possa atualizar o índice de um arquivo que não foi alterado, porém onde a entrada da estatísticas esteja desatualizada.
 
-Como por exemplo, você gostaria de fazer isso depois de fazer um comando `git read-tree`, para vincular os detalhes do índice estatístico aos arquivos adequados.
+Como por exemplo, você gostaria de fazer isso após fazer um comando `git read-tree`, para vincular os detalhes do índice estatístico aos arquivos adequados.
 
 USANDO AS OPÇÕES --CACHEINFO OU --INFO-ONLY
 -------------------------------------------
@@ -213,11 +213,13 @@ $ git ls-files -s
 UTILIZANDO O BIT ``ASSUME UNCHANGED''
 -------------------------------------
 
-Muitas operações no Git dependem do seu sistema de arquivos para ter uma implementação eficiente `lstat(2)`, de modo que as informações `st_mtime` para os arquivos da árvore de trabalho possam ser averiguadas com menos custo para ver se o conteúdo do arquivo foi alterado em relação à versão registrada no arquivo do índice. Infelizmente, alguns sistemas de arquivos têm um `lstat(2)` ineficiente. Caso o seu sistema de arquivos seja um deles, é possível definir o bit "assuma como inalterado" para os caminhos que não foram alterados, fazendo com que o Git não faça essa verificação. Observe que definir este bit em um caminho não significa que o Git verificará o conteúdo do arquivo para ver se ele foi alterado -- le faz com que o Git omita qualquer verificação e presuma que ele não foi alterado. Quando você faz alterações nos arquivos da árvore de trabalho, é preciso informar ao Git de forma explicita, removendo o bit "assuma como inalterado", antes ou depois de modificá-los.
+Muitas operações no Git dependem do seu sistema de arquivos para ter uma implementação eficiente `lstat(2)`, de modo que as informações `st_mtime` para os arquivos da árvore de trabalho possam ser averiguadas com menos custo para ver se o conteúdo do arquivo foi alterado em relação à versão registrada no arquivo do índice. Infelizmente, alguns sistemas de arquivos têm um `lstat(2)` ineficiente. Caso o seu sistema de arquivos seja um deles, é possível definir o bit "assuma como inalterado" para os caminhos que não foram alterados, fazendo com que o Git não faça essa verificação. Observe que definir este bit em um caminho não significa que o Git verificará o conteúdo do arquivo para ver se ele foi alterado -- le faz com que o Git omita qualquer verificação e presuma que ele não foi alterado. Quando você faz alterações nos arquivos da árvore de trabalho, é preciso informar ao Git de forma explicita, removendo o bit "assuma como inalterado", antes ou após modificá-los.
 
 Para definir o bit "assume unchanged" (assuma como inalterado), utilize a opção `--assume-unchanged`. Para remover a definição utilize `--no-assume-unchanged`. Para ver quais os arquivos tem o bit "assume unchanged" definido, utilize `git ls-files -v` (consulte linkgit:git-ls-files[1]).
 
 O comando analisa a variável de configuração `core.ignorestat`. Quando for 'true', os caminhos são atualizados com o comando `git update-index paths...` e os caminhos são atualizados com outros comandos Git que atualizam o índice e a árvore de trabalho (por exemplo, o 'git apply --index', 'git checkout-index -u' e o 'git read-tree -u') são marcados automaticamente com o bit "assuma como inalterado". Observe que o bit "assuma como inalterado" *não* está definido caso o comando `git update-index --refresh` encontre o arquivo da árvore de trabalho que coincida com o índice (utilize o `git update-index --really-refresh` caso queira marcá-los com o bit "assuma como inalterado").
+
+Sometimes users confuse the assume-unchanged bit with the skip-worktree bit. See the final paragraph in the "Skip-worktree bit" section below for an explanation of the differences.
 
 
 EXEMPLOS
@@ -260,11 +262,15 @@ M foo.c
 SKIP-WORKTREE BIT
 -----------------
 
-Skip-worktree bit (o bit que ignora a árvore de trabalho) pode ser definido com uma sentença (longa): Ao ler uma entrada, caso esteja marcado com 'skip-work-tree', então o Git finge que a versão do diretório de trabalho está atualizada e em vez disso, lê a versão do índice.
+O bit do Skip-worktree pode ser definido numa (longa) frase: Diga ao git para evitar escrever o arquivo no diretório de trabalho quando for razoavelmente possível, e trate o arquivo como inalterado quando ele não estiver presente no diretório de trabalho.
 
-Para elaborar, "ler" significa verificar a existência do arquivo, ler os atributos ou o conteúdo do mesmo. A versão do diretório de trabalho pode estar presente ou não. Caso esteja, o seu conteúdo pode coincidir à versão do índice ou não. A escrita não é afetada por este bit, a segurança do conteúdo ainda é a primeira prioridade. Observe que o Git _pode_ atualizar o arquivo do diretório de trabalho, marcado como 'skip-worktree' (ignore a árvore de trabalho), caso seja seguro fazê-lo (por exemplo, se a versão do diretório de trabalho coincide com à versão do índice)
+Note que nem todos os comandos do git prestarão atenção a este bit, e alguns, só são parcialmente compatíveis.
 
-Embora esse bit pareça com o bit assumido como inalterado, o seu objetivo é diferente dos bits que são assumidos como inalterados. Skip-worktree também tem precedência sobre o bit assumido como inalterado quando ambos estão definidos.
+The update-index flags and the read-tree capabilities relating to the skip-worktree bit predated the introduction of the linkgit:git-sparse-checkout[1] command, which provides a much easier way to configure and handle the skip-worktree bits. If you want to reduce your working tree to only deal with a subset of the files in the repository, we strongly encourage the use of linkgit:git-sparse-checkout[1] in preference to the low-level update-index and read-tree primitives.
+
+The primary purpose of the skip-worktree bit is to enable sparse checkouts, i.e. to have working directories with only a subset of paths present. When the skip-worktree bit is set, Git commands (such as `switch`, `pull`, `merge`) will avoid writing these files. However, these commands will sometimes write these files anyway in important cases such as conflicts during a merge or rebase. Git commands will also avoid treating the lack of such files as an intentional deletion; for example `git add -u` will not not stage a deletion for these files and `git commit -a` will not make a commit deleting them either.
+
+Although this bit looks similar to assume-unchanged bit, its goal is different. The assume-unchanged bit is for leaving the file in the working tree but having Git omit checking it for changes and presuming that the file has not been changed (though if it can determine without stat'ing the file that it has changed, it is free to record the changes). skip-worktree tells Git to ignore the absence of the file, avoid updating it when possible with commands that normally update much of the working directory (e.g. `checkout`, `switch`, `pull`, etc.), and not have its absence be recorded in commits. Note that in sparse checkouts (setup by `git sparse-checkout` or by configuring core.sparseCheckout to true), if a file is marked as skip-worktree in the index but is found in the working tree, Git will clear the skip-worktree bit for that file.
 
 ÍNDICE DIVIDIDO
 ---------------
@@ -309,7 +315,7 @@ MONITOR DO SISTEMA DE ARQUIVOS
 
 Este recurso visa acelerar as operações do git para os repositórios que possuem grandes diretórios de trabalho.
 
-Ele permite que o git trabalhe em conjunto com um monitor do sistema de arquivos (consulte a seção "fsmonitor-watchman" do linkgit:githooks[5]) que pode informá-lo sobre quais os arquivos foram alterados. Isso permite que o git evite ter que fazer um 'lstat()' em todo arquivo para localizar quais arquivos foram modificados.
+Ele permite que o git trabalhe em conjunto com um monitor do sistema de arquivos (consulte linkgit:git-fsmonitor--daemon[1] e a seção "fsmonitor-watchman" do linkgit:githooks[5]) que pode informá-lo sobre quais os arquivos foram alterados. Isso permite que o git evite ter que fazer um 'lstat()' em todo arquivo para localizar quais arquivos foram modificados.
 
 Quando usado em conjunto com o cache não monitorado, pode melhorar ainda mais o desempenho, evitando o custo de varrer todo o diretório ativo à procura de novos arquivos.
 

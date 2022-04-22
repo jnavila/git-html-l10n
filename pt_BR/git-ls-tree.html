@@ -452,8 +452,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git ls-tree</em> [-d] [-r] [-t] [-l] [-z]
-            [--name-only] [--name-status] [--full-name] [--full-tree] [--abbrev[=&lt;n&gt;]]
-            &lt;árvore&gt; [&lt;caminho&gt;&#8230;&#8203;]</pre>
+            [--name-only] [--name-status] [--object-only] [--full-name] [--full-tree] [--abbrev[=&lt;n&gt;]] [--format=&lt;formato&gt;]
+            &lt;tree-ish&gt; [&lt;caminho&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -508,7 +508,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--name-only</dt>
 <dt class="hdlist1">--name-status</dt>
 <dd>
-<p>Liste apenas os nomes dos arquivos (em vez da saída "longa"), um por linha.</p>
+<p>Liste apenas os nomes dos arquivos (em vez da saída "longa"), um por linha. Não pode ser combinado com a opção <code>--object-only</code>.</p>
+</dd>
+<dt class="hdlist1">--object-only</dt>
+<dd>
+<p>List only names of the objects, one per line. Cannot be combined with <code>--name-only</code> or <code>--name-status</code>. This is equivalent to specifying <code>--format='%(objectname)'</code>, but for both this option and that exact format the command takes a hand-optimized codepath instead of going through the generic formatting mechanism.</p>
 </dd>
 <dt class="hdlist1">--abrev[=&lt;n&gt;]</dt>
 <dd>
@@ -522,6 +526,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Não limite a listagem ao diretório de trabalho atual. Implica no uso da opção <code>--full-name</code>.</p>
 </dd>
+<dt class="hdlist1">--format=&lt;formato&gt;</dt>
+<dd>
+<p>A string that interpolates <code>%(fieldname)</code> from the result being shown. It also interpolates <code>%%</code> to <code>%</code>, and <code>%xx</code> where <code>xx</code> are hex digits interpolates to character with hex code <code>xx</code>; for example <code>%00</code> interpolates to <code>\0</code> (NUL), <code>%09</code> to <code>\t</code> (TAB) and <code>%0a</code> to <code>\n</code> (LF). When specified, <code>--format</code> cannot be combined with other format-altering options, including <code>--long</code>, <code>--name-only</code> and <code>--object-only</code>.</p>
+</dd>
 <dt class="hdlist1">[&lt;caminho&gt;&#8230;&#8203;]</dt>
 <dd>
 <p>Quando os caminhos forem informados, exiba-os (observe que estes nomes do caminho não são realmente brutos, porém uma lista de padrões que serão combinados). Caso contrário, implicitamente utiliza o nível na raiz da árvore como o único argumento do caminho.</p>
@@ -533,9 +541,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect1">
 <h2 id="_formato_de_saída">Formato de saída</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>O formato de saída do <code>ls-tree</code> é determinado pela opção <code>--format</code> ou com as outras opções de alteração do formato, tais como <code>--name-only</code> etc. (consulte o <code>--format</code> acima).</p>
+</div>
+<div class="paragraph">
+<p>The use of certain <code>--format</code> directives is equivalent to using those options, but invoking the full formatting machinery can be slower than using an appropriate formatting option.</p>
+</div>
+<div class="paragraph">
+<p>Nos casos onde o <code>- -format</code> mapearia exatamente para uma opção existente, o <code>ls-tree</code> utilizará o caminho mais rápido e apropriado. Assim, o formato padrão é equivalente a:</p>
+</div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;mode&gt; SP &lt;tipo&gt; SP &lt;objeto&gt; TAB &lt;arquivo&gt;</pre>
+<pre>%(objectmode) %(objecttype) %(objectname)%x09%(path)</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -546,14 +563,57 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;mode&gt; SP &lt;tipo&gt; SP &lt;objeto&gt; SP &lt;object size&gt; TAB &lt;arquivo&gt;</pre>
+<pre>%(objectmode) %(objecttype) %(objectname) %(objectsize:padded)%x09%(path)</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>O tamanho do objeto identificado por <code>&lt;objeto&gt;</code> é informado em bytes e justificado à direita com largura mínima de 7 caracteres. O tamanho do objeto é informado apenas para as entradas das bolhas (arquivo); para as outras entradas, o caracter <code>-</code> é utilizado no lugar do tamanho.</p>
+<p>O tamanho do objeto identificado pelo <code>&lt;nome_do_objeto&gt;</code> é informado em bytes e justificado à direita com largura mínima de 7 caracteres. O tamanho do objeto é informado apenas para as entradas das bolhas (arquivo); para as outras entradas, o caracter <code>-</code> é utilizado no lugar do tamanho.</p>
 </div>
 <div class="paragraph">
 <p>Sem a opção <code>z</code>, os <code>pathnames</code> com os caracteres "incomuns" são citados conforme explicado na variável de configuração <code>core.quotePath</code> (consulte <a href="git-config.html">git-config(1)</a>). Utilizando a opção <code>-z</code>, o nome do arquivo é gerado literalmente e a linha é finalizada com um byte <code>NUL</code>.</p>
+</div>
+<div class="paragraph">
+<p>Formato personalizado:</p>
+</div>
+<div class="paragraph">
+<p>It is possible to print in a custom format by using the <code>--format</code> option, which is able to interpolate different fields using a <code>%(fieldname)</code> notation. For example, if you only care about the "objectname" and "path" fields, you can execute with a specific "--format" like</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>git ls-tree --format='%(objectname) %(path)' &lt;tree-ish&gt;</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nome_dos_campos">NOME DOS CAMPOS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Há vários valores dos campos estruturados que podem ser utilizados para a interpolação da saída resultante. Para cada linha gerada, os seguintes nomes podem ser usados:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">objectmode</dt>
+<dd>
+<p>O modo do objeto.</p>
+</dd>
+<dt class="hdlist1">objecttype</dt>
+<dd>
+<p>O tipo do objeto (<code>blob</code> ou <code>tree</code>).</p>
+</dd>
+<dt class="hdlist1">objectname</dt>
+<dd>
+<p>O nome do objeto.</p>
+</dd>
+<dt class="hdlist1">objectsize[:padded]</dt>
+<dd>
+<p>The size of the object ("-" if it&#8217;s a tree). It also supports a padded format of size with "%(size:padded)".</p>
+</dd>
+<dt class="hdlist1">caminho</dt>
+<dd>
+<p>O caminho do objeto.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
@@ -568,7 +628,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:49 +0100
+Last updated 2022-04-22 20:33:50 +0200
 </div>
 </div>
 </body>

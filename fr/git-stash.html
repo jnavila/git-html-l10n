@@ -456,7 +456,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <em>git stash</em> drop [-q|--quiet] [&lt;remisage&gt;]
 <em>git stash</em> ( pop | apply ) [--index] [-q|--quiet] [&lt;remisage&gt;]
 <em>git stash</em> branch &lt;nom-de-branche&gt; [&lt;remisage&gt;]
-<em>git stash</em> [push [-p|--patch] [-k|--[no-]keep-index] [-q|--quiet]
+<em>git stash</em> [push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-q|--quiet]
              [-u|--include-untracked] [-a|--all] [-m|--message &lt;message&gt;]
              [--pathspec-from-file=&lt;fichier&gt; [--pathspec-file-nul]]
              [--] [&lt;spéc-de-chemin&gt;&#8230;&#8203;]]
@@ -485,14 +485,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="dlist">
 <dl>
-<dt class="hdlist1">push [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message &lt;message&gt;] [--pathspec-from-file=&lt;fichier&gt; [--pathspec-file-nul]] [--] [&lt;spéc-de-chemin&gt;&#8230;&#8203;]</dt>
+<dt class="hdlist1">push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message &lt;message&gt;] [--pathspec-from-file=&lt;fichier&gt; [--pathspec-file-nul]] [--] [&lt;spéc-de-chemin&gt;&#8230;&#8203;]</dt>
 <dd>
 <p>Enregistre vos modifications locales dans une nouvelle "entrée de remisage" et les ramène dans HEAD (dans l&#8217;arbre de travail et dans l&#8217;index). La partie &lt;message&gt; est facultative et donne la description ainsi que l&#8217;état du remisage.</p>
 <div class="paragraph">
 <p>Pour faire rapidement un instantané, vous pouvez omettre "push". Dans ce mode, les arguments de non-optionnels ne sont pas autorisés pour empêcher une sous-commande mal orthographiée de faire une entrée indésirable dans le remisage. Les deux exceptions sont <code>stash -p</code> qui agit comme alias pour <code>push -p</code> et les éléments spéc-de-chemin, qui sont autorisés après un double trait d&#8217;union <code>--</code> pour la désambiguïsation.</p>
 </div>
 </dd>
-<dt class="hdlist1">save [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [&lt;message&gt;]</dt>
+<dt class="hdlist1">save [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [&lt;message&gt;]</dt>
 <dd>
 <p>Cette option est déconseillée au profit de l&#8217;option 'git stash push". Elle diffère de "stash push" en ce qu&#8217;elle ne peut pas prendre de spéc-de-chemin. Au lieu de cela, tous les arguments non liés à une option sont concaténés pour former le message de remisage.</p>
 </dd>
@@ -605,6 +605,17 @@ stash@{1}: On master: 9cc0589... Add git-stash</pre>
 </div>
 <div class="paragraph">
 <p>L&#8217;option <code>--patch</code> implique <code>--keep-index</code>. Vous pouvez utiliser l&#8217;option <code>--no keep-index</code> pour passer outre.</p>
+</div>
+</dd>
+<dt class="hdlist1">-S</dt>
+<dt class="hdlist1">--staged</dt>
+<dd>
+<p>Cette option n&#8217;est valable que pour les commandes <code>push</code> et <code>save</code>.</p>
+<div class="paragraph">
+<p>Stocker uniquement les modifications actuellement indexés. Ceci est similaire au <em>git commit</em> de base, sauf que l’état est validé dans la remise au lieu de la branche actuelle.</p>
+</div>
+<div class="paragraph">
+<p>L’option <em>--patch</em> a la priorité sur celle-ci.</p>
 </div>
 </dd>
 <dt class="hdlist1">--pathspec-from-file=&lt;fichier&gt;</dt>
@@ -744,6 +755,21 @@ $ git commit foo -m 'Partie restante'</pre>
 </div>
 </div>
 </dd>
+<dt class="hdlist1">Sauvegarde de modifications sans relation pour une utilisation future</dt>
+<dd>
+<p>Lorsque vous êtes au milieu de changements massifs et que vous trouvez un problème sans rapport que vous ne voulez pas oublier de corriger, vous pouvez faire le ou les changements, les indexer et utiliser <code>git stash push --staged</code> pour les remiser pour une utilisation future. Ceci est similaire à la validation des modifications indexées, sauf que la validation se retrouve dans la remise et non sur la branche courante.</p>
+<div class="listingblock">
+<div class="content">
+<pre># ... travail, travail, travail ...
+$ git add --patch foo            # ajouter des modifications sans relation à l'index
+$ git stash push --keep-staged    # remiser toutes les autres modifications
+$ #... code, code, code, pour finir les modifications actuelles
+$ git commit -m 'Massive'     # valider une modification complètement testée
+$ git switch branch-correctif                  # basculer sur une autre branche
+$ git stash pop                 # pour terminer de travailler sur les modifications enregistrées</pre>
+</div>
+</div>
+</dd>
 <dt class="hdlist1">Récupération des entrées de remisage qui ont été effacées/abandonnées par erreur</dt>
 <dd>
 <p>Si vous laissez tomber ou videz par erreur les entrées de remisage, elles ne peuvent pas être récupérées par les mécanismes de sécurité habituels. Cependant, vous pouvez essayer l&#8217;incantation suivante pour obtenir une liste des entrées de remisage qui sont toujours dans votre dépôt, mais qui ne sont plus accessibles :</p>
@@ -786,7 +812,7 @@ xargs git log --merges --no-walk --grep=WIP</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:00 +0100
+Last updated 2022-04-22 20:33:09 +0200
 </div>
 </div>
 </body>

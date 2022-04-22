@@ -459,7 +459,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
         [--points-at &lt;objet&gt;] [--format=&lt;format&gt;]
         [(-r | --remotes) | (-a | --all)]
         [--list] [&lt;motif&gt;&#8230;&#8203;]
-<em>git branch</em> [--track | --no-track] [-f] &lt;nom-de-branche&gt; [&lt;start-point&gt;]
+<em>git branch</em> [--track [direct|inherit] | --no-track] [-f]
+        [--recurse-submodules] &lt;nom-de-branche&gt; [&lt;point-de-départ&gt;]
 <em>git branch</em> (--set-upstream-to=&lt;amont&gt; | -u &lt;amont&gt;) [&lt;nom-de-branche&gt;]
 <em>git branch</em> --unset-upstream [&lt;nom-de-branche&gt;]
 <em>git branch</em> (-m | -M) [&lt;anciennebranche&gt;] &lt;nouvellebranche&gt;
@@ -608,16 +609,29 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Afficher les sha1s complets dans la liste des résultats plutôt que de les abréger.</p>
 </dd>
 <dt class="hdlist1">-t</dt>
-<dt class="hdlist1">--track</dt>
+<dt class="hdlist1">--track[=(direct|inherit)]</dt>
 <dd>
-<p>Lors de la création d&#8217;une nouvelle branche, configurer les entrées de configuration <code>branch.&lt;nom&gt;.remote</code> et <code>branch.&lt;nom&gt;.merge</code> pour marquer la branche de départ comme étant "en amont" de la nouvelle branche. Cette configuration indiquera à git de montrer la relation entre les deux branches dans "git status" et "git branch -v". En outre, il règle <code>git pull</code> sans arguments de tirer depuis l&#8217;amont lorsque la nouvelle branche est extraite.</p>
+<p>Lors de la création d&#8217;une nouvelle branche, configurer les entrées de configuration <code>branch.&lt;nom&gt;.remote</code> et <code>branch.&lt;nom&gt;.merge</code> pour pour définir la configuration du suivi "amont" de la nouvelle branche. Cette configuration indiquera à git de montrer la relation entre les deux branches dans "git status" et "git branch -v". En outre, il règle <code>git pull</code> sans arguments de tirer depuis l&#8217;amont lorsque la nouvelle branche est extraite.</p>
 <div class="paragraph">
-<p>Ce comportement est le défaut lorsque le point de départ est une branche de suivi à distance. Définissez la variable de configuration branch.autoSetupMerge à <code>false</code> si vous voulez <code>git switch</code>, <code>git checkout</code> et <code>git branch</code> pour toujours se comporter comme si <code>--no-track</code> a été donné. Réglez-le <code>always</code> si vous voulez ce comportement lorsque le point de départ est soit une branche locale ou de suivi à distance.</p>
+<p>La branche amont exacte est choisie en fonction de l&#8217;argument optionnel : <code>t</code>, <code>--track</code> ou <code>--track direct</code> signifie utiliser la branche du point de départ elle-même comme amont ; <code>--track=inherit</code> signifie copier la configuration amont de la branche du point de départ.</p>
+</div>
+<div class="paragraph">
+<p><code>--track=direct</code> est le défaut lorsque le point de départ est une branche de suivi à distance. Définissez la variable de configuration branch.autoSetupMerge à <code>false</code> si vous voulez <code>git switch</code>, <code>git checkout</code> et <code>git branch</code> pour toujours se comporter comme si <code>--no-track</code> a été donné. Réglez-le <code>always</code> si vous voulez ce comportement lorsque le point de départ est soit une branche locale ou de suivi à distance. Mettez-le à <code>inherit</code> si vous voulez copier la configuration du suivi depuis le point de branchement.</p>
+</div>
+<div class="paragraph">
+<p>Voir <a href="git-pull.html">git-pull(1)</a> et <a href="git-config.html">git-config(1)</a> pour des discussions supplémentaires sur la façon dont les options <code>branch.&lt;nom&gt;.remote</code> et <code>branch.&lt;nom&gt;.merge</code> sont utilisées.</p>
 </div>
 </dd>
 <dt class="hdlist1">--no-track</dt>
 <dd>
-<p>Ne pas renseigner la configuration « amont », même si la configuration branch.autoSetupMerge est true.</p>
+<p>Ne pas renseigner la configuration « amont », même si la configuration branch.autoSetupMerge est paramétrée.</p>
+</dd>
+<dt class="hdlist1">--recurse-submodules</dt>
+<dd>
+<p>CETTE OPTION EST EXPÉRIMENTALE ! Fait en sorte que la commande courante fasse une récursion dans les sous-modules si <code>submodule.propagateBranches</code> est activé. Voir <code>submodule.propagateBranches</code> dans <a href="git-config.html">git-config(1)</a>. Actuellement, seule la création de branches est supportée.</p>
+<div class="paragraph">
+<p>Lorsqu&#8217;utilisé dans la création de branche, une nouvelle branche &lt;nom-de-branche&gt; sera créée dans le superprojet et tous les sous-modules au &lt;point-de-départ&gt; du superprojet. Dans les sous-modules, la branche pointera vers le commit du sous-module au &lt;point-de-départ&gt; du superprojet, mais les informations de suivi de la branche seront établies en fonction des branches et des distants du sous-module, par ex. <code>git branch --recurse-submodules topic origin/main</code> créera la branche du sous-module "topic" qui pointe vers le commit du sous-module dans le "origin/main" du superprojet, mais suivra le "origin/main" du sous-module.</p>
+</div>
 </dd>
 <dt class="hdlist1">--set-upstream</dt>
 <dd>
@@ -822,7 +836,7 @@ $ git for-each-ref 'refs/remotes/&lt;distant&gt;/&lt;motif&gt;'    <b class="con
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:16:58 +0100
+Last updated 2022-04-22 20:33:07 +0200
 </div>
 </div>
 </body>

@@ -454,7 +454,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="content"><em>git merge</em> [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
         [--no-verify] [-s &lt;strategie&gt;] [-X &lt;option-de-strategie&gt;] [-S[&lt;id-clé&gt;]]
         [--[no-]allow-unrelated-histories]
-        [--[no-]rerere-autoupdate] [-m &lt;msg&gt;] [-F &lt;fichier&gt;] [&lt;commit&gt;&#8230;&#8203;]
+        [--[no-]rerere-autoupdate] [-m &lt;msg&gt;] [-F &lt;fichier&gt;]
+        [--into-name &lt;branche&gt;] [&lt;commit&gt;&#8230;&#8203;]
 <em>git merge</em> (--continue | --abort | --quit)</pre>
 </div>
 </div>
@@ -585,9 +586,9 @@ L&#8217;option <code>--edit</code> (ou <code>-e</code>) est toujours utile si vo
 <p>Avec --squash, --commit n&#8217;est pas permis, et échouera.</p>
 </div>
 </dd>
-<dt class="hdlist1">--no-verify</dt>
+<dt class="hdlist1">--[no-]verify</dt>
 <dd>
-<p>Cette option court-circuite les crochets pre-merge et commit-msg. Voir aussi <a href="githooks.html">githooks(5)</a>.</p>
+<p>Par défaut, les crochets pre-merge et commit-msg sont exécutés. Lorsque <code>--no-verify</code> est donné, ils sont contournés. Voir aussi <a href="githooks.html">githooks(5)</a>.</p>
 </dd>
 <dt class="hdlist1">-s &lt;stratégie&gt;</dt>
 <dt class="hdlist1">--strategy=&lt;strategie&gt;</dt>
@@ -642,6 +643,10 @@ L&#8217;option <code>--edit</code> (ou <code>-e</code>) est toujours utile si vo
 <div class="paragraph">
 <p>La commande <em>git fmt-merge-msg</em> peut être utilisée pour donner une bonne valeur par défaut pour les invocations automatisées de <em>git merge</em>. Le message automatisé peut inclure la description de la branche.</p>
 </div>
+</dd>
+<dt class="hdlist1">--into-branch &lt;branche&gt;</dt>
+<dd>
+<p>Préparer le message de fusion par défaut comme si la fusion se faisait vers la branche <code>&lt;branche&gt;</code>, au lieu du nom de la branche réelle vers laquelle la fusion est faite.</p>
 </dd>
 <dt class="hdlist1">-F &lt;fichier&gt;</dt>
 <dt class="hdlist1">--file=&lt;fichier&gt;</dt>
@@ -787,7 +792,8 @@ git merge --ff-only v1.2.3</pre>
 <div class="listingblock">
 <div class="content">
 <pre>Voici des lignes qui sont soit inchangées par rapport à l'ancêtre
-commun, ou résolues proprement car un seul côté a changé.
+commun, ou résolues proprement parce qu'un seul côté a changé,
+ou parce que les deux côtés ont changé de la même manière.
 &lt;&lt;&lt;&lt;&lt;&lt;&lt; yours : exemple.txt
 La résolution des conflits est difficile ;
 allons faire du shopping.
@@ -804,16 +810,39 @@ Et voici une autre ligne qui est résolue proprement ou non modifiée.</pre>
 <p>Le format par défaut ne montre pas ce que l&#8217;original a dit dans la zone de conflit. Vous ne pouvez pas savoir combien de lignes sont supprimées et remplacées par la remarque de Barbie à votre côté. La seule chose que vous pouvez dire, c&#8217;est que votre côté veut dire que c&#8217;est difficile et que vous préférez faire du shopping, alors que l&#8217;autre côté veut prétendre que c&#8217;est facile.</p>
 </div>
 <div class="paragraph">
-<p>Un autre style peut être utilisé en réglant la variable de configuration "merge.conflictStyle" sur "diff3". Dans le style "diff3", le conflit ci-dessus peut ressembler à ceci :</p>
+<p>Un autre style peut être utilisé en réglant la variable de configuration "merge.conflictStyle" sur "diff3" ou "zdiff3". Dans le style "diff3", le conflit ci-dessus peut ressembler à ceci :</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre>Voici les lignes qui sont soit inchangées par rapport à l'ancêtre
-commun, ou proprement résolu parce qu'un seul côté a changé.
+commun, ou proprement résolues parce qu'un seul côté a changé,
+&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; yours:exemple.txt
+ou parce que les deux côtés ont changé de la même façon.
+La résolution des conflits est difficile ;
+Allons faire du shopping.
+||||||| base:sample.txt
+ou parce que les deux côtés ont changé de la même façon.
+La résolution des conflits est difficile.
+=======
+ou parce que les deux côtés ont changé de la même façon.
+Git facilite la résolution des conflits.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; theirs:exemple.txt
+Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>alors que dans le style "zdiff3", cela peut ressembler à ceci :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Voici les lignes qui sont soit inchangées par rapport à l'ancêtre
+commun, ou proprement résolu parce qu'un seul côté a changé,
+ou parce que les deux côtés ont changé de la même manière.
 &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; yours:exemple.txt
 La résolution des conflits est difficile ;
 Allons faire du shopping.
-|||||||
+||||||| base:sample.txt
+ou parce que les deux côtés ont changé de la même manière.
 La résolution des conflits est difficile.
 =======
 Git facilite la résolution des conflits.
@@ -1025,7 +1054,7 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 <dl>
 <dt class="hdlist1">merge.conflictStyle</dt>
 <dd>
-<p>Spécifier le style dans lequel les sections en conflit sont écrites dans les fichiers de l&#8217;arbre de travail lors de la fusion. La valeur par défaut est "merge", qui affiche un marqueur de conflit <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, les modifications faites par un côté, un marqueur <code>==========, les modifications faites par l'autre côté, et ensuite un marqueur `&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Un style alternatif, "diff3", ajoute un marqueur <code>|||||||</code> et le texte original avant le marqueur <code>========</code>.</p>
+<p>Spécifier le style dans lequel les sections en conflit sont écrites dans les fichiers de l&#8217;arbre de travail lors de la fusion. La valeur par défaut est "merge", qui affiche un marqueur de conflit <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, les modifications faites par un côté, un marqueur <code>==========, les modifications faites par l'autre côté, et ensuite un marqueur `&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Un style alternatif, "diff3", ajoute un marqueur <code>|||||||</code> et le texte original avant le marqueur <code>========</code>. Le style "merge" tend à produire des régions de conflit plus petites que diff3, à la fois à cause de l&#8217;exclusion du texte original, et parce que lorsqu&#8217;un sous-ensemble de lignes correspondent des deux côtés, elles sont simplement retirées de la région de conflit. Un autre style alternatif, "zdiff3" est similaire à diff3 mais supprime les lignes correspondantes des deux côtés de la région de conflit lorsque ces lignes correspondantes apparaissent près du début ou de la fin d&#8217;une région de conflit.</p>
 </dd>
 <dt class="hdlist1">merge.defaultToUpstream</dt>
 <dd>
@@ -1240,7 +1269,7 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:16:59 +0100
+Last updated 2022-04-22 20:33:08 +0200
 </div>
 </div>
 </body>

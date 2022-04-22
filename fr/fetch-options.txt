@@ -40,7 +40,7 @@ Voir aussi les variables de configuration `fetch.negotiationAlgorithm` et `push.
 --negotiate-only::
 	Ne rien récupérer du serveur, et à la place afficher les ancêtres des arguments fournis par `--negotiation-tip=*`, que nous avons en commun avec le serveur.
 +
-En interne, ceci est utilisé pour implémenter l'option `push.negotiate`, voir linkgit:git-config[1].
+C'est incompatible avec `--recurse-submodules=[yes|on-demand]`. En interne, ceci est utilisé pour implémenter l'option `push.negotiate`, voir linkgit:git-config[1].
 
 --dry-run::
 	Montrer ce qui serait fait, sans faire de changements.
@@ -102,6 +102,11 @@ endif::git-pull[]
 --no-tags::
 	Par défaut, les étiquettes qui pointent sur des objets téléchargés à partir du dépôt distant sont récupérées et stockées localement. Cette option désactive le suivi automatique des étiquettes. Le comportement par défaut d'un distant peut être spécifié avec le paramètre remote.<nom>.tagOpt. Voir linkgit:git-config[1].
 
+ifndef::git-pull[]
+--refetch::
+	Au lieu de négocier avec le serveur pour éviter de transférer les commits et les objets associés qui sont déjà présents localement, cette option récupère tous les objets comme le ferait un nouveau clone. Utilisez cette option pour réappliquer un filtre de clone partiel depuis la configuration ou en utilisant `--filter=` lorsque la définition du filtre a changé. La maintenance automatique post-récupération effectuera une consolidation des paquets de la base de données des objets pour supprimer tout objet en double.
+endif::git-pull[]
+
 --refmap=<spécificateur-de-référence>::
 	Lors de la récupération des références listées en ligne de commande, utiliser la spécification de référence (qui peut être donnée plusieurs fois) pour mapper les références sur les branches de suivi à distance, au lieu des valeurs des variables de configuration `remote.*.fetch` pour le dépôt distant. Fournir un `<spécificateur-de-référence>` vide à l'option `--refmap` fait que Git ignore les spécification de référence configurées et se fie entièrement aux spécifications de référence fournies comme arguments de la ligne de commande. Voir la section sur les "Branches de suivi à distance configurées" pour plus de détails.
 
@@ -111,7 +116,11 @@ endif::git-pull[]
 
 ifndef::git-pull[]
 --recurse-submodules[=yes|on-demand|no]::
-	Cette option permet de contrôler si et dans quelles conditions les nouveaux engagements de sous-modules peuplés doivent également être récupérés. Elle peut être utilisée comme une option booléenne pour désactiver complètement la récursivité lorsqu'elle est définie sur 'no' ou pour visiter récursivement sans condition tous les sous-modules peuplés lorsqu'elle est définie sur 'yes', qui est la valeur par défaut lorsque cette option est utilisée sans aucune valeur. Utiliser 'on-demand' pour ne visiter récursivement un sous-module peuplé que lorsque le superprojet récupère un commit qui met à jour la référence du sous-module à un commit qui n'est pas déjà dans le clone local du sous-module. Par défaut, 'on-demand' est utilisé à moins que `fetch.recurseSubmodules` ne soit paramétré (voir linkgit:git-config[1]).
+	Cette option contrôle si et sous quelles conditions les nouveaux commits des sous-modules doivent être récupérés également. Lorsqu'il parcourt les sous-modules, `git fetch` essaie toujours de récupérer les sous-modules "modifiés", c'est-à-dire les sous-modules qui ont des commits référencés par un commit de superprojet récemment récupéré mais qui sont manquants dans le clone de sous-module local. Un sous-module modifié peut être récupéré tant qu'il est présent localement, par exemple dans `$GIT_DIR/modules/` (voir linkgit:gitsubmodules[7]) ; si l'amont ajoute un nouveau sous-module, ce sous-module ne peut pas être récupéré jusqu'à ce qu'il soit cloné, par exemple par `git submodule update`.
++
+Lorsqu'il est défini sur 'on-demand', seuls les sous-modules modifiés sont récupérés. Lorsqu'il a pour valeur 'yes', tous les sous-modules peuplés sont récupérés et les sous-modules non peuplés et modifiés sont récupérés. Avec la valeur 'no', les sous-modules ne sont jamais récupérés.
++
+Lorsque cette option n'est pas spécifiée, elle utilise la valeur de `fetch.recurseSubmodules` si elle est définie (voir linkgit:git-config[1]), et prend par défaut la valeur 'on-demand' si elle n'est pas définie. Lorsque cette option est utilisée sans aucune valeur, elle prend par défaut la valeur 'yes'.
 endif::git-pull[]
 
 -j::

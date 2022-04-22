@@ -456,7 +456,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <em>git stash</em> drop [-q|--quiet] [&lt;stash&gt;]
 <em>git stash</em> ( pop | apply ) [--index] [-q|--quiet] [&lt;stash&gt;]
 <em>git stash</em> branch &lt;nome-do-ramo&gt; [&lt;stash&gt;]
-<em>git stash</em> [push [-p|--patch] [-k|--[no-]keep-index] [-q|--quiet]
+<em>git stash</em> [push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-q|--quiet]
              [-u|--include-untracked] [-a|--all] [-m|--message &lt;mensagem&gt;]
              [--pathspec-from-file=&lt;arquivo&gt; [--pathspec-file-nul]]
              [--] [&lt;pathspec&gt;&#8230;&#8203;]]
@@ -485,14 +485,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="dlist">
 <dl>
-<dt class="hdlist1">push [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message &lt;mensagem&gt;] [--pathspec-from-file=&lt;arquivo&gt; [--pathspec-file-nul]] [--] [&lt;pathspec&gt;&#8230;&#8203;]</dt>
+<dt class="hdlist1">push [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [-m|--message &lt;mensagem&gt;] [--pathspec-from-file=&lt;arquivo&gt; [--pathspec-file-nul]] [--] [&lt;pathspec&gt;&#8230;&#8203;]</dt>
 <dd>
 <p>Salva as suas alterações locais em um nova entrada <em>stash</em> e reverta-as para <code>HEAD</code> (na árvore de trabalho e no índice). A parte da &lt;mensagem&gt; é opcional e dá a descrição junto com a condição do empilhamento.</p>
 <div class="paragraph">
 <p>Para fazer um instantâneo de forma rápida, você pode omitir o "push". Neste modo, os argumentos não opcionais não são permitidos, visam impedir que um subcomando com erro de ortografia faça uma entrada na pilha indesejada. As duas exceções são <code>stash -p</code>, que atua como um alias para o <code>stash push -p</code> e os elementos pathspec, que são permitidos após um hífen duplo <code>--</code> para desambiguação.</p>
 </div>
 </dd>
-<dt class="hdlist1">save [-p|--patch] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [&lt;mensagem&gt;]</dt>
+<dt class="hdlist1">save [-p|--patch] [-S|--staged] [-k|--[no-]keep-index] [-u|--include-untracked] [-a|--all] [-q|--quiet] [&lt;mensagem&gt;]</dt>
 <dd>
 <p>Esta opção já está obsoleta em favor da opção <em>git stash push</em>. Difere do "stash push", pois não pode lidar com o pathspec. Em vez disso, todos os argumentos não opcionais são concatenados para formar a mensagem "stash".</p>
 </dd>
@@ -605,6 +605,17 @@ stash@{1}: On master: 9cc0589... Add git-stash</pre>
 </div>
 <div class="paragraph">
 <p>A opção <code>--patch</code> implica no uso da opção <code>--keep-index</code>. Você pode usar a <code>--no-keep-index</code> para substituir isso.</p>
+</div>
+</dd>
+<dt class="hdlist1">-S</dt>
+<dt class="hdlist1">--staged</dt>
+<dd>
+<p>Esta opção só é válida para os comandos <code>push</code> e <code>save</code>.</p>
+<div class="paragraph">
+<p>Armazene apenas as alterações que estão sendo preparadas atualmente. Isto é similar ao comando <code>git commit</code> básico, exceto que o estado do commit é feito na pilha armazenada em vez do ramo atual.</p>
+</div>
+<div class="paragraph">
+<p>A opção <code>--patch</code> tem prioridade sobre esta.</p>
 </div>
 </dd>
 <dt class="hdlist1">--pathspec-from-file=&lt;arquivo&gt;</dt>
@@ -744,6 +755,21 @@ $ git commit foo -m 'Partes resultantes'</pre>
 </div>
 </div>
 </dd>
+<dt class="hdlist1">Salvando as alterações não relacionadas para utilização futura</dt>
+<dd>
+<p>Quando estiver no meio de grandes alterações e encontre algum problema não relacionado que você não queira deixar de corrigir, você pode fazer as alterações, organizá-las e usar o comando <code>git stash push --staged</code> deixando guardado para uso posterior. Isso se assemelha ao fazer o commit das alterações acumuladas, apenas o commit acaba ficando armazenado e não no ramo atual.</p>
+<div class="listingblock">
+<div class="content">
+<pre># ... hack hack hack ...
+$ git add --patch foo           # adiciona alterações não relacionadas ao índice
+$ git stash push --staged       # salva estas alterações nos arquivos que foram armazenados
+# ... hack hack hack, concluí as alterações atuais ...
+$ git commit -m 'Massive'       # faz o commit das alterações que foram totalmente testados
+$ git switch fixup-branch       # alterna para outro ramo
+$ git stash pop                 # para concluir o trabalho nas alterações que foram salvas</pre>
+</div>
+</div>
+</dd>
 <dt class="hdlist1">Recuperando entradas "stash" que foram limpas/eliminadas erroneamente</dt>
 <dd>
 <p>Caso você derrube ou limpe as entradas "stash" por engano, elas não poderão mais ser recuperadas pelos mecanismos de segurança normais. No entanto, é possível tentar o seguinte encantamento para obter uma lista das entradas stash que ainda estão em seu repositório, mas que não são mais acessíveis:</p>
@@ -778,7 +804,7 @@ xargs git log --merges --no-walk --grep=WIP</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:50 +0100
+Last updated 2022-04-22 20:33:52 +0200
 </div>
 </div>
 </body>

@@ -9,8 +9,14 @@ git-cat-file - Forneça as informações do conteúdo, tipo e do tamanho para os
 RESUMO
 ------
 [verse]
-'git cat-file' (-t [--allow-unknown-type]| -s [--allow-unknown-type]| -e | -p | <tipo> | --textconv | --filters ) [--path=<caminho>] <objeto>
-'git cat-file' (--batch[=<formato>] | --batch-check[=<formato>]) [ --textconv | --filters ] [--follow-symlinks]
+'git cat-file' <tipo> <objeto>
+'git cat-file' (-e | -p) <objeto>
+'git cat-file' (-t | -s) [--allow-unknown-type] <objeto>
+'git cat-file' (--batch | --batch-check) [--batch-all-objects]
+	     [--buffer] [--follow-symlinks] [--unordered]
+	     [--textconv | --filters]
+'git cat-file' (--textconv | --filters)
+	     [<rev>:<path|tree-ish> | --path=<path|tree-ish> <rev>]
 
 DESCRIÇÃO
 ---------
@@ -55,14 +61,32 @@ OPÇÕES
 --batch-check=<formato>::
 	Exiba as informações do objeto para cada objeto informado no stdin. Talvez não possa ser combinado com nenhuma outra opção exceto `--textconv` ou `--filters`, neste caso, as linhas da entrada também precisam informar o caminho, separado por espaços. Para mais detalhes consulte a seção `SAÍDA DO LOTE` abaixo.
 
+--batch-command::
+--batch-command=<formato>::
+	Insira um modo de comando que faça a leitura dos comandos e dos argumentos do stdin. Só pode ser combinado com `--buffer`, `--textconv` ou `--filters`. No caso de `--textconv` ou de `--filters`, as linhas da entrada também precisam especificar o caminho, separado por espaços em branco. Consulte a seção `SAÍDA DE LOTE` abaixo para obter mais detalhes.
++
+o `--batch-command` reconhece os seguintes comandos:
++
+--
+conteúdos <objeto>::
+	Imprime o conteúdo do objeto para a referência do objeto `<objeto>`. Isso corresponde à saída `--batch`.
+
+info <objeto>::
+	Imprime as informações do objeto para a referência do objeto `<objeto>`. Isso corresponde à saída `--batch-check`.
+
+flush::
+	É utilizado com a opção `--buffer` para executar todos os comandos anteriores que foram emitidos desde o início ou desde que o último flush tenha sido feito. Quando a opção `--buffer` é utilizada, nenhuma saída virá até que um `flush` seja emitido. Quando `--buffer` não for utilizado, os comandos são liberados um por vez sem emitir um `flush`.
+--
++
+
 --batch-all-objects::
 	Em vez de ler uma lista dos objetos no stdin, execute a operação em lote solicitada em todos os objetos no repositório e em quaisquer outros armazenamentos alternativos dos objetos (não apenas nos objetos que forem acessíveis). Requer que o comando `--batch` ou `--batch-check` seja utilizado. É predefinido que os objetos são capturados através da ordem dos seus hashes; consulte abaixo também o comando `--unordered`. Os objetos são apresentados como estão, sem respeitar o mecanismo de "replace" (substituição) do comando linkgit:git-replace[1].
 
 --buffer::
-	Normalmente, a saída em lote é liberada após a saída de cada objeto, para que um processo possa ler e gravar de forma interativa a partir do `cat-file`. Com esta opção, a saída utiliza uma memória intermédia normal no stdio; por ser muito mais eficiente ao invocar comando `--batch-check` em uma grande quantidade de objetos.
+	Normalmente, a saída em lote é liberada após a saída de cada objeto, para que um processo possa ler e gravar de forma interativa a partir do `cat-file`. Com esta opção, a saída utiliza uma memória intermédia normal no stdio; por ser muito mais eficiente ao invocar comando `--batch-check` ou `--batch-command` numa grande quantidade de objetos.
 
 --unordered::
-	Quando o comando `--batch-all-objects` estiver em uso, visite os objetos em uma ordem que possa ser mais eficiente para acessar o conteúdo do objeto do que pela ordem do hash. Os detalhes exatos do pedido não são especificados, porém caso não precise de um pedido específico, em geral isso resultará em uma saída mais rápida, especialmente com a opção `--batch`. Observe que `cat-file` ainda exibirá cada objeto apenas uma vez, mesmo que ele seja armazenado várias vezes no repositório.
+	Quando o comando `--batch-all-objects` estiver em uso, visite os objetos numa ordem que possa ser mais eficiente para acessar o conteúdo do objeto do que pela ordem do hash. Os detalhes exatos do pedido não são especificados, porém caso não precise de um pedido específico, em geral isso resultará numa saída mais rápida, especialmente com a opção `--batch`. Observe que `cat-file` ainda exibirá cada objeto apenas uma vez, mesmo que ele seja armazenado várias vezes no repositório.
 
 --allow-unknown-type::
 	Permita que `-s` ou `-t` consultem os objetos quebrados/corrompidos de um tipo desconhecido.
@@ -126,6 +150,8 @@ SAÍDA DO LOTE
 
 Caso o comando `--batch` ou `--batch-check` seja utilizado, o `cat-file` lerá os objetos vindos do stdin, um por linha, imprimindo as informações sobre eles. É predefinido que a linha inteira seja considerada como um objeto, como se fosse alimentada para o linkgit:git-rev-parse[1].
 
+When `--batch-command` is given, `cat-file` will read commands from stdin, one per line, and print information based on the command given. With `--batch-command`, the `info` command followed by an object will print information about the object the same way `--batch-check` would, and the `contents` command followed by an object prints contents in the same way `--batch` would.
+
 Você pode definir as informações exibidas para cada objeto utilizando um `<formato>` personalizado. O `<formato>` é copiado de forma literal para cada objeto no stdout, com espaços reservados no formato `%(atom)` expandidos, seguidos por uma nova linha. Os átomos que estão disponíveis são:
 
 `objectname`::
@@ -148,7 +174,7 @@ Você pode definir as informações exibidas para cada objeto utilizando um `<fo
 
 Caso nenhum formato seja definido, o formato predefinido é `%(objectname) %(objecttype) %(objectsize)`.
 
-Caso `--batch` seja utilizado, as informações do objeto são seguidas pelo conteúdo do objeto (consistindo em `%(objectsize)` bytes), seguido por uma nova linha.
+Caso `--batch` seja utilizado, ou caso o `--batch-command` seja utilizado com o comando `contents`, as informações do objeto são seguidas pelo conteúdo do objeto (consistindo em `%(objectsize)` bytes), seguido por uma nova linha.
 
 Por exemplo, o comando `--batch` sem um formato personalizado produziria:
 

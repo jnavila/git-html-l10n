@@ -73,6 +73,15 @@ Le motif peut contenir des caractères génériques de globbing standard et deux
 +
 Si le motif se termine par `/`, `**` sera automatiquement ajouté. Par exemple, le motif `foo/` devient `foo/**`. En d'autres termes, il correspond à toutes les branches qui commencent par `foo/`. Ceci est utile si vos branches sont organisées de manière hiérarchique et que vous souhaitez appliquer une configuration à toutes les branches de cette hiérarchie.
 
+`hasconfig:remote.*.url:`::
+	Les données qui suivent ce mot-clé sont considérées comme un motif avec des jokers standard et deux autres, `**/` et `/**`, qui peuvent correspondre à plusieurs composants. La première fois que ce mot-clé est vu, le reste des fichiers de configuration sera analysé pour trouver des URL distants (sans appliquer aucune valeur). S'il exist au moint une URL distante qui correspond au motif, la condition d'inclusion est remplie.
++
+Les fichiers inclus par cette option (directement ou indirectement) ne sont pas autorisés à contenir des URL distants.
++
+Notez que contrairement aux autres conditions includeIf, la résolution de cette condition repose sur des informations qui ne sont pas encore connues au moment de la lecture de la condition. Un cas d'utilisation typique est que cette option est présente dans une configuration de niveau système ou global, et que l'URL distante se trouve dans une configuration de niveau local ; d'où la nécessité d'effectuer un balayage préalable lors de la résolution de cette condition. Afin d'éviter le problème de la poule et de l'œuf, dans lequel les fichiers potentiellement inclus peuvent affecter le fait que ces fichiers soient potentiellement inclus ou non, Git brise le cycle en interdisant à ces fichiers d'affecter la résolution de ces conditions (donc en leur interdisant de déclarer des URL distantes).
++
+Quant au nom de ce mot-clé, c'est pour des raisons de compatibilité avec un schéma de nommage qui supporte des conditions d'inclusion plus basées sur des variables, mais actuellement Git ne supporte que le mot-clé exact décrit ci-dessus.
+
 Quelques notes supplémentaires sur la correspondance via `gitdir` et `gitdir/i` :
 
  * Les liens symboliques dans `$GIT_DIR` ne sont pas résolus avant la correspondance.
@@ -133,6 +142,14 @@ les chemins relatifs sont toujours relatifs au fichier
 ; actuellement extrait
 [includeIf "onbranch:foo-branch"]
 	path = foo.inc
+
+; inclure seulement si un fichier distant avec l'URL donnée existe (note
+; qu'une telle URL peut être fournie plus tard dans un fichier ou dans un fichier
+; ou dans un fichier lu après la lecture de ce fichier, comme dans cet exemple).
+[includeIf "hasconfig:remote.*.url:https://example.com/**"]
+	path = foo.inc
+[remote "origin"]
+	url = https://example.com/git
 ----
 
 Valeurs
@@ -311,13 +328,13 @@ include::config/repack.txt[]
 
 include::config/rerere.txt[]
 
-include::config/reset.txt[]
-
 include::config/sendemail.txt[]
 
 include::config/sequencer.txt[]
 
 include::config/showbranch.txt[]
+
+include::config/sparse.txt[]
 
 include::config/splitindex.txt[]
 

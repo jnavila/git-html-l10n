@@ -451,8 +451,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git cat-file</em> (-t [--allow-unknown-type]| -s [--allow-unknown-type]| -e | -p | &lt;tipo&gt; | --textconv | --filters ) [--path=&lt;caminho&gt;] &lt;objeto&gt;
-<em>git cat-file</em> (--batch[=&lt;formato&gt;] | --batch-check[=&lt;formato&gt;]) [ --textconv | --filters ] [--follow-symlinks]</pre>
+<pre class="content"><em>git cat-file</em> &lt;tipo&gt; &lt;objeto&gt;
+<em>git cat-file</em> (-e | -p) &lt;objeto&gt;
+<em>git cat-file</em> (-t | -s) [--allow-unknown-type] &lt;objeto&gt;
+<em>git cat-file</em> (--batch | --batch-check) [--batch-all-objects]
+             [--buffer] [--follow-symlinks] [--unordered]
+             [--textconv | --filters]
+<em>git cat-file</em> (--textconv | --filters)
+             [&lt;rev&gt;:&lt;path|tree-ish&gt; | --path=&lt;path|tree-ish&gt; &lt;rev&gt;]</pre>
 </div>
 </div>
 </div>
@@ -518,17 +524,45 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Exiba as informações do objeto para cada objeto informado no stdin. Talvez não possa ser combinado com nenhuma outra opção exceto <code>--textconv</code> ou <code>--filters</code>, neste caso, as linhas da entrada também precisam informar o caminho, separado por espaços. Para mais detalhes consulte a seção <code>SAÍDA DO LOTE</code> abaixo.</p>
 </dd>
+<dt class="hdlist1">--batch-command</dt>
+<dt class="hdlist1">--batch-command=&lt;formato&gt;</dt>
+<dd>
+<p>Insira um modo de comando que faça a leitura dos comandos e dos argumentos do stdin. Só pode ser combinado com <code>--buffer</code>, <code>--textconv</code> ou <code>--filters</code>. No caso de <code>--textconv</code> ou de <code>--filters</code>, as linhas da entrada também precisam especificar o caminho, separado por espaços em branco. Consulte a seção <code>SAÍDA DE LOTE</code> abaixo para obter mais detalhes.</p>
+<div class="paragraph">
+<p>o <code>--batch-command</code> reconhece os seguintes comandos:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">conteúdos &lt;objeto&gt;</dt>
+<dd>
+<p>Imprime o conteúdo do objeto para a referência do objeto <code>&lt;objeto&gt;</code>. Isso corresponde à saída <code>--batch</code>.</p>
+</dd>
+<dt class="hdlist1">info &lt;objeto&gt;</dt>
+<dd>
+<p>Imprime as informações do objeto para a referência do objeto <code>&lt;objeto&gt;</code>. Isso corresponde à saída <code>--batch-check</code>.</p>
+</dd>
+<dt class="hdlist1">flush</dt>
+<dd>
+<p>É utilizado com a opção <code>--buffer</code> para executar todos os comandos anteriores que foram emitidos desde o início ou desde que o último flush tenha sido feito. Quando a opção <code>--buffer</code> é utilizada, nenhuma saída virá até que um <code>flush</code> seja emitido. Quando <code>--buffer</code> não for utilizado, os comandos são liberados um por vez sem emitir um <code>flush</code>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
 <dt class="hdlist1">--batch-all-objects</dt>
 <dd>
 <p>Em vez de ler uma lista dos objetos no stdin, execute a operação em lote solicitada em todos os objetos no repositório e em quaisquer outros armazenamentos alternativos dos objetos (não apenas nos objetos que forem acessíveis). Requer que o comando <code>--batch</code> ou <code>--batch-check</code> seja utilizado. É predefinido que os objetos são capturados através da ordem dos seus hashes; consulte abaixo também o comando <code>--unordered</code>. Os objetos são apresentados como estão, sem respeitar o mecanismo de "replace" (substituição) do comando <a href="git-replace.html">git-replace(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--buffer</dt>
 <dd>
-<p>Normalmente, a saída em lote é liberada após a saída de cada objeto, para que um processo possa ler e gravar de forma interativa a partir do <code>cat-file</code>. Com esta opção, a saída utiliza uma memória intermédia normal no stdio; por ser muito mais eficiente ao invocar comando <code>--batch-check</code> em uma grande quantidade de objetos.</p>
+<p>Normalmente, a saída em lote é liberada após a saída de cada objeto, para que um processo possa ler e gravar de forma interativa a partir do <code>cat-file</code>. Com esta opção, a saída utiliza uma memória intermédia normal no stdio; por ser muito mais eficiente ao invocar comando <code>--batch-check</code> ou <code>--batch-command</code> numa grande quantidade de objetos.</p>
 </dd>
 <dt class="hdlist1">--unordered</dt>
 <dd>
-<p>Quando o comando <code>--batch-all-objects</code> estiver em uso, visite os objetos em uma ordem que possa ser mais eficiente para acessar o conteúdo do objeto do que pela ordem do hash. Os detalhes exatos do pedido não são especificados, porém caso não precise de um pedido específico, em geral isso resultará em uma saída mais rápida, especialmente com a opção <code>--batch</code>. Observe que <code>cat-file</code> ainda exibirá cada objeto apenas uma vez, mesmo que ele seja armazenado várias vezes no repositório.</p>
+<p>Quando o comando <code>--batch-all-objects</code> estiver em uso, visite os objetos numa ordem que possa ser mais eficiente para acessar o conteúdo do objeto do que pela ordem do hash. Os detalhes exatos do pedido não são especificados, porém caso não precise de um pedido específico, em geral isso resultará numa saída mais rápida, especialmente com a opção <code>--batch</code>. Observe que <code>cat-file</code> ainda exibirá cada objeto apenas uma vez, mesmo que ele seja armazenado várias vezes no repositório.</p>
 </dd>
 <dt class="hdlist1">--allow-unknown-type</dt>
 <dd>
@@ -637,6 +671,9 @@ alink: um link simbólico para /etc/passwd</pre>
 <p>Caso o comando <code>--batch</code> ou <code>--batch-check</code> seja utilizado, o <code>cat-file</code> lerá os objetos vindos do stdin, um por linha, imprimindo as informações sobre eles. É predefinido que a linha inteira seja considerada como um objeto, como se fosse alimentada para o <a href="git-rev-parse.html">git-rev-parse(1)</a>.</p>
 </div>
 <div class="paragraph">
+<p>When <code>--batch-command</code> is given, <code>cat-file</code> will read commands from stdin, one per line, and print information based on the command given. With <code>--batch-command</code>, the <code>info</code> command followed by an object will print information about the object the same way <code>--batch-check</code> would, and the <code>contents</code> command followed by an object prints contents in the same way <code>--batch</code> would.</p>
+</div>
+<div class="paragraph">
 <p>Você pode definir as informações exibidas para cada objeto utilizando um <code>&lt;formato&gt;</code> personalizado. O <code>&lt;formato&gt;</code> é copiado de forma literal para cada objeto no stdout, com espaços reservados no formato <code>%(atom)</code> expandidos, seguidos por uma nova linha. Os átomos que estão disponíveis são:</p>
 </div>
 <div class="dlist">
@@ -671,7 +708,7 @@ alink: um link simbólico para /etc/passwd</pre>
 <p>Caso nenhum formato seja definido, o formato predefinido é <code>%(objectname) %(objecttype) %(objectsize)</code>.</p>
 </div>
 <div class="paragraph">
-<p>Caso <code>--batch</code> seja utilizado, as informações do objeto são seguidas pelo conteúdo do objeto (consistindo em <code>%(objectsize)</code> bytes), seguido por uma nova linha.</p>
+<p>Caso <code>--batch</code> seja utilizado, ou caso o <code>--batch-command</code> seja utilizado com o comando <code>contents</code>, as informações do objeto são seguidas pelo conteúdo do objeto (consistindo em <code>%(objectsize)</code> bytes), seguido por uma nova linha.</p>
 </div>
 <div class="paragraph">
 <p>Por exemplo, o comando <code>--batch</code> sem um formato personalizado produziria:</p>
@@ -780,7 +817,7 @@ alink: um link simbólico para /etc/passwd</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:48 +0100
+Last updated 2022-04-22 20:33:49 +0200
 </div>
 </div>
 </body>

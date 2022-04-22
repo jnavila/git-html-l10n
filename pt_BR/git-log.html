@@ -573,9 +573,9 @@ $ git log A...B</pre>
 <p>Caso <code>:&lt;funcname&gt;</code> seja informado no lugar do <em>&lt;inicio&gt;</em> e <em>&lt;fim&gt;</em>, é uma expressão regular que indica o intervalo da primeira <code>&lt;funcname&gt;</code> que coincida com <em>&lt;funcname&gt;</em> até a próxima linha funcname. <code>:&lt;funcname&gt;</code> pesquisa no final do intervalo <code>-L</code> anterior, se houver, caso contrário, a pesquisa ocorrerá desde o início do arquivo. <code>^:&lt;funcname&gt;</code> pesquisa desde o início do arquivo. Os nomes das funções são determinados da mesma maneira que o comando <code>git diff</code> lida com os pedaços dos cabeçalhos do patch (consulte <em>Definindo um cabeçalho personalizado do hunk</em> em <a href="gitattributes.html">gitattributes(5)</a>).</p>
 </div>
 </dd>
-<dt class="hdlist1">&lt;intervalo da revisão&gt;</dt>
+<dt class="hdlist1">&lt;intervalo-da-revisão&gt;</dt>
 <dd>
-<p>Exibe apenas os commits no intervalo definido das revisões. Quando um &lt;intervalo de revisão&gt; não é definido, a predefinição retorna para <code>HEAD</code> (ou seja, todo o histórico que leva ao commit atual). O <code>origin..HEAD</code> define todos os commits acessíveis a partir do commit atual (ou seja, <code>HEAD</code>), porém não a partir do <code>origin</code>. Para obter uma lista mais completa de maneiras de soletrar os nomes dos objetos, consulte a seção "DEFININDO OS INTERVALOS" no <a href="gitrevisions.html">gitrevisions(7)</a>.</p>
+<p>Exibe apenas os commits no intervalo definido das revisões. Quando um &lt;intervalo-da-revisão&gt; não é definido, a predefinição retorna para <code>HEAD</code> (ou seja, todo o histórico que leva ao commit atual). O <code>origin..HEAD</code> define todos os commits acessíveis a partir do commit atual (ou seja, <code>HEAD</code>), porém não a partir do <code>origin</code>. Para obter uma lista mais completa de maneiras de soletrar o &lt;intervalo-da-revisão&gt;, consulte a seção "DEFININDO OS INTERVALOS" no <a href="gitrevisions.html">gitrevisions(7)</a>.</p>
 </dd>
 <dt class="hdlist1">[--] &lt;caminho&gt;&#8230;&#8203;</dt>
 <dd>
@@ -694,10 +694,14 @@ $ git log A...B</pre>
 </dd>
 <dt class="hdlist1">--first-parent</dt>
 <dd>
-<p>Siga apenas o primeiro commit da origem ao ver a mesclagem de um commit. Essa opção pode lhe fornecer uma melhor visão geral durante a visualização da evolução de um tópico específico no ramo, pois faz a mesclagem em um tópico no ramo e tende a ser apenas sobre o ajuste das atualizações upstream de tempos em tempos, esta opção permite ignorar os commits individuais trazidas para o seu histórico feitas por essa mesclagem.</p>
+<p>Ao encontrar os commits que serão incluídos, siga apenas o primeiro commit principal ao ver a mesclagem de um commit. Essa opção pode lhe fornecer uma melhor visão geral durante a visualização da evolução de um tópico específico no ramo, pois faz a mesclagem em um tópico no ramo e tende a ser apenas sobre o ajuste das atualizações upstream de tempos em tempos, esta opção permite ignorar os commits individuais trazidas para o seu histórico feitas por essa mesclagem.</p>
 <div class="paragraph">
 <p>Esta opção também muda o formato diff padrão para a mesclagem dos commits para <code>first-parent</code>, consulte <code>--diff-merges=first-parent</code> para mais detalhes.</p>
 </div>
+</dd>
+<dt class="hdlist1">--exclude-first-parent-only</dt>
+<dd>
+<p>Ao encontrar os commits para serem excluídos (com um <em>^</em>), siga apenas o primeiro commit principal ao ver um commit para ser mesclado. Isso pode ser usado para encontrar o conjunto de alterações num determinado ramo a partir do ponto em que ele divergiu do ramo remoto, dado que as mesclagens arbitrárias podem ser alterações válidas no tópico do ramo.</p>
 </dd>
 <dt class="hdlist1">--not</dt>
 <dd>
@@ -1252,13 +1256,9 @@ $ git log A...B</pre>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--unsorted-input</dt>
-<dd>
-<p>Mostra os commits na ordem que eles foram passados na linha de comando em vez de classificá-los em ordem cronológica inversa por tempo do commit. Não pode ser combinado com <code>--no-walk</code> ou <code>--no-walk=sorted</code>.</p>
-</dd>
 <dt class="hdlist1">--no-walk [=(com classificação|sem classificação)]</dt>
 <dd>
-<p>Exibe apenas determinados commits, mas não atravesse os seus ancestrais. Isso não tem nenhum efeito caso um intervalo seja especificado. Caso o argumento <code>unsorted</code> (sem classificação) seja utilizada, os commits serão exibidos na ordem em que foram utilizadas na linha de comando. Caso contrário (se o argumento <code>ordenado</code> ou nenhum outro seja utilizado), os commits serão exibidos em ordem cronológica reversa pela data do commit. Não pode ser combinado com <code>--graph</code>. Não pode ser combinado com a opção <code>--unsorted-input</code> caso a opção <code>sorted</code> ou nenhuma opção seja usada.</p>
+<p>Exibe apenas determinados commits, mas não atravesse os seus ancestrais. Isso não tem nenhum efeito caso um intervalo seja especificado. Caso o argumento <code>unsorted</code> (sem classificação) seja utilizada, os commits serão exibidos na ordem em que foram utilizadas na linha de comando. Caso contrário (se o argumento <code>ordenado</code> ou nenhum outro seja utilizado), os commits serão exibidos em ordem cronológica reversa pela data do commit. Não pode ser combinado com <code>--graph</code>.</p>
 </dd>
 <dt class="hdlist1">--do-walk</dt>
 <dd>
@@ -1386,7 +1386,7 @@ $ git log A...B</pre>
 <p>A opção <code>date=unix</code> exibe a data como um carimbo de data/hora da época do Unix (segundos desde 1970). Assim como a opção <code>--raw</code>, isso sempre está no UTC e portanto, o <code>-local</code> não tem nenhum efeito.</p>
 </div>
 <div class="paragraph">
-<p>A opção <code>--date=format:...</code> alimenta o formato <code>...</code> par ao seu sistema <code>strftime</code>, menos para o %z e %Z, que são tratados internamente. Use a opção <code>--date=format:%c</code> para exibir a data no formato preferido do código do idioma do sistema. Consulte o manual do <code>strftime</code> para obter uma lista completa dos "placeholders". Ao utilizar o <code>-local</code>, a sintaxe correta é <code>--date=format-local:...</code>.</p>
+<p>A opção <code>--date=format:...</code> alimenta o formato <code>...</code> par ao seu sistema <code>strftime</code>, menos para %s, %z, e %Z, que são tratados internamente. Use a opção <code>--date=format:%c</code> para exibir a data no formato preferido do código do idioma do sistema. Consulte o manual do <code>strftime</code> para obter uma lista completa dos "placeholders". Ao utilizar o <code>-local</code>, a sintaxe correta é <code>--date=format-local:...</code>.</p>
 </div>
 <div class="paragraph">
 <p>A opção <code>--date=default</code> é o formato predefinido e similar ao <code>--date=rfc2822</code> com algumas excessões:</p>
@@ -1477,7 +1477,7 @@ $ git log A...B</pre>
 <p><em>oneline</em></p>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;hash&gt; &lt;linha do título&gt;</pre>
+<pre>&lt;hash&gt; &lt;linha-do-título&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1494,7 +1494,7 @@ Author: &lt;autor&gt;</pre>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;linha do título&gt;</pre>
+<pre>&lt;linha-do-título&gt;</pre>
 </div>
 </div>
 </li>
@@ -1504,17 +1504,17 @@ Author: &lt;autor&gt;</pre>
 <div class="content">
 <pre>commit &lt;hash&gt;
 Author: &lt;autor&gt;
-Date:   &lt;data do autor&gt;</pre>
+Date:   &lt;data-do-autor&gt;</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;linha do título&gt;</pre>
+<pre>&lt;linha-do-título&gt;</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;mensagem completa do commit&gt;</pre>
+<pre>&lt;mensagem-completa-do-commit&gt;</pre>
 </div>
 </div>
 </li>
@@ -1529,12 +1529,12 @@ Commit: &lt;quem fez o commit&gt;</pre>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;linha do título&gt;</pre>
+<pre>&lt;linha-do-título&gt;</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;mensagem completa do commit&gt;</pre>
+<pre>&lt;mensagem-completa-do-commit&gt;</pre>
 </div>
 </div>
 </li>
@@ -1544,19 +1544,19 @@ Commit: &lt;quem fez o commit&gt;</pre>
 <div class="content">
 <pre>commit &lt;hash&gt;
 Author:     &lt;autor&gt;
-AuthorDate: &lt;data do autor&gt;
-Commit:     &lt;quem fez o commit&gt;
-CommitDate: &lt;a data de quem fez o commit&gt;</pre>
+AuthorDate: &lt;data-do-autor&gt;
+Commit:     &lt;quem-fez-o-commit&gt;
+CommitDate: &lt;a-data-de-quem-fez-o-commit&gt;</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;linha do título&gt;</pre>
+<pre>&lt;linha-do-título&gt;</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;mensagem completa do commit&gt;</pre>
+<pre>&lt;mensagem-completa-do-commit&gt;</pre>
 </div>
 </div>
 </li>
@@ -1564,7 +1564,7 @@ CommitDate: &lt;a data de quem fez o commit&gt;</pre>
 <p><em>reference</em></p>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;abbrev hash&gt; (&lt;linha do título&gt;, &lt;data do autor abreviada&gt;)</pre>
+<pre>&lt;abbrev-hash&gt; (&lt;linha-do-título&gt;, &lt;data-do-autor-abreviada&gt;)</pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1577,13 +1577,13 @@ CommitDate: &lt;a data de quem fez o commit&gt;</pre>
 <div class="content">
 <pre>From &lt;hash&gt; &lt;data&gt;
 From: &lt;autor&gt;
-Date: &lt;data do autor&gt;
-Subject: [PATCH] &lt;linha do título&gt;</pre>
+Date: &lt;data-do-autor&gt;
+Subject: [PATCH] &lt;linha-do-título&gt;</pre>
 </div>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>&lt;mensagem completa do commit&gt;</pre>
+<pre>&lt;mensagem-completa-do-commit&gt;</pre>
 </div>
 </div>
 </li>
@@ -1600,9 +1600,9 @@ Subject: [PATCH] &lt;linha do título&gt;</pre>
 </div>
 </li>
 <li>
-<p><em>format:&lt;texto&gt;</em></p>
+<p><em>format:&lt;formato-do-texto&gt;</em></p>
 <div class="paragraph">
-<p>O formato <em>format:&lt;texto&gt;</em> permite especificar quais as informações que você deseja exibir. Funciona um pouco como o formato "printf" com a exceção notável de que você obtém uma nova linha com <em>%n</em> em vez de <em>\n</em>.</p>
+<p>O formato <em>format:&lt;formato-do-texto&gt;</em> permite especificar quais as informações que você deseja exibir. Funciona um pouco como o formato "printf" com a exceção notável de que você obtém uma nova linha com <em>%n</em> em vez de <em>\n</em>.</p>
 </div>
 <div class="paragraph">
 <p>Por exemplo,<em>format:"O autor do %h foi %an, %ar%nO título era &gt;&gt;%s&lt;&lt;%n"</em> exibirá algo como isso:</p>
@@ -1846,6 +1846,12 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <div class="ulist">
 <ul>
 <li>
+<p><em>tags[=&lt;bool-value&gt;]</em>: Em vez de considerar apenas as tags anotadas, considere também as lightweight tags.</p>
+</li>
+<li>
+<p><em>abbrev=&lt;número&gt;</em>: Em vez de usar o número padrão com dígitos hexadecimais (que variam de acordo com a quantidade dos objetos no repositório com um padrão de 7) do nome abreviado do objeto, utilize <code>&lt;número&gt;</code> dígitos ou quantos dígitos forem necessários para formar um nome do objeto que seja único.</p>
+</li>
+<li>
 <p><em>match=&lt;pattern&gt;</em>: Considere apenas as etiquetas que coincidam com o padrão <code>glob(7)</code> informado, excluindo o prefixo "refs/tags/".</p>
 </li>
 <li>
@@ -1941,31 +1947,28 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <dt class="hdlist1"><em>%(trailers[:options])</em></dt>
 <dd>
 <p>exibe os trechos do corpo como interpretado através do <a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>. Os trechos do texto da resposta podem ser seguidas por dois pontos, zero ou mais opções separadas por vírgula: Caso qualquer opção seja usada várias vezes, a última ocorrência ganha.</p>
-<div class="paragraph">
-<p>As opções booleanas aceitam um valor opcional <code>[=&lt;BOOL&gt;]</code>. Todos os valores <code>true</code>, <code>false</code>, <code>on</code>, <code>off</code> etc. são aceitos. Consulte a subseção "booleana" em "EXEMPLOS" em <a href="git-config.html">git-config(1)</a>. Caso uma opção booleana seja fornecida sem valor, ela será ativada.</p>
-</div>
 <div class="ulist">
 <ul>
 <li>
-<p><em>key=&lt;K&gt;</em>: exibe apenas os caracteres de resposta com as chaves que forem definidas. A combinação é feita sem distinção entre maiúsculas e minúsculas, os dois pontos à direita são opcionais. Caso a opção seja utilizada várias vezes, os atributos das linhas coincidentes a qualquer uma das teclas serão exibidas. Esta opção ativa automaticamente a opção <code>only</code>, para que as linhas de bloqueio não sejam ocultadas. Caso não seja o efeito desejado, pode ser desativado com a opção <code>only=false</code>. Por exemplo, <code>%(trailers:key=Revisado-por)</code> exibe as linhas com caracteres de resposta com a chave <code>Revisado-por</code>.</p>
+<p><em>key=&lt;chave&gt;</em>: exibe apenas os caracteres de resposta com as &lt;chaves&gt; que forem definidas. A combinação é feita sem distinção entre maiúsculas e minúsculas, os dois pontos à direita são opcionais. Caso a opção seja utilizada várias vezes, os atributos das linhas coincidentes a qualquer uma das teclas serão exibidas. Esta opção ativa automaticamente a opção <code>only</code>, para que as linhas de bloqueio não sejam ocultadas. Caso não seja o efeito desejado, pode ser desativado com a opção <code>only=false</code>. Por exemplo, <code>%(trailers:key=Revisado-por)</code> exibe as linhas com caracteres de resposta com a chave <code>Revisado-por</code>.</p>
 </li>
 <li>
-<p><em>only[=&lt;BOOL&gt;]</em>: selecione se as linhas não relacionadas à resposta a partir do bloco de resposta, devem ser incluídas ou não.</p>
+<p><em>only[=&lt;bool&gt;]</em>: selecione se as linhas não relacionadas à resposta a partir do bloco de resposta, devem ser incluídas ou não.</p>
 </li>
 <li>
-<p><em>separator=&lt;SEP&gt;</em>: defina um separador para ser inserido entre as linhas da resposta. Quando esta opção não é informada, cada linha de resposta é encerrada com um caractere de alimentação da linha. Uma string SEP pode conter os códigos de formatação literal descritos acima. Para usar a vírgula como separador, deve-se usar <code>%x2C</code>, caso contrário, seria analisado como sendo a próxima opção. Por exemplo, <code>%(trailers:key=Ticket,separator=%x2C )</code> mostra todas as linhas de resposta cuja palavra principal seja "Ticket" separadas por uma vírgula e um espaço.</p>
+<p><em>separator=&lt;sep&gt;</em>: defina um separador para ser inserido entre as linhas da resposta. Quando esta opção não é informada, cada linha de resposta é encerrada com um caractere de alimentação da linha. Uma string &lt;sep&gt; pode conter os códigos de formatação literal descritos acima. Para usar a vírgula como separador, deve-se usar <code>%x2C</code>, caso contrário, seria analisado como sendo a próxima opção. Por exemplo, <code>%(trailers:key=Ticket,separator=%x2C )</code> mostra todas as linhas de resposta cuja palavra principal seja "Ticket" separadas por uma vírgula e um espaço.</p>
 </li>
 <li>
-<p><em>unfold[=&lt;BOOL&gt;]</em>: faça com que se comporte como se a opção <code>--unfold</code> do caracteres de resposta tenha sido passado. Por exemplo, <code>%(trailers:only,unfold=true)</code> desdobra e mostra todas as linhas de resposta.</p>
+<p><em>unfold[=&lt;bool&gt;]</em>: faça com que se comporte como se a opção <code>--unfold</code> do caracteres de resposta tenha sido passado. Por exemplo, <code>%(trailers:only,unfold=true)</code> desdobra e mostra todas as linhas de resposta.</p>
 </li>
 <li>
-<p><em>keyonly[=&lt;BOOL&gt;]</em>: mostra apenas a parte principal da resposta.</p>
+<p><em>keyonly[=&lt;bool&gt;]</em>: mostra apenas a parte principal da resposta.</p>
 </li>
 <li>
-<p><em>valueonly[=&lt;BOOL&gt;]</em>: mostra apenas o valor da parte da resposta.</p>
+<p><em>valueonly[=&lt;bool&gt;]</em>: mostra apenas o valor da parte da resposta.</p>
 </li>
 <li>
-<p><em>key_value_separator=&lt;SEP&gt;</em>: define um separador inserido entre as linhas de resposta. Quando esta opção não é informada, cada par dos valores da palavra principal da resposta é separado por ": ". Caso contrário, ele compartilha a mesma semântica de <em>separator=&lt;SEP&gt;</em> acima.</p>
+<p><em>key_value_separator=&lt;sep&gt;</em>: define um separador inserido entre as linhas de resposta. Quando esta opção não é informada, cada par dos valores da palavra principal da resposta é separado por ": ". Caso contrário, ele compartilha a mesma semântica de <em>separator=&lt;sep&gt;</em> acima.</p>
 </li>
 </ul>
 </div>
@@ -1989,6 +1992,9 @@ Alguns espaços reservados podem depender das outras opções passadas para o mo
 </td>
 </tr>
 </table>
+</div>
+<div class="paragraph">
+<p>As opções booleanas aceitam um valor opcional <code>[=&lt;bool&gt;]</code>. Todos os valores <code>true</code>, <code>false</code>, <code>on</code>, <code>off</code> etc. são aceitos. Consulte a subseção "booleana" em "EXEMPLOS" em <a href="git-config.html">git-config(1)</a>. Caso uma opção booleana seja fornecida sem valor, ela será ativada.</p>
 </div>
 <div class="paragraph">
 <p>Caso adicionemos um <code>+</code> (sinal de adição) após o <em>%</em> de um espaço reservado, um feed de linha será inserido imediatamente antes da expansão, se e somente se o espaço reservado se expandir para uma sequência de caracteres não vazio.</p>
@@ -2055,7 +2061,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dd>
 <p>Suprime a saída diff. Útil para comandos como <code>git show</code> que por predefinição exibem a correção ou para cancelar o efeito de <code>--patch</code>.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc)</dt>
+<dt class="hdlist1">--diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc|remerge|r)</dt>
 <dt class="hdlist1">--no-diff-merges</dt>
 <dd>
 <p>Define o formato diff que será usado para a mesclagem dos commits. A predefinição é `off` a menos que a opção <code>--first-parent</code> esteja em uso, nesse caso a predefinição será <code>first-parent</code>.</p>
@@ -2080,6 +2086,15 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">--diff-merges=separate</dt>
 <dd>
 <p>Faz com que os commits mesclados mostrem a diferença total com relação a cada uma das suas origens. É gerado uma entrada de registro separada e um diff para cada um dos commits relacionados.</p>
+</dd>
+<dt class="hdlist1">--diff-merges=remerge</dt>
+<dt class="hdlist1">--diff-merges=r</dt>
+<dt class="hdlist1">--remerge-diff</dt>
+<dd>
+<p>Com esta opção, os dois principais commits são mesclados novamente para criar um objeto temporário na árvore&#8201;&#8212;&#8201;potencialmente contendo arquivos com os marcadores de conflito e tal. Uma diferença é então mostrada entre essa árvore temporária e o commit real da mesclagem.</p>
+<div class="paragraph">
+<p>A saída é gerada quando esta opção usada está sujeita a alterações, assim como a sua interação com as outras opções (a menos que esteja explicitamente documentada).</p>
+</div>
 </dd>
 <dt class="hdlist1">--diff-merges=combined</dt>
 <dt class="hdlist1">--diff-merges=c</dt>
@@ -2195,7 +2210,7 @@ a opção <code>--format=raw</code>.</p>
 </dd>
 <dt class="hdlist1">--stat[=&lt;largura&gt;[,&lt;largura-do-nome&gt;[,&lt;count&gt;]]]</dt>
 <dd>
-<p>Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima a predefinição retorna para a largura do terminal ou 80 colunas, caso não esteja conectada em um terminal e pode ser substituída por <code>&lt;largura&gt;</code>. A largura da parte do nome do arquivo pode ser limitada, fornecendo outra largura <code>&lt;largura-do-nome&gt;</code> após uma vírgula. A largura da parte do grafo pode ser limitada utilizando <code>--stat-graph-width=&lt;largura&gt;</code> (afeta todos os comandos que geram um grafo estatístico) ou definindo <code>diff.statGraphWidth=&lt;largura&gt;</code> (não afeta o <code>git format-patch</code>). Ao fornecer um terceiro parâmetro <code>&lt;count&gt;</code>, é possível limitar a saída às primeiras linhas <code>&lt;count&gt;</code>, seguidas por <code>...</code> caso haja mais.</p>
+<p>Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima a predefinição retorna para a largura do terminal ou 80 colunas, caso não esteja conectada num terminal e pode ser substituída por <code>&lt;largura&gt;</code>. A largura da parte do nome do arquivo pode ser limitada, fornecendo outra largura <code>&lt;largura-do-nome&gt;</code> após uma vírgula. A largura da parte do grafo pode ser limitada utilizando <code>--stat-graph-width=&lt;largura&gt;</code> (afeta todos os comandos que geram um grafo estatístico) ou definindo <code>diff.statGraphWidth=&lt;largura&gt;</code> (não afeta o <code>git format-patch</code>). Ao fornecer um terceiro parâmetro <code>&lt;count&gt;</code>, é possível limitar a saída às primeiras linhas <code>&lt;count&gt;</code>, seguidas por <code>...</code> caso haja mais.</p>
 <div class="paragraph">
 <p>Estes parâmetros também podem ser ajustados individualmente com <code>--stat-width=&lt;largura&gt;</code>, <code>--stat-name-width=&lt;largura-do-nome&gt;</code> e <code>--stat-count=&lt;count&gt;</code>.</p>
 </div>
@@ -2222,11 +2237,11 @@ a opção <code>--format=raw</code>.</p>
 <dl>
 <dt class="hdlist1"><code>changes</code></dt>
 <dd>
-<p>Calcule os números "dirstat" contando as linhas que foram removidas da fonte ou adicionadas ao destino. Ignora a quantidade de movimentos de código puro em um arquivo. Em outras palavras, reorganizar as linhas em um arquivo não conta tanto quanto as outras alterações. Este é o comportamento predefinido quando nenhum parâmetro for utilizado.</p>
+<p>Calcule os números "dirstat" contando as linhas que foram removidas da fonte ou adicionadas ao destino. Ignora a quantidade de movimentos de código puro num arquivo. Em outras palavras, reorganizar as linhas num arquivo não conta tanto quanto as outras alterações. Este é o comportamento predefinido quando nenhum parâmetro for utilizado.</p>
 </dd>
 <dt class="hdlist1"><code>lines</code></dt>
 <dd>
-<p>Calcule os números "dirstat" fazendo a análise diferencial com base nas linhas regulares e somando as contagens das linhas removidas / adicionadas. (Para os arquivos binários, conte em blocos de 64 bytes, pois os arquivos binários não têm um conceito natural de linhas). Este é um comportamento mais dispendioso do <code>--dirstat</code> do que o comportamento <code>changes</code> (alterações), conta as linhas reorganizadas em um arquivo tanto quanto as outras alterações. A produção resultante é consistente com o que você obtém das outras opções <code>--*stat</code>.</p>
+<p>Calcule os números "dirstat" fazendo a análise diferencial com base nas linhas regulares e somando as contagens das linhas removidas / adicionadas. (Para os arquivos binários, conte em blocos de 64 bytes, pois os arquivos binários não têm um conceito natural de linhas). Este é um comportamento mais dispendioso do <code>--dirstat</code> do que o comportamento <code>changes</code> (alterações), conta as linhas reorganizadas num arquivo tanto quanto as outras alterações. A produção resultante é consistente com o que você obtém das outras opções <code>--*stat</code>.</p>
 </dd>
 <dt class="hdlist1"><code>files</code></dt>
 <dd>
@@ -2234,7 +2249,7 @@ a opção <code>--format=raw</code>.</p>
 </dd>
 <dt class="hdlist1"><code>cumulative</code></dt>
 <dd>
-<p>Conta as alterações em um diretório herdeiro e também para o diretório de origem. Observe que, ao utilizar <code>cumulative</code> (cumulativo), a soma das porcentagens relatadas pode exceder os 100%. O comportamento predefinido (não cumulativo) pode ser especificado com o parâmetro <code>noncumulative</code> (não cumulativo).</p>
+<p>Conta as alterações num diretório herdeiro e também para o diretório de origem. Observe que, ao utilizar <code>cumulative</code> (cumulativo), a soma das porcentagens relatadas pode exceder os 100%. O comportamento predefinido (não cumulativo) pode ser especificado com o parâmetro <code>noncumulative</code> (não cumulativo).</p>
 </dd>
 <dt class="hdlist1">&lt;limite&gt;</dt>
 <dd>
@@ -2315,7 +2330,7 @@ O modo deve ser um dos seguintes:</p>
 </dd>
 <dt class="hdlist1">plain</dt>
 <dd>
-<p>Qualquer linha adicionada em um local e removida em outro será colorida com <em>color.diff.newMoved</em>. Da mesma forma, <em>color.diff.oldMoved</em> será utilizado para as linhas que forem removidas e que foram adicionadas em outro lugar no diff. Este modo seleciona qualquer linha movida, mas não é muito útil em uma revisão para determinar se um bloco do código foi movido sem permutação.</p>
+<p>Qualquer linha adicionada num local e removida em outro será colorida com <em>color.diff.newMoved</em>. Da mesma forma, <em>color.diff.oldMoved</em> será utilizado para as linhas que forem removidas e que foram adicionadas em outro lugar no diff. Este modo seleciona qualquer linha movida, mas não é muito útil numa revisão para determinar se um bloco do código foi movido sem permutação.</p>
 </dd>
 <dt class="hdlist1">blocks</dt>
 <dd>
@@ -2364,7 +2379,7 @@ Estes modos podem ser utilizados como uma lista separada por vírgulas:</p>
 </dd>
 <dt class="hdlist1">allow-indentation-change</dt>
 <dd>
-<p>Ignore inicialmente, qualquer espaço na detecção da ação de mover, em seguida, agrupe os blocos do código que foram movidos apenas em um bloco caso a alteração no espaço seja a mesma em cada linha. Isto é incompatível com os outros modos.</p>
+<p>Ignore inicialmente, qualquer espaço na detecção da ação de mover, em seguida, agrupe os blocos do código que foram movidos apenas num bloco caso a alteração no espaço seja a mesma em cada linha. Isto é incompatível com os outros modos.</p>
 </dd>
 </dl>
 </div>
@@ -2392,7 +2407,7 @@ Estes modos podem ser utilizados como uma lista separada por vírgulas:</p>
 </dd>
 <dt class="hdlist1">porcelain</dt>
 <dd>
-<p>Use um formato especial orientado em linha destinado para a utilização com um script. As execuções adicionadas/removidas/inalteradas são impressas no formato diff unificado tradicional, começando com um caractere <code>+</code>/<code>-</code>/` ` no início da linha e estendendo-se até o final. As novas linhas na entrada são representadas por um til <code>~</code> em uma linha própria.</p>
+<p>Use um formato especial orientado em linha destinado para a utilização com um script. As execuções adicionadas/removidas/inalteradas são impressas no formato diff unificado tradicional, começando com um caractere <code>+</code>/<code>-</code>/` ` no início da linha e estendendo-se até o final. As novas linhas na entrada são representadas por um til <code>~</code> numa linha própria.</p>
 </dd>
 <dt class="hdlist1">none</dt>
 <dd>
@@ -2507,12 +2522,12 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 <p>Além disso, estas letras maiúsculas podem ser transformadas em minusculas para se excluir. <code>--diff-filter=ad</code> exclui os caminhos adicionados e excluídos por exemplo.</p>
 </div>
 <div class="paragraph">
-<p>Observe que nem todas as diferenças diff podem apresentar todos os tipos. Por exemplo, diffs do índice para a árvore de trabalho nunca podem ter entradas adicionadas (porque o conjunto dos caminhos inclusos no diff é limitado pelo que está no índice). Da mesma forma, as entradas copiadas e renomeadas não podem aparecer caso a detecção para estes tipos estiverem desativados.</p>
+<p>Observe que nem todas as diferenças diff podem apresentar todos os tipos. Por exemplo, as entradas copiadas e renomeadas não podem aparecer caso a detecção para estes tipos estiverem desativados.</p>
 </div>
 </dd>
 <dt class="hdlist1">-S&lt;texto&gt;</dt>
 <dd>
-<p>Procure por diferenças que alterem a quantidade de ocorrências da cadeia de caracteres usada (ou seja, adição/exclusão) em um arquivo. Destinado ao uso do scripter.</p>
+<p>Procure por diferenças que alterem a quantidade de ocorrências da cadeia de caracteres usada (ou seja, adição/exclusão) num arquivo. Destinado ao uso do scripter.</p>
 <div class="paragraph">
 <p>Útil durante a produra por um bloco de código exato (como uma "struct"), e quera saber o histórico deste bloco desde que ele surgiu: utilize o recurso de forma iterativa para alimentar o bloco de interesse na pré-imagem de volta <code>-S</code> e continue até você obter a primeira versão do bloco.</p>
 </div>
@@ -2552,7 +2567,7 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 </dd>
 <dt class="hdlist1">--pickaxe-all</dt>
 <dd>
-<p>Quando a opção <code>-S</code> ou <code>-G</code> encontra uma alteração, exiba todas as alterações naquele conjunto de alterações e não apenas nos arquivos que contenham as alterações em uma <code>&lt;texto&gt;</code>.</p>
+<p>Quando a opção <code>-S</code> ou <code>-G</code> encontra uma alteração, exiba todas as alterações naquele conjunto de alterações e não apenas nos arquivos que contenham as alterações numa <code>&lt;texto&gt;</code>.</p>
 </dd>
 <dt class="hdlist1">--pickaxe-regex</dt>
 <dd>
@@ -2925,7 +2940,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </dd>
 <dt class="hdlist1"><code>git log -p -m --first-parent</code></dt>
 <dd>
-<p>EWxibe o histórico, incluindo as alterações dos diffs, porém apenas da perspectiva do &#8220;ramo principal&#8221;, ignorando os commits provenientes da mesclagem das ramificações e exibindo os diffs completos das alterações introduzidas pelas mesclagens. Apenas faz sentido ao seguir uma política estrita de mesclar todos os tópicos das ramificações ao permanecer em um único ramo integrado.</p>
+<p>EWxibe o histórico, incluindo as alterações dos diffs, porém apenas da perspectiva do &#8220;ramo principal&#8221;, ignorando os commits provenientes da mesclagem das ramificações e exibindo os diffs completos das alterações introduzidas pelas mesclagens. Apenas faz sentido ao seguir uma política estrita de mesclar todos os tópicos das ramificações ao permanecer num único ramo integrado.</p>
 </dd>
 <dt class="hdlist1"><code>git log -L '/int main/',/^}/:main.c</code></dt>
 <dd>
@@ -3061,7 +3076,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:49 +0100
+Last updated 2022-04-22 20:33:50 +0200
 </div>
 </div>
 </body>

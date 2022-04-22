@@ -540,7 +540,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Ne rien récupérer du serveur, et à la place afficher les ancêtres des arguments fournis par <code>--negotiation-tip=*</code>, que nous avons en commun avec le serveur.</p>
 <div class="paragraph">
-<p>En interne, ceci est utilisé pour implémenter l&#8217;option <code>push.negotiate</code>, voir <a href="git-config.html">git-config(1)</a>.</p>
+<p>C&#8217;est incompatible avec <code>--recurse-submodules=[yes|on-demand]</code>. En interne, ceci est utilisé pour implémenter l&#8217;option <code>push.negotiate</code>, voir <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 </dd>
 <dt class="hdlist1">--dry-run</dt>
@@ -601,6 +601,10 @@ Cette option permet de passer outre à ce contrôle.</p>
 <dd>
 <p>Par défaut, les étiquettes qui pointent sur des objets téléchargés à partir du dépôt distant sont récupérées et stockées localement. Cette option désactive le suivi automatique des étiquettes. Le comportement par défaut d&#8217;un distant peut être spécifié avec le paramètre remote.&lt;nom&gt;.tagOpt. Voir <a href="git-config.html">git-config(1)</a>.</p>
 </dd>
+<dt class="hdlist1">--refetch</dt>
+<dd>
+<p>Au lieu de négocier avec le serveur pour éviter de transférer les commits et les objets associés qui sont déjà présents localement, cette option récupère tous les objets comme le ferait un nouveau clone. Utilisez cette option pour réappliquer un filtre de clone partiel depuis la configuration ou en utilisant <code>--filter=</code> lorsque la définition du filtre a changé. La maintenance automatique post-récupération effectuera une consolidation des paquets de la base de données des objets pour supprimer tout objet en double.</p>
+</dd>
 <dt class="hdlist1">--refmap=&lt;spécificateur-de-référence&gt;</dt>
 <dd>
 <p>Lors de la récupération des références listées en ligne de commande, utiliser la spécification de référence (qui peut être donnée plusieurs fois) pour mapper les références sur les branches de suivi à distance, au lieu des valeurs des variables de configuration <code>remote.*.fetch</code> pour le dépôt distant. Fournir un <code>&lt;spécificateur-de-référence&gt;</code> vide à l&#8217;option <code>--refmap</code> fait que Git ignore les spécification de référence configurées et se fie entièrement aux spécifications de référence fournies comme arguments de la ligne de commande. Voir la section sur les "Branches de suivi à distance configurées" pour plus de détails.</p>
@@ -612,7 +616,13 @@ Cette option permet de passer outre à ce contrôle.</p>
 </dd>
 <dt class="hdlist1">--recurse-submodules[=yes|on-demand|no]</dt>
 <dd>
-<p>Cette option permet de contrôler si et dans quelles conditions les nouveaux engagements de sous-modules peuplés doivent également être récupérés. Elle peut être utilisée comme une option booléenne pour désactiver complètement la récursivité lorsqu&#8217;elle est définie sur <em>no</em> ou pour visiter récursivement sans condition tous les sous-modules peuplés lorsqu&#8217;elle est définie sur <em>yes</em>, qui est la valeur par défaut lorsque cette option est utilisée sans aucune valeur. Utiliser <em>on-demand</em> pour ne visiter récursivement un sous-module peuplé que lorsque le superprojet récupère un commit qui met à jour la référence du sous-module à un commit qui n&#8217;est pas déjà dans le clone local du sous-module. Par défaut, <em>on-demand</em> est utilisé à moins que <code>fetch.recurseSubmodules</code> ne soit paramétré (voir <a href="git-config.html">git-config(1)</a>).</p>
+<p>Cette option contrôle si et sous quelles conditions les nouveaux commits des sous-modules doivent être récupérés également. Lorsqu&#8217;il parcourt les sous-modules, <code>git fetch</code> essaie toujours de récupérer les sous-modules "modifiés", c&#8217;est-à-dire les sous-modules qui ont des commits référencés par un commit de superprojet récemment récupéré mais qui sont manquants dans le clone de sous-module local. Un sous-module modifié peut être récupéré tant qu&#8217;il est présent localement, par exemple dans <code>$GIT_DIR/modules/</code> (voir <a href="gitsubmodules.html">gitsubmodules(7)</a>) ; si l&#8217;amont ajoute un nouveau sous-module, ce sous-module ne peut pas être récupéré jusqu&#8217;à ce qu&#8217;il soit cloné, par exemple par <code>git submodule update</code>.</p>
+<div class="paragraph">
+<p>Lorsqu&#8217;il est défini sur <em>on-demand</em>, seuls les sous-modules modifiés sont récupérés. Lorsqu&#8217;il a pour valeur <em>yes</em>, tous les sous-modules peuplés sont récupérés et les sous-modules non peuplés et modifiés sont récupérés. Avec la valeur <em>no</em>, les sous-modules ne sont jamais récupérés.</p>
+</div>
+<div class="paragraph">
+<p>Lorsque cette option n&#8217;est pas spécifiée, elle utilise la valeur de <code>fetch.recurseSubmodules</code> si elle est définie (voir <a href="git-config.html">git-config(1)</a>), et prend par défaut la valeur <em>on-demand</em> si elle n&#8217;est pas définie. Lorsque cette option est utilisée sans aucune valeur, elle prend par défaut la valeur <em>yes</em>.</p>
+</div>
 </dd>
 <dt class="hdlist1">-j</dt>
 <dt class="hdlist1">--jobs=&lt;n&gt;</dt>
@@ -917,14 +927,14 @@ Lorsque la branche distante que vous voulez récupérer est connue pour être r�
 <div class="listingblock">
 <div class="content">
 <pre>        [remote "&lt;nom&gt;"]
-                url = &lt;url&gt;
+                url = &lt;URL&gt;
                 pushurl = &lt;url-poussée&gt;
                 push = &lt;spéc-de-réf&gt;
                 fetch = &lt;spéc-de-réf&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Le <code>&lt;url-poussée&gt;</code> n&#8217;est utilisé que pour les poussées. Il est facultatif et sa valeur par défaut est <code>&lt;url&gt;</code>.</p>
+<p>Le <code>&lt;url-poussée&gt;</code> n&#8217;est utilisé que pour les poussées. Il est facultatif et sa valeur par défaut est <code>&lt;URL&gt;</code>.</p>
 </div>
 </div>
 <div class="sect2">
@@ -950,11 +960,11 @@ Lorsque la branche distante que vous voulez récupérer est connue pour être r�
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>        &lt;url&gt;#&lt;tête&gt;</pre>
+<pre>        &lt;URL&gt;#&lt;tête&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>&lt;url&gt;</code> est obligatoire ; <code>#&lt;tête&gt;</code> est facultatif.</p>
+<p><code>&lt;URL&gt;</code> est obligatoire ; <code>#&lt;tête&gt;</code> est facultatif.</p>
 </div>
 <div class="paragraph">
 <p>En fonction de l&#8217;opération, git utilisera l&#8217;un des spécificateurs de référence suivants, si vous n&#8217;en fournissez pas un en ligne de commande. <code>&lt;branche&gt;</code> est le nom de ce fichier dans <code>$GIT_DIR/branches</code> et <code>&lt;tête&gt;</code> vaut par défaut <code>master</code>.</p>
@@ -1228,7 +1238,7 @@ $ git log FETCH_HEAD</pre>
 <h2 id="_bogues">BOGUES</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>L&#8217;utilisation de --recurse-submodules ne permet actuellement d&#8217;obtenir de nouveaux commits que dans les sous-modules déjà vérifiés . Lorsque, par exemple, un nouveau sous-module est ajouté dans les commit en amont qui viennent d&#8217;être récupérés du superprojet, le sous-module lui-même ne peut pas être récupéré, ce qui rend impossible de vérifier ce sous-module plus tard sans avoir à le récupérer à nouveau. Ce problème devrait être corrigé dans une prochaine version de Git.</p>
+<p>L&#8217;utilisation de --recurse-submodules ne permet actuellement d&#8217;obtenir de nouveaux commits que dans les sous-modules qui sont présents par exemple dans \$GIT_DIR/modules/`. Lorsqu&#8217;un nouveau sous-module est ajouté en amont, le sous-module lui-même ne peut pas être récupéré, ce qui rend impossible de vérifier ce sous-module plus tard sans avoir à le récupérer à nouveau. Ce problème devrait être corrigé dans une prochaine version de Git.</p>
 </div>
 </div>
 </div>
@@ -1259,7 +1269,7 @@ $ git log FETCH_HEAD</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:16:58 +0100
+Last updated 2022-04-22 20:33:08 +0200
 </div>
 </div>
 </body>

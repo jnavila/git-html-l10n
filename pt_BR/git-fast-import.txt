@@ -17,7 +17,7 @@ Este programa geralmente não é o que o usuário final deseja executar diretame
 
 O `fast-import` lê um fluxo misto de comandos e dados na entrada padrão e grava um ou mais pacote de arquivos diretamente no repositório atual. Quando um "EOF" é recebido na entrada padrão, a importação rápida grava as referências atualizadas das ramificações e tags, atualizando completamente o repositório atual com os dados importados recentemente.
 
-A estrutura `fast-import` em si pode importar para um repositório vazio (um que já foi inicializado por 'git init') ou atualizar de forma incremental em um repositório preenchido já existente. Caso as importações incrementais sejam ou não compatíveis com determinada fonte estrangeira específica, isso vai depender do programa de front-end utilizado.
+A estrutura `fast-import` em si pode importar para um repositório vazio (um que já foi inicializado por 'git init') ou atualizar de forma incremental num repositório preenchido já existente. Caso as importações incrementais sejam ou não compatíveis com determinada fonte estrangeira específica, isso vai depender do programa de front-end utilizado.
 
 
 OPÇÕES
@@ -102,7 +102,7 @@ DESEMPENHO
 ----------
 O design do `fast-import` permite a importação de grandes projetos com uma quantidade mínima do consumo da memória e do tempo de processamento. Supondo que o front-end seja capaz de acompanhar e alimentar o `fast-import` com um fluxo constante de dados, os tempos de importação para os projetos com mais de 10+ anos de história e com mais de 100.000+ commits individuais geralmente são concluídos entre uma a duas horas com um hardware modesto (~$2.000 USD).
 
-A maioria dos gargalos parece estar no acesso a dados de origem estrangeira (a fonte simplesmente não pode extrair as revisões com a rapidez suficiente) ou no E/S do disco (o `fast-import` grava tão rápido quanto o disco aceitar). As importações serão executadas o mais rapidamente caso os dados de origem sejam armazenados em uma unidade diferente do repositório de destino Git (devido a menor contenção de E/S).
+A maioria dos gargalos parece estar no acesso a dados de origem estrangeira (a fonte simplesmente não pode extrair as revisões com a rapidez suficiente) ou no E/S do disco (o `fast-import` grava tão rápido quanto o disco aceitar). As importações serão executadas o mais rapidamente caso os dados de origem sejam armazenados numa unidade diferente do repositório de destino Git (devido a menor contenção de E/S).
 
 
 CUSTO DE DESENVOLVIMENTO
@@ -116,7 +116,7 @@ Como `git push` ou `git fetch`, as importações manipuladas pelo `fast-import` 
 
 O `fast-import` não bloqueia a ramificação ou "tag refs" que está sendo importando ativamente. Após a importação, durante a sua fase de atualização do "ref", o `fast-import` testa cada "ref" em cada ramo existente para verificar se a atualização será uma atualização de avanço rápido (o commit armazenado no "ref" está contida no novo histórico do commit a ser gravado). Se a atualização não for uma atualização rápida, a importação rápida pulará a atualização "ref" e em vez disso, imprimirá uma mensagem de aviso. A importação rápida sempre tentará atualizar todas as ramificações refs e não para na primeira falha.
 
-As atualizações das ramificações podem ser impostas com a opção `--force`, mas é recomendável que isso seja utilizado apenas em um repositório silencioso. O uso da opção `--force` não é necessário para uma importação inicial para um repositório vazio.
+As atualizações das ramificações podem ser impostas com a opção `--force`, mas é recomendável que isso seja utilizado apenas num repositório silencioso. O uso da opção `--force` não é necessário para uma importação inicial para um repositório vazio.
 
 
 DISCUSSÃO TÉCNICA
@@ -160,9 +160,9 @@ Um valor de exemplo é ``Ter 6 de fevereiro 11:22:18 2007 -0500''. O analisador 
 +
 Algumas cadeias de caracteres (strings) malformadas podem ser aceitas como datas válidas. Em alguns desses casos, o Git ainda poderá obter a data correta da cadeia de caracteres. Também existem alguns tipos de cadeia de caracteres malformados que o Git analisará incorretamente e, no entanto, ainda assim o considerará válido. As sequências que estiverem seriamente malformadas serão rejeitadas.
 +
-Diferentemente do formato `bruto` acima, as informações de compensação do fuso horário/UTC contidas em uma sequência de datas RFC 2822, são utilizadas para ajustar o valor da data para UTC antes do armazenamento. Portanto, é importante que essas informações sejam as mais precisas possíveis.
+Diferentemente do formato `bruto` acima, as informações de compensação do fuso horário/UTC contidas numa sequência de datas RFC 2822, são utilizadas para ajustar o valor da data para UTC antes do armazenamento. Portanto, é importante que essas informações sejam as mais precisas possíveis.
 +
-Caso o material de origem utilize datas no formato RFC 2822, o front-end deve permitir que o `fast-import` manipule a análise a conversão (em vez de tentar fazer isso sozinho), pois o analisador do Git foi bem testado em um ambiente natural.
+Caso o material de origem utilize datas no formato RFC 2822, o front-end deve permitir que o `fast-import` manipule a análise a conversão (em vez de tentar fazer isso sozinho), pois o analisador do Git foi bem testado num ambiente natural.
 +
 Os front-end devem preferir o formato `raw` (bruto) caso o material de origem já utilize o formato UNIX, pode ser atrativo fornecer datas nesse formato, ou o seu formato é facilmente convertível, pois não há ambiguidade na análise.
 
@@ -173,7 +173,7 @@ Este é um formato de brinquedo. A hora e o fuso horário atual deste sistema s�
 +
 Esse formato em particular é informado para implementação curta e pode ser útil para um processo onde se deseja criar um novo commit imediatamente, sem a necessidade de usar um diretório ativo ou `git update-index`.
 +
-Caso o `autor` e o `committer` sejam utilizados de forma separadas em um `commit`, os registro de data e hora podem não coincidir, pois o relógio do sistema será pesquisado duas vezes (uma vez para cada comando). A única maneira de garantir que as informações de identidade do autor e de quem fez o commit tenham o mesmo registro de data e hora é omitir o `autor` (copiando assim do `committer`) ou usar um formato de data diferente de `now`.
+Caso o `autor` e o `committer` sejam utilizados de forma separadas num `commit`, os registro de data e hora podem não coincidir, pois o relógio do sistema será pesquisado duas vezes (uma vez para cada comando). A única maneira de garantir que as informações de identidade do autor e de quem fez o commit tenham o mesmo registro de data e hora é omitir o `autor` (copiando assim do `committer`) ou usar um formato de data diferente de `now`.
 
 Comandos
 ~~~~~~~~
@@ -189,7 +189,7 @@ O fast-import aceita vários comandos para atualizar o repositório atual e cont
 	Redefina uma ramificação existente (ou uma nova ramificação) para determinada revisão. Este comando deve ser utilizado para alterar uma ramificação para uma revisão específica sem fazer um commit nela.
 
 `blob`::
-	Converta os dados brutos do arquivo em uma bolha, para uso futuro em um comando `commit`. Este comando é opcional, não sendo necessário para executar uma importação.
+	Converta os dados brutos do arquivo numa bolha, para uso futuro num comando `commit`. Este comando é opcional, não sendo necessário para executar uma importação.
 
 `alias`::
 	Registre que uma marca se refere a um determinado objeto sem antes criar qualquer objeto novo. O uso de --import-marks e referindo-se a marcas ausentes fará com que a importação rápida falhe de modo que os pseudônimos possam fornecer uma maneira de definir os compromissos podados de outra forma a um valor válido (por exemplo, o ancestral não podado mais próximo).
@@ -236,7 +236,7 @@ Crie ou atualize uma ramificação com um novo commit, registrando uma alteraç�
 	LF?
 ....
 
-onde `<ref>` é o nome do ramo no qual o commit deve ser feito. Normalmente, os nomes dos ramos são prefixados com `refs/heads/` no Git, portanto, a importação do símbolo do ramo CVS `RELENG-1_0` utilizaria `refs/heads/RELENG-1_0` como o valor de `<ref>`. O valor de `<ref>` deve ser um "refname" válido no Git. Como `LF` não é válido em um "refname" do Git, nenhuma sintaxe de aspas ou de escape é compatível aqui.
+onde `<ref>` é o nome do ramo no qual o commit deve ser feito. Normalmente, os nomes dos ramos são prefixados com `refs/heads/` no Git, portanto, a importação do símbolo do ramo CVS `RELENG-1_0` utilizaria `refs/heads/RELENG-1_0` como o valor de `<ref>`. O valor de `<ref>` deve ser um "refname" válido no Git. Como `LF` não é válido num "refname" do Git, nenhuma sintaxe de aspas ou de escape é compatível aqui.
 
 Um comando de marcação `mark` pode aparecer opcionalmente, solicitando ao `fast-import` para salvar uma referência ao commit recém-criado para uso futuro através do front-end (veja abaixo). É muito comum que os front-ends marquem cada commit criado, permitindo assim a criação futura de ramificações a partir de qualquer commit importado.
 
@@ -268,7 +268,7 @@ O comando `from` é utilizado para especificar o commit para inicializar esta ra
 
 Omitir o comando `from` no primeiro commit de uma nova ramificação fará com que o `fast-import` crie este commit sem antecessor. Isso tende a ser desejado apenas para o commit inicial de um projeto. Caso o front-end crie todos os arquivos do zero ao criar uma nova ramificação, um comando `merge` poderá ser utilizado em vez de `from` para iniciar o commit com uma árvore vazia. Omitir o comando `from` em ramificações existentes é geralmente desejado, pois o commit atual neste ramo é automaticamente assumido como o primeiro antecessor do novo commit.
 
-Como `LF` não é válido em uma referência de nome do Git ou em uma expressão SHA-1, nenhuma sintaxe de citação ou escape é compatível com `<commit-ish>`.
+Como `LF` não é válido numa referência de nome do Git ou numa expressão SHA-1, nenhuma sintaxe de citação ou escape é compatível com `<commit-ish>`.
 
 Aqui `<commit-ish>` é qualquer um dos seguintes:
 
@@ -380,7 +380,7 @@ aqui o primeiro `<caminho>` é o local de origem e o segundo `<caminho>` é o de
 
 Um comando `filerename` entra em vigor imediatamente. Depois que o local de origem for renomeado para o destino, quaisquer comandos futuros aplicados ao local de origem criarão novos arquivos e não afetarão o destino da renomeação.
 
-Observe que um `filename` é o mesmo que um` filecopy` seguido de um `filedelete` do local de origem. Há uma pequena vantagem de desempenho em usar o `filename`, mas a vantagem é tão pequena que nunca vale a pena tentar converter um par de exclusão/adição no material de origem em uma renomeação para o `fast-import`. Este comando `filerename` é informado apenas para simplificar os front-ends que já possuam informações de renomeação e não querem se decompor em um `filecopy` seguido de um `filedelete`.
+Observe que um `filename` é o mesmo que um` filecopy` seguido de um `filedelete` do local de origem. Há uma pequena vantagem de desempenho em usar o `filename`, mas a vantagem é tão pequena que nunca vale a pena tentar converter um par de exclusão/adição no material de origem numa renomeação para o `fast-import`. Este comando `filerename` é informado apenas para simplificar os front-ends que já possuam informações de renomeação e não querem se decompor num `filecopy` seguido de um `filedelete`.
 
 `filedeleteall`
 ^^^^^^^^^^^^^^^
@@ -396,7 +396,7 @@ A emissão de um arquivo ʻfiledeleteall` seguido dos comandos necessários `fil
 
 `notemodify`
 ^^^^^^^^^^^^
-Incluído em um comando `commit` `<notes_ref>` para adicionar uma nova nota anotando um `<commit-ish>` ou alterar este conteúdo da anotação. Internamente, é semelhante ao arquivo modificado 100644 no caminho `<commit-ish>` (talvez dividido em subdiretórios). Não é aconselhável usar outros comandos para escrever na árvore `<notes_ref>`, exceto `filedeleteall` para excluir todas as anotações existentes nessa árvore. Este comando possui dois meios diferentes de especificar o conteúdo da anotação.
+Incluído num comando `commit` `<notes_ref>` para adicionar uma nova nota anotando um `<commit-ish>` ou alterar este conteúdo da anotação. Internamente, é semelhante ao arquivo modificado 100644 no caminho `<commit-ish>` (talvez dividido em subdiretórios). Não é aconselhável usar outros comandos para escrever na árvore `<notes_ref>`, exceto `filedeleteall` para excluir todas as anotações existentes nessa árvore. Este comando possui dois meios diferentes de especificar o conteúdo da anotação.
 
 Formato de dados externos::
 	O conteúdo dos dados para a anotação já foi informado por um comando `blob` anterior. O front-end só precisa conectá-lo ao commit que deve ser anotado.
@@ -421,7 +421,7 @@ Nos dois formatos, `<commit-ish>` é qualquer uma das expressões de especifica�
 
 `mark`
 ~~~~~~
-Organiza `fast-import` para salvar uma referência ao objeto atual, permitindo que o front-end recupere este objeto em um momento futuro, sem conhecer o seu SHA-1. Aqui, o objeto atual é o comando de criação do objeto no qual o comando `mark` aparece. Pode ser `commit`, `tag` e `blob`, mas `commit` é o uso mais comum.
+Organiza `fast-import` para salvar uma referência ao objeto atual, permitindo que o front-end recupere este objeto num momento futuro, sem conhecer o seu SHA-1. Aqui, o objeto atual é o comando de criação do objeto no qual o comando `mark` aparece. Pode ser `commit`, `tag` e `blob`, mas `commit` é o uso mais comum.
 
 ....
 	'mark' SP ':' <idnum> LF
@@ -458,7 +458,7 @@ onde `<nome>` é o nome da tag a ser criada.
 
 Os nomes das tags são prefixados automaticamente com `refs/tags/` quando armazenados no Git, portanto, a importação do símbolo do ramo CVS `RELENG-1_0-FINAL` usaria apenas `RELENG-1_0-FINAL` para `<nome>` e o `fast-import` irá escrever um `ref` correspondente como `refs/tags/RELENG-1_0-FINAL`.
 
-O valor de `<nome>` deve ser um `refname` válido no Git e portanto, pode conter barras. Como `LF` não é válido em um "refname" do Git, nenhuma sintaxe de aspas ou de escape é compatível aqui.
+O valor de `<nome>` deve ser um `refname` válido no Git e portanto, pode conter barras. Como `LF` não é válido num "refname" do Git, nenhuma sintaxe de aspas ou de escape é compatível aqui.
 
 O comando `from` é o mesmo que no comando `commit`; veja acima para detalhes.
 
@@ -532,7 +532,7 @@ Formato delimitado::
 	LF?
 ....
 +
-onde `<delim>` é a cadeia de caracteres escolhida para a delimitação. A cadeia de caracteres `<delim>` não deve aparecer em uma linha sozinha dentro de `<raw>`, pois o `fast-import` pensará que os dados terminam mais cedo do que realmente terminam. O `LF` imediatamente após `<raw>` faz parte de `<raw>`. Essa é uma das limitações do formato delimitado, é impossível fornecer um bloco de dados que não tenha um `LF` como o seu último byte.
+onde `<delim>` é a cadeia de caracteres escolhida para a delimitação. A cadeia de caracteres `<delim>` não deve aparecer numa linha sozinha dentro de `<raw>`, pois o `fast-import` pensará que os dados terminam mais cedo do que realmente terminam. O `LF` imediatamente após `<raw>` faz parte de `<raw>`. Essa é uma das limitações do formato delimitado, é impossível fornecer um bloco de dados que não tenha um `LF` como o seu último byte.
 +
 O `LF` após `<delim> LF` é opcional (costumava ser necessário).
 
@@ -596,7 +596,7 @@ Consulte ``RESPOSTAS AOS COMANDOS'' abaixo para obter detalhes sobre como ler es
 
 `cat-blob`
 ~~~~~~~~~~
-Faz com que o `fast-import` imprima uma bolha em um descritor do arquivo previamente organizado com o argumento `--cat-blob-fd`. Caso contrário, o comando não tem impacto na importação atual; o seu principal objetivo é recuperar as bolhas que podem estar na memória do `fast-import`, mas não acessíveis no repositório de destino.
+Faz com que o `fast-import` imprima uma bolha num descritor do arquivo previamente organizado com o argumento `--cat-blob-fd`. Caso contrário, o comando não tem impacto na importação atual; o seu principal objetivo é recuperar as bolhas que podem estar na memória do `fast-import`, mas não acessíveis no repositório de destino.
 
 ....
 	'cat-blob' SP <dataref> LF
@@ -617,7 +617,7 @@ Consulte ``RESPOSTAS AOS COMANDOS'' abaixo para obter detalhes sobre como ler es
 
 `ls`
 ~~~~
-Imprime as informações sobre o objeto em um caminho para um descritor do arquivo organizado anteriormente com a opção `--cat-blob-fd`. Permite a impressão de uma bolha a partir do commit ativo (com `cat-blob`) ou copiando uma bolha ou árvore de um commit anterior para uso no atual (com `filemodify`).
+Imprime as informações sobre o objeto num caminho para um descritor do arquivo organizado anteriormente com a opção `--cat-blob-fd`. Permite a impressão de uma bolha a partir do commit ativo (com `cat-blob`) ou copiando uma bolha ou árvore de um commit anterior para uso no atual (com `filemodify`).
 
 O comando `ls` também pode ser usado onde uma diretiva `filemodify` possa aparecer, permitindo que ela seja usada no meio de um commit.
 
@@ -683,7 +683,7 @@ notes::
 	Exija que a estrutura seja compatível com o subcomando `notemodify` (N) com o comando `commit`. As versões do `fast-import` que não sejam compatíveis com as anotações serão encerradas com uma mensagem.
 
 done::
-	Indique um erro caso o fluxo termine sem um comando 'done'. Sem este recurso, os erros que fazem com que o front-end termine abruptamente em um ponto conveniente no fluxo podem não ser detectados. Isso pode ocorrer, por exemplo, caso um front end de importação morra no meio da operação sem emitir um `SIGTERM` ou um `SIGKILL` em sua instância subordinada do `git fast-import`.
+	Indique um erro caso o fluxo termine snum comando 'done'. Sem este recurso, os erros que fazem com que o front-end termine abruptamente num ponto conveniente no fluxo podem não ser detectados. Isso pode ocorrer, por exemplo, caso um front end de importação morra no meio da operação sem emitir um `SIGTERM` ou um `SIGKILL` em sua instância subordinada do `git fast-import`.
 
 `option`
 ~~~~~~~~
@@ -864,19 +864,19 @@ Há uma quantidade de fatores que afetam a quantidade de memória consumida pelo
 
 por objeto
 ~~~~~~~~~~
-O `fast-import` mantém uma estrutura na memória para todos os objetos gravados nesta execução. Em um sistema de 32 bits a estrutura é de 32 bytes; em um sistema de 64 bits a estrutura é de 40 bytes (devido aos tamanhos maiores do ponteiro). Os objetos na tabela não são desalocados até que o `fast-import` termine. A importação de 2 milhões de objetos em um sistema de 32 bits exigirá aproximadamente 64 MiB de memória.
+O `fast-import` mantém uma estrutura na memória para todos os objetos gravados nesta execução. Em um sistema de 32 bits a estrutura é de 32 bytes; num sistema de 64 bits a estrutura é de 40 bytes (devido aos tamanhos maiores do ponteiro). Os objetos na tabela não são desalocados até que o `fast-import` termine. A importação de 2 milhões de objetos num sistema de 32 bits exigirá aproximadamente 64 MiB de memória.
 
 A tabela de objetos é na verdade uma "hashtable" (tabela hash) codificada no nome do objeto com o SHA-1. Essa configuração de armazenamento permite que o `fast-import` reutilize um objeto existente ou já gravado e evite gravar duplicatas no saída do arquivo de pacote. Em uma importação, as bolhas duplicadas são muito comuns, geralmente devido a mesclagem do ramo na origem.
 
 por marcação
 ~~~~~~~~~~~~
-As marcações são armazenadas em uma origem esparsa, utilizando 1 ponteiro (4 bytes ou 8 bytes, dependendo do tamanho do ponteiro) por marcação. Embora a origem seja escassa, os front-end ainda são fortemente incentivados a usar marcas entre 1 e n, onde n é a quantidade total de marcações necessárias para essa importação.
+As marcações são armazenadas numa origem esparsa, utilizando 1 ponteiro (4 bytes ou 8 bytes, dependendo do tamanho do ponteiro) por marcação. Embora a origem seja escassa, os front-end ainda são fortemente incentivados a usar marcas entre 1 e n, onde n é a quantidade total de marcações necessárias para essa importação.
 
 por ramo
 ~~~~~~~~
 Os ramos são classificados como ativos e inativos. O uso de memória das duas classes é significativamente diferente.
 
-As ramificações inativas são armazenadas em uma estrutura que usa entre 96 ou 120 bytes (sistemas de 32 ou 64 bits, respectivamente), mais o comprimento do nome do ramo (normalmente com menos de 200 bytes), por ramificação. O `fast-import` processa facilmente até 10.000 ramificações inativas com menos de 2 MiB de memória.
+As ramificações inativas são armazenadas numa estrutura que usa entre 96 ou 120 bytes (sistemas de 32 ou 64 bits, respectivamente), mais o comprimento do nome do ramo (normalmente com menos de 200 bytes), por ramificação. O `fast-import` processa facilmente até 10.000 ramificações inativas com menos de 2 MiB de memória.
 
 As ramificações ativas têm a mesma sobrecarga das ramificações inativas, mas também contêm as cópias de todas as árvores que foram modificadas recentemente nesta ramificação. Se a subárvore `include` não tenha sido modificada, desde o momento que a ramificação se tornou ativa, o seu conteúdo não será carregado na memória, mas o seu conteúdo será carregado na memória caso a subárvore `src` tenha sido modificada por um commit.
 
@@ -890,9 +890,9 @@ As árvores (também conhecidas como diretórios) usam apenas 12 bytes de memór
 
 por entrada de arquivo ativa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Os arquivos (e os ponteiros para as subárvores) nas árvores ativas requerem 52 ou 64 bytes (plataformas de 32/64 bits) por entrada. Para economizar espaço, os nomes dos arquivos e as árvores são agrupados em uma tabela de cadeias comuns, permitindo que o nome do arquivo ``Makefile'' utilize apenas 16 bytes (depois de incluir a sobrecarga do cabeçalho da cadeia), não importa quantas vezes isso ocorra no projeto.
+Os arquivos (e os ponteiros para as subárvores) nas árvores ativas requerem 52 ou 64 bytes (plataformas de 32/64 bits) por entrada. Para economizar espaço, os nomes dos arquivos e as árvores são agrupados numa tabela de cadeias comuns, permitindo que o nome do arquivo ``Makefile'' utilize apenas 16 bytes (após incluir a sobrecarga do cabeçalho da cadeia), não importa quantas vezes isso ocorra no projeto.
 
-O LRU do ramo ativo, quando associado ao conjunto da cadeia de caracteres do nome do arquivo e ao carregamento lento das subárvores, permite que a eficiência da importação rápida dos projetos com mais de 2.000 ramificações e mais de 45.114 arquivos em um espaço de memória muito limitado (menos de 2,7 MiB por ramo ativo).
+O LRU do ramo ativo, quando associado ao conjunto da cadeia de caracteres do nome do arquivo e ao carregamento lento das subárvores, permite que a eficiência da importação rápida dos projetos com mais de 2.000 ramificações e mais de 45.114 arquivos num espaço de memória muito limitado (menos de 2,7 MiB por ramo ativo).
 
 SINAIS
 ------

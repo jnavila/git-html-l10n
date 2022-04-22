@@ -21,12 +21,12 @@
 	Aprofunde ou diminua o histórico de um repositório raso para excluir os commits acessíveis vindos de uma determinada tag ou ramificação remota. Esta opção pode ser utilizada várias vezes.
 
 --unshallow::
-	Caso o repositório de origem esteja completo, converta um repositório raso em um completo, removendo todas as limitações impostas pelos repositórios rasos.
+	Caso o repositório de origem esteja completo, converta um repositório raso num completo, removendo todas as limitações impostas pelos repositórios rasos.
 +
 Caso o repositório de origem seja superficial, busque o máximo possível para que o repositório atual tenha o mesmo histórico que o repositório de origem.
 
 --update-shallow::
-	É predefinido que durante a captura em um repositório superficial, o `git fetch` recuse os refs que exijam a atualização do `.git/shallow`. Esta opção atualiza o `.git/shallow` e aceita tais refs.
+	É predefinido que durante a captura num repositório superficial, o `git fetch` recuse os refs que exijam a atualização do `.git/shallow`. Esta opção atualiza o `.git/shallow` e aceita tais refs.
 
 --negotiation-tip=<commit|glob>::
 	É predefinido que o Git relatará ao servidor os commits acessíveis de todos as refs locais para que localize os commits comuns na tentativa de reduzir o tamanho do pacote que será recebido. Caso seja utilizado, o Git relatará apenas os commits acessíveis a partir das dicas informadas. Útil para acelerar o processo "fetch" quando o usuário sabe qual a ref local que provavelmente, haverá commits em comum com uma ref upstream que está sendo capturada.
@@ -40,7 +40,7 @@ Consulte também a variável de configuração `fetch.negotiationAlgorithm` e `p
 --negotiate-only::
 	Não busque nada do servidor e imprima os argumentos `--negotiation-tip=*` fornecidos anteriormente e que nós temos em comum com o servidor.
 +
-Internamente, isto é utilizado para implementar a opção `push.negotiate`, consulte linkgit:git-config[1].
+Isso é compatível com a opção `--recurse-submodules=[yes|on-demand]`. Internamente, isto é utilizado para implementar a opção `push.negotiate`, consulte linkgit:git-config[1].
 
 --dry-run::
 	Exiba apenas o que seria feito, sem fazer quaisquer alterações.
@@ -102,6 +102,11 @@ endif::git-pull[]
 --no-tags::
 	É predefinido que as tags que apontem para os objetos baixados do repositório remoto sejam capturados e armazenadas localmente. Esta opção desativa essa tag automática a seguir. O comportamento remoto predefinido pode ser especificado com a configuração remote.<nome>.tagOpt. Consulte linkgit:git-config[1].
 
+ifndef::git-pull[]
+--refetch::
+	Instead of negotiating with the server to avoid transferring commits and associated objects that are already present locally, this option fetches all objects as a fresh clone would. Use this to reapply a partial clone filter from configuration or using `--filter=` when the filter definition has changed. Automatic post-fetch maintenance will perform object database pack consolidation to remove any duplicate objects.
+endif::git-pull[]
+
 --refmap=<refspec>::
 	Ao capturar as refs listadas na linha de comando, utilize o "refspec" informado (pode ser utilizado mais de uma vez) para mapear os refs para as ramificações rastreadas remotamente em vez dos valores das variáveis da configuração `remote.*.fetch` para o repositório remoto. Informe um `<refspec>` vazio à opção `--refmap` faz com que o Git ignore os "refspecs" configurados e confie inteiramente nos "refspecs" informados como os argumentos da linha de comando. Para mais detalhes consulte a seção "Configuração dos Ramos Monitorados Remotamente".
 
@@ -111,7 +116,11 @@ endif::git-pull[]
 
 ifndef::git-pull[]
 --recurse-submodules[=yes|on-demand|no]::
-	Essa opção controla se e sob quais condições os novos commits dos submódulos preenchidos também devem ser capturadas. Pode ser utilizado como uma opção booleana para desativar completamente a recursão quando definido como 'no' ou para recursar incondicionalmente em todos os sub-módulos preenchidos quando definido como 'sim', que é a predefinição quando esta opção é utilizada sem qualquer valor. Utilize 'on demand' para re-examinar apenas em um submódulo preenchido quando o superprojeto recuperar um commit que atualize a referência do submódulo para um commit que ainda não esteja no clone do submódulo local. É predefinido que 'on demand' seja utilizado, a menos que `fetch.recurseSubmodules` seja definido (consulte linkgit:git-config[1]).
+	This option controls if and under what conditions new commits of submodules should be fetched too. When recursing through submodules, `git fetch` always attempts to fetch "changed" submodules, that is, a submodule that has commits that are referenced by a newly fetched superproject commit but are missing in the local submodule clone. A changed submodule can be fetched as long as it is present locally e.g. in `$GIT_DIR/modules/` (see linkgit:gitsubmodules[7]); if the upstream adds a new submodule, that submodule cannot be fetched until it is cloned e.g. by `git submodule update`.
++
+When set to 'on-demand', only changed submodules are fetched. When set to 'yes', all populated submodules are fetched and submodules that are both unpopulated and changed are fetched. When set to 'no', submodules are never fetched.
++
+When unspecified, this uses the value of `fetch.recurseSubmodules` if it is set (see linkgit:git-config[1]), defaulting to 'on-demand' if unset. When this option is used without any value, it defaults to 'yes'.
 endif::git-pull[]
 
 -j::
@@ -156,7 +165,7 @@ ifndef::git-pull[]
 endif::git-pull[]
 
 --progress::
-	É predefinido que a condição geral do progresso seja relatada no fluxo de erros quando estiver conectado em um terminal, a menos que `-q` seja utilizado. Esta opção impõem a condição geral do progresso, mesmo que o fluxo de erro predefinido não seja direcionado para um terminal.
+	É predefinido que a condição geral do progresso seja relatada no fluxo de erros quando estiver conectado num terminal, a menos que `-q` seja utilizado. Esta opção impõem a condição geral do progresso, mesmo que o fluxo de erro predefinido não seja direcionado para um terminal.
 
 -o <opção>::
 --server-option=<opção>::

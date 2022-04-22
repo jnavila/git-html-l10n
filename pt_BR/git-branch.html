@@ -459,7 +459,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
         [--points-at &lt;objeto&gt;] [--format=&lt;formato&gt;]
         [(-r | --remotes) | (-a | --all)]
         [--list] [&lt;padrão&gt;&#8230;&#8203;]
-<em>git branch</em> [--track | --no-track] [-f] &lt;nome-do-ramo&gt; [&lt;ponto-de-partida&gt;]
+<em>git branch</em> [--track[=(direct|inherit)] | --no-track] [-f]
+        [--recurse-submodules] &lt;nome-do-ramo&gt; [&lt;ponto-de-partida&gt;]
 <em>git branch</em> (--set-upstream-to=&lt;upstream&gt; | -u &lt;upstream&gt;) [&lt;nome-do-ramo&gt;]
 <em>git branch</em> --unset-upstream [&lt;nome-do-ramo&gt;]
 <em>git branch</em> (-m | -M) [&lt;ramo-antigo&gt;] &lt;nome-do-ramo&gt;
@@ -491,7 +492,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Observe que isso criará a nova ramificação mas não mudará a árvore de trabalho para ela; para alternar para a nova ramificação utilize "git switch &lt;novo-ramo&gt;".</p>
 </div>
 <div class="paragraph">
-<p>Quando uma ramificação local é iniciada em uma ramificação remotamente monitorada, o Git define a ramificação (especificamente as entradas da configuração <code>branch.&lt;nome&gt;.remote</code> e <code>branch.&lt;nome&gt;.merge</code>) para que o comando <em>git pull</em> mescle adequadamente a partir do ramo monitorado remotamente. Este comportamento pode ser alterado através da variável de configuração global <code>branch.autoSetupMerge</code>. Esta configuração pode ser substituída utilizando as opções <code>--track</code> e <code>--no-track</code>, podendo ser alterada posteriormente utilizando o comando <code>git branch --set-upstream-to</code>.</p>
+<p>Quando uma ramificação local é iniciada numa ramificação remotamente monitorada, o Git define a ramificação (especificamente as entradas da configuração <code>branch.&lt;nome&gt;.remote</code> e <code>branch.&lt;nome&gt;.merge</code>) para que o comando <em>git pull</em> mescle adequadamente a partir do ramo monitorado remotamente. Este comportamento pode ser alterado através da variável de configuração global <code>branch.autoSetupMerge</code>. Esta configuração pode ser substituída utilizando as opções <code>--track</code> e <code>--no-track</code>, podendo ser alterada posteriormente utilizando o comando <code>git branch --set-upstream-to</code>.</p>
 </div>
 <div class="paragraph">
 <p>Com uma opção <code>-m</code> ou <code>-M</code>, o ramo antigo <code>&lt;ramo-antigo&gt;</code> será renomeado para o novo ramo <code>&lt;novo-ramo&gt;</code>. Caso o <code>&lt;ramo-antigo&gt;</code> tenha um reflog correspondente, ele será renomeado para coincidir com o <code>&lt;novo-ramo&gt;</code>, uma entrada de reflog será criada para lembrar da renomeação do ramo. Caso <code>&lt;novo-ramo&gt;</code> exista, -M deve ser utilizado para impor que a renomeação aconteça.</p>
@@ -608,16 +609,29 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Exibe o sha1 completo na saída da listagem em vez de abreviá-los.</p>
 </dd>
 <dt class="hdlist1">-t</dt>
-<dt class="hdlist1">--track</dt>
+<dt class="hdlist1">--track[=(direct|inherit)]</dt>
 <dd>
-<p>Ao criar uma nova ramificação, configure as entradas da configuração <code>branch.&lt;nome&gt;.remote</code> e <code>branch.&lt;nome&gt;.merge</code> para marcar a ramificação do ponto do início como "upstream" partindo da nova ramificação. Esta configuração instruirá o git a exibir o relacionamento entre as duas ramificações com o <code>git status</code> e com o <code>git branch -v</code>. Além disso, ele direciona o <code>git pull</code> sem argumentos para extrair do "upstream" quando o novo ramo for retirado.</p>
+<p>Ao criar uma nova ramificação, configure as entradas da configuração <code>branch.&lt;nome&gt;.remote</code> e <code>branch.&lt;nome&gt;.merge</code> para definir a configuração do monitoramento "upstream" partindo da nova ramificação. Esta configuração instruirá o git a exibir o relacionamento entre as duas ramificações com o <code>git status</code> e com o <code>git branch -v</code>. Além disso, ele direciona o <code>git pull</code> sem argumentos para extrair do "upstream" quando o novo ramo for retirado.</p>
 <div class="paragraph">
-<p>Este é o comportamento predefinido quando o ponto inicial for uma ramificação rastreada remotamente. Defina a variável de configuração <code>branch.autoSetupMerge</code> como <code>false</code> caso queira que o <code>git switch</code>, <code>git checkout</code> e o <code>git branch</code> sempre se comportem como se a opção <code>--no-track</code> fosse utilizada. Defina-o como <code>always</code> caso queira que este comportamento quando o ponto de partida for uma ramificação local ou rastreada remotamente.</p>
+<p>O exato ramo "upstream" é escolhido dependendo do argumento opcional: <code>-t</code>, <code>--track</code> ou <code>--track=direct</code>, significa usar o próprio ramo do ponto inicial como o "upstream"; já a opção <code>--track=inherit</code> significa copiar a configuração "upstream" da ramificação do ponto inicial.</p>
+</div>
+<div class="paragraph">
+<p>A opção <code>--track=direct</code> é a opção predefinida quando o ponto inicial for uma ramificação rastreada remotamente. Defina a variável de configuração <code>branch.autoSetupMerge</code> como <code>false</code> caso queira que o <code>git switch</code>, <code>git checkout</code> e o <code>git branch</code> sempre se comportem como se a opção <code>--no-track</code> fosse utilizada. Defina-o como <code>always</code> caso queira que este comportamento quando o ponto de partida for uma ramificação local ou rastreada remotamente. Defina-o como <code>inherit</code> caso queira copiar a configuração de rastreamento a partir do ponto da ramificação.</p>
+</div>
+<div class="paragraph">
+<p>Consulte <a href="git-pull.html">git-pull(1)</a> e <a href="git-config.html">git-config(1)</a> para uma discussão adicional sobre como as opções <code>branch.&lt;nome&gt;.remote</code> e <code>branch.&lt;nome&gt;.merge</code> são utilizadas.</p>
 </div>
 </dd>
 <dt class="hdlist1">--no-track</dt>
 <dd>
-<p>Não configure o "upstream", ainda que a variável de configuração <code>branch.autoSetupMerge</code> seja verdadeira.</p>
+<p>Não configure o "upstream", ainda que a variável de configuração <code>branch.autoSetupMerge</code> seja definida.</p>
+</dd>
+<dt class="hdlist1">--recurse-submodules</dt>
+<dd>
+<p>ESSA OPÇÃO É EXPERIMENTAL! Faz com que o comando atual se repita no submódulos caso <code>submodule.propagateBranches</code> esteja ativado. Consulte <code>submodule.propagateBranches</code> em <a href="git-config.html">git-config(1)</a>. No momento, há apenas suporte para a criação do ramo.</p>
+<div class="paragraph">
+<p>Quando usado na criação dos ramos, um novo ramo &lt;nome-do-ramo&gt; será criado no super projeto (superproject) e todos os submódulos no super projeto &lt;ponto-de-início&gt;. Nos submódulos, o ramo irá apontar para o commit do submódulo no &lt;ponto-de-inicio&gt; do super projeto, porém a informação do rastreamento do ramo será configurado com base no submódulo&#8217;s dos ramos locais e remotos por exemplo. O ramo <code>git --recurse-submodules topic origin/main</code> irá criar o ramo do submódulo "topic" que aponta para o commit do submódulo no super projeto "origin/main", contudo rastreia o submódulos "origin/main".</p>
+</div>
 </dd>
 <dt class="hdlist1">--set-upstream</dt>
 <dd>
@@ -710,7 +724,7 @@ $ git switch my2.6.14</pre>
 <div class="colist arabic">
 <ol>
 <li>
-<p>Esta etapa e a próxima poderiam ser combinadas em uma única etapa com "checkout -b my2.6.14 v2.6.14".</p>
+<p>Esta etapa e a próxima poderiam ser combinadas numa única etapa com "checkout -b my2.6.14 v2.6.14".</p>
 </li>
 </ol>
 </div>
@@ -814,7 +828,7 @@ $ git for-each-ref 'refs/remotes/&lt;remoto&gt;/&lt;padrão&gt;'    <b class="co
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:48 +0100
+Last updated 2022-04-22 20:33:49 +0200
 </div>
 </div>
 </body>

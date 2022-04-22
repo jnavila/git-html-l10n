@@ -455,6 +455,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
         [--no-verify] [-s &lt;estratégia&gt;] [-X &lt;opção-da-estratégia&gt;] [-S[&lt;keyid&gt;]]
         [--[no-]allow-unrelated-histories]
         [--[no-]rerere-autoupdate] [-m &lt;msg&gt;] [-F &lt;arquivo&gt;] [&lt;commit&gt;&#8230;&#8203;]
+        [--into-name &lt;ramo&gt;] [&lt;commit&gt;&#8230;&#8203;]
 <em>git merge</em> (--continue | --abort | --quit)</pre>
 </div>
 </div>
@@ -476,7 +477,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Em seguida, <code>git merge topic</code> repetirá as alterações feitas no ramo <code>topic</code> uma vez que ele divergiu de <code>master</code> (ou seja,<code>E</code>) até que o seu commit atual (<code>C</code>) no topo do <code>master</code> registrando o resultado em um novo commit junto com os nomes de dois commits relacionados em uma mensagem log vindo do usuário descrevendo as alterações.</p>
+<p>Em seguida, <code>git merge topic</code> repetirá as alterações feitas no ramo <code>topic</code> uma vez que ele divergiu de <code>master</code> (ou seja,<code>E</code>) até que o seu commit atual (<code>C</code>) no topo do <code>master</code> registrando o resultado num novo commit junto com os nomes de dois commits relacionados numa mensagem log vindo do usuário descrevendo as alterações.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -491,7 +492,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p><strong>Aviso</strong>: É desencorajado executar o comando <em>git merge</em> com alterações
 não-triviais dos commits que não foram feitos é desencorajado: enquanto
-possível, pode deixá-lo em uma condição difícil de sair no caso de haver um conflito.</p>
+possível, pode deixá-lo numa condição difícil de sair no caso de haver um conflito.</p>
 </div>
 <div class="paragraph">
 <p>A terceira sintaxe ("<code>git merge --continue</code>") só pode ser executada depois que a mesclagem apresentar conflitos.</p>
@@ -585,9 +586,9 @@ A opção <code>--edit</code> (ou <code>-e</code>) ainda é útil caso esteja en
 <p>Com a opção <code>--squash</code>, a opção <code>--commit</code> não é permitida e irá falhar.</p>
 </div>
 </dd>
-<dt class="hdlist1">--no-verify</dt>
+<dt class="hdlist1">--[no-]verify</dt>
 <dd>
-<p>Esta opção ignora os ganchos dos commits anteriores e os ganchos das mensagens do commit. Consulte também <a href="githooks.html">githooks(5)</a>.</p>
+<p>É predefinido que os ganchos dos commits anteriores e os ganchos das mensagens do commit sejam executados. Quando a opção <code>--no-verify</code> for usada, ela será ignorada. Consulte também <a href="githooks.html">githooks(5)</a>.</p>
 </dd>
 <dt class="hdlist1">-s &lt;estratégia&gt;</dt>
 <dt class="hdlist1">--strategy=&lt;estratégia&gt;</dt>
@@ -642,6 +643,10 @@ A opção <code>--edit</code> (ou <code>-e</code>) ainda é útil caso esteja en
 <div class="paragraph">
 <p>O comando <em>git fmt-merge-msg</em> pode ser utilizado para informar uma boa predefinição para as invocações automatizadas do comando <em>git merge</em>. A mensagem automatizada pode incluir a descrição da ramificação.</p>
 </div>
+</dd>
+<dt class="hdlist1">--into-name &lt;ramo&gt;</dt>
+<dd>
+<p>Prepare a mensagem predefinida da mesclagem como se fosse uma mesclagem para a ramificação <code>&lt;ramificação&gt;</code> em vez do nome da ramificação real para onde a mesclagem for feita.</p>
 </dd>
 <dt class="hdlist1">-F &lt;arquivo&gt;</dt>
 <dt class="hdlist1">--file=&lt;arquivo&gt;</dt>
@@ -722,7 +727,7 @@ A opção <code>--edit</code> (ou <code>-e</code>) ainda é útil caso esteja en
 <h2 id="_mesclagem_real">MESCLAGEM REAL</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Exceto em uma mesclagem de avanço rápido (veja acima), as ramificações que serão mescladas devem ser vinculadas através de uma consolidação da mesclagem que tenha ambas como as suas origens.</p>
+<p>Exceto numa mesclagem de avanço rápido (veja acima), as ramificações que serão mescladas devem ser vinculadas através de uma consolidação da mesclagem que tenha ambas como as suas origens.</p>
 </div>
 <div class="paragraph">
 <p>Uma versão mesclada que reconcilia as alterações de todas as ramificações que serão mescladas, o commit é feito e o seu <code>HEAD</code>, índice e a árvore de trabalho são atualizados para ela. É possível ter alterações na árvore de trabalho, desde que não se sobreponham; a atualização irá preservá-las.</p>
@@ -787,7 +792,8 @@ git merge --ff-only v1.2.3</pre>
 <div class="listingblock">
 <div class="content">
 <pre>Aqui estão as linhas que não são alteradas em relação ao ancestral
-comum ou resolvido de maneira limpa porque apenas um lado mudou.
+comum ou resolvido de maneira limpa porque apenas um lado foi alterado
+ou foi resolvido de forma limpa porque ambos os lados foram igualmente alterados.
 &lt;&lt;&lt;&lt;&lt;&lt;&lt; yours:sample.txt
 A resolução de conflitos é difícil;
 vamos às compras.
@@ -804,20 +810,43 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 <p>O formato predefinido não exibe o que o original disse na área conflitante. Você não pode dizer quantas linhas foram excluídas e substituídas através das observações do seu lado. A única coisa que é possível dizer é que o seu lado quer dizer que é difícil e você prefere ir às compras, enquanto o outro lado quer dizer que é fácil.</p>
 </div>
 <div class="paragraph">
-<p>Um estilo alternativo pode ser utilizado ao definir a variável de configuração "merge.conflictStyle" como "diff3". No estilo "diff3", o conflito acima pode ser assim:</p>
+<p>Um estilo alternativo pode ser utilizado ao definir a variável de configuração "merge.conflictStyle" para "diff3" ou "zdiff3". No estilo "diff3", o conflito acima pode ser assim:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre>Aqui estão as linhas que não são alteradas em relação ao ancestral
-comum ou resolvido de maneira limpa porque apenas um lado mudou.
-&lt;&lt;&lt;&lt;&lt;&lt;&lt; yours:sample.txt
+comum ou foi resolvido de maneira limpa porque apenas um lado foi alterado.
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; seu:sample.txt
+ou resolvidos de forma limpa porque ambos os lados foram alterados igualmente.
 A resolução de conflitos é difícil;
 vamos às compras.
-|||||||
+||||||| base:sample.txt
+ou resolvidos de forma limpa porque ambos os lados foram igualmente alterados.
 A resolução de conflitos é difícil.
 =======
+ou resolvidos de forma limpa porque ambos os lados foram alterados igualmente.
+O git facilita a resolução de conflitos.
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; deles:sample.txt
+E aqui está outra linha que foi resolvida ou não foi modificada.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>enquanto no estilo "zdiff3", por ficar assim:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>Aqui estão as linhas que não são alteradas a partir do ancestral
+comum ou foi resolvido de maneira limpa porque apenas um lado foi alterado,
+ou foi resolvido de maneira limpa porque apenas um lado foi alterado.
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; seu:sample.txt
+A resolução de conflitos é difícil;
+vamos às compras.
+||||||| base:sample.txt
+ou resolvidos de forma limpa porque ambos os lados foram igualmente alterados.
+A resolução de conflitos é difícil;
+=======
 O Git facilita a resolução de conflitos.
-&gt;&gt;&gt;&gt;&gt;&gt;&gt; theirs:sample.txt
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; deles:sample.txt
 E aqui está outra linha que foi claramente resolvida ou não foi modificada.</pre>
 </div>
 </div>
@@ -895,7 +924,7 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 <p>Isso pode ser utilizado quando você queira incluir outras alterações na mesclagem ou se deseja, grave a sua própria mensagem do commit na mesclagem.</p>
 </div>
 <div class="paragraph">
-<p>Você deve evitar abusar dessa opção para ocultar as alterações substanciais em uma mesclagem do commit. Pequenos reparos, como o nome da versão/revisão são aceitáveis.</p>
+<p>Você deve evitar abusar dessa opção para ocultar as alterações substanciais numa mesclagem do commit. Pequenos reparos, como o nome da versão/revisão são aceitáveis.</p>
 </div>
 </li>
 </ul>
@@ -1025,7 +1054,7 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 <dl>
 <dt class="hdlist1">merge.conflictStyle</dt>
 <dd>
-<p>Especifique o estilo no qual os blocos em conflito são gravados nos arquivos da árvore de trabalho durante a mesclagem. A predefinição é "mesclar", onde exibe um marcador de conflito <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> nas modificações feitas por um lado, o <code>=======</code> marca as modificações feita pelo outro lado e então a marca <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Um estilo alternativo, "diff3", adiciona um marcador <code>|||||||</code> e o texto original antes do marcador <code>=======</code>.</p>
+<p>Especifique o estilo no qual os blocos em conflito são gravados nos arquivos da árvore de trabalho durante a mesclagem. A predefinição é "mesclar", onde exibe um marcador de conflito <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> nas modificações feitas por um lado, o <code>=======</code> marca as modificações feita pelo outro lado e então a marca <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Um estilo alternativo, "diff3", adiciona um marcador <code>|||||||</code> e o texto original antes do marcador <code>=======</code>. O estilo "merge" tende a produzir menos regiões com conflito se comparado com o diff3, seja por causa da exclusão do texto original, seja porque quando um subconjunto das linhas combine nos dois lados elas são retiradas da região em conflito. O outro estilo alternativo, "zdiff3", é semelhante ao diff3 mas remove as linhas correspondentes nos dois lados da região em conflito quando essas linhas correspondentes aparecem perto do início ou do fim de uma região em conflito.</p>
 </dd>
 <dt class="hdlist1">merge.defaultToUpstream</dt>
 <dd>
@@ -1232,7 +1261,7 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:49 +0100
+Last updated 2022-04-22 20:33:51 +0200
 </div>
 </div>
 </body>

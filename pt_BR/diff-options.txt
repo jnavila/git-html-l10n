@@ -33,7 +33,7 @@ endif::git-diff[]
 endif::git-format-patch[]
 
 ifdef::git-log[]
---diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc)::
+--diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc|remerge|r)::
 --no-diff-merges::
 	Define o formato diff que será usado para a mesclagem dos commits. A predefinição é {diff-merges-default} a menos que a opção `--first-parent` esteja em uso, nesse caso a predefinição será `first-parent`.
 +
@@ -52,6 +52,13 @@ ifdef::git-log[]
 +
 --diff-merges=separate:::
 	Faz com que os commits mesclados mostrem a diferença total com relação a cada uma das suas origens. É gerado uma entrada de registro separada e um diff para cada um dos commits relacionados.
++
+--diff-merges=remerge:::
+--diff-merges=r:::
+--remerge-diff:::
+	Com esta opção, os dois principais commits são mesclados novamente para criar um objeto temporário na árvore -- potencialmente contendo arquivos com os marcadores de conflito e tal. Uma diferença é então mostrada entre essa árvore temporária e o commit real da mesclagem.
++
+A saída é gerada quando esta opção usada está sujeita a alterações, assim como a sua interação com as outras opções (a menos que esteja explicitamente documentada).
 +
 --diff-merges=combined:::
 --diff-merges=c:::
@@ -148,7 +155,7 @@ Caso uma linha exista na origem e no destino, exista apenas uma vez e comece com
 Caso tenha configurado uma variável `diff.algorithm` para um valor sem predefinição e quer utilizar a variável predefinida por exemplo, então utilize a opção `--diff-algorithm=default`.
 
 --stat[=<largura>[,<largura-do-nome>[,<count>]]]::
-	Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima a predefinição retorna para a largura do terminal ou 80 colunas, caso não esteja conectada em um terminal e pode ser substituída por `<largura>`. A largura da parte do nome do arquivo pode ser limitada, fornecendo outra largura `<largura-do-nome>` após uma vírgula. A largura da parte do grafo pode ser limitada utilizando `--stat-graph-width=<largura>` (afeta todos os comandos que geram um grafo estatístico) ou definindo `diff.statGraphWidth=<largura>` (não afeta o `git format-patch`). Ao fornecer um terceiro parâmetro `<count>`, é possível limitar a saída às primeiras linhas `<count>`, seguidas por `...` caso haja mais.
+	Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima a predefinição retorna para a largura do terminal ou 80 colunas, caso não esteja conectada num terminal e pode ser substituída por `<largura>`. A largura da parte do nome do arquivo pode ser limitada, fornecendo outra largura `<largura-do-nome>` após uma vírgula. A largura da parte do grafo pode ser limitada utilizando `--stat-graph-width=<largura>` (afeta todos os comandos que geram um grafo estatístico) ou definindo `diff.statGraphWidth=<largura>` (não afeta o `git format-patch`). Ao fornecer um terceiro parâmetro `<count>`, é possível limitar a saída às primeiras linhas `<count>`, seguidas por `...` caso haja mais.
 +
 Estes parâmetros também podem ser ajustados individualmente com `--stat-width=<largura>`, `--stat-name-width=<largura-do-nome>` e `--stat-count=<count>`.
 
@@ -167,13 +174,13 @@ Estes parâmetros também podem ser ajustados individualmente com `--stat-width=
 +
 --
 `changes`;;
-	Calcule os números "dirstat" contando as linhas que foram removidas da fonte ou adicionadas ao destino. Ignora a quantidade de movimentos de código puro em um arquivo. Em outras palavras, reorganizar as linhas em um arquivo não conta tanto quanto as outras alterações. Este é o comportamento predefinido quando nenhum parâmetro for utilizado.
+	Calcule os números "dirstat" contando as linhas que foram removidas da fonte ou adicionadas ao destino. Ignora a quantidade de movimentos de código puro num arquivo. Em outras palavras, reorganizar as linhas num arquivo não conta tanto quanto as outras alterações. Este é o comportamento predefinido quando nenhum parâmetro for utilizado.
 `lines`;;
-	Calcule os números "dirstat" fazendo a análise diferencial com base nas linhas regulares e somando as contagens das linhas removidas / adicionadas. (Para os arquivos binários, conte em blocos de 64 bytes, pois os arquivos binários não têm um conceito natural de linhas). Este é um comportamento mais dispendioso do `--dirstat` do que o comportamento `changes` (alterações), conta as linhas reorganizadas em um arquivo tanto quanto as outras alterações. A produção resultante é consistente com o que você obtém das outras opções `--*stat`.
+	Calcule os números "dirstat" fazendo a análise diferencial com base nas linhas regulares e somando as contagens das linhas removidas / adicionadas. (Para os arquivos binários, conte em blocos de 64 bytes, pois os arquivos binários não têm um conceito natural de linhas). Este é um comportamento mais dispendioso do `--dirstat` do que o comportamento `changes` (alterações), conta as linhas reorganizadas num arquivo tanto quanto as outras alterações. A produção resultante é consistente com o que você obtém das outras opções `--*stat`.
 `files`;;
 	Calcule os números "dirstat" contando a quantidade de arquivos alterados. Cada arquivo alterado conta igualmente na análise do "dirstat". Este é o comportamento computacional mais barato do `--dirstat`, pois não precisa olhar o conteúdo do arquivo.
 `cumulative`;;
-	Conta as alterações em um diretório herdeiro e também para o diretório de origem. Observe que, ao utilizar `cumulative` (cumulativo), a soma das porcentagens relatadas pode exceder os 100%. O comportamento predefinido (não cumulativo) pode ser especificado com o parâmetro `noncumulative` (não cumulativo).
+	Conta as alterações num diretório herdeiro e também para o diretório de origem. Observe que, ao utilizar `cumulative` (cumulativo), a soma das porcentagens relatadas pode exceder os 100%. O comportamento predefinido (não cumulativo) pode ser especificado com o parâmetro `noncumulative` (não cumulativo).
 <limite>;;
 	Um parâmetro inteiro especifica uma porcentagem de corte (a predefinição retorna para 3%). Os diretórios que contribuem com menos que esta porcentagem nas alterações não são exibidos na saída.
 --
@@ -247,7 +254,7 @@ no::
 default::
 	É um sinônimo para `zebra`. Pode ser que isso mude para um modo mais sensível no futuro.
 plain::
-	Qualquer linha adicionada em um local e removida em outro será colorida com 'color.diff.newMoved'. Da mesma forma, 'color.diff.oldMoved' será utilizado para as linhas que forem removidas e que foram adicionadas em outro lugar no diff. Este modo seleciona qualquer linha movida, mas não é muito útil em uma revisão para determinar se um bloco do código foi movido sem permutação.
+	Qualquer linha adicionada num local e removida em outro será colorida com 'color.diff.newMoved'. Da mesma forma, 'color.diff.oldMoved' será utilizado para as linhas que forem removidas e que foram adicionadas em outro lugar no diff. Este modo seleciona qualquer linha movida, mas não é muito útil numa revisão para determinar se um bloco do código foi movido sem permutação.
 blocks::
 	Os blocos de texto movidos com pelo menos 20 caracteres alfanuméricos são detectados de forma ávida. Os blocos detectados são pintados utilizando a cor `color.diff.{old,new}Moved`. Os blocos adjacentes não podem ser separados.
 zebra::
@@ -276,7 +283,7 @@ ignore-space-change::
 ignore-all-space::
 	Ignore o espaço durante a comparação das linhas. Ignore as diferenças mesmo que uma linha tenha espaços quando a outra linha não tiver nenhuma.
 allow-indentation-change::
-	Ignore inicialmente, qualquer espaço na detecção da ação de mover, em seguida, agrupe os blocos do código que foram movidos apenas em um bloco caso a alteração no espaço seja a mesma em cada linha. Isto é incompatível com os outros modos.
+	Ignore inicialmente, qualquer espaço na detecção da ação de mover, em seguida, agrupe os blocos do código que foram movidos apenas num bloco caso a alteração no espaço seja a mesma em cada linha. Isto é incompatível com os outros modos.
 --
 
 --no-color-moved-ws::
@@ -291,7 +298,7 @@ color::
 plain::
 	Exiba as palavras como `[-removed-]` (removido) e `{+added+}` (adicionado). Não faz nenhuma tentativa de escapar os delimitadores caso eles apareçam na entrada, portanto, a saída pode ser ambígua.
 porcelain::
-	Use um formato especial orientado em linha destinado para a utilização com um script. As execuções adicionadas/removidas/inalteradas são impressas no formato diff unificado tradicional, começando com um caractere `+`/`-`/` ` no início da linha e estendendo-se até o final. As novas linhas na entrada são representadas por um til `~` em uma linha própria.
+	Use um formato especial orientado em linha destinado para a utilização com um script. As execuções adicionadas/removidas/inalteradas são impressas no formato diff unificado tradicional, começando com um caractere `+`/`-`/` ` no início da linha e estendendo-se até o final. As novas linhas na entrada são representadas por um til `~` numa linha própria.
 none::
 	Desative a palavra diff novamente.
 --
@@ -388,10 +395,10 @@ ifndef::git-format-patch[]
 +
 Além disso, estas letras maiúsculas podem ser transformadas em minusculas para se excluir. `--diff-filter=ad` exclui os caminhos adicionados e excluídos por exemplo.
 +
-Observe que nem todas as diferenças diff podem apresentar todos os tipos. Por exemplo, diffs do índice para a árvore de trabalho nunca podem ter entradas adicionadas (porque o conjunto dos caminhos inclusos no diff é limitado pelo que está no índice). Da mesma forma, as entradas copiadas e renomeadas não podem aparecer caso a detecção para estes tipos estiverem desativados.
+Observe que nem todas as diferenças diff podem apresentar todos os tipos. Por exemplo, as entradas copiadas e renomeadas não podem aparecer caso a detecção para estes tipos estiverem desativados.
 
 -S<texto>::
-	Procure por diferenças que alterem a quantidade de ocorrências da cadeia de caracteres usada (ou seja, adição/exclusão) em um arquivo. Destinado ao uso do scripter.
+	Procure por diferenças que alterem a quantidade de ocorrências da cadeia de caracteres usada (ou seja, adição/exclusão) num arquivo. Destinado ao uso do scripter.
 +
 Útil durante a produra por um bloco de código exato (como uma "struct"), e quera saber o histórico deste bloco desde que ele surgiu: utilize o recurso de forma iterativa para alimentar o bloco de interesse na pré-imagem de volta `-S` e continue até você obter a primeira versão do bloco.
 +
@@ -420,7 +427,7 @@ Para mais informações consulte a entrada 'pickaxe' em linkgit:gitdiffcore[7].
 O objeto pode ser uma bolha ou um commit do submódulo. Para também encontrar árvores, faça a utilização da opção `-t` também no `git-log`.
 
 --pickaxe-all::
-	Quando a opção `-S` ou `-G` encontra uma alteração, exiba todas as alterações naquele conjunto de alterações e não apenas nos arquivos que contenham as alterações em uma `<texto>`.
+	Quando a opção `-S` ou `-G` encontra uma alteração, exiba todas as alterações naquele conjunto de alterações e não apenas nos arquivos que contenham as alterações numa `<texto>`.
 
 --pickaxe-regex::
 	Trate o `<texto>` utilizado com o `-S` como uma expressão regular POSIX estendida para coincidir.

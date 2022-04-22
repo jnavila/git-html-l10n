@@ -451,15 +451,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_samantekt">SAMANTEKT</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git clone</em> [--template=&lt;sniðmótsskrá&gt;]
+<pre class="content"><em>git clone</em> [--template=&lt;template-directory&gt;]
           [-l] [-s] [--no-hardlinks] [-q] [-n] [--bare] [--mirror]
-          [-o &lt;nafn&gt;] [-b &lt;nafn&gt;] [-u &lt;upphalspakki&gt;] [--reference &lt;hirsla&gt;]
-          [--dissociate] [--separate-git-dir &lt;git skrá&gt;]
-          [--depth &lt;dýpt&gt;] [--[no-]single-branch] [--no-tags]
-          [--recurse-submodules[=&lt;slóðatilgreining&gt;]] [--[no-]shallow-submodules]
-          [--[no-]remote-submodules] [--jobs &lt;n&gt;] [--sparse][--[no-]reject-shallow]
-          [--filter=&lt;sía&gt;] [--] &lt;hirsla&gt;
-          [&lt;skrá&gt;]</pre>
+          [-o &lt;name&gt;] [-b &lt;name&gt;] [-u &lt;upload-pack&gt;] [--reference &lt;repository&gt;]
+          [--dissociate] [--separate-git-dir &lt;git-dir&gt;]
+          [--depth &lt;depth&gt;] [--[no-]single-branch] [--no-tags]
+          [--recurse-submodules[=&lt;pathspec&gt;]] [--[no-]shallow-submodules]
+          [--[no-]remote-submodules] [--jobs &lt;n&gt;] [--sparse] [--[no-]reject-shallow]
+          [--filter=&lt;filter&gt; [--also-filter-submodules]] [--] &lt;repository&gt;
+          [&lt;directory&gt;]</pre>
 </div>
 </div>
 </div>
@@ -564,11 +564,15 @@ Ef þessi viðföng eru fjarlægð og hafa tilvísun í afrituðu hirslunni
 </dd>
 <dt class="hdlist1">--sparse</dt>
 <dd>
-<p>Frumstillir sparlega endurupptöku skjala svo að verkskráin byrjar einungis með þau skjöl sem eru í rót hirslunnar. Sparleg endurupptaka getur verið stillt til þess að stækka verkskrána eins og þörf er á.</p>
+<p>Employ a sparse-checkout, with only files in the toplevel directory initially being present. The <a href="git-sparse-checkout.html">git-sparse-checkout(1)</a> command can be used to grow the working directory as needed.</p>
 </dd>
 <dt class="hdlist1">--filter=&lt;síutilgreiningar&gt;</dt>
 <dd>
 <p>Nota möguleikann til hlutaeinritunar og mælast til þess að netþjónninn sendi undirsafn viðfanga sem hægt er að ná í samkvæmt ákveðinni viðfangasíu. Þegar <code>--filter</code>(sía) er uppgefið er <code>&lt;síutilgreining&gt;`notuð til þess að sía hlutaeinritunina. Til dæmis `--filter=blob:none</code>(sía slumma engin) mun sía út allar slummur (innihald skjals) þangað til Git þarf á þeim að halda. Einnig er hægt að nota <code>--filter=blob:limit=&lt;stærð&gt;</code>(sía slumma takmörk) til þess að sía út allar slummur af lágmarksstærð <code>&lt;stærð&gt;</code>. Fyrir meiri upplýsingar um tilgreiningar á síum, sjá <code>--filter</code>(sía) valmöguleikann í <a href="git-rev-list.html">git-rev-list(1)</a>.</p>
+</dd>
+<dt class="hdlist1">--also-filter-submodules</dt>
+<dd>
+<p>Also apply the partial clone filter to any submodules in the repository. Requires <code>--filter</code> and <code>--recurse-submodules</code>. This can be turned on by default by setting the <code>clone.filterSubmodules</code> config option.</p>
 </dd>
 <dt class="hdlist1">--mirror</dt>
 <dd>
@@ -589,7 +593,7 @@ Ef þessi viðföng eru fjarlægð og hafa tilvísun í afrituðu hirslunni
 <dd>
 <p>Þegar þessi valmöguleiki er uppgefinn, og aðgangur að hirslunni sem á að afrita er í gegn um ssh (secure shell, öryggisskel), þá skilgreinir hann óforstillta slóð fyrir skipunina sem framkvæmd er á hinum endanum.</p>
 </dd>
-<dt class="hdlist1">--template=&lt;sniðmót_skrá&gt;</dt>
+<dt class="hdlist1">--template=&lt;template-directory&gt;</dt>
 <dd>
 <p>Skilgreina skrá þar sem sniðmót eru geymd (sjá "SNIÐMÁTSSKRÁ" hluta <a href="git-init.html">git-init(1)</a>.)</p>
 </dd>
@@ -639,7 +643,7 @@ Ef þessi viðföng eru fjarlægð og hafa tilvísun í afrituðu hirslunni
 <dd>
 <p>Allar undirverkeiningar sem eru einritðaðar nota stöðu viðeigandi greinar undir fjareftirliti til þess að uppfæra undirverkeininguna, fremur en skráða SHA-1 öryggisundirskrift yfirverksins. Jafngildir því að gefa upp <code>--remote</code>(fjarlægja) með <code>git submodule update</code> (undirverkeining uppfæra).</p>
 </dd>
-<dt class="hdlist1">--separate-git-dir=&lt;git skrá&gt;</dt>
+<dt class="hdlist1">--separate-git-dir=&lt;git-skrá&gt;</dt>
 <dd>
 <p>Í stað þess að setja einrituðu hirsluna þar sem hún á að vera, setja hana í tilgreinda skrá, og búa síðan til Git hlekk þangað sem er ómeðvitaður um skráasafnið. Árangurinn verður sá að Git hirslan verður aðskilin verktrénu.</p>
 </dd>
@@ -856,7 +860,7 @@ $ cd mitt-línux</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:17:12 +0100
+Last updated 2022-04-22 20:33:19 +0200
 </div>
 </div>
 </body>
