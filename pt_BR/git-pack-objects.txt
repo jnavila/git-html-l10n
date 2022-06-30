@@ -13,6 +13,7 @@ RESUMO
 	[--no-reuse-delta] [--delta-base-offset] [--non-empty]
 	[--local] [--incremental] [--window=<n>] [--depth=<n>]
 	[--revs [--unpacked | --all]] [--keep-pack=<nome-do-pacote>]
+	[--cruft] [--cruft-expiration=<tempo>]
 	[--stdout [--filter=<filter-spec>] | <nome-base>]
 	[--shallow] [--keep-true-parents] [--[no-]sparse] < <lista-do-objeto>
 
@@ -54,6 +55,16 @@ base-name::
 	Leia os nomes base dos "packfiles" (por exemplo, `pack-1234abcd.pack`) a partir da entrada predefinida, em vez de nomes dos objetos ou das opções da revisão. O pacote resultante contém todos os objetos listados nos pacotes incluídos (aqueles que não comecem com `^`), excluindo quaisquer objetos listados nos pacotes excluídos (que comecem com `^`).
 +
 É incompatível com a opção `--revs`, ou opções que impliquem no uso de `--revs` (como `--all`), menos com a opção `--unpacked`, que é compatível.
+
+--cruft::
+	Empacota objetos inacessíveis num pacote "cruft" (simples) separado, denotado pela existência de um arquivo `.mtimes`. É normalmente é utilizado por `git repack --cruft`. Aqueles que os invocam fornecem uma lista dos nomes dos pacotes e indicam quais os pacotes permanecerão no repositório, juntamente com quais pacotes serão excluídos (indicado pelo prefixo `-`). O conteúdo do pacote "cruft" são todos os objetos não contidos nos pacotes sobreviventes que não excederam o período de carência (consulte `--cruft-expiration` abaixo), ou que excederam o período de carência, mas são acessíveis a partir de um outro objeto que não o tem.
++
+Quando a entrada listar um pacote contendo todos os objetos alcançáveis (e listar todos os outros pacotes como exclusão pendente), o pacote "cruft" correspondente conterá todos os objetos inalcançáveis (com mtime mais recente que `--cruft-expiration`) junto com quaisquer objetos inalcançáveis cujos mtime seja mais antigo que o `--cruft-expiration`, e seja acessível a partir de um objeto inacessível cujo mtime seja mais recente que `--cruft-expiration`).
++
+É incompatível com as opções `--unpack-unreachable`, `--keep-unreachable`, `--pack-loose-unreachable`, `--stdin-packs`, bem como quaisquer outras opções que impliquem `--revs`. Também é incompatível com as opções `--max-pack-size`; quando esta opção é definida, o tamanho máximo do pacote não é inferido a partir de `pack.packSizeLimit`.
+
+--cruft-expiration=<aproximado>::
+	Se definido, os objetos são eliminados do pacote "cruft" caso tenham um mtime mais antigo que `<aproximado>`. Se não for definido (e for usado `--cruft`), nenhum objeto será eliminado.
 
 --window=<n>::
 --depth=<n>::

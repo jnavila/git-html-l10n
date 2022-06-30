@@ -35,14 +35,21 @@ OPÇÕES
 	Relate o progresso para o stderr.
 
 --prefix=<prefixo>/::
-	Anexe o `<prefixo>/` em cada nome do arquivo no arquivo.
+	Anexe o <prefix>/ aos caminhos no arquivo. Pode ser repetido; o seu valor mais à direita é usado para todos os arquivos que estejam sendo rastreados. Veja abaixo qual o valor é utilizado por `--add-file` e por `--add-virtual-file`.
 
 -o <arquivo>::
 --output=<arquivo>::
 	Escreva o arquivo para o `<arquivo>` em vez do stdout.
 
 --add-file=<arquivo>::
-	Adicione um arquivo não rastreado ao arquivo. Pode ser repetido para que seja possível adicionar diversos arquivos. O caminho do arquivo no arquivo é construído concatenando o valor para `--prefixo` (caso haja) e o nome principal do <arquivo>.
+	Adiciona um arquivo não rastreado ao arquivo. Pode ser repetido para que seja possível adicionar diversos arquivos. O caminho do arquivo no arquivo é construído concatenando o valor do último `--prefix` (caso haja) antes deste `--add-file` e o nome principal do <arquivo>.
+
+--add-virtual-file=<caminho>:<conteúdo>::
+	Adicione o conteúdo especificado ao arquivo. Pode ser repetido para que seja possível adicionar diversos arquivos. O caminho do arquivo no arquivo é construído concatenando o valor da última opção `--prefix` (caso haja) antes deste `--add-virtual-file` e `<caminho>`.
++
+O argumento `<caminho>` pode começar e terminar com um caractere literal de aspas duplas; o nome do arquivo contido é interpretado como um texto estilo C, ou seja, a barra invertida é interpretada como caractere de escape. O caminho deve ser citado tenha dois pontos, para evitar que os dois pontos sejam mal interpretados como o separador entre o caminho e o conteúdo, ou, caso o caminho comece ou termine com um caractere de aspas duplas.
++
+O modo do arquivo é limitado a um arquivo regular, a opção pode estar sujeita aos limites da linha de comando que dependem da plataforma. Para casos não triviais, grave um arquivo não rastreado e use `--add-file`.
 
 --worktree-attributes::
 	Procure pelos atributos nos arquivos `.gitattributes` da árvore de trabalho (consulte <<ATRIBUTOS>>).
@@ -130,6 +137,10 @@ EXEMPLOS
 `git archive -o latest.zip HEAD`::
 
 	Crie um arquivo Zip com o conteúdo do commit mais recente na ramificação atual. Observe que o formato gerado é deduzido através da extensão do arquivo utilizado na saída.
+
+`git archive -o latest.tar --prefix=build/ --add-file=configure --prefix= HEAD`::
+
+	Cria um arquivo tar que contém o conteúdo do último commit no ramo atual sem o prefixo e o arquivo não rastreado 'configure' com o prefixo 'build/'.
 
 `git config tar.tar.xz.command "xz -c"`::
 

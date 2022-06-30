@@ -745,7 +745,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>O comando analisa a variável de configuração <code>core.ignorestat</code>. Quando for <em>true</em>, os caminhos são atualizados com o comando <code>git update-index paths...</code> e os caminhos são atualizados com outros comandos Git que atualizam o índice e a árvore de trabalho (por exemplo, o <em>git apply --index</em>, <em>git checkout-index -u</em> e o <em>git read-tree -u</em>) são marcados automaticamente com o bit "assuma como inalterado". Observe que o bit "assuma como inalterado" <strong>não</strong> está definido caso o comando <code>git update-index --refresh</code> encontre o arquivo da árvore de trabalho que coincida com o índice (utilize o <code>git update-index --really-refresh</code> caso queira marcá-los com o bit "assuma como inalterado").</p>
 </div>
 <div class="paragraph">
-<p>Sometimes users confuse the assume-unchanged bit with the skip-worktree bit. See the final paragraph in the "Skip-worktree bit" section below for an explanation of the differences.</p>
+<p>Às vezes, os usuários confundem o bit presumido inalterado com o bit do "skip-worktree". Consulte o parágrafo final na seção "Skip-worktree bit" abaixo para obter uma explicação das diferenças.</p>
 </div>
 </div>
 </div>
@@ -827,13 +827,13 @@ M foo.c</pre>
 <p>Note que nem todos os comandos do git prestarão atenção a este bit, e alguns, só são parcialmente compatíveis.</p>
 </div>
 <div class="paragraph">
-<p>The update-index flags and the read-tree capabilities relating to the skip-worktree bit predated the introduction of the <a href="git-sparse-checkout.html">git-sparse-checkout(1)</a> command, which provides a much easier way to configure and handle the skip-worktree bits. If you want to reduce your working tree to only deal with a subset of the files in the repository, we strongly encourage the use of <a href="git-sparse-checkout.html">git-sparse-checkout(1)</a> in preference to the low-level update-index and read-tree primitives.</p>
+<p>Os sinalizadores do índice de atualização e os recursos da leitura da árvore relacionados ao bit skip-worktree, antecederam a introdução do comando <a href="git-sparse-checkout.html">git-sparse-checkout(1)</a>, que fornece uma maneira muito mais fácil de configurar e manipular os bits skip-worktree . Caso queira reduzir a sua árvore de trabalho para lidar apenas com um subconjunto dos arquivos no repositório, nós encorajamos fortemente o uso de <a href="git-sparse-checkout.html">git-sparse-checkout(1)</a> em preferência ao índice de atualização de baixo nível e leitura dos primitivos da árvore.</p>
 </div>
 <div class="paragraph">
-<p>The primary purpose of the skip-worktree bit is to enable sparse checkouts, i.e. to have working directories with only a subset of paths present. When the skip-worktree bit is set, Git commands (such as <code>switch</code>, <code>pull</code>, <code>merge</code>) will avoid writing these files. However, these commands will sometimes write these files anyway in important cases such as conflicts during a merge or rebase. Git commands will also avoid treating the lack of such files as an intentional deletion; for example <code>git add -u</code> will not not stage a deletion for these files and <code>git commit -a</code> will not make a commit deleting them either.</p>
+<p>O objetivo principal do bit skip-worktree é ativar verificações esparsas, ou seja, ter os diretórios de trabalho com apenas um subconjunto de caminhos presentes. Quando o bit skip-worktree for definido, os comandos do Git (como <code>switch</code>, <code>pull</code>, <code>merge</code>) evitarão escrever esses arquivos. No entanto, esses comandos às vezes gravam esses arquivos de qualquer maneira em casos importantes, como conflitos durante uma mesclagem ou rebase. Os comandos do Git também evitarão tratar a falta de tais arquivos como uma exclusão intencional; por exemplo, <code>git add -u</code> não irá realizar uma exclusão para esses arquivos e <code>git commit -a</code> também não fará um commit deletando-os.</p>
 </div>
 <div class="paragraph">
-<p>Although this bit looks similar to assume-unchanged bit, its goal is different. The assume-unchanged bit is for leaving the file in the working tree but having Git omit checking it for changes and presuming that the file has not been changed (though if it can determine without stat&#8217;ing the file that it has changed, it is free to record the changes). skip-worktree tells Git to ignore the absence of the file, avoid updating it when possible with commands that normally update much of the working directory (e.g. <code>checkout</code>, <code>switch</code>, <code>pull</code>, etc.), and not have its absence be recorded in commits. Note that in sparse checkouts (setup by <code>git sparse-checkout</code> or by configuring core.sparseCheckout to true), if a file is marked as skip-worktree in the index but is found in the working tree, Git will clear the skip-worktree bit for that file.</p>
+<p>Embora este bit pareça ser semelhante ao bit inalterado assumido, o seu objetivo é diferente. O bit assumido não alterado é para ser deixado no arquivo da árvore de trabalho, mas fazer com que o Git omita a verificação das alterações e presumindo que o arquivo não foi alterado (embora se ele puder determinar sem declarar o arquivo que foi alterado, é livre para gravar as alterações). A opção <code>--skip-worktree</code> diz ao Git para ignorar a ausência do arquivo, evite atualizá-lo sempre quando for possível com os comandos que normalmente atualizam grande parte do diretório de trabalho (por exemplo, <code>checkout</code>, <code>switch</code>, <code>pull</code>, etc.), e para não ter a sua ausência registrada nos commits. Observe que com os check-outs esparsos (configurados através da opção <code>git sparse-checkout</code> ou configurando "true" em core.sparseCheckout), caso um arquivo esteja marcado como skip-worktree no índice mas seja encontrado na árvore de trabalho, o Git limpará o bit do skip-worktree na árvore de trabalho neste arquivo.</p>
 </div>
 </div>
 </div>
@@ -901,7 +901,7 @@ M foo.c</pre>
 <p>Este recurso visa acelerar as operações do git para os repositórios que possuem grandes diretórios de trabalho.</p>
 </div>
 <div class="paragraph">
-<p>Ele permite que o git trabalhe em conjunto com um monitor do sistema de arquivos (consulte <a href="git-fsmonitor&#8212;&#8203;daemon.html">git-fsmonitor&#8212;&#8203;daemon(1)</a> e a seção "fsmonitor-watchman" do <a href="githooks.html">githooks(5)</a>) que pode informá-lo sobre quais os arquivos foram alterados. Isso permite que o git evite ter que fazer um <em>lstat()</em> em todo arquivo para localizar quais arquivos foram modificados.</p>
+<p>It enables git to work together with a file system monitor (see <a href="git-fsmonitor--daemon.html">git-fsmonitor--daemon(1)</a> and the "fsmonitor-watchman" section of <a href="githooks.html">githooks(5)</a>) that can inform it as to what files have been modified. This enables git to avoid having to lstat() every file to find modified files.</p>
 </div>
 <div class="paragraph">
 <p>Quando usado em conjunto com o cache não monitorado, pode melhorar ainda mais o desempenho, evitando o custo de varrer todo o diretório ativo à procura de novos arquivos.</p>
@@ -970,7 +970,7 @@ necessário usar o comando <em>git update-index --chmod =</em>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-04-22 20:33:52 +0200
+Last updated 2022-06-15 22:00:04 +0200
 </div>
 </div>
 </body>
