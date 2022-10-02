@@ -191,16 +191,16 @@ O `pager.config` somente é respeitado durante a listagem da configuração, ou 
 ARQUIVOS
 --------
 
-Caso não seja definido de forma explicita com a opção `--file`, existem quatro arquivos onde o 'git config' irá procurar as opções de configuração:
+É predefinido que o comado 'git config' leia as opções de configuração a partir de diversos arquivos:
 
 $(prefixo)/etc/gitconfig::
 	Arquivo de configuração do sistema.
 
 $XDG_CONFIG_HOME/git/config::
-	Segundo arquivo de configuração específico do usuário. Caso $XDG_CONFIG_HOME não esteja definido ou esteja vazio , a opção de configuração `$HOME/.config/git/config` será utilizada. Qualquer variável com valor único definido neste arquivo será substituída pelo que estiver em `~/.gitconfig`. É uma boa ideia não criar este arquivo no caso de você às vezes usar versões mais antigas do Git, pois o suporte para este arquivo foi adicionado recentemente.
-
 ~/.gitconfig::
-	Arquivo de configuração específico do usuário. Também chamado de arquivo de configuração "global".
+	Arquivos de configuração específicos do usuário. Quando a variável de ambiente XDG_CONFIG_HOME não estiver definida ou estiver vazia, $HOME/.config/ será usado como $XDG_CONFIG_HOME.
++
+Eles também são chamados de arquivos de configuração "globais". Caso ambos existam, eles serão lidos na ordem indicada acima.
 
 $GIT_DIR/config::
 	Arquivo de configuração específico do repositório.
@@ -208,17 +208,55 @@ $GIT_DIR/config::
 $GIT_DIR/config.worktree::
 	Isso é opcional e só é pesquisado quando o arquivo `extensions.worktreeConfig` está presente em $GIT_DIR/config.
 
-Caso nenhuma outra opção seja utilizada, todas as opções de leitura irão ler todos estes arquivos que estiverem disponíveis. Caso o arquivo global ou o arquivo de configuração global inteiro não esteja disponível, eles serão ignorados. Caso o arquivo de configuração do repositório não estiver disponível ou legível, o comando 'git config' encerrará com um código de erro diferente de zero. No entanto, em nenhum dos casos será emitida uma mensagem de erro.
+Você também poderá fornecer parâmetros adicionais de configuração ao executar qualquer comando git usando a opção `-c`. Consulte linkgit:git[1] para obter mais detalhes.
+
+As opções serão lidas a partir de todos os arquivos disponíveis. Caso os arquivos de configuração global ou de todo o sistema estiverem ausentes ou ilegíveis, eles serão ignorados. Se o arquivo de configuração do repositório estiver ausente ou ilegível, o comando 'git config' encerrará com um código de erro diferente de zero. Uma mensagem de erro será produzida caso o arquivo esteja ilegível, mas não se estiver ausente.
 
 Os arquivos são lidos na ordem dada acima, com o último valor encontrado tendo precedência sobre os valores lidos anteriormente. Quando vários valores são obtidos, então todos os valores de uma chave de todos os arquivos, serão usados.
 
-Você pode substituir os parâmetros da configuração dos parâmetros individuais ao executar qualquer comando git utilizando a opção `-c`. Para mais detalhes, consulte linkgit:git[1].
+É predefinido que as opções sejam gravadas apenas no arquivo específico de configuração do repositório. Observe que isso também afeta opções como `--replace-all` e `--unset`. O comando *'git config' só alterará um arquivo por vez*.
 
-É predefinido que todas as opções de gravação sejam gravadas no arquivo de configuração específico do repositório. Observe que isso também afeta opções como `--replace-all` e `--sunset`. *O comando 'git config' sempre irá alterar um arquivo por vez*.
+Você pode limitar quais fontes de configuração serão lidas ou quais serão gravadas ao definir o caminho de um arquivo com a opção `--file`, ou definindo um escopo de configuração com `--system`, `--global`, `-- local` ou `--worktree`. Consulte <<OPÇÕES>> acima para obter mais informações.
 
-É possível substituir estas regras usando as opções na linha de comando `--global`, `--system`, `--local`, `--worktree` e `--file`; consulte <<OPÇÕES>> acima.
+[[SCOPES]]
+ESCOPOS
+-------
 
+Cada fonte de configuração está dentro de um escopo de configuração. Os escopos são:
 
+system::
+	$(prefixo)/etc/gitconfig
+
+global::
+	$XDG_CONFIG_HOME/git/config
++
+~/.gitconfig
+
+local::
+	$GIT_DIR/config
+
+árvore de trabalho::
+	$GIT_DIR/config.worktree
+
+comando::
+	GIT_CONFIG_{COUNT,KEY,VALUE} variáveis de ambiente (consulte <<AMBIENTE>> abaixo)
++
+a opção `-c`
+
+Com exceção do 'command', cada escopo corresponde a uma opção da linha de comando: `--system`, `--global`, `--local`, `--worktree`.
+
+Ao ler as opções, ao especificar um escopo lerá apenas as opções dos arquivos que estejam dentro deste escopo. Ao gravar as opções, ao especificar um escopo ele será gravado nos arquivos dentro deste escopo (em vez do arquivo de configuração específico do repositório). Consulte <<OPÇÕES>> acima para obter uma descrição completa.
+
+Independentemente da definição do escopo, a maioria das opções de configuração são respeitadas, porém, algumas opções são respeitadas apenas em determinados escopos. Consulte a documentação da respectiva opção para obter mais informações.
+
+Configuração protegida
+~~~~~~~~~~~~~~~~~~~~~~
+
+A configuração protegida refere-se aos escopos 'system', 'global' e 'command'. Por questões de segurança, certas opções são obedecidas apenas quando definidas na configuração protegida, caso contrário, serão ignoradas.
+
+O Git trata estes escopos como se fossem controlados pelo usuário ou por um administrador confiável. Isso ocorre porque um invasor que controla esses escopos pode causar danos substanciais sem usar o Git, portanto, presume-se que o ambiente do usuário proteja estes escopos contra invasores.
+
+[[ENVIRONMENT]]
 VARIÁVEIS DO AMBIENTE
 ---------------------
 

@@ -27,7 +27,7 @@ DESCRIÇÃO
 ---------
 Um daemon TCP Git realmente simples e que normalmente escuta na porta "DEFAULT_GIT_PORT", também conhecida como 9418. Aguarda uma conexão solicitando um serviço e o servirá caso esteja ativo.
 
-Ele verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação dessa maneira (a menos que o parâmetro `--export-all` seja utilizado). Caso passe alguns caminhos de diretórios como argumentos par ao 'git daemon', é possível restringir ainda mais as ofertas a uma lista de permissões composta por eles.
+Ele verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação dessa maneira (a menos que o parâmetro `--export-all` seja utilizado). Caso passe alguns caminhos de diretórios como argumentos 'git daemon', os caminhos serão limitados a repositórios dentro desses diretórios.
 
 É predefinido que apenas o serviço `upload-pack` esteja ativo, o que atende aos clientes são o 'git fetch-pack' e 'git ls-remote', que são chamados de 'git fetch', 'git pull' e 'git clone'.
 
@@ -38,7 +38,7 @@ Também existe um `upload-archive` para servir o `git archive` .
 OPÇÕES
 ------
 --strict-paths::
-	A coincidência exata dos caminhos (ou seja, não permita "/foo/repo" quando o caminho real for "/foo/repo.git" ou "/foo/repo/.git"), assim como, não faça caminhos relativos ao usuário. O 'git daemon' se recusará a iniciar quando esta opção estiver ativa e nenhuma lista de permissões tenha sido usada.
+	A coincidência exata dos caminhos (ou seja, não permita "/foo/repo" quando o caminho real for "/foo/repo.git" ou "/foo/repo/.git"), assim como, não faça caminhos relativos ao usuário. O 'git daemon' se recusará a iniciar quando esta opção estiver ativa e nenhum argumento de diretório for informado.
 
 --base-path=<caminho>::
 	Faça o remapeamento de todas as solicitações de caminho em relação ao caminho informado. Isso é meio que um "Git root" - caso você execute o comando 'git daemon' com '--base-path=/srv/git' em 'example.com', caso tente obter mais tarde 'git://example.com/hello.git', 'git daemon' interpretará o caminho como `/srv/git/hello.git`.
@@ -47,7 +47,7 @@ OPÇÕES
 	Caso `--base-path` esteja ativo e a pesquisa do repositório falhar, com esta opção o 'git daemon' tentará procurar sem prefixar o caminho da base. É útil para alternar para o uso de `--base-path`, enquanto ainda for permitido os caminhos antigos.
 
 --interpolated-path=<modelo-de-caminho>::
-	Para dar suporte à hospedagem virtual, um modelo de caminho interpolado pode ser utilizado para construir dinamicamente os caminhos alternativos. O modelo é compatível com `%H` para o nome de host do destino, informado pelo cliente, porém é convertido minúsculas, `%CH` para o nome do host canônico, `%IP` para o endereço IP do servidor, `%P` para o número da porta e `%D` para o caminho absoluto do nome do repositório. Após a interpolação, o caminho é validado na lista branca de permissões do diretório.
+	Para dar suporte à hospedagem virtual, um modelo de caminho interpolado pode ser utilizado para construir dinamicamente os caminhos alternativos. O modelo é compatível com `%H` para o nome de host do destino, informado pelo cliente, porém é convertido minúsculas, `%CH` para o nome do host canônico, `%IP` para o endereço IP do servidor, `%P` para o número da porta e `%D` para o caminho absoluto do nome do repositório. Após a interpolação, o caminho é validado contra uma lista de diretório.
 
 --export-all::
 	Permite puxar de todos os diretórios que se pareçam com os repositórios Git (possuem os subdiretórios 'objects' e 'refs'), mesmo que eles não tenham o arquivo 'git-daemon-export-ok'.
@@ -128,7 +128,7 @@ Como muitos programas que alternam o ID do usuário, o daemon não redefine as v
 O comando externo pode, opcionalmente, gravar uma única linha em sua saída padrão para ser enviada ao solicitante como uma mensagem de erro quando ele recusar o serviço.
 
 <diretório>::
-	Um diretório a ser adicionado à lista branca dos diretórios permitidos. A menos que `--strict-paths` seja especificado, isso também incluirá subdiretórios de cada diretório informado.
+	Os argumentos restantes fornecem uma lista de diretórios. Caso algum diretório seja definido, então o processo `git-daemon` ofertará um diretório solicitado somente se este estiver contido num destes diretórios. Caso a opção `--strict-paths` seja informada, o diretório solicitado deve corresponder exatamente a um destes diretórios.
 
 SERVIÇOS
 --------
@@ -154,7 +154,7 @@ git		9418/tcp		# Controle de Versão do Sistema Git
 ------------
 
 'git daemon' como um servidor inetd::
-	Para configurar o 'git daemon' como um serviço inetd que lida com qualquer repositório no conjunto de diretórios da lista branca do /pub/foo e /pub/bar, coloque uma entrada em /etc/inetd, tudo numa linha:
+	Para configurar o 'git daemon' como um serviço inetd que lida com qualquer repositório dentro de `/pub/foo` ou `/pub/bar`, insira uma entrada como demonstrado abaixo em `/etc/inetd`, tudo numa linha só:
 +
 ------------------------------------------------
 	git stream tcp nowait nobody  /usr/bin/git

@@ -149,7 +149,8 @@ ifdef::git-rev-list[]
 	不要打印任何东西到标准输出。 这种形式主要是为了让调用者测试退出状态，看看一系列的对象是否完全连接（或没有）。 它比将stdout重定向到`/dev/null`要快，因为输出不需要被格式化。
 
 --disk-usage::
-	抑制正常输出；相反，打印所选提交或对象用于磁盘存储的字节数之和。这相当于用管道将输出写入 `git cat-file --batch-check='%(objectsize:disk)'，只是它的运行速度要快得多（尤其是在使用 `--use-bitmap-index'时）。参见 linkgit:git-cat-file[1] 中的 `CAVEATS` 部分，了解 "磁盘存储 "的限制。
+--disk-usage=human::
+	Suppress normal output; instead, print the sum of the bytes used for on-disk storage by the selected commits or objects. This is equivalent to piping the output into `git cat-file --batch-check='%(objectsize:disk)'`, except that it runs much faster (especially with `--use-bitmap-index`). See the `CAVEATS` section in linkgit:git-cat-file[1] for the limitations of what "on-disk storage" means. With the optional value `human`, on-disk storage size is shown in human-readable string(e.g. 12.24 Kib, 3.50 Mib).
 endif::git-rev-list[]
 
 --cherry-mark::
@@ -239,8 +240,8 @@ Default mode::
 --simplify-merges::
 	为`--full-history`增加了一个选项，可以从结果的历史中删除一些不必要的合并，因为没有选定的提交对这次合并有贡献。
 
---ancestry-path::
-	当给定一个要显示的提交范围（例如 "commit1...commit2 "或 "commit2 {caret}commit1"）时，只显示直接存在于 "commit1 "和 "commit2 "之间的祖先链的提交，即既是 "commit1 "的后代，又是 "commit2 "的祖先的提交。
+--ancestry-path[=<commit>]::
+	When given a range of commits to display (e.g. 'commit1..commit2' or 'commit2 {caret}commit1'), only display commits in that range that are ancestors of <commit>, descendants of <commit>, or <commit> itself. If no commit is specified, use 'commit1' (the excluded part of the range) as <commit>. Can be passed multiple times; if so, a commit is included if it is any of the commits given or if it is an ancestor or descendant of one of them.
 
 以下是更详细的解释。
 
@@ -358,8 +359,8 @@ This results in:
 
 还有一种简化模式可用。
 
---ancestry-path::
-	将显示的提交限制在给定提交范围内 "from "和 "to "提交之间的直接祖先链上。也就是说，只显示 "to "提交的祖先和 "from "提交的后代的提交。
+--ancestry-path[=<commit>]::
+	Limit the displayed commits to those which are an ancestor of <commit>, or which are a descendant of <commit>, or are <commit> itself.
 +
 作为一个用例，请考虑以下提交历史。
 +
@@ -381,6 +382,24 @@ This results in:
 		  G--H--I--J
 			       \
 				L--M
+-----------------------------------------------------------------------
++
+We can also use `--ancestry-path=D` instead of `--ancestry-path` which means the same thing when applied to the 'D..M' range but is just more explicit.
++
+If we instead are interested in a given topic within this range, and all commits affected by that topic, we may only want to view the subset of `D..M` which contain that topic in their ancestry path. So, using `--ancestry-path=H D..M` for example would result in:
++
+-----------------------------------------------------------------------
+		E
+		 \
+		  G---H---I---J
+			       \
+				L--M
+-----------------------------------------------------------------------
++
+Whereas `--ancestry-path=K D..M` would result in
++
+-----------------------------------------------------------------------
+		K---------------L--M
 -----------------------------------------------------------------------
 
 在讨论另一个选项，`--显示--推力'之前，我们需要创建一个新的历史实例。
@@ -415,7 +434,7 @@ This results in:
 	   `---X--'  `------'
 -----------------------------------------------------------------------
 
-这里，合并提交`O`和`P`带来了额外的噪音，因为它们实际上并没有对`file.txt`做出改变。他们只是合并了一个基于 "file.txt "旧版本的主题。这是在使用工作流程的仓库中常见的问题，在工作流程中，许多贡献者并行工作，并沿着一个主干合并他们的主题分支：不相关的合并出现在`--full-history`结果中。
+Here, the merge commits `O` and `P` contribute extra noise, as they did not actually contribute a change to `file.txt`. They only merged a topic that was based on an older version of `file.txt`. This is a common issue in repositories using a workflow where many contributors work in parallel and merge their topic branches along a single trunk: many unrelated merges appear in the `--full-history` results.
 
 当使用`--简化合并`选项时，提交的`O`和`P`从结果中消失。这是因为 "O "和 "P "重写的第二父本可以从它们的第一父本到达。这些边被移除，然后这些提交看起来就像与它们的父类一样的单亲提交。这也发生在提交`N`上，导致历史视图如下。
 
@@ -574,8 +593,7 @@ The form '--filter=sparse:oid=<blob-ish>' uses a sparse-checkout specification c
 +
 可以指定多个'--过滤器='标志来组合过滤器。只有那些被每个过滤器接受的对象才会被包括在内。
 +
-The form '--filter=combine:<filter1>+<filter2>+...<filterN>' can also be used to combined several filters, but this is harder than just repeating the '--filter' flag and is usually not necessary. Filters are joined by '{plus}' and individual filters are %-encoded (i.e. URL-encoded). Besides the '{plus}' and '%' characters, the following characters are reserved and also must be encoded: `~!@#$^&*()[]{}\;",<>?`+&#39;&#96;+
-as well as all characters with ASCII code &lt;= `0x20`, which includes space and newline.
+'--filter=combine:<filter1>+<filter2>+...<filterN>'的形式也可以用来组合几个过滤器，但这比重复'--filter'标志要难，通常没有必要。过滤器用'{plus}'连接，单个过滤器用%编码（即用URL编码）。 除了'{plus}'和'%'字符，以下字符是保留字符，也必须进行编码：`~！@#$^&*()[]{}/;",<>?`+&#39;&#96;+以及所有ASCII代码为&lt;=`0x20`的字符，其中包括空格和换行。
 +
 其他任意的字符也可以被编码。例如，'combined:tree:3+blob:none'和'combined:tree%3A3+blob%3Anone'是等同的。
 

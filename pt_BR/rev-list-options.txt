@@ -149,7 +149,8 @@ ifdef::git-rev-list[]
 	Não imprima nada na saída padrão. Este formulário tem como principal objetivo, permitir que a pessoa que chame, teste a condição da saída para verificar se um conjunto de objetos está totalmente conectado (ou não). É mais rápido que redirecionar o stdout para `/dev/null`, pois a saída não precisa ser formatada.
 
 --disk-usage::
-	Suprima a saída normal; em vez disso, imprima a soma dos bytes utilizados para o armazenamento em disco pelos commits ou pelos objetos selecionados. Isso é o o mesmo que canalizar a saída para `git cat-file --batch-check='%(objectsize:disk)'`, exceto que roda muito mais rápido (especialmente com `--use-bitmap-index`). Consulte a seção `RESSALVAS` em linkgit:git-cat-file[1] para conhecer as limitações do que significa o "armazenamento em disco".
+--disk-usage=human::
+	Suprime a saída normal; em vez disso, imprime a soma dos bytes usados para o armazenamento em disco feito pelos commits ou pelos objetos que foram selecionados. Isso é equivalente a canalizar a saída para `git cat-file --batch-check='%(objectsize:disk)'`, exceto que ele roda muito mais rápido (especialmente com `--use-bitmap-index`). Consulte a seção `RESSALVAS` em linkgit:git-cat-file[1] para conhecer o significado da limitações do "armazenamento em disco". Com o valor opcional `human`, o tamanho do armazenamento no disco será mostrado numa string humanamente legível (12,24 Kib, 3,50 Mib por exemplo).
 endif::git-rev-list[]
 
 --cherry-mark::
@@ -207,7 +208,7 @@ endif::git-rev-list[]
 Simplificação do histórico
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Às vezes, você está interessado apenas nas partes da história, por exemplo, os commit que alteraram um determinado <caminho>. Porém existem duas partes da 'Simplificação do Histórico', uma parte é a seleção dos commits e a outra é como fazê-lo, pois existem várias estratégias para simplificar o histórico.
+Às vezes, você está interessado apenas nas partes do histórico, por exemplo, os commit que alteraram um determinado <caminho>. Porém existem duas partes da 'Simplificação do Histórico', uma parte é a seleção dos commits e a outra é como fazê-lo, pois existem várias estratégias para simplificar o histórico.
 
 As seguintes opções selecionam os commits que serão exibidos:
 
@@ -239,8 +240,8 @@ Modo predefinido::
 --simplify-merges::
 	Opção adicional para `--full-history` para remover algumas mesclagens desnecessárias do histórico resultante, pois não há commits selecionados contribuindo para essa mesclagem.
 
---ancestry-path::
-	Quando um intervalo dos commits é exibido (por exemplo, 'commit1..commit2' ou 'commit2 {caret}commit1'), apenas exibe os commits que existem diretamente na cadeia de ancestralidade entre o 'commit1' e o 'commit1', ou seja, os commits que são ambos descendentes doe 'commit1' e os ancestrais do 'commit2'.
+--ancestry-path[=<commit>]::
+	Ao receber um intervalo de commits para mostrar ('commit1..commit2' ou 'commit2 {caret}commit1' por exemplo), exibe apenas os commits nesse intervalo que sejam ancestrais do <commit>, descendentes do <commit> ou o <commit> em si. Caso nenhum commit seja definido, use 'commit1' (a parte excluída do intervalo) como <commit>. Pode ser passado mais de uma vez; em caso afirmativo, um commit é incluído caso seja qualquer um dos commits informados ou caso seja um ancestral ou descendente de um deles.
 
 Segue explicações com mais detalhes.
 
@@ -358,8 +359,8 @@ Observe que as maiores diferenças entre `N`, `P`, e `Q` sobre `--full-history`:
 
 Há um outra modo de simplificação disponível:
 
---ancestry-path::
-	Limite os commits exibidos àquelas diretamente na cadeia de ancestralidade entre os commits ``from'' e ``to'' no intervalo dos commits informados. Ou seja, exiba apenas os commits que são ancestrais do commit ``to'' ('para') e os descendentes do commit ``from''.
+--ancestry-path[=<commit>]::
+	Limite os commits exibidos àqueles que sejam ancestrais do <commit>, ou que sejam descendentes do <commit>, ou são o <commit> em si.
 +
 Como um exemplo de caso, considere o seguinte histórico do commit:
 +
@@ -381,6 +382,24 @@ Quando queremos descobrir o qual commit em `M` está contaminado com o bug intro
 		  G---H---I---J
 			       \
 				L--M
+-----------------------------------------------------------------------
++
+Também podemos usar `--ancestry-path=D` em vez de `--ancestry-path` que significa a mesma coisa quando é aplicado ao intervalo 'D..M', porém, é apenas mais explícito.
++
+Se, em vez disso, estivermos interessados num determinado assunto dentro desse intervalo e todos os commits afetados por esse assunto, podemos querer apenas visualizar o subconjunto de `D..M` que contém esse assunto em seu caminho ancestral. Então, ao usar `--ancestry-path=H D..M`, por exemplo, resultaria em:
++
+-----------------------------------------------------------------------
+		E
+		 \
+		  G---H---I---J
+			       \
+				L--M
+-----------------------------------------------------------------------
++
+Onde `--ancestry-path=K D..M` resultará em
++
+-----------------------------------------------------------------------
+		K---------------L--M
 -----------------------------------------------------------------------
 
 Antes de discutir outra opção, `--show-pulls`, precisamos criar um novo histórico de exemplo.
@@ -415,7 +434,7 @@ Ao utilizar a opção `--full-history`, O Git percorre cada canto. Descobre se o
 	   `---X--'  `------'
 -----------------------------------------------------------------------
 
-Aqui, a mesclagem do commit `O` e `P` contribuem com um ruído extra, pois na verdade não contribuíram com uma alteração no `file.txt`. Eles mesclaram apenas um 'topic' com base numa versão mais antiga do `file.txt`. Este é um problema comum em repositórios que utilizam um fluxo de trabalho onde que muitos colaboradores trabalham em paralelo e mesclam as suas ramificações dos tópicos em um único "trunk": as mesclagens não relacionadas ao manu aparecem nos resultados do comando `--full-history`.
+Aqui, a mesclagem do commit `O` e `P` contribuem com um ruído extra, pois na verdade não contribuíram com uma alteração no `file.txt`. Eles mesclaram apenas um 'topic' com base numa versão mais antiga do `file.txt`. Este é um problema comum em repositórios que utilizam um fluxo de trabalho onde que muitos colaboradores trabalham em paralelo e mesclam as suas ramificações dos tópicos em um único tronco: muitas mesclagens não relacionadas aparecem nos resultados da opção `--full-history`.
 
 Ao utilizar a opção `--simplify-merges`, os commits `O` e `P` desaparecem dos resultados. Pois as reescritas do segundo pai de `O` e `P` são acessíveis a partir dos seus primeiros pais. Estes cantos são removidos e então os commits se parecem com commits com pai singular só que são TREESAME em relação aos seus pais. Isso também acontece ao commit `N`, resultando no histórico a seguir:
 
@@ -574,8 +593,7 @@ Observe que o formulário '--filter=sparse:path=<caminho>' deseja ler de um cami
 +
 Várias opções `--filter=` podem ser utilizados para fazer a combinação dos filtros. Somente os objetos que são aceitos por todos os filtros serão incluídos.
 +
-The form '--filter=combine:<filter1>+<filter2>+...<filterN>' can also be used to combined several filters, but this is harder than just repeating the '--filter' flag and is usually not necessary. Filters are joined by '{plus}' and individual filters are %-encoded (i.e. URL-encoded). Besides the '{plus}' and '%' characters, the following characters are reserved and also must be encoded: `~!@#$^&*()[]{}\;",<>?`+&#39;&#96;+
-as well as all characters with ASCII code &lt;= `0x20`, which includes space and newline.
+O formulário '--filter=combine:<filter1>+<filter2>+...<filterN>' também pode ser usado para combinar vários filtros, mas isso é mais difícil do que apenas repetir o comando '--filter' e geralmente não é necessário. Os filtros são unidos pelo '{plus}' e os filtros individuais são %-codificados (ou seja, URL-codificada). Além dos caracteres '{plus}' e '%' os seguintes caracteres são reservados e também devem ser codificados: `~!@#$^&*()[]{}\;",<>?`+&#39;&#96;+ assim como todos os caracteres com código ASCII &lt;= `0x20`, que inclui espaço e nova linha.
 +
 Outros caracteres arbitrários também podem ser codificados. Por exemplo, 'combine:tree:3+blob:none' e 'combine:tree%3A3+blob%3Anone' são equivalentes.
 

@@ -149,7 +149,8 @@ ifdef::git-rev-list[]
 	Ne rien imprimer en sortie standard. Cette forme est principalement destinée à permettre à l'appelant de tester l'état de sortie pour voir si une série d'objets est entièrement connectée (ou non). C'est plus rapide que de rediriger stdout vers `/dev/null` car la sortie n'a pas besoin d'être formatée.
 
 --disk-usage::
-	Supprimer la sortie normale ; afficher plutôt la somme des octets utilisés pour le stockage sur disque par les commits ou les objets sélectionnés. Cela équivaut à envoyer la sortie dans `git cat-file --batch-check='%(objectsize:disk)'`, sauf que cela fonctionne beaucoup plus vite (surtout avec `--use-bitmap-index`). Voir la section `AVERTISSEMENTS` dans linkgit:git-cat-file[1] pour les limitations de ce que signifie "stockage sur disque".
+--disk-usage=human::
+	Supprimer la sortie normale ; afficher plutôt la somme des octets utilisés pour le stockage sur disque par les commits ou les objets sélectionnés. Cela équivaut à envoyer la sortie dans `git cat-file --batch-check='%(objectsize:disk)'`, sauf que cela fonctionne beaucoup plus vite (surtout avec `--use-bitmap-index`). Voir la section `AVERTISSEMENTS` dans linkgit:git-cat-file[1] pour les limitations de ce que signifie "stockage sur disque". Avec la valeur optionnelle `human`, la taille du stockage sur disque est affichée par une chaîne de caractères lisible par l'homme (par exemple 12,24 Kio, 3,50 Mio).
 endif::git-rev-list[]
 
 --cherry-mark::
@@ -239,8 +240,8 @@ Mode par défaut::
 --simplify-merges::
 	Option supplémentaire à `--full-history' pour supprimer certaines fusions inutiles de l'historique résultant, car il n'y a pas de commits sélectionnés contribuant à cette fusion.
 
---ancestry-path::
-	Lorsqu'on lui donne une plage de commits à afficher (par exemple'commit1..commit2' ou'commit2 {caret}commit1'), seuls les commits qui existent directement sur la chaîne des ancêtres entre 'commit1' et 'commit2', c'est-à-dire les commits qui sont à la fois descendants de 'commit1' et ancêtres de 'commit2', sont affichés.
+--ancestry-path[=<commit>]::
+	Lorsque l'on donne une plage de commits à afficher (par exemple 'commit1..commit2' ou 'commit2 {caret}commit1'), n'afficher que les commits de cette plage qui sont des ancêtres de <commit>, des descendants de <commit>, ou <commit> lui-même. Si aucun commit n'est spécifié, utiliser 'commit1' (la partie exclue de la plage) comme <commit>. Peut être passée plusieurs fois ; si c'est le cas, un commit est inclus s'il est l'un des commits donnés ou s'il est un ancêtre ou un descendant de l'un d'eux.
 
 Une explication plus détaillée suit.
 
@@ -358,8 +359,8 @@ Notez les principales différences entre `N`, `P` et `Q` par rapport à `--full-
 
 Il existe un autre mode de simplification :
 
---ancestry-path::
-	Limiter les commits affichés à ceux qui se trouvent directement sur la chaîne des ancêtres entre les commits "from" et "to" dans la plage de commit donnée. C'est-à-dire n'afficher que les commits qui sont l'ancêtre du commit "to" et les descendants du commit "from".
+--ancestry-path[=<commit>]::
+	Limiter les commits affichés à ceux qui sont un ancêtre de <commit>, ou qui sont un descendant de <commit>, ou sont <commit> lui-même.
 +
 À titre d'exemple, considérons l'historique de commits suivant :
 +
@@ -381,6 +382,24 @@ Quand nous voulons savoir quels commits dans `M` sont contaminés par le bogue i
 		  G---H---I---J
 			       \
 				L--M
+-----------------------------------------------------------------------
++
+Nous pouvons également utiliser `--ancestry-path=D` au lieu de `--ancestry-path` qui signifie la même chose lorsqu'il est appliqué à la plage 'D..M' mais est juste plus explicite.
++
+Si nous sommes plutôt intéressés par un sujet donné dans cette plage, et tous les commits affectés par ce sujet, nous pouvons seulement vouloir voir ceux du sous-ensemble de `D..M` qui contiennent ce sujet dans leur chemin d'ascendance. Ainsi, en utilisant `--ancestry-path=H D..M` par exemple, on obtiendrait le résultat suivant :
++
+-----------------------------------------------------------------------
+		E
+		 \
+		  G---H---I---J
+			       \
+				L--M
+-----------------------------------------------------------------------
++
+Alors que `--ancestry-path=K D...M` donnerait comme résultat
++
+-----------------------------------------------------------------------
+		K---------------L--M
 -----------------------------------------------------------------------
 
 Avant de discuter d'une autre option, `--show-pulls`, nous devons créer un nouvel exemple d'historique.
@@ -574,8 +593,7 @@ Notez que la forme '--filter=sparse:path=<chemin>' qui veut lire à partir d'un 
 +
 Plusieurs drapeaux '--filter=' peuvent être spécifiés pour combiner les filtres. Seuls les objets acceptés par tous les filtres sont inclus.
 +
-The form '--filter=combine:<filter1>+<filter2>+...<filterN>' can also be used to combined several filters, but this is harder than just repeating the '--filter' flag and is usually not necessary. Filters are joined by '{plus}' and individual filters are %-encoded (i.e. URL-encoded). Besides the '{plus}' and '%' characters, the following characters are reserved and also must be encoded: `~!@#$^&*()[]{}\;",<>?`+&#39;&#96;+
-as well as all characters with ASCII code &lt;= `0x20`, which includes space and newline.
+La forme'--filter=combine:<filtre1>+<filtre2>+...<filtreN>' peut aussi être utilisée pour combiner plusieurs filtres, mais c'est plus difficile que de répéter simplement le drapeau'--filter' et ce n'est généralement pas nécessaire. Les filtres sont joints par des signes '{plus}' et les filtres individuels sont codés en % (c'est-à-dire codés comme des URL). Outre les caractères '{plus}' et'%', les caractères suivants sont réservés et doivent également être encodés : `~!@#$^^&*()[]{]{}\ ;",<>?`+&#39;&#96;+ ainsi que tous les caractères avec un code ASCII <= `0x20`, qui inclut l'espace et la ligne nouvelle.
 +
 D'autres caractères arbitraires peuvent également être encodés. Par exemple,'combine:tree:3+blob:none' et 'combine:tree%3A3+blob%3Anone' sont équivalents.
 

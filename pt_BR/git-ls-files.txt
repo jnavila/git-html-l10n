@@ -20,7 +20,7 @@ RESUMO
 		[--exclude-standard]
 		[--error-unmatch] [--with-tree=<árvore>]
 		[--full-name] [--recurse-submodules]
-		[--abbrev[=<n>]] [--] [<arquivo>...]
+		[--abbrev[=<n>]] [--format=<formato>] [--] [<arquivo>...]
 
 DESCRIÇÃO
 ---------
@@ -139,6 +139,8 @@ Ambos os `<eolinfo>` no índice ("i/<eolinfo>") e na árvore de trabalho ("w/<eo
 --sparse::
 	Caso o índice seja esparso, mostre os diretórios esparsos sem expandir aos arquivos contidos. Os diretórios esparsos serão mostrados com uma barra, como "x/" para um diretório esparso "x".
 
+--format=<formato>::
+	Uma string que interpola `%(fieldname)` do resultado que está sendo mostrado. Ele também interpola `%%` para `%`, e `%xx` onde `xx` são dígitos hexadecimais interpolados para o caractere com código hexadecimal `xx`; por exemplo, `%00` interpola para `\0` (NUL), `%09` para `\t` (TAB) e %0a para `\n` (LF). A opção`--format` não pode ser combinado com `-s`, `-o`, `-k`, `-t`, `--resolve-undo` e `--eol`.
 \--::
 	Não interprete mais argumentos como opções.
 
@@ -160,6 +162,27 @@ Para um caminho que não foi mesclado, em vez de gravar um único modo/ par SHA-
 
 Sem a opção `z`, os `pathnames` com os caracteres "incomuns" são citados conforme explicado na variável de configuração `core.quotePath` (consulte linkgit:git-config[1]). Utilizando a opção `-z`, o nome do arquivo é gerado literalmente e a linha é finalizada com um byte `NUL`.
 
+É possível imprimir em um formato personalizado usando a opção `--format`, que é capaz de interpolar diferentes campos usando uma notação `%(fieldname)`. Por exemplo, se você se importa apenas com os campos "objectname" e "path", você pode executar com um comando "--format" específico como
+
+	git ls-files --format='%(objectname) %(caminho)'
+
+NOME DOS CAMPOS
+---------------
+A maneira como cada caminho é mostrado pode ser personalizada ao usar a opção `--format=<formato>`, onde o %(fieldname) na string <formato> são interpolados nos vários aspectos da entrada do índice. Os seguintes "fieldname" são compreendidos:
+
+objectmode::
+	O modo do arquivo que está registrado no índice.
+objectname::
+	O nome do arquivo que está registrado no índice.
+estágio::
+	O estágio do arquivo que é registrado no índice.
+eolinfo:index::
+eolinfo:worktree::
+	O <eolinfo> (consulte a descrição da opção `--eol`) do conteúdo no índice ou para o caminho na árvore de trabalho.
+eolattr::
+	O <eolattr> (consulte a descrição da opção `--eol`) que se aplica ao caminho.
+caminho::
+	O nome do caminho do arquivo que está registrado no índice.
 
 EXCLUIR PADRÕES
 ---------------

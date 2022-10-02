@@ -29,7 +29,7 @@ DESCRIPTION
 -----------
 Vous pouvez interroger/définir/remplacer/annuler les options avec cette commande. Le nom est en fait la section et la clé séparées par un point, et la valeur sera échappée.
 
-Plusieurs lignes peuvent être ajoutées à une option en utilisant l'option `--add`. Si vous voulez mettre à jour ou annuler une option qui peut se trouver sur plusieurs lignes, un "motif-de-valeur" (qui est une expression régulière étendue, à moins que l'option "--fixed-value" soit donnée) doit être donné. Seules les valeurs existantes qui correspondent au motif sont mises à jour ou annulées. Si vous voulez gérer les lignes qui ne correspondent *pas* au motif, ajoutez simplement un point d'exclamation devant (voir aussi <<EXEMPLES>>), mais notez que cela ne fonctionne que lorsque l'option `--fixed-value` n'est pas utilisée.
+Plusieurs lignes peuvent être ajoutées à une option en utilisant l'option `--add`. Si vous voulez mettre à jour ou annuler une option qui peut se trouver sur plusieurs lignes, un "motif-de-valeur" (qui est une expression régulière étendue, à moins que l'option "--fixed-value" soit donnée) doit être donné. Seules les valeurs existantes qui correspondent au motif sont mises à jour ou annulées. Si vous voulez gérer les lignes qui ne correspondent *pas* au motif, ajoutez simplement un point d'exclamation devant (voir aussi <<EXAMPLES,EXEMPLES>>), mais notez que cela ne fonctionne que lorsque l'option `--fixed-value` n'est pas utilisée.
 
 L'option `--type=<type>` indique à 'git config' de s'assurer que les valeurs entrantes et sortantes peuvent être canonisées sous le <type> donné. Si aucun `--type=<type>` n'est donné, aucune canonisation ne sera effectuée. Les appelants peuvent annuler un spécificateur `--type` existant avec `--no-type`.
 
@@ -191,16 +191,16 @@ CONFIGURATION
 FICHIERS
 --------
 
-Si ce n'est pas défini explicitement avec `--file`, il y a quatre fichiers où 'git config' cherchera des options de configuration :
+Par défaut, 'git config' lira les options de configuration à partir de plusieurs fichiers :
 
 $(préfixe)/etc/gitconfig::
 	Fichier de configuration au niveau système.
 
 $XDG_CONFIG_HOME/git/config::
-	Deuxième fichier de configuration spécifique à l'utilisateur. Si $XDG_CONFIG_HOME n'est pas défini ou est vide, `$HOME/.config/git/config` sera utilisé. Toute variable à valeur unique définie dans ce fichier sera écrasée par ce qui se trouve dans `~/.gitconfig`. C'est une bonne idée de ne pas créer ce fichier si vous utilisez parfois d'anciennes versions de Git, car le support de ce fichier a été ajouté assez récemment.
-
 ~/.gitconfig::
-	Fichier de configuration spécifique à l'utilisateur. Également appelé fichier de configuration "global".
+	Fichiers de configuration spécifiques à l'utilisateur. Lorsque la variable d'environnement XDG_CONFIG_HOME n'est pas définie ou est vide, $HOME/.config/ est utilisé comme $XDG_CONFIG_HOME.
++
+Ces fichiers sont également appelés fichiers de configuration "globaux". Si les deux fichiers existent, ils sont lus dans l'ordre donné ci-dessus.
 
 $GIT_DIR/config::
 	Fichier de configuration spécifique au dépôt.
@@ -208,17 +208,55 @@ $GIT_DIR/config::
 $GIT_DIR/config.worktree::
 	Ceci est optionnel et n'est recherché que si `extensions.worktreeConfig` est présent dans $GIT_DIR/config.
 
-Si aucune autre option n'est donnée, toutes les options de lecture liront tous ces fichiers lorsqu'ils sont disponibles. Si le fichier de configuration global ou le fichier de configuration du système ne sont pas disponibles, ils seront ignorés. Si le fichier de configuration du dépôt n'est pas disponible ou lisible, 'git config' se terminera avec un code d'erreur non nul. Cependant, dans aucun des cas, un message d'erreur ne sera émis.
+Vous pouvez aussi fournir des paramètres de configuration additionnels lorsque vous exécutez une commande git en utilisant l'option `-c`. Voir linkgit:git[1] pour plus de détails.
+
+Les options seront lues depuis tous ces fichiers lorsqu'ils sont disponibles. Si le fichier de configuration global ou le fichier de configuration du système sont manquants ou illisibles, ils seront ignorés. Si le fichier de configuration du dépôt est manquant ou illisible, 'git config' se terminera avec un code d'erreur non nul. Un message d'erreur sera produit si le fichier n'est pas lisible, mais pas s'il est manquant.
 
 Les fichiers sont lus dans l'ordre indiqué ci-dessus, la dernière valeur trouvée étant prioritaire sur les valeurs lues précédemment. Lorsque plusieurs valeurs peuvent être concaténées, toutes les valeurs d'une clé dans tous les fichiers seront utilisées.
 
-Vous pouvez remplacer les paramètres de configuration individuels lorsque vous exécutez une commande git en utilisant l'option `-c`. Voir linkgit:git[1] pour plus de détails.
+Par défaut, les options sont seulement écrites dans le fichier de configuration spécifique au dépôt. Notez que cela affecte également les options comme `--replace-all` et `--unset`. *'git config' ne modifiera jamais qu'un seul fichier à la fois*.
 
-Toutes les options d'écriture seront par défaut écrites dans le fichier de configuration spécifique au dépôt. Notez que cela affecte également les options comme `--replace-all` et `--unset`. *'git config' ne modifiera jamais qu'un seul fichier à la fois*.
+Vous pouvez limiter les sources de configuration qui sont lues ou écrites en spécifiant le chemin d'un fichier avec l'option `--file`, ou en spécifiant une portée de configuration avec `--system`, `--global`, `--local`, ou `--worktree`. Pour en savoir plus, voir <<OPTIONS>> ci-dessus.
 
-Vous pouvez outrepasser ces règles en utilisant les options de ligne de commande `--global`, `--system`, `--local`, `--worktree`, et `--file` ; voir <<OPTIONS>> ci-dessus.
+[[SCOPES]]
+PORTÉES
+-------
 
+Chaque source de configuration relève d'une portée de configuration. Les portées sont les suivantes :
 
+Système::
+	$(préfixe)/etc/gitconfig
+
+global::
+	$XDG_CONFIG_HOME/git/config
++
+~/.gitconfig
+
+local::
+	$GIT_DIR/config
+
+arbre-de-travail::
+	$GIT_DIR/config.worktree
+
+commande::
+	variables d'environnement GIT_CONFIG_{COUNT,KEY,VALUE} (voir <<ENVIRONNEMENT>> ci-dessous)
++
+l'option `-c`
+
+À l'exception de 'commande', chaque portée correspond à une option de ligne de commande : `--system`, `--global`, `--local`, `--worktree`.
+
+Lors de la lecture d'options, la spécification d'une portée ne lira que les options des fichiers de cette portée. Lors de l'écriture d'options, la spécification d'une portée écrira dans les fichiers de cette portée (au lieu du fichier de configuration spécifique au dépôt). Voir <<OPTIONS>> ci-dessus pour une description complète.
+
+La plupart des options de configuration sont respectées quelle que soit la portée dans laquelle elles sont définies, mais certaines options ne sont respectées que dans certaines portées. Consultez la documentation de l'option concernée pour plus de détails.
+
+Configuration protégée
+~~~~~~~~~~~~~~~~~~~~~~
+
+La configuration protégée fait référence aux portées 'système', 'global' et 'commande'. Pour des raisons de sécurité, certaines options ne sont respectées que lorsqu'elles sont spécifiées en configuration protégée, et ignorées dans le cas contraire.
+
+Git traite ces portées comme si elles étaient contrôlées par l'utilisateur ou un administrateur de confiance. Ceci est dû au fait qu'un attaquant qui contrôle ces portées peut causer des dommages substantiels sans utiliser Git, il est donc supposé que l'environnement de l'utilisateur protège ces portées contre les attaquants.
+
+[[ENVIRONMENT]]
 ENVIRONNEMENT
 -------------
 
