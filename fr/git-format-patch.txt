@@ -1,0 +1,491 @@
+git-format-patch(1)
+===================
+
+NOM
+---
+git-format-patch - Prépare les rustines pour la soumission par courriel
+
+
+SYNOPSIS
+--------
+[verse]
+'git format-patch' [-k] [(-o|--output-directory) <rép.> | --stdout]
+		   [--no-thread | --thread[=<style>]]
+		   [(--attach|--inline)[=<limite>] | --no-attach]
+		   [-s | --signoff]
+		   [--signature=<signature> | --no-signature]
+		   [--signature-file=<fichier>]
+		   [-n | --numbered | -N | --no-numbered]
+		   [--start-number <n>] [--numbered-files]
+		   [--in-reply-to=<id message >] [--suffix=.<sfx>]
+		   [--ignore-if-in-upstream] [--always]
+		   [--cover-from-description=<mode>]
+		   [--rfc] [--subject-prefix=<préfixe-sujet >]
+		   [(--reroll-count|-v) <n>]
+		   [--to=<email>] [--cc=<courriel>]
+		   [--[no-]cover-letter] [--quiet]
+		   [--[no-]encode-email-headers]
+		   [--no-notes | --notes[=<réf>]]
+		   [--interdiff=<précédent>]
+		   [--range-diff=<précédent> [--creation-factor=<pourcent>]]
+		   [--filename-max-length=<n>]
+		   [--progress]
+		   [<options-diff-communes>]
+		   [ <depuis> | <plage-de-révisions> ]
+
+DESCRIPTION
+-----------
+
+Prépare chaque commit non fusionné avec sa "rustine" dans un "message" par commit, formaté pour ressembler à une boîte aux lettres UNIX. La sortie de cette commande est pratique pour la soumission par courriel ou pour l'utilisation de 'git am'.
+
+Un « message » généré par la commande se compose de trois parties :
+
+* Un bref en-tête de métadonnées qui commence par `From <commit>` avec un horodatage fixe `Mon Sep 17 00:00:00 2001` pour aider des programmes comme "file(1)" à reconnaître que le fichier est une sortie de cette commande, des champs qui enregistrent l'identité de l'auteur, la date de l'auteur, et le titre de la modification (le premier paragraphe du message du journal de validation).
+
+* Le deuxième paragraphe et les suivants du message du journal de validation.
+
+* La "rustine", qui est la sortie "diff -p --stat" (voir linkgit:git-diff[1]) entre le commit et son parent.
+
+Le message du journal et la rustine sont séparés par une ligne à trois tirets.
+
+Il existe deux façons de spécifier les commits sur lesquels opérer.
+
+1. Un seul commit, <depuis>, spécifie que les commits menant au sommet de la branche courante qui ne sont pas dans l'historique qui mène à <depuis> doivent être émis.
+
+2. L'expression générique <plage-de-révisions> (voir la section "SPECIFIER LES REVISIONS" dans linkgit:gitrevisions[7]) sélectionne les commits dans la plage spécifiée.
+
+La première règle est prioritaire dans le cas d'un seul <commit>. Pour appliquer la deuxième règle, c'est-à-dire tout formater depuis le début de l'historique jusqu'à <commit>, utilisez l'option `--root` : `git format-patch --root <commit>`. Si vous souhaitez formater uniquement <commit> lui-même, vous pouvez le faire avec `git format-patch -1 <commit>`.
+
+Par défaut, chaque fichier de sortie est numéroté séquentiellement à partir de 1, et utilise la première ligne du message de validation (traité pour la sécurité des chemins) comme nom de fichier. Avec l'option `--numbered-files`, les noms des fichiers de sortie ne seront que des numéros, sans la première ligne du message de livraison ajoutée. Les noms des fichiers de sortie sont affichés sur la sortie standard, sauf si l'option `--stdout` est spécifiée.
+
+Si `-o` est spécifié, les fichiers de sortie sont créés dans <rép.>. Sinon, ils sont créés dans le répertoire de travail actuel. Le chemin par défaut peut être défini avec l'option de configuration `format.outputDirectory`. L'option `-o` est prioritaire sur `format.outputDirectory`. Pour stocker les rustines dans le répertoire de travail actuel même si `format.outputDirectory` pointe ailleurs, utilisez `-o .`. Tous les composants du répertoire seront créés.
+
+Par défaut, le sujet d'une rustine unique est "[PATCH]" suivi de la concaténation des lignes du message de validation jusqu'à la première ligne vide (voir la section DISCUSSION de linkgit:git-commit[1]).
+
+Lorsque plusieurs rustines sont émises, le préfixe du sujet sera plutôt "[PATCH n/m]". Pour forcer l'ajout de 1/1 pour une seule rustine, utilisez `-n`. Pour omettre les numéros de rustine dans le sujet, utilisez `-N`.
+
+Avec `--thread`, `git-format-patch` générera les en-têtes `In-Reply-To` et `References` pour que le deuxième courrier de rustine et les suivants apparaissent comme des réponses au premier courrier ; cela génère aussi un en-tête `Message-Id` pour référence ultérieure.
+
+OPTIONS
+-------
+:git-format-patch: 1
+include::diff-options.txt[]
+
+-<n>::
+	Préparer les rustines à partir des <n> commits les plus récents.
+
+-o <rép.>::
+--output-directory <rép.>::
+	Utiliser <rép.> pour stocker les fichiers résultants, au lieu du répertoire de travail actuel.
+
+-n::
+--numbered::
+	Nommer la sortie au format '[PATCH n/m]', même avec une seule rustine.
+
+-N::
+--no-numbered::
+	Nommer la sortie au format '[PATCH]'.
+
+--start-number <n>::
+	démarrer la numérotation des patchs à <n> au lieu de 1.
+
+--numbered-files::
+	Les noms des fichiers de sortie seront une simple séquence de nombres sans la première ligne par défaut du commit ajouté.
+
+-k::
+--keep-subject::
+	Ne pas enlever/ajouter '[PATCH]' de la première ligne du message du journal de validation.
+
+-s::
+--signoff::
+	Ajouter une ligne terminale `Signed-off-by` au message de commit, en utilisant votre identité pour validateur. Référez-vous à l'option de contre-signature dans linkgit:git-commit[1] pour plus d'information.
+
+--stdout::
+	Afficher tous les commits sur la sortie standard au format mbox, au lieu de créer un fichier pour chacun d'entre eux.
+
+--attach[=<séparateur>]::
+	Créer une pièce jointe multipart/mixte, dont la première partie est le message de validation et la deuxième partie la rustine elle-même, avec `Content-Disposition : attachment`.
+
+--no-attach::
+	Désactiver la création d'une pièce jointe, en remplaçant le paramètre de configuration.
+
+--inline [=<séparateur>]::
+	Créer une pièce jointe multipart/mixte, dont la première partie est le message de validation et la deuxième partie la rustine elle-même, avec `Content-Disposition : inline`.
+
+--thread[=<style>]::
+--no-thread::
+	Contrôle l'ajout des en-têtes `In-Reply-To` et `References` pour que le deuxième courrier et les suivants apparaissent comme des réponses au premier. Contrôle également la génération de l'en-tête `Message-Id` à référencer.
++
+L'argument optionnel <style> peut être soit `shallow` soit `deep`. Le filage 'shallow' fait de chaque courrier une réponse à la tête de la série, où la tête est choisie parmi la lettre d'accompagnement, le `--in-reply-to`, et le premier courrier de correction, dans cet ordre. Le filage 'deep' fait de chaque courrier une réponse au précédent.
++
+La valeur par défaut est `--no-thread`, sauf si la configuration `format.thread` est définie. Si `--thread` est spécifié sans style, il prend par défaut le style spécifié par `format.thread` s'il existe, sinon `shallow`.
++
+Attention, le comportement par défaut de `git send-email' est d'arranger les emails en enfilade lui-même. Si vous voulez que `git format-patch` s'occupe de la mise en fil, vous devrez vous assurer que le la mise en file est désactivée pour `git send-email`.
+
+--in-reply-to=<id message>::
+	Faire en sorte que le premier message (ou tous les messages si `--no-thread` est spécifié) apparaisse comme une réponse au <id message> donné, ce qui évite de casser les fils de discussion lors d'une nouvelle série de patchs.
+
+--ignore-if-in-upstream::
+	Ne pas inclure une rustine qui correspond à un commit dans <jusque>..<depuis>. Ceci examinera tous les commits atteignables depuis <depuis> mais pas depuis <jusque> et les comparera avec les rustines en cours de génération, et toute rustine qui correspond sera ignorée.
+
+--always::
+	Inclure les rustines pour les commits qui n'introduisent aucun changement, qui sont ignorés par défaut.
+
+--cover-from-description=<mode>::
+	Contrôle les parties de la lettre d'introduction qui seront automatiquement remplies à l'aide de la description de la branche.
++
+Si `<mode>` est `message` ou `default`, le sujet de la lettre d'introduction sera rempli avec un texte de remplacement. Le corps de la lettre d'introduction sera rempli avec la description de la branche. C'est le mode par défaut lorsqu'aucune configuration ou option de ligne de commande n'est spécifiée.
++
+Si `<mode>` est `subject`, le premier paragraphe de la description de la branche alimentera le sujet de la lettre d'introduction. Le reste de la description constituera le corps de la lettre d'introduction.
++
+Quand `<mode>` est `auto`, si le premier paragraphe de la description de la branche est supérieur à 100 octets, alors le mode sera `message`, sinon `subject` sera utilisé.
++
+Si `<mode>` est `none`, le sujet et le corps de la lettre d'introduction seront remplis avec du texte de remplacement.
+
+--subject-prefix=<préfixe de sujet>::
+	Au lieu du préfixe standard '[PATCH]' dans la ligne d'objet, utiliser plutôt '[<préfixe de l'objet>]. Cela permet de nommer utilement une série de rustines, et peut être combiné avec l'option `--numbered`.
+
+--filename-max-length=<n>::
+	Au lieu de la longueur standard de 64 octets, les noms de fichiers de sortie générés sont réduits à environ '<n>' octets (une valeur trop courte sera augmentée silencieusement à une longueur raisonnable). La valeur par défaut est la valeur de la variable de configuration `format.filenameMaxLength`, ou 64 si non configuré.
+
+--rfc::
+	Alias pour `--subject-prefix="RFC PATCH"`. RFC signifie "Request For Comments" (demande de commentaires) ; utilisez ceci lorsque vous envoyez une rustine expérimentale pour une discussion plutôt que pour une application.
+
+-v <n>::
+--reroll-count=<n>::
+	Marquer la série comme la <n>ème itération du sujet. Les noms des fichiers de sortie sont précédés de `v<n>`, et le préfixe du sujet ("PATCH" par défaut, mais configurable via l'option `--subject-prefix`) a ` v<n>` ajouté. Par exemple, `--reroll-count=4` peut produire le fichier `v4-0001-add-makefile.patch` qui a "Subject : [PATCH v4 1/20] Add makefile". `<n>` n'a pas besoin d'être un nombre entier (par exemple, "--reroll-count=4.4", ou "--reroll-count=4rev2" sont autorisés), mais l'inconvénient d'utiliser un tel nombre de rerolls est que le range-diff/interdiff avec la version précédente n'indique pas exactement à quelle version la nouvelle interation est comparée.
+
+--to=<courriel>::
+	Ajoute un en-tête `To:` aux en-têtes du courriel. Ceci s'ajoute à tous les en-têtes configurés, et peut être utilisé plusieurs fois. La forme négative `--no-to` élimine tous les en-têtes `To:` ajoutés jusqu'à présent (depuis la configuration ou la ligne de commande).
+
+--cc=<courriel>::
+	Ajoute un en-tête `Cc:` aux en-têtes du courriel. Ceci s'ajoute à tous les en-têtes configurés, et peut être utilisé plusieurs fois. La forme négative `--no-cc` élimine tous les en-têtes `Cc:` ajoutés jusqu'à présent (depuis la configuration ou la ligne de commande).
+
+--from::
+--from=<ident>::
+	Utiliser `ident` dans l'en-tête `From:` de chaque courriel de commit. Si l'identifiant de l'auteur du commit n'est pas textuellement identique au `ident` fourni, placer un en-tête `From:` dans le corps du message avec l'auteur original. Si aucun `ident` n'est fourni, utiliser l'identifiant du validateur.
++
+Notez que cette option n'est utile que si vous envoyez réellement les courriel et que vous voulez vous identifier comme l'expéditeur, mais conserver l'auteur original (et `git am` récupérera correctement l'en-tête in-body). Notez également que `git send-email` gère déjà cette transformation pour vous, et cette option ne devrait pas être utilisée si vous envoyez le résultat à `git send-email`.
+
+--[no-]force-in-body-from::
+	Avec l'expéditeur du courriel spécifié par l'option `--from`, par défaut, un "From :" dans le corps du message pour identifier l'auteur réel du commit est ajouté en haut du message du journal des validations si l'expéditeur est différent de l'auteur. Avec cette option, le "From :" dans le corps du message est ajouté même si l'expéditeur et l'auteur ont le même nom et la même adresse, ce qui peut aider si le logiciel de liste de diffusion confond l'identité de l'expéditeur. La valeur par défaut est la valeur de la variable de configuration `format.forceInBodyFrom`.
+
+--add-header=<entête>::
+	Ajoute un entête arbitraire aux entêtes du courriel. Ceci s'ajoute à tous les entêtes configurés, et peut être utilisé plusieurs fois. Par exemple, `--add-header="Organisation : git-foo"`. La forme négative `--no-add-header` élimine *tous* les entêtes (`To:`, `Cc:`, et personnalisés) ajoutés jusqu'ici depuis la configuration ou la ligne de commande.
+
+--[no-]cover-letter::
+	En plus des rustine, générer un fichier de lettre d'introduction contenant la description de la branche, le shortlog et le diffstat global. Vous pouvez remplir une description dans le fichier avant de l'envoyer.
+
+--encode-email-headers::
+--no-encode-email-headers::
+	Encoder les entêtes de courriel qui contiennent des caractères non ASCII avec le "Q-encoding" (décrit dans la RFC 2047), au lieu d'afficher les entêtes textuellement. La valeur par défaut est la valeur de la variable de configuration `format.encodeEmailHeaders`.
+
+--interdiff=<précédent>::
+	Pour aider à la revue, insérer un interdiff dans la lettre d'introduction, ou comme commentaire de la rustine d'une série d'une seule rustine, montrant les différences entre la version précédente de la série de rustines et la série en cours de formatage. `précédent` est une révision unique nommant la pointe de la série précédente qui partage une base commune avec la série en cours de formatage (par exemple `git format-patch --cover-letter --interdiff=feature/v1 -3 feature/v2`).
+
+--range-diff=<précédent>::
+	Pour aider à la revue, insérer un range-diff (voir linkgit:git-range-diff[1]) dans la lettre d'introduction, ou comme commentaire de la rustine d'une série d'une seule rustine, montrant les différences entre la version précédente de la série de rustines et la série en cours de formatage. `précédent` peut être une révision unique nommant la pointe de la série précédente si elle partage une base commune avec la série en cours de formatage (par exemple `git format-patch --cover-letter --range-diff=feature/v1 -3 feature/v2`), ou une plage de révisions si les deux versions de la série sont disjointes (par exemple `git format-patch --cover-letter --range-diff=feature/v1~3..feature/v1 -3 feature/v2`).
++
+Notez que les options diff passées à la commande affectent la façon dont le produit principal de `format-patch` est généré, mais qu'elles ne sont pas passées à la machinerie sous-jacente de `range-diff` utilisée pour générer le matériel de la lettre d'introduction (ceci pourrait changer dans le futur).
+
+--creation-factor=<pourcentage>::
+	Utilisé avec `--range-diff`, modifie l'heuristique qui fait correspondre les commits entre la série précédente et la série actuelle de rustines en ajustant le facteur de correction du coût de création/suppression. Voir linkgit:git-range-diff[1]) pour plus de détails.
+
+--notes[=<ref>]::
+--no-notes::
+	Ajouter les notes (voir linkgit:git-notes[1]) pour le commit après la ligne à trois tirets.
++
+Le cas d'utilisation attendu de ceci est d'écrire une explication de soutien pour le commit qui n'appartient pas au message de journal de commit proprement dit, et de l'inclure avec la soumission de la rustine. Alors que l'on peut simplement écrire ces explications après l'exécution de `format-patch` mais avant l'envoi, les conserver sous forme de notes Git permet de les maintenir entre les versions de la série de patchs (mais voir la discussion sur les options de configuration `notes.rewrite` dans linkgit:git-notes[1] pour utiliser ce flux de travail).
++
+La valeur par défaut est `--no-notes`, sauf si la configuration `format.notes` est définie.
+
+--[no-]signature=<signature>::
+	Ajouter une signature à chaque message produit. Selon la RFC 3676, la signature est séparée du corps du message par une ligne avec '--'. Si l'option signature est omise, la signature est par défaut le numéro de version de Git.
+
+--signature-file=<fichier>::
+	Fonctionne comme --signature, sauf que la signature est lue depuis un fichier.
+
+--suffix=.<sfx>::
+	Au lieu d'utiliser `.patch` comme suffixe pour les noms de fichiers générés, utiliser le suffixe spécifié. Une alternative courante est `--suffix=.txt`. Si cette option est laissée vide, le suffixe `.patch` sera supprimé.
++
+Notez que le caractère de tête ne doit pas nécessairement être un point ; par exemple, vous pouvez utiliser `--suffix=-patch` pour obtenir `0001-description-de-ma-modification-patch`.
+
+-q::
+--quiet::
+	Ne pas afficher les noms des fichiers générés sur la sortie standard.
+
+--no-binary::
+	Ne pas afficher le contenu des modifications dans les fichiers binaires, mais plutôt un avis que ces fichiers ont été modifiés. Les rustines générées à l'aide de cette option ne peuvent pas être appliquées correctement, mais elles sont toujours utiles pour une revue du code.
+
+--zero-commit::
+  Affiche une empreinte entièrement nulle dans l'en-tête From de chaque rustine au lieu de l'empreinte du commit.
+
+--[no-]base[=<commit>]::
+	Enregistrer les informations sur l'arbre de base pour identifier l'état auquel la série de rustines s'applique. Voir la section INFORMATION SUR L'ARBRE DE BASE ci-dessous pour plus de détails. Si <commit> est "auto", un commit de base est automatiquement choisi. L'option `--no-base` remplace la valeur configurée dans `format.useAutoBase`.
+
+--root::
+	Traiter l'argument révision comme une <plage de révisions>, même s'il ne s'agit que d'un seul commit (qui serait normalement traité comme un <depuis>). Notez que les commits racines inclus dans l'intervalle spécifié sont toujours formatés comme des rustines de création, indépendamment de ce drapeau.
+
+--progress::
+	Afficher des rapports de progression sur stderr au fur et à mesure que les rustines sont générées.
+
+CONFIGURATION
+-------------
+Vous pouvez spécifier des lignes d'en-tête supplémentaires à ajouter à chaque message, des valeurs par défaut pour le préfixe de l'objet et le suffixe du fichier, numéroter les rustines lorsque vous en produisez plusieurs, ajouter des en-têtes "To :" ou "Cc :", configurer les pièces jointes, changer le répertoire de sortie des rustines et signer les rustines avec des variables de configuration.
+
+------------
+[format]
+	headers = "Organization: git-foo\n"
+	subjectPrefix = CHANGE
+	suffix = .txt
+	numbered = auto
+	to = <courriel>
+	cc = <courriel>
+	attach [ = mime-boundary-string ]
+	signOff = true
+	outputDirectory = <répertoire>
+	coverLetter = auto
+	coverFromDescription = auto
+------------
+
+
+DISCUSSION
+----------
+
+La rustine produite par 'git format-patch' est au format d'une boîte aux lettres UNIX, avec un horodatage "magique" fixe pour indiquer que le fichier est produit par format-patch plutôt que par une vraie boîte aux lettres, comme ceci :
+
+------------
+From 8f72bad1baf19a53459661343e21d6491c3908d3 Mon Sep 17 00:00:00 2001
+From: Tony Luck <tony.luck@intel.com>
+Date: Tue, 13 Jul 2010 11:42:54 -0700
+Subject: [PATCH] =?UTF-8?q?[IA64]=20Put=20ia64=20config=20files=20on=20the=20?=
+ =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig=20diet?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Les fichiers de configuration arch/arm ont été allégés à l'aide d'un script python.
+(Voir le commentaire du commit c2330e286f68f1c408b4aa6515ba49d57f05beae)
+
+Faire la même chose pour ia64 afin que nous puissions avoir un look élégant et soigné.
+...
+------------
+
+Typiquement, elles sera placée dans le dossier des brouillons d'un MUA, éditée pour ajouter des commentaires opportuns qui ne devraient pas aller dans le changelog après les trois tirets, et ensuite envoyée comme un message dont le corps, dans notre exemple, commence par "arch/arm les fichiers de configuration...". À la réception, les lecteurs peuvent enregistrer les rustines intéressantes dans une boîte aux lettres UNIX et les appliquer avec linkgit:git-am[1].
+
+Lorsqu'une rustine fait partie d'une discussion en cours, la rustine générée par "git format-patch" peut être modifiée pour tirer parti de la fonctionnalité "git am --scissors". Après votre réponse à la discussion vient une ligne qui consiste uniquement en "`-- >8 --`" (ciseaux et perforation), suivie par la rustine avec les champs d'en-tête inutiles supprimés :
+
+------------
+...
+> Il faut donc faire telle ou telle chose.
+
+C'est logique pour moi.  Et cette rustine ?
+
+-- >8 --
+Sujet : [IA64] Mettre les fichiers de configuration ia64 sur le régime Uwe Kleine-KÃ¶nig
+
+Les fichiers de configuration arch/arm ont été allégés à l'aide d'un script python
+...
+------------
+
+Lorsque vous envoyez une rustine de cette manière, le plus souvent vous envoyez votre propre rustine, donc en plus du marqueur "`From $SHA1 $magic_timestamp`" vous devez omettre les lignes `From:` et `Date:` du fichier de rustine. Le titre de la rustine est susceptible d'être différent du sujet de la discussion à laquelle la rustine répond, il est donc probable que vous souhaitiez conserver la ligne Subject :, comme dans l'exemple ci-dessus.
+
+Vérification de la corruption des rustines
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+S'ils ne sont pas configurés correctement, de nombreux outils de courriel corrompent les espaces blancs. Voici deux types courants de corruption :
+
+* Lignes de contexte vides qui ne comportent pas d'espace.
+
+* Lignes de contexte non vides qui ont un espace blanc supplémentaire au début.
+
+Une façon de tester si votre MUA est correctement configuré est :
+
+* Envoyez le patch à vous-même, exactement comme vous le feriez, à l'exception des lignes To : et Cc : qui ne contiennent pas l'adresse de la liste et du mainteneur.
+
+* Enregistrez cette rustine dans un fichier au format boîte aux lettres UNIX. Appelez-la a.patch, par exemple.
+
+* Appliquez-le :
+
+    $ git fetch <projet> master:test-apply
+    $ git switch test-apply
+    $ git restore --source=HEAD --staged --worktree :/
+    $ git am a.patch
+
+Si elle ne s'applique pas correctement, il peut y avoir plusieurs raisons.
+
+* La rustine elle-même ne s'applique pas proprement. C'est _mauvais signe_ mais cela n'a pas grand chose à voir avec votre MUA. Vous pourriez vouloir rebaser la rustine avec linkgit:git-rebase[1] avant de la régénérer dans ce cas.
+
+* Le MUA a corrompu votre rustine ; "am" se plaint que la rustine ne s'applique pas. Regardez dans le sous-répertoire .git/rebase-apply/ et voyez ce que contient le fichier 'patch' et vérifiez les modèles de corruption courants mentionnés ci-dessus.
+
+* Pendant que vous y êtes, vérifiez également les fichiers 'info' et 'final-commit'. Si ce qui se trouve dans 'final-commit' n'est pas exactement ce que vous voulez voir dans le message du journal de validation, il est très probable que le destinataire finisse par modifier manuellement le message du journal en appliquant votre rustine. Des éléments tels que "Hi, this is my first patch.\n" dans le courriel de rustine doivent figurer après la ligne à trois tirets qui signale la fin du message de validation.
+
+CONSEILS SPÉCIFIQUES À CHAQUE OUTIL DE COURRIEL
+-----------------------------------------------
+Voici quelques conseils pour réussir à soumettre des rustines en ligne en utilisant différents outils de courriel.
+
+GMail
+~~~~~
+GMail ne dispose d'aucun moyen de désactiver le retour à la ligne dans l'interface Web, ce qui fait que les courriels que vous envoyez seront tronqués. Vous pouvez cependant utiliser "git send-email" et envoyer vos correctifs par le biais du serveur SMTP de GMail, ou utiliser n'importe quel client de messagerie IMAP pour vous connecter au serveur IMAP de Google et transférer les courriels par ce biais.
+
+Pour des conseils sur l'utilisation de "git send-email" pour envoyer vos rustines via le serveur SMTP GMail, consultez la section EXEMPLE de linkgit:git-send-email[1].
+
+Pour des conseils sur la soumission en utilisant l'interface IMAP, voir la section EXEMPLE de linkgit:git-imap-send [1].
+
+Thunderbird
+~~~~~~~~~~~
+Par défaut, Thunderbird enveloppe les courriels et les signale comme étant 'format=flowed', ce qui rend le courriel résultant inutilisable par Git.
+
+Il existe trois approches différentes : utiliser un module complémentaire pour désactiver les retours à la ligne, configurer Thunderbird pour qu'il n'altère pas les rustine, ou utiliser un éditeur externe pour empêcher Thunderbird d'altérer les rustines.
+
+Approche n°1 (add-on)
+^^^^^^^^^^^^^^^^^^^^^
+
+Installez le module complémentaire Toggle Word Wrap disponible sur https://addons.mozilla.org/thunderbird/addon/toggle-word-wrap/. Il ajoute une entrée de menu "Enable Word Wrap" dans le menu "Options" du compositeur que vous pouvez cocher. Vous pouvez maintenant composer le message comme vous le feriez normalement (couper + coller, 'git format-patch' | 'git imap-send', etc.), mais vous devez insérer manuellement des sauts de ligne dans tout texte que vous tapez.
+
+Approche n°2 (configuration)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Trois étapes :
+
+1. Configurez la composition de votre serveur de messagerie en texte brut : Editer...Paramètres du compte...Composition et adressage, décocher "Composer les messages en HTML".
+
+2. Configurez votre fenêtre de composition générale pour qu'elle n'introduise pas automatiquement des retours chariot.
++
+Dans Thunderbird 2 : Edition..Préférences..Composition, envelopper les messages en texte brut à 0
++
+Dans Thunderbird 3 : Editer...Préférences...Avancé...Editeur de configuration. Recherchez l'entrée "mail.wrap_long_lines". Basculez-la pour vous assurer qu'elle est réglée sur `false`. Recherchez également "mailnews.wraplength" et mettez la valeur à 0.
+
+3. Désactiver l'utilisation de format=flowed : Édition..Préférences..Avancé..Éditeur de configuration. Recherchez l'entrée "mailnews.send_plaintext_flowed". Basculez-la pour vous assurer qu'elle est définie sur `false`.
+
+Une fois que c'est fait, vous devriez être en mesure de composer un courriel comme vous le feriez normalement (couper + coller, 'git format-patch' | 'git imap-send', etc), et les rustines ne seront pas altérées.
+
+Approche n°3 (éditeur externe)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Les extensions Thunderbird suivantes sont nécessaires : AboutConfig de http://aboutconfig.mozdev.org/ et External Editor de http://globs.org/articles.php?lng=en&pg=8
+
+1. Préparer la rustine sous forme de fichier texte à l’aide de la méthode de votre choix.
+
+2. Avant d'ouvrir une fenêtre de composition, utilisez Edit->Account Settings pour décocher le paramètre "Compose messages in HTML format" dans le panneau "Composition & Addressing" du compte qui sera utilisé pour envoyer la rustine.
+
+3. Dans la fenêtre principale de Thunderbird, 'avant' d'ouvrir la fenêtre de composition de la rustine, utilisez Tools->about:config pour définir les éléments suivants aux valeurs indiquées :
++
+----------
+	mailnews.send_plaintext_flowed  => false
+	mailnews.wraplength             => 0
+----------
+
+4. Ouvrez une fenêtre de composition et cliquez sur l’icône de l’éditeur externe.
+
+5. Dans la fenêtre de l'éditeur externe, lisez le fichier de rustine et quittez l'éditeur normalement.
+
+Remarque : il est peut-être possible de réaliser l'étape 2 avec about:config et les paramètres suivants, mais personne n'a encore essayé.
+
+----------
+	mail.html_compose                       => false
+	mail.identity.default.compose_html      => false
+	mail.identity.id?.compose_html          => false
+----------
+
+Il existe un script dans contrib/thunderbird-patch-inline qui peut vous aider à inclure des rustines dans Thunderbird de manière simple. Pour l'utiliser, suivez les étapes ci-dessus et utilisez le script comme éditeur externe.
+
+KMail
+~~~~~
+Cela devrait vous aider à soumettre des rustine en ligne en utilisant KMail.
+
+1. Préparez la rustine sous forme de fichier texte.
+
+2. Cliquez sur Nouveau courrier.
+
+3. Allez sous "Options" dans la fenêtre Composer et assurez-vous que l'option "Word wrap" n'est pas activée.
+
+4. Utilisez Message -> Insérer un fichier... et insérez la rustine.
+
+5. De retour dans la fenêtre de composition : ajoutez tout autre texte que vous souhaitez au message, complétez les champs "adresse" et "objet", puis appuyez sur "envoyer".
+
+INFORMATION D'ARBRE DE BASE
+---------------------------
+
+Le bloc d'informations de l'arbre de base est utilisé par les mainteneurs ou les testeurs tiers pour connaître l'état exact auquel s'applique la série de rustines. Il se compose du "base commit", qui est un commit bien connu faisant partie de la partie stable de l'historique du projet sur lequel tout le monde travaille, et de zéro ou plus "rustines prérequises", qui sont des rustines bien connues en cours de développement qui ne font pas encore partie du "base commit" et qui doivent être appliquées au-dessus du "base commit" dans un ordre topologique avant que les rustines puissent être appliquées.
+
+Le "commit de base" est affiché sous la forme "base-commit : " suivi de l'indice 40-hex du nom de l'objet commit. Une 'rustine pré-requise' est affichée sous la forme "prerequisite-patch-id : " suivi de l'identifiant 40-hex de la rustine, qui peut être obtenu en passant la rustine par la commande `git patch-id --stable`.
+
+Imaginez qu'en plus du commit public P, vous appliquiez des rustines X, Y et Z bien connues de quelqu'un d'autre, et que vous construisiez ensuite votre série de trois rustines A, B, C, l'historique serait le suivant :
+
+................................................
+---P---X---Y---Z---A---B---C
+................................................
+
+Avec `git format-patch --base=P -3 C` (ou ses variantes, par exemple avec `--cover-letter` ou en utilisant `Z..C` au lieu de `-3 C` pour spécifier l'intervalle), le bloc d'information de l'arbre de base est affiché à la fin du premier message que la commande produit (soit la première rustine, soit la lettre d'introduction), comme ceci :
+
+------------
+base-commit: P
+prerequisite-patch-id: X
+prerequisite-patch-id: Y
+prerequisite-patch-id: Z
+------------
+
+Pour une topologie non linéaire, telle que
+
+................................................
+---P---X---A---M---C
+    \         /
+     Y---Z---B
+................................................
+
+Vous pouvez également utiliser `git format-patch --base=P -3 C` pour générer des rustines pour A, B et C, et les identifiants de P, X, Y, Z sont ajoutés à la fin du premier message.
+
+Si vous mettez `--base=auto` dans la ligne de commande, le commit de base sera calculé automatiquement comme étant la base de fusion du commit sommet de la branche de suivi à distance et de l'intervalle de révision spécifié dans la ligne de commande. Pour une branche locale, vous devez la faire suivre une branche distante par `git branch --set-upstream-to` avant d'utiliser cette option.
+
+EXEMPLES
+--------
+
+* Extraire les commits entre les révisions R1 et R2, et les appliquer sur la branche courante en utilisant 'git am' pour les sélectionner :
++
+------------
+$ git format-patch -k --stdout R1..R2 | git am -3 -k
+------------
+
+* Extrait tous les commits qui sont dans la branche actuelle mais pas dans la branche d'origine :
++
+------------
+$ git format-patch origin
+------------
++
+Pour chaque commit, un fichier séparé est créé dans le répertoire actuel.
+
+* Extrait tous les commits qui mènent à 'origin' depuis le début du projet :
++
+------------
+$ git format-patch --root origin
+------------
+
+* Pareil que précédemment :
++
+------------
+$ git format-patch -M -B origin
+------------
++
+En outre, la commande détecte et traite intelligemment les renommages et les réécritures complètes pour produire une rustine de renommage. Une rustine de renommage réduit la quantité de texte produit, et facilite la revue. Notez que les programmes "patch" non-Git ne comprendront pas les rustines de renommage, aussi ne l'utilisez que si vous savez que le destinataire utilise Git pour appliquer votre rustine.
+
+* Extraire les trois commits les plus élevés de la branche actuelle et les formater comme des rustines pouvant être envoyées par courriel :
++
+------------
+$ git format-patch -3
+------------
+
+MISES EN GARDE
+--------------
+
+Notez que `format-patch` omettra les commits de fusion dans la sortie, même s'ils font partie de la plage demandée. Un simple "patch" n'inclut pas assez d'informations pour que le destinataire puisse reproduire le même commit de fusion.
+
+VOIR AUSSI
+----------
+linkgit:git-am[1], linkgit:git-send-email[1]
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

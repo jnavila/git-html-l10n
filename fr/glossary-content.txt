@@ -8,7 +8,7 @@
 	<<def_object,Objet>> non typé, par exemple le contenu d'un fichier.
 
 [[def_branch]]branche::
-	Une "branche" est une ligne de développement. Le <<def_commit,commit>> le plus récent sur une branche est appelé sommet de cette branche. Le sommet de la branche est référencé par une <<def_head,tête>> de branche, qui avance au fur et à mesure que des développements supplémentaires sont effectués sur la branche. Un seul <<def_repository,dépôt>> Git peut suivre un nombre arbitraire de branches, mais votre <<def_working_tree,arbre de travail>> est associé à une seule d'entre elles (la branche "actuelle" ou "extraite"), et <<def_HEAD,HEAD>> pointe vers cette branche.
+	Une "branche" est une ligne de développement. Le <<def_commit,commit>> le plus récent sur une branche est appelé sommet de cette branche. Le sommet de la branche est <<def_ref,référencé>> par une <<def_head,tête>> de branche, qui avance au fur et à mesure que des développements supplémentaires sont effectués sur la branche. Un seul <<def_repository,dépôt>> Git peut suivre un nombre arbitraire de branches, mais votre <<def_working_tree,arbre de travail>> est associé à une seule d'entre elles (la branche "actuelle" ou "extraite"), et <<def_HEAD,HEAD>> pointe vers cette branche.
 
 [[def_cache]]cache::
 	Obsolète pour : <<def_index,index>>.
@@ -32,6 +32,12 @@
 	En tant que substantif : Un point unique dans l'historique de Git ; l'historique complet d'un projet est représenté comme un ensemble de commits interconnectés. Le mot "commit" est souvent utilisé par Git aux mêmes endroits où d'autres systèmes de contrôle de révision utilisent les mots "revision" ou "version". Également utilisé comme raccourci pour <<def_commit_object,objet commit>>.
 +
 Comme verbe : le terme "valider" est utilisé en français. L'action de stocker un nouvel instantané de l'état du projet dans l'historique Git, en créant un nouveau commit représentant l'état actuel de l'<<def_index,index>> et en avançant la <<def_HEAD,HEAD>> pour pointer vers le nouveau commit.
+
+[[def_commit_graph_general]]concept, représentations et utilisation du graphe de commit::
+	Un synonyme de la structure <<def_DAG,DAG>> (*Directed Acyclic Graph* : graphe dirigé acyclique) formée par les commits de la base de données des objets, <<def_ref,referencés>> par les sommets de branches, en utilisant leur <<def_chain,chaîne>> de commits liés. Cette structure est le graphe de commits définitif. Le graphe peut être représenté d'autres façons, par exemple par le <<def_commit_graph_file,fichier "commit-graph">>.
+
+[[def_commit_graph_file]]fichier de graphe de commit::
+	Le fichier "commit-graph" (normalement avec un trait d'union) est une représentation supplémentaire du <<def_commit_graph_general,graphe de commit>> qui accélère les parcours du graphe de commit. Le fichier "commit-graph" est stocké soit dans le répertoire .git/objects/info, soit dans le répertoire info d'une base de données d'objets alternative.
 
 [[def_commit_object]]objet commit::
 	Un <<def_object,objet>> qui contient les informations sur une <<def_revision,révision>> particulière, telles que ses <<def_parent,parents>>, validateur, auteur, date et le <<def_tree_object,objet arbre>> qui correspond au <<def_directory,répertoire>> racine de la révision stockée.
@@ -117,7 +123,7 @@ Comme nom (fusion) : à moins qu'il ne s'agisse d'une <<def_fast_forward,avance 
 [[def_object_database]]base de données d'objets::
 	Stocke un ensemble d' "objets", et un <<def_object,objet>> individuel est identifié par son <<def_object_name,nom d'objet>>. Les objets se trouvent généralement dans `$GIT_DIR/objects/`.
 
-[[def_object_identifier]]identifiant d'objet::
+[[def_object_identifier]]identifiant d'objet (oid)::
 	Synonyme de <<def_object_name,nom d'objet>>.
 
 [[def_object_name]]nom d'objet::
@@ -232,6 +238,9 @@ exclude;;
 
 [[def_reachable]]accessible::
 	Tous les ancêtres d’un <<def_commit, commit>> donné sont dits « accessibles » à partir de ce commit. Plus généralement, un <<def_object, objet>> est accessible depuis un autre si nous pouvons atteindre l’un de l’autre par une <<def_chain, chaîne>> qui suit les <<def_tag, étiquettes>> à tout ce qu’ils marquent, les <<def_commit_object,commits >> à leurs parents ou arbres, et les <<def_tree_object, arbres>> aux arbres ou les <<def_blob_object, blobs>> qu’ils contiennent.
+
+[[def_reachability_bitmap]]bitmaps d'accessibilité::
+	Les bitmaps d'accessibilité stockent des informations sur l'<<def_reachable,accessibilité>> d'un ensemble sélectionné de commits dans un fichier paquet, ou un index multi-paquet (MIDX), pour accélérer la recherche d'objets. Les bitmaps sont stockés dans un fichier ".bitmap". Un dépôt peut avoir au maximum un fichier bitmap en cours d'utilisation. Le fichier bitmap peut appartenir soit à un paquet, soit à l'index multi-paquet du dépôt (s'il existe).
 
 [[def_rebase]]rebaser, rebasage::
 	Réappliquer une série de modifications d’une <<def_branch,branche>> à une autre base et réinitialiser la <<def_head,tête>> de cette branche au résultat.
