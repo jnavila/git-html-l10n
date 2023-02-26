@@ -61,6 +61,28 @@ Considerando que para uma mesclagem conflitante, a saída é, por padrão, do fo
 
 Estes são discutidos individualmente abaixo.
 
+Contudo, há uma exceção. Caso a opção `--stdin` seja usado, haverá uma seção extra no início, um caractere NUL no final e todas as seções serão repetidas para cada linha da entrada. Assim, se a primeira mesclagem estiver em conflito e a segunda estiver limpa, a saída seria da seguinte maneira:
+
+	<Condição da mesclagem>
+	<OID do cume da árvore>
+	<Informação do arquivo com conflito>
+	<Mensagens informacionais>
+	NUL
+	<Merge status>
+	<OID do cume da árvore>
+	NUL
+
+[[MS]]
+Condição da mesclagem
+~~~~~~~~~~~~~~~~~~~~~
+
+Este é uma condição inteira seguida por um caractere NUL. A condição inteira é:
+
+     0: a mesclagem teve conflitos
+     1: a mesclagem foi limpa
+     &lt;0: algo impediu a execução da mesclagem (acesso ao repositório
+objetos negados pelo sistema de arquivos por exemplo)
+
 [[OIDTLT]]
 OID do cume da árvore
 ~~~~~~~~~~~~~~~~~~~~~
@@ -81,19 +103,40 @@ O nome do arquivo será citado como explicado para a variável de configuração
 Mensagens de Informação
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Isso sempre começa com uma linha em branco (ou NUL se a opção `-z` for usada) para separá-la das seções anteriores e depois, tiver mensagens de formato livre sobre a mesclagem, como:
+Esta seção fornece mensagens informativas, geralmente sobre os conflitos. O formato da seção varia significativamente dependendo se `-z` for utilizado.
+
+Caso `-z` seja utilizado:
+
+O formato da saída é zero ou registros informativos adicionais do conflito, cada um no formato:
+
+	<lista-dos-caminhos><tipo-do-conflito>NUL<mensagem-do-conflito>NUL
+
+onde <lista-dos-caminhos> é da forma
+
+	<quantidade-dos-caminhos>NUL<caminho1>NUL<caminho2>NUL...<caminhoN>NUL
+
+e inclui caminhos (ou os nomes das ramificações) afetados pelo conflito ou uma mensagem informativa na <mensagem-do-conflito>. Além disso, o <tipo-do-conflito> é um texto que explica o tipo do conflito, como
+
+  * "Auto-merging"
+  * "CONFLITO (renomear/excluir)"
+  * "CONFLICT (o submódulo não possui uma base para mesclagem)"
+  * "CONFLITO (binário)"
+
+e a <mensagem-do-conflito> é uma mensagem mais detalhada sobre o conflito que geralmente (mas nem sempre) incorpora a <descrição-tipo-curta-e-estável> dentro dela. Esses textos podem ser alterados em versões futuras do Git. Alguns exemplos:
 
   * "Auto-merging <arquivo>"
   * "CONFLITO (renomear/excluir): <oldfile> renomeado...mas excluído em..."
-  * "Houve uma falha ao mesclar o submódulo <submódulo> (<motivo>)"
+  * "Houve uma falha ao mesclar o submódulo <submódulo> (sem base para mesclar)"
   * "Aviso: não é possível mesclar arquivos binários: <nome-do-arquivo>"
 
-Observe que estas mensagens de formato livre nunca terão um caractere NUL entre elas, mesmo que a opção `-z` seja usada. É simplesmente um grande bloco de texto que ocupa o restante da saída.
+Caso `-z` NÃO seja utilizado:
+
+Esta seção começa com uma linha em branco para separá-la das seções anteriores e contém apenas as informações da <mensagem-do-conflito> da seção anterior (separadas por novas linhas). Estes são textos não estáveis que não devem ser analisadas por scripts e destinam-se apenas a utilização por uma pessoa. Além disso, observe que, embora os textos da <mensagem-do-conflito> geralmente não contenham novas linhas incorporadas, às vezes elas contêm. (No entanto, as mensagens em formato livre nunca terão um caractere NUL incorporado). Portanto, todo o bloco de informações é destinado às pessoas como um aglomerado de todas as mensagens de conflito.
 
 CONDIÇÃO DE ENCERRAMENTO
 ------------------------
 
-Para uma mesclagem bem-sucedida e sem conflitos, o status de saída é 0. Quando a mesclagem possuir conflitos, o status de saída é 1. Caso a mesclagem não puder ser concluída (ou iniciada) devido a algum tipo de erro, o status de saída será algo diferente de 0 ou de 1 (e a saída não é especificada).
+Para uma mesclagem bem-sucedida e sem conflitos, o status de saída é 0. Quando a mesclagem possuir conflitos, o status de saída é 1. Caso a mesclagem não puder ser concluída (ou iniciada) devido a algum tipo de erro, o status de saída será algo diferente de 0 ou de 1 (e a saída não é especificada). Quando a opção `--stdin` é utilizado, a condição do retorno é `0` para as ambas as mesclagens bem-sucedidas, conflitantes e algo diferente de 0 ou 1 caso não seja possível concluir todas as mesclagens solicitadas.
 
 OBSERVAÇÕES SOBRE A UTILIZAÇÃO
 ------------------------------

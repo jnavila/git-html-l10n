@@ -20,7 +20,7 @@
 	显示比某一特定日期更近的提交。
 
 --since-as-filter=<date>::
-	Show all commits more recent than a specific date. This visits all commits in the range, rather than stopping at the first commit which is older than a specific date.
+	显示所有比指定日期更近的提交。这将访问该范围内的所有提交，而不是停在第一个比指定日期更早的提交。
 
 --until=<日期>::
 --before=<date>::
@@ -98,7 +98,7 @@ ifdef::git-log[]
 endif::git-log[]
 
 --exclude-first-parent-only::
-	When finding commits to exclude (with a '{caret}'), follow only the first parent commit upon seeing a merge commit. This can be used to find the set of changes in a topic branch from the point where it diverged from the remote branch, given that arbitrary merges can be valid topic branch changes.
+	在寻找要排除的提交（用'{caret}'）时，在看到合并提交时只跟随第一个父提交。 考虑到任意的合并都可以成为有效的主题分支变化，这可以用来查找主题分支中从它与远程分支的分歧点开始的变化集合。
 
 --not::
 	颠倒"{caret}"前缀（或没有前缀）对所有后续修订指定符的意义，直到下一个`--not`。
@@ -363,9 +363,9 @@ This results in:
 还有一种简化模式可用。
 
 --ancestry-path[=<commit>]::
-	Limit the displayed commits to those which are an ancestor of <commit>, or which are a descendant of <commit>, or are <commit> itself.
+	将显示的提交限制在<提交>的祖先，或<提交>的后代，或<提交>本身。
 +
-作为一个用例，请考虑以下提交历史。
+作为一个用例，请考虑以下提交历史：
 +
 -----------------------------------------------------------------------
 	    D--E-------F
@@ -387,9 +387,9 @@ This results in:
 				L--M
 -----------------------------------------------------------------------
 +
-We can also use `--ancestry-path=D` instead of `--ancestry-path` which means the same thing when applied to the 'D..M' range but is just more explicit.
+我们也可以用`--ancestry-path=D`来代替`--ancestry-path`，这在应用于'D...M'范围时意思相同，只是更加明确。
 +
-If we instead are interested in a given topic within this range, and all commits affected by that topic, we may only want to view the subset of `D..M` which contain that topic in their ancestry path. So, using `--ancestry-path=H D..M` for example would result in:
+如果我们感兴趣的是这个范围内的某个主题，以及受该主题影响的所有提交，我们可能只想查看祖先路径中包含该主题的`D...M`子集。 因此，以`--ancestry-path=H D...M`为例，会形成以下结果：
 +
 -----------------------------------------------------------------------
 		E
@@ -399,15 +399,15 @@ If we instead are interested in a given topic within this range, and all commits
 				L--M
 -----------------------------------------------------------------------
 +
-Whereas `--ancestry-path=K D..M` would result in
+而`--ancestry-path=K D...M`会形成以下结果
 +
 -----------------------------------------------------------------------
 		K---------------L--M
 -----------------------------------------------------------------------
 
-在讨论另一个选项，`--显示--推力'之前，我们需要创建一个新的历史实例。
+在讨论另一个选项，`--show-pulls`之前，我们需要创建一个新的历史实例。
 
-用户在查看简化历史时经常遇到的一个问题是，他们知道的对某个文件的修改提交并没有出现在该文件的简化历史中。让我们演示一个新的例子，并说明`--full-history`和`--simplify-merges`等选项在这种情况下是如何工作的。
+用户在查看简化的提交历史时经常遇到的一个问题是，他们知道的对某个文件的修改提交并没有出现在该文件的简史中。让我们演示一个新的例子，并说明`--full-history`和`--simplify-merges`等选项在这种情况下是如何工作的：
 
 -----------------------------------------------------------------------
 	  .-A---M-----C--N---O---P
@@ -418,9 +418,9 @@ Whereas `--ancestry-path=K D..M` would result in
 	   `---X--'  `---Y--'
 -----------------------------------------------------------------------
 
-在这个例子中，假设`I`创建了`file.txt`，并被`A`、`B`和`X`以不同方式修改。单亲提交的`C`、`Z`和`Y`没有修改`file.txt`。合并提交 "M "是通过解决合并冲突而产生的，包括了 "A "和 "B "的修改，因此与其中任何一个都不是同源的。然而，合并提交`R`是通过忽略`M`处的`file.txt`的内容，而只采用`X`处的`file.txt`的内容而产生的。因此，`R`与`X`是同源的，但不是`M`。最后，创建`N'的自然合并决议是取`file.txt`在`R'的内容，所以`N'与`R'是同源的，但不是`C'。 合并提交的 "O "和 "P "与它们的第一代父母是同源的，但与它们的第二代父母 "Z "和 "Y "则不是同源的。
+在这个例子中，假设`I`创建了`file.txt`，并被`A`、`B`和`X`以不同方式修改。单亲提交的`C`、`Z`和`Y`没有修改`file.txt`。合并提交 `M`是通过解决合并冲突而产生的，包括了 `A `和 `B `的修改，因此与其中任何一个都不是同源的。然而，合并提交`R`是通过忽略`M`处的`file.txt`的内容，而只采用`X`处的`file.txt`的内容而产生的。因此，`R`与`X`是同源的，但不是`M`。最后，创建`N'的自然合并决议是取`file.txt`在`R'的内容，所以`N'与`R`是同源的，但不是`C`。 合并提交的 `O` 和 `P` 与它们的第一代父母是同源的，但与它们的第二代父母 `Z` 和 `Y `则不是同源的。
 
-当使用默认模式时，`N'和`R'都有一个TREESAME父级，所以这些边被走，其他的被忽略。由此产生的历史图是。
+当使用默认模式时，`N'和`R`都有一个TREESAME父级，所以这些边被展示出来，其他边被忽略。由此产生的历史图是：
 
 -----------------------------------------------------------------------
 	I--X
