@@ -24,6 +24,9 @@ Todas as alterações feitas através de commits no ramo atual, mas que não est
 
 A ramificação atual é redefinida para `<upstream>` ou `<newbase>` caso a opção `--onto` seja utilizada. Isso tem exatamente o mesmo efeito que `git reset --hard <upstream>` (ou `<newbase>`). O `ORIG_HEAD` está definido para apontar no cume do ramo antes da redefinição.
 
+[NOTE]
+Não é garantido que `ORIG_HEAD` ainda aponte para o cume de uma ramificação anterior no final do "rebase" caso os outros comandos que escrevem essa pseudo-ref (`git reset` por exemplo) sejam usados durante o "rebase". O cume da ramificação anterior, no entanto, é acessível usando o "reflog" da ramificação atual (ou seja, `@{1}`, consulte linkgit:gitrevisions[7]).
+
 Os commits que foram salvos anteriormente na área temporária são reaplicadas no ramo atual, uma por uma e em ordem. Observe que quaisquer commits no `HEAD` que introduzam as mesmas alterações textuais que um commit no `HEAD..<upstream>` são omitidas (ou seja, um patch já aceito na inicial com uma mensagem de commit ou carimbo de data e hora diferente, serão ignorados).
 
 É possível que uma falha da mesclagem impeça que este processo seja completamente automático. Você terá que resolver qualquer falha da mesclagem e executar o comando `git rebase --continue`. Outra opção é ignorar o commit que causou a falha da mesclagem com o comando `git rebase --skip`. Para verificar o <ramo> original e remover os arquivos de trabalho `.git/rebase-apply`, utilize o comando `git rebase --abort`.
@@ -158,6 +161,29 @@ Como alternativa, você pode desfazer o 'git rebase' com
 
     git rebase --abort
 
+MAIS OPÇÕES
+-----------
+
+As opções nesta seção, não podem ser usadas com nenhuma outra opção, inclusive entre si:
+
+--continue::
+	Reinicie o processo de reformulação após resolver um conflito de mesclagem.
+
+--skip::
+	Reinicie o processo de reconstrução da fundação ignorando o patch atual.
+
+--abort::
+	Interrompa a operação de reconstrução da fundação e redefina o `HEAD` para o ramo original. Caso `<ramo>` seja informado quando a operação de reconstrução da fundação seja iniciada, o `HEAD` será redefinido para `<ramo>`. Caso contrário, o `HEAD` será redefinido para onde estava quando a operação de reconstrução foi iniciada.
+
+--quit::
+	Interrompa a operação de reconstrução, porém o `HEAD` não será redefinido para o ramo original. Como resultado, o índice e a árvore de trabalho também permanecem inalterados. Caso uma entrada temporária "stash" seja criada utilizando `--autostash`, ela será salva na lista "stash".
+
+--edit-todo::
+	Edite a lista de tarefas durante uma nova reconstrução interativa.
+
+--show-current-patch::
+	Exiba o patch atual numa nova recuperação interativa ou quando a nova recuperação for interrompida por causa de conflitos. É o equivalente ao `git show REBASE_HEAD`.
+
 OPÇÕES
 ------
 --onto <nova-base>::
@@ -179,15 +205,6 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 <ramo>::
 	Ramo de trabalho; A predefinição retorna para `HEAD`.
-
---continue::
-	Reinicie o processo de reformulação após resolver um conflito de mesclagem.
-
---abort::
-	Interrompa a operação de reconstrução da fundação e redefina o `HEAD` para o ramo original. Caso `<ramo>` seja informado quando a operação de reconstrução da fundação seja iniciada, o `HEAD` será redefinido para `<ramo>`. Caso contrário, o `HEAD` será redefinido para onde estava quando a operação de reconstrução foi iniciada.
-
---quit::
-	Interrompa a operação de reconstrução, porém o `HEAD` não será redefinido para o ramo original. Como resultado, o índice e a árvore de trabalho também permanecem inalterados. Caso uma entrada temporária "stash" seja criada utilizando `--autostash`, ela será salva na lista "stash".
 
 --apply::
 	Utilize estratégias para aplicar a reestruturação da base "rebase" (invocando `git-am` internamente). Esta opção poderá se tornar não operacional no futuro uma vez que o processo interno da mesclagem processe tudo o que a opção '--apply' fizer.
@@ -215,9 +232,7 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 --no-reapply-cherry-picks::
 	Reaplique todas as escolhas seletivas que estejam limpas de qualquer commit "upstream" em vez inviabilizá-los por completo. (Então, caso estes commits se tornem vazios depois da reconstrução, por conter um subconjunto de alterações da "upstream", o comportamento em direção à eles é controlado através da opção `--empty`.)
 +
-
 Na ausência da opção `--keep-base` (ou se `--no-reapply-cherry-picks 'for fornecido), estes commits serão automaticamente eliminados. Como isso requer a leitura de todos os commits upstream, isso pode custar caro nos repositórios com uma grande quantidade de commits na upstream que precisam ser lidos. Ao utilizar `merge`, avisos serão emitidos para cada commit abandonado (a menos que `--quiet` seja usado). Os avisos também serão emitidos a menos que a variável `advice.skippedCherryPicks` seja definida como falso (consulte linkgit:git-config[1]).
-
 +
 A opção `--reapply-cherry-picks` permite que a reconstrução anteceda a leitura de todos os commits "upstream", melhorando muito o desempenho.
 +
@@ -227,15 +242,6 @@ Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 	No-op. A reconstrução dos commits com uma mensagem vazia costumava falhar, esta opção substitui este comportamento, permitindo que os commits com mensagens vazias sejam refeitas. Agora os commits com uma mensagem vazia não causam mais a interrupção do "rebasing".
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
-
---skip::
-	Reinicie o processo de reconstrução da fundação ignorando o patch atual.
-
---edit-todo::
-	Edite a lista de tarefas durante uma nova reconstrução interativa.
-
---show-current-patch::
-	Exiba o patch atual numa nova recuperação interativa ou quando a nova recuperação for interrompida por causa de conflitos. É o equivalente ao `git show REBASE_HEAD`.
 
 -m::
 --merge::
@@ -376,7 +382,7 @@ Utiliza o mecanismo `--interactive` internamente, porém pode ser executado sem 
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 --root::
-	Reconstrói todos os commits acessíveis a partir do `<ramo>`, em vez de limitá-los com a `<upstream>`. Permite a reestruturação dos commit da raiz em um ramo. Quando utilizado com a opção `--onto`, será ignorado as alterações já contidas em `<nova-base>` (em vez de `<upstream>`) enquanto que sem a opção `--onto` a operação ocorrerá em todas as alterações.
+	Reconstrói todos os commits acessíveis a partir do `<ramo>`, em vez de limitá-los com a `<upstream>`. Isso permite a reestruturação dos commit da raiz num ramo.
 +
 Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
@@ -403,6 +409,8 @@ Ainda que esta opção se aplique quando uma reconstrução for iniciada, é def
 	Atualize automaticamente todas as ramificações que apontem para os commits onde os "rebases" estejam sendo feitos. Quaisquer ramificações forem verificadas numa árvore de trabalho não são atualizadas desta maneira.
 +
 Caso a variável de configuração `rebase.updateRefs` esteja definida, então esta opção pode ser usada para substituir e desativar esta configuração.
++
+Consulte também a seção "OPÇÕES INCOMPATÍVEIS" logo abaixo.
 
 OPÇÕES INCOMPATÍVEIS
 --------------------
@@ -418,17 +426,15 @@ são incompatíveis com as seguintes opções:
  * --merge
  * --strategy
  * --strategy-option
- * --allow-empty-message
- * --[no-]autosquash
+ * --autosquash
  * --rebase-merges
  * --interactive
  * --exec
  * --no-keep-empty
  * --empty=
- * --reapply-cherry-picks
- * --edit-todo
+ * --[no-]reapply-cherry-picks quando utilizado com --keep-base
  * --update-refs
- * --root quando utilizado em conjunto com --onto
+ * --root quando utilizado sem o --onto
 
 Além disso, os seguintes pares de opções são incompatíveis:
 

@@ -33,7 +33,7 @@ OPÇÕES
 	Em vez do conteúdo, exiba o tipo do objeto identificado por `<objeto>`.
 
 -s::
-	Em vez do conteúdo, exiba o tamanho do objeto identificado por `<objeto>`.
+	Em vez do conteúdo, mostre o tamanho do objeto identificado pelo `<objeto>`. Caso seja utilizado com a opção `--use-mailmap`, mostrará o tamanho do objeto atualizado após a substituição dos "idents" usando o mecanismo do "mailmap".
 
 -e::
 	Encerre com a condição zero caso o `<objeto>` exista e seja um objeto válido. Caso o `<objeto>` tenha um formato inválido, encerre com um valor diferente de zero e emita uma mensagem de erro no "stderr".
@@ -59,15 +59,35 @@ OPÇÕES
 
 --batch::
 --batch=<formato>::
-	Exiba a informação do objeto e seu conteúdo para cada objeto informado no stdin. Talvez não possa ser combinado com nenhuma outra opção exceto `--textconv` ou `--filters`, neste caso, as linhas da entrada também precisam informar o caminho, separado por espaços. Para mais detalhes consulte a seção `SAÍDA DO LOTE` abaixo.
+	Exiba a informação do objeto e seu conteúdo para cada objeto informado no stdin. Talvez não possa ser combinado com nenhuma outra opção exceto `--textconv`, `--filters` ou `--use-mailmap`.
++
+--
+	* Quando utilizado com `--textconv` ou `--filters`, as linhas da entrada devem informar o caminho, separado por espaços. Para mais detalhes consulte a seção `SAÍDA DO LOTE` abaixo.
+
+	* Quando usado com a opção `--use-mailmap`, para objetos commit e tag, a parte da saída do conteúdo mostra as identidades que foram substituídas usando o mecanismo do "mailmap", enquanto a parte da saída de informação, mostra o tamanho do objeto como se ele realmente fosse gravado fazendo a substituição das identidades.
+--
 
 --batch-check::
 --batch-check=<formato>::
-	Exiba as informações do objeto para cada objeto informado no stdin. Talvez não possa ser combinado com nenhuma outra opção exceto `--textconv` ou `--filters`, neste caso, as linhas da entrada também precisam informar o caminho, separado por espaços. Para mais detalhes consulte a seção `SAÍDA DO LOTE` abaixo.
+	Exiba as informações do objeto para cada objeto informado no stdin. Talvez não possa ser combinado com nenhuma outra opção exceto `--textconv`, `--filters` ou `--use-mailmap`.
++
+--
+	* Quando utilizado com `--textconv` ou `--filters`, as linhas da entrada devem
+	 especificar o caminho, separado por espaço. Consulte a seção
+	 `SAÍDA DO LOTE` abaixo para mais detalhes.
+
+	* Quando usado com `--use-mailmap`, para objetos commit e tag, as informações impressas do objeto mostram o tamanho do objeto como se as identidades registradas nele fossem substituídas pelo mecanismo mailmap.
+--
 
 --batch-command::
 --batch-command=<formato>::
-	Insira um modo de comando que faça a leitura dos comandos e dos argumentos do stdin. Só pode ser combinado com `--buffer`, `--textconv` ou `--filters`. No caso de `--textconv` ou de `--filters`, as linhas da entrada também precisam especificar o caminho, separado por espaços em branco. Consulte a seção `SAÍDA DE LOTE` abaixo para obter mais detalhes.
+	Insira um modo de comando que faça a leitura dos comandos e dos argumentos do stdin. Só pode ser combinado com `--buffer`, `--textconv`, `--use-mailmap` ou `--filters`.
++
+--
+	* Quando utilizado com `--textconv` ou `--filters`, as linhas da entrada devem informar o caminho, separado por espaços. Para mais detalhes consulte a seção `SAÍDA DO LOTE` abaixo.
+
+	* Quando usado com `--use-mailmap`, para os objetos commit e tag, o comando `contents` mostra as identidades substituídas usando o mecanismo mailmap, enquanto o comando `info` mostra o tamanho do objeto como se ele realmente registrasse a substituição das identidades.
+--
 +
 o `--batch-command` reconhece os seguintes comandos:
 +
@@ -87,7 +107,7 @@ flush::
 	Em vez de ler uma lista dos objetos no stdin, execute a operação em lote solicitada em todos os objetos no repositório e em quaisquer outros armazenamentos alternativos dos objetos (não apenas nos objetos que forem acessíveis). Requer que o comando `--batch` ou `--batch-check` seja utilizado. É predefinido que os objetos são capturados através da ordem dos seus hashes; consulte abaixo também o comando `--unordered`. Os objetos são apresentados como estão, sem respeitar o mecanismo de "replace" (substituição) do comando linkgit:git-replace[1].
 
 --buffer::
-	Normalmente, a saída em lote é liberada após a saída de cada objeto, para que um processo possa ler e gravar de forma interativa a partir do `cat-file`. Com esta opção, a saída utiliza uma memória intermédia normal no stdio; por ser muito mais eficiente ao invocar comando `--batch-check` ou `--batch-command` numa grande quantidade de objetos.
+	Normalmente, a saída do lote é liberada após a saída de cada objeto, para que um processo possa ler e gravar de forma interativa a partir do `cat-file`. Com esta opção, a saída utiliza uma memória intermédia normal no stdio; por ser muito mais eficiente ao invocar comando `--batch-check` ou `--batch-command` numa grande quantidade de objetos.
 
 --unordered::
 	Quando o comando `--batch-all-objects` estiver em uso, visite os objetos numa ordem que possa ser mais eficiente para acessar o conteúdo do objeto do que pela ordem do hash. Os detalhes exatos do pedido não são especificados, porém caso não precise de um pedido específico, em geral isso resultará numa saída mais rápida, especialmente com a opção `--batch`. Observe que `cat-file` ainda exibirá cada objeto apenas uma vez, mesmo que ele seja armazenado várias vezes no repositório.

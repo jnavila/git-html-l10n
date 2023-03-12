@@ -12,13 +12,14 @@ RESUMO
 'git ls-files' [-z] [-t] [-v] [-f]
 		[-c|--cached] [-d|--deleted] [-o|--others] [-i|--ignored]
 		[-s|--stage] [-u|--unmerged] [-k|--killed] [-m|--modified]
+		[--resolve-undo]
 		[--directory [--no-empty-directory]] [--eol]
 		[--deduplicate]
-		[-x <padrão>|--exclude=<padrão>]
-		[-X <arquivo>|--exclude-from=<arquivo>]
+		[-x <pattern>|--exclude=<padrão>]
+		[-X <file>|--exclude-from=<arquivo>]
 		[--exclude-per-directory=<arquivo>]
 		[--exclude-standard]
-		[--error-unmatch] [--with-tree=<árvore>]
+		[--error-unmatch] [--with-tree=<tree-ish>]
 		[--full-name] [--recurse-submodules]
 		[--abbrev[=<n>]] [--format=<formato>] [--] [<arquivo>...]
 
@@ -26,21 +27,21 @@ DESCRIÇÃO
 ---------
 Isso mescla a lista dos arquivos no índice com a lista real dos diretórios de trabalho e mostra as diferentes combinações dos dois.
 
-Uma ou mais das opções abaixo podem ser utilizadas para determinar quais os arquivos serão exibidos:
+Uma ou mais das opções abaixo podem ser utilizadas para definir os arquivos mostrados e cada arquivo pode ser impresso várias vezes caso haja várias entradas no índice ou caso vários status sejam aplicáveis às opções da seleção de arquivos relevantes.
 
 OPÇÕES
 ------
 -c::
 --cached::
-	Exibe os arquivos no cache da saída (predefinido)
+	Mostra todos os arquivos armazenados em cache no índice do Git, ou seja, todos os arquivos rastreados. (Este é o padrão caso nenhuma opção -c/-s/-d/-o/-u/-k/-m/--resolve-undo seja especificada.)
 
 -d::
 --deleted::
-	Exibe os arquivos excluídos da saída
+	Mostra arquivos com uma exclusão não preparada
 
 -m::
 --modified::
-	Exibe os arquivos modificados na saída
+	Mostra os arquivos com uma modificação não preparada (observe que uma exclusão não preparada também conta como uma alteração não preparada)
 
 -o::
 --others::
@@ -48,25 +49,28 @@ OPÇÕES
 
 -i::
 --ignored::
-	Exibe apenas os arquivos ignorados na saída. Ao exibir os arquivos no índice, exiba apenas aqueles que coincidam através de um padrão de exclusão. Ao exibir os "outros" arquivos, exiba apenas aqueles que coincidam através de um padrão de exclusão. As regras predefinidas para ignorar não estão automaticamente ativas; portanto, pelo menos uma das opções `--exclude*` são necessários.
+	Exibe apenas os arquivos que foram ignorados na saída. Deve ser usado de forma explícita com um '-c' ou '-o'. Ao mostrar arquivos no índice (ou seja, quando usar '-c'), mostre apenas os arquivos que correspondem a um padrão de exclusão. Ao mostrar "outros" arquivos (ou seja, quando usar '-o'), mostre apenas aqueles que correspondam a um padrão de exclusão. As regras predefinidas para ignorar não são ativadas automaticamente, portanto, pelo menos uma das opções `--exclude*` é obrigatória.
 
 -s::
 --stage::
 	Exibe os bits do modo do conteúdo escalonado, o nome do objeto e o número do estágio na saída.
 
 --directory::
-	Caso um diretório inteiro seja classificado como "other" (outro), exibe apenas o seu nome (com uma barra à direita) e não todo o seu conteúdo.
+	Caso um diretório inteiro seja classificado como "other" (outro), exibe apenas o seu nome (com uma barra à direita) e não todo o seu conteúdo. Não tem qualquer efeito sem -o/--others.
 
 --no-empty-directory::
 	Não liste os diretórios vazios. Não tem efeito sem a opção `--directory`.
 
 -u::
 --unmerged::
-	Exibe os arquivos não mesclados na saída (impõem a utilização da opção `--stage`)
+	Mostra informações sobre arquivos não foram mesclados na saída, mas não mostra nenhum outro arquivo rastreado (impõem o uso da opção --stage, substitui a opção --cached).
 
 -k::
 --killed::
-	Exibe os arquivos no sistema de arquivos que precisam ser removidos devido a conflitos do arquivo/diretório para que o índice averiguado seja bem-sucedido.
+	Mostra os arquivos não rastreados no sistema de arquivos que precisam ser removidos por causa de conflitos do arquivo/diretório para que os arquivos rastreados possam ser gravados.
+
+--resolve-undo::
+	Mostra os arquivos com informações de resolução-desfazer no índice junto com suas informações de resolução-desfazer. (as informações de resolução-desfazer são usadas para implementar o "git checkout -m $PATH", ou seja, para recriar conflitos de mesclagem que foram resolvidos de forma acidental)
 
 -z::
 	A terminação \0 da linha na saída e não cita os nomes dos arquivos. Consulte SAÍDA abaixo para obter mais informações.
@@ -83,7 +87,7 @@ OPÇÕES
 	Leia os padrões de exclusão do <arquivo>; 1 por linha.
 
 --exclude-per-directory=<arquivo>::
-	Leia os padrões de exclusão adicionais que se aplicam apenas ao diretório e aos seus subdiretórios no <arquivo>.
+	Leia os padrões de exclusão adicionais que se aplicam apenas ao diretório e aos seus subdiretórios no <arquivo>. Descontinuado; em vez disso use --exclude-standard.
 
 --exclude-standard::
 	Adicione as exclusões padrão do Git: '.git/info/exclude', '.gitignore' em cada diretório e o arquivo de exclusão global do usuário.
@@ -95,18 +99,19 @@ OPÇÕES
 	Ao utilizar o comando `--error-unmatch` para expandir os argumentos <arquivo> (padrão do caminho por exemplo) argumentos para os caminhos, finja que os caminhos que foram removidos no índice desde que a `<árvore>` ainda esteja presente. Utilizar esta opção com as opções `-s` ou `-u` não faz nenhum sentido.
 
 -t::
-	Esse recurso está quase obsoleto. Para fins de script, linkgit:git-status[1] `--porcelain` e linkgit:git-diff-files[1] `--name-status` são quase sempre as maiores alternativas, os usuários devem olhar para o linkgit:git-status[1] `--short` ou linkgit:git-diff[1] `--namename-status` para as alternativas mais amigáveis.
+	Mostra as tags da condição geral junto com os nomes dos arquivos. Observe que para fins de uso com script, linkgit:git-status[1] `--porcelain` e linkgit:git-diff-files[1] `--name-status` são quase sempre as maiores alternativas, os usuários devem olhar para o linkgit:git-status[1] `--short` ou linkgit:git-diff[1] `--namename-status` para as alternativas mais amigáveis.
 +
 --
-Esta opção identifica a condição geral do arquivo com as seguintes opções (seguidas por um espaço) no início de cada linha:
+Esta opção fornece um motivo para mostrar cada nome de arquivo em forma de uma tag de status (que é seguida por um espaço e, em seguida, o nome do arquivo). As tags de status são todas com caracteres únicos a partir da lista a seguir:
 
-	H::		cached
-	S::		skip-worktree
-	M::		unmerged
-	R::		removido/excluído
-	C::		modificado/alterado
-	K::		para ser encerrado
-	?::		Outros
+	H::		um arquivo rastreado que não seja não mesclado "unmerged" ou "skip-worktree"
+	S::		arquivo rastreado que é "skip-worktree"
+	M::		o arquivo rastreado que não foi mesclado
+	R::		arquivo rastreado com remoção/exclusão não preparada
+	C::		arquivo rastreado com modificação/alteração não preparada
+	K::	caminhos não rastreados que fazem parte de conflitos do arquivo/diretório que impedem o check-out dos arquivos rastreados
+	?::		arquivo não rastreado
+	U::     	arquivo com informações de resolução-desfazer
 --
 
 -v::
@@ -189,7 +194,7 @@ EXCLUIR PADRÕES
 
 O 'git ls-files' pode utilizar uma lista de "padrões de exclusão" ao percorrer a árvore dos diretórios e localizar os arquivos para exibir quando as opções `--others` ou `--ignored` são utilizados. linkgit:gitignore[5] determina o formato dos padrões de exclusão.
 
-Estes padrões de exclusão vêm destes locais, na ordem:
+Geralmente, você deve usar apenas o comando --exclude-standard, mas por razões históricas, os padrões de exclusão podem ser especificados a partir dos seguintes lugares na ordem:
 
   1. A opção da linha de comando `--exclude=<padrão>` define um único padrão. Os padrões são ordenados na mesma ordem em que aparecem na linha de comando.
 
