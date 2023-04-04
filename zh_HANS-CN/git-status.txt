@@ -41,14 +41,14 @@ git-status - 显示工作树状态
 --verbose::
 	除了显示被修改的文件名外，还显示被分阶段提交的文本修改（即，像`git diff --cached`的输出）。如果`-v`被指定了两次，那么也会显示工作树中尚未分阶段的变化（即，像`git diff`的输出）。
 
--u[<mode>]::
---untracked-files[=<mode>]::
-	Show untracked files.
+-u[<模式>]::
+--untracked-files[=<模式>]::
+	显示未追踪文件。
 +
 --
 模式参数用于指定对未跟踪文件的处理。 它是可选的：默认为 "所有"，如果指定，必须与选项卡在一起（例如，`-uno`，但不是`-u no`）。
 
-可能的选择是。
+可选项：
 
 	- 'no' - 不显示未跟踪的文件。
 	- 'normal' - 显示未被追踪的文件和目录。
@@ -62,13 +62,13 @@ git-status - 显示工作树状态
 --ignore-submodules[=<when>]::
 	在寻找变化时忽略子模块的变化。<when>可以是 "none"、"untracked"、"dirty "或 "all"，这是默认的。 使用 "none"，當子模塊包含未被追蹤或修訂的檔案，或者它的頭部與超級工程中記錄的提交不同時，就會認為子模塊被修改了，可以用來覆蓋 linkgit:git-config[1] 或 linkgit:gitmodules[5] 中 "忽略 "選項的任何設定。当使用 "untracked "时，当子模块只包含未跟踪的内容时，不被认为是脏的（但它们仍然被扫描为修改的内容）。使用 "dirty "会忽略所有对子模块工作树的修改，只显示存储在超级项目中的提交的修改（这是1.7.0之前的行为）。使用 "all "会隐藏子模块的所有变化（当配置选项`status.submoduleSummary`被设置时，会抑制子模块摘要的输出）。
 
---ignored[=<mode>]::
+--ignored[=<模式>]::
 	也显示忽略的文件。
 +
 --
 模式参数用于指定对被忽略文件的处理。 它是可选的：默认为 "传统"。
 
-可能的选择是。
+可选项：
 
 	- '传统' - 显示被忽略的文件和目录，除非
 			  --untracked-files=all is specified, in which case
@@ -102,8 +102,8 @@ git-status - 显示工作树状态
 <pathspec>...::
 	参见 linkgit:gitglossary[7] 中的'pathspec'条目。
 
-OUTPUT
-------
+输出
+--
 这个命令的输出是用来作为提交模板注释的。 默认的长篇格式是为了让人可读性强、言简意赅和描述性好。 其内容和格式可以随时更改。
 
 与许多其他 Git 命令不同，如果你在子目录中工作，输出中提到的路径是相对于当前目录的（这是故意的，以帮助剪切和粘贴）。参见下面的 status.relativePaths 配置选项。
@@ -143,32 +143,32 @@ OUTPUT
 * 'U'=更新但未合并
 
 ....
-X          Y     Meaning
+X Y的含义
 -------------------------------------------------
-	 [AMD]   not updated
-M        [ MTD]  updated in index
-T        [ MTD]  type changed in index
-A        [ MTD]  added to index
-D                deleted from index
-R        [ MTD]  renamed in index
-C        [ MTD]  copied in index
-[MTARC]          index and work tree matches
-[ MTARC]    M    work tree changed since index
-[ MTARC]    T    type changed in work tree since index
-[ MTARC]    D    deleted in work tree
-	    R    renamed in work tree
-	    C    copied in work tree
+	 [AMD]未更新
+M [MTD] 在索引中更新
+T [MTD] 类型在索引中有所改变
+A [MTD] 添加到索引中
+D 从索引中删除
+R [MTD] 在索引中重新命名
+C [MTD] 在索引中被复制
+[MTARC] 索引和工作树匹配
+[MTARC] 自索引以来，M工作树发生了变化
+[MTARC] 工作树中的T类型自索引以来发生了变化
+[MTARC] D在工作树中被删除
+	    R在工作树中重新命名
+	    C在工作树中被复制
 -------------------------------------------------
-D           D    unmerged, both deleted
-A           U    unmerged, added by us
-U           D    unmerged, deleted by them
-U           A    unmerged, added by them
-D           U    unmerged, deleted by us
-A           A    unmerged, both added
-U           U    unmerged, both modified
+D D未合并，均已删除
+A U 未合并，由我们添加
+U D未合并，被他人删除
+U A 未合并，由他人添加
+D U未合并，被我们删除
+A A未合并，都被添加
+U U未合并，都被修改
 -------------------------------------------------
-?           ?    untracked
-!           !    ignored
+?           未被追踪的
+!           忽略不计
 -------------------------------------------------
 ....
 
@@ -330,6 +330,25 @@ If `--show-stash` is given, one line is printed showing the number of stash entr
 ----
 
 默认情况下，`git status`会自动刷新索引，更新工作树上缓存的状态信息，并将结果写出来。写出更新的索引是一种优化，严格来说并无必要（`status`为自己计算数值，但写出它们只是为了避免后续程序重复我们的计算）。当`status`在后台运行时，在写入过程中持有的锁可能与其他同时进行的进程发生冲突，导致它们失败。在后台运行`status`的脚本应该考虑使用`git --no-optional-locks status`（详见linkgit:git[1]）。
+
+UNTRACKED FILES AND PERFORMANCE
+-------------------------------
+
+`git status` can be very slow in large worktrees if/when it needs to search for untracked files and directories. There are many configuration options available to speed this up by either avoiding the work or making use of cached results from previous Git commands. There is no single optimum set of settings right for everyone. We'll list a summary of the relevant options to help you, but before going into the list, you may want to run `git status` again, because your configuration may already be caching `git status` results, so it could be faster on subsequent runs.
+
+* The `--untracked-files=no` flag or the
+	`status.showUntrackedfiles=false` config (see above for both): indicate that `git status` should not report untracked files. This is the fastest option. `git status` will not list the untracked files, so you need to be careful to remember if you create any new files and manually `git add` them.
+
+* `advice.statusUoption=false` (see linkgit:git-config[1]):
+	setting this variable to `false` disables the warning message given when enumerating untracked files takes more than 2 seconds. In a large project, it may take longer and the user may have already accepted the trade off (e.g. using "-uno" may not be an acceptable option for the user), in which case, there is no point issuing the warning message, and in such a case, disabling the warning may be the best.
+
+* `core.untrackedCache=true` (see linkgit:git-update-index[1]):
+	enable the untracked cache feature and only search directories that have been modified since the previous `git status` command. Git remembers the set of untracked files within each directory and assumes that if a directory has not been modified, then the set of untracked files within has not changed. This is much faster than enumerating the contents of every directory, but still not without cost, because Git still has to search for the set of modified directories. The untracked cache is stored in the `.git/index` file. The reduced cost of searching for untracked files is offset slightly by the increased size of the index and the cost of keeping it up-to-date. That reduced search time is usually worth the additional size.
+
+* `core.untrackedCache=true` and `core.fsmonitor=true` or
+	`core.fsmonitor=<hook_command_pathname>` (see linkgit:git-update-index[1]): enable both the untracked cache and FSMonitor features and only search directories that have been modified since the previous `git status` command. This is faster than using just the untracked cache alone because Git can also avoid searching for modified directories. Git only has to enumerate the exact set of directories that have changed recently. While the FSMonitor feature can be enabled without the untracked cache, the benefits are greatly reduced in that case.
+
+Note that after you turn on the untracked cache and/or FSMonitor features it may take a few `git status` commands for the various caches to warm up before you see improved command times. This is normal.
 
 参见
 --
