@@ -451,11 +451,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git bundle</em> create [-q | --quiet | --progress | --all-progress] [--all-progress-implied]
-                    [--version=&lt;version&gt;] &lt;fichier&gt; &lt;arguments-git-rev-list&gt;
-<em>git bundle</em> verify [-q | --quiet] &lt;fichier&gt;
-<em>git bundle</em> list-heads &lt;fichier&gt; [&lt;nom-de-ref&gt;&#8230;&#8203;]
-<em>git bundle</em> unbundle [--progress] &lt;fichier&gt; [&lt;nom-de-ref&gt;&#8230;&#8203;]</pre>
+<pre class="content"><em>git bundle</em> create [-q | --quiet | --progress]
+                    [--version=&lt;version&gt;] &lt;file&gt; &lt;git-rev-list-args&gt;
+<em>git bundle</em> verify [-q | --quiet] &lt;file&gt;
+<em>git bundle</em> list-heads &lt;file&gt; [&lt;refname&gt;&#8230;&#8203;]
+<em>git bundle</em> unbundle [--progress] &lt;file&gt; [&lt;refname&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -492,7 +492,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Il n&#8217;y a pas d&#8217;option pour créer un "paquet épais" lors de l&#8217;utilisation des exclusions de révision, et les utilisateurs ne doivent pas s&#8217;inquiéter de la différence. En utilisant des "paquets minces", les paquets créés à l&#8217;aide d&#8217;exclusions sont plus petits en taille. Le fait qu&#8217;ils soient "minces" sous le capot est simplement noté ici comme une curiosité, et comme une référence à d&#8217;autres documents.</p>
 </div>
 <div class="paragraph">
-<p>Voir <a href="technical/bundle-format.html">la documentation <code>bundle-format</code></a> pour plus de détails et la discussion sur le "paquets fins" dans <a href="technical/pack-format.html">la documentation sur le format du pack</a> pour plus de détails.</p>
+<p>Voir git:gitformat-bundle[5] pour plus de détails et la discussion sur le "paquets fins" dans git:gitformat-pack[5] pour plus de détails.</p>
 </div>
 </div>
 </div>
@@ -503,19 +503,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">create [options] &lt;fichier&gt; &lt;git-rev-list-args&gt;</dt>
 <dd>
-<p>Utilisé pour créer un regroupement nommé <em>fichier</em>. Cela nécessite les arguments <em>&lt;arguments-git-rev-list&gt;</em> pour définir le contenu du regroupement. options' contient les options spécifiques à la sous-commande <em>git bundle create</em>.</p>
+<p>Used to create a bundle named <em>file</em>. This requires the <em>&lt;git-rev-list-args&gt;</em> arguments to define the bundle contents. <em>options</em> contains the options specific to the <em>git bundle create</em> subcommand. If <em>file</em> is <code>-</code>, the bundle is written to stdout.</p>
 </dd>
 <dt class="hdlist1">verify &lt;fichier&gt;</dt>
 <dd>
-<p>Utilisé pour vérifier qu&#8217;un fichier regroupement est valide et s&#8217;appliquera proprement au dépôt actuel. Cela inclut des vérifications sur le format du regroupement lui-même ainsi que la vérification que les commits pré-requis existent et sont complètement liés dans le dépôt actuel. <em>git bundle</em> affiche une liste des commits manquants, s&#8217;il y en a. Enfin, des informations sur des capacités supplémentaires, telles que "object filter" sont imprimées. Voir "Capacités" dans link:technical/bundle-format.html pour plus d&#8217;informations. Le code de sortie est zéro en cas de succès, mais sera non nul si le fichier colis est invalide.</p>
+<p>Used to check that a bundle file is valid and will apply cleanly to the current repository. This includes checks on the bundle format itself as well as checking that the prerequisite commits exist and are fully linked in the current repository. Then, <em>git bundle</em> prints a list of missing commits, if any. Finally, information about additional capabilities, such as "object filter", is printed. See "Capabilities" in <a href="gitformat-bundle.html">gitformat-bundle(5)</a> for more information. The exit code is zero for success, but will be nonzero if the bundle file is invalid. If <em>file</em> is <code>-</code>, the bundle is read from stdin.</p>
 </dd>
 <dt class="hdlist1">list-heads &lt;fichier&gt;</dt>
 <dd>
-<p>Liste les références définies dans le regroupement. Si elle est suivie d&#8217;une liste de références, seules les références correspondant à celles données sont imprimées.</p>
+<p>Lists the references defined in the bundle. If followed by a list of references, only references matching those given are printed out. If <em>file</em> is <code>-</code>, the bundle is read from stdin.</p>
 </dd>
 <dt class="hdlist1">unbundle &lt;fichier&gt;</dt>
 <dd>
-<p>Passe les objets du groupement à <em>git index-pack</em> pour qu&#8217;ils soient stockés dans le dépôt, puis affiche les noms de toutes les références définies. Si une liste de références est donnée, seules les références correspondant à celles de la liste sont imprimées. Cette commande est vraiment de plomberie et n&#8217;est définie que pour être appelée par <em>git fetch</em>.</p>
+<p>Passes the objects in the bundle to <em>git index-pack</em> for storage in the repository, then prints the names of all defined references. If a list of references is given, only references matching those in the list are printed. This command is really plumbing, intended to be called only by <em>git fetch</em>. If <em>file</em> is <code>-</code>, the bundle is read from stdin.</p>
 </dd>
 <dt class="hdlist1">&lt;git-rev-list-args&gt;</dt>
 <dd>
@@ -528,14 +528,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--progress</dt>
 <dd>
 <p>L&#8217;état d&#8217;avancement est affiché sur la sortie d&#8217;erreur standard quand elle est attachée à un terminal, à moins que -q soit spécifié. Ce drapeau force l&#8217;état d&#8217;avancement même si le flux d&#8217;erreur standard n&#8217;est pas dirigé vers un terminal.</p>
-</dd>
-<dt class="hdlist1">--all-progress</dt>
-<dd>
-<p>Lorsque --stdout est spécifié, le rapport de progression est affiché pendant les phases de comptage d&#8217;objets et de compression, mais il est inhibé pendant la phase d&#8217;écriture. La raison en est que dans certains cas, le flux de sortie est directement lié à une autre commande qui peut souhaiter afficher son propre état d&#8217;avancement pendant qu&#8217;elle traite les données du paquet entrant. Ce drapeau est comme --progress sauf qu&#8217;il force le rapport de progression pour la phase d&#8217;écriture même si --stdout est utilisé.</p>
-</dd>
-<dt class="hdlist1">--all-progress-implied</dt>
-<dd>
-<p>C&#8217;est utilisé pour impliquer --all-progress lorsque l&#8217;affichage de la progression est activé. Contrairement à --all-progress, ce drapeau ne force pas l&#8217;affichage de la progression par lui-même.</p>
 </dd>
 <dt class="hdlist1">--version[=&lt;version&gt;]</dt>
 <dd>
@@ -744,6 +736,14 @@ machineB$ git pull</pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_formats_de_fichier">FORMATS DE FICHIER</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Voir <a href="gitformat-bundle.html">gitformat-bundle(5)</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -762,7 +762,7 @@ machineB$ git pull</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 21:59:17 +0200
+Last updated 2023-05-21 19:03:32 +0200
 </div>
 </div>
 </body>

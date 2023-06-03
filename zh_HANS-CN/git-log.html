@@ -486,7 +486,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--decorate-refs=&lt;pattern&gt;</dt>
 <dt class="hdlist1">--decorate-refs-exclude=&lt;pattern&gt;</dt>
 <dd>
-<p>如果没有给定`--decorate-refs`，就假装所有的参考文献都被包括在内。 对于每个候选者，如果它与`--decorate-refs-exclude`给出的任何模式相匹配，或者它与`--decorate-refs`给出的任何模式不匹配，就不要将其用于装饰。<code>log.excludeDecoration`配置选项允许从装饰中排除参考文献，但明确的</code>--decorate-refs`模式将覆盖`log.excludeDecoration`的匹配。</p>
+<p>对于每个候选者，如果它与`--decorate-refs-exclude`给出的任何模式相匹配，或者它与`--decorate-refs`给出的任何模式不匹配，就不要将其用于装饰。<code>log.excludeDecoration`配置选项允许从装饰中排除参考文献，但明确的</code>--decorate-refs`模式将覆盖`log.excludeDecoration`的匹配。</p>
+<div class="paragraph">
+<p>如果没有给出这些选项或配置设置，那么如果引用与`HEAD`、<code>refs/heads/</code>、<code>refs/remotes/</code>、`refs/stash/`或`refs/tags/`相匹配，则被用作装饰引用。</p>
+</div>
+</dd>
+<dt class="hdlist1">--clear-decorations</dt>
+<dd>
+<p>当指定时，这个选项会清除之前所有的`--decorate-refs`或`--decorate-refs-exclude`选项，并释放默认的装饰过滤器，包括所有的引用。该选项假设配置值`log.initialDecorationSet`被设置为`all`。</p>
 </dd>
 <dt class="hdlist1">--source</dt>
 <dd>
@@ -558,7 +565,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--since-as-filter=&lt;date&gt;</dt>
 <dd>
-<p>Show all commits more recent than a specific date. This visits all commits in the range, rather than stopping at the first commit which is older than a specific date.</p>
+<p>显示所有比指定日期更近的提交。这将访问该范围内的所有提交，而不是停在第一个比指定日期更早的提交。</p>
 </dd>
 <dt class="hdlist1">--until=&lt;日期&gt;</dt>
 <dt class="hdlist1">--before=&lt;date&gt;</dt>
@@ -647,7 +654,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--exclude-first-parent-only</dt>
 <dd>
-<p>When finding commits to exclude (with a <em>^</em>), follow only the first parent commit upon seeing a merge commit. This can be used to find the set of changes in a topic branch from the point where it diverged from the remote branch, given that arbitrary merges can be valid topic branch changes.</p>
+<p>在寻找要排除的提交（用'^'）时，在看到合并提交时只跟随第一个父提交。 考虑到任意的合并都可以成为有效的主题分支变化，这可以用来查找主题分支中从它与远程分支的分歧点开始的变化集合。</p>
 </dd>
 <dt class="hdlist1">--not</dt>
 <dd>
@@ -679,6 +686,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>当应用于"--分支"、"--标签 "或"--远程 "时，给出的模式不应该以 "refs/heads"、"refs/tags "或 "refs/remotes "开头，而当应用于"--glob "或 "all "时，必须以 "refs/"开头。如果打算使用尾部的"/*"，必须明确给出。</p>
 </div>
+</dd>
+<dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
+<dd>
+<p>Do not include refs that would be hidden by <code>git-fetch</code>, <code>git-receive-pack</code> or <code>git-upload-pack</code> by consulting the appropriate <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> or <code>uploadpack.hideRefs</code> configuration along with <code>transfer.hideRefs</code> (see <a href="git-config.html">git-config(1)</a>). This option affects the next pseudo-ref option <code>--all</code> or <code>--glob</code> and is cleared after processing them.</p>
 </dd>
 <dt class="hdlist1">--reflog</dt>
 <dd>
@@ -824,9 +835,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>为`--full-history`增加了一个选项，可以从结果的历史中删除一些不必要的合并，因为没有选定的提交对这次合并有贡献。</p>
 </dd>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>当给定一个要显示的提交范围（例如 "commit1&#8230;&#8203;commit2 "或 "commit2 ^commit1"）时，只显示直接存在于 "commit1 "和 "commit2 "之间的祖先链的提交，即既是 "commit1 "的后代，又是 "commit2 "的祖先的提交。</p>
+<p>When given a range of commits to display (e.g. <em>commit1..commit2</em> or <em>commit2 ^commit1</em>), only display commits in that range that are ancestors of &lt;commit&gt;, descendants of &lt;commit&gt;, or &lt;commit&gt; itself. If no commit is specified, use <em>commit1</em> (the excluded part of the range) as &lt;commit&gt;. Can be passed multiple times; if so, a commit is included if it is any of the commits given or if it is an ancestor or descendant of one of them.</p>
 </dd>
 </dl>
 </div>
@@ -1016,11 +1027,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>将显示的提交限制在给定提交范围内 "from "和 "to "提交之间的直接祖先链上。也就是说，只显示 "to "提交的祖先和 "from "提交的后代的提交。</p>
+<p>将显示的提交限制在&lt;提交&gt;的祖先，或&lt;提交&gt;的后代，或&lt;提交&gt;本身。</p>
 <div class="paragraph">
-<p>作为一个用例，请考虑以下提交历史。</p>
+<p>作为一个用例，请考虑以下提交历史：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1046,14 +1057,37 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
                                 L--M</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>我们也可以用`--ancestry-path=D`来代替`--ancestry-path`，这在应用于&#8217;D&#8230;&#8203;M&#8217;范围时意思相同，只是更加明确。</p>
+</div>
+<div class="paragraph">
+<p>如果我们感兴趣的是这个范围内的某个主题，以及受该主题影响的所有提交，我们可能只想查看祖先路径中包含该主题的`D&#8230;&#8203;M`子集。 因此，以`--ancestry-path=H D&#8230;&#8203;M`为例，会形成以下结果：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                E
+                 \
+                  G---H---I---J
+                               \
+                                L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>而`--ancestry-path=K D&#8230;&#8203;M`会形成以下结果</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                K---------------L--M</pre>
+</div>
+</div>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>在讨论另一个选项，`--显示&#8212;&#8203;推力&#8217;之前，我们需要创建一个新的历史实例。</p>
+<p>在讨论另一个选项，`--show-pulls`之前，我们需要创建一个新的历史实例。</p>
 </div>
 <div class="paragraph">
-<p>用户在查看简化历史时经常遇到的一个问题是，他们知道的对某个文件的修改提交并没有出现在该文件的简化历史中。让我们演示一个新的例子，并说明`--full-history`和`--simplify-merges`等选项在这种情况下是如何工作的。</p>
+<p>用户在查看简化的提交历史时经常遇到的一个问题是，他们知道的对某个文件的修改提交并没有出现在该文件的简史中。让我们演示一个新的例子，并说明`--full-history`和`--simplify-merges`等选项在这种情况下是如何工作的：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1066,10 +1100,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>在这个例子中，假设`I`创建了`file.txt`，并被`A`、<code>B`和`X`以不同方式修改。单亲提交的`C</code>、<code>Z`和`Y`没有修改`file.txt</code>。合并提交 "M "是通过解决合并冲突而产生的，包括了 "A "和 "B "的修改，因此与其中任何一个都不是同源的。然而，合并提交`R`是通过忽略`M`处的`file.txt`的内容，而只采用`X`处的`file.txt`的内容而产生的。因此，<code>R`与`X`是同源的，但不是`M</code>。最后，创建`N&#8217;的自然合并决议是取`file.txt`在`R&#8217;的内容，所以`N&#8217;与`R&#8217;是同源的，但不是`C'。 合并提交的 "O "和 "P "与它们的第一代父母是同源的，但与它们的第二代父母 "Z "和 "Y "则不是同源的。</p>
+<p>在这个例子中，假设`I`创建了`file.txt`，并被`A`、<code>B`和`X`以不同方式修改。单亲提交的`C</code>、<code>Z`和`Y`没有修改`file.txt</code>。合并提交 <code>M`是通过解决合并冲突而产生的，包括了 `A `和 `B `的修改，因此与其中任何一个都不是同源的。然而，合并提交`R`是通过忽略`M`处的`file.txt`的内容，而只采用`X`处的`file.txt`的内容而产生的。因此，`R`与`X`是同源的，但不是`M</code>。最后，创建`N&#8217;的自然合并决议是取`file.txt`在`R&#8217;的内容，所以`N&#8217;与`R`是同源的，但不是`C`。 合并提交的 <code>O</code> 和 <code>P</code> 与它们的第一代父母是同源的，但与它们的第二代父母 <code>Z</code> 和 `Y `则不是同源的。</p>
 </div>
 <div class="paragraph">
-<p>当使用默认模式时，`N&#8217;和`R&#8217;都有一个TREESAME父级，所以这些边被走，其他的被忽略。由此产生的历史图是。</p>
+<p>当使用默认模式时，`N&#8217;和`R`都有一个TREESAME父级，所以这些边被展示出来，其他边被忽略。由此产生的历史图是：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1090,7 +1124,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>这里，合并提交`O`和`P`带来了额外的噪音，因为它们实际上并没有对`file.txt`做出改变。他们只是合并了一个基于 "file.txt "旧版本的主题。这是在使用工作流程的仓库中常见的问题，在工作流程中，许多贡献者并行工作，并沿着一个主干合并他们的主题分支：不相关的合并出现在`--full-history`结果中。</p>
+<p>Here, the merge commits <code>O</code> and <code>P</code> contribute extra noise, as they did not actually contribute a change to <code>file.txt</code>. They only merged a topic that was based on an older version of <code>file.txt</code>. This is a common issue in repositories using a workflow where many contributors work in parallel and merge their topic branches along a single trunk: many unrelated merges appear in the <code>--full-history</code> results.</p>
 </div>
 <div class="paragraph">
 <p>当使用`--简化合并`选项时，提交的`O`和`P`从结果中消失。这是因为 "O "和 "P "重写的第二父本可以从它们的第一父本到达。这些边被移除，然后这些提交看起来就像与它们的父类一样的单亲提交。这也发生在提交`N`上，导致历史视图如下。</p>
@@ -1273,19 +1307,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><code>--date=format:...</code> feeds the format <code>...</code> to your system <code>strftime</code>, except for %s, %z, and %Z, which are handled internally. Use <code>--date=format:%c</code> to show the date in your system locale&#8217;s preferred format. See the <code>strftime</code> manual for a complete list of format placeholders. When using <code>-local</code>, the correct syntax is <code>--date=format-local:...</code>.</p>
 </div>
 <div class="paragraph">
-<p><code>--date=default`是默认格式，与</code>--date=rfc2822`类似，但有一些例外。</p>
+<p><code>--date=default`是默认格式，基于ctime(3)输出。 它仅仅在一行中显示缩写的星期、缩写的月份、一月中的第几天、"HH:MM:SS "格式的小时-分钟-秒，然后是年份，除非使用本地时区，在末尾都会加上时区信息，例如`Thu Jan 1 00:00:00 1970 +0000</code>。</p>
 </div>
 </div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>在星期的后面没有逗号</p>
-</li>
-<li>
-<p>当使用本地时区时，省略了时区。</p>
-</li>
-</ul>
 </div>
 </dd>
 <dt class="hdlist1">--parents</dt>
@@ -1364,7 +1388,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect1">
-<h2 id="_使用选项_p_生成补丁文本">使用选项 <code>-p</code> 生成补丁文本</h2>
+<h2 id="generate_patch_text_with_p">使用选项 <code>-p</code> 生成补丁文本</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Running <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a>, or <a href="git-diff-files.html">git-diff-files(1)</a> with the <code>-p</code> option produces patch text. You can customize the creation of patch text via the <code>GIT_EXTERNAL_DIFF</code> and the <code>GIT_DIFF_OPTS</code> environment variables (see <a href="git.html">git(1)</a>), and the <code>diff</code> attribute (see <a href="gitattributes.html">gitattributes(5)</a>).</p>
@@ -1517,7 +1541,7 @@ deleted file mode &lt;模式&gt;,&lt;模式&gt;</pre>
 <p>它的后面是两行源文件/目标文件的头信息</p>
 <div class="literalblock">
 <div class="content">
-<pre>--- Index.pg
+<pre>--- a/file
 +++ b/file</pre>
 </div>
 </div>
@@ -1529,9 +1553,9 @@ deleted file mode &lt;模式&gt;,&lt;模式&gt;</pre>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>--- Index.pg
---- Index.pg
---- Index.pg
+<pre>--- a/file
+--- a/file
+--- a/file
 +++ b/file</pre>
 </div>
 </div>
@@ -1567,7 +1591,7 @@ deleted file mode &lt;模式&gt;,&lt;模式&gt;</pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_examples">EXAMPLES</h2>
+<h2 id="_实例">实例</h2>
 <div class="sectionbody">
 <div class="dlist">
 <dl>
@@ -1616,7 +1640,7 @@ deleted file mode &lt;模式&gt;,&lt;模式&gt;</pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_discussion">DISCUSSION</h2>
+<h2 id="_讨论">讨论</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Git在某种程度上是与字符编码无关的。</p>
@@ -1689,40 +1713,16 @@ deleted file mode &lt;模式&gt;,&lt;模式&gt;</pre>
 <dd>
 <p>显示日志时要使用的编码。 (见上面的 "讨论"。)如果设置了，默认为`i18n.commitEncoding`的值，否则为UTF-8。</p>
 </dd>
-<dt class="hdlist1">log.date</dt>
-<dd>
-<p>人类可读日期的默认格式。 (比较`--date`选项。)默认为 "default"，即写成`Sat May 8 19:35:34 2010 -0500`这样的日期。</p>
-<div class="paragraph">
-<p>如果格式被设置为 "auto:foo"，并且正在使用呼叫器，那么格式 "foo "将被用于日期格式。否则将使用 "默认"。</p>
-</div>
-</dd>
-<dt class="hdlist1">log.follow</dt>
-<dd>
-<p>如果`true`，<code>git log`将像使用</code>--follow`选项一样，当给出一个&lt;路径&gt;时。 这与`--follow`有相同的限制，即它不能用于跟踪多个文件，并且在非线性历史上不能很好地工作。</p>
-</dd>
-<dt class="hdlist1">log.showRoot</dt>
-<dd>
-<p>如果`false`，<code>git log`和相关命令将不把初始提交作为一个大的创建事件。 `git log -p`输出中的任何根提交都会被显示出来，而不附加差异。 默认是`true</code>。</p>
-</dd>
-<dt class="hdlist1">log.showSignature</dt>
-<dd>
-<p>如果 "true"，"git log "和相关命令将像"--显示签名 "选项一样行事。</p>
-</dd>
-<dt class="hdlist1">mailmap.*</dt>
-<dd>
-<p>See <a href="git-shortlog.html">git-shortlog(1)</a>.</p>
-</dd>
-<dt class="hdlist1">笔记.displayRef</dt>
-<dd>
-<p>除了由`core.notesRef`或`GIT_NOTES_REF`设置的默认值外，在用`log`系列命令显示提交信息时，还要从哪些参考文献中读取注释。 参见<a href="git-notes.html">git-notes(1)</a>。</p>
-<div class="paragraph">
-<p>可以是一个非缩写的 ref 名称或一个 glob，并且可以多次指定。 对于不存在的参考文献将发出警告，但不匹配任何参考文献的glob将被沉默地忽略。</p>
-</div>
-<div class="paragraph">
-<p>这个设置可以由`--no-notes`选项禁用，由`GIT_NOTES_DISPLAY_REF`环境变量覆盖，并由`--notes=&lt;ref&gt;`选项覆盖。</p>
-</div>
-</dd>
 </dl>
+</div>
+<div class="paragraph">
+<p>本节中这一行以上的内容并不包括在 <a href="git-config.html">git-config(1)</a> 文档中。下面的内容与那里的内容相同：</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in git-log.txt - include::config/log.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in git-log.txt - include::config/notes.txt[]</p>
 </div>
 </div>
 </div>
@@ -1737,7 +1737,7 @@ deleted file mode &lt;模式&gt;,&lt;模式&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:35 +0200
+Last updated 2023-05-21 19:05:49 +0200
 </div>
 </div>
 </body>

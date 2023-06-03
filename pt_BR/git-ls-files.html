@@ -452,17 +452,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git ls-files</em> [-z] [-t] [-v] [-f]
-                [-c|--cached] [-d|--deleted] [-o|--others] [-i|--|ignored]
-                [-s|--stage] [-u|--unmerged] [-k|--|killed] [-m|--modified]
+                [-c|--cached] [-d|--deleted] [-o|--others] [-i|--ignored]
+                [-s|--stage] [-u|--unmerged] [-k|--killed] [-m|--modified]
+                [--resolve-undo]
                 [--directory [--no-empty-directory]] [--eol]
                 [--deduplicate]
-                [-x &lt;padrão&gt;|--exclude=&lt;padrão&gt;]
-                [-X &lt;arquivo&gt;|--exclude-from=&lt;arquivo&gt;]
+                [-x &lt;pattern&gt;|--exclude=&lt;padrão&gt;]
+                [-X &lt;file&gt;|--exclude-from=&lt;arquivo&gt;]
                 [--exclude-per-directory=&lt;arquivo&gt;]
                 [--exclude-standard]
-                [--error-unmatch] [--with-tree=&lt;árvore&gt;]
+                [--error-unmatch] [--with-tree=&lt;tree-ish&gt;]
                 [--full-name] [--recurse-submodules]
-                [--abbrev[=&lt;n&gt;]] [--] [&lt;arquivo&gt;&#8230;&#8203;]</pre>
+                [--abbrev[=&lt;n&gt;]] [--format=&lt;formato&gt;] [--] [&lt;arquivo&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -473,7 +474,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Isso mescla a lista dos arquivos no índice com a lista real dos diretórios de trabalho e mostra as diferentes combinações dos dois.</p>
 </div>
 <div class="paragraph">
-<p>Uma ou mais das opções abaixo podem ser utilizadas para determinar quais os arquivos serão exibidos:</p>
+<p>Uma ou mais das opções abaixo podem ser utilizadas para definir os arquivos mostrados e cada arquivo pode ser impresso várias vezes caso haja várias entradas no índice ou caso vários status sejam aplicáveis às opções da seleção de arquivos relevantes.</p>
 </div>
 </div>
 </div>
@@ -485,17 +486,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-c</dt>
 <dt class="hdlist1">--cached</dt>
 <dd>
-<p>Exibe os arquivos no cache da saída (predefinido)</p>
+<p>Mostra todos os arquivos armazenados em cache no índice do Git, ou seja, todos os arquivos rastreados. (Este é o padrão caso nenhuma opção -c/-s/-d/-o/-u/-k/-m/--resolve-undo seja especificada.)</p>
 </dd>
 <dt class="hdlist1">-d</dt>
 <dt class="hdlist1">--deleted</dt>
 <dd>
-<p>Exibe os arquivos excluídos da saída</p>
+<p>Mostra arquivos com uma exclusão não preparada</p>
 </dd>
 <dt class="hdlist1">-m</dt>
 <dt class="hdlist1">--modified</dt>
 <dd>
-<p>Exibe os arquivos modificados na saída</p>
+<p>Mostra os arquivos com uma modificação não preparada (observe que uma exclusão não preparada também conta como uma alteração não preparada)</p>
 </dd>
 <dt class="hdlist1">-o</dt>
 <dt class="hdlist1">--others</dt>
@@ -505,7 +506,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-i</dt>
 <dt class="hdlist1">--ignored</dt>
 <dd>
-<p>Exibe apenas os arquivos ignorados na saída. Ao exibir os arquivos no índice, exiba apenas aqueles que coincidam através de um padrão de exclusão. Ao exibir os "outros" arquivos, exiba apenas aqueles que coincidam através de um padrão de exclusão. As regras predefinidas para ignorar não estão automaticamente ativas; portanto, pelo menos uma das opções <code>--exclude*</code> são necessários.</p>
+<p>Exibe apenas os arquivos que foram ignorados na saída. Deve ser usado de forma explícita com um <em>-c</em> ou <em>-o</em>. Ao mostrar arquivos no índice (ou seja, quando usar <em>-c</em>), mostre apenas os arquivos que correspondem a um padrão de exclusão. Ao mostrar "outros" arquivos (ou seja, quando usar <em>-o</em>), mostre apenas aqueles que correspondam a um padrão de exclusão. As regras predefinidas para ignorar não são ativadas automaticamente, portanto, pelo menos uma das opções <code>--exclude*</code> é obrigatória.</p>
 </dd>
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--stage</dt>
@@ -514,7 +515,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--directory</dt>
 <dd>
-<p>Caso um diretório inteiro seja classificado como "other" (outro), exibe apenas o seu nome (com uma barra à direita) e não todo o seu conteúdo.</p>
+<p>Caso um diretório inteiro seja classificado como "other" (outro), exibe apenas o seu nome (com uma barra à direita) e não todo o seu conteúdo. Não tem qualquer efeito sem -o/--others.</p>
 </dd>
 <dt class="hdlist1">--no-empty-directory</dt>
 <dd>
@@ -523,12 +524,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-u</dt>
 <dt class="hdlist1">--unmerged</dt>
 <dd>
-<p>Exibe os arquivos não mesclados na saída (impõem a utilização da opção <code>--stage</code>)</p>
+<p>Mostra informações sobre arquivos não foram mesclados na saída, mas não mostra nenhum outro arquivo rastreado (impõem o uso da opção --stage, substitui a opção --cached).</p>
 </dd>
 <dt class="hdlist1">-k</dt>
 <dt class="hdlist1">--killed</dt>
 <dd>
-<p>Exibe os arquivos no sistema de arquivos que precisam ser removidos devido a conflitos do arquivo/diretório para que o índice averiguado seja bem-sucedido.</p>
+<p>Mostra os arquivos não rastreados no sistema de arquivos que precisam ser removidos por causa de conflitos do arquivo/diretório para que os arquivos rastreados possam ser gravados.</p>
+</dd>
+<dt class="hdlist1">--resolve-undo</dt>
+<dd>
+<p>Mostra os arquivos com informações de resolução-desfazer no índice junto com suas informações de resolução-desfazer. (as informações de resolução-desfazer são usadas para implementar o "git checkout -m $PATH", ou seja, para recriar conflitos de mesclagem que foram resolvidos de forma acidental)</p>
 </dd>
 <dt class="hdlist1">-z</dt>
 <dd>
@@ -550,7 +555,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--exclude-per-directory=&lt;arquivo&gt;</dt>
 <dd>
-<p>Leia os padrões de exclusão adicionais que se aplicam apenas ao diretório e aos seus subdiretórios no &lt;arquivo&gt;.</p>
+<p>Leia os padrões de exclusão adicionais que se aplicam apenas ao diretório e aos seus subdiretórios no &lt;arquivo&gt;. Descontinuado; em vez disso use --exclude-standard.</p>
 </dd>
 <dt class="hdlist1">--exclude-standard</dt>
 <dd>
@@ -566,41 +571,45 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">-t</dt>
 <dd>
-<p>Esse recurso está quase obsoleto. Para fins de script, <a href="git-status.html">git-status(1)</a> <code>--porcelain</code> e <a href="git-diff-files.html">git-diff-files(1)</a> <code>--name-status</code> são quase sempre as maiores alternativas, os usuários devem olhar para o <a href="git-status.html">git-status(1)</a> <code>--short</code> ou <a href="git-diff.html">git-diff(1)</a> <code>--namename-status</code> para as alternativas mais amigáveis.</p>
+<p>Mostra as tags da condição geral junto com os nomes dos arquivos. Observe que para fins de uso com script, <a href="git-status.html">git-status(1)</a> <code>--porcelain</code> e <a href="git-diff-files.html">git-diff-files(1)</a> <code>--name-status</code> são quase sempre as maiores alternativas, os usuários devem olhar para o <a href="git-status.html">git-status(1)</a> <code>--short</code> ou <a href="git-diff.html">git-diff(1)</a> <code>--namename-status</code> para as alternativas mais amigáveis.</p>
 <div class="openblock">
 <div class="content">
 <div class="paragraph">
-<p>Esta opção identifica a condição geral do arquivo com as seguintes opções (seguidas por um espaço) no início de cada linha:</p>
+<p>Esta opção fornece um motivo para mostrar cada nome de arquivo em forma de uma tag de status (que é seguida por um espaço e, em seguida, o nome do arquivo). As tags de status são todas com caracteres únicos a partir da lista a seguir:</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">H</dt>
 <dd>
-<p>cached</p>
+<p>um arquivo rastreado que não seja não mesclado "unmerged" ou "skip-worktree"</p>
 </dd>
 <dt class="hdlist1">S</dt>
 <dd>
-<p>skip-worktree</p>
+<p>arquivo rastreado que é "skip-worktree"</p>
 </dd>
 <dt class="hdlist1">M</dt>
 <dd>
-<p>unmerged</p>
+<p>o arquivo rastreado que não foi mesclado</p>
 </dd>
 <dt class="hdlist1">R</dt>
 <dd>
-<p>removido/excluído</p>
+<p>arquivo rastreado com remoção/exclusão não preparada</p>
 </dd>
 <dt class="hdlist1">C</dt>
 <dd>
-<p>modificado/alterado</p>
+<p>arquivo rastreado com modificação/alteração não preparada</p>
 </dd>
 <dt class="hdlist1">K</dt>
 <dd>
-<p>para ser encerrado</p>
+<p>caminhos não rastreados que fazem parte de conflitos do arquivo/diretório que impedem o check-out dos arquivos rastreados</p>
 </dd>
 <dt class="hdlist1">?</dt>
 <dd>
-<p>Outros</p>
+<p>arquivo não rastreado</p>
+</dd>
+<dt class="hdlist1">U</dt>
+<dd>
+<p>arquivo com informações de resolução-desfazer</p>
 </dd>
 </dl>
 </div>
@@ -648,6 +657,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Caso o índice seja esparso, mostre os diretórios esparsos sem expandir aos arquivos contidos. Os diretórios esparsos serão mostrados com uma barra, como "x/" para um diretório esparso "x".</p>
 </dd>
+<dt class="hdlist1">--format=&lt;formato&gt;</dt>
+<dd>
+<p>Uma string que interpola <code>%(fieldname)</code> do resultado que está sendo mostrado. Ele também interpola <code>%%</code> para <code>%</code>, e <code>%xx</code> onde <code>xx</code> são dígitos hexadecimais interpolados para o caractere com código hexadecimal <code>xx</code>; por exemplo, <code>%00</code> interpola para <code>\0</code> (NUL), <code>%09</code> para <code>\t</code> (TAB) e %0a para <code>\n</code> (LF). A opção`--format` não pode ser combinado com <code>-s</code>, <code>-o</code>, <code>-k</code>, <code>-t</code>, <code>--resolve-undo</code> e <code>--eol</code>.</p>
+</dd>
 <dt class="hdlist1">--</dt>
 <dd>
 <p>Não interprete mais argumentos como opções.</p>
@@ -684,6 +697,51 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Sem a opção <code>z</code>, os <code>pathnames</code> com os caracteres "incomuns" são citados conforme explicado na variável de configuração <code>core.quotePath</code> (consulte <a href="git-config.html">git-config(1)</a>). Utilizando a opção <code>-z</code>, o nome do arquivo é gerado literalmente e a linha é finalizada com um byte <code>NUL</code>.</p>
 </div>
+<div class="paragraph">
+<p>É possível imprimir em um formato personalizado usando a opção <code>--format</code>, que é capaz de interpolar diferentes campos usando uma notação <code>%(fieldname)</code>. Por exemplo, se você se importa apenas com os campos "objectname" e "path", você pode executar com um comando "--format" específico como</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>git ls-files --format='%(objectname) %(caminho)'</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_nome_dos_campos">NOME DOS CAMPOS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A maneira como cada caminho é mostrado pode ser personalizada ao usar a opção <code>--format=&lt;formato&gt;</code>, onde o %(fieldname) na string &lt;formato&gt; são interpolados nos vários aspectos da entrada do índice. Os seguintes "fieldname" são compreendidos:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">objectmode</dt>
+<dd>
+<p>O modo do arquivo que está registrado no índice.</p>
+</dd>
+<dt class="hdlist1">objectname</dt>
+<dd>
+<p>O nome do arquivo que está registrado no índice.</p>
+</dd>
+<dt class="hdlist1">estágio</dt>
+<dd>
+<p>O estágio do arquivo que é registrado no índice.</p>
+</dd>
+<dt class="hdlist1">eolinfo:index</dt>
+<dt class="hdlist1">eolinfo:worktree</dt>
+<dd>
+<p>O &lt;eolinfo&gt; (consulte a descrição da opção <code>--eol</code>) do conteúdo no índice ou para o caminho na árvore de trabalho.</p>
+</dd>
+<dt class="hdlist1">eolattr</dt>
+<dd>
+<p>O &lt;eolattr&gt; (consulte a descrição da opção <code>--eol</code>) que se aplica ao caminho.</p>
+</dd>
+<dt class="hdlist1">caminho</dt>
+<dd>
+<p>O nome do caminho do arquivo que está registrado no índice.</p>
+</dd>
+</dl>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -693,7 +751,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>O <em>git ls-files</em> pode utilizar uma lista de "padrões de exclusão" ao percorrer a árvore dos diretórios e localizar os arquivos para exibir quando as opções <code>--others</code> ou <code>--ignored</code> são utilizados. <a href="gitignore.html">gitignore(5)</a> determina o formato dos padrões de exclusão.</p>
 </div>
 <div class="paragraph">
-<p>Estes padrões de exclusão vêm destes locais, na ordem:</p>
+<p>Geralmente, você deve usar apenas o comando --exclude-standard, mas por razões históricas, os padrões de exclusão podem ser especificados a partir dos seguintes lugares na ordem:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -732,7 +790,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:02 +0200
+Last updated 2023-05-21 19:04:52 +0200
 </div>
 </div>
 </body>

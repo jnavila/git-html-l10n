@@ -682,7 +682,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--show-scope</dt>
 <dd>
-<p>Similar to <code>--show-origin</code> in that it augments the output of all queried config options with the scope of that value (worktree, local, global, system, command).</p>
+<p>Semelhante a opção <code>--show-origin</code>, na medida em que aumenta a saída de todas as opções de configuração consultadas com o escopo deste valor (<code>worktree</code>, <code>local</code>, <code>global</code>, <code>system</code>, <code>command</code>).</p>
 </dd>
 <dt class="hdlist1">--get-colorbool &lt;nome&gt; [&lt;stdout-is-tty&gt;]</dt>
 <dd>
@@ -724,7 +724,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="FILES">ARQUIVOS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Caso não seja definido de forma explicita com a opção <code>--file</code>, existem quatro arquivos onde o <em>git config</em> irá procurar as opções de configuração:</p>
+<p>É predefinido que o comado <em>git config</em> leia as opções de configuração a partir de diversos arquivos:</p>
 </div>
 <div class="dlist">
 <dl>
@@ -733,12 +733,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Arquivo de configuração do sistema.</p>
 </dd>
 <dt class="hdlist1">$XDG_CONFIG_HOME/git/config</dt>
-<dd>
-<p>Segundo arquivo de configuração específico do usuário. Caso $XDG_CONFIG_HOME não esteja definido ou esteja vazio , a opção de configuração <code>$HOME/.config/git/config</code> será utilizada. Qualquer variável com valor único definido neste arquivo será substituída pelo que estiver em <code>~/.gitconfig</code>. É uma boa ideia não criar este arquivo no caso de você às vezes usar versões mais antigas do Git, pois o suporte para este arquivo foi adicionado recentemente.</p>
-</dd>
 <dt class="hdlist1">~/.gitconfig</dt>
 <dd>
-<p>Arquivo de configuração específico do usuário. Também chamado de arquivo de configuração "global".</p>
+<p>Arquivos de configuração específicos do usuário. Quando a variável de ambiente XDG_CONFIG_HOME não estiver definida ou estiver vazia, $HOME/.config/ será usado como $XDG_CONFIG_HOME.</p>
+<div class="paragraph">
+<p>Eles também são chamados de arquivos de configuração "globais". Caso ambos existam, eles serão lidos na ordem indicada acima.</p>
+</div>
 </dd>
 <dt class="hdlist1">$GIT_DIR/config</dt>
 <dd>
@@ -751,24 +751,80 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dl>
 </div>
 <div class="paragraph">
-<p>Caso nenhuma outra opção seja utilizada, todas as opções de leitura irão ler todos estes arquivos que estiverem disponíveis. Caso o arquivo global ou o arquivo de configuração global inteiro não esteja disponível, eles serão ignorados. Caso o arquivo de configuração do repositório não estiver disponível ou legível, o comando <em>git config</em> encerrará com um código de erro diferente de zero. No entanto, em nenhum dos casos será emitida uma mensagem de erro.</p>
+<p>Você também poderá fornecer parâmetros adicionais de configuração ao executar qualquer comando git usando a opção <code>-c</code>. Consulte <a href="git.html">git(1)</a> para obter mais detalhes.</p>
+</div>
+<div class="paragraph">
+<p>As opções serão lidas a partir de todos os arquivos disponíveis. Caso os arquivos de configuração global ou de todo o sistema estiverem ausentes ou ilegíveis, eles serão ignorados. Se o arquivo de configuração do repositório estiver ausente ou ilegível, o comando <em>git config</em> encerrará com um código de erro diferente de zero. Uma mensagem de erro será produzida caso o arquivo esteja ilegível, mas não se estiver ausente.</p>
 </div>
 <div class="paragraph">
 <p>Os arquivos são lidos na ordem dada acima, com o último valor encontrado tendo precedência sobre os valores lidos anteriormente. Quando vários valores são obtidos, então todos os valores de uma chave de todos os arquivos, serão usados.</p>
 </div>
 <div class="paragraph">
-<p>Você pode substituir os parâmetros da configuração dos parâmetros individuais ao executar qualquer comando git utilizando a opção <code>-c</code>. Para mais detalhes, consulte <a href="git.html">git(1)</a>.</p>
+<p>É predefinido que as opções sejam gravadas apenas no arquivo específico de configuração do repositório. Observe que isso também afeta opções como <code>--replace-all</code> e <code>--unset</code>. O comando <strong><em>git config</em> só alterará um arquivo por vez</strong>.</p>
 </div>
 <div class="paragraph">
-<p>É predefinido que todas as opções de gravação sejam gravadas no arquivo de configuração específico do repositório. Observe que isso também afeta opções como <code>--replace-all</code> e <code>--sunset</code>. <strong>O comando <em>git config</em> sempre irá alterar um arquivo por vez</strong>.</p>
-</div>
-<div class="paragraph">
-<p>É possível substituir estas regras usando as opções na linha de comando <code>--global</code>, <code>--system</code>, <code>--local</code>, <code>--worktree</code> e <code>--file</code>; consulte <a href="#OPÇÕES">[OPÇÕES]</a> acima.</p>
+<p>Você pode limitar quais fontes de configuração serão lidas ou quais serão gravadas ao definir o caminho de um arquivo com a opção <code>--file</code>, ou definindo um escopo de configuração com <code>--system</code>, <code>--global</code>, <code>-- local</code> ou <code>--worktree</code>. Consulte <a href="#OPÇÕES">[OPÇÕES]</a> acima para obter mais informações.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_variáveis_do_ambiente">VARIÁVEIS DO AMBIENTE</h2>
+<h2 id="SCOPES">ESCOPOS</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cada fonte de configuração está dentro de um escopo de configuração. Os escopos são:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">system</dt>
+<dd>
+<p>$(prefixo)/etc/gitconfig</p>
+</dd>
+<dt class="hdlist1">global</dt>
+<dd>
+<p>$XDG_CONFIG_HOME/git/config</p>
+<div class="paragraph">
+<p>~/.gitconfig</p>
+</div>
+</dd>
+<dt class="hdlist1">local</dt>
+<dd>
+<p>$GIT_DIR/config</p>
+</dd>
+<dt class="hdlist1">árvore de trabalho</dt>
+<dd>
+<p>$GIT_DIR/config.worktree</p>
+</dd>
+<dt class="hdlist1">comando</dt>
+<dd>
+<p>GIT_CONFIG_{COUNT,KEY,VALUE} variáveis de ambiente (consulte <a href="#AMBIENTE">[AMBIENTE]</a> abaixo)</p>
+<div class="paragraph">
+<p>a opção <code>-c</code></p>
+</div>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Com exceção do <em>command</em>, cada escopo corresponde a uma opção da linha de comando: <code>--system</code>, <code>--global</code>, <code>--local</code>, <code>--worktree</code>.</p>
+</div>
+<div class="paragraph">
+<p>Ao ler as opções, ao especificar um escopo lerá apenas as opções dos arquivos que estejam dentro deste escopo. Ao gravar as opções, ao especificar um escopo ele será gravado nos arquivos dentro deste escopo (em vez do arquivo de configuração específico do repositório). Consulte <a href="#OPÇÕES">[OPÇÕES]</a> acima para obter uma descrição completa.</p>
+</div>
+<div class="paragraph">
+<p>Independentemente da definição do escopo, a maioria das opções de configuração são respeitadas, porém, algumas opções são respeitadas apenas em determinados escopos. Consulte a documentação da respectiva opção para obter mais informações.</p>
+</div>
+<div class="sect2">
+<h3 id="_configuração_protegida">Configuração protegida</h3>
+<div class="paragraph">
+<p>A configuração protegida refere-se aos escopos <em>system</em>, <em>global</em> e <em>command</em>. Por questões de segurança, certas opções são obedecidas apenas quando definidas na configuração protegida, caso contrário, serão ignoradas.</p>
+</div>
+<div class="paragraph">
+<p>O Git trata estes escopos como se fossem controlados pelo usuário ou por um administrador confiável. Isso ocorre porque um invasor que controla esses escopos pode causar danos substanciais sem usar o Git, portanto, presume-se que o ambiente do usuário proteja estes escopos contra invasores.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="ENVIRONMENT">VARIÁVEIS DO AMBIENTE</h2>
 <div class="sectionbody">
 <div class="dlist">
 <dl>
@@ -1267,6 +1323,9 @@ http.sslverify false</pre>
 <p>Unresolved directive in config.txt - include::config/browser.txt[]</p>
 </div>
 <div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/bundle.txt[]</p>
+</div>
+<div class="paragraph">
 <p>Unresolved directive in config.txt - include::config/checkout.txt[]</p>
 </div>
 <div class="paragraph">
@@ -1321,6 +1380,9 @@ http.sslverify false</pre>
 <p>Unresolved directive in config.txt - include::config/fsck.txt[]</p>
 </div>
 <div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/fsmonitor&#8212;&#8203;daemon.txt[]</p>
+</div>
+<div class="paragraph">
 <p>Unresolved directive in config.txt - include::config/gc.txt[]</p>
 </div>
 <div class="paragraph">
@@ -1352,6 +1414,9 @@ http.sslverify false</pre>
 </div>
 <div class="paragraph">
 <p>Unresolved directive in config.txt - include::config/imap.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/includeif.txt[]</p>
 </div>
 <div class="paragraph">
 <p>Unresolved directive in config.txt - include::config/index.txt[]</p>
@@ -1447,110 +1512,14 @@ http.sslverify false</pre>
 <dt class="hdlist1">merge.guitool</dt>
 <dd>
 <p>Controla qual a ferramenta de mesclagem é utilizada pelo <a href="git-mergetool.html">git-mergetool(1)</a> quando a opção <code>-g/--gui</code> for utilizada. A lista abaixo exibe os valores predefinidos que são válidos . Qualquer outro valor é tratado como uma ferramenta de mesclagem personalizada e requer que uma variável <code>mergetool.&lt;guitool&gt;.cmd</code> correspondente seja definida.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>araxis</p>
-</li>
-<li>
-<p>bc</p>
-</li>
-<li>
-<p>bc3</p>
-</li>
-<li>
-<p>bc4</p>
-</li>
-<li>
-<p>codecompare</p>
-</li>
-<li>
-<p>deltawalker</p>
-</li>
-<li>
-<p>diffmerge</p>
-</li>
-<li>
-<p>diffuse</p>
-</li>
-<li>
-<p>ecmerge</p>
-</li>
-<li>
-<p>emerge</p>
-</li>
-<li>
-<p>examdiff</p>
-</li>
-<li>
-<p>guiffy</p>
-</li>
-<li>
-<p>gvimdiff</p>
-</li>
-<li>
-<p>gvimdiff1</p>
-</li>
-<li>
-<p>gvimdiff2</p>
-</li>
-<li>
-<p>gvimdiff3</p>
-</li>
-<li>
-<p>kdiff3</p>
-</li>
-<li>
-<p>meld</p>
-</li>
-<li>
-<p>nvimdiff</p>
-</li>
-<li>
-<p>nvimdiff1</p>
-</li>
-<li>
-<p>nvimdiff2</p>
-</li>
-<li>
-<p>nvimdiff3</p>
-</li>
-<li>
-<p>opendiff</p>
-</li>
-<li>
-<p>p4merge</p>
-</li>
-<li>
-<p>smerge</p>
-</li>
-<li>
-<p>tkdiff</p>
-</li>
-<li>
-<p>tortoisemerge</p>
-</li>
-<li>
-<p>vimdiff</p>
-</li>
-<li>
-<p>vimdiff1</p>
-</li>
-<li>
-<p>vimdiff2</p>
-</li>
-<li>
-<p>vimdiff3</p>
-</li>
-<li>
-<p>winmerge</p>
-</li>
-<li>
-<p>xxdiff</p>
-</li>
-</ul>
-</div>
 </dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config/merge.txt - include::../mergetools-merge.txt[]</p>
+</div>
+<div class="dlist">
+<dl>
 <dt class="hdlist1">merge.verbosity</dt>
 <dd>
 <p>Controla a quantidade de saída exibida pela estratégia de mesclagem recursiva. O level 0 não envia nada, exceto uma mensagem final de erro, caso conflitos sejam detectados. O level 1 gera apenas os conflitos na saída, o 2 gera conflitos e alterações nos arquivos. O level 5 e acima gera informações de depuração. 2 é o valor predefinido. Pode ser substituído pela variável de ambiente <code>GIT_MERGE_VERBOSITY</code>.</p>
@@ -1610,6 +1579,9 @@ http.sslverify false</pre>
 </div>
 <div class="paragraph">
 <p>Unresolved directive in config.txt - include::config/rerere.txt[]</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config.txt - include::config/revert.txt[]</p>
 </div>
 <div class="paragraph">
 <p>Unresolved directive in config.txt - include::config/safe.txt[]</p>
@@ -1712,7 +1684,7 @@ http.sslverify false</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:01 +0200
+Last updated 2023-05-21 19:04:50 +0200
 </div>
 </div>
 </body>

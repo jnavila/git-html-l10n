@@ -451,21 +451,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git branch</em> [--color[=&lt;when&gt;] |--no-color] [--show-current]
-        [-v [--abbrev=&lt;n&gt; |--no-abbrev] ]
-        [--column[=&lt;options&gt;] | --no-column][--sort=&lt;key&gt;]
-        [--合并 [&lt;commit&gt;]][--no-merged [&lt;commit&gt;]]。
-        [--包含[&lt;commit&gt;]][--no-contains [&lt;commit&gt;]] [--contains [&lt;commit&gt;]]
-        [--points-at &lt;object&gt;] [--format=&lt;format&gt;]。
-        [(-r | --remotes) | (-a | --all)
-        [--列表] [&lt;pattern&gt;&#8230;&#8203;]
-<em>git branch</em> [--track |-no-track] [-f] &lt;branchname&gt; [&lt;start-point&gt;]。
-<em>git branch</em> (-set-upstream-to=&lt;upstream&gt; | -u &lt;upstream&gt;) [&lt;branchname&gt;]
-<em>git branch</em> --unset-upstream [&lt;branchname&gt;]
-<em>git branch</em> (-m | -M) [&lt;oldbranch&gt;] &lt;newbranch&gt;
-<em>git branch</em> (-c | -C) [&lt;oldbranch&gt;] &lt;newbranch&gt;
-<em>git branch</em> (-d | -D) [-r] &lt;branchname&gt;&#8230;&#8203;
-<em>git branch</em> --edit-description [&lt;branchname&gt;])</pre>
+<pre class="content"><em>git branch</em> [--color[=&lt;when&gt;] | --no-color] [--show-current]
+        [-v [--abbrev=&lt;n&gt; | --no-abbrev]]
+        [--column[=&lt;options&gt;] | --no-column] [--sort=&lt;key&gt;]
+        [--merged [&lt;commit&gt;]] [--no-merged [&lt;commit&gt;]]
+        [--contains [&lt;commit&gt;]] [--no-contains [&lt;commit&gt;]]
+        [--points-at &lt;object&gt;] [--format=&lt;format&gt;]
+        [(-r | --remotes) | (-a | --all)]
+        [--list] [&lt;pattern&gt;&#8230;&#8203;]
+<em>git branch</em> [--track[=(direct|inherit)] | --no-track] [-f]
+        [--recurse-submodules] &lt;分支名&gt; [&lt;起始点&gt;]
+<em>git branch</em> (--set-upstream-to=&lt;上游&gt; | -u &lt;上游&gt;) [&lt;分支名&gt;]
+<em>git branch</em> --unset-upstream [&lt;分支名&gt;]
+<em>git branch</em> (-m | -M) [&lt;旧分支&gt;] &lt;新分支&gt;
+<em>git branch</em> (-c | -C) [&lt;旧分支&gt;] &lt;新分支&gt;
+<em>git branch</em> (-d | -D) [-r] &lt;分支名&gt;&#8230;&#8203;
+<em>git branch</em> --edit-description [&lt;分支名&gt;]</pre>
 </div>
 </div>
 </div>
@@ -528,7 +529,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-f</dt>
 <dt class="hdlist1">--force</dt>
 <dd>
-<p>Reset &lt;branchname&gt; to &lt;startpoint&gt;, even if &lt;branchname&gt; exists already. Without <code>-f</code>, <em>git branch</em> refuses to change an existing branch. In combination with <code>-d</code> (or <code>--delete</code>), allow deleting the branch irrespective of its merged status, or whether it even points to a valid commit. In combination with <code>-m</code> (or <code>--move</code>), allow renaming the branch even if the new branch name already exists, the same applies for <code>-c</code> (or <code>--copy</code>).</p>
+<p>Reset &lt;branchname&gt; to &lt;start-point&gt;, even if &lt;branchname&gt; exists already. Without <code>-f</code>, <em>git branch</em> refuses to change an existing branch. In combination with <code>-d</code> (or <code>--delete</code>), allow deleting the branch irrespective of its merged status, or whether it even points to a valid commit. In combination with <code>-m</code> (or <code>--move</code>), allow renaming the branch even if the new branch name already exists, the same applies for <code>-c</code> (or <code>--copy</code>).</p>
+<div class="paragraph">
+<p>请注意，"git branch -f &lt;branchname&gt; [&lt;start-point&gt;]"命令，即使添加"-f"选项，该命令也会拒绝改变一个在链接到同一仓库的另一个工作树中被检查出来的现有分支`&lt;branchname&gt;`。</p>
+</div>
 </dd>
 <dt class="hdlist1">-m</dt>
 <dt class="hdlist1">--move</dt>
@@ -560,6 +564,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--ignore-case</dt>
 <dd>
 <p>排序和过滤分支是不分大小写的。</p>
+</dd>
+<dt class="hdlist1">--omit-empty</dt>
+<dd>
+<p>Do not print a newline after formatted refs where the format expands to the empty string.</p>
 </dd>
 <dt class="hdlist1">--column[=&lt;选项&gt;]</dt>
 <dt class="hdlist1">--no-column</dt>
@@ -608,16 +616,32 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>在输出列表中显示完整的sha1，而不是缩写它们。</p>
 </dd>
 <dt class="hdlist1">-t</dt>
-<dt class="hdlist1">--track</dt>
+<dt class="hdlist1">--track[=(direct|inherit)]</dt>
 <dd>
-<p>在创建新分支时，设置`branch.&lt;name&gt;.remote`和`branch.&lt;name&gt;.merge`配置项，将起始点分支标记为新分支的 "上游"。这个配置将告诉git在`git status`和`git branch -v`中显示这两个分支之间的关系。此外，它还指示`git pull`在新分支被检出时，不带参数地从上游提取。</p>
+<p>When creating a new branch, set up <code>branch.&lt;name&gt;.remote</code> and <code>branch.&lt;name&gt;.merge</code> configuration entries to set "upstream" tracking configuration for the new branch. This configuration will tell git to show the relationship between the two branches in <code>git status</code> and <code>git branch -v</code>. Furthermore, it directs <code>git pull</code> without arguments to pull from the upstream when the new branch is checked out.</p>
 <div class="paragraph">
-<p>当起点是一个远程跟踪的分支时，这种行为是默认的。 如果你想让 "git switch"、"git checkout "和 "git branch "总是表现得像"--no-track "一样，就把 branch.autoSetupMerge 配置变量设为 "false"。如果你想在起始点是本地或远程跟踪的分支时有这种行为，则将其设置为`always`。</p>
+<p>The exact upstream branch is chosen depending on the optional argument: <code>-t</code>, <code>--track</code>, or <code>--track=direct</code> means to use the start-point branch itself as the upstream; <code>--track=inherit</code> means to copy the upstream configuration of the start-point branch.</p>
+</div>
+<div class="paragraph">
+<p>branch.autoSetupMerge配置变量指定了当既不指定`--track`也不指定`--no-track`时，<code>git switch</code>、`git checkout`和`git branch`应如何运行：</p>
+</div>
+<div class="paragraph">
+<p>默认选项 "true"，在起点是远程跟踪分支的情况下，就像给了 "track=direct"。 <code>false`的行为就像给了</code>--no-track`一样。<code>always`的行为就像给了</code>--track=direct`一样。继承(inherit)的行为就像给了`--track=inherit&#8217;一样。<code>simple`的行为就像给了</code>--track=direct`一样，只有当起点是远程跟踪的分支，并且新的分支与远程分支有相同的名字时，才会有这种行为。</p>
+</div>
+<div class="paragraph">
+<p>See <a href="git-pull.html">git-pull(1)</a> and <a href="git-config.html">git-config(1)</a> for additional discussion on how the <code>branch.&lt;name&gt;.remote</code> and <code>branch.&lt;name&gt;.merge</code> options are used.</p>
 </div>
 </dd>
 <dt class="hdlist1">--no-track</dt>
 <dd>
-<p>不要设置 "上游 "配置，即使 branch.autoSetupMerge 配置变量为 true。</p>
+<p>Do not set up "upstream" configuration, even if the branch.autoSetupMerge configuration variable is set.</p>
+</dd>
+<dt class="hdlist1">--recurse-submodules</dt>
+<dd>
+<p>这个选项是实验性的！！！如果 <code>submodule.propagateBranches</code> 被启用，会导致当前命令递归到子模块。参见 <a href="git-config.html">git-config(1)</a> 中的 <code>submodule.propagateBranches</code>。目前，只支持创建分支。</p>
+<div class="paragraph">
+<p>当在分支创建中使用时，一个新的分支&lt;branchname&gt;将在父项目和父项目的&lt;start-point&gt;中的所有子模块中创建。在子模块中，该分支将指向超级项目的&lt;start-point&gt;中的子模块提交，但该分支的跟踪信息将根据子模块的分支和远程来设置，例如`git branch --recurse-submodules topic origin/main`将创建一个子模块分支 "topic"，指向父项目的 "origin/main "中的子模块提交，但跟踪子模块的 "origin/main"。</p>
+</div>
 </dd>
 <dt class="hdlist1">--set-upstream</dt>
 <dd>
@@ -690,10 +714,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p><code>pager.branch`只在列出分支时被尊重，即使用或暗示使用</code>--list`时。默认情况是使用 pager。 参见 <a href="git-config.html">git-config(1)</a>。</p>
 </div>
+<div class="paragraph">
+<p>本节中这一行以上的内容并不包括在 <a href="git-config.html">git-config(1)</a> 文档中。下面的内容与那里的内容相同：</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in git-branch.txt - include::config/branch.txt[]</p>
+</div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_examples">EXAMPLES</h2>
+<h2 id="_实例">实例</h2>
 <div class="sectionbody">
 <div class="dlist">
 <dl>
@@ -796,7 +826,7 @@ $ git for-each-ref 'refs/remotes/&lt;remote&gt;/&lt;pattern&gt;'    <b class="co
 </div>
 </div>
 <div class="sect1">
-<h2 id="_see_also">SEE ALSO</h2>
+<h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><a href="git-check-ref-format.html">git-check-ref-format(1)</a>, <a href="git-fetch.html">git-fetch(1)</a>, <a href="git-remote.html">git-remote(1)</a>, <a href="user-manual.html#what-is-a-branch">&#8216;`了解历史：什么是分支？&#8217;</a> 在 Git User&#8217;s Manual。</p>
@@ -807,14 +837,14 @@ $ git for-each-ref 'refs/remotes/&lt;remote&gt;/&lt;pattern&gt;'    <b class="co
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Part of the <a href="git.html">git(1)</a> suite</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-12-10 17:18:19 +0100
+Last updated 2023-05-21 19:05:47 +0200
 </div>
 </div>
 </body>

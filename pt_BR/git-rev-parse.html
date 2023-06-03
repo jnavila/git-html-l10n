@@ -619,6 +619,10 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 <p>Os padrões informados não devem começar com <code>refs/heads</code>, <code>refs/tags</code>, ou <code>refs/remotes</code> quando aplicadas as opções <code>--branches</code>, <code>--tags</code>, ou <code>--remotes</code> respectivamente, e devem começar com <code>refs/</code> quando for aplicado ao <code>--glob</code> ou <code>--all</code>. Se a intenção for um delimitador <em>/{asterisco}</em>, este deve ser utilizado de forma explicita.</p>
 </div>
 </dd>
+<dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
+<dd>
+<p>Do not include refs that would be hidden by <code>git-fetch</code>, <code>git-receive-pack</code> or <code>git-upload-pack</code> by consulting the appropriate <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> or <code>uploadpack.hideRefs</code> configuration along with <code>transfer.hideRefs</code> (see <a href="git-config.html">git-config(1)</a>). This option affects the next pseudo-ref option <code>--all</code> or <code>--glob</code> and is cleared after processing them.</p>
+</dd>
 <dt class="hdlist1">--disambiguate=&lt;prefixo&gt;</dt>
 <dd>
 <p>Exiba todos os objetos cujo nome começa com o prefixo informado. O <code>&lt;prefixo&gt;</code> deve ter pelo menos 4 dígitos hexadecimais para evitar ter que listar por engano todos os objetos no repositório.</p>
@@ -795,7 +799,7 @@ Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e outras
 <li>
 <p>caso contrário, utilize <em>refs/remotes/&lt;refname&gt;/HEAD</em> caso exista.</p>
 <div class="paragraph">
-<p><code>HEAD</code> informa o commit no qual você teve como base as alterações na árvore de trabalho. <code>FETCH_HEAD</code> registra em qual ramo você buscou no repositório remoto com a sua última invocação <code>git fetch</code>. <code>ORIG_HEAD</code> é criado por comandos que movem seu` HEAD` de uma maneira drástica, para registrar a posição do <code>HEAD</code> antes da sua operação, para que você possa facilmente mudar a ponta do ramo de volta ao estado anterior a sua execução. <code>MERGE_HEAD</code> registra os commits que você está mesclando no seu ramo quando você executa o comando <code>git merge</code>. <code>CHERRY_PICK_HEAD</code> registra o commit que você está escolhendo quando executa o comando <code>git cherry-pick</code>.</p>
+<p><code>HEAD</code> informa o commit no qual você teve como base as alterações na árvore de trabalho. <code>FETCH_HEAD</code> registra em qual ramo você buscou no repositório remoto com a sua última invocação <code>git fetch</code>. <code>ORIG_HEAD</code> é criado por comandos que movem seu` HEAD` de uma maneira drástica (<code>git am</code>, <code>git merge</code>, <code>git rebase</code>, <code>git reset</code>), para registrar a posição do <code>HEAD</code> antes da sua operação, para que você possa facilmente mudar a ponta do ramo de volta ao estado anterior a sua execução. <code>MERGE_HEAD</code> registra os commits que você está mesclando no seu ramo quando você executa o comando <code>git merge</code>. <code>CHERRY_PICK_HEAD</code> registra o commit que você está escolhendo quando executa o comando <code>git cherry-pick</code>.</p>
 </div>
 <div class="paragraph">
 <p>Observe que em qualquer um dos casos o <em>refs/*</em> acima pode vir do diretório <code>$GIT_DIR/refs</code> ou do arquivo`$GIT_DIR/packed-refs`. Embora a codificação do nome de referência não seja especificado, o UTF-8 é o predefinido pois algum processamento de saída pode assumir nomes <code>ref</code> em UTF-8.</p>
@@ -826,11 +830,11 @@ Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e outras
 </dd>
 <dt class="hdlist1"><em>[&lt;nome-do-ramo&gt;]@{upstream}</em>, exemplo, <em>master@{upstream}</em>, <em>@{u}</em></dt>
 <dd>
-<p>O sufixo <em>@ {upstream}</em> para o nome de uma ramificação (o formato abreviado <em>&lt;nome-do-ramo&gt;@{u}</em>) refere-se ao ramo onde o ramo informado pelo "branchname" esteja definido para construir em cima do <code>branch.&lt;nome&gt;.remote</code> e <code>branch.&lt;nome&gt;.merge</code>). Em uma ramificação desaparecida a predefinição retorna para a atual. Estes sufixos também são aceitos quando digitados em maiúsculas e significam a mesma coisa, não importa o caso.</p>
+<p>Um ramo B pode ser configurado para construir em cima de um ramo X (configurado com <code>branch.&lt;nome&gt;.merge</code>) em um R remoto (configurado com <code>branch.&lt;nome&gt;.remote</code>). B@{u} refere-se ao ramo rastreado remotamente para o ramo X obtido a partir do R remoto, normalmente encontrado em <code>refs/remotes/R/X</code>.</p>
 </dd>
 <dt class="hdlist1"><em>[&lt;nome-do-ramo&gt;]@{push}</em>, exemplo, <em>master@{push}</em>, <em>@{push}</em></dt>
 <dd>
-<p>O sufixo <em>@{push}</em> relata ao ramo "para onde estaremos fazendo impulsionamento" caso <code>git push</code> seja executado enquanto <code>branchname</code> seja verificado (ou o <code>HEAD</code> atual, caso nenhum nome do ramo tenha sido especificado). Como o nosso impulsionamento foi feito em um repositório remoto, é claro, relatamos o ramo de rastreamento local que tenha correspondência a esse ramo (ou seja, algo em <code>refs/remotes/</code>).</p>
+<p>O sufixo <em>@{push}</em> relata ao ramo "para onde estaremos fazendo impulsionamento" caso <code>git push</code> seja executado enquanto <code>branchname</code> seja verificado (ou o <code>HEAD</code> atual, caso nenhum nome do ramo tenha sido especificado). Como é para <em>@{upstream}</em>, reportamos o ramo rastreado remotamente que corresponda aquela ramificação remotamente.</p>
 <div class="paragraph">
 <p>Aqui um exemplo para deixar mais claro:</p>
 </div>
@@ -964,7 +968,7 @@ J = F^2  = B^3^2   = A^^3^2</pre>
 <dd>
 <p>A operação do conjunto <em>^r1 r2</em> aparece com tanta frequência que existe uma abreviação para isso. Quando você tem dois commits <em>r1</em> e <em>r2</em> (nomeados de acordo com a sintaxe explicada em ESPECIFICANDO REVISÕES acima), você pode solicitar os commits que sejam acessíveis atraés do <em>r2</em> excluindo aqueles que podem ser acessados através do <em>r1</em> pelo <em>^r1 r2</em> e podem ser escritos como <em>r1..r2</em>.</p>
 </dd>
-<dt class="hdlist1">A notação da diferença simétrica <em>&#8230;&#8203;</em> (três pontos)</dt>
+<dt class="hdlist1">A notação da diferença simétrica <em>...</em> (três pontos)</dt>
 <dd>
 <p>Uma notação semelhante <em>r1...r2</em> é chamada de uma diferença simétrica de <em>r1</em> e <em>r2</em> sendo definida como <em>r1 r2 --not $(git merge-base --all r1 r2)</em>. É o conjunto dos commits que são acessíveis a partir do <em>r1</em> (lado esquerdo) ou <em>r2</em> (lado direito), porém, não de ambos.</p>
 </dd>
@@ -1040,7 +1044,7 @@ J = F^2  = B^3^2   = A^^3^2</pre>
 </dd>
 <dt class="hdlist1"><em>&lt;rev&gt;^!</em>, e.g. <em>HEAD^!</em></dt>
 <dd>
-<p>Um sufixo <em>^</em> seguido de um ponto de exclamação é o mesmo que fazer um commit <em>&lt;rev&gt;</em> e em seguida, todos as suas origens prefixam com <em>^</em> para excluí-los (assim como seus ancestrais).</p>
+<p>Um sufixo <em>^</em> seguido de um ponto de exclamação é o mesmo que fazer um commit <em>&lt;rev&gt;</em> e todos os seus principais prefixam com <em>^</em> para excluí-los (assim como seus ancestrais).</p>
 </dd>
 <dt class="hdlist1"><em>&lt;rev&gt;^-&lt;n&gt;</em>, e.g. <em>HEAD^-, HEAD^-2</em></dt>
 <dd>
@@ -1267,7 +1271,7 @@ $ sh your-git-script.sh "a b'c"</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:03 +0200
+Last updated 2023-05-21 19:04:53 +0200
 </div>
 </div>
 </body>

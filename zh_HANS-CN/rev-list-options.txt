@@ -124,8 +124,8 @@ endif::git-log[]
 +
 当应用于"--分支"、"--标签 "或"--远程 "时，给出的模式不应该以 "refs/heads"、"refs/tags "或 "refs/remotes "开头，而当应用于"--glob "或 "all "时，必须以 "refs/"开头。如果打算使用尾部的"/{asterisk}"，必须明确给出。
 
---exclude-hidden=[receive|uploadpack]::
-	Do not include refs that would be hidden by `git-receive-pack` or `git-upload-pack` by consulting the appropriate `receive.hideRefs` or `uploadpack.hideRefs` configuration along with `transfer.hideRefs` (see linkgit:git-config[1]). This option affects the next pseudo-ref option `--all` or `--glob` and is cleared after processing them.
+--exclude-hidden=[fetch|receive|uploadpack]::
+	Do not include refs that would be hidden by `git-fetch`, `git-receive-pack` or `git-upload-pack` by consulting the appropriate `fetch.hideRefs`, `receive.hideRefs` or `uploadpack.hideRefs` configuration along with `transfer.hideRefs` (see linkgit:git-config[1]). This option affects the next pseudo-ref option `--all` or `--glob` and is cleared after processing them.
 
 --reflog::
 	假设reflogs提到的所有对象都在命令行中被列为`<commit>`。
@@ -556,7 +556,7 @@ ifndef::git-shortlog[]
 
 ifdef::git-rev-list[]
 --objects::
-	打印列出的提交对象所引用的任何对象的ID。 `--objects foo ^bar`因此意味着`给我发送所有我需要下载的对象ID，如果我有提交对象_bar_但没有_foo_的话'。
+	Print the object IDs of any object referenced by the listed commits. `--objects foo ^bar` thus means ``send me all object IDs which I need to download if I have the commit object _bar_ but not _foo_''. See also `--object-names` below.
 
 --in-commit-order::
 	按照提交的顺序打印树和blob的id。树和blob的id会在它们第一次被提交者引用后打印。
@@ -574,7 +574,7 @@ ifdef::git-rev-list[]
 	只对`---对象`有用；打印不在包中的对象ID。
 
 --object-names::
-	只对`---对象`有用；打印找到的对象ID的名称。这是默认行为。
+	只对 `--objects` 有用；打印找到的对象ID的名称。这是默认的行为。注意，每个对象的 "名字" 是模糊的，主要是作为打包对象的提示。特别是：标签、树和二进制文件的名字不作区分；路径名称可以被修改以删除换行；如果一个对象会以不同的名字出现多次，则只显示一个名字。
 
 --no-object-names::
 	只对`--对象`有用；不打印找到的对象ID的名称。这与`--object-names`相反。这个标志允许输出更容易被linkgit:git-cat-file[1]等命令解析。
@@ -672,7 +672,7 @@ include::pretty-options.txt[]
 
 `--date=format:...` feeds the format `...` to your system `strftime`, except for %s, %z, and %Z, which are handled internally. Use `--date=format:%c` to show the date in your system locale's preferred format. See the `strftime` manual for a complete list of format placeholders. When using `-local`, the correct syntax is `--date=format-local:...`.
 
-`--date=default` is the default format, and is based on ctime(3) output. It shows a single line with three-letter day of the week, three-letter month, day-of-month, hour-minute-seconds in "HH:MM:SS" format, followed by 4-digit year, plus timezone information, unless the local time zone is used, e.g. `Thu Jan 1 00:00:00 1970 +0000`.
+`--date=default`是默认格式，基于ctime(3)输出。 它仅仅在一行中显示缩写的星期、缩写的月份、一月中的第几天、"HH:MM:SS "格式的小时-分钟-秒，然后是年份，除非使用本地时区，在末尾都会加上时区信息，例如`Thu Jan 1 00:00:00 1970 +0000`。
 --
 
 ifdef::git-rev-list[]

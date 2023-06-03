@@ -535,7 +535,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--in-reply-to=&lt;identificador&gt;</dt>
 <dd>
-<p>Faça o primeiro e-mail (ou todos os e-mails com <code>--no-thread</code>) aparecer como uma resposta ao ID da mensagem informada, o que evita as quebras dos encadeamentos provendo uma nova série de patches. O segundo e-mail e os seguintes serão enviados como resposta de acordo com a configuração <code>--[no-]chain-reply-to</code>.</p>
+<p>Make the first mail (or all the mails with <code>--no-thread</code>) appear as a reply to the given Message-ID, which avoids breaking threads to provide a new patch series. The second and subsequent emails will be sent as replies according to the <code>--[no-]chain-reply-to</code> setting.</p>
 <div class="paragraph">
 <p>Assim, por exemplo, quando <code>--thread</code> e <code>--no-chain-reply-to</code> sejam utilizados, o segundo e os patches subsequentes serão as respostas para o primeiro, como na ilustração abaixo, onde <code>[PATCH v2 0/3]</code> está como resposta para <code>[PATCH 0/2]</code>:</p>
 </div>
@@ -605,7 +605,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--smtp-encryption=&lt;criptografia&gt;</dt>
 <dd>
-<p>Define a criptografia que será utilizada, <em>ssl</em> ou <em>tls</em>. Qualquer outro valor é revertido para o SMTP simples. A predefinição é o valor da opção de configuração <code>sendemail.smtpEncryption</code>.</p>
+<p>Especifique de que maneira a criptografia será iniciada na conexão SMTP. Os valores válidos são <em>ssl</em> e <em>tls</em>. Qualquer outro valor reverte para SMTP simples (não criptografado), cujo padrão é a porta 25. Apesar dos nomes, ambos os valores usarão a mesma versão mais recente do TLS, porém, têm estes nomes por motivos históricos. O <em>ssl</em> refere-se à criptografia "implícita" (às vezes chamada de SMTPS), que por padrão usa a porta 465. O <em>tls</em> refere-se à criptografia "explícita" (geralmente conhecida como STARTTLS), que por padrão usa a porta 25. Outras portas podem ser usadas pelo servidor SMTP que sejam fora do padrão. A porta alternativa comumente encontrada para o <em>tls</em> e não criptografada é a porta 587. É preciso verificar a documentação do seu provedor ou a configuração do seu servidor para ter certeza do seu caso específico. O padrão é o valor de <code>sendemail.smtpEncryption</code>.</p>
 </dd>
 <dt class="hdlist1">--smtp-domain=&lt;FQDN&gt;</dt>
 <dd>
@@ -698,6 +698,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--cc-cmd=&lt;comando&gt;</dt>
 <dd>
 <p>Define um comando que será executado um por vez no arquivo patch que deve gerar as entradas "Cc:". A saída deste comando deve ser um endereço de e-mail único por linha. A predefinição é o valor da opção de configuração <code>sendemail.ccCmd</code>.</p>
+</dd>
+<dt class="hdlist1">--header-cmd=&lt;command&gt;</dt>
+<dd>
+<p>Specify a command that is executed once per outgoing message and output RFC 2822 style header lines to be inserted into them. When the <code>sendemail.headerCmd</code> configuration variable is set, its value is always used. When --header-cmd is provided at the command line, its value takes precedence over the <code>sendemail.headerCmd</code> configuration variable.</p>
+</dd>
+<dt class="hdlist1">--no-header-cmd</dt>
+<dd>
+<p>Disable any header command in use.</p>
 </dd>
 <dt class="hdlist1">--[no-]chain-reply-to</dt>
 <dd>
@@ -872,58 +880,11 @@ isso se deve as limitações do SMTP descritos em
 <div class="sect1">
 <h2 id="_configuração">CONFIGURAÇÃO</h2>
 <div class="sectionbody">
-<div class="dlist">
-<dl>
-<dt class="hdlist1">sendemail.aliasesFile</dt>
-<dd>
-<p>Para evitar a digitação dos longos endereços de e-mail, aponte para um ou mais arquivos aliases do e-mail. Você também deve informar o <code>sendemail.aliasFileType</code>.</p>
-</dd>
-<dt class="hdlist1">sendemail.aliasFileType</dt>
-<dd>
-<p>Formato do(s) arquivo(s) definidos(s) em <code>sendemail.aliasesFile</code>. Deve ser <em>mutt</em>, <em>mailrc</em>, <em>pine</em>, <em>elm</em>, <em>gnus</em> ou <em>sendmail</em>.</p>
 <div class="paragraph">
-<p>A aparência de um arquivo alias em cada formato pode ser encontrada na documentação do programa do e-mail com o mesmo nome. As diferenças e as limitações dos formatos predefinidas são descritas abaixo:</p>
+<p>Tudo abaixo desta linha nesta seção, está seletivamente incluído na documentação <a href="git-config.html">git-config(1)</a>. O conteúdo é o mesmo que é encontrado ali:</p>
 </div>
-<div class="openblock">
-<div class="content">
-<div class="dlist">
-<dl>
-<dt class="hdlist1">sendmail</dt>
-<dd>
-<div class="ulist">
-<ul>
-<li>
-<p>Os aliases e os endereços citados não são compatíveis: linhas que
-contenham o símbolo <code>"</code> são ignorados.</p>
-</li>
-<li>
-<p>O redirecionamento para um arquivo (<code>/nome/do/caminho</code>) ou pipe (<code>|comando</code>) não é
-suportado.</p>
-</li>
-<li>
-<p>A inclusão dos arquivos (<code>:include: /path/nome</code>) não é suportada.</p>
-</li>
-<li>
-<p>Os avisos são impressos na saída de erro predefinido para qualquer
-construções explicitamente não suportadas e quaisquer outras linhas que não sejam reconhecidas pelo analisador.</p>
-</li>
-</ul>
-</div>
-</dd>
-</dl>
-</div>
-</div>
-</div>
-</dd>
-<dt class="hdlist1">sendemail.multiEdit</dt>
-<dd>
-<p>Caso o valor seja <code>true</code> (predefinido), uma única instância do editor será gerada para editar os arquivos que precisam ser editados (os patches quando <code>--annotate</code> é utilizado e o resumo quando <code>--compose</code> é utilizado). Caso o valor seja <code>false</code>, os arquivos serão editados um após o outro, onde um novo editor é aberto a cada vez.</p>
-</dd>
-<dt class="hdlist1">sendemail.confirm</dt>
-<dd>
-<p>Define a predefinição para confirmar antes do envio. Deve ser um de <em>always</em> (sempre), <em>never</em> (nunca), <em>cc</em> (com cópia), <em>compose</em> (compor) ou <em>auto</em>. Consulte <code>--confirm</code> na seção anterior para obter o significado destes valores.</p>
-</dd>
-</dl>
+<div class="paragraph">
+<p>Unresolved directive in git-send-email.txt - include::config/sendemail.txt[]</p>
 </div>
 </div>
 </div>
@@ -945,10 +906,7 @@ construções explicitamente não suportadas e quaisquer outras linhas que não 
 </div>
 </div>
 <div class="paragraph">
-<p>Caso opte pela autenticação em várias etapas configurada na sua conta do Gmail, será necessário gerar uma senha específica do aplicativo para que possa ser usado com o comando <em>git send-email</em>. Visite o link <a href="https://security.google.com/settings/security/apppasswords" class="bare">https://security.google.com/settings/security/apppasswords</a> para criá-la.</p>
-</div>
-<div class="paragraph">
-<p>Caso não tenha a autenticação em várias etapas configurada na sua conta do Gmail, será necessário permitir o acesso ao aplicativo menos seguro. Visite o link <a href="https://myaccount.google.com/lesssecureapps" class="bare">https://myaccount.google.com/lesssecureapps</a> para ativá-la.</p>
+<p>If you have multi-factor authentication set up on your Gmail account, you can generate an app-specific password for use with <em>git send-email</em>. Visit <a href="https://security.google.com/settings/security/apppasswords" class="bare">https://security.google.com/settings/security/apppasswords</a> to create it.</p>
 </div>
 <div class="paragraph">
 <p>Quando os seus commits estiverem prontos para serem enviadas para a lista de discussão, execute os seguintes comandos:</p>
@@ -988,7 +946,7 @@ $ git send-email outgoing/*</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:03 +0200
+Last updated 2023-05-21 19:04:53 +0200
 </div>
 </div>
 </body>

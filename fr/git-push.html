@@ -451,12 +451,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git push</em> [--all | --mirror | --tags] [--follow-tags] [--atomic] [-n | --dry-run] [--receive-pack=&lt;git-receive-pack&gt;]
-           [--repo=&lt;dépôt&gt;] [-f | --force] [-d | --delete] [--prune] [-v | --verbose]
-           [-u | --set-upstream] [-o &lt;chaîne&gt; | --push-option=&lt;chaîne&gt;]
+<pre class="content"><em>git push</em> [--all | --branches | --mirror | --tags] [--follow-tags] [--atomic] [-n | --dry-run] [--receive-pack=&lt;git-receive-pack&gt;]
+           [--repo=&lt;repository&gt;] [-f | --force] [-d | --delete] [--prune] [-v | --verbose]
+           [-u | --set-upstream] [-o &lt;string&gt; | --push-option=&lt;string&gt;]
            [--[no-]signed|--signed=(true|false|if-asked)]
-           [--force-with-lease[=&lt;nom-de-réf&gt;[:&lt;attendu&gt;]] [--force-if-includes]]
-           [--no-verify] [&lt;dépôt&gt; [&lt;spéc-de-réf&gt;&#8230;&#8203;]]</pre>
+           [--force-with-lease[=&lt;refname&gt;[:&lt;expect&gt;]] [--force-if-includes]]
+           [--no-verify] [&lt;repository&gt; [&lt;refspec&gt;&#8230;&#8203;]]</pre>
 </div>
 </div>
 </div>
@@ -550,6 +550,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </dd>
 <dt class="hdlist1">--all</dt>
+<dt class="hdlist1">--branches</dt>
 <dd>
 <p>Pousser toutes les branches (c&#8217;est-à-dire les références sous <code>refs/heads/</code>) ; ne peut pas être utilisé avec d&#8217;autres &lt;spéc-de-réf&gt;.</p>
 </dd>
@@ -726,7 +727,10 @@ git push --force-with-lease=master:base master:master</pre>
 <dt class="hdlist1">--no-recurse-submodules</dt>
 <dt class="hdlist1">--recurse-submodules=check|on-demand|only|no</dt>
 <dd>
-<p>Peut être utilisé pour s&#8217;assurer que tous les commits de sous-module utilisés par les révisions à pousser sont disponibles sur une branche de suivi à distance. Si <em>check</em> est utilisé, Git vérifiera que tous les commits de sous-module qui ont changé dans les révisions à pousser sont disponibles sur au moins une branche distante du sous-module. S&#8217;il manque des validations, la poussée sera interrompue et sortira avec un statut non nul. Si <em>on-demand</em> est utilisé, tous les sous-module qui ont été modifiés dans les révisions à pousser seront poussés. Si <em>on-demand</em> n&#8217;a pas pu pousser toutes les révisions nécessaires, il sera également interrompu et sortira avec un statut non nul. Si <em>only</em> est utilisé, tous les sous-modules seront poussés récursivement alors que le superprojet est laissé sans poussée. La valeur <em>no</em> ou l&#8217;utilisation de <code>--no-recurse-submodules</code> peut être utilisée pour remplacer la variable de configuration push.recurseSubmodules lorsqu&#8217;aucune récursion de sous-module n&#8217;est nécessaire.</p>
+<p>Peut être utilisé pour s&#8217;assurer que tous les commits de sous-module utilisés par les révisions à pousser sont disponibles sur une branche de suivi à distance. Si <em>check</em> est utilisé, Git vérifiera que tous les commits de sous-module qui ont changé dans les révisions à pousser sont disponibles sur au moins une branche distante du sous-module. S&#8217;il manque des validations, la poussée sera interrompue et sortira avec un statut non nul. Si <em>on-demand</em> est utilisé, tous les sous-module qui ont été modifiés dans les révisions à pousser seront poussés. Si <em>on-demand</em> n&#8217;a pas pu pousser toutes les révisions nécessaires, il sera également interrompu et sortira avec un statut non nul. Si <em>only</em> est utilisé, tous les sous-modules seront poussés alors que le superprojet est laissé sans poussée. La valeur <em>no</em> ou l&#8217;utilisation de <code>--no-recurse-submodules</code> peut être utilisée pour remplacer la variable de configuration push.recurseSubmodules lorsqu&#8217;aucune récursion de sous-module n&#8217;est nécessaire.</p>
+<div class="paragraph">
+<p>Lors de l&#8217;utilisation de <em>on-demand</em> ou <em>only</em>, si un sous-module possède une configuration "push.recurseSubmodules={on-demand,only}" ou "submodule.recurse", une récursion supplémentaire se produira. Dans ce cas, "only" est traité comme "on-demand".</p>
+</div>
 </dd>
 <dt class="hdlist1">--[no-]verify</dt>
 <dd>
@@ -920,7 +924,7 @@ git push --force-with-lease=master:base master:master</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Le <code>&lt;url-poussée&gt;</code> n&#8217;est utilisé que pour les poussées. Il est facultatif et sa valeur par défaut est <code>&lt;URL&gt;</code>.</p>
+<p>Le <code>&lt;url-de-poussée&gt;</code> est utilisé uniquement pour les poussées. Il est optionnel et sa valeur par défaut est <code>&lt;URL&gt;</code>. Pousser vers un distant affecte tous les urls-de-poussés définis ou tous les urls définis si aucun url-de-poussée n&#8217;est défini. Fetch, cependant, ne récupérera que le premier url défini si plusieurs urls sont définis.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1247,6 +1251,17 @@ git push --force-with-lease=master:base master:master</pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_configuration">CONFIGURATION</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Tout ce qui se trouve en dessous de cette ligne dans cette section est inclus de manière sélective à partir de la documentation <a href="git-config.html">git-config(1)</a>. Le contenu est le même que celui qui s&#8217;y trouve :</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in git-push.txt - include::config/push.txt[]</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -1265,7 +1280,7 @@ git push --force-with-lease=master:base master:master</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 21:59:18 +0200
+Last updated 2023-05-21 19:03:35 +0200
 </div>
 </div>
 </body>

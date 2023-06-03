@@ -301,11 +301,8 @@ $ git checkout -b foo  # ou "git switch -c foo"  <1>
 $ git branch foo                                 <2>
 $ git tag foo                                    <3>
 ------------
-
 <1> crée une nouvelle branche `foo` qui fait référence au commit `f`, puis met à jour `HEAD` pour faire référence à la branche `foo`. En d'autres termes, l'état ne sera plus en `HEAD` détachée après cette commande.
-
 <2> crée aussi une nouvelle branche `foo` qui fait référence au commit `f` mais laisse `HEAD` détachée.
-
 <3> crée une nouvelle étiquette `foo` qui fait référence au commit `f`, en laissant `HEAD` détachée.
 
 Si nous ne sommes plus sur `f`, alors nous devons d'abord retrouver son nom d'objet (typiquement en utilisant git reflog), puis nous pouvons créer une référence dessus. Par exemple, pour voir les deux derniers commits sur lesquels `HEAD` pointait, nous pouvons utiliser l'une des commandes suivantes :
@@ -323,66 +320,71 @@ Quand il n'y a qu'un argument fourni et qu'il n'est pas `--` (par exemple `git c
 EXEMPLES
 --------
 
-. La séquence suivante extrait la branche `master`, ramène le fichier `Makefile` à deux révisions en arrière, supprime `hello.c` par erreur et le récupère de l'index.
-+
+=== 1. Chemins
+
+La séquence suivante extrait la branche `master`, ramène le fichier `Makefile` à deux révisions en arrière, supprime `hello.c` par erreur et le récupère de l'index.
+
 ------------
 $ git checkout master             <1>
 $ git checkout master~2 Makefile  <2>
 $ rm -f hello.c
 $ git checkout hello.c            <3>
 ------------
-+
 <1> bascule de branche
 <2> prend un fichier depuis un autre commit
 <3> restaure `hello.c` depuis l'index
-+
+
 Si vous souhaitez extraire _tous_ les fichiers source C de l'index, vous pouvez lancer
-+
+
 ------------
 $ git checkout -- '*.c'
 ------------
-+
+
 Notez les guillemets autour de `*.c`. Le fichier `hello.c` sera aussi extrait, même s'il n'est plus dans l'arbre de travail, parce que le patron de fichier est utilisé pour trouver les entrées dans l'index (et non dans l'arbre de travail par le shell).
-+
+
 Si vous avez une branche qui s'appelle malheureusement `hello.c`, cette étape pourrait être confondue avec une instruction de basculer sur cette branche. Vous devriez alors plutôt écrire :
-+
+
 ------------
 $ git checkout -- hello.c
 ------------
 
-. Après avoir travaillé dans la mauvaise branche, basculer sur la branche correcte serait réalisé par :
-+
+=== 2. Fusion
+
+Après avoir travaillé dans la mauvaise branche, basculer sur la branche correcte serait réalisé par :
+
 ------------
 $ git checkout monsujet
 ------------
-+
+
 Cependant, votre « fausse » branche et votre branche correcte `monsujet` peuvent être différentes par les fichiers que vous avez modifiés localement, auquel cas l'extraction ci-dessus échouerait comme ceci :
-+
+
 ------------
 $ git checkout monsujet
 error: Vos modifications locales aux fichiers suivants seraient écrasées par l'extraction :
 ------------
-+
+
 Vous pouvez fournir l'option `-m` à la commande, ce qui essaierait une fusion à trois points :
-+
+
 ------------
 $ git checkout -m monsujet
 Fusion automatique de frotz
 ------------
-+
+
 Après cette fusion à trois points, les modifications locales ne sont _pas_ enregistrées dans votre index, donc `git diff` vous montrerait ce qui a changé depuis le sommet de la nouvelle branche.
 
-. Quand un conflit de fusion arrive pendant un basculement de branche avec l'option `-m`, vous devriez voir quelque chose comme :
-+
+=== 3. Conflit de fusion
+
+Quand un conflit de fusion arrive pendant un basculement de branche avec l'option `-m`, vous devriez voir quelque chose comme :
+
 ------------
 $ git checkout -m mytopic
 Fusion automatique de frotz
 CONFLIT (contenu): Conflit de fusion dans frotz
 fatal: merge program failed
 ------------
-+
+
 À ce stade, `git diff` affiche les modifications proprement fusionnées comme dans l'exemple précédent, ainsi que les modifications en conflit. Éditez et résolvez le conflit et marquez-le résolu avec `git add` comme d'habitude :
-+
+
 ------------
 $ edit frotz
 $ git add frotz

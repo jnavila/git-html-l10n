@@ -451,7 +451,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git status</em> [&lt;options&gt;&#8230;&#8203;] [--] [&lt;spécificateur de chemin&gt;&#8230;&#8203;]</pre>
+<pre class="content"><em>git status</em> [&lt;options&gt;] [--] [&lt;spéc-de-chemin&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -930,6 +930,37 @@ via <code>git add</code> dans le super-projet pour préparer une validation.</p>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_fichiers_non_suivis_et_performances">FICHIERS NON SUIVIS ET PERFORMANCES</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>git status</code> peut être très lent dans les grands arbres-de-travail si/quand il doit rechercher des fichiers et des répertoires non suivis. Il y a beaucoup d&#8217;options de configuration disponibles pour accélérer cela, soit en évitant le travail, soit en utilisant les résultats en cache des commandes Git précédentes. Il n&#8217;y a pas un seul ensemble optimal de paramètres qui convienne à tout le monde. Nous allons lister un résumé des options pertinentes pour vous aider, mais avant de les lister, vous devriez lancer <code>git status</code> à nouveau, parce que votre configuration peut déjà avoir mis en cache les résultats de <code>git status</code>, et donc être plus rapide lors des exécutions suivantes.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Le drapeau <code>--untracked-files=no</code> ou la
+variable de configuration <code>status.showUntrackedfiles=false</code>(voir ci-dessus pour les deux) : indique que <code>git status</code> ne doit pas signaler les fichiers non suivis. C&#8217;est l&#8217;option la plus rapide. <code>git status</code> ne listera pas les fichiers non suivis, vous devez donc faire attention à vous souvenir si vous créez de nouveaux fichiers et à les <code>git add</code> manuellement.</p>
+</li>
+<li>
+<p><code>advice.statusUoption=false</code> (voir <a href="git-config.html">git-config(1)</a>) :
+mettre cette variable à <code>false</code> désactive le message d&#8217;avertissement donné lorsque l&#8217;énumération des fichiers non suivis prend plus de 2 secondes. Dans un grand projet, cela peut prendre plus de temps et l&#8217;utilisateur peut avoir déjà accepté le compromis (par exemple, l&#8217;utilisation de "-uno" peut ne pas être une option acceptable pour l&#8217;utilisateur), auquel cas, il n&#8217;y a pas de raison d&#8217;émettre un message d&#8217;avertissement, et désactiver l&#8217;avertissement peut être la meilleure solution.</p>
+</li>
+<li>
+<p><code>core.untrackedCache=true</code> (voir <a href="git-update-index.html">git-update-index(1)</a>) :
+activer la fonctionnalité de cache non suivi et ne rechercher que les répertoires qui ont été modifiés depuis la précédente commande <code>git status</code>. Git se souvient de l&#8217;ensemble des fichiers non suivis dans chaque répertoire et suppose que si un répertoire n&#8217;a pas été modifié, alors l&#8217;ensemble des fichiers non suivis n&#8217;a pas changé. C&#8217;est beaucoup plus rapide que d&#8217;énumérer le contenu de chaque répertoire, mais ce n&#8217;est pas sans coût, car Git doit toujours rechercher l&#8217;ensemble des répertoires modifiés. Le cache non suivi est stocké dans le fichier <code>.git/index</code>. Le coût réduit de la recherche des fichiers non suivis est légèrement compensé par l&#8217;augmentation de la taille de l&#8217;index et le coût de sa mise à jour. Cette réduction du temps de recherche l&#8217;emporte généralement sur la taille supplémentaire.</p>
+</li>
+<li>
+<p><code>core.untrackedCache=true</code> et <code>core.fsmonitor=true</code> ou
+<code>core.fsmonitor=&lt;chemin-de-commande-crochet&gt;</code> (voir <a href="git-update-index.html">git-update-index(1)</a>) : active à la fois les fonctionnalités de cache de non suivi et de FSMonitor et ne recherche que les répertoires qui ont été modifiés depuis la précédente commande <code>git status</code>. Ceci est plus rapide que d&#8217;utiliser uniquement le cache de non suivi car Git peut également éviter de rechercher les répertoires modifiés. Git doit seulement énumérer l&#8217;ensemble exact des répertoires qui ont été modifiés récemment. Bien que la fonctionnalité FSMonitor puisse être activée sans le cache de non suivi, les avantages sont considérablement réduits dans ce cas.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Notez qu&#8217;après avoir activé les fonctionnalités cache de non suivi et/ou FSMonitor, quelques commandes <code>git status</code> peuvent être nécessaires pour que les différents caches se remplissent avant que vous ne constatiez une amélioration des temps de commande. Ceci est normal.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_voir_aussi">VOIR AUSSI</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -956,7 +987,7 @@ via <code>git add</code> dans le super-projet pour préparer une validation.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 21:59:19 +0200
+Last updated 2023-05-21 19:03:36 +0200
 </div>
 </div>
 </body>

@@ -475,7 +475,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Um daemon TCP Git realmente simples e que normalmente escuta na porta "DEFAULT_GIT_PORT", também conhecida como 9418. Aguarda uma conexão solicitando um serviço e o servirá caso esteja ativo.</p>
 </div>
 <div class="paragraph">
-<p>Ele verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação dessa maneira (a menos que o parâmetro <code>--export-all</code> seja utilizado). Caso passe alguns caminhos de diretórios como argumentos par ao <em>git daemon</em>, é possível restringir ainda mais as ofertas a uma lista de permissões composta por eles.</p>
+<p>Ele verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação dessa maneira (a menos que o parâmetro <code>--export-all</code> seja utilizado). Caso passe alguns caminhos de diretórios como argumentos <em>git daemon</em>, os caminhos serão limitados a repositórios dentro desses diretórios.</p>
 </div>
 <div class="paragraph">
 <p>É predefinido que apenas o serviço <code>upload-pack</code> esteja ativo, o que atende aos clientes são o <em>git fetch-pack</em> e <em>git ls-remote</em>, que são chamados de <em>git fetch</em>, <em>git pull</em> e <em>git clone</em>.</p>
@@ -495,7 +495,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">--strict-paths</dt>
 <dd>
-<p>A coincidência exata dos caminhos (ou seja, não permita "/foo/repo" quando o caminho real for "/foo/repo.git" ou "/foo/repo/.git"), assim como, não faça caminhos relativos ao usuário. O <em>git daemon</em> se recusará a iniciar quando esta opção estiver ativa e nenhuma lista de permissões tenha sido usada.</p>
+<p>A coincidência exata dos caminhos (ou seja, não permita "/foo/repo" quando o caminho real for "/foo/repo.git" ou "/foo/repo/.git"), assim como, não faça caminhos relativos ao usuário. O <em>git daemon</em> se recusará a iniciar quando esta opção estiver ativa e nenhum argumento de diretório for informado.</p>
 </dd>
 <dt class="hdlist1">--base-path=&lt;caminho&gt;</dt>
 <dd>
@@ -507,7 +507,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--interpolated-path=&lt;modelo-de-caminho&gt;</dt>
 <dd>
-<p>Para dar suporte à hospedagem virtual, um modelo de caminho interpolado pode ser utilizado para construir dinamicamente os caminhos alternativos. O modelo é compatível com <code>%H</code> para o nome de host do destino, informado pelo cliente, porém é convertido minúsculas, <code>%CH</code> para o nome do host canônico, <code>%IP</code> para o endereço IP do servidor, <code>%P</code> para o número da porta e <code>%D</code> para o caminho absoluto do nome do repositório. Após a interpolação, o caminho é validado na lista branca de permissões do diretório.</p>
+<p>Para dar suporte à hospedagem virtual, um modelo de caminho interpolado pode ser utilizado para construir dinamicamente os caminhos alternativos. O modelo é compatível com <code>%H</code> para o nome de host do destino, informado pelo cliente, porém é convertido minúsculas, <code>%CH</code> para o nome do host canônico, <code>%IP</code> para o endereço IP do servidor, <code>%P</code> para o número da porta e <code>%D</code> para o caminho absoluto do nome do repositório. Após a interpolação, o caminho é validado contra uma lista de diretório.</p>
 </dd>
 <dt class="hdlist1">--export-all</dt>
 <dd>
@@ -623,7 +623,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">&lt;diretório&gt;</dt>
 <dd>
-<p>Um diretório a ser adicionado à lista branca dos diretórios permitidos. A menos que <code>--strict-paths</code> seja especificado, isso também incluirá subdiretórios de cada diretório informado.</p>
+<p>Os argumentos restantes fornecem uma lista de diretórios. Caso algum diretório seja definido, então o processo <code>git-daemon</code> ofertará um diretório solicitado somente se este estiver contido num destes diretórios. Caso a opção <code>--strict-paths</code> seja informada, o diretório solicitado deve corresponder exatamente a um destes diretórios.</p>
 </dd>
 </dl>
 </div>
@@ -669,7 +669,7 @@ git             9418/tcp                # Controle de Versão do Sistema Git</pr
 </dd>
 <dt class="hdlist1"><em>git daemon</em> como um servidor inetd</dt>
 <dd>
-<p>Para configurar o <em>git daemon</em> como um serviço inetd que lida com qualquer repositório no conjunto de diretórios da lista branca do /pub/foo e /pub/bar, coloque uma entrada em /etc/inetd, tudo numa linha:</p>
+<p>Para configurar o <em>git daemon</em> como um serviço inetd que lida com qualquer repositório dentro de <code>/pub/foo</code> ou <code>/pub/bar</code>, insira uma entrada como demonstrado abaixo em <code>/etc/inetd</code>, tudo numa linha só:</p>
 <div class="listingblock">
 <div class="content">
 <pre>        git stream tcp nowait nobody  /usr/bin/git
@@ -744,7 +744,7 @@ git             9418/tcp                # Controle de Versão do Sistema Git</pr
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:02 +0200
+Last updated 2023-05-21 19:04:50 +0200
 </div>
 </div>
 </body>

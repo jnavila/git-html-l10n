@@ -456,7 +456,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <em>git cat-file</em> (-t | -s) [--allow-unknown-type] &lt;object&gt;
 <em>git cat-file</em> (--batch | --batch-check | --batch-command) [--batch-all-objects]
              [--buffer] [--follow-symlinks] [--unordered]
-             [--textconv | --filters]
+             [--textconv | --filters] [-z]
 <em>git cat-file</em> (--textconv | --filters)
              [&lt;rev&gt;:&lt;path|tree-ish&gt; | --path=&lt;path|tree-ish&gt; &lt;rev&gt;]</pre>
 </div>
@@ -488,7 +488,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">-s</dt>
 <dd>
-<p>Au lieu du contenu, afficher la taille de l&#8217;objet identifié par <code>&lt;objet&gt;</code>.</p>
+<p>Instead of the content, show the object size identified by <code>&lt;object&gt;</code>. If used with <code>--use-mailmap</code> option, will show the size of updated object after replacing idents using the mailmap mechanism.</p>
 </dd>
 <dt class="hdlist1">-e</dt>
 <dd>
@@ -501,6 +501,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">&lt;type&gt;</dt>
 <dd>
 <p>Typiquement, cela correspond au type réel de <code>&lt;objet&gt;</code> mais la demande d&#8217;un type qui peut trivialement être déréférencé à partir du <code>&lt;objet&gt;</code> donné est également autorisée. Un exemple est de demander un "tree" avec <code>&lt;objet&gt;</code> étant un objet commit qui le contient, ou de demander un "blob" avec <code>&lt;objet&gt;</code> étant un objet tag qui le pointe.</p>
+</dd>
+<dt class="hdlist1">--[no-]mailmap</dt>
+<dt class="hdlist1">--[no-]use-mailmap</dt>
+<dd>
+<p>Utiliser le fichier mailmap pour mapper les noms d&#8217;auteurs, de validateurs et d&#8217;étiqueteur, et les adresses email avec les vrais noms et adresses email canoniques. Voir <a href="git-shortlog.html">git-shortlog(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--textconv</dt>
 <dd>
@@ -517,17 +522,61 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--batch</dt>
 <dt class="hdlist1">--batch=&lt;format&gt;</dt>
 <dd>
-<p>Afficher les informations et le contenu des objets pour chaque objet fourni sur stdin. Ne peut être combiné avec aucune autre option ou argument sauf <code>--textconv</code> ou <code>--filters</code>, auquel cas les lignes d&#8217;entrée doivent aussi spécifier le chemin, séparé par des espaces. Voir la section <code>SORTIE PAR LOT</code> ci-dessous pour plus de détails.</p>
+<p>Afficher les informations et le contenu des objets pour chaque objet fourni sur stdin. Ne peut être combiné avec aucune autre option ou argument sauf <code>--textconv</code>, <code>--filters</code> ou <code>--use-mailmap</code>.</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Utilisé avec <code>--textconv</code> ou <code>--filters</code>, les lignes d&#8217;entrée doivent spécifier le chemin, séparé par des espaces. Voir la section <code>SORTIE PAR LOT</code> ci-dessous pour plus de détails.</p>
+</li>
+<li>
+<p>When used with <code>--use-mailmap</code>, for commit and tag objects, the contents part of the output shows the identities replaced using the mailmap mechanism, while the information part of the output shows the size of the object as if it actually recorded the replacement identities.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 </dd>
 <dt class="hdlist1">--batch-check</dt>
 <dt class="hdlist1">--batch-check=&lt;format&gt;</dt>
 <dd>
-<p>Afficher les informations sur les objets pour chaque objet fourni sur stdin. Ne peut être combiné avec aucune autre option ou argument sauf <code>--textconv</code> ou <code>--filters</code>, auquel cas les lignes d&#8217;entrée doivent aussi spécifier le chemin, séparé par des espaces. Voir la section <code>SORTIE PAR LOT</code> ci-dessous pour plus de détails.</p>
+<p>Afficher les informations sur les objets pour chaque objet fourni sur stdin. Ne peut être combiné avec aucune autre option ou argument sauf <code>--textconv</code>, <code>--filters</code> ou <code>--use-mailmap</code>.</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>When used with <code>--textconv</code> or <code>--filters</code>, the input lines must
+specify the path, separated by whitespace. See the section
+<code>BATCH OUTPUT</code> below for details.</p>
+</li>
+<li>
+<p>When used with <code>--use-mailmap</code>, for commit and tag objects, the printed object information shows the size of the object as if the identities recorded in it were replaced by the mailmap mechanism.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 </dd>
 <dt class="hdlist1">--batch-command</dt>
 <dt class="hdlist1">--batch-command=&lt;format&gt;</dt>
 <dd>
-<p>Entrer dans un mode de commande qui lit les commandes et les arguments depuis stdin. Peut seulement être combiné avec <code>--buffer</code>, <code>--textconv</code> ou <code>--filters</code>. Dans le cas de <code>--textconv</code> ou <code>--filters</code>, les lignes d&#8217;entrée doivent également spécifier le chemin, séparé par des espaces. Voir la section <code>SORTIE PAR LOT</code> ci-dessous pour plus de détails.</p>
+<p>Entrer dans un mode de commande qui lit les commandes et les arguments depuis stdin. Peut seulement être combiné avec <code>--buffer</code>, <code>--textconv</code>, <code>--use-mailmap</code> ou <code>--filters</code>.</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Utilisé avec <code>--textconv</code> ou <code>--filters</code>, les lignes d&#8217;entrée doivent spécifier le chemin, séparé par des espaces. Voir la section <code>SORTIE PAR LOT</code> ci-dessous pour plus de détails.</p>
+</li>
+<li>
+<p>When used with <code>--use-mailmap</code>, for commit and tag objects, the <code>contents</code> command shows the identities replaced using the mailmap mechanism, while the <code>info</code> command shows the size of the object as if it actually recorded the replacement identities.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
 <div class="paragraph">
 <p><code>--batch-command</code> reconnaît les commandes suivantes :</p>
 </div>
@@ -639,6 +688,10 @@ alink : un lien symbolique vers /etc/passwd</pre>
 </div>
 </div>
 </div>
+</dd>
+<dt class="hdlist1">-z</dt>
+<dd>
+<p>Only meaningful with <code>--batch</code>, <code>--batch-check</code>, or <code>--batch-command</code>; input is NUL-delimited instead of newline-delimited.</p>
 </dd>
 </dl>
 </div>
@@ -825,7 +878,7 @@ alink : un lien symbolique vers /etc/passwd</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 21:59:17 +0200
+Last updated 2023-05-21 19:03:32 +0200
 </div>
 </div>
 </body>

@@ -334,21 +334,21 @@ If `--show-stash` is given, one line is printed showing the number of stash entr
 UNTRACKED FILES AND PERFORMANCE
 -------------------------------
 
-`git status` can be very slow in large worktrees if/when it needs to search for untracked files and directories. There are many configuration options available to speed this up by either avoiding the work or making use of cached results from previous Git commands. There is no single optimum set of settings right for everyone. We'll list a summary of the relevant options to help you, but before going into the list, you may want to run `git status` again, because your configuration may already be caching `git status` results, so it could be faster on subsequent runs.
+`git status`在大型工作树中，如果/当它需要搜索未被追踪的文件和目录时，速度会非常慢。有许多配置选项可以通过避免这种操作或是利用以前的 Git 命令的缓存结果来加快速度。但是没有一套适合所有人的最佳设置。我们将列出相关选项的摘要以帮助你，但在进入列表之前，你可能想再次运行`git status`，因为你的配置可能已经缓存了`git status`的结果，所以在随后的运行中可能会更快。
 
 * The `--untracked-files=no` flag or the
-	`status.showUntrackedfiles=false` config (see above for both): indicate that `git status` should not report untracked files. This is the fastest option. `git status` will not list the untracked files, so you need to be careful to remember if you create any new files and manually `git add` them.
+	设置`status.showUntrackedfiles=false`：表示`git status`不应该报告未跟踪的文件。这是最快的选项。`git status`不会列出未跟踪的文件，所以你得注意，在创建任何新的文件后，需要手动`git add`它们。
 
-* `advice.statusUoption=false` (see linkgit:git-config[1]):
-	setting this variable to `false` disables the warning message given when enumerating untracked files takes more than 2 seconds. In a large project, it may take longer and the user may have already accepted the trade off (e.g. using "-uno" may not be an acceptable option for the user), in which case, there is no point issuing the warning message, and in such a case, disabling the warning may be the best.
+* `advice.statusUoption=false`（见linkgit:git-config[1]）：
+	将此变量设置为 "false"，当列举未跟踪的文件需要超过2秒时，将禁用警告信息。 在一个大型项目中，可能需要更长的时间，而且用户可能已经接受了这种设置（例如，使用"-uno"可能不是用户可以接受的选项）。在这种情况下，发出警告信息没有意义，禁用警告可能是最好的。
 
 * `core.untrackedCache=true` (see linkgit:git-update-index[1]):
-	enable the untracked cache feature and only search directories that have been modified since the previous `git status` command. Git remembers the set of untracked files within each directory and assumes that if a directory has not been modified, then the set of untracked files within has not changed. This is much faster than enumerating the contents of every directory, but still not without cost, because Git still has to search for the set of modified directories. The untracked cache is stored in the `.git/index` file. The reduced cost of searching for untracked files is offset slightly by the increased size of the index and the cost of keeping it up-to-date. That reduced search time is usually worth the additional size.
+	启用未跟踪缓存功能，只搜索自上一个 `git status` 命令以来修改过的目录。 Git 会记住每个目录中的未跟踪文件集，并假定如果目录未被修改，则其中的未跟踪文件集不会更改。这比枚举每个目录的内容要快得多，但这依然有代价，因为 Git 仍然需要搜索修改目录的集合。未跟踪的缓存存储在 .git/index 文件中。搜索未跟踪文件的成本降低被索引大小的增加和保持最新的成本所抵消。缩短的搜索时间通常值得新增额外的大小。
 
-* `core.untrackedCache=true` and `core.fsmonitor=true` or
-	`core.fsmonitor=<hook_command_pathname>` (see linkgit:git-update-index[1]): enable both the untracked cache and FSMonitor features and only search directories that have been modified since the previous `git status` command. This is faster than using just the untracked cache alone because Git can also avoid searching for modified directories. Git only has to enumerate the exact set of directories that have changed recently. While the FSMonitor feature can be enabled without the untracked cache, the benefits are greatly reduced in that case.
+* `core.untrackedCache=true`和`core.fsmonitor=true`或
+	`core.fsmonitor=<hook_command_pathname>`（见linkgit:git-update-index[1]）：同时启用无痕缓存和FSMonitor功能，只搜索自上一条`git status'命令以来被修改的目录。 这比单独使用无痕缓存要快，因为Git也可以避免搜索被修改的目录。 Git只需要列举出最近有变化的确切目录集。虽然FSMonitor功能可以在没有无痕缓存的情况下启用，但在这种情况下好处会大大减少。
 
-Note that after you turn on the untracked cache and/or FSMonitor features it may take a few `git status` commands for the various caches to warm up before you see improved command times. This is normal.
+请注意，在你打开无痕缓存和/或FSMonitor功能后，可能需要几个`git status'命令来让各种缓存活动起来，然后你才能看到命令耗时的改善，这很正常。
 
 参见
 --

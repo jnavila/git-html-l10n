@@ -474,7 +474,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1"><a id="def_branch"></a>branch (ramo)</dt>
 <dd>
-<p>Um "ramo" é uma linha de desenvolvimento. O <a href="#def_commit">commit </a> mais recente em um ramo é referido como o cume deste ramo. O cume do ramo é referenciado por um ramo <a href="#def_head">head</a>, que avança à medida que o desenvolvimento adicional é feito no ramo. Um único Git <a href="#def_repository">repositório</a> pode monitorar um número arbitrário de ramos, porém a sua <a href="#def_working_tree">árvore de trabalho</a> está associada apenas a uma delas (o ramo "atual" ou "averiguado") e <a href="#def_HEAD">HEAD</a> aponte para esse ramo.</p>
+<p>Um "ramo" é uma linha de desenvolvimento. O <a href="#def_commit">commit </a> mais recente em um ramo é referido como o cume deste ramo. O cume do ramo é <a href="#def_ref">referenced</a> por um ramo <a href="#def_head">head</a>, que avança à medida que o desenvolvimento adicional é feito no ramo. Um único Git <a href="#def_repository">repositório</a> pode monitorar um número arbitrário de ramos, porém a sua <a href="#def_working_tree">árvore de trabalho</a> está associada apenas a uma delas (o ramo "atual" ou "averiguado") e <a href="#def_HEAD">HEAD</a> aponte para esse ramo.</p>
 </dd>
 <dt class="hdlist1"><a id="def_cache"></a>cache</dt>
 <dd>
@@ -496,7 +496,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>No jargão <a href="#def_SCM">SCM</a>, a "escolha seletiva" (cherry pick) significa escolher um subconjunto das alterações de uma série de alterações (em geral, commits) e registrá-las como uma nova série de alterações sobre uma base de código diferente. No Git, isso é executado pelo comando <code>git cherry-pick</code> para extrair a alteração introduzida através de um <a href="#def_commit">commit</a> já existente e registrá-lo com base no cume do <a href="#def_branch">ramo</a> atual como um novo commit.</p>
 </dd>
-<dt class="hdlist1"><a id="def_clean"></a>clean (limpar, limpeza)</dt>
+<dt class="hdlist1"><a id="def_clean"></a>clean</dt>
 <dd>
 <p>Uma <a href="#def_working_tree">árvore de trabalho</a> está limpa, caso corresponda à <a href="#def_revision">revisão</a> referenciada pelo <a href="#def_head">cabeçalho</a> atual. Consulte também "<a href="#def_dirty">dirty</a>".</p>
 </dd>
@@ -506,6 +506,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>Como um verbo: A ação de armazenar um novo instantâneo da condição do projeto no histórico do Git, criando um novo commit que representa a condição atual do <a href="#def_index">índice</a> e avançando o <a href="#def_HEAD">HEAD</a> apontando para o novo commit.</p>
 </div>
+</dd>
+<dt class="hdlist1"><a id="def_commit_graph_general"></a>conceito do commit gráfico, representações e uso</dt>
+<dd>
+<p>Um sinônimo de <a href="#def_DAG">DAG</a> estrutura formada pelos commits no banco de dados dos objetos, <a href="#def_ref">referenciada</a> pelas dicas da ramificação, utilizando as suas <a href="#def_chain">cadeias</a> de commits vinculados. Essa estrutura é o commit gráfico. O gráfico pode ser representado de outras maneiras, por exemplo, o <a href="#def_commit_graph_file">o arquivo "commit-graph"</a>.</p>
+</dd>
+<dt class="hdlist1"><a id="def_commit_graph_file"></a>arquivo commit-graph</dt>
+<dd>
+<p>O arquivo "commit-graph" (normalmente hifenizado) é uma representação suplementar do <a href="#def_commit_graph_general">commit gráfico</a> que acelera os passos do commit-graph. O arquivo "commit-graph" é armazenado ou no diretório .git/objects/info ou no diretório info de um banco de dados alternativo dos objetos .</p>
 </dd>
 <dt class="hdlist1"><a id="def_commit_object"></a>commit object (objeto commit)</dt>
 <dd>
@@ -620,7 +628,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Armazena o conjunto de "objetos", e um <a href="#def_object">objeto</a> individual é identificado pelos seus <a href="#def_object_name">nomes dos objetos</a>. Geralmente o objeto reside no <code>$GIT_DIR/objects/</code>.</p>
 </dd>
-<dt class="hdlist1"><a id="def_object_identifier"></a>object identifier (identificador do objeto)</dt>
+<dt class="hdlist1"><a id="def_object_identifier"></a>object identifier (antigo)</dt>
 <dd>
 <p>É um sinônimo para o <a href="#def_object_name">nome do objeto</a>.</p>
 </dd>
@@ -800,6 +808,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Todos os ancestrais de um determinado <a href="#def_commit">commit</a> são considerados "reachable" (ou acessíveis) a partir deste commit. De um modo mais geral, um <a href="#def_object">objeto</a> é acessível a partir do outro se pudermos alcançá-lo através de um <a href="#def_chain">chain</a> seguido de <a href="#def_tag">tags</a> para o que quer que eles marque com uma tag, <a href="#def_commit_object">commits</a> para as suas origens ou árvores, e as <a href="#def_tree_object">árvores</a> para as árvores ou as <a href="#def_blob_object">bolhas</a> que os contém.</p>
 </dd>
+<dt class="hdlist1"><a id="def_reachability_bitmap"></a>bitmaps de alcançabilidade</dt>
+<dd>
+<p>Os bitmaps de acessibilidade armazenam informações sobre a <a href="#def_reachable">acessibilidade</a> de um conjunto de commits selecionados num arquivo de pacotes, ou num índice de multi-pack (MIDX), para acelerar a pesquisa dos objetos. Os bitmaps são armazenados num arquivo ".bitmap". Um repositório pode ter, no máximo, um arquivo bitmap em uso. O arquivo bitmap pode pertencer a um pacote ou ao índice multi-pack do repositório (caso exista).</p>
+</dd>
 <dt class="hdlist1"><a id="def_rebase"></a>rebase (reconstrução da fundação ou reconstrução)</dt>
 <dd>
 <p>Para reaplicar uma série de alterações de uma <a href="#def_branch">ramo</a> para uma base diferente e redefinir o <a href="#def_head">head</a> dessa ramificação para o resultado.</p>
@@ -945,7 +957,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:04 +0200
+Last updated 2023-05-21 19:04:55 +0200
 </div>
 </div>
 </body>

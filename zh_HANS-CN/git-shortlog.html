@@ -499,6 +499,10 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 </div>
 </dd>
+<dt class="hdlist1">--date=&lt;format&gt;</dt>
+<dd>
+<p>显示根据给定日期字符串格式化的日期。(参见<a href="git-log.html">git-log(1)</a>中 "提交格式化"部分的`--date`选项）。与 `--group=format:&lt;format&gt;`一起使用会非常有用。</p>
+</dd>
 <dt class="hdlist1">--group=&lt;type&gt;</dt>
 <dd>
 <p>根据`&lt;类型&gt;<code>对提交进行分组。如果没有指定</code>--组&#8217;选项，默认为`作者'。`&lt;类型&gt;`是以下之一。</p>
@@ -514,6 +518,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </li>
 <li>
 <p><code>trailer:&lt;field&gt;</code>，<code>&lt;field&gt;`被解释为不区分大小写的提交消息预告片（见 linkgit:git-interpret-trailers[1]）。例如，如果你的项目使用 `Reviewed-by</code> 拖车，你可能想用 <code>git shortlog -ns --group=trailer:reviewed-by</code> 来查看谁在审核。</p>
+</li>
+<li>
+<p><code>格式：&lt;format&gt;`可以是任何被'git log'的</code>--format&#8217;选项接受的字符串，比如'* [%h] %s'。 参见<a href="git-log.html">git-log(1)</a>的 "PRETTY FORMATS "部分）。</p>
 <div class="paragraph">
 <p>请注意，不包括拖车的提交将不被计算在内。 同样地，有多个拖车的提交（例如多个签收）可以被计算一次（但该提交中每个独特的拖车值只能计算一次）。</p>
 </div>
@@ -584,7 +591,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </dd>
 <dt class="hdlist1">--since-as-filter=&lt;date&gt;</dt>
 <dd>
-<p>Show all commits more recent than a specific date. This visits all commits in the range, rather than stopping at the first commit which is older than a specific date.</p>
+<p>显示所有比指定日期更近的提交。这将访问该范围内的所有提交，而不是停在第一个比指定日期更早的提交。</p>
 </dd>
 <dt class="hdlist1">--until=&lt;日期&gt;</dt>
 <dt class="hdlist1">--before=&lt;date&gt;</dt>
@@ -670,7 +677,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </dd>
 <dt class="hdlist1">--exclude-first-parent-only</dt>
 <dd>
-<p>When finding commits to exclude (with a <em>^</em>), follow only the first parent commit upon seeing a merge commit. This can be used to find the set of changes in a topic branch from the point where it diverged from the remote branch, given that arbitrary merges can be valid topic branch changes.</p>
+<p>在寻找要排除的提交（用'^'）时，在看到合并提交时只跟随第一个父提交。 考虑到任意的合并都可以成为有效的主题分支变化，这可以用来查找主题分支中从它与远程分支的分歧点开始的变化集合。</p>
 </dd>
 <dt class="hdlist1">--not</dt>
 <dd>
@@ -702,6 +709,10 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 <div class="paragraph">
 <p>当应用于"--分支"、"--标签 "或"--远程 "时，给出的模式不应该以 "refs/heads"、"refs/tags "或 "refs/remotes "开头，而当应用于"--glob "或 "all "时，必须以 "refs/"开头。如果打算使用尾部的"/*"，必须明确给出。</p>
 </div>
+</dd>
+<dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
+<dd>
+<p>Do not include refs that would be hidden by <code>git-fetch</code>, <code>git-receive-pack</code> or <code>git-upload-pack</code> by consulting the appropriate <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> or <code>uploadpack.hideRefs</code> configuration along with <code>transfer.hideRefs</code> (see <a href="git-config.html">git-config(1)</a>). This option affects the next pseudo-ref option <code>--all</code> or <code>--glob</code> and is cleared after processing them.</p>
 </dd>
 <dt class="hdlist1">--reflog</dt>
 <dd>
@@ -847,9 +858,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 <dd>
 <p>为`--full-history`增加了一个选项，可以从结果的历史中删除一些不必要的合并，因为没有选定的提交对这次合并有贡献。</p>
 </dd>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>当给定一个要显示的提交范围（例如 "commit1&#8230;&#8203;commit2 "或 "commit2 ^commit1"）时，只显示直接存在于 "commit1 "和 "commit2 "之间的祖先链的提交，即既是 "commit1 "的后代，又是 "commit2 "的祖先的提交。</p>
+<p>When given a range of commits to display (e.g. <em>commit1..commit2</em> or <em>commit2 ^commit1</em>), only display commits in that range that are ancestors of &lt;commit&gt;, descendants of &lt;commit&gt;, or &lt;commit&gt; itself. If no commit is specified, use <em>commit1</em> (the excluded part of the range) as &lt;commit&gt;. Can be passed multiple times; if so, a commit is included if it is any of the commits given or if it is an ancestor or descendant of one of them.</p>
 </dd>
 </dl>
 </div>
@@ -1039,11 +1050,11 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>将显示的提交限制在给定提交范围内 "from "和 "to "提交之间的直接祖先链上。也就是说，只显示 "to "提交的祖先和 "from "提交的后代的提交。</p>
+<p>将显示的提交限制在&lt;提交&gt;的祖先，或&lt;提交&gt;的后代，或&lt;提交&gt;本身。</p>
 <div class="paragraph">
-<p>作为一个用例，请考虑以下提交历史。</p>
+<p>作为一个用例，请考虑以下提交历史：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1069,14 +1080,37 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
                                 L--M</pre>
 </div>
 </div>
+<div class="paragraph">
+<p>我们也可以用`--ancestry-path=D`来代替`--ancestry-path`，这在应用于&#8217;D&#8230;&#8203;M&#8217;范围时意思相同，只是更加明确。</p>
+</div>
+<div class="paragraph">
+<p>如果我们感兴趣的是这个范围内的某个主题，以及受该主题影响的所有提交，我们可能只想查看祖先路径中包含该主题的`D&#8230;&#8203;M`子集。 因此，以`--ancestry-path=H D&#8230;&#8203;M`为例，会形成以下结果：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                E
+                 \
+                  G---H---I---J
+                               \
+                                L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>而`--ancestry-path=K D&#8230;&#8203;M`会形成以下结果</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                K---------------L--M</pre>
+</div>
+</div>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>在讨论另一个选项，`--显示&#8212;&#8203;推力&#8217;之前，我们需要创建一个新的历史实例。</p>
+<p>在讨论另一个选项，`--show-pulls`之前，我们需要创建一个新的历史实例。</p>
 </div>
 <div class="paragraph">
-<p>用户在查看简化历史时经常遇到的一个问题是，他们知道的对某个文件的修改提交并没有出现在该文件的简化历史中。让我们演示一个新的例子，并说明`--full-history`和`--simplify-merges`等选项在这种情况下是如何工作的。</p>
+<p>用户在查看简化的提交历史时经常遇到的一个问题是，他们知道的对某个文件的修改提交并没有出现在该文件的简史中。让我们演示一个新的例子，并说明`--full-history`和`--simplify-merges`等选项在这种情况下是如何工作的：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1089,10 +1123,10 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>在这个例子中，假设`I`创建了`file.txt`，并被`A`、<code>B`和`X`以不同方式修改。单亲提交的`C</code>、<code>Z`和`Y`没有修改`file.txt</code>。合并提交 "M "是通过解决合并冲突而产生的，包括了 "A "和 "B "的修改，因此与其中任何一个都不是同源的。然而，合并提交`R`是通过忽略`M`处的`file.txt`的内容，而只采用`X`处的`file.txt`的内容而产生的。因此，<code>R`与`X`是同源的，但不是`M</code>。最后，创建`N&#8217;的自然合并决议是取`file.txt`在`R&#8217;的内容，所以`N&#8217;与`R&#8217;是同源的，但不是`C'。 合并提交的 "O "和 "P "与它们的第一代父母是同源的，但与它们的第二代父母 "Z "和 "Y "则不是同源的。</p>
+<p>在这个例子中，假设`I`创建了`file.txt`，并被`A`、<code>B`和`X`以不同方式修改。单亲提交的`C</code>、<code>Z`和`Y`没有修改`file.txt</code>。合并提交 <code>M`是通过解决合并冲突而产生的，包括了 `A `和 `B `的修改，因此与其中任何一个都不是同源的。然而，合并提交`R`是通过忽略`M`处的`file.txt`的内容，而只采用`X`处的`file.txt`的内容而产生的。因此，`R`与`X`是同源的，但不是`M</code>。最后，创建`N&#8217;的自然合并决议是取`file.txt`在`R&#8217;的内容，所以`N&#8217;与`R`是同源的，但不是`C`。 合并提交的 <code>O</code> 和 <code>P</code> 与它们的第一代父母是同源的，但与它们的第二代父母 <code>Z</code> 和 `Y `则不是同源的。</p>
 </div>
 <div class="paragraph">
-<p>当使用默认模式时，`N&#8217;和`R&#8217;都有一个TREESAME父级，所以这些边被走，其他的被忽略。由此产生的历史图是。</p>
+<p>当使用默认模式时，`N&#8217;和`R`都有一个TREESAME父级，所以这些边被展示出来，其他边被忽略。由此产生的历史图是：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1113,7 +1147,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>这里，合并提交`O`和`P`带来了额外的噪音，因为它们实际上并没有对`file.txt`做出改变。他们只是合并了一个基于 "file.txt "旧版本的主题。这是在使用工作流程的仓库中常见的问题，在工作流程中，许多贡献者并行工作，并沿着一个主干合并他们的主题分支：不相关的合并出现在`--full-history`结果中。</p>
+<p>Here, the merge commits <code>O</code> and <code>P</code> contribute extra noise, as they did not actually contribute a change to <code>file.txt</code>. They only merged a topic that was based on an older version of <code>file.txt</code>. This is a common issue in repositories using a workflow where many contributors work in parallel and merge their topic branches along a single trunk: many unrelated merges appear in the <code>--full-history</code> results.</p>
 </div>
 <div class="paragraph">
 <p>当使用`--简化合并`选项时，提交的`O`和`P`从结果中消失。这是因为 "O "和 "P "重写的第二父本可以从它们的第一父本到达。这些边被移除，然后这些提交看起来就像与它们的父类一样的单亲提交。这也发生在提交`N`上，导致历史视图如下。</p>
@@ -1200,7 +1234,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:37 +0200
+Last updated 2023-05-21 19:05:51 +0200
 </div>
 </div>
 </body>

@@ -451,7 +451,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git status</em> [&lt;opções&gt;&#8230;&#8203;] [--] [&lt;pathspec&gt;&#8230;&#8203;]</pre>
+<pre class="content"><em>git status</em> [&lt;opções&gt;] [--] [&lt;pathspec&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -930,6 +930,37 @@ submódulo não podem ser adicionados via <code>git add</code> no <code>superpro
 </div>
 </div>
 <div class="sect1">
+<h2 id="_arquivos_não_rastreados_e_desempenho">ARQUIVOS NÃO RASTREADOS E DESEMPENHO</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>O comando <code>git status</code> pode ser muito lento em grandes árvores de trabalho se/quando precisar procurar arquivos e diretórios não rastreados. Existem muitas opções de configuração disponíveis para acelerar isso, evitando o trabalho ou fazendo o uso dos resultados já em cache dos comandos anteriores do Git. Não existe um único conjunto ideal de configurações que sejam corretas para todos. Para ajudá-lo, vamos listar um resumo das opções relevantes, porém, antes de entrar na lista, talvez você queira executar o comando <code>git status</code> novamente, pois a sua configuração já pode estar armazenada em cache com os resultados do <code>git status</code>, assim pode ficar mais rápido nas execuções posteriores.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>A opção <code>--untracked-files=no</code> ou o
+A configuração <code>status.showUntrackedfiles=false</code> (veja acima para ambos): indica que o comando <code>git status</code> não deve relatar os arquivos que não estejam rastreados. Esta é a opção mais rápida. O comando <code>git status</code> não listará os arquivos sem rastreio, então é preciso ter cuidado para se lembrar se ao criar novos arquivos e manualmente executar o comando <code>git add</code> neles.</p>
+</li>
+<li>
+<p><code>advice.statusUoption=false</code> (consulte <a href="git-config.html">git-config(1)</a>):
+definir esta variável como <code>false</code> desativa a exibição da mensagem de aviso quando a enumeração dos arquivos sem rastreio levar mais do que 2 segundos. Num grande projeto, pode demorar mais e o usuário já pode ter aceitado a troca (usar <code>-uno</code> pode não ser uma opção aceitável para o usuário por exemplo), casos onde não faz qualquer sentido emitir uma mensagem de aviso, e nesse caso, desativar essa mensagem pode ser a melhor opção.</p>
+</li>
+<li>
+<p><code>core.untrackedCache=true</code> (consulte <a href="git-update-index.html">git-update-index(1)</a>):
+ative o recurso de cache sem rastreio e apenas busque nos diretórios que foram modificados desde o comando <code>git status</code> anterior. O Git se lembra do conjunto dos arquivos sem rastreio em cada diretório e assume que, caso um diretório não tenha sido modificado, assim, todos estes arquivos sem rastreio dentro do diretório não foram alterados. Isso é muito mais rápido do que enumerar o conteúdo de cada diretório, mas ainda assim, tendo um custo, pois o Git ainda precisa fazer a busca do conjunto de diretórios modificados. O cache sem rastreio é armazenado no arquivo <code>.git/index</code>. O custo reduzido da procura dos arquivos sem rastreio é ligeiramente compensado pelo aumento do tamanho do índice e também pelo custo de mantê-lo atualizado. Esta redução de tempo extra feito pela procura, em geral, vale o tamanho adicional.</p>
+</li>
+<li>
+<p><code>core.untrackedCache=true</code> e <code>core.fsmonitor=true</code> ou
+<code>core.fsmonitor=&lt;hook_command_pathname&gt;</code> (consulte <a href="git-update-index.html">git-update-index(1)</a>): ative o cache sem rastreio e os recursos do FSMonitor e busque apenas os diretórios que foram modificados desde o comando <code>git status</code> anterior. Isso é mais rápido do que usar apenas o cache sem rastreio sozinho pois o Git também pode ignorar a procura por diretórios modificados. O Git só precisa enumerar o conjunto exato dos diretórios que foram alterados recentemente. Embora o recurso FSMonitor possa ser ativado sem o cache sem rastreio, neste caso, os benefícios são bastante reduzidos.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Observe que depois de ativar o cache sem rastreio e/ou os recursos do FSMonitor, pode se preciso executar o comando <code>git status</code> algumas vezes para atualizar os vários caches antes que você veja os melhores tempos do comando. Isso é normal.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_veja_também">VEJA TAMBÉM</h2>
 <div class="sectionbody">
 <div class="paragraph">
@@ -948,7 +979,7 @@ submódulo não podem ser adicionados via <code>git add</code> no <code>superpro
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:03 +0200
+Last updated 2023-05-21 19:04:54 +0200
 </div>
 </div>
 </body>

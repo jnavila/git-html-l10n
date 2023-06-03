@@ -499,6 +499,10 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 </div>
 </div>
 </dd>
+<dt class="hdlist1">--date=&lt;formato&gt;</dt>
+<dd>
+<p>Mostra as datas formatadas de acordo com a string de data informada. (Veja a opção <code>--date</code> na seção "Formatando o commit" do <a href="git-log.html">git-log(1)</a>). É útil quando utilizado com <code>--group=format:&lt;formato&gt;</code>.</p>
+</dd>
 <dt class="hdlist1">--group=&lt;tipo&gt;</dt>
 <dd>
 <p>Grupo dos commits com base no <code>&lt;tipo&gt;</code>. Caso nenhuma opção <code>--group</code> seja usada a predefinição é <code>author</code>. <code>&lt;tipo&gt;</code> é um dos:</p>
@@ -514,6 +518,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 </li>
 <li>
 <p><code>trailer:&lt;campo&gt;</code>, o <code>&lt;campo&gt;</code> é interpretado como um trecho da mensagem do commit indiferente se for maiúsculas ou minúsculas (consulte <a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>). Por exemplo, caso o seu projeto use trechos <code>Revisados por</code> (<code>Reviewed-by</code>), é possível ver quem tem feito a revisão através do comando <code>git shortlog -ns --group=trailer:reviewed-by</code>.</p>
+</li>
+<li>
+<p>O <code>format:&lt;formato&gt;</code>, qualquer string aceito pela opção <code>--format</code> do comando <em>git log</em>. (Consulte a seção "FORMATOS BONITOS" do <a href="git-log.html">git-log(1)</a>.)</p>
 <div class="paragraph">
 <p>Observe que os commits não serão contados caso não incluam os trechos. Da mesma maneira que os commits com vários trechos (por exemplo, diversos signoffs) podem ser contados mais de uma vez (porém apenas uma vez com o valor de um trecho único naquele commit).</p>
 </div>
@@ -582,9 +589,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 <dd>
 <p>Exiba os commits com data mais recente das que foram informada.</p>
 </dd>
-<dt class="hdlist1">--since-as-filter=&lt;date&gt;</dt>
+<dt class="hdlist1">--since-as-filter=&lt;data&gt;</dt>
 <dd>
-<p>Show all commits more recent than a specific date. This visits all commits in the range, rather than stopping at the first commit which is older than a specific date.</p>
+<p>Mostra todos os commits mais recentes do que uma determinada data. Isso avalia todos os commits que estejam neste intervalo, em vez de parar no primeiro commit que for o mais antigo que uma determinada data.</p>
 </dd>
 <dt class="hdlist1">--until=&lt;data&gt;</dt>
 <dt class="hdlist1">--before=&lt;data&gt;</dt>
@@ -703,6 +710,10 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 <p>Os padrões informados não devem começar com <code>refs/heads</code>, <code>refs/tags</code>, ou <code>refs/remotes</code> quando aplicadas as opções <code>--branches</code>, <code>--tags</code>, ou <code>--remotes</code> respectivamente, e devem começar com <code>refs/</code> quando for aplicado ao <code>--glob</code> ou <code>--all</code>. Se a intenção for um delimitador <em>/{asterisco}</em>, este deve ser utilizado de forma explicita.</p>
 </div>
 </dd>
+<dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
+<dd>
+<p>Do not include refs that would be hidden by <code>git-fetch</code>, <code>git-receive-pack</code> or <code>git-upload-pack</code> by consulting the appropriate <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> or <code>uploadpack.hideRefs</code> configuration along with <code>transfer.hideRefs</code> (see <a href="git-config.html">git-config(1)</a>). This option affects the next pseudo-ref option <code>--all</code> or <code>--glob</code> and is cleared after processing them.</p>
+</dd>
 <dt class="hdlist1">--reflog</dt>
 <dd>
 <p>Finja que todos os objetos mencionados pelos <code>reflogs</code> estejam listados na linha de comando como <code>&lt;commit&gt;</code>.</p>
@@ -798,7 +809,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 <div class="sect2">
 <h3 id="_simplificação_do_histórico">Simplificação do histórico</h3>
 <div class="paragraph">
-<p>Às vezes, você está interessado apenas nas partes da história, por exemplo, os commit que alteraram um determinado &lt;caminho&gt;. Porém existem duas partes da <em>Simplificação do Histórico</em>, uma parte é a seleção dos commits e a outra é como fazê-lo, pois existem várias estratégias para simplificar o histórico.</p>
+<p>Às vezes, você está interessado apenas nas partes do histórico, por exemplo, os commit que alteraram um determinado &lt;caminho&gt;. Porém existem duas partes da <em>Simplificação do Histórico</em>, uma parte é a seleção dos commits e a outra é como fazê-lo, pois existem várias estratégias para simplificar o histórico.</p>
 </div>
 <div class="paragraph">
 <p>As seguintes opções selecionam os commits que serão exibidos:</p>
@@ -847,9 +858,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 <dd>
 <p>Opção adicional para <code>--full-history</code> para remover algumas mesclagens desnecessárias do histórico resultante, pois não há commits selecionados contribuindo para essa mesclagem.</p>
 </dd>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>Quando um intervalo dos commits é exibido (por exemplo, <em>commit1..commit2</em> ou <em>commit2 ^commit1</em>), apenas exibe os commits que existem diretamente na cadeia de ancestralidade entre o <em>commit1</em> e o <em>commit1</em>, ou seja, os commits que são ambos descendentes doe <em>commit1</em> e os ancestrais do <em>commit2</em>.</p>
+<p>Ao receber um intervalo de commits para mostrar (<em>commit1..commit2</em> ou <em>commit2 ^commit1</em> por exemplo), exibe apenas os commits nesse intervalo que sejam ancestrais do &lt;commit&gt;, descendentes do &lt;commit&gt; ou o &lt;commit&gt; em si. Caso nenhum commit seja definido, use <em>commit1</em> (a parte excluída do intervalo) como &lt;commit&gt;. Pode ser passado mais de uma vez; em caso afirmativo, um commit é incluído caso seja qualquer um dos commits informados ou caso seja um ancestral ou descendente de um deles.</p>
 </dd>
 </dl>
 </div>
@@ -1039,9 +1050,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>Limite os commits exibidos àquelas diretamente na cadeia de ancestralidade entre os commits &#8220;from&#8221; e &#8220;to&#8221; no intervalo dos commits informados. Ou seja, exiba apenas os commits que são ancestrais do commit &#8220;to&#8221; (<em>para</em>) e os descendentes do commit &#8220;from&#8221;.</p>
+<p>Limite os commits exibidos àqueles que sejam ancestrais do &lt;commit&gt;, ou que sejam descendentes do &lt;commit&gt;, ou são o &lt;commit&gt; em si.</p>
 <div class="paragraph">
 <p>Como um exemplo de caso, considere o seguinte histórico do commit:</p>
 </div>
@@ -1067,6 +1078,29 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
                   G---H---I---J
                                \
                                 L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Também podemos usar <code>--ancestry-path=D</code> em vez de <code>--ancestry-path</code> que significa a mesma coisa quando é aplicado ao intervalo <em>D..M</em>, porém, é apenas mais explícito.</p>
+</div>
+<div class="paragraph">
+<p>Se, em vez disso, estivermos interessados num determinado assunto dentro desse intervalo e todos os commits afetados por esse assunto, podemos querer apenas visualizar o subconjunto de <code>D..M</code> que contém esse assunto em seu caminho ancestral. Então, ao usar <code>--ancestry-path=H D..M</code>, por exemplo, resultaria em:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                E
+                 \
+                  G---H---I---J
+                               \
+                                L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Onde <code>--ancestry-path=K D..M</code> resultará em</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                K---------------L--M</pre>
 </div>
 </div>
 </dd>
@@ -1113,7 +1147,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Aqui, a mesclagem do commit <code>O</code> e <code>P</code> contribuem com um ruído extra, pois na verdade não contribuíram com uma alteração no <code>file.txt</code>. Eles mesclaram apenas um <em>topic</em> com base numa versão mais antiga do <code>file.txt</code>. Este é um problema comum em repositórios que utilizam um fluxo de trabalho onde que muitos colaboradores trabalham em paralelo e mesclam as suas ramificações dos tópicos em um único "trunk": as mesclagens não relacionadas ao manu aparecem nos resultados do comando <code>--full-history</code>.</p>
+<p>Aqui, a mesclagem do commit <code>O</code> e <code>P</code> contribuem com um ruído extra, pois na verdade não contribuíram com uma alteração no <code>file.txt</code>. Eles mesclaram apenas um <em>topic</em> com base numa versão mais antiga do <code>file.txt</code>. Este é um problema comum em repositórios que utilizam um fluxo de trabalho onde que muitos colaboradores trabalham em paralelo e mesclam as suas ramificações dos tópicos em um único tronco: muitas mesclagens não relacionadas aparecem nos resultados da opção <code>--full-history</code>.</p>
 </div>
 <div class="paragraph">
 <p>Ao utilizar a opção <code>--simplify-merges</code>, os commits <code>O</code> e <code>P</code> desaparecem dos resultados. Pois as reescritas do segundo pai de <code>O</code> e <code>P</code> são acessíveis a partir dos seus primeiros pais. Estes cantos são removidos e então os commits se parecem com commits com pai singular só que são TREESAME em relação aos seus pais. Isso também acontece ao commit <code>N</code>, resultando no histórico a seguir:</p>
@@ -1200,7 +1234,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;opções&gt;]</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:03 +0200
+Last updated 2023-05-21 19:04:53 +0200
 </div>
 </div>
 </body>

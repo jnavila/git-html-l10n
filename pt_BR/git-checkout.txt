@@ -203,7 +203,7 @@ Como um caso especial, é possível utilizar `"A...B"` como um atalho como uma b
 <pathspec>...::
 	Limita os caminhos afetados pela operação.
 +
-Para mais detalhes sobre a sintaxe <pathspec>, veja a entrada 'pathspec' em linkgit:gitglossary[7].
+Para mais detalhes sobre a sintaxe, consulte a entrada 'pathspec' em linkgit:gitglossary[7].
 
 HEAD DESANEXADO
 ---------------
@@ -301,11 +301,8 @@ $ git checkout -b foo  # or "git switch -c foo"  <1>
 $ git branch foo                                 <2>
 $ git tag foo                                    <3>
 ------------
-
 <1> cria uma nova ramificação `foo` com referência ao commit `f`, atualiza HEAD com referência ao ramo `foo`. Isso significa que agora não estamos mais desanexados do `HEAD` após este comando.
-
 <2> similarmente cria um novo ramo `foo` com referência ao commit `f` deixando `HEAD` desanexado.
-
 <3> cria uma nova tag `foo`com referência ao commit `f` deixando HEAD desanexado.
 
 Se nos afastamos do commit `f`, primeiro precisamos recuperar o nome do objeto (normalmente utilizando `git reflog`) e em seguida, podemos criar uma referência para ele. Para ver os dois últimos commits aos quais o `HEAD` se refere, podemos usar um destes comandos, por exemplo:
@@ -323,66 +320,71 @@ Quando há apenas um argumento que não seja `--` (como `git checkout abc`) e qu
 EXEMPLOS
 --------
 
-. A sequência a seguir exclui o ramo `master`, reverte o` Makefile` para duas revisões anteriores, exclui o arquivo hello.c por engano e faz a recuperação do índice.
-+
+=== 1. Caminhos
+
+A sequência a seguir exclui o ramo `master`, reverte o` Makefile` para duas revisões anteriores, exclui o arquivo hello.c por engano e faz a recuperação do índice.
+
 ------------
 $ git checkout master             <1>
 $ git checkout master~2 Makefile  <2>
 $ rm -f hello.c
 $ git checkout hello.c            <3>
 ------------
-+
 <1> alternância do ramo
 <2> tirar um arquivo de um outro commit
 <3> restaura o arquivo `hello.c` a partir do índice
-+
+
 Caso queira verificar _todos_ os arquivos "*.c" do código-fonte diretamente do índice, você pode utilizar
-+
+
 ------------
 $ git checkout -- '*.c'
 ------------
-+
+
 Observe as aspas em torno de `* .c`. O arquivo `hello.c` também será retirado, mesmo que não esteja mais na árvore de trabalho, porque o agrupamento dos arquivos é utilizado para coincidir com as entradas no índice (não na árvore de trabalho pelo shell).
-+
+
 Caso tenha um ramo chamado `hello.c`, esta etapa será confundida como uma instrução para alternar para este ramo. Você deve então escrever:
-+
+
 ------------
 $ git checkout -- hello.c
 ------------
 
-. Depois de trabalhar no ramo errado, mudar para o ramo correto seria feito utilizando:
-+
+=== 2. Mesclar
+
+Depois de trabalhar no ramo errado, mudar para o ramo correto seria feito utilizando:
+
 ------------
 $ git checkout mytopic
 ------------
-+
+
 No entanto, o seu ramo "errado" e o correto "mytopic" podem diferir nos arquivos modificados localmente por você. Que dessa maneira, a verificação acima falhará assim:
-+
+
 ------------
 $ git checkout mytopic
 error: You have local changes to 'frotz'; not switching branches.
 ------------
-+
+
 Você pode repassar a opção`-m` ao comando, que tentaria uma mesclagem de três vias:
-+
+
 ------------
 $ git checkout -m mytopic
 Auto-merging frotz
 ------------
-+
+
 Após esta mesclagem de três vias, as alterações locais não serão registradas no seu arquivo do índice, portanto, o `git diff` exibirá quais foram as alterações feitas desde o cume do novo ramo.
 
-. Quando um conflito de mesclagem acontece durante a troca de branches com a opção `-m`, você veria algo assim:
-+
+=== 3. Mesclar os conflitos
+
+Quando um conflito de mesclagem acontece durante a troca de branches com a opção `-m`, você veria algo assim:
+
 ------------
 $ git checkout -m mytopic
 Auto-merging frotz
 ERROR: Merge conflict in frotz
 fatal: merge program failed
 ------------
-+
+
 Neste ponto, o comando `git diff` exibe as alterações mescladas de maneira limpa, como no exemplo anterior, bem como as alterações nos arquivos conflitantes. Edite e resolva o conflito marcando-o como resolvido através do comando `git add` como de costume:
-+
+
 ------------
 $ edit frotz
 $ git add frotz

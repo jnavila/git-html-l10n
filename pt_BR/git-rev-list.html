@@ -451,7 +451,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git rev-list</em> [&lt;opções&gt;] &lt;commit&gt;&#8230;&#8203; [[--] &lt;caminho&gt;&#8230;&#8203;]</pre>
+<pre class="content"><em>git rev-list</em> [&lt;options&gt;] &lt;commit&gt;&#8230;&#8203; [--] [&lt;caminho&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -529,9 +529,9 @@ $ git rev-list A...B</pre>
 <dd>
 <p>Exiba os commits com data mais recente das que foram informada.</p>
 </dd>
-<dt class="hdlist1">--since-as-filter=&lt;date&gt;</dt>
+<dt class="hdlist1">--since-as-filter=&lt;data&gt;</dt>
 <dd>
-<p>Show all commits more recent than a specific date. This visits all commits in the range, rather than stopping at the first commit which is older than a specific date.</p>
+<p>Mostra todos os commits mais recentes do que uma determinada data. Isso avalia todos os commits que estejam neste intervalo, em vez de parar no primeiro commit que for o mais antigo que uma determinada data.</p>
 </dd>
 <dt class="hdlist1">--until=&lt;data&gt;</dt>
 <dt class="hdlist1">--before=&lt;data&gt;</dt>
@@ -652,6 +652,10 @@ $ git rev-list A...B</pre>
 <p>Os padrões informados não devem começar com <code>refs/heads</code>, <code>refs/tags</code>, ou <code>refs/remotes</code> quando aplicadas as opções <code>--branches</code>, <code>--tags</code>, ou <code>--remotes</code> respectivamente, e devem começar com <code>refs/</code> quando for aplicado ao <code>--glob</code> ou <code>--all</code>. Se a intenção for um delimitador <em>/{asterisco}</em>, este deve ser utilizado de forma explicita.</p>
 </div>
 </dd>
+<dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
+<dd>
+<p>Do not include refs that would be hidden by <code>git-fetch</code>, <code>git-receive-pack</code> or <code>git-upload-pack</code> by consulting the appropriate <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> or <code>uploadpack.hideRefs</code> configuration along with <code>transfer.hideRefs</code> (see <a href="git-config.html">git-config(1)</a>). This option affects the next pseudo-ref option <code>--all</code> or <code>--glob</code> and is cleared after processing them.</p>
+</dd>
 <dt class="hdlist1">--reflog</dt>
 <dd>
 <p>Finja que todos os objetos mencionados pelos <code>reflogs</code> estejam listados na linha de comando como <code>&lt;commit&gt;</code>.</p>
@@ -677,8 +681,9 @@ $ git rev-list A...B</pre>
 <p>Não imprima nada na saída padrão. Este formulário tem como principal objetivo, permitir que a pessoa que chame, teste a condição da saída para verificar se um conjunto de objetos está totalmente conectado (ou não). É mais rápido que redirecionar o stdout para <code>/dev/null</code>, pois a saída não precisa ser formatada.</p>
 </dd>
 <dt class="hdlist1">--disk-usage</dt>
+<dt class="hdlist1">--disk-usage=human</dt>
 <dd>
-<p>Suprima a saída normal; em vez disso, imprima a soma dos bytes utilizados para o armazenamento em disco pelos commits ou pelos objetos selecionados. Isso é o o mesmo que canalizar a saída para <code>git cat-file --batch-check='%(objectsize:disk)'</code>, exceto que roda muito mais rápido (especialmente com <code>--use-bitmap-index</code>). Consulte a seção <code>RESSALVAS</code> em <a href="git-cat-file.html">git-cat-file(1)</a> para conhecer as limitações do que significa o "armazenamento em disco".</p>
+<p>Suprime a saída normal; em vez disso, imprime a soma dos bytes usados para o armazenamento em disco feito pelos commits ou pelos objetos que foram selecionados. Isso é equivalente a canalizar a saída para <code>git cat-file --batch-check='%(objectsize:disk)'</code>, exceto que ele roda muito mais rápido (especialmente com <code>--use-bitmap-index</code>). Consulte a seção <code>RESSALVAS</code> em <a href="git-cat-file.html">git-cat-file(1)</a> para conhecer o significado da limitações do "armazenamento em disco". Com o valor opcional <code>human</code>, o tamanho do armazenamento no disco será mostrado numa string humanamente legível (12,24 Kib, 3,50 Mib por exemplo).</p>
 </dd>
 <dt class="hdlist1">--cherry-mark</dt>
 <dd>
@@ -759,7 +764,7 @@ $ git rev-list A...B</pre>
 <div class="sect2">
 <h3 id="_simplificação_do_histórico">Simplificação do histórico</h3>
 <div class="paragraph">
-<p>Às vezes, você está interessado apenas nas partes da história, por exemplo, os commit que alteraram um determinado &lt;caminho&gt;. Porém existem duas partes da <em>Simplificação do Histórico</em>, uma parte é a seleção dos commits e a outra é como fazê-lo, pois existem várias estratégias para simplificar o histórico.</p>
+<p>Às vezes, você está interessado apenas nas partes do histórico, por exemplo, os commit que alteraram um determinado &lt;caminho&gt;. Porém existem duas partes da <em>Simplificação do Histórico</em>, uma parte é a seleção dos commits e a outra é como fazê-lo, pois existem várias estratégias para simplificar o histórico.</p>
 </div>
 <div class="paragraph">
 <p>As seguintes opções selecionam os commits que serão exibidos:</p>
@@ -808,9 +813,9 @@ $ git rev-list A...B</pre>
 <dd>
 <p>Opção adicional para <code>--full-history</code> para remover algumas mesclagens desnecessárias do histórico resultante, pois não há commits selecionados contribuindo para essa mesclagem.</p>
 </dd>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>Quando um intervalo dos commits é exibido (por exemplo, <em>commit1..commit2</em> ou <em>commit2 ^commit1</em>), apenas exibe os commits que existem diretamente na cadeia de ancestralidade entre o <em>commit1</em> e o <em>commit1</em>, ou seja, os commits que são ambos descendentes doe <em>commit1</em> e os ancestrais do <em>commit2</em>.</p>
+<p>Ao receber um intervalo de commits para mostrar (<em>commit1..commit2</em> ou <em>commit2 ^commit1</em> por exemplo), exibe apenas os commits nesse intervalo que sejam ancestrais do &lt;commit&gt;, descendentes do &lt;commit&gt; ou o &lt;commit&gt; em si. Caso nenhum commit seja definido, use <em>commit1</em> (a parte excluída do intervalo) como &lt;commit&gt;. Pode ser passado mais de uma vez; em caso afirmativo, um commit é incluído caso seja qualquer um dos commits informados ou caso seja um ancestral ou descendente de um deles.</p>
 </dd>
 </dl>
 </div>
@@ -1000,9 +1005,9 @@ $ git rev-list A...B</pre>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>Limite os commits exibidos àquelas diretamente na cadeia de ancestralidade entre os commits &#8220;from&#8221; e &#8220;to&#8221; no intervalo dos commits informados. Ou seja, exiba apenas os commits que são ancestrais do commit &#8220;to&#8221; (<em>para</em>) e os descendentes do commit &#8220;from&#8221;.</p>
+<p>Limite os commits exibidos àqueles que sejam ancestrais do &lt;commit&gt;, ou que sejam descendentes do &lt;commit&gt;, ou são o &lt;commit&gt; em si.</p>
 <div class="paragraph">
 <p>Como um exemplo de caso, considere o seguinte histórico do commit:</p>
 </div>
@@ -1028,6 +1033,29 @@ $ git rev-list A...B</pre>
                   G---H---I---J
                                \
                                 L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Também podemos usar <code>--ancestry-path=D</code> em vez de <code>--ancestry-path</code> que significa a mesma coisa quando é aplicado ao intervalo <em>D..M</em>, porém, é apenas mais explícito.</p>
+</div>
+<div class="paragraph">
+<p>Se, em vez disso, estivermos interessados num determinado assunto dentro desse intervalo e todos os commits afetados por esse assunto, podemos querer apenas visualizar o subconjunto de <code>D..M</code> que contém esse assunto em seu caminho ancestral. Então, ao usar <code>--ancestry-path=H D..M</code>, por exemplo, resultaria em:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                E
+                 \
+                  G---H---I---J
+                               \
+                                L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Onde <code>--ancestry-path=K D..M</code> resultará em</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                K---------------L--M</pre>
 </div>
 </div>
 </dd>
@@ -1074,7 +1102,7 @@ $ git rev-list A...B</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Aqui, a mesclagem do commit <code>O</code> e <code>P</code> contribuem com um ruído extra, pois na verdade não contribuíram com uma alteração no <code>file.txt</code>. Eles mesclaram apenas um <em>topic</em> com base numa versão mais antiga do <code>file.txt</code>. Este é um problema comum em repositórios que utilizam um fluxo de trabalho onde que muitos colaboradores trabalham em paralelo e mesclam as suas ramificações dos tópicos em um único "trunk": as mesclagens não relacionadas ao manu aparecem nos resultados do comando <code>--full-history</code>.</p>
+<p>Aqui, a mesclagem do commit <code>O</code> e <code>P</code> contribuem com um ruído extra, pois na verdade não contribuíram com uma alteração no <code>file.txt</code>. Eles mesclaram apenas um <em>topic</em> com base numa versão mais antiga do <code>file.txt</code>. Este é um problema comum em repositórios que utilizam um fluxo de trabalho onde que muitos colaboradores trabalham em paralelo e mesclam as suas ramificações dos tópicos em um único tronco: muitas mesclagens não relacionadas aparecem nos resultados da opção <code>--full-history</code>.</p>
 </div>
 <div class="paragraph">
 <p>Ao utilizar a opção <code>--simplify-merges</code>, os commits <code>O</code> e <code>P</code> desaparecem dos resultados. Pois as reescritas do segundo pai de <code>O</code> e <code>P</code> são acessíveis a partir dos seus primeiros pais. Estes cantos são removidos e então os commits se parecem com commits com pai singular só que são TREESAME em relação aos seus pais. Isso também acontece ao commit <code>N</code>, resultando no histórico a seguir:</p>
@@ -1230,7 +1258,7 @@ $ git rev-list A...B</pre>
 <dl>
 <dt class="hdlist1">--objects</dt>
 <dd>
-<p>Imprima as IDs do objeto de qualquer objeto referenciado pelos commits listados. Os <code>--objects foo ^bar</code> significa, portanto, &#8220;me envie todas as IDs dos objetos que eu preciso baixar caso eu tenha o objeto commit <em>bar</em> mas não <em>foo</em>&#8221;.</p>
+<p>Print the object IDs of any object referenced by the listed commits. <code>--objects foo ^bar</code> thus means &#8220;send me all object IDs which I need to download if I have the commit object <em>bar</em> but not <em>foo</em>&#8221;. See also <code>--object-names</code> below.</p>
 </dd>
 <dt class="hdlist1">--in-commit-order</dt>
 <dd>
@@ -1254,7 +1282,7 @@ $ git rev-list A...B</pre>
 </dd>
 <dt class="hdlist1">--object-names</dt>
 <dd>
-<p>Útil apenas com a opção <code>--objects</code>; imprima os nomes dos IDs dos objetos que forem encontrados. Este é o comportamento predefinido.</p>
+<p>Only useful with <code>--objects</code>; print the names of the object IDs that are found. This is the default behavior. Note that the "name" of each object is ambiguous, and mostly intended as a hint for packing objects. In particular: no distinction is made between the names of tags, trees, and blobs; path names may be modified to remove newlines; and if an object would appear multiple times with different names, only one name is shown.</p>
 </dd>
 <dt class="hdlist1">--no-object-names</dt>
 <dd>
@@ -1285,8 +1313,7 @@ $ git rev-list A...B</pre>
 <p>Várias opções <code>--filter=</code> podem ser utilizados para fazer a combinação dos filtros. Somente os objetos que são aceitos por todos os filtros serão incluídos.</p>
 </div>
 <div class="paragraph">
-<p>The form <em>--filter=combine:&lt;filter1&gt;+&lt;filter2&gt;+&#8230;&#8203;&lt;filterN&gt;</em> can also be used to combined several filters, but this is harder than just repeating the <em>--filter</em> flag and is usually not necessary. Filters are joined by <em>&#43;</em> and individual filters are %-encoded (i.e. URL-encoded). Besides the <em>&#43;</em> and <em>%</em> characters, the following characters are reserved and also must be encoded: <code>~!@#$^&amp;*()[]{}\;",&lt;&gt;?</code><code>&#39;&#96;</code>
-as well as all characters with ASCII code &lt;= <code>0x20</code>, which includes space and newline.</p>
+<p>O formulário <em>--filter=combine:&lt;filter1&gt;+&lt;filter2&gt;+&#8230;&#8203;&lt;filterN&gt;</em> também pode ser usado para combinar vários filtros, mas isso é mais difícil do que apenas repetir o comando <em>--filter</em> e geralmente não é necessário. Os filtros são unidos pelo <em>&#43;</em> e os filtros individuais são %-codificados (ou seja, URL-codificada). Além dos caracteres <em>&#43;</em> e <em>%</em> os seguintes caracteres são reservados e também devem ser codificados: <code>~!@#$^&amp;*()[]{}\;",&lt;&gt;?</code><code>&#39;&#96;</code> assim como todos os caracteres com código ASCII &lt;= <code>0x20</code>, que inclui espaço e nova linha.</p>
 </div>
 <div class="paragraph">
 <p>Outros caracteres arbitrários também podem ser codificados. Por exemplo, <em>combine:tree:3+blob:none</em> e <em>combine:tree%3A3+blob%3Anone</em> são equivalentes.</p>
@@ -1438,19 +1465,9 @@ as well as all characters with ASCII code &lt;= <code>0x20</code>, which include
 <p>A opção <code>--date=format:...</code> alimenta o formato <code>...</code> par ao seu sistema <code>strftime</code>, menos para %s, %z, e %Z, que são tratados internamente. Use a opção <code>--date=format:%c</code> para exibir a data no formato preferido do código do idioma do sistema. Consulte o manual do <code>strftime</code> para obter uma lista completa dos "placeholders". Ao utilizar o <code>-local</code>, a sintaxe correta é <code>--date=format-local:...</code>.</p>
 </div>
 <div class="paragraph">
-<p>A opção <code>--date=default</code> é o formato predefinido e similar ao <code>--date=rfc2822</code> com algumas excessões:</p>
+<p><code>--date=default</code> é o formato predefinido e tem como base na saída ctime(3). Ele mostra uma única linha com três letras do dia da semana, três letras do mês, dia do mês, hora-minuto-segundos no formato "HH:MM:SS", seguido do ano de 4 dígitos, além das informações do fuso horário, a menos que o fuso horário local seja usado, por ex. <code>Thu Jan 1 00:00:00 1970 +0000</code>.</p>
 </div>
 </div>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>não há vírgula após o dia da semana</p>
-</li>
-<li>
-<p>o fuso horário é omitido quando o fuso horário local é utilizado</p>
-</li>
-</ul>
 </div>
 </dd>
 <dt class="hdlist1">--header</dt>
@@ -1738,25 +1755,25 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <dd>
 <p>alterna a quebra da linha, como na opção <code>-w</code> do <a href="git-shortlog.html">git-shortlog(1)</a>.</p>
 </dd>
-<dt class="hdlist1"><em>%&lt;(&lt;N&gt;[,trunc|ltrunc|mtrunc])</em></dt>
+<dt class="hdlist1"><em>%&lt;( &lt;N&gt; [,trunc|ltrunc|mtrunc])</em></dt>
 <dd>
-<p>faz com que o próximo espaço ocupado ocupe ao menos N colunas, preenchendo espaços à direita, se necessário. Opcionalmente, truncar no início (ltrunc), no meio (mtrunc) ou no final (trunc) caso a saída seja maior que N colunas. Observe que o truncamento funciona corretamente com N &gt;= 2.</p>
+<p>faça com que o próximo espaço reservado ocupe pelo menos N larguras de coluna, preenchendo os espaços à direita, caso seja necessário. Opcionalmente, truncar (com reticências <em>..</em>) à esquerda (ltrunc) <code>..ft</code>, no meio (mtrunc) <code>mi..le</code> ou no final (trunc) <code>rig..</code>, caso a saída seja maior do que N colunas. Observação 1: esse truncamento só funciona corretamente com N &gt;= 2. Observação 2: os espaços ao redor dos valores N e M (veja abaixo) são opcionais. Observação 3: Emojis e outros caracteres largos terão duas colunas de exibição, o que pode ultrapassar os limites da coluna. Observação 4: as marcas de combinação de caracteres decompostos podem ser mal posicionados nos limites do preenchimento.</p>
 </dd>
-<dt class="hdlist1"><em>%&lt;|(&lt;N&gt;)</em></dt>
+<dt class="hdlist1"><em>%&lt;|( &lt;M&gt; )</em></dt>
 <dd>
-<p>faça com que o próximo espaço reservado leve pelo menos até a enésima coluna, preenchendo os espaços à direita caso seja necessário</p>
+<p>faça com que o próximo espaço reservado ocupe pelo menos até a M(ésima) coluna de exibição, preenchendo os espaços à direita, caso seja necessário. Use valores M negativos para posições da coluna medidos a partir da borda direita da janela do terminal.</p>
 </dd>
-<dt class="hdlist1"><em>%&gt;(&lt;N&gt;)</em>, <em>%&gt;|(&lt;N&gt;)</em></dt>
+<dt class="hdlist1"><em>%&gt;( &lt;N&gt; )</em>, <em>%&gt;|( &lt;M&gt; )</em></dt>
 <dd>
-<p>semelhante ao <em>%&lt;(&lt;N&gt;)</em>, <em>%&lt;|(&lt;N&gt;)</em> respectivamente, mas preenchendo os espaços à esquerda</p>
+<p>semelhante a <em>%&lt;( &lt;N&gt; )</em>, <em>%&lt;|( &lt;M&gt; )</em> respectivamente, mas preenchendo os espaços à esquerda</p>
 </dd>
-<dt class="hdlist1"><em>%&gt;&gt;(&lt;N&gt;)</em>, <em>%&gt;&gt;|(&lt;N&gt;)</em></dt>
+<dt class="hdlist1"><em>%&gt;&gt;( &lt;N&gt; )</em>, <em>%&gt;&gt;|( &lt;M&gt; )</em></dt>
 <dd>
-<p>semelhante a <em>%&gt;(&lt;N&gt;)</em>, <em>%&gt;|(&lt;N&gt;)</em> respectivamente, exceto caso o próximo espaço reservado ocupe mais espaços do que o informado e haja espaços à esquerda, utilize estes espaços</p>
+<p>semelhante a <em>%&gt;( &lt;N&gt; )</em>, <em>%&gt;|( &lt;M&gt; )</em> respectivamente, exceto caso o próximo espaço reservado ocupe mais espaços do que o informado e haja espaços à esquerda, utilize estes espaços</p>
 </dd>
-<dt class="hdlist1"><em>%&gt;&lt;(&lt;N&gt;)</em>, <em>%&gt;&lt;|(&lt;N&gt;)</em></dt>
+<dt class="hdlist1"><em>%&gt;&lt;( &lt;N&gt; )</em>, <em>%&gt;&lt;|( &lt;M&gt; )</em></dt>
 <dd>
-<p>semelhante a <em>%&lt;(&lt;N&gt;)</em>, <em>%&lt;|(&lt;N&gt;)</em> respectivamente, mas preenchendo ambos os lados (quando o texto for centralizado por exemplo)</p>
+<p>semelhante a <em>%&lt;( &lt;N&gt; )</em>, <em>%&lt;|(&lt; M &gt;)</em> respectivamente, mas preenchendo ambos os lados (quando o texto for centralizado por exemplo)</p>
 </dd>
 </dl>
 </div>
@@ -2218,7 +2235,7 @@ sort -n</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:03 +0200
+Last updated 2023-05-21 19:04:53 +0200
 </div>
 </div>
 </body>

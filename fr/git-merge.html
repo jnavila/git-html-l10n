@@ -477,7 +477,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Alors, "<code>git merge theme</code>" rejouera les modifications apportées à la branche "theme" puisqu’elle s’est écartée de <code>master</code> (c’est-à-dire <code>E</code>) jusqu’à son commit actuel (<code>C</code>) par dessus <code>master</code>, et enregistrera le résultat dans un nouveau commit comprenant les noms des deux parents et un message de validation de l’utilisateur décrivant les modifications.</p>
+<p>Alors, "<code>git merge theme</code>" rejouera les modifications apportées à la branche "theme" puisqu’elle s’est écartée de <code>master</code> (c’est-à-dire <code>E</code>) jusqu’à son commit actuel (<code>C</code>) par dessus <code>master</code>, et enregistrera le résultat dans un nouveau commit comprenant les noms des deux parents et un message de validation de l’utilisateur décrivant les modifications. Avant l’opération, <em>ORIG_HEAD</em> est défini sur le sommet de la branche actuelle (<em>C</em>).</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -659,7 +659,7 @@ L&#8217;option <code>--edit</code> (ou <code>-e</code>) est toujours utile si vo
 <dt class="hdlist1">--rerere-autoupdate</dt>
 <dt class="hdlist1">--no-rerere-autoupdate</dt>
 <dd>
-<p>Permettre au mécanisme rerere de mettre à jour l&#8217;index avec le résultat de la résolution automatique des conflits si possible.</p>
+<p>Après que le mécanisme rerere réutilise une résolution enregistrée sur le conflit actuel pour mettre à jour les fichiers dans l&#8217;arbre de travail, lui permettre de mettre également à jour l&#8217;index avec le résultat de la résolution. <code>--no-rerere-autoupdate</code> est un bon moyen de revérifier ce que <code>rerere</code> a fait et de détecter des erreurs de fusion potentielles, avant de valider le résultat dans l&#8217;index avec un <code>git add</code> séparé.</p>
 </dd>
 <dt class="hdlist1">--overwrite-ignore</dt>
 <dt class="hdlist1">--no-overwrite-ignore</dt>
@@ -1052,6 +1052,17 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 <div class="sectionbody">
 <div class="dlist">
 <dl>
+<dt class="hdlist1">branch.&lt;nom&gt;.mergeOptions</dt>
+<dd>
+<p>Définir les options par défaut pour la fusion dans la branche &lt;nom&gt;. La syntaxe et les options prises en charge sont les mêmes que celles de <em>git merge</em>, mais les valeurs d&#8217;options contenant des espaces ne sont actuellement pas prises en charge.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Tout ce qui se trouve au-dessus de cette ligne dans cette section n&#8217;est pas inclus dans la documentation <a href="git-config.html">git-config(1)</a>. Le contenu qui suit est le même que celui qui s&#8217;y trouve :</p>
+</div>
+<div class="dlist">
+<dl>
 <dt class="hdlist1">merge.conflictStyle</dt>
 <dd>
 <p>Spécifier le style dans lequel les sections en conflit sont écrites dans les fichiers de l&#8217;arbre de travail lors de la fusion. La valeur par défaut est "merge", qui affiche un marqueur de conflit <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, les modifications faites par un côté, un marqueur <code>==========, les modifications faites par l'autre côté, et ensuite un marqueur `&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Un style alternatif, "diff3", ajoute un marqueur <code>|||||||</code> et le texte original avant le marqueur <code>========</code>. Le style "merge" tend à produire des régions de conflit plus petites que diff3, à la fois à cause de l&#8217;exclusion du texte original, et parce que lorsqu&#8217;un sous-ensemble de lignes correspondent des deux côtés, elles sont simplement retirées de la région de conflit. Un autre style alternatif, "zdiff3" est similaire à diff3 mais supprime les lignes correspondantes des deux côtés de la région de conflit lorsque ces lignes correspondantes apparaissent près du début ou de la fin d&#8217;une région de conflit.</p>
@@ -1114,110 +1125,14 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 <dt class="hdlist1">merge.guitool</dt>
 <dd>
 <p>Contrôle quel outil de fusion est utilisé par <a href="git-mergetool.html">git-mergetool(1)</a> lorsque le drapeau -g/--gui est spécifié. La liste ci-dessous indique les valeurs pré-intégrées valides. Toute autre valeur est traitée comme un outil de fusion personnalisé et nécessite qu&#8217;une variable mergetool.&lt;outilgraphique&gt;.cmd correspondante soit définie.</p>
-<div class="ulist">
-<ul>
-<li>
-<p>araxis</p>
-</li>
-<li>
-<p>bc</p>
-</li>
-<li>
-<p>bc3</p>
-</li>
-<li>
-<p>bc4</p>
-</li>
-<li>
-<p>codecompare</p>
-</li>
-<li>
-<p>deltawalker</p>
-</li>
-<li>
-<p>diffmerge</p>
-</li>
-<li>
-<p>diffuse</p>
-</li>
-<li>
-<p>ecmerge</p>
-</li>
-<li>
-<p>emerge</p>
-</li>
-<li>
-<p>examdiff</p>
-</li>
-<li>
-<p>guiffy</p>
-</li>
-<li>
-<p>gvimdiff</p>
-</li>
-<li>
-<p>gvimdiff1</p>
-</li>
-<li>
-<p>gvimdiff2</p>
-</li>
-<li>
-<p>gvimdiff3</p>
-</li>
-<li>
-<p>kdiff3</p>
-</li>
-<li>
-<p>meld</p>
-</li>
-<li>
-<p>nvimdiff</p>
-</li>
-<li>
-<p>nvimdiff1</p>
-</li>
-<li>
-<p>nvimdiff2</p>
-</li>
-<li>
-<p>nvimdiff3</p>
-</li>
-<li>
-<p>opendiff</p>
-</li>
-<li>
-<p>p4merge</p>
-</li>
-<li>
-<p>smerge</p>
-</li>
-<li>
-<p>tkdiff</p>
-</li>
-<li>
-<p>tortoisemerge</p>
-</li>
-<li>
-<p>vimdiff</p>
-</li>
-<li>
-<p>vimdiff1</p>
-</li>
-<li>
-<p>vimdiff2</p>
-</li>
-<li>
-<p>vimdiff3</p>
-</li>
-<li>
-<p>winmerge</p>
-</li>
-<li>
-<p>xxdiff</p>
-</li>
-</ul>
-</div>
 </dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config/merge.txt - include::../mergetools-merge.txt[]</p>
+</div>
+<div class="dlist">
+<dl>
 <dt class="hdlist1">merge.verbosity</dt>
 <dd>
 <p>Contrôle la quantité de production affichée par la stratégie de fusion récursive. Le niveau 0 ne produit rien, sauf un message d&#8217;erreur final si des conflits ont été détectés. Le niveau 1 ne produit que des conflits, le niveau 2 produit des conflits et des changements de fichiers. Les niveaux 5 et plus produisent des informations de débogage. La valeur par défaut est le niveau 2. Peut être écrasée par la variable d&#8217;environnement <code>GIT_MERGE_VERBOSITY</code>.</p>
@@ -1233,10 +1148,6 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 <dt class="hdlist1">merge.&lt;pilote&gt;.recursive</dt>
 <dd>
 <p>Nomme un pilote de fusion de bas niveau à utiliser lors d&#8217;une fusion interne entre des ancêtres communs. Voir <a href="gitattributes.html">gitattributes(5)</a> pour plus de détails.</p>
-</dd>
-<dt class="hdlist1">branch.&lt;nom&gt;.mergeOptions</dt>
-<dd>
-<p>Définir les options par défaut pour la fusion dans la branche &lt;nom&gt;. La syntaxe et les options prises en charge sont les mêmes que celles de <em>git merge</em>, mais les valeurs d&#8217;options contenant des espaces ne sont actuellement pas prises en charge.</p>
 </dd>
 </dl>
 </div>
@@ -1269,7 +1180,7 @@ Et voici une autre ligne qui est proprement résolue ou non modifiée.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 21:59:18 +0200
+Last updated 2023-05-21 19:03:35 +0200
 </div>
 </div>
 </body>

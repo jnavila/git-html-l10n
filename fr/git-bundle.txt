@@ -9,7 +9,7 @@ git-bundle - Déplace les objets et les références par archive
 SYNOPSIS
 --------
 [verse]
-'git bundle' create [-q | --quiet | --progress | --all-progress] [--all-progress-implied]
+'git bundle' create [-q | --quiet | --progress]
 		    [--version=<version>] <fichier> <arguments-git-rev-list>
 'git bundle' verify [-q | --quiet] <fichier>
 'git bundle' list-heads <fichier> [<nom-de-ref>...]
@@ -43,16 +43,16 @@ OPTIONS
 -------
 
 create [options] <fichier> <git-rev-list-args>::
-	Utilisé pour créer un regroupement nommé 'fichier'. Cela nécessite les arguments '<arguments-git-rev-list>' pour définir le contenu du regroupement. options' contient les options spécifiques à la sous-commande 'git bundle create'.
+	Utilisé pour créer un regroupement nommé 'fichier'. Cela nécessite les arguments '<arguments-git-rev-list>' pour définir le contenu du regroupement. options' contient les options spécifiques à la sous-commande 'git bundle create'. si 'fichier' est `-`, le paquet envoyé sur la sortie standard.
 
 verify <fichier>::
-	Utilisé pour vérifier qu'un fichier regroupement est valide et s'appliquera proprement au dépôt actuel. Cela inclut des vérifications sur le format du regroupement lui-même ainsi que la vérification que les commits pré-requis existent et sont complètement liés dans le dépôt actuel. 'git bundle' affiche une liste des commits manquants, s'il y en a. Enfin, des informations sur des capacités supplémentaires, telles que "object filter" sont imprimées. Voir "Capacités" dans git:gitformat-bundle[5] pour plus d'informations. Le code de sortie est zéro en cas de succès, mais sera non nul si le fichier colis est invalide.
+	Utilisé pour vérifier qu'un fichier regroupement est valide et s'appliquera proprement au dépôt actuel. Cela inclut des vérifications sur le format du regroupement lui-même ainsi que la vérification que les commits pré-requis existent et sont complètement liés dans le dépôt actuel. 'git bundle' affiche une liste des commits manquants, s'il y en a. Enfin, des informations sur des capacités supplémentaires, telles que "object filter" sont imprimées. Voir "Capacités" dans git:gitformat-bundle[5] pour plus d'informations. Le code de sortie est zéro en cas de succès, mais sera non nul si le fichier colis est invalide. Si 'fichier' est `-`, le paquet est lu sur l'entrée standard.
 
 list-heads <fichier>::
-	Liste les références définies dans le regroupement. Si elle est suivie d'une liste de références, seules les références correspondant à celles données sont imprimées.
+	Liste les références définies dans le regroupement. Si elle est suivie d'une liste de références, seules les références correspondant à celles données sont imprimées. Si 'fichier' est `-`, le paquet est lu sur l'entrée standard.
 
 unbundle <fichier>::
-	Passe les objets du groupement à 'git index-pack' pour qu'ils soient stockés dans le dépôt, puis affiche les noms de toutes les références définies. Si une liste de références est donnée, seules les références correspondant à celles de la liste sont imprimées. Cette commande est vraiment de plomberie et n'est définie que pour être appelée par 'git fetch'.
+	Passe les objets du groupement à 'git index-pack' pour qu'ils soient stockés dans le dépôt, puis affiche les noms de toutes les références définies. Si une liste de références est donnée, seules les références correspondant à celles de la liste sont imprimées. Cette commande est vraiment de plomberie et n'est définie que pour être appelée par 'git fetch'. si 'fichier' est `-`, le paquet est lu depuis l'entrée standard.
 
 <git-rev-list-args>::
 	Une liste d'arguments, acceptable pour 'git rev-parse' et 'git rev-list' (et contenant une référence nommée, voir SPECIFICATION DES REFERENCES ci-dessous), qui spécifie les objets et références spécifiques à transporter. Par exemple, `master~10..master` fait en sorte que la référence master actuelle soit regroupée avec tous les objets ajoutés depuis le dixième commit de son ancêtre. Il n'y a pas de limite explicite au nombre de références et d'objets qui peuvent être regroupés.
@@ -63,12 +63,6 @@ unbundle <fichier>::
 
 --progress::
 	L'état d'avancement est affiché sur la sortie d'erreur standard quand elle est attachée à un terminal, à moins que -q soit spécifié. Ce drapeau force l'état d'avancement même si le flux d'erreur standard n'est pas dirigé vers un terminal.
-
---all-progress::
-	Lorsque --stdout est spécifié, le rapport de progression est affiché pendant les phases de comptage d'objets et de compression, mais il est inhibé pendant la phase d'écriture. La raison en est que dans certains cas, le flux de sortie est directement lié à une autre commande qui peut souhaiter afficher son propre état d'avancement pendant qu'elle traite les données du paquet entrant. Ce drapeau est comme --progress sauf qu'il force le rapport de progression pour la phase d'écriture même si --stdout est utilisé.
-
---all-progress-implied::
-	C'est utilisé pour impliquer --all-progress lorsque l'affichage de la progression est activé. Contrairement à --all-progress, ce drapeau ne force pas l'affichage de la progression par lui-même.
 
 --version[=<version>]::
 	Spécifier la version du regroupement. La version 2 est l'ancien format et ne peut être utilisée qu'avec les dépôts SHA-1 ; la version 3, plus récente, contient des capacités qui permettent des extensions. La valeur par défaut est le plus ancien format pris en charge, en fonction de l'algorithme de hachage utilisé.

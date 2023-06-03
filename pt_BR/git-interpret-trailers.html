@@ -451,8 +451,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git interpret-trailers</em> [&lt;opções&gt;] [(--trailer &lt;token&gt;[(=|:)&lt;valor&gt;])&#8230;&#8203;] [&lt;arquivo&gt;&#8230;&#8203;]
-<em>git interpret-trailers</em> [&lt;opções&gt;] [--parse] [&lt;arquivo&gt;&#8230;&#8203;]</pre>
+<pre class="content"><em>git interpret-trailers</em> [--in-place] [--trim-empty]
+                        [(--trailer &lt;token&gt;[(=|:)&lt;valor&gt;])&#8230;&#8203;]
+                        [--parse] [&lt;arquivo&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
 </div>
@@ -489,7 +490,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Os caracteres de resposta já existentes são extraídos da mensagem da entrada ao procurar um grupo de uma ou mais linhas onde (i) tenha todos os caracteres de resposta ou (ii) contenha pelo menos um caractere de resposta gerado através do Git ou configurado pelo usuário que consista em pelo menos 25% dos caracteres de resposta. O grupo deve ser precedido por uma ou mais linhas vazias (ou somente com espaço). O grupo deve estar no final da mensagem ou ser as últimas linhas que não sejam espaços antes de uma linha que começa com <em>---</em> (seguida por um espaço ou o quebra da linha). Estes três sinais de menos (-) iniciam a parte do patch da mensagem. Consulte também a opção <code>--no-divider</code> abaixo.</p>
 </div>
 <div class="paragraph">
-<p>Ao ler os caracteres de resposta, podem haver espaços após o token, o separador e o valor. Também pode haver espaços no token e no valor. O valor pode ser dividido em várias linhas, com cada linha subsequente começando com um espaço, como a descrição "folding" (dobra) na norma RFC 822.</p>
+<p>Ao ler os caracteres de resposta, não poderá haver espaço antes ou dentro do token, porém qualquer quantidade de caracteres regulares de espaço e tabulação são permitidos entre o token e o separador. Pode haver espaços antes, dentro ou depois do valor. O valor pode ser dividido em várias linhas com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822.</p>
 </div>
 <div class="paragraph">
 <p>Observe que caracteres de resposta não seguem e não se destinam a seguir muitas regras para os cabeçalhos da norma RFC 822. Por exemplo, eles não seguem as normas de codificação e muito provavelmente não sigam quaisquer outras.</p>
@@ -678,7 +679,7 @@ $ cat msg.txt
 subject
 
 message
-$ cat msg.txt | git interpret-trailers --trailer 'sign: Alice &lt;alice@example.com&gt;' --trailer 'sign: Bob &lt;bob@example.com&gt;'
+$ git interpret-trailers --trailer 'sign: Alice &lt;alice@example.com&gt;' --trailer 'sign: Bob &lt;bob@example.com&gt;' &lt;msg.txt
 subject
 
 mensagem
@@ -723,17 +724,30 @@ $ git interpret-trailers --trailer 'Cc: Alice &lt;alice@example.com&gt;' --trail
 <p>Configure um caractere de resposta <em>sign</em> com um comando para adicionar automaticamente um <em>Assinado-por:</em> com as informações do autor apenas se ainda não houver um <em>Assinado-por:</em> e exiba como ele funciona:</p>
 <div class="listingblock">
 <div class="content">
-<pre>$ git config trailer.sign.key "Assinado-por: "
+<pre>$ cat msg1.txt
+subject
+
+message
+$ git config trailer.sign.key "Signed-off-by: "
 $ git config trailer.sign.ifmissing add
 $ git config trailer.sign.ifexists doNothing
-$ git config trailer.sign.command 'echo "$(git config user.name) &lt;$(git config user.email)&gt;"'
-$ git interpret-trailers &lt;&lt;EOF
-&gt; EOF
+$ git config trailer.sign.cmd 'echo "$(git config user.name) &lt;$(git config user.email)&gt;"'
+$ git interpret-trailers --trailer sign &lt;msg1.txt
+subject
 
-Assinado-por: Bob &lt;bob@example.com&gt;
-$ git interpret-trailers &lt;&lt;EOF
-&gt; Signed-off-by: Alice &lt;alice@example.com&gt;
-&gt; EOF
+mensagem
+
+Signed-off-by: Bob &lt;bob@example.com&gt;
+$ cat msg2.txt
+subject
+
+mensagem
+
+Signed-off-by: Alice &lt;alice@example.com&gt;
+$ git interpret-trailers --trailer sign &lt;msg2.txt
+subject
+
+mensagem
 
 Assinado-por: Alice &lt;alice@example.com&gt;</pre>
 </div>
@@ -759,16 +773,15 @@ Fix #42</pre>
 <pre>$ cat ~/bin/glog-find-author
 #!/bin/sh
 test -n "$1" &amp;&amp; git log --author="$1" --pretty="%an &lt;%ae&gt;" -1 || true
-$ git config trailer.help.key "Auxiliado por: "
+$ cat msg.txt
+subject
+
+message
+$ git config trailer.help.key "Helped-by: "
 $ git config trailer.help.ifExists "addIfDifferentNeighbor"
 $ git config trailer.help.cmd "~/bin/glog-find-author"
-$ git interpret-trailers --trailer="help:Junio" --trailer="help:Couder" &lt;&lt;EOF
-&gt; assunto
-&gt;
-&gt; mensagem
-&gt;
-&gt; EOF
-assunto
+$ git interpret-trailers --trailer="help:Junio" --trailer="help:Couder" &lt;msg.txt
+subject
 
 mensagem
 
@@ -784,16 +797,15 @@ Auxiliado por: Christian Couder &lt;christian.couder@gmail.com&gt;</pre>
 <pre>$ cat ~/bin/glog-grep
 #!/bin/sh
 test -n "$1" &amp;&amp; git log --grep "$1" --pretty=reference -1 || true
-$ git config trailer.ref.key "Referência para: "
-$ git config trailer.ref.ifExists "substitua"
+$ cat msg.txt
+subject
+
+message
+$ git config trailer.ref.key "Reference-to: "
+$ git config trailer.ref.ifExists "replace"
 $ git config trailer.ref.cmd "~/bin/glog-grep"
-$ git interpret-trailers --trailer="ref:Add copyright notices." &lt;&lt;EOF
-&gt; assunto
-&gt;
-&gt; mensagem
-&gt;
-&gt; EOF
-assunto
+$ git interpret-trailers --trailer="ref:Add copyright notices." &lt;msg.txt
+subject
 
 mensagem
 
@@ -805,17 +817,20 @@ Refere-se ao: 8bc9a0c769 (Adicionado avisos de ireitos autorais., 2005-04-07)</p
 <p>Configure um caractere de resposta <em>see</em> com um comando para exibir o assunto de um commit relacionado e exibir como ele funciona:</p>
 <div class="listingblock">
 <div class="content">
-<pre>$ git config trailer.see.key "See-also: "
+<pre>$ cat msg.txt
+subject
+
+mensagem
+
+see: HEAD~2
+$ cat ~/bin/glog-ref
+#!/bin/sh
+git log -1 --oneline --format="%h (%s)" --abbrev-commit --abbrev=14
+$ git config trailer.see.key "See-also: "
 $ git config trailer.see.ifExists "replace"
 $ git config trailer.see.ifMissing "doNothing"
-$ git config trailer.see.command "git log -1 --oneline --format=\"%h (%s)\" --abbrev-commit --abbrev=14 \$ARG"
-$ git interpret-trailers &lt;&lt;EOF
-&gt; subject
-&gt;
-&gt; message
-&gt;
-&gt; see: HEAD~2
-&gt; EOF
+$ git config trailer.see.cmd "glog-ref"
+$ git interpret-trailers --trailer=see &lt;msg.txt
 subject
 
 mensagem
@@ -828,22 +843,21 @@ See-also: fe3187489d69c4 (assunto do commit relacionado)</pre>
 <p>Configure um modelo do commit com alguns caracteres de resposta com valores vazios (utilizando o comando sed para exibir e manter os espaços finais no final dos caracteres de resposta) e configure um gancho <em>commit-msg</em> que utilize o comando <em>git interpret-trailers</em> para remover os caracteres de resposta com os valores vazios e para adicionar um <em>git-version</em>:</p>
 <div class="listingblock">
 <div class="content">
-<pre>$ sed -e 's/ Z$/ /' &gt;commit_template.txt &lt;&lt;EOF
-&gt; ***assunto***
-&gt;
-&gt; ***mensagem***
-&gt;
-&gt; Fixes: Z
-&gt; Cc: Z
-&gt; Revisado-por: Z
-&gt; Assinado-por: Z
-&gt; EOF
+<pre>$ cat temp.txt
+***subject***
+
+***message***
+
+Fixes: Z
+Cc: Z
+Reviewed-by: Z
+Signed-off-by: Z
+$ sed -e 's/ Z$/ /' temp.txt &gt; commit_template.txt
 $ git config commit.template commit_template.txt
-$ cat &gt;.git/hooks/commit-msg &lt;&lt;EOF
-&gt; #!/bin/sh
-&gt; git interpret-trailers --trim-empty --trailer "git-version: \$(git describe)" "\$1" &gt; "\$1.new"
-&gt; mv "\$1.new" "\$1"
-&gt; EOF
+$ cat .git/hooks/commit-msg
+#!/bin/sh
+git interpret-trailers --trim-empty --trailer "git-version: \$(git describe)" "\$1" &gt; "\$1.new"
+mv "\$1.new" "\$1"
 $ chmod +x .git/hooks/commit-msg</pre>
 </div>
 </div>
@@ -871,7 +885,7 @@ $ chmod +x .git/hooks/commit-msg</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 22:00:02 +0200
+Last updated 2023-05-21 19:04:52 +0200
 </div>
 </div>
 </body>

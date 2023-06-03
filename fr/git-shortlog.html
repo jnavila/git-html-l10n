@@ -499,6 +499,10 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 </div>
 </dd>
+<dt class="hdlist1">--date=&lt;format&gt;</dt>
+<dd>
+<p>Affiche les dates formatées en fonction de la chaîne de date donnée. (Voir l&#8217;option <code>--date</code> dans la section "Formatage de commit" de <a href="git-log.html">git-log(1)</a>). Utile avec <code>--group=format:&lt;format&gt;</code>.</p>
+</dd>
 <dt class="hdlist1">--group=&lt;type&gt;</dt>
 <dd>
 <p>Grouper les commits basés sur <code>&lt;type&gt;</code>. Si aucune option <code>--group</code> n&#8217;est spécifiée, la valeur par défaut est <code>author</code>. <code>&lt;type&gt;</code> peut être :</p>
@@ -514,6 +518,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </li>
 <li>
 <p><code>trailer:&lt;field&gt;</code>, Le champ <code>&lt;field&gt;</code> est interprété comme un message de fin de commit sans prise en compte de la casse (voir <a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>). Par exemple, si votre projet utilise des fins de messages <code>Reviewed-by</code>, vous voulez sans doute voir qui a fait des revisions avec <code>git shortlog -ns --group=trailer:reviewed-by</code>.</p>
+</li>
+<li>
+<p><code>format:&lt;format&gt;</code>, toute chaîne acceptée par l&#8217;option <code>--format</code> de <em>git log</em> (voir la section "MISES EN FORME DIFF" de <a href="git-log.html">git-log(1)</a>).</p>
 <div class="paragraph">
 <p>Notez que les commits qui n&#8217;incluent pas de fin de message ne seront pas comptés. De la même façon, les commits avec plusieurs fins de message (par ex., plusieurs approbations) peuvent être comptés plus d&#8217;une fois (mais seulement une fois par valeur unique de fin de message sur ce commit).</p>
 </div>
@@ -584,7 +591,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </dd>
 <dt class="hdlist1">--since-as-filter=&lt;date&gt;</dt>
 <dd>
-<p>Show all commits more recent than a specific date. This visits all commits in the range, rather than stopping at the first commit which is older than a specific date.</p>
+<p>Afficher tous les commits plus récents qu&#8217;une date spécifique. Cela visite tous les commits dans la plage, plutôt que de s&#8217;arrêter au premier commit qui est plus ancien qu&#8217;une date spécifique.</p>
 </dd>
 <dt class="hdlist1">--until=&lt;date&gt;</dt>
 <dt class="hdlist1">--before=&lt;date&gt;</dt>
@@ -702,6 +709,10 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 <div class="paragraph">
 <p>Les motifs donnés ne doivent pas commencer par <code>refs/heads</code>, <code>refs/tags</code>, ou <code>refs/remotes</code> lorsqu&#8217;ils sont appliqués à <code>--branches</code>, <code>--tags</code>, ou <code>--remotes</code>, respectivement, et ils doivent commencer par <code>refs/</code> lorsqu&#8217;ils sont appliqués à <code>--glob</code> ou <code>--all</code>. Si un'/*' final est intentionnel, il doit être donné explicitement.</p>
 </div>
+</dd>
+<dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
+<dd>
+<p>Do not include refs that would be hidden by <code>git-fetch</code>, <code>git-receive-pack</code> or <code>git-upload-pack</code> by consulting the appropriate <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> or <code>uploadpack.hideRefs</code> configuration along with <code>transfer.hideRefs</code> (see <a href="git-config.html">git-config(1)</a>). This option affects the next pseudo-ref option <code>--all</code> or <code>--glob</code> and is cleared after processing them.</p>
 </dd>
 <dt class="hdlist1">--reflog</dt>
 <dd>
@@ -847,9 +858,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 <dd>
 <p>Option supplémentaire à &#8216;--full-history&#8217; pour supprimer certaines fusions inutiles de l&#8217;historique résultant, car il n&#8217;y a pas de commits sélectionnés contribuant à cette fusion.</p>
 </dd>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>Lorsqu&#8217;on lui donne une plage de commits à afficher (par exemple&#8217;commit1..commit2' ou&#8217;commit2 ^commit1'), seuls les commits qui existent directement sur la chaîne des ancêtres entre <em>commit1</em> et <em>commit2</em>, c&#8217;est-à-dire les commits qui sont à la fois descendants de <em>commit1</em> et ancêtres de <em>commit2</em>, sont affichés.</p>
+<p>Lorsque l&#8217;on donne une plage de commits à afficher (par exemple <em>commit1..commit2</em> ou <em>commit2 ^commit1</em>), n&#8217;afficher que les commits de cette plage qui sont des ancêtres de &lt;commit&gt;, des descendants de &lt;commit&gt;, ou &lt;commit&gt; lui-même. Si aucun commit n&#8217;est spécifié, utiliser <em>commit1</em> (la partie exclue de la plage) comme &lt;commit&gt;. Peut être passée plusieurs fois ; si c&#8217;est le cas, un commit est inclus s&#8217;il est l&#8217;un des commits donnés ou s&#8217;il est un ancêtre ou un descendant de l&#8217;un d&#8217;eux.</p>
 </dd>
 </dl>
 </div>
@@ -1039,9 +1050,9 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--ancestry-path</dt>
+<dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>Limiter les commits affichés à ceux qui se trouvent directement sur la chaîne des ancêtres entre les commits "from" et "to" dans la plage de commit donnée. C&#8217;est-à-dire n&#8217;afficher que les commits qui sont l&#8217;ancêtre du commit "to" et les descendants du commit "from".</p>
+<p>Limiter les commits affichés à ceux qui sont un ancêtre de &lt;commit&gt;, ou qui sont un descendant de &lt;commit&gt;, ou sont &lt;commit&gt; lui-même.</p>
 <div class="paragraph">
 <p>À titre d&#8217;exemple, considérons l&#8217;historique de commits suivant :</p>
 </div>
@@ -1067,6 +1078,29 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
                   G---H---I---J
                                \
                                 L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nous pouvons également utiliser <code>--ancestry-path=D</code> au lieu de <code>--ancestry-path</code> qui signifie la même chose lorsqu&#8217;il est appliqué à la plage <em>D..M</em> mais est juste plus explicite.</p>
+</div>
+<div class="paragraph">
+<p>Si nous sommes plutôt intéressés par un sujet donné dans cette plage, et tous les commits affectés par ce sujet, nous pouvons seulement vouloir voir ceux du sous-ensemble de <code>D..M</code> qui contiennent ce sujet dans leur chemin d&#8217;ascendance. Ainsi, en utilisant <code>--ancestry-path=H D..M</code> par exemple, on obtiendrait le résultat suivant :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                E
+                 \
+                  G---H---I---J
+                               \
+                                L--M</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Alors que <code>--ancestry-path=K D...M</code> donnerait comme résultat</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>                K---------------L--M</pre>
 </div>
 </div>
 </dd>
@@ -1208,7 +1242,7 @@ git log --pretty=short | <em>git shortlog</em> [&lt;options&gt;]</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-15 21:59:19 +0200
+Last updated 2023-05-21 19:03:36 +0200
 </div>
 </div>
 </body>
