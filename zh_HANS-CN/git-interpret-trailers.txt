@@ -1,0 +1,337 @@
+git-interpret-trailers(1)
+=========================
+
+名称
+--
+git-interpret-trailers - 添加或解析提交消息中的结构化信息
+
+概述
+--
+[verse]
+'git interpret-trailers' [--in-place] [--trim-empty]
+			[(--trailer <token>[(=|:)<值>])...]
+			[--parse] [<文件>...]
+
+描述
+--
+帮助解析或添加 ‘尾注’ 行，看起来类似于 RFC 822 电子邮件标题，在提交消息的自由格式部分的末尾。
+
+这个命令从 <文件> 参数或标准输入（如果没有指定 <文件>）中读取一些补丁或提交信息。如果指定了 `--parse`，则输出由解析后的预告片组成。
+
+否则，该命令将使用 `--trailer` 选项传递的参数（如果有的话）应用于每个输入文件的提交信息部分。其结果将在标准输出中发出。
+
+一些配置变量可以控制 `--trailer` 参数应用于每条提交信息的方式，以及修改提交信息中任何现有尾注的方式。它们还可以自动添加一些尾注。
+
+默认情况下，使用 `--trailer` 给出的 '<token>=<值>' 或 '<token>:<值>' 参数将被附加到现有的尾注之后，只有当最后一个尾注有不同的（<token>, <值>）对（或者没有现有的尾注）。<token> 和 <值>部分将被修剪，以去除开头和结尾的空白，修剪后的 <token> 和 <值> 将像这样出现在消息中：
+
+------------------------------------------------
+token: value
+------------------------------------------------
+
+这意味着修剪后的 <token> 和 <值> 将被 `': '`（一个冒号，后面是一个空格）分开。
+
+默认情况下，新尾注将出现在所有现有尾注的末尾。如果没有现有的尾注，新的尾注将出现在输出的提交信息部分之后，如果在提交信息部分的末尾没有只有空格的行，在新的尾注之前将增加一个空行。
+
+从输入的信息中提取现有的预告片，方法是寻找一组或多行，(i) 全部是尾注，或(ii)至少包含一个 Git 生成的或用户配置的尾注，并且至少由 25% 的尾注组成。 该组的前面必须有一个或多个空行（或仅有白色空间）。 该组必须位于信息的末尾，或者是以 '---' 开头的一行（后面是空格或行尾）之前的最后几行非空格。这样的三个减号开始了消息的补丁部分。也可参见下面的 `---no-divider`。
+
+读取尾注时，在标记之前或内部不能有空白，但在标记和分隔符之间允许有任何数量的常规空格和制表符。在值的前面、里面或后面都可以有空白。该值可以被分割成多行，每一行都以至少一个空白开始，就像 RFC 822 中的 “折叠”。
+
+请注意，‘尾注’ 不遵循也不打算遵循RFC 822报头的许多规则。例如，它们不遵循编码规则，可能还有许多其他规则。
+
+选项
+--
+--in-place::
+	在原地编辑文件。
+
+--trim-empty::
+	如果任何尾注的 <值> 部分只包含空格，整个尾注将从产生的消息中被删除。 这适用于现有的尾注和新的尾注。
+
+--trailer <令牌>[(=|:)<值>]::
+	指定一个（<token>, <value>）对，应该作为尾注应用到输入信息中。参见此命令的描述。
+
+--where <placement>::
+--no-where::
+	指定所有新尾注的添加位置。 '--where' 提供的设置将覆盖所有配置变量并应用于所有 '--trailer' 选项，直到下一次出现 '--where' 或 '--no-where'。可能的值为 `after`、`before`、`end` 或 `start`。
+
+--if-exists <action>::
+--no-if-exists::
+	指定当消息中已经有至少一个具有相同 <token> 的尾注时，将执行什么。 用 '--if-exists' 提供的设置覆盖了所有的配置变量，并适用于所有 '--trailer ' 选项，直到下一次出现 '--if-exists' 或 '--no-if-exists'。可能的操作有：`addIfDifferent`, `addIfDifferentNeighbor`， `add`， `replace` 和 `doNothing`。
+
+--if-missing <action>::
+--no-if-missing::
+	指定当消息中没有其他具有相同 <token> 的尾注时，将执行什么行为。 用 '--if-missing' 提供的设置覆盖所有的配置变量，并适用于所有的 '--trailer' 选项，直到下次出现 '--if-missing' 或 '--no-if-missing'。可能的操作是 `doNothing` 或 `add`。
+
+--only-trailers::
+	只输出尾注，不输出输入的任何其他部分。
+
+--only-input::
+	只输出输入中存在的尾注；不要从命令行或按照配置的 `trailer.*` 规则添加任何尾注。
+
+--unfold::
+	移除尾注中的任何空格，以便每个尾注都能以其完整的内容出现在一行中。
+
+--parse::
+	`--only-trailers --only-input --unfold` 的别名。
+
+--no-divider::
+	不要把 `---` 当作提交信息的结尾。当你知道你的输入只包含提交信息本身（而不是电子邮件或 `git format-patch` 的输出）时，请使用这个方法。
+
+配置变量
+----
+
+trailer.separators::
+	这个选项告诉我们哪些字符可以被识别为尾注分隔符。默认情况下，只有 ':' 被识别为尾注分隔符，但为了与其他 git 命令兼容，命令行上总是接受 '='。
++
+当这个尾注的配置中没有指定其他分隔符时，这个选项给出的第一个字符将是默认使用的字符。
++
+例如，如果这个选项的值是 "%=$"，那么只有使用 '<token><sep><value>' 格式的行，<sep> 包含 '%'、'=' 或 '$'，然后是空格，才会被视为尾注。而 '%' 将是默认使用的分隔符，所以默认情况下，尾注会出现如下情况： '<token>% <value>' （一个百分号和一个空格将出现在标记和值之间）。
+
+trailer.where::
+	这个选项告诉人们新的尾注将被添加到哪里。
++
+默认是 `end`，也可以是 `start`，`after` 或 `before`。
++
+如果它是 `end`，那么每个新的拖车将出现在现有拖车的末尾。
++
+如果是 `start`，那么每个新尾注将出现在现有尾注的开端，而不是结尾。
++
+如果是 `after`，那么每个新的尾注将出现在具有相同 <token> 的最后一个尾注之后。
++
+如果是 `before`，那么每个新的尾注将出现在具有相同 <token> 的第一个尾注之前。
+
+trailer.ifexists::
+	这个选项可以选择当信息中已经有至少一个具有相同 <token> 的尾注时，将执行什么行为。
++
+这个选项的有效值是： `addIfDifferentNeighbor`（这是默认值），`addIfDifferent`，`add`，`replace` 或 `doNothing`。
++
+使用 `addIfDifferentNeighbor`，只有在没有相同（<token>, <value>）的尾注对在新尾注的上方或下方，才会添加新的尾注。
++
+使用 `addIfDifferent`，只有当信息中没有相同的（<token>, <value>）尾注时，才会添加新的尾注。
++
+使用 `add`，一个新的尾注将被添加，即使一些具有相同（<token>, <value>）对的尾注已经在信息中。
++
+使用 `replace`，一个具有相同 <token> 的现有尾注将被删除，新的尾注将被添加。被删除的尾注将是离新尾注位置最近的一个（具有相同的<token>）。
++
+使用 `doNothing`，将不做任何事情；也就是说，如果消息中已经有一个相同的<token>，将不会再添加新的尾注。
+
+trailer.ifmissing::
+	这个选项使我们有可能选择当信息中还没有任何具有相同 <token> 的尾注时，将执行什么行为。
++
+这个选项的有效值是： `add`（这是默认值）和 `doNothing`。
++
+使用 `add`，一个新的尾注将被添加。
++
+有了 `doNothing`，就不会有任何事情发生。
+
+trailer.<token>.key::
+	这个 `key` 将被用来代替尾注中的 <token>。在这个键的末端，可以出现一个分隔符，然后是一些空格字符。默认情况下，唯一有效的分隔符是 ':'，但这可以通过 `trailer.separators` 配置变量来改变。
++
+如果有一个分隔符，那么在添加尾注时，将使用该键而不是 <token> 和默认的分隔符。
+
+trailer.<token>.where::
+	这个选项与 'trailer.where' 配置变量的取值相同，对于指定 <token> 的尾注，它覆盖了该选项所指定的内容。
+
+trailer.<token>.ifexists::
+	这个选项与 'trailer.ifexists' 配置变量的取值相同，对于具有指定 <token> 的尾注，它覆盖了该选项所指定的内容。
+
+trailer.<token>.ifmissing::
+	这个选项与'trailer.ifmissing' 配置变量的取值相同，对于指定 <token> 的尾注，它覆盖该选项所指定的内容。
+
+trailer.<token>.command::
+	这个选项的作用与 'trailer.<token>.cmd' 相同，只是它不把任何东西作为参数传递给指定命令。 相反，子串 $ARG 的第一次出现会被作为参数传递的值所取代。
++
+'trailer.<token>.command' 选项已被弃用，改为 'trailer.<token>.cmd'，原因是用户命令中的 $ARG 只被替换一次，而且原来替换 $ARG 的方式并不安全。
++
+当'trailer.<token>.cmd' 和 'trailer.<token>.command' 都是针对同一个 <token> 给出的时候，使用 'trailer.<token>.cmd'，'trailer.<token>.command' 被忽略。
+
+trailer.<token>.cmd::
+	这个选项可以用来指定一个将被调用的shell 命令：一次自动添加一个指定的 <token> 的尾注，然后每次用 '--trailer <token>=<value>' 参数来修改这个选项将产生的尾注的 <value>。
++
+当第一次调用指定的命令来添加带有指定 <token> 的尾注时，其行为就像在 "git interpret-trailers" 命令的开头添加了一个特殊的 '-trailer <token>=<value>' 参 数，其中 <value> 被认为是该命令的标准输出，其前面和后面的空白被修剪掉。
++
+如果在命令行中还传递了一些 '--trailer <token>=<value>' 参数，那么对于这些参数中的每一个，都会以相同的 <token> 再次调用该命令。而这些参数的 <value>部分，如果有的话，将作为第一个参数传递给命令。这样，命令可以产生一个从 '--trailer <token>=<value>' 参数中传递的 <value> 计算出来的 <value>。
+
+实例
+--
+
+* 配置一个带有 'Signed-off-by' 密钥的 'sign' 尾注，然后在一封邮件中添加两个这样的尾注：
++
+------------
+$ git config trailer.sign.key "Signed-off-by"
+$ cat msg.txt
+subject
+
+message
+$ git interpret-trailers --trailer 'sign: Alice <alice@example.com>' --trailer 'sign: Bob <bob@example.com>' <msg.txt
+subject
+
+message
+
+Signed-off-by: Alice <alice@example.com>
+Signed-off-by: Bob <bob@example.com>
+------------
+
+* 使用 `--in-place` 选项来就地编辑一个信息文件：
++
+------------
+$ cat msg.txt
+subject
+
+message
+
+Signed-off-by: Bob <bob@example.com>
+$ git interpret-trailers --trailer 'Acked-by: Alice <alice@example.com>' --in-place msg.txt
+$ cat msg.txt
+subject
+
+message
+
+Signed-off-by: Bob <bob@example.com>
+Acked-by: Alice <alice@example.com>
+------------
+
+* 将最后一次提交的内容提取为补丁，并在其中加入 'Cc' 和 'Reviewed-by' 尾注：
++
+------------
+$ git format-patch -1
+0001-foo.patch
+$ git interpret-trailers --trailer 'Cc: Alice <alice@example.com>' --trailer 'Reviewed-by: Bob <bob@example.com>' 0001-foo.patch >0001-bar.patch
+------------
+
+* 配置一个带有命令的 'sign' 拖车，只有在没有 'Signed-off-by: ' 的情况下，才会自动添加带有作者信息的 'Signed-off-by: ' ，以下展示它是如何工作的：
++
+------------
+$ cat msg1.txt
+subject
+
+message
+$ git config trailer.sign.key "Signed-off-by: "
+$ git config trailer.sign.ifmissing add
+$ git config trailer.sign.ifexists doNothing
+$ git config trailer.sign.cmd 'echo "$(git config user.name) <$(git config user.email)>"'
+$ git interpret-trailers --trailer sign <msg1.txt
+subject
+
+message
+
+Signed-off-by: Bob <bob@example.com>
+$ cat msg2.txt
+subject
+
+message
+
+Signed-off-by: Alice <alice@example.com>
+$ git interpret-trailers --trailer sign <msg2.txt
+subject
+
+message
+
+Signed-off-by: Alice <alice@example.com>
+------------
+
+* 配置一个 'fix' 尾注，其关键是包含一个 '#'，并且这个字符后面没有空格，以下展示它是如何工作的：
++
+------------
+$ git config trailer.separators ":#"
+$ git config trailer.fix.key "Fix #"
+$ echo "subject" | git interpret-trailers --trailer fix=42
+subject
+
+Fix #42
+------------
+
+* 在 cmd 中使用脚本 `glog-find-author` 配置一个 'help' 尾注，从 git 仓库的 git日志中搜索指定的作者身份，以下展示它是如何工作的：
++
+------------
+$ cat ~/bin/glog-find-author
+#!/bin/sh
+test -n "$1" && git log --author="$1" --pretty="%an <%ae>" -1 || true
+$ cat msg.txt
+subject
+
+message
+$ git config trailer.help.key "Helped-by: "
+$ git config trailer.help.ifExists "addIfDifferentNeighbor"
+$ git config trailer.help.cmd "~/bin/glog-find-author"
+$ git interpret-trailers --trailer="help:Junio" --trailer="help:Couder" <msg.txt
+subject
+
+message
+
+Helped-by: Junio C Hamano <gitster@pobox.com>
+Helped-by: Christian Couder <christian.couder@gmail.com>
+------------
+
+* 在 cmd 中用脚本 `glog-grep` 从git仓库的git日志中搜索最后一次相关的提交并配置一个 'ref' 尾注，以下展示它是如何工作的：
++
+------------
+$ cat ~/bin/glog-grep
+#!/bin/sh
+test -n "$1" && git log --grep "$1" --pretty=reference -1 || true
+$ cat msg.txt
+subject
+
+message
+$ git config trailer.ref.key "Reference-to: "
+$ git config trailer.ref.ifExists "replace"
+$ git config trailer.ref.cmd "~/bin/glog-grep"
+$ git interpret-trailers --trailer="ref:Add copyright notices." <msg.txt
+subject
+
+message
+
+Reference-to: 8bc9a0c769 (Add copyright notices., 2005-04-07)
+------------
+
+* 配置一个带有命令的 'see' 尾注，以显示相关提交的主题，以下展示它是如何工作的：
++
+------------
+$ cat msg.txt
+subject
+
+message
+
+see: HEAD~2
+$ cat ~/bin/glog-ref
+#!/bin/sh
+git log -1 --oneline --format="%h (%s)" --abbrev-commit --abbrev=14
+$ git config trailer.see.key "See-also: "
+$ git config trailer.see.ifExists "replace"
+$ git config trailer.see.ifMissing "doNothing"
+$ git config trailer.see.cmd "glog-ref"
+$ git interpret-trailers --trailer=see <msg.txt
+subject
+
+message
+
+See-also: fe3187489d69c4 (subject of related commit)
+------------
+
+* 配置一个带有一些空尾注的提交模板（使用 sed 来显示并保留尾注末尾的空格），然后配置一个 commit-msg 钩子，使用 'git interpret-trailers' 来移除空值尾注，并添加一个 'git-version' 尾注：
++
+------------
+$ cat temp.txt
+***subject***
+
+***message***
+
+Fixes: Z
+Cc: Z
+Reviewed-by: Z
+Signed-off-by: Z
+$ sed -e 's/ Z$/ /' temp.txt > commit_template.txt
+$ git config commit.template commit_template.txt
+$ cat .git/hooks/commit-msg
+#!/bin/sh
+git interpret-trailers --trim-empty --trailer "git-version: \$(git describe)" "\$1" > "\$1.new"
+mv "\$1.new" "\$1"
+$ chmod +x .git/hooks/commit-msg
+------------
+
+参见
+--
+linkgit:git-commit[1], linkgit:git-format-patch[1], linkgit:git-config[1]
+
+GIT
+---
+属于 linkgit:git[1] 文档

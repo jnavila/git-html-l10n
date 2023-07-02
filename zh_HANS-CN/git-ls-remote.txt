@@ -1,0 +1,90 @@
+git-ls-remote(1)
+================
+
+名称
+--
+git-ls-remote - List references in a remote repository
+
+
+概述
+--
+[verse]
+'git ls-remote' [--heads] [--tags] [--refs] [--upload-pack=<exec>]
+	      [-q | --quiet] [--exit-code] [--get-url] [--sort=<key>]
+	      [--symref] [<repository> [<patterns>...]]
+
+描述
+--
+显示远程版本库中可用的引用以及相关的提交 ID。
+
+
+选项
+--
+-h::
+--heads::
+-t::
+--tags::
+	分别限制在 refs/heads 和 refs/tags。 这些选项不是相互排斥的；当两个选项都给出时，存储在 refs/heads 和 refs/tags 中的引用会被显示。 注意，`git ls-remote -h` 在命令行中不使用任何其他东西，就会提供帮助，与其他 git 子命令一致。
+
+--refs::
+	在输出中不显示剥离的标签或像 `HEAD` 这样的伪引用。
+
+-q::
+--quiet::
+	不将远程 URL 打印到标准错误流。
+
+--upload-pack=<exec>::
+	指定远程主机上 'git-upload-pack' 的完整路径。这允许列出通过 SSH 访问的存储库的引用，而且 SSH 守护程序不使用用户配置的 PATH。
+
+--exit-code::
+	当在远程版本库中没有找到匹配的引用时，以状态 "2" 退出。通常该命令以状态 "0" 退出，表示它成功地与远程版本库进行了对话，无论是否找到了匹配的引用。
+
+--get-url::
+	考虑任何 "url.<base>.insteadOf" 的配置设置（见linkgit:git-config[1]），展开给定的远程仓库的URL，然后退出，不与远程对话。
+
+--symref::
+	除了它所指向的对象之外，在显示一个符号引用时，还要显示它所指向的底层引用。 目前，upload-pack 只显示符号引用HEAD，所以它将是 ls-remote 显示的唯一对象。
+
+--排序=<键>::
+	根据给定的键进行排序。前缀 `-` 以数值的降序来排序。支持 "version:refname" 或 "v:refname"（标签名被视为版本）。"version:refname" 的排序顺序也可以由 "versionort.suffix" 配置的变量影响。 见 linkgit:git-for-each-ref[1] 以获得更多的排序选项，但要注意像 `committerdate` 这样需要访问对象本身的键，对对象尚未从远程获取的引用不起作用，并会出现 `missing object` 的错误。
+
+-o <选项>::
+--server-option=<选项>::
+	当使用协议版本2进行通信时，将给定的字符串传输给服务器。 给定的字符串不能包含 NUL 或 LF 字符。 当给出多个 `--server-option=<option>` 时，它们将按照命令行中列出的顺序全部发送给对方。
+
+<repository>::
+	要查询的 "远程" 版本库。 这个参数可以是一个 URL，也可以是一个远程的名称（见 linkgit:git-fetch[1] 的 GIT URLS 和远端部分）。
+
+<patterns>...::
+	当未指定时，在用 --heads 和 --tags 过滤后，所有引用都会被显示。 当 <patterns>... 被指定时，只显示匹配一个或多个给定模式的引用。每个模式都被解释为一个 glob（见 linkgit:gitglossary[7] 中的 `glob`），它与引用的 "尾巴" 相匹配，从引用的开头开始（所以像 `refs/heads/foo` 这样的全名匹配）或者从斜线分隔符开始（所以 `bar` 匹配 `refs/heads/bar`，而不是 `refs/heads/foobar`）。
+
+实例
+--
+
+----
+$ git ls-remote --tags .
+d6602ec5194c87b0fc87103ca4d67251c76f233a	refs/tags/v0.99
+f25a265a342aed6041ab0cc484224d9ca54b6f41	refs/tags/v0.99.1
+7ceca275d047c90c0c7d5afb13ab97efdf51bd6e	refs/tags/v0.99.3
+c5db5456ae3b0873fc659c19fafdde22313cc441	refs/tags/v0.99.2
+0918385dbd9656cab0d1d81ba7453d49bbc16250	refs/tags/junio-gpg-pub
+
+$ git ls-remote http://www.kernel.org/pub/scm/git/git.git master seen rc
+5fe978a5381f1fbad26a80e682ddd2a401966740	refs/heads/master
+c781a84b5204fb294c9ccc79f8b3baceeb32c061	refs/heads/seen
+
+$ git remote add korg http://www.kernel.org/pub/scm/git/git.git
+$ git ls-remote --tags korg v\*
+d6602ec5194c87b0fc87103ca4d67251c76f233a	refs/tags/v0.99
+f25a265a342aed6041ab0cc484224d9ca54b6f41	refs/tags/v0.99.1
+c5db5456ae3b0873fc659c19fafdde22313cc441	refs/tags/v0.99.2
+7ceca275d047c90c0c7d5afb13ab97efdf51bd6e	refs/tags/v0.99.3
+----
+
+参见
+--
+linkgit:git-check-ref-format[1].
+
+GIT
+---
+属于 linkgit:git[1] 文档

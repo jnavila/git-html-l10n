@@ -1,0 +1,154 @@
+Formato de salida bruta
+-----------------------
+
+El formato de la salida bruta de "git-diff-index", "git-diff-tree", "git-diff-files" y "git diff --raw" son muy similares.
+
+Todos estos comandos comparan dos conjuntos de cosas; lo que se compara difiere:
+
+git-diff-index <arbol-ismo>::
+        compara el <arbol-ismo> y los ficheros en el sistema de ficheros.
+
+git-diff-index --cached <arbol-ismo>::
+        compara el <arbol-ismo> y el índice.
+
+git-diff-tree [-r] <arbol-ismo-1> <arbol-ismo-2> [<patron>...]::
+        compara los árboles nombrados en los dos argumentos.
+
+git-diff-files [<patrón>...]::
+        compara el índice y los ficheros en el sistema de ficheros.
+
+El comando "git-diff-tree" comienza su salida imprimiendo el hash de los que se compara. Después de eso, todos los comandos imprimen una línea de salida por fichero modificado.
+
+Un línea de salida se formatea así:
+
+------------------------------------------------
+in-place edit  :100644 100644 bcd1234 0123456 M fichero0
+copy-edit      :100644 100644 abcd123 1234567 C68 fichero1 fichero2
+rename-edit    :100644 100644 abcd123 1234567 R86 fichero1 fichero3
+create         :000000 100644 0000000 1234567 A fichero4
+delete         :100644 000000 1234567 0000000 D fichero5
+unmerged       :000000 000000 0000000 0000000 U fichero6
+------------------------------------------------
+
+Esto es, de izquierda a derecha:
+
+. dos puntos.
+. modo para "src"; 000000 si es creación o sin fusionar.
+. un espacio.
+. modo para "dst"; 000000 si se borra o sin fusionar.
+. un espacio.
+. sha1 para "src"; 0\{40\} si es creación o sin fusionar.
+. un espacio.
+. sha1 para "dst"; 0\{40\} si es borrado o sin fusionar o "árbol de trabajo está desincronizado con el índice".
+. un espacio.
+. estatus, seguido de número opcional "puntaje".
+. un tabulador o un NUL cuando se usa la opción `-z`.
+. ruta a "src"
+. un tabulador o un NUL cuando se usa la opción `-z`; sólo existe para C o R.
+. ruta a "dst"; sólo existe para C o R.
+. un LF o un NUL cuando se usa la opción `-z`, para terminar el registro.
+
+Las letras de estatus posibles son:
+
+- A: adición de un fichero
+- C: copia de un fichero en uno nuevo
+- D: borrado de un fichero
+- M: modificación del contenido o modo de un fichero
+- R: renombrado de un fichero
+- T: cambio en el tipo de un fichero (fichero regular, liga simbólica o sub-módulo)
+- U: fichero sin fusionar (tú debes completar la fusión antes de que se pueda encomendar)
+- X: tipo de cambio "desconocido" (muy probablemente un bug, por favor repórtalo)
+
+Las letras de estatus C y R siempre son seguidas de un puntaje (denotando el porcentaje de similaridad entre la fuente y el objetivo del movimiento o copia). La letra de estatus M puede ser seguida de un puntaje (denotando el porcentaje de disimilaridad) en re-escrituras de ficheros.
+
+El sha1 para "dst" se muestra como puros 0's si un fichero en el sistema de ficheros esta desincronizado con el índice.
+
+Ejemplo:
+
+------------------------------------------------
+:100644 100644 5be4a4a 0000000 M fichero.c
+------------------------------------------------
+
+Sin la opción `-z`, los nombres de rutas con caracteres "inusuales" son entrecomillados como se explica para la variable de configuración `core.quotePath` (ver linkgit:git-config[1]). Usando `-z` el nombre del fichero se manda a la salida literalmente y la línea se termina con un byte NUL.
+
+Formatos de diff para fusiones
+------------------------------
+
+"git-diff-tree", "git-diff-files" y "git-diff --raw" pueden tomar las opciones `-c` o `--cc` para generar salidas de diff también para commits de fusión. La salida difiere del formato descrito anteriormente de la manera siguiente:
+
+. hay un dos puntos por cada antecesor
+. hay mas modos "src" y sha1 de "src"
+. estatus es la concatenación de caracteres de estatus de cada antecesor
+. sin numero de "puntaje" opcional
+. nombre(s) de ruta(s) del fichero separadas por tabulador
+
+Para `-c` y `--cc`, sólo la ruta destino o final es mostrada incluso si el fichero fue renombrado en cualquier lado del historial. Con `--combined-all-paths`, se muestra el nombre de la ruta en cada antecesor seguido del nombre de la ruta en el commit de fusión.
+
+Ejemplos para `-c` and `--cc` sin `--combined-all-paths`:
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	phooey.c
+------------------------------------------------
+
+Ejemplos cuando se agrega `--combined-all-paths` a `-c` o `--cc`:
+
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c	desc.c	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	foo.sh	bar.sh	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	fooey.c	fuey.c	phooey.c
+------------------------------------------------
+
+Nótese que 'combined diffs' lista sólo ficheros que fueron modificados de todos sus padres.
+
+
+include::diff-generate-patch.txt[]
+
+
+otros formatos diff
+-------------------
+
+La opción `--summary` describe ficheros recientemente agregados, eliminados, renombrados y copiados. La opción `--stat` agrega el grafo de diffstat(1) a la salida. Estas opciones pueden ser combinadas con otras, como `-p`, y su intención es para consumo humano.
+
+Cuando se muestra un cambio que involucra un renombrado o copia, la salida con `--stat` formatea compactamente los nombres de las rutas combinando prefijos y sufijos comunes de los nombres de ruta. Por ejemplo, un cambio que mueve `arch/i386/Makefile` a `arch/x86/Makefile` cuando se modifican 4 líneas se verá como:
+
+------------------------------------
+arch/{i386 => x86}/Makefile    |   4 +--
+------------------------------------
+
+La opción `--numstat` da la información de diffstat(1), pero esta diseñada para un fácil consumo por máquina. Una entrada en la salida de `--numstat` se ve así:
+
+----------------------------------------
+1	2	LEEME
+3	1	arch/{i386 => x86}/Makefile
+----------------------------------------
+
+Esto es, de izquierda a derecha:
+
+. el número de líneas añadidas;
+. un tabulador;
+. el número de líneas eliminadas;
+. un tabulador;
+. nombre de ruta (posiblemente con información de renombre/copia);
+. un salto de línea.
+
+Cuando la opción de salida `-z` está en efecto, la salida se formatea así:
+
+----------------------------------------
+1	2	LEEME NUL
+3	1	NUL arch/i386/Makefile NUL arch/x86/Makefile NUL
+----------------------------------------
+
+Esto es:
+
+. el número de líneas añadidas;
+. un tabulador;
+. el número de líneas eliminadas;
+. un tabulador;
+. un NUL (sólo existe si renombrado/copiado);
+. nombre de ruta en pre-imagen;
+. un NUL (sólo existe si renombrado/copiado);
+. nombre de ruta en post-imagen (sólo existe si renombrado/copiado);
+. un NUL.
+
+El `NUL` extra antes de la ruta de pre-imagen en caso de renombrado es para permitir a los scripts que leen la salida decir si el registro actual leído es un registro de una sola ruta o un registro de renombre/copia sin lectura posterior. Después de leer las líneas agregadas y eliminadas, leer hasta `NUL` dará el nombre de ruta , pero si es `NUL`, el registro mostrará dos rutas.
