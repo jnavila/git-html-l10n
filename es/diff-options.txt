@@ -197,7 +197,7 @@ Ejemplo: El siguiente contará ficheros modificados, ignorando directorios con m
 	Sinónimo de --dirstat=cumulative
 
 --dirstat-by-file[=<parámetro1,parámetro2>...]::
-	Sinónimo de --dirstat=archivos,parám1,parám2...
+	Sinónimo de --dirstat=ficheros,parám1,parám2...
 
 --summary::
 	Muestra un resumen condensado de información de encabezado extendido como creaciones, renombrados y cambios de modo.
@@ -369,22 +369,22 @@ ifdef::git-log[]
 	Para seguir ficheros a través de los cambios de nombre en el historial, ver
 	`--follow`.
 endif::git-log[]
-	If `n` is specified, it is a threshold on the similarity
-	index (i.e. amount of addition/deletions compared to the
-	file's size). For example, `-M90%` means Git should consider a
-	delete/add pair to be a rename if more than 90% of the file
-	hasn't changed.  Without a `%` sign, the number is to be read as
-	a fraction, with a decimal point before it.  I.e., `-M5` becomes
-	0.5, and is thus the same as `-M50%`.  Similarly, `-M05` is
-	the same as `-M5%`.  To limit detection to exact renames, use
-	`-M100%`.  The default similarity index is 50%.
+	Si se especifica `n`, es un límite sobre el índice de semejanza
+	(ej. la cantidad de adiciones/eliminaciones comparadas con
+	el tamaño del fichero). Por ejemplo, `-M90%` significa que Git
+	debe considerar un par eliminación/adición como un renombramiento
+	si mas del 90% del fichero no ha cambiado. Sin el signo `%`, el número
+	se leerá como una fraccion, con un punto decimal antes de él. Ej., `-M5`
+	será 0.5, que por lo tanto es lo mismo que `-M50%`. Similarmente, `-M05` es
+	lo mismo que `-M5%`. Para limitar la detección a renombramientos exactos,
+	use `-M100%`. El índice de semejanza predeterminado es 50%.
 
 -C[<n>]::
 --find-copies[=<n>]::
-	Detect copies as well as renames. See also `--find-copies-harder`. If `n` is specified, it has the same meaning as for `-M<n>`.
+	Detecta tanto copias como renombramientos. Ver también `--find-copies-harder`. Si se especifica `n`, tiene el mismo significado que `-M<n>`.
 
 --find-copies-harder::
-	For performance reasons, by default, `-C` option finds copies only if the original file of the copy was modified in the same changeset. This flag makes the command inspect unmodified files as candidates for the source of copy. This is a very expensive operation for large projects, so use it with caution. Giving more than one `-C` option has the same effect.
+	Por razones de desempeño, predeterminadamente, la opción `-C` busca copias sólo si el fichero original de la copia fue modificado en el mismo conjunto de cambios. Esta bandera hace que el comando inspeccione ficheros sin modificar como candidatos a fuente de copia. Esta es una operación muy costosa para proyectos grandes, así que usarla con precaución. Dar más de una opción `-C` tiene el mismo efecto.
 
 -D::
 --irreversible-delete::
@@ -404,16 +404,16 @@ Also, these upper-case letters can be downcased to exclude. E.g. `--diff-filter=
 Note that not all diffs can feature all types. For instance, copied and renamed entries cannot appear if detection for those types is disabled.
 
 -S<cadena>::
-	Look for differences that change the number of occurrences of the specified string (i.e. addition/deletion) in a file. Intended for the scripter's use.
+	Busca diferencias que cambian el número de ocurrencias de la cadena especificada (ej. adición/eliminación) en un fichero. Destinada para el uso de creadores de scripts.
 +
-It is useful when you're looking for an exact block of code (like a struct), and want to know the history of that block since it first came into being: use the feature iteratively to feed the interesting block in the preimage back into `-S`, and keep going until you get the very first version of the block.
+Es útil cuando buscas un bloque exacto de código (como un struct), y quieres conocer el historial de ese bloque desde la primera vez que entró en existencia: use la característica iterativamente para alimentar el bloque de interés de vuelta a la preimagen `-S`, y seguir hasta que obtengas la primera versión del bloque.
 +
-Binary files are searched as well.
+También se buscan ficheros binarios.
 
 -G<expresión regular>::
-	Look for differences whose patch text contains added/removed lines that match <regex>.
+	Busca diferencias cuyo texto de parche contenga líneas agregadas/quitadas que coincidan <expresión-regular>.
 +
-To illustrate the difference between `-S<regex> --pickaxe-regex` and `-G<regex>`, consider a commit with the following diff in the same file:
+Para ilustrar la diferencia entre `-S<expresión-regular> --pickaxe-regex` y `-G<expresión-regular>`, considere un commit con el diff siguiente en el mismo fichero:
 +
 ----
 +    return frotz(nitfol, two->ptr, 1, 0);
@@ -421,22 +421,22 @@ To illustrate the difference between `-S<regex> --pickaxe-regex` and `-G<regex>`
 -    hit = frotz(nitfol, mf2.ptr, 1, 0);
 ----
 +
-While `git log -G"frotz\(nitfol"` will show this commit, `git log -S"frotz\(nitfol" --pickaxe-regex` will not (because the number of occurrences of that string did not change).
+Mientras `git log -G"frotz\(nitfol"` mostrará éste commit, `git log -S"frotz\(nitfol" --pickaxe-regex` no lo hará (porque el número de ocurrencias de esa cadena no cambió).
 +
-Unless `--text` is supplied patches of binary files without a textconv filter will be ignored.
+A menos que se proporcione `--text`, parches de ficheros binarios sin un filtro de conversión de texto serán ignorados.
 +
-See the 'pickaxe' entry in linkgit:gitdiffcore[7] for more information.
+Ver la entrada 'pickaxe' en linkgit:gitdiffcore[7] para mas información.
 
 --find-object=<id-de-objeto>::
-	Look for differences that change the number of occurrences of the specified object. Similar to `-S`, just the argument is different in that it doesn't search for a specific string but for a specific object id.
+	Busca diferencias que cambien el número de ocurrencias del objeto especificado. Similar a `-S`, solo que el argumento es diferente en que no busca una cadena específica, sino un identificador de objeto específico.
 +
-The object can be a blob or a submodule commit. It implies the `-t` option in `git-log` to also find trees.
+El objeto puede ser un blob o un commit de submódulo. Implica la opción `-t` en `git-log` para también buscar árboles.
 
 --pickaxe-all::
-	When `-S` or `-G` finds a change, show all the changes in that changeset, not just the files that contain the change in <string>.
+	Cuando `-S` o `-G` encuentra un cambio, muestra todos los cambios en ese conjunto de cambios, no sólo los ficheros que contienen el cambio en <cadena>.
 
 --pickaxe-regex::
-	Treat the <string> given to `-S` as an extended POSIX regular expression to match.
+	Trata la <cadena> dada en `-S` como una expresión regular extendida de POSIX para coincidir.
 
 endif::git-format-patch[]
 
@@ -472,7 +472,7 @@ endif::git-format-patch[]
 
 -a::
 --text::
-	Tratar todos los archivos como si fueran de texto.
+	Tratar todos los ficheros como si fueran de texto.
 
 --ignore-cr-at-eol::
 	Ignore carriage-return at the end of line when doing a comparison.
