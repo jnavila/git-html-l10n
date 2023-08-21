@@ -9,12 +9,12 @@ git-worktree - Gerencie as várias árvores de trabalho
 RESUMO
 ------
 [verse]
-'git worktree add' [-f] [--detach] [--checkout] [--lock [--reason <texto>]]
-		   [-b <novo-ramo>] <caminho> [<commit-ish>]
+'git worktree add' [-f] [--detach] [--checkout] [--lock [--reason <string>]]
+		   [--orphan] [(-b | -B) <novo-ramo>] <caminho> [<commit-ish>]
 'git worktree list' [-v | --porcelain [-z]]
-'git worktree lock' [--reason <texto>] <árvore-de-trabalho>
-'git worktree move' <árvore-de-trabalho> <novo-caminho>
-'git worktree prune' [-n] [-v] [--expire <expiração>]
+'git worktree lock' [--reason <string>] <árvore-de-trabalho>
+'git worktree move' <worktree> <novo-caminho>
+'git worktree prune' [-n] [-v] [--expire <expira>]
 'git worktree remove' [-f] <árvore-de-trabalho>
 'git worktree repair' [<caminho>...]
 'git worktree unlock' <árvore-de-trabalho>
@@ -49,6 +49,8 @@ $ git worktree add --track -b <ramo> <caminho> <remoto>/<ramo>
 Caso o ramo exista em diversos ramos remotos e um deles seja nomeado pela variável de configuração `checkout.defaultRemote`, para propósitos de desambiguação, mesmo que `<ramo>` não seja o único em todos os outros ramos remotos. Defina por exemplo, `checkout.defaultRemote=origin` para que sempre verifique as ramificações remotas de lá caso `<ramo>` seja ambíguo e ainda assim `origin` exista. Consulte também `checkout.defaultRemote` em linkgit:git-config[1].
 +
 Caso o `<commit-ish>` seja omitido e nem a opção `-b`, `-B` ou `--detach` sejam utilizados, então, por conveniência, a nova árvore de trabalho será associada com um ramo (chame-o de `<ramo>`) nomeado após `$(basename <caminho>)`. Caso o `<ramo>` não exista, um novo ramo com base no `HEAD` será criado automaticamente como se a opção `-b <ramo>` fosse usado. Caso o `<ramo>` exista, ele será averiguado na nova árvore de trabalho, se não tiver sido averiguado em nenhum outro lugar, caso contrário, o comando se recusará a criar a árvore de trabalho (a menos que `--force` seja utilizado).
++
+Se `<commit-ish>` for omitido ou se nenhuma das opções `--detach` ou `--orphan` forem usados e não houver ramificações locais válidas (ou ramificações remotas especificadas via `--guess-remote`), então, por conveniência, a nova árvore de trabalho será associada a uma nova ramificação órfã denominada `<ramo>` (após o `$(basename <path>)` se nem `-b` ou `-B` forem usados) como se `--orphan` tivesse sido passado para o comando. Caso o repositório tenha um ramo remoto e `--guess-remote` seja usado, e não existam ramificações remotas ou locais, o comando falhará com um aviso lembrando o usuário para buscar primeiro no ramo remoto (ou substituir usando `-f/--force`).
 
 list::
 
@@ -120,6 +122,9 @@ Isso também pode ser definido como um comportamento predefinido ao usar a opç�
 -n::
 --dry-run::
 	Com `prune`, não remove nada; apenas relate o que seria removido.
+
+--orphan::
+	Com `add`, torne a nova árvore de trabalho e o índice vazio associando a árvore de trabalho a um novo ramo órfão/não nascido chamado `<novo-ramo>`.
 
 --porcelain::
 	Com `list` gere um formato para fácil análise dos scripts. Este formato permanecerá estável em todas as versões Git independentemente da configuração do usuário. É recomendado que seja usado em conjunto com a opção `-z`. Veja abaixo os detalhes.

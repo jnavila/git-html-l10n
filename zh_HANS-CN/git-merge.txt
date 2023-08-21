@@ -121,8 +121,9 @@ include::rerere-options.txt[]
 1. `HEAD`的指针保持不变。
 2. `MERGE_HEAD`参数被设置为指向另一个分支头部。
 3. 合并干净的路径在索引文件和你的工作区中都更新了。
-4. 对于冲突的路径，索引文件最多记录三个版本：第1阶段存储来自共同祖先的版本，第2阶段来自`HEAD`，第3阶段来自`MERGE_HEAD`（你可以用`git ls-files -u`检查这些阶段）。 工作区文件包含了"合并"程序的结果；即带有熟悉的冲突标记`<<<` `===``>>>`的三方合并结果。
-5. 没有其他变化。 特别是，你在开始合并之前的本地修改将保持不变，它们的索引条目保持原样，即匹配`HEAD`。
+4. For conflicting paths, the index file records up to three versions: stage 1 stores the version from the common ancestor, stage 2 from `HEAD`, and stage 3 from `MERGE_HEAD` (you can inspect the stages with `git ls-files -u`). The working tree files contain the result of the merge operation; i.e. 3-way merge results with familiar conflict markers `<<<` `===` `>>>`.
+5. 会写入一个特殊的 `AUTO_MERGE` 引用，指向一个与当前工作区内容（包括文本冲突的冲突标记）相对应的目录树。 请注意，只有在使用 'ort' 合并策略（默认）时，才会写入这个引用。
+6. 没有其他变化。 特别是，你在开始合并之前的本地修改将保持不变，它们的索引条目保持原样，即匹配`HEAD`。
 
 如果你尝试的合并导致了复杂的冲突，并想重新开始，你可以用`git merge --abort`恢复。
 
@@ -219,7 +220,7 @@ And here is another line that is cleanly resolved or unmodified.
 
  * 使用一个mergetool。 `git mergetool`启动一个图形化的mergetool，它将帮助你完成合并工作。
 
- * 查看差异。`git diff`将会显示一个三向差异，突出显示从`HEAD`和`MERGE_HEAD`版本的变化。
+ * Look at the diffs. `git diff` will show a three-way diff, highlighting changes from both the `HEAD` and `MERGE_HEAD` versions. `git diff AUTO_MERGE` will show what changes you've made so far to resolve textual conflicts.
 
  * 看看每个分支的差异。`git log --merge -p <路径>`将首先显示`HEAD`版本的差异，然后是`MERGE_HEAD`版本。
 

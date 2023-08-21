@@ -54,11 +54,13 @@ status [--cached] [--recursive] [--] [<路径>...]::
 如果你只对当前初始化的子模块相对于索引或 HEAD 中记录的提交的变化感兴趣，linkgit:git-status[1] 和 linkgit:git-diff[1] 也会提供这些信息（也可以报告一个子模块工作目录的变化）。
 
 init [--] [<路径>...]::
-	通过在 .git/config 中设置 `submodule.$name.url` 来初始化索引中记录的子模块（这些子模块在其他地方被添加和提交）。它使用来自 `.gitmodules` 的相同设置作为模板。如果 URL 是相对的，它将使用默认的远程进行解析。如果没有默认的远程，当前的仓库将被假定为上游仓库。
+	Initialize the submodules recorded in the index (which were added and committed elsewhere) by setting `submodule.$name.url` in `.git/config`, using the same setting from `.gitmodules` as a template. If the URL is relative, it will be resolved using the default remote. If there is no default remote, the current repository will be assumed to be upstream.
 +
 可选的 <路径> 参数限制哪些子模块将被初始化。 如果没有指定路径，并且已经配置了 submodule.active，配置为激活的子模块将被初始化，否则所有的子模块都被初始化。
 +
-当出现时，它也将复制 `submodule.$name.update` 的值。 这个命令不会改变 .git/config 中的现有信息。 然后你可以在 .git/config 中为你的本地设置定制子模块克隆 URLs，并继续运行 `git submodule update`；如果你不打算定制任何子模块的位置，你也可以直接使用 `git submodule update --init` 而不使用明确的 'init' 步驟。
+如果 `.gitmodules` 文件中存在 `submodule.$name.update`，它也会将其值复制到 `.git/config`，但 (1) 该命令不会更改 `.git/config` 中的现有信息，(2) 出于安全考虑，设置为自定义命令的 `submodule.$name.update` 不会被复制。
++
+You can then customize the submodule clone URLs in `.git/config` for your local setup and proceed to `git submodule update`; you can also just use `git submodule update --init` without the explicit 'init' step if you do not intend to customize any submodule locations.
 +
 关于默认远程的定义，请参见 add 的子命令。
 
@@ -74,7 +76,7 @@ deinit [-f|--force] (--all|[--] <路径>...)::
 update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <仓库>] [--depth <深度>] [--recursive] [--jobs <数量>] [--[no-]single-branch] [--filter <过滤规范>] [--] [<路径>...]::
 +
 --
-通过克隆缺失的子模块，获取子模块中缺失的提交，以及更新子模块的工作区，来更新注册的子模块，以符合父项目的期望。"更新" 可以通过几种方式进行，取决于命令行选项和 `submodule.<名称>.update` 配置变量的值。命令行选项优先于配置变量。如果两者都没有给出，就会执行 "检查"。 从命令行以及通过 `submodule.<名称>.update` 配置所支持的 'update' 程序是：
+Update the registered submodules to match what the superproject expects by cloning missing submodules, fetching missing commits in submodules and updating the working tree of the submodules. The "updating" can be done in several ways depending on command line options and the value of `submodule.<name>.update` configuration variable. The command line option takes precedence over the configuration variable. If neither is given, a 'checkout' is performed. (note: what is in `.gitmodules` file is irrelevant at this point; see `git submodule init` above for how `.gitmodules` is used). The 'update' procedures supported both from the command line as well as through the `submodule.<name>.update` configuration are:
 
 	checkout;; 在父项目中记录的提交将在分离的 HEAD 上的子模块中检出。
 +
@@ -84,11 +86,11 @@ update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--forc
 
 	merge;; 父项目中记录的提交将被合并到子模块中的当前分支。
 
-以下 'update' 程序仅通过 `submodule.<名称>.update` 配置变量可用：
+以下更新程序有其他限制：
 
-	自定义命令;; 执行任意的 shell 命令，该命令需要一个参数（父项目中记录的提交的 sha1）。当 `submodule.<名称>.update` 被设置为 '!command' 时，惊叹号后的剩余部分就是自定义命令。
+	自定义命令;; 以提交 ID 作为参数运行任意命令的机制。具体来说，如果 `submodule.<name>.update` 配置变量被设置为 `!custom command`，子模块的超级项目中记录的提交对象名称就会被附加到 `custom command` 字符串中并被执行。请注意，`.gitmodules` 文件或命令行均不支持该机制。
 
-	none;; 	该子模块不被更新。
+	none;; 子模块不会更新。命令行中不允许使用此更新程序。
 
 如果子模块还没有被初始化，而你只是想使用存储在 `.gitmodules` 中的设置，你可以用 `--init` 选项自动初始化子模块。
 

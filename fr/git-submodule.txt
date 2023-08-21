@@ -54,9 +54,11 @@ Si `--recursive` est spécifié, cette commande va parcourir récursivement les 
 Si vous n'êtes intéressé que par les modifications des sous-modules actuellement initialisés par rapport au commit enregistré dans l'index ou dans HEAD, linkgit:git-status[1] et linkgit:git-diff[1] vous fourniront également ces informations (et peuvent également signaler les modifications de l'arbre de travail d'un sous-module).
 
 init [--] [<chemin>...]::
-	Initialiser les sous-modules enregistrés dans l'index (qui ont été ajoutés et validés ailleurs) en définissant `submodule.$nom.url` dans .git/config. Il utilise le même paramètre de `.gitmodules` comme modèle. Si l'URL est relative, elle sera résolue en utilisant le distant par défaut. S'il n'y a pas de distant par défaut, le dépôt actuel sera supposé être en amont.
+	Initialiser les sous-modules enregistrés dans l'index (qui ont été ajoutés et validés ailleurs) en définissant `submodule.$nom.url` dans `.git/config`, en utilisant le même paramètre de `.gitmodules` comme modèle. Si l'URL est relative, elle sera résolue en utilisant le distant par défaut. S'il n'y a pas de distant par défaut, le dépôt actuel sera supposé être en amont.
 +
 Les arguments facultatifs <chemin> limitent les sous-modules qui seront initialisés. Si aucun chemin n'est spécifié et que submodule.active a été configuré, les sous-modules configurés pour être actifs seront initialisés, sinon tous les sous-modules sont initialisés.
++
+La valeur de `submodule.$name.update`sera aussi copiée, si présente dans le fichier `.gitmodules`, dans `.git/config`, mais (1) cette commande ne modifie pas les informations existantes dans `.git/config`, et (2) `submodule.$name.update` qui est défini à une commande personnalisée n'est *pas* copié pour des raisons de sécurité.
 +
 Lorsqu'il est présent, copie également la valeur de `submodule.$nom.update`. Cette commande ne modifie pas les informations existantes dans le fichier .git/config. Vous pouvez ensuite personnaliser les URL de clonage de sous-module dans .git/config pour votre configuration locale et passer à `git submodule update` ; vous pouvez aussi simplement utiliser `git submodule update --init` sans l'étape explicite 'init' si vous n'avez pas l'intention de personnaliser l'emplacement des sous-module.
 +
@@ -74,7 +76,7 @@ Si vous voulez vraiment supprimer un sous-module du dépôt et valider le résul
 update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <dépôt>] [--depth <profondeur>] [--recursive] [--jobs <n>] [--[no-]single-branch] [--filter <spéc-de-filtre>] [--] [<chemin>...]::
 +
 --
-Mettre à jour les sous-modules enregistrés pour qu'ils correspondent aux attentes du superprojet en clonant les sous-modules manquants, en récupérant les commits manquants dans les sous-modules et en mettant à jour l'arbre de travail des sous-modules. La "mise à jour" peut être effectuée de plusieurs façons, en fonction des options de la ligne de commande et de la valeur de la variable de configuration `submodule.<nom>.update`. L'option de ligne de commande a la priorité sur la variable de configuration. Si aucune des deux n'est donnée, un 'checkout' est effectué. Les procédures de 'update'supportées aussi bien en ligne de commande que par la configuration `submodule.<nom>.update`sont :
+Mettre à jour les sous-modules enregistrés pour qu'ils correspondent aux attentes du superprojet en clonant les sous-modules manquants, en récupérant les commits manquants dans les sous-modules et en mettant à jour l'arbre de travail des sous-modules. La "mise à jour" peut être effectuée de plusieurs façons, en fonction des options de la ligne de commande et de la valeur de la variable de configuration `submodule.<nom>.update`. L'option de ligne de commande a la priorité sur la variable de configuration. Si aucune des deux n'est donnée, un 'checkout' est effectué. (note : ce qui est dans le fichier`.gitmodules` n'est pas pertinent à ce point ; voir `git submodule init` ci-dessus pour comment `.gitmodules` est utilisé). Les procédures de 'update'supportées aussi bien en ligne de commande que par la configuration `submodule.<nom>.update`sont :
 
 	checkout;; le commit enregistré dans le superprojet sera extrait dans le sous-module sur une HEAD détachée.
 +
@@ -84,11 +86,11 @@ Si `--force` est spécifié, le sous-module sera extrait (en utilisant `git chec
 
 	merge;; le commit enregistré dans le superprojet sera fusionné dans la branche actuelle dans le sous-module.
 
-Les procédures 'update' suivantes sont uniquement disponibles via la variable de configuration `submodule.<nom>.update` :
+Les procédures de mise à jour suivantes ont des limites supplémentaires :
 
-	commande personnalisée;; une commande shell arbitraire qui prend un seul argument (le sha1 du commit enregistré dans le superprojet) est exécuté. Lorsque `submodule.<nom>.update`est réglé sur '!command', le reste après le point d'exclamation est la commande personnalisée.
+	commande personnalisée;; mécanisme pour exécuter des commandes arbitraires avec l'ID de commit comme argument. Plus précisément, si la variable de configuration `submodule<nom>.update` à `!<commande personnalisée>`', le nom de l'objet enregistré dans le superprojet pour le sous-module est ajouté à la fin de la chaîne `<commande personnalisée>` et celle-ci est exécutée. Notez que ce mécanisme n'est pas pris en charge dans le fichier `.gitmodules` ou sur la ligne de commande.
 
-	none;; 	le sous-module n'est pas mis à jour.
+	none;; le sous-module n'est pas mis à jour. Cette procédure de mise à jour n'est pas autorisée sur la ligne de commande.
 
 Si le sous-module n'est pas encore initialisé, et que vous souhaitez simplement utiliser le paramètre stocké dans `.gitmodules`, vous pouvez initialiser automatiquement le sous-module avec l'option `--init`.
 

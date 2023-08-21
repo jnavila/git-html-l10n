@@ -14,29 +14,45 @@ RESUMO
 
 DESCRIÇÃO
 ---------
-Ajuda a analisar ou adicionar linhas com 'caracteres de resposta' que se pareçam com os cabeçalhos de e-mail segundo a norma RFC 822 no final ou na parte livre de uma mensagem de commit.
+Adiciona ou analisa as linhas com 'caracteres de resposta' que se assemelham aos cabeçalhos de e-mail RFC 822 no final de uma mensagem do commit. Por exemplo, na seguinte mensagem de commit
 
-Este comando lê alguns patches ou faz o commit das mensagens dos argumentos <arquivo> ou da entrada padrão se nenhum <arquivo> seja definido. Caso `--parse` seja definido a saída consistirá nos caracteres de resposta analisados.
+------------------------------------------------
+assunto
 
-Caso contrário, este comando aplica os argumentos passados utilizando a opção `--trailer`, caso exista, à parte da mensagem de commit de cada arquivo de entrada. O resultado é emitido na saída padrão.
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
 
-Algumas variáveis de configuração controlam a maneira como os argumentos do `--trailer` são aplicados a cada mensagem de commit e a maneira como qualquer `trailer` existente na mensagem de commit é alterado. Eles também possibilitam adicionar automaticamente alguns `trailers`.
+Assinado-por: Alice <alice@example.com>
+Assinado-por: Bob <bob@example.com>
+------------------------------------------------
 
-É predefinido que, usando um argumento '<token>=<valor>' ou '<token>:<valor>' utilizando a opção `--trailer` será anexado após os caracteres de resposta existentes caso o último tenha um par (<token>, <valor>), (ou caso não exista nenhum caractere de resposta). As partes <token> e <valor> serão aparados para remover os espaços iniciais e finais, o que sobrar aparecerá na mensagem da seguinte maneira:
+as duas últimas linhas começando com "Signed-off-by" são os "trailers".
+
+Esse comando lê as mensagens dos commits seja a partir dos argumentos do <arquivo> ou da entrada padrão caso nenhum <arquivo> seja especificado. Se `--parse` for especificado, a saída consistirá nos "trailers" analisados. Caso contrário, esse comando aplica os argumentos passados usando a opção `--trailer`, se houver, a cada arquivo de entrada. O resultado é omitido na saída normal.
+
+Esse comando também pode operar na saída do linkgit:git-format-patch[1], que é mais elaborado do que uma simples mensagem de confirmação. Ou seja, essa saída inclui uma mensagem de confirmação (como acima), uma linha divisória "---" e uma parte do patch. Para essas entradas, as partes do divisor e do patch não são modificadas por esse comando e são emitidas como estão na saída, a menos que a opção `--no-divider` seja especificada.
+
+Algumas variáveis de configuração controlam a forma como os argumentos `--trailer` são aplicados a cada entrada e a forma como qualquer trailer existente na entrada é alterado. Eles também possibilitam a adição automática de alguns trailers.
+
+Por padrão, um argumento '<token>=<valor>' ou '<token>:<valor>' usado com `--trailer` será anexado após os trailers existentes apenas se o último trailer tiver um par (<token>, <valor>) diferente (ou se não houver nenhum trailer existente). As partes <token> e <valor> serão cortadas para remover os espaços em branco iniciais e finais, o <token> e o <valor> cortados resultantes aparecerão na saída desta maneira:
 
 ------------------------------------------------
 token: valor
 ------------------------------------------------
 
-Significa que o <token> e o <valor> ajustado será separado por um `': '` (dois pontos seguido por um espaço).
+Isso significa que o <token> e o <valor> recortados serão separados por `': '` (dois-pontos seguidos de um espaço). Por conveniência, o <token> pode ser uma cadeia de caracteres abreviada (por exemplo, "sign") em vez da cadeia de caracteres completa que deve aparecer antes do separador na saída (por exemplo, "Signed-off-by"). Isso pode ser configurado usando a variável de configuração 'trailer.<token>.key'.
 
-É predefinido que o novo caractere de resposta aparecerá no final de todos os caracteres de resposta já existentes. Caso não exista, o novo caractere de resposta aparecerá na saída após a parte da mensagem do commit, caso não haja uma linha com apenas espaços no final da parte da mensagem do commit, uma linha em branco será adicionada antes do novo caractere de resposta.
+É predefinido que o novo trailer apareça no final de todos os trailers já existentes. Caso não haja nenhum, o novo trailer aparecerá no final. Uma linha em branco será adicionada antes do novo trailer caso já não exista um.
 
-Os caracteres de resposta já existentes são extraídos da mensagem da entrada ao procurar um grupo de uma ou mais linhas onde (i) tenha todos os caracteres de resposta ou (ii) contenha pelo menos um caractere de resposta gerado através do Git ou configurado pelo usuário que consista em pelo menos 25% dos caracteres de resposta. O grupo deve ser precedido por uma ou mais linhas vazias (ou somente com espaço). O grupo deve estar no final da mensagem ou ser as últimas linhas que não sejam espaços antes de uma linha que começa com '---' (seguida por um espaço ou o quebra da linha). Estes três sinais de menos (-) iniciam a parte do patch da mensagem. Consulte também a opção `--no-divider` abaixo.
+Os trailers já existentes são extraídos da entrada procurando um grupo de uma ou mais linhas que (i) sejam todos trailers, ou (ii) contenham pelo menos um trailer gerado pelo Git ou que tenha sido configurado pelo usuário e consista de pelo menos 25% de trailers. O grupo deve ser precedido por uma ou mais linhas vazias (ou somente com espaços). O grupo deve estar no final da entrada ou ser as últimas linhas sem espaços antes de uma linha que comece com '---' (seguida de um espaço ou do final da linha).
 
-Ao ler os caracteres de resposta, não poderá haver espaço antes ou dentro do token, porém qualquer quantidade de caracteres regulares de espaço e tabulação são permitidos entre o token e o separador. Pode haver espaços antes, dentro ou depois do valor. O valor pode ser dividido em várias linhas com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822.
+Ao ler os caracteres de resposta, não pode haver espaço em branco antes ou dentro do <token>, mas qualquer quantidade de espaço regular e de caracteres de tabulação são permitidos entre o <token> e o separador. Pode existir espaço antes, dentr ou depois do <valor>. O <valor> pode ser dividido em várias linhas, com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822. Exemplo:
 
-Observe que caracteres de resposta não seguem e não se destinam a seguir muitas regras para os cabeçalhos da norma RFC 822. Por exemplo, eles não seguem as normas de codificação e muito provavelmente não sigam quaisquer outras.
+------------------------------------------------
+token: Esse é um valor muito longo, com espaços e
+  novas linhas nele.
+------------------------------------------------
+
+Observe que os trailers não seguem (nem pretendem seguir) muitas das regras dos cabeçalhos RFC 822. Por exemplo, eles não seguem a regra de codificação.
 
 OPÇÕES
 ------
@@ -44,7 +60,7 @@ OPÇÕES
 	Edite os arquivos no local.
 
 --trim-empty::
-	Caso o <valor> da parte de qualquer `caractere de resposta` contenha apenas espaços, o `caractere de resposta` inteiro será removido da mensagem resultante. Isso se aplica os `caracteres de resposta` já existentes, bem como aos novos `caractere de resposta`.
+	Se a parte <valor> de qualquer caractere de resposta tiver apenas espaços, todo o caractere de resposta será removido da saída. Isso se aplica tanto a caracteres de resposta já existentes e os novos.
 
 --trailer <token>[(=|:)<valor>]::
 	Defina um par (<token>, <valor>) que deve ser aplicado como um caractere de resposta nas mensagens de entrada. Consulte a descrição deste comando.
@@ -55,11 +71,11 @@ OPÇÕES
 
 --if-exists <ação>::
 --no-if-exists::
-	Defina qual ação será executada quando já houver pelo menos um caractere de resposta com o mesmo <token> na mensagem. Uma configuração utilizada com '--if-exists' substitui todas as variáveis de configuração e se aplica a todas as opções `--trailer` até a próxima ocorrência do '--if-exists' ou '--no-if-exists'. As possíveis ações são `addIfDifferent`, `addIfDifferentNeighbor`, `add`, `replace` e `doNothing`.
+	Especifique a ação que será executada quando já houver pelo menos um caracter de resposta com o mesmo <token> na entrada. Uma configuração fornecida com "--if-exists" substitui todas as variáveis de configuração e se aplica a todas as opções "--trailer" até a próxima ocorrência de "--if-exists" ou "--no-if-exists". As possiveis ações são `addIfDifferent`, `addIfDifferentNeighbor`, `add`, `replace` e `doNothing`.
 
 --if-missing <ação>::
 --no-if-missing::
-	Especifique qual ação será executada quando não houver outro caractere de resposta com o mesmo <token> na mensagem. Uma configuração utilizada com o comando `--if-missing` substitui todas as variáveis de configuração e se aplica a todas as opções `--trailer` até a próxima ocorrência de `--if-missing` ou `--no-if-missing`. As possíveis ações são `doNothing` ou `add`.
+	Especifique a ação que será executada quando não houver outro trailer com o mesmo <token> na entrada. Uma configuração usada com "--if-missing" irá substituir todas as variáveis de configuração e se aplica a todas as opções "--trailer" até a próxima ocorrência de "--if-missing" ou "--no-if-missing". As possíveis ações são `doNothing` ou `add`.
 
 --only-trailers::
 	Exibe apenas os caracteres de resposta e não quaisquer outras partes da entrada.
@@ -100,22 +116,22 @@ Caso seja `after` , cada novo caractere de resposta aparecerá logo após o últ
 Caso seja `before`, então cada novo caractere de resposta aparecerá logo no começo do primeiro caractere de resposta com o mesmo <token>.
 
 trailer.ifexists::
-	Essa opção permite escolher qual ação será executada quando já houver pelo menos um caractere de resposta com o mesmo <token> na mensagem.
+	Essa opção permite escolher a ação a ser executada quando já houver pelo menos um caracter de resposta com o mesmo <token> na entrada.
 +
 Os valores válidos para esta opção são: `addIfDifferentNeighbor` (predefinido), `addIfDifferent`, `add`, `replace` ou `doNothing`.
 +
 Com `addIfDifferentNeighbor`, um novo caractere de resposta será adicionado apenas caso nenhum com o mesmo par (<token>,<valor>) esteja acima ou abaixo da linha onde o novo caractere de resposta será adicionado.
 +
-Com `addIfDifferent`, um novo caractere de resposta será adicionado apenas caso nenhum com o mesmo par (<token>,<valor>) já esteja na mensagem.
+Com `addIfDifferent`, um novo caractere de resposta será adicionado somente se nenhum caractere de resposta com o mesmo par (<token>, <valor>) já estiver na entrada.
 +
-Com `add`, um novo caractere de resposta será adicionado mesmo que alguns com o mesmo par (<token>,<valor>) já estejam na mensagem.
+Com `add`, um novo caracter de resposta será adicionado, mesmo que alguns caracteres de resposta com o mesmo par (<token>, <valor>) já estejam na entrada.
 +
 Com `replace`, um caractere de resposta existente com a mesmo <token> será excluído e um novo será adicionado. O caractere de resposta excluído será o mais próximo (com o mesmo <token>) do local onde o novo será adicionado.
 +
-Com `doNothing`, nada será feito; isso é, nenhum novo caractere de resposta será adicionado caso já haja um com o mesmo <token> na mensagem.
+Com `doNothing`, nada será feito, ou seja, nenhum novo caracter de resposta será adicionado se já houver um com o mesmo <token> na entrada.
 
 trailer.ifmissing::
-	Esta opção possibilita escolher qual ação será executada quando ainda não houver nenhum "caractere de resposta" com o mesmo `<token>` na mensagem.
+	Essa opção permite escolher a ação a ser executada quando ainda não houver nenhum atrelado com o mesmo <token> na entrada.
 +
 Os valores válidos para esta opção são: `add` (o valor predefinido) e `doNothing`.
 +
@@ -138,14 +154,14 @@ trailer.<token>.ifmissing::
 	Esta opção utiliza os mesmos valores que a variável de configuração 'trailer.ifmissing' e substitui o que for definido por esta opção para os caracteres de resposta com o <token> informado.
 
 trailer.<token>.command::
-	Esta opção se comporta da mesma maneira que o 'trailer.<token>.cmd', exceto que nada é oferecido como argumento para o comando informado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo valor que seria passado como argumento.
+	Preterido em favor do 'trailer.<token>.cmd'. Essa opção se comporta da mesma forma que 'trailer.<token>.cmd', exceto pelo fato de não passar nada como argumento para o comando especificado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo <valor> que seria passado como argumento.
 +
-A opção 'trailer.<token>.command' foi substituída por 'trailer.<token>.cmd' pois o $ARG no comando do usuário ser substituído apenas uma vez e a maneira anterior de se substituir o $ARG não era segura.
+Observe que $ARG no comando do usuário é substituído apenas uma vez e que a maneira original de substituir o $ARG não é segura.
 +
 Quando ambos 'trailer.<token>.cmd' e 'trailer.<token>.command' são oferecidos para o mesmo <token>, o 'trailer.<token>.cmd' é usado e o 'trailer.<token>.command' é ignorado.
 
 trailer.<token>.cmd::
-	Esta opção pode ser usada para definir um comando shell que será invocado: uma vez para adicionar um atrelado de forma automática com o <token> informado e, a seguir, a cada opção '--trailer <token>=<valor>' para alterar o <valor> do atrelado que esta opção produziria.
+	Essa opção pode ser usada para especificar um comando do shell que será chamado uma vez para adicionar automaticamente um caracter de resposta com o <token> especificado e, em seguida, chamado toda vez que o argumento '--trailer <token>=<valor>' for usado para alterar o <valor> do trailer que essa opção produziria.
 +
 Quando o comando informado é chamado pela primeira vez para adicionar um atrelado com o <token> definido, o comportamento é como se um argumento especial '--trailer <token>=<valor>' fosse adicionado no início do comando "git interpret-trailers", onde o <valor> é considerado a saída padrão do comando com qualquer espaço em branco eliminado à esquerda e à direita.
 +
@@ -154,37 +170,37 @@ Caso algumas opção '--trailer <token>=<valor>' também sejam passadosna linha 
 EXEMPLOS
 --------
 
-* Configure um caractere de resposta 'sign' com uma chave 'Assinada por' (Signed-off-by) e adicione dois destes caracteres de resposta numa mensagem:
+* Configure uma "assinatura" como caractere de resposta com "Signed-off-by" e, em seguida, adicione dois desses caracteres de resposta a um arquivo de mensagem de confirmação:
 +
 ------------
 $ git config trailer.sign.key "Assinado-por"
 $ cat msg.txt
 subject
 
-message
+corpo de texto
 $ git interpret-trailers --trailer 'sign: Alice <alice@example.com>' --trailer 'sign: Bob <bob@example.com>' <msg.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Alice <alice@example.com>
 Assinado-por: Bob <bob@example.com>
 ------------
 
-* Utilize a opção `- in-place` para editar um arquivo da mensagem no local:
+* Use a opção `--in-place` para editar um arquivo de mensagem de confirmação no local:
 +
 ------------
 $ cat msg.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Bob <bob@example.com>
 $ git interpret-trailers --trailer 'Acked-by: Alice <alice@example.com>' --in-place msg.txt
 $ cat msg.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Bob <bob@example.com>
 Reconhecido-por: Alice <alice@example.com>
@@ -204,27 +220,27 @@ $ git interpret-trailers --trailer 'Cc: Alice <alice@example.com>' --trailer 'Re
 $ cat msg1.txt
 subject
 
-message
+corpo do texto
 $ git config trailer.sign.key "Signed-off-by: "
 $ git config trailer.sign.ifmissing add
 $ git config trailer.sign.ifexists doNothing
 $ git config trailer.sign.cmd 'echo "$(git config user.name) <$(git config user.email)>"'
 $ git interpret-trailers --trailer sign <msg1.txt
-subject
+assunto
 
-mensagem
+corpo do texto
 
 Signed-off-by: Bob <bob@example.com>
 $ cat msg2.txt
 subject
 
-mensagem
+corpo do texto
 
 Signed-off-by: Alice <alice@example.com>
 $ git interpret-trailers --trailer sign <msg2.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Alice <alice@example.com>
 ------------
@@ -249,14 +265,14 @@ test -n "$1" && git log --author="$1" --pretty="%an <%ae>" -1 || true
 $ cat msg.txt
 subject
 
-message
+corpo do texto
 $ git config trailer.help.key "Helped-by: "
 $ git config trailer.help.ifExists "addIfDifferentNeighbor"
 $ git config trailer.help.cmd "~/bin/glog-find-author"
 $ git interpret-trailers --trailer="help:Junio" --trailer="help:Couder" <msg.txt
-subject
+assunto
 
-mensagem
+corpo do texto
 
 Auxiliado por: Junio C Hamano <gitster@pobox.com>
 Auxiliado por: Christian Couder <christian.couder@gmail.com>
@@ -271,14 +287,14 @@ test -n "$1" && git log --grep "$1" --pretty=reference -1 || true
 $ cat msg.txt
 subject
 
-message
+corpo do texto
 $ git config trailer.ref.key "Reference-to: "
 $ git config trailer.ref.ifExists "replace"
 $ git config trailer.ref.cmd "~/bin/glog-grep"
 $ git interpret-trailers --trailer="ref:Add copyright notices." <msg.txt
-subject
+assunto
 
-mensagem
+corpo do texto
 
 Refere-se ao: 8bc9a0c769 (Adicionado avisos de ireitos autorais., 2005-04-07)
 ------------
@@ -289,7 +305,7 @@ Refere-se ao: 8bc9a0c769 (Adicionado avisos de ireitos autorais., 2005-04-07)
 $ cat msg.txt
 subject
 
-mensagem
+corpo do texto
 
 see: HEAD~2
 $ cat ~/bin/glog-ref
@@ -302,7 +318,7 @@ $ git config trailer.see.cmd "glog-ref"
 $ git interpret-trailers --trailer=see <msg.txt
 subject
 
-mensagem
+corpo do texto
 
 See-also: fe3187489d69c4 (assunto do commit relacionado)
 ------------

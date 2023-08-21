@@ -8,7 +8,7 @@ git-pack-refs - Embale os cabeçalhos e a tags do pacote para acesso eficiente a
 RESUMO
 ------
 [verse]
-'git pack-refs' [--all] [--no-prune]
+'git pack-refs' [--all] [--no-prune] [--include <padrão>] [--exclude <padrão>]
 
 DESCRIÇÃO
 ---------
@@ -27,11 +27,23 @@ OPÇÕES
 
 --all::
 
-É predefinido que o comando empacote todas as "tags" e refs que já estão empacotados e deixe as outras refs em paz. Isso ocorre porque os ramos devem ser desenvolvidas ativamente e embalar as suas pontas não ajudam no desempenho. Essa opção também faz com que os cumes dos ramos sejam compactadas. Útil para um repositório com muitos ramos de interesses histórico.
+O comando, por padrão, empacota todas as tags e as refs que já estão empacotadas e não mexe com as outras refs. Isso se deve ao fato onde se espera que as ramificações sejam ativamente desenvolvidas, e o empacotamento das suas pontas não auxilia no desempenho. Essa opção faz com que todas as refs também sejam empacotadas, com exceção das refs ocultas, das refs quebradas e das refs simbólicas. Útil para um repositório com muitos ramos de interesse histórico.
 
 --no-prune::
 
 O comando normalmente remove as refs soltas na hierarquia `$GIT_DIR/refs` após empacotá-los. Esta opção diz para não fazê-lo.
+
+--include <padrão>::
+
+Empacota refs com base num padrão `glob(7)`. As repetições dessa opção acumulam padrões de inclusão. Se uma referência estiver incluída tanto em `--include` quanto em `--exclude`, a opção `--exclude` tem precedência. Por padrão, o uso da opção `--include` impedirá que todas as tags sejam incluídas. os refs simbólicos e os refs quebrados nunca serão empacotados. Quando usado com `--all`, será um noop. Use `--no-include` para limpar e redefinir a lista de padrões.
+
+--exclude <padrão>::
+
+Não empacote refs que correspondam ao padrão `glob(7)` fornecido. As repetições dessa opção acumulam padrões de exclusão. Use `--no-include` para limpar e redefinir a lista de padrões. Se uma ref já estiver empacotada, ao incluí-la com a opção `--exclude` não a desempacotará.
+
+Quando usado com `--all`, empacota apenas as refs soltas que não correspondem a nenhum dos padrões `--exclude` fornecidos.
+
+Quando usado com a opção `--include`, as refs fornecidas para a opção `--include`, menos as refs que sejam fornecidas para `--exclude`, serão empacotadas.
 
 
 BUGS

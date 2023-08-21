@@ -20,7 +20,7 @@ Exiba as referências disponíveis em um repositório local, juntamente com as I
 
 É predefinido que se exiba as tags, cabeçalhos e as referências remotas.
 
-A opção `--exclude-existing` é uma forma de filtro que faz o inverso. Ele lê as refs do 'stdin', uma "ref" por linha, e exibe aqueles que não existem no repositório local.
+O formulário `--exclude-existing` é um filtro que faz o inverso. Ele lê as refs do stdin, uma ref por linha, e mostra aquelas que não existem no repositório local.
 
 O uso deste utilitário é incentivado em favor do acesso direto aos arquivos no diretório `.git`.
 
@@ -39,12 +39,12 @@ OPÇÕES
 -d::
 --dereference::
 
-	Remova as referências das tags dos IDs do objeto também. Eles serão exibidos com um "{caret}{}" anexado.
+	Remova a referência e também as tags de referência nos IDs do objeto. Eles serão exibidos com `{caret}{}` anexado.
 
 -s::
 --hash[=<n>]::
 
-	Exiba apenas o hash SHA-1, não o nome da referência. Quando combinada com `--dereference`, a tag da perda da referência ainda será exibida após o SHA-1.
+	Mostra apenas o OID, não o nome da referência. Quando combinada com `--dereference`, a tag com a referência removida ainda será exibida após o OID.
 
 --verify::
 
@@ -57,12 +57,12 @@ OPÇÕES
 -q::
 --quiet::
 
-	Não imprima nenhum resultado no stdout. Quando combinado com a opção `--verify`, isso pode ser utilizado para verificar silenciosamente a existência de uma referência.
+	Não exiba nenhum resultado no stdout. Quando combinado com `--verify`, pode ser usado para verificar se uma referência existe silenciosamente.
 
 --exclude-existing[=<padrão>]::
 
-	Faça com que o comando 'git show-ref' atue como um filtro que leia as refs do stdin no formato "`^(?:<anything>\s)?<refname>(?:\^{})?$`" e execute o seguintes ações em cada:
-	(1) tira o "{caret}{}" no final da linha, caso haja;
+	Faça com que o `git show-ref` atue como um filtro que lê as refs do stdin no formato `^(?:<qualquer coisa>\s)?<refname>(?:\^{})?$` e executa as seguintes ações em cada uma delas:
+	(1) strip `{caret}{}` no final da linha caso haja;
 	(2) ignore caso a predefinição seja informada e não corresponder ao cabeçalho a "refname";
 	(3) avise caso o "refname" não seja um "refname" bem formado e ignore;
 	(4) ignore caso o "refname" é uma "ref" que exista no repositório local;
@@ -76,7 +76,13 @@ OPÇÕES
 SAÍDA
 -----
 
-A saída está no formato: '<SHA-1 ID>' '<espaço>' '<nome da referência>'.
+O resultado será no formato:
+
+------------
+<oid> SP <ref> LF
+------------
+
+Por exemplo,
 
 -----------------------------------------------------------------------------
 $ git show-ref --head --dereference
@@ -90,7 +96,13 @@ $ git show-ref --head --dereference
 ...
 -----------------------------------------------------------------------------
 
-Ao utilizar o `--hash` (e não `--dereference`), o formato de saída é: '<ID do SHA-1>'
+Ao usar `--hash` (e não `--dereference`), a saída está no formato:
+
+------------
+<oid> LF
+------------
+
+Por exemplo,
 
 -----------------------------------------------------------------------------
 $ git show-ref --heads --hash
@@ -119,9 +131,9 @@ Quando utilizar a opção `--verify`, o comando precisa de um caminho exato:
 
 coincidirá apenas ao ramo exato chamado "master".
 
-Caso não haja coincidência com nada, o comando 'git show-ref' retornará um código de erro '1' e no caso de uma verificação, exibirá uma mensagem de erro.
+Se nada corresponder, o `git show-ref` retornará um código de erro 1 e, no caso de verificação, exibirá uma mensagem de erro.
 
-Para os scripts, é possível pedir para que fiquem em silêncio com a opção `--quiet`, que permite fazer coisas como
+Para a criação de scripts, você pode pedir que ele fique quieto com a opção `--quiet`, que permite que você faça coisas como
 
 -----------------------------------------------------------------------------
 	git show-ref --quiet --verify -- "refs/heads/$headname" ||
@@ -130,9 +142,9 @@ Para os scripts, é possível pedir para que fiquem em silêncio com a opção `
 
 para verificar se um ramo específico existe ou não (observe como na verdade não queremos exibir os resultados e queremos usar o nome completo da "ref" para ele, a fim de não desencadear o problema com coincidências parciais e ambíguas).
 
-Para exibir adequadamente apenas as tags, ou apenas os cabeçalhos do ramo, utilize "--tags" e/ou "--heads" respectivamente (usando ambos significa que ele exibirá as tags e as heads, porém não as outras referências aleatórias no subdiretório 'refs/').
+Para mostrar apenas as tags ou apenas os cabeçalhos dos ramos adequados, use a opção `--tags` e/ou `--heads` respectivamente (o uso de ambos significa que ele mostra as tags e os cabeçalhos, mas não outras referências aleatórias no subdiretório refs/).
 
-Para fazer a perda da referência automática da tag dos objetos, utilize a opção `-d` ou `--dereference` para que seja possível executar
+Para fazer a remoção da referência automática da tag do objeto, use a opção `-d` ou a opção `--dereference`, para que você possa fazer
 
 -----------------------------------------------------------------------------
 	git show-ref --tags --dereference

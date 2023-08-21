@@ -9,15 +9,15 @@ git-worktree - 管理多个工作区
 概述
 --
 [verse]
-'git worktree add' [-f] [--detach] [--checkout] [--lock [--reason <字符串>]]
-		   [-b <新分支>] <路径> [<提交号>]
+'git worktree add' [-f] [--detach] [--checkout] [--lock [--reason <string>]]
+		   [--orphan] [(-b | -B) <new-branch>] <path> [<commit-ish>]
 'git worktree list' [-v | --porcelain [-z]]
-'git worktree lock' [--reason <字符串>] <工作区>
-'git worktree move' <工作区> <新分支>
-'git worktree prune' [-n] [-v] [--expire <到期>]
-'git worktree remove' [-f] <工作区>
-'git worktree repair' [<路径>...]
-'git worktree unlock' <工作区>
+'git worktree lock' [--reason <string>] <worktree>
+'git worktree move' <worktree> <new-path>
+'git worktree prune' [-n] [-v] [--expire <expire>]
+'git worktree remove' [-f] <worktree>
+'git worktree repair' [<path>...]
+'git worktree unlock' <worktree>
 
 描述
 --
@@ -49,6 +49,8 @@ $ git worktree add --track -b <branch> <path> <remote>/<branch>
 如果该分支存在于多个远程仓库，并且其中一个是由`checkout.defaultRemote`配置变量命名的，为了消除歧义，我们将使用该变量，即使`<分支>`在所有远程中并不唯一。将其设置为例如 `checkout.defaultRemote=origin`，以便在`<分支>`不明确但存在于'origin'远程时，总是从那里签出远程分支。参见 linkgit:git-config[1] 中的 `checkout.defaultRemote`。
 +
 如果省略了`<提交号>`，也没有使用`-b`或`-B`或`-detach`，那么作为一种方便，新的工作树将与一个以`$(basename <路径>)`命名的分支（称为`<分支>`）相关联。 如果`<分支>`不存在，一个基于`HEAD`的新分支将被自动创建，就像给出`-b <分支>`一样。 如果`<分支>`确实存在，它将在新的工作树中被签出，如果它没有在其他地方被签出，否则命令将拒绝创建工作区（除非使用`--force`）。
++
+如果省略了 `<commit-ish>`，既没有使用 `--detach`，也没有使用 `--orphan`，并且没有有效的本地分支（或远程分支，如果指定了 `--guess-remote`），那么为了方便起见，新的工作树会与一个名为 `<branch>` 的新孤儿分支关联（如果没有使用 `-b` 或 `-B`，则在 `$(basename <path>)`之后），就像向命令传递了 `--orphan`一样。如果仓库有远程分支，并且使用了 `--guess-remote`，但不存在远程或本地分支，则命令会失败，并发出警告，提醒用户先从远程获取（或使用 `-f/-force` 覆盖）。
 
 list::
 
@@ -120,6 +122,9 @@ unlock::
 -n::
 --dry-run::
 	在使用`prune`时，不会删除任何文件；只会报告它要删除的东西。
+
+--orphan::
+	使用 `add` 使新的工作区和索引为空，并将工作树与名为 `<new-branch>` 的新孤儿/未出生分支关联起来。
 
 --porcelain::
 	With `list`, output in an easy-to-parse format for scripts. This format will remain stable across Git versions and regardless of user configuration. It is recommended to combine this with `-z`. See below for details.

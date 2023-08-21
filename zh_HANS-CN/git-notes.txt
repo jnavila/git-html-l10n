@@ -3,30 +3,30 @@ git-notes(1)
 
 名称
 --
-git-notes - Add or inspect object notes
+git-notes - 添加或查看对象注释
 
 概述
 --
 [verse]
 'git notes' [list [<object>]]
-'git notes' add [-f] [--allow-empty] [-F <file> | -m <msg> | (-c | -C) <object>] [<object>] 。
+'git notes' add [-f] [--allow-empty] [--[no-]separator | --separator=<paragraph-break>] [--[no-]stripspace] [-F <file> | -m <msg> | (-c | -C) <object>] [<object>]
 'git notes' copy [-f] ( --stdin | <from-object> [<to-object>] )
-'git notes' append [--allow-empty] [-F <file> | -m <msg> | (-c | -C) <object>] [<object>]
-'git notes' edit [--allow-empty] [<object>])
-'git notes' 显示 [<object>]
+'git notes' append [--allow-empty] [--[no-]separator | --separator=<paragraph-break>] [--[no-]stripspace] [-F <file> | -m <msg> | (-c | -C) <object>] [<object>]
+'git notes' edit [--allow-empty] [<object>] [--[no-]stripspace]
+'git notes' show [<object>]
 'git notes' merge [-v | -q] [-s <strategy> ] <notes-ref>
 'git notes' merge --commit [-v | -q]
 'git notes' merge --abort [-v | -q]
-'git notes' remove [--ignore-missing] [--stdin] [<object>...]。
+'git notes' remove [--ignore-missing] [--stdin] [<object>...]
 'git notes' prune [-n] [-v]
 'git notes' get-ref
 
 
 描述
 --
-添加、删除或读取附在物体上的注释，而不接触物体本身。
+添加、移除或读取附加在对象上的注释，而不影响对象本身。
 
-默认情况下，笔记被保存到`refs/notes/commits`并从那里读取，但这个默认值可以被覆盖。 参见下面的OPTIONS, CONFIGURATION和ENVIRONMENT部分。 如果这个参考文献不存在，当它第一次需要存储笔记时，它将被悄悄地创建。
+默认情况下，注释被保存在 `refs/notes/commits` 中，并且可以覆盖此默认设置。请参阅下面的 OPTIONS、CONFIGURATION 和 ENVIRONMENT 部分。如果该引用不存在，当首次需要存储注释时，它将被静默地创建。
 
 注释的一个典型用途是在不改变提交本身的情况下补充提交信息。注释可以通过 "git log "与原始提交信息一起显示。为了将这些注释与保存在提交对象中的消息区分开来，注释会像消息一样缩进，在未缩进的一行后面写上 "注释（<参考名称>）："（或 "注释："用于`参考/注释/提交`）。
 
@@ -44,7 +44,7 @@ list::
 	列出给定对象的注释对象。如果没有给定对象，则显示所有注解对象及其注解的对象的列表（格式为"<注解对象><注解对象>"）。 如果没有给出子命令，这是默认的子命令。
 
 add::
-	为一个给定的对象添加注释（默认为HEAD）。如果该对象已经有了注释，则放弃（使用`-f`覆盖现有的注释）。 然而，如果你正在交互式地使用`add`（使用编辑器提供注释内容），那么--而不是中止--现有的注释将在编辑器中打开（像`edit`子命令）。
+	Add notes for a given object (defaults to HEAD). Abort if the object already has notes (use `-f` to overwrite existing notes). However, if you're using `add` interactively (using an editor to supply the notes contents), then - instead of aborting - the existing notes will be opened in the editor (like the `edit` subcommand). If you specify multiple `-m` and `-F`, a blank line will be inserted between the messages. Use the `--separator` option to insert other delimiters.
 
 copy::
 	将第一个对象的注释复制到第二个对象上（默认为HEAD）。如果第二个对象已经有注解，或者第一个对象没有注解，则放弃（使用-f将现有注解覆盖到第二个对象）。这个子命令等同于。`git notes add [-f] -C $(git notes list <from-object>) <to-object>`。
@@ -58,7 +58,7 @@ copy::
 在标准输入中，将每个<from-object>中的注释复制到相应的<to-object>中。（可选的`<rest>`被忽略，以便命令可以读取给`post-rewrite`钩的输入）。
 
 append::
-	附加到一个现有对象的注释中（默认为HEAD）。 如果需要的话，会创建一个新的注释对象。
+	将 `-m` 或 `-F` 选项指定的新信息附加到现有注释中，或将不存在的信息作为新注释添加到对象中（默认为 HEAD）。 当添加到现有注释时，每条新信息前都会添加一个空行作为段间分隔符。 分隔符可使用 `--separator` 选项自定义。
 
 edit::
 	编辑一个给定对象的注释（默认为HEAD）。
@@ -88,15 +88,15 @@ get-ref::
 
 -m <消息>::
 --message=<msg>::
-	使用给定的注释信息（而不是提示）。 如果给定了多个`-m`选项，它们的值将作为单独的段落串联起来。 以`#`开头的行和段落之间的单行以外的空行将被剥离出来。
+	Use the given note message (instead of prompting). If multiple `-m` options are given, their values are concatenated as separate paragraphs. Lines starting with `#` and empty lines other than a single line between paragraphs will be stripped out, if you wish to keep them verbatim, use `--no-stripspace`.
 
 -F <文件>::
 --file=<文件>::
-	从给定的文件中获取注释信息。 使用'-'可以从标准输入中读取注释信息。 以 "#"开头的行和段落之间的单行以外的空行将被剥离出来。
+	Take the note message from the given file. Use '-' to read the note message from the standard input. Lines starting with `#` and empty lines other than a single line between paragraphs will be stripped out, if you wish to keep them verbatim, use with `--no-stripspace` option.
 
 -C <对象>::
 --reuse-message=<object>::
-	将给定的blob对象（例如，另一个笔记）作为笔记信息。(使用`git notes copy <object>`来代替在对象之间复制注释)。
+	Take the given blob object (for example, another note) as the note message. (Use `git notes copy <object>` instead to copy notes between objects.). By default, message will be copied verbatim, but if you wish to strip out the lines starting with `#` and empty lines other than a single line between paragraphs, use with`--stripspace` option.
 
 -c <对象>::
 --reedit-message=<object>::
@@ -104,6 +104,12 @@ get-ref::
 
 --allow-empty::
 	允许存储一个空的笔记对象。默认行为是自动删除空笔记。
+
+--[no-]separator, --separator=<paragraph-break>::
+	指定用于自定义段落间分隔符的字符串（根据需要在末尾添加换行符）。如果使用 `--no-separator`，则段落之间不添加分隔符。 默认为空行。
+
+--[no-]stripspace::
+	从备注信息中删除前导和尾部空白。 还会删除段落之间单行以外的空行。在 "-m"、"-F" 和 "-C" 等非编辑器情况下，以 `#` 开头的行将被删除，但在 "git notes edit"、"-c"等编辑器情况下则不会。
 
 --ref <ref>::
 	操纵<ref>中的笔记树。 这覆盖了`GIT_NOTES_REF`和 "core.notesRef "配置。 当Ref以`refs/notes/`开始时，指定完整的Ref名称；当它以`notes/`开始时，`refs/`，否则`refs/notes/`前缀，形成Ref的全名。

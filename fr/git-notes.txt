@@ -9,9 +9,9 @@ SYNOPSIS
 --------
 [verse]
 'git notes' [list [<objet>]]
-'git notes' add [-f] [--allow-empty] [-F <fichier> | -m <msg> | (-c | -C) <objet>] [<objet>]
+'git notes' add [-f] [--allow-empty] [--[no-]separator | --separator=<coupure-paragraphe>] [--[no-]stripspace] [-F <fichier> | -m <msg> | (-c | -C) <objet>] [<objet>]
 'git notes' copy [-f] ( --stdin | <objet-source> [<objet-cible>] )
-'git notes' append [--allow-empty] [-F <fichier> | -m <msg> | (-c | -C) <objet>] [<objet>]
+'git notes' append [--allow-empty] [--[no-]separator | --separator=<coupure-paragraphe>] [--[no-]stripspace] [-F <fichier> | -m <msg> | (-c | -C) <objet>] [<objet>]
 'git notes' edit [--allow-empty] [<objet>]
 'git notes' show [<objet>]
 'git notes' merge [-v | -q] [-s <strategie> ] <ref-de-notes>
@@ -44,7 +44,7 @@ list::
 	Affiche la liste des objets notes pour un objet donné. Si aucun objet n'est donné, affiche une liste de tous les objets notes et des objets qu'ils annotent (au format "<objet note> <objet annoté>"). Il s'agit de la sous-commande par défaut si aucune sous-commande n'est donnée.
 
 add::
-	Ajouter des notes pour un objet donné (par défaut HEAD). Abandonner si l'objet a déjà des notes (utilisez `-f` pour écraser les notes existantes). Cependant, si vous utilisez `add` de manière interactive (en utilisant un éditeur pour fournir le contenu des notes), alors - au lieu d'abandonner - les notes existantes seront ouvertes dans l'éditeur (comme la sous-commande `edit`).
+	Ajouter des notes pour un objet donné (par défaut HEAD). Abandonner si l'objet a déjà des notes (utilisez `-f` pour écraser les notes existantes). Cependant, si vous utilisez `add` de manière interactive (en utilisant un éditeur pour fournir le contenu des notes), alors - au lieu d'abandonner - les notes existantes seront ouvertes dans l'éditeur (comme la sous-commande `edit`). Si vous spécifiez plusieurs `-m` et `-F`, une ligne vierge sera insérée entre les messages. Utilisez l'option `--separator` pour insérer d'autres délimiteurs.
 
 copy::
 	Copier les notes du premier objet sur le deuxième objet (par défaut HEAD). Abandonner si le second objet a déjà des notes, ou si le premier objet n'en a pas (utilisez -f pour écraser les notes existantes sur le second objet). Cette sous-commande est équivalente à : `git notes add [-f] -C $(git notes list <objet-source>) <objet-cible>`
@@ -58,7 +58,7 @@ En mode `--stdin`, prendre les lignes au format
 sur l'entrée standard, et copier les notes de chaque <objet-source> vers son <objet-cible> correspondant. (Le`<rest>` optionnel est ignoré afin que la commande puisse lire l'entrée donnée au crochet `post-rewrite`).
 
 append::
-	Ajouter aux notes d'un objet existant (valeur par défaut : HEAD). Crée un nouvel objet notes si nécessaire.
+	Appliquer un ou plusieurs nouveaux messages donnés par des options `-m` ou `-F` à une note existante, ou les ajouter comme une nouvelle note si aucune n'existe , pour l'objet (par défaut à HEAD). Lorsqu'elle continue une note existante, une ligne vierge est ajoutée avant chaque nouveau message en tant que séparateur inter-paragraphe. Le séparateur peut être personnalisé avec l'option `--separator`.
 
 edit::
 	Modifier les notes pour un objet donné (par défaut HEAD).
@@ -88,15 +88,15 @@ OPTIONS
 
 -m <msg>::
 --message=<msg>::
-	Utiliser le message de note fourni (au lieu de le demander). Si plusieurs options `-m` sont fournies, leurs valeurs sont concaténées comme paragraphes séparés. Les lignes commençant par `#` et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes.
+	Utiliser le message de note fourni (au lieu de le demander). Si plusieurs options `-m` sont fournies, leurs valeurs sont concaténées comme paragraphes séparés. Les lignes commençant par `#` et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes ; si vous souhaitez les garder verbatim, utilisez `--no-stripspace`.
 
 -F <fichier>::
 --file=<fichier>::
-	Prendre le message de note depuis le fichier indiqué. Utilisez '-' pour lire le message depuis l'entrée standard. Les lignes commençant par `#` et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes.
+	Prendre le message de note depuis le fichier indiqué. Utilisez '-' pour lire le message depuis l'entrée standard. Les lignes commençant par `#` et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes ; si vous souhaitez les garder verbatim, utilisez `--no-stripspace`.
 
 -C <objet>::
 --reuse-message=<objet>::
-	Prendre l'objet blob donné (par exemple, une autre note) comme message de la note. (Utilisez plutôt `git notes copy <objet>` pour copier des notes entre objets).
+	Prendre l'objet blob donné (par exemple, une autre note) comme message de note. (Utilisez `git notes copy <objet>` au lieu de copier les notes entre les objets). Par défaut, le message sera copié verbatim, mais si vous souhaitez supprimer les lignes commençant par `#` et les lignes vides autres que les lignes uniques entre les paragraphes, utilisez l'option `--stripspace`.
 
 -c <objet>::
 --reedit-message=<objet>::
@@ -104,6 +104,12 @@ OPTIONS
 
 --allow-empty::
 	Permettre de stocker un objet note vide. Le comportement par défaut consiste à supprimer automatiquement les notes vides.
+
+--[no-]separator, --separator=<coupure-paragraphe>::
+	Spécifier une chaîne utilisée comme séparateur d'inter-paragraphe personnalisé (une nouvelle ligne est ajoutée à la fin si nécessaire). Si `--no-separator` , aucun séparateur ne sera ajouté entre les paragraphes. Par défaut, la valeur est une ligne vierge.
+
+--[no-]stripspace::
+	Éliminer les espaces précédant et suivant le message de note. Également éliminer les lignes vides autres que les lignes uniques entre les paragraphes. Les lignes commençant par `#` seront nettoyées dans des cas sans éditeur comme "-m", "-F" et "-C", mais pas dans les cas avec éditeur comme "git notes edit", "-c", etc.
 
 --ref <réf>::
 	Manipuler l'arbre des notes dans <réf>. Ceci a priorité sur `GIT_NOTES_REF` et la configuration "core.notesRef". La réf spécifie le nom complet de la réf quand elle commence par `refs/notes/` ; quand elle commence par `notes/`, `refs/` ou autre, `refs/notes/` est préfixé pour former un nom complet de la réf.

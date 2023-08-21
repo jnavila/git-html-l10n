@@ -54,11 +54,13 @@ Caso `--recursive` seja utilizado, este comando será recusado no submódulos an
 Caso apenas tenha interesse nas alterações dos submódulos inicializados no momento em relação ao commit registrado no índice ou no HEAD, o linkgit:git-status[1] e o linkgit:git-diff[1] também disponibilizarão essas informações (e podem também relatar as alterações na árvore de trabalho de um submódulo).
 
 init [--] [<caminho>...]::
-	Inicialize os submódulos registrados no índice (que foram adicionados e onde os commits foram feitos em outros lugares) configurando o `submodule.$name.url` no `.git/config`. Ele usa a mesma configuração do `.gitmodules` como um modelo. Caso a URL seja relativa, será resolvido utilizando ramo remoto predefinido. Caso não nenhum ramo remoto seja predefinido, o repositório atual será reconhecido como sendo a upstream.
+	Inicialize os submódulos registrados no índice (que foram adicionados e confirmados em outro lugar) definindo `submodule.$name.url` em `.git/config`, usando a mesma configuração de `.gitmodules` como modelo. Se o URL for relativo, ele será resolvido usando o ramo remoto padrão. Se não houver um ramo remoto padrão, o repositório atual será considerado upstream.
 +
 Os argumentos opcionais do `<caminho>` limitam quais foram os submódulos que serão inicializados. Caso nenhum caminho seja informado e o `submodule.active` tenha sido configurado, apenas os submódulos configurados para estarem ativos serão inicializados, caso contrário, todos os submódulos serão.
 +
-Quando presente, também copiará o valor do `submodule.$name.update`. Este comando não altera as informações existentes no `.git/config`. É possível personalizar os clones dos submódulos das URLs no `.git/config` para sua configuração local e prosseguir para o `git submodule update`; tamém é possível utilizar o `git submodule update --init` sem a etapa 'init' de forma explícita caso não pretenda personalizar nenhum local do submodule.
+Ele também copiará o valor de `submodule.$name.update`, se estiver presente no arquivo `.gitmodules`, para `.git/config`, mas (1) esse comando não altera as informações existentes em `.git/config` e (2) `submodule.$name.update` definido como um comando personalizado *não* é copiado por motivos de segurança.
++
+Em seguida, você pode personalizar os URLs do clone do submódulo em `.git/config` para a sua configuração local e prosseguir com `git submodule update`; você também pode usar `git submodule update --init` sem a etapa 'init' explícita se não tiver a intenção de personalizar nenhum local do submódulo.
 +
 Consulte o subcomando `add` para obter a definição predefinida do ramo remoto.
 
@@ -74,7 +76,7 @@ Caso realmente deseja remover um submódulo do repositório e fazer o commit em 
 update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <repositório>] [--depth <profundidade>] [--recursive] [--jobs <n>] [--[no-]single-branch] [--filter <filter spec>] [--] [<caminho>...]::
 +
 --
-Atualize os submódulos registrados para que coincidam com o que o superprojeto espera, clonando os submódulos ausentes, capturando os commit que estejam ausentes nos submódulos e atualizando a árvore de trabalho dos submódulos. A "atualização" pode ser feita de várias maneiras, dependendo das opções da linha de comando e do valor da variável de configuração `submodule.<nome>.update`. A opção da linha de comando tem precedência sobre a variável de configuração. Caso nenhum seja informado, um 'checkout' é realizado. Os procedimentos de 'atualização' compatíveis tanto na linha de comando quanto na configuração `submodule.<nome>.update` são:
+Atualize os submódulos registrados para que correspondam ao que o superprojeto espera, clonando os submódulos ausentes, buscando os commits ausentes nos submódulos e atualizando a árvore de trabalho dos submódulos. A "atualização" pode ser feita de várias maneiras, dependendo das opções da linha de comando e do valor da variável de configuração `submodule.<nome>.update`. A opção da linha de comando tem precedência sobre a variável de configuração. Se nenhum dos dois for fornecido, será realizado um "checkout". (Observação: o que está no arquivo `.gitmodules` é irrelevante neste momento; consulte `git submodule init` acima para saber como o `.gitmodules` é usado). Os procedimentos de "atualização" compatíveis tanto com a linha de comando quanto com a configuração `submodule.<nome>.update` são:
 
 	checkout;; o commit registrado no superprojeto será verificado no submódulo do HEAD desanexado.
 +
@@ -84,11 +86,11 @@ Caso a opção `--force` utilizado, o submódulo será averiguado (utilizando `g
 
 	merge;; o commit registrado no superprojeto será mesclado no submódulo do ramo atual.
 
-Os seguintes procedimentos de 'atualização' estão disponíveis apenas através da variável de configuração `submodule.<nome>.update`:
+Os procedimentos de atualização a seguir têm limitações adicionais:
 
-	comando personalizado;; um comand shell arbitrário que usa um simples argumento (o sha1 do commit registrado no superprojeto) é executado. Quando o `submodule.<nome>.update` é definido como '!command', o comando personalizado é o que sobra após o ponto de exclamação.
+	comando personalizado;; para executar comandos arbitrários com o ID do commit como argumento. Especificamente, se a variável de configuração `submodule.<nome>.update` for definida como `!custom command`, o nome do objeto do commit registrado no superprojeto para o submódulo será anexado à string `custom command` e depois executado. Observe que esse mecanismo não é compatível com o arquivo `.gitmodules` ou com a linha de comando.
 
-	none;; 	o submódulo não é atualizado.
+	none;; o submódulo não é atualizado. Esse procedimento de atualização não é permitido na linha de comando.
 
 Se o submódulo ainda não foi inicializado e você apenas deseja utilizar a configuração armazenada no `.gitmodules`, você pode inicializar automaticamente o submódulo com a opção `--init`.
 

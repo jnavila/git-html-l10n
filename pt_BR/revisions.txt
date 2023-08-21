@@ -13,8 +13,8 @@ NOTE: Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e 
 
 '<refname>', exemplo. 'master', 'heads/master', 'refs/heads/master'::
   Um nome simbólico `ref`. 'master' por exemplo, significa que o objeto de commit tem referência com 'refs/heads/master'. Caso aconteça de haver ambos os 'heads/master' ou 'tags/master', você pode explicitamente usar 'heads/master' para informar o Git qual deles quer. Quando ambíguo, um '<refname>' que desperte dúvidas é interpretado através da primeira coincidência de acordo com as seguintes regras:
-
-  . Caso '$GIT_DIR/<refname>' exista, quando é isso o que você quer dizer (geralmente é apenas útil para `HEAD`, `FETCH_HEAD`, `ORIG_HEAD`, `MERGE_HEAD` e `CHERRY_PICK_HEAD`);
++
+  . Se '$GIT_DIR/<refname>' existir, é isso que você quer dizer (isso geralmente é útil apenas para `HEAD`, `FETCH_HEAD`, `ORIG_HEAD`, `MERGE_HEAD`, `REBASE_HEAD`, `REVERT_HEAD`, `CHERRY_PICK_HEAD`, `BISECT_HEAD` e `AUTO_MERGE`);
 
   . caso contrário, utilize 'refs/<refname>' caso exista;
 
@@ -25,8 +25,38 @@ NOTE: Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e 
   . caso contrário, utilize 'refs/remotes/<refname>' caso exista;
 
   . caso contrário, utilize 'refs/remotes/<refname>/HEAD' caso exista.
+
 +
-`HEAD` informa o commit no qual você teve como base as alterações na árvore de trabalho. `FETCH_HEAD` registra em qual ramo você buscou no repositório remoto com a sua última invocação `git fetch`. `ORIG_HEAD` é criado por comandos que movem seu` HEAD` de uma maneira drástica (`git am`, `git merge`, `git rebase`, `git reset`), para registrar a posição do `HEAD` antes da sua operação, para que você possa facilmente mudar a ponta do ramo de volta ao estado anterior a sua execução. `MERGE_HEAD` registra os commits que você está mesclando no seu ramo quando você executa o comando `git merge`. `CHERRY_PICK_HEAD` registra o commit que você está escolhendo quando executa o comando `git cherry-pick`.
+  `HEAD`:::
+    nomeia o commit no qual você baseou as alterações na árvore de trabalho.
+  `FETCH_HEAD`:::
+    registra o ramo que você obteve de um repositório remoto com
+    a sua última invocação `git fetch`.
+  `ORIG_HEAD`:::
+    é criado por comandos que movem seu `HEAD` de forma drástica (`git
+    am`, `git merge`, `git rebase`, `git reset`), para registrar a posição
+    do `HEAD` antes de sua operação, para que você possa alterar
+    facilmente o cume da ramificação de volta ao estado anterior à sua execução.
+  `MERGE_HEAD`:::
+    registra o(s) commit(s) que está(ão) sendo mesclado(s) no seu ramo quando você
+    executar o `git merge`.
+  `REBASE_HEAD`:::
+    durante um rebase, registra o commit onde a operação está
+    interrompida no momento, seja por causa de conflitos ou de um comando `edit`
+    num rebase interativo.
+  `REVERT_HEAD`:::
+    registra o commit que está sendo revertido quando você executa o `git revert`.
+  `CHERRY_PICK_HEAD`:::
+    registra o commit que você está selecionando quando executa o `git
+    cherry-pick`.
+  `BISECT_HEAD`:::
+    registra o commit atual a ser testado quando você executa `git bisect
+    --no-checkout`.
+  `AUTO_MERGE`:::
+    registra um objeto da árvore correspondente ao estado da estratégia de mesclagem
+    'ort' gravada na árvore de trabalho quando uma operação de mesclagem
+    resultar em conflitos.
+
 +
 Observe que em qualquer um dos casos o 'refs/*' acima pode vir do diretório `$GIT_DIR/refs` ou do arquivo`$GIT_DIR/packed-refs`. Embora a codificação do nome de referência não seja especificado, o UTF-8 é o predefinido pois algum processamento de saída pode assumir nomes `ref` em UTF-8.
 

@@ -10,7 +10,7 @@ SYNOPSIS
 --------
 [verse]
 'git worktree add' [-f] [--detach] [--checkout] [--lock [--reason <chaîne>]]
-		   [-b <nouvelle-branche>] <chemin> [<commit-esque>]
+		   [--orphan] [(-b | -B) <nouvelle-branche>] <chemin> [<commit-esque>]
 'git worktree list' [-v | --porcelain [-z]]
 'git worktree lock' [--reason <chaîne>] <arbre-de-travail>
 'git worktree move' <arbre-de-travail> <nouveau-chemin>
@@ -49,6 +49,8 @@ $ git worktree add --track -b <branche> <chemin> <distant>/<branche>
 Si la branche existe dans plus d'un distant et que l'un d'entre eux est la valeur de la variable de configuration `checkout.defaultRemote`, celui-ci sera utilisé pour désambiguïser, même si la <branche> n'est pas unique parmi tous les distants. Réglez la variable `checkout.defaultRemote=origin` par exemple pour extraire toujours les branches distantes depuis celle-ci si <branche> est ambigüe mais existe sur le distant `origin`. Voir aussi `checkout.defaultRemote` dans linkgit:git-config[1].
 +
 Si `<commit-esque>` est omis et que ni `-b` ni `-B` ni `--detach` ne sont utilisés, alors, par commodité, le nouvel arbre-de-travail est associé à une branche (appelez-la `<branche>`) nommée d'après `$(basename <chemin>)`. Si `<branche>` n'existe pas, une nouvelle branche basée sur `HEAD` est automatiquement créée comme si `-b <branche>` était donné. Si `<branche>` existe, elle sera extraite dans le nouvel arbre-de-travail, si elle n'est pas extraite ailleurs, sinon la commande refusera de créer l'arbre-de-travail (à moins que `--force` soit utilisé).
++
+Si l ' on omet `<commit-esque>`, que ni `---detach`, ni `--orphan` ne sont utilisés et qu'il n ' y a pas de branche locale valide (ou de branches distantes si`--guess-remote` est spécifié ), alors, par commodité, le nouvel arbre-de-travail est associé à une nouvelle branche orpheline dénommée `<branche >` (après `$(basename <chemin>)` si ni `-b`ni `-B` n ' est utilisé) comme si `--orphan` était passé à la commande. Dans le cas où le dépôt a un distant et où `--guess-remote` est utilisé, mais où il n'y a pas de branches distantes ou locales, alors la commande échoue avec un avertissement rappelant à l'utilisateur de récupérer depuis leur dépôt distant avant (ou passer outre en utilisant `-f/-force`).
 
 list::
 
@@ -120,6 +122,9 @@ Cela peut également être configuré comme le comportement par défaut en utili
 -n::
 --dry-run::
 	Avec `prune`, ne rien supprimer ; montrer seulement ce qui serait supprimé.
+
+--orphan::
+	Avec `add`, rendre le nouveau arbre-de-travail et index vides, associant l'arbre-de-travail avec une nouvelle branche orpheline/non-née nommée `<nouvelle-branche>`.
 
 --porcelain::
 	Avec `list`, donner la sortie dans un format facile à analyser par script. Ce format restera stable à travers les versions de Git et sans tenir compte de la configuration utilisateur. Il est recommandé de combiner ceci avec `-z`. Voir ci-dessous pour de plus amples détails.

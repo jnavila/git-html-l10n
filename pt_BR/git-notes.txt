@@ -9,10 +9,10 @@ RESUMO
 ------
 [verse]
 'git notes' [list [<objeto>]]
-'git notes' add [-f] [--allow-empty] [-F <arquivo> | -m <msg> | (-c | -C) <objeto>] [<objeto>]
-'git notes' copy [-f] ( --stdin | <a-partir-do-objeto> [<para-o-objeto>] )
-'git notes' append [--allow-empty] [-F <arquivo> | -m <msg> | (-c | -C) <objeto>] [<objeto>]
-'git notes' edit [--allow-empty] [<objeto>]
+'git notes' add [-f] [--allow-empty] [--[no-]separator | --separator=<quebra-parágrafo>] [--[no-]stripspace] [-F <file> | -m <msg> | (-c | -C) <objeto>] [<objeto>]
+'git notes' copy [-f] ( --stdin | <do-objeto> [<para-o-objeto>] )
+'git notes' append [--allow-empty] [--[no-]separator | --separator=<quebra-parágrafo>] [--[no-]stripspace] [-F <file> | -m <msg> | (-c | -C) <objeto>] [<objeto>]
+'git notes' edit [--allow-empty] [<objeto>] [--[no-]stripspace]
 'git notes' show [<objeto>]
 'git notes' merge [-v | -q] [-s <estratégia> ] <notes-ref>
 'git notes' merge --commit [-v | -q]
@@ -44,7 +44,7 @@ list::
 	Liste as anotações do objeto para um determinado objeto. Caso nenhum objeto seja informado, exiba uma lista com todas as anotações dos objetos e os objetos que eles anotam (no formato "<nota do objeto> <objeto anotado>"). Este é o subcomando predefinido caso nenhum subcomando seja utilizado.
 
 add::
-	Adiciona anotações para um determinado objeto (a predefinição retorna para `HEAD`). Interrompa caso o objeto já tiver anotações (utilize `-f` para substituir as anotações já existentes). No entanto, caso você esteja utilizando `add` de forma interativa (utilizando um editor para editar o conteúdo das notas), então - em vez de interromper - as anotações já existentes serão abertas no editor (como o subcomando `edit`).
+	Adiciona anotações para um determinado objeto (padrão para HEAD). Abortar se o objeto já tiver anotações (use `-f` para substituir as anotações existentes). No entanto, se estiver usando o `add` de forma interativa (usando um editor para fornecer o conteúdo das notas), em vez de abortar, as anotações existentes serão abertas no editor (como o subcomando `edit`). Se você especificar vários `-m` e `-F`, uma linha em branco será inserida entre as mensagens. Use a opção `--separator` para inserir outros delimitadores.
 
 copy::
 	Copie as anotações para o primeiro objeto no segundo (a predefinição retorna para `HEAD`). Interrompa caso o segundo objeto já tenha as anotações ou caso o primeiro objeto não tiver nenhuma (utilize '-f' para substituir as anotações existentes no segundo objeto). Este subcomando se equivale a: `git notes add [-f] -C $(git notes list <do-objeto>) <para-o-objeto>`
@@ -58,7 +58,7 @@ No modo `--stdin`, pegue as linhas no formato
 na entrada padrão e copie as anotações de cada <do-objeto> para o seu <para-o-objeto> correspondente. (O `<rest>` opcional é ignorado para que o comando possa ler a entrada informada ao gancho `post-rewrite`.)
 
 append::
-	Anexe às anotações de um objeto já existente (a predefinição retorna para `HEAD`). Cria uma nova anotação no objeto, caso seja necessário.
+	Anexa nova(s) mensagem(ns) fornecida(s) pelas opções `-m` ou `-F` a uma anotação já existente ou as adiciona como uma nova anotação, caso não exista uma, para o objeto (o padrão é HEAD). Ao anexar a uma anotação existente, uma linha em branco é adicionada antes de cada nova mensagem como um separador entre os parágrafos. O separador pode ser personalizado com a opção `--separator`.
 
 edit::
 	Edite as anotações para um determinado objeto (a predefinição retorna para `HEAD`).
@@ -88,15 +88,15 @@ OPÇÕES
 
 -m <msg>::
 --message=<msg>::
-	Utilize uma mensagem da anotação informada (em vez de solicitar). Caso várias opções `-m` seja informadas, os seus valores serão concatenados como parágrafos separados. Serão removidas as linhas começando com `#` e as linhas vazias que não estejam numa única linha entre os parágrafos.
+	Use a mensagem fornecida da anotação (em vez de solicitar). Se forem fornecidas várias opções `-m`, os seus valores serão concatenados como parágrafos separados. Serão removidas as linhas que começam com `#` e as linhas vazias que não sejam uma única linha entre parágrafos; se você quiser mantê-las textualmente, use a opção `--no-stripspace`.
 
 -F <arquivo>::
 --file=<arquivo>::
-	Pegue a mensagem da anotação do arquivo informado. Utilize '-' para ler a mensagem da nota vindo da entrada padrão. Serão removidas as linhas começando com `#` e as linhas vazias que não estejam numa única linha entre os parágrafos.
+	Obtém a mensagem de anotação a partir de um determinado arquivo. Use '-' para ler a mensagem da anotação na entrada padrão. As linhas que começam com `#` e as linhas vazias que não sejam uma única linha entre os parágrafos serão removidas; se você quiser mantê-las textualmente, use a opção `--no-stripspace`.
 
 -C <objeto>::
 --reuse-message=<objeto>::
-	Tome o objeto bolha informada (outra nota por exemplo) como uma mensagem da nota. (Utiliza `git notes copy <objeto>` em vez da copia das notas entre os objetos.)
+	Tome o objeto bolha fornecido (por exemplo, outra anotação) como a mensagem da anotação. (Em vez disso, use `git notes copy <objeto>` para copiar anotações entre os objetos). Por padrão, a mensagem será copiada literalmente, mas caso queira remover as linhas que começam com `#` e as linhas vazias que não sejam uma única linha entre parágrafos, use a opção `--stripspace`.
 
 -c <objeto>::
 --reedit-message=<objeto>::
@@ -104,6 +104,12 @@ OPÇÕES
 
 --allow-empty::
 	Permita que uma anotação vazia do objeto seja armazenado. O comportamento predefinido é remover automaticamente as anotações que estiverem vazias.
+
+--[no-]separator, --separator=<quebra-do-parágrafo>::
+	Especifique uma string usada como separador personalizado entre os parágrafos (uma nova linha é adicionada ao final, conforme seja necessário). caso a opção `--no-separator` seja usada, nenhum separador entre os parágrafos será adicionado. O padrão é uma linha em branco.
+
+--[no-]stripspace::
+	Retire os espaços em branco iniciais e finais da mensagem de anotação. Remova também as linhas vazias que não sejam uma única linha entre os parágrafos. As linhas que começam com `#` serão removidas em casos não relacionados ao editor, como "-m", "-F" e "-C", mas não em casos relacionados ao editor, como "git notes edit", "-c" etc.
 
 --ref <ref>::
 	Manipule as anotações da árvore na <ref>. Sobrescreve o `GIT_NOTES_REF` e a configuração "core.notesRef". A "ref" determina o nome completo quando começa com `refs/notes/`; quando começa com `notes/`, `refs/` e caso contrário `refs/notes/` é prefixado para formar um nome completo da "ref".
