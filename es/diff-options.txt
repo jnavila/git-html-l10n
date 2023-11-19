@@ -22,13 +22,7 @@ ifndef::git-format-patch[]
 -p::
 -u::
 --patch::
-	Genera parche (ver sección titulada
-ifdef::git-log[]
-<<generate_patch_text_with_p, "Generando texto de parche con -p">>).
-endif::git-log[]
-ifndef::git-log[]
-"Generando texto de parche con -p").
-endif::git-log[]
+	Genera parche (ver <<generate_patch_text_with_p>>).
 ifdef::git-diff[]
 	Este es el predeterminado
 endif::git-diff[]
@@ -40,42 +34,53 @@ endif::git-diff[]
 endif::git-format-patch[]
 
 ifdef::git-log[]
---diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc|remerge|r)::
+-m::
+	Muestra diffs para confirmaciones de fusión en el formato predeterminado. Es similar a '--diff-merges=on', excepto `-m` no producirá salida a menos que se dé también `-p`.
+
+-c::
+	Produce salida de diff combinada para confirmaciones de fusión. Atajo para '--diff-merges=combined -p'.
+
+--cc::
+	Produce salida de diff densa combinada para confirmaciones de fusión. Atajo para '--diff-merges=dense-combined -p'.
+
+--dd::
+	Produce diff con respecto al primer padre tanto para confirmaciones normales como de fusión. Atajo para '--diff-merges=first-parent -p'.
+
+--remerge-diff::
+	Produce salida de diff de re-fusión para confirmaciones de fusión. Atajo para '--diff-merges=remerge -p'.
+
 --no-diff-merges::
+	Sinónimo de '--diff-merges=off'.
+
+--diff-merges=<formato>::
 	Especifica el formato de diff a usar para commits de fusión. El predeterminado es {diff-merges-default} a menos que se use `--first-parent`, en tal caso `first-parent` es el predeterminado.
 +
---diff-merges=(off|none):::
---no-diff-merges:::
+Los siguientes formatos están soportados:
++
+--
+off, none::
 	Deshabilita la salida de diff para commits de fusión. Útil para sobreescribir el valor implicado.
 +
---diff-merges=on:::
---diff-merges=m:::
--m:::
-	Esta opción hace que se muestre la salida de diff para commits de fusión en el formato predeterminado. `-m` producirá la salida sólo si también de proporciona `-p`. Se puede cambiar el formato predeterminado usando el parámetro de configuración `log.diffMerges`, cuyo valor predeterminado es `separate`.
+on, m::
+	Hace que se muestre la salida de diff en el formato predeterminado para confirmaciones de fusión. Se puede cambiar el formato predeterminado usando la variable de configuración `log.diffMerges`, cuyo valor predeterminado es `separate`.
 +
---diff-merges=first-parent:::
---diff-merges=1:::
-	Esta opción hace que los commits de fusión muestren el diff completo con respecto al primer antecesor únicamente.
+first-parent, 1::
+	Mostrar diff completo con respecto a su primer padre. Es el mismo formato que produce `--patch` para confirmaciones de no-fusión.
 +
---diff-merges=separate:::
-	Este hace que los commits de fusión muestren el diff completo con respecto a cada uno de los padres. Para cada padre por separado se generan entrada en la bitácora y diff.
+separate::
+	Muestra el diff completo con respecto a cada uno de los padres. Para cada padre por separado se generan entrada en la bitácora y diff.
 +
---diff-merges=remerge:::
---diff-merges=r:::
---remerge-diff:::
-	Con esta opción, commits de fusión de dos padres son re-fusionados para crear un objeto árbol temporal -- potencialmente conteniendo ficheros con marcadores de conflicto y similares. Entonces se muestra un diff entre ese árbol temporal y el commit de fusión actual.
+combined, c::
+	Muestra simultáneamente las diferencias entre todos -y cada uno de- los padres y el resultado de la fusión, en lugar de mostrar diferencias por pares entre un padre y el resultado, uno a la vez. Mas allá, lista sólo los ficheros que fueron modificados de todos los padres.
++
+dense-combined, cc::
+	Compresión posterior de salida producida por `--diff-merges=combined` al omitir fragmentos no-interesantes cuyo contenido en los padres sólo tienen dos variantes y la fusión resulta elegir una de ellas sin modificación.
++
+remerge, r::
+	Refusiona confirmaciones de fusión de dos padres para crear un objeto árbol temporal --potencialmente conteniendo ficheros con marcadores de conflicto y similares. Entonces se muestra un diff entre ese árbol temporal y la confirmación de fusión actual.
 +
 La salida emitida cuando se usa esta opción es sujeta a cambios, y también lo es su interacción con otras opciones (a menos que esté explícitamente documentado).
-+
---diff-merges=combined:::
---diff-merges=c:::
--c:::
-	Con esta opción, la salida del diff para un commit de fusión muestra las diferencias entre cada uno de los padres al resultado de la fusión simultáneamente en lugar de mostrar por pares la diferencia entre un padre y el resultado uno a la vez. Mas allá, lista sólo los ficheros que fueron modificados de todos los padres. `-c` implica `-p`.
-+
---diff-merges=dense-combined:::
---diff-merges=cc:::
---cc:::
-	Con esta opción la salida producida por `--diff-merges=combined` es además comprimida al omitir fragmentos no-interesantes cuyo contenido en los padres sólo tienen dos variantes y la fusión resulta elegir una de ellas sin modificación. `--cc` implica `-p`.
+--
 
 --combined-all-paths::
 	Esta bandera causa diffs combinados (usados para commits de fusión) para listar el nombre del fichero de todos los padres. Por lo tanto sólo tiene efecto cuando se usa `--diff-merges=[dense-]combined`, y es probable que sólo sea útil si se detectan cambios de nombre de fichero (ej. cuando se ha solicitado detección ya sea de renombre o de copia).
@@ -133,13 +138,13 @@ endif::git-log[]
 	Ocupa tiempo extra para asegurarse que se produce el diff más pequeño posible.
 
 --patience::
-	Generar diferencias mediante el algoritmo «patience diff».
+	Generar diferencias mediante el algoritmo "patience diff".
 
 --histogram::
-	Generar diferencias mediante el algoritmo «histogram diff».
+	Generar diferencias mediante el algoritmo "histogram diff".
 
 --anchored=<texto>::
-	Generar diferencias mediante el algoritmo «anchored diff».
+	Generar diferencias mediante el algoritmo "anchored diff".
 +
 Esta opción puede ser especificada más de una vez.
 +
@@ -162,7 +167,7 @@ Si una línea existe tanto en fuente como en destino, existe sólo una vez, y co
 Por lo tanto, si configuraste la variable `diff.algorithm` a un valor no predeterminado y quieres usar el predeterminado, entonces tienes que usar la opción `--diff-algorithm=default`.
 
 --stat[=<anchura>[,<anchura-nombre>[,<recuento>]]]::
-	Generate a diffstat. By default, as much space as necessary will be used for the filename part, and the rest for the graph part. Maximum width defaults to terminal width, or 80 columns if not connected to a terminal, and can be overridden by `<width>`. The width of the filename part can be limited by giving another width `<name-width>` after a comma. The width of the graph part can be limited by using `--stat-graph-width=<width>` (affects all commands generating a stat graph) or by setting `diff.statGraphWidth=<width>` (does not affect `git format-patch`). By giving a third parameter `<count>`, you can limit the output to the first `<count>` lines, followed by `...` if there are more.
+	Generate a diffstat. By default, as much space as necessary will be used for the filename part, and the rest for the graph part. Maximum width defaults to terminal width, or 80 columns if not connected to a terminal, and can be overridden by `<width>`. The width of the filename part can be limited by giving another width `<name-width>` after a comma or by setting `diff.statNameWidth=<width>`. The width of the graph part can be limited by using `--stat-graph-width=<width>` or by setting `diff.statGraphWidth=<width>`. Using `--stat` or `--stat-graph-width` affects all commands generating a stat graph, while setting `diff.statNameWidth` or `diff.statGraphWidth` does not affect `git format-patch`. By giving a third parameter `<count>`, you can limit the output to the first `<count>` lines, followed by `...` if there are more.
 +
 Estos parámetros también se puedes asignar individualmente con `--stat-width=<ancho>`, `--stat-name-width=<nombre-ancho>` y `--stat-count=<conteo>`.
 
@@ -212,7 +217,7 @@ ifndef::git-format-patch[]
 
 -z::
 ifdef::git-log[]
-	Separa los commits con NULs en lugar de saltos de línea.
+	Separa las confirmaciones con NULs en lugar de saltos de línea.
 +
 Además, cuando se da `--raw` o `--numstat`, no manipula los nombres de ruta y usa NULs como salida de terminadores de campo.
 endif::git-log[]
@@ -391,18 +396,18 @@ endif::git-log[]
 --irreversible-delete::
 	Omit the preimage for deletes, i.e. print only the header but not the diff between the preimage and `/dev/null`. The resulting patch is not meant to be applied with `patch` or `git apply`; this is solely for people who want to just concentrate on reviewing the text after the change. In addition, the output obviously lacks enough information to apply such a patch in reverse, even manually, hence the name of the option.
 +
-When used together with `-B`, omit also the preimage in the deletion part of a delete/create pair.
+Cuando se usa junto con `-B`, omite también la preimagen en la parte de borrado de un par borrar/crear.
 
 -l<número>::
-	The `-M` and `-C` options involve some preliminary steps that can detect subsets of renames/copies cheaply, followed by an exhaustive fallback portion that compares all remaining unpaired destinations to all relevant sources. (For renames, only remaining unpaired sources are relevant; for copies, all original sources are relevant.) For N sources and destinations, this exhaustive check is O(N^2). This option prevents the exhaustive portion of rename/copy detection from running if the number of source/destination files involved exceeds the specified number. Defaults to diff.renameLimit. Note that a value of 0 is treated as unlimited.
+	Las opciones `-M`y `-C` involucran algunos pasos preliminares que pueden detectar subconjuntos de renombramientos/copias económicamente, seguido de una porción exhaustiva de iteraciones que compara todos los destinos remanentes sin pareja con todos los orígenes relevantes. (Para renombramientos, sólo los orígenes remanentes sin pareja son relevantes; para copias, todos los orígenes son relevantes). Para N orígenes y destinos, esta verificación exhaustiva es O(N^2). Esta opción previene la ejecución de la porción exhaustiva de detección de renombramiento/copia si el número de ficheros orígenes/destino involucrado excede el número especificado. Es predeterminado a diff.renameLimit. Nota que un valor de 0 es tratado como ilimitado.
 
 ifndef::git-format-patch[]
 --diff-filter=[(A|C|D|M|R|T|U|X|B)...[*]]::
-	Select only files that are Added (`A`), Copied (`C`), Deleted (`D`), Modified (`M`), Renamed (`R`), have their type (i.e. regular file, symlink, submodule, ...) changed (`T`), are Unmerged (`U`), are Unknown (`X`), or have had their pairing Broken (`B`). Any combination of the filter characters (including none) can be used. When `*` (All-or-none) is added to the combination, all paths are selected if there is any file that matches other criteria in the comparison; if there is no file that matches other criteria, nothing is selected.
+	Selecciona sólo los ficheros que son Agregados(`A`), Copiados (`C`), eliminados (`D`), Modificados (`M`), Renombrados (`R`), tienen su tipo (ej. fichero regular, enlace simbólico, submódulo, ...) cambiado (`T`), están sin fusionar (`U`), son desconocidos (`X`), o tienen su pareja rota (`B`). Se puede usar cualquier combinación de los caracteres filtro (incluyendo ninguno). Cuando se agrega `*`(todo-o-nada) a la combinación, todas las rutas son seleccionadas si hay algún fichero que cumpla otro criterio en la comparación; si no hay fichero que cumpla otro criterio, nada es seleccionado.
 +
-Also, these upper-case letters can be downcased to exclude. E.g. `--diff-filter=ad` excludes added and deleted paths.
+También, estas letras en mayúsculas pueden ser en minúscula para excluir. Ej. `--diff-filter=ad` excluye rutas añadidas y eliminadas.
 +
-Note that not all diffs can feature all types. For instance, copied and renamed entries cannot appear if detection for those types is disabled.
+Nota que no todos los diffs pueden presentar todos los tipos. Por lo tanto, entradas copiadas y renombradas no pueden aparecer si la detección para esos tipos está deshabilitada.
 
 -S<cadena>::
 	Busca diferencias que cambian el número de ocurrencias de la cadena especificada (ej. adición/eliminación) en un fichero. Destinada para el uso de creadores de scripts.
@@ -441,42 +446,42 @@ El objeto puede ser un blob o un commit de submódulo. Implica la opción `-t` e
 
 endif::git-format-patch[]
 
--O<orderfile>::
-	Control the order in which files appear in the output. This overrides the `diff.orderFile` configuration variable (see linkgit:git-config[1]). To cancel `diff.orderFile`, use `-O/dev/null`.
+-O<fichero-de-ordenamiento>::
+	Controla el orden en el que aparecen los ficheros en la salida. Esto anula la variable de configuración `diff.orderFile` (ver linkgit:git-config[1]). Para cancelar `diff.orderFile`, use `-O/dev/null`.
 +
-The output order is determined by the order of glob patterns in <orderfile>. All files with pathnames that match the first pattern are output first, all files with pathnames that match the second pattern (but not the first) are output next, and so on. All files with pathnames that do not match any pattern are output last, as if there was an implicit match-all pattern at the end of the file. If multiple pathnames have the same rank (they match the same pattern but no earlier patterns), their output order relative to each other is the normal order.
+El orden de salida es determinado por el orden de patrones glob en <fichero-de-ordenamiento>. Todos los ficheros con nombres de ruta que coincidan el primer patrón salen primero, todos los ficheros con nombres de ruta que coincidan el segundo patrón (pero no el primero) salen después, y así sucesivamente. Todos los ficheros con nombres de ruta que no coincidan con algún patrón salen al último, como si hubiera implícito un patrón coincide-todo al final del fichero. Si varios nombres de ruta tienen el mismo rango (coinciden en el mismo patrón pero no en patrones anteriores), su orden de salida respecto al otro es el orden normal.
 +
-<orderfile> is parsed as follows:
+<fichero-de-ordenamiento> es analizado como sigue:
 +
 --
- - Blank lines are ignored, so they can be used as separators for readability.
+ - Líneas en blanco son ignoradas, que se pueden usar como separadores por legibilidad.
 
- - Lines starting with a hash ("`#`") are ignored, so they can be used for comments. Add a backslash ("`\`") to the beginning of the pattern if it starts with a hash.
+ - Líneas que comiencen con hash ("`#`") son ignoradas, que se pueden usar para comentarios. Agregue una diagonal invertida ("`\`") al inicio del patrón si comienza con un hash.
 
- - Each other line contains a single pattern.
+ - Cada línea contiene un solo patrón.
 --
 +
-Patterns have the same syntax and semantics as patterns used for fnmatch(3) without the FNM_PATHNAME flag, except a pathname also matches a pattern if removing any number of the final pathname components matches the pattern. For example, the pattern "`foo*bar`" matches "`fooasdfbar`" and "`foo/bar/baz/asdf`" but not "`foobarx`".
+Los patrones tienen la misma sintaxis y semántica que los patrones usados para fnmatch(3) sin la bandera FNM_PATHNAME, excepto que un nombre de ruta también coincida con un patrón si se le quita cualquier cantidad de componentes de ruta al final. Por ejemplo, el patrón "`foo*bar`" coincide "`fooasdbar`" y "`foo/bar/baz/asdf`" pero no "`foobarx`".
 
 --skip-to=<fichero>::
 --rotate-to=<fichero>::
-	Discard the files before the named <file> from the output (i.e. 'skip to'), or move them to the end of the output (i.e. 'rotate to'). These were invented primarily for use of the `git difftool` command, and may not be very useful otherwise.
+	Descarta de la salida los ficheros que están antes que el <fichero> nombrado (ej. 'skipt to'), o los mueve al final de la salida (ej. 'rotate to'). Estas opciones se inventaron primordialmente para uso del comando `git difftool`, y pueden no ser útiles de otra forma.
 
 ifndef::git-format-patch[]
 -R::
-	Swap two inputs; that is, show differences from index or on-disk file to tree contents.
+	Intercambia dos entradas; esto es, muestra diferencias entre el índice o fichero en disco y el contenido del árbol.
 endif::git-format-patch[]
 
 --relative[=<ruta>]::
 --no-relative::
-	When run from a subdirectory of the project, it can be told to exclude changes outside the directory and show pathnames relative to it with this option. When you are not in a subdirectory (e.g. in a bare repository), you can name which subdirectory to make the output relative to by giving a <path> as an argument. `--no-relative` can be used to countermand both `diff.relative` config option and previous `--relative`.
+	Cuando se ejecuta desde un subdirectorio del proyecto, se puede decir que se excluyan cambios fuera del directorio y mostrar los nombres de ruta relativos a él con ésta opción. Cuando no estas en un subdirectorio (ej. en un repositorio básico), puedes decir a cuál subdirectorio hacer relativa la salida dando una <ruta> como argumento. Se puede usar `--no-relative` para contrarrestar ambas opciones de configuración `diff.relative` y `--relative` previo.
 
 -a::
 --text::
 	Tratar todos los ficheros como si fueran de texto.
 
 --ignore-cr-at-eol::
-	Ignore carriage-return at the end of line when doing a comparison.
+	Ignora retornos de carro al final de la línea al comparar.
 
 --ignore-space-at-eol::
 	Ignorar cambios de espacios en blanco al finalizar renglón.
@@ -487,41 +492,41 @@ endif::git-format-patch[]
 
 -w::
 --ignore-all-space::
-	Ignore whitespace when comparing lines. This ignores differences even if one line has whitespace where the other line has none.
+	Ignora espacios en blanco al comparar líneas. Esto ignora diferencias incluso si una línea tiene espacio en blanco donde la otra no.
 
 --ignore-blank-lines::
 	Ignorar cambios cuyos renglones están todos vacíos.
 
 -l<expresión-regular>::
 --ignore-matching-lines=<expresión-regular>::
-	Ignore changes whose all lines match <regex>. This option may be specified more than once.
+	Ignora cambios donde todas las líneas coincidan <expresión-regular>. Esta opción puede especificarse mas de una vez.
 
 --inter-hunk-context=<líneas>::
-	Show the context between diff hunks, up to the specified number of lines, thereby fusing hunks that are close to each other. Defaults to `diff.interHunkContext` or 0 if the config option is unset.
+	Muestra el contexto entre pedazos de diferencia, hasta el número especificado de líneas, a modo de fusionar pedazos cercanos. Predeterminado a `diff.interHunkContext`o 0 si no se configura la opción.
 
 -W::
 --function-context::
-	Show whole function as context lines for each change. The function names are determined in the same way as `git diff` works out patch hunk headers (see 'Defining a custom hunk-header' in linkgit:gitattributes[5]).
+	Mostrar la función completa como líneas de contexto para cada cambio. Los nombres de función se determinan de la misma manera que `git diff` maneja encabezados de pedazos de parche (ver 'Definiendo un encabezado de pedazo personalizado' en linkgit:gitattributes[5]).
 
 ifndef::git-format-patch[]
 ifndef::git-log[]
 --exit-code::
-	Make the program exit with codes similar to diff(1). That is, it exits with 1 if there were differences and 0 means no differences.
+	Hace al programa salir con códigos similares a diff(1). Esto es, sale con 1 si hubo diferencias y 0 significa sin diferencias.
 
 --quiet::
-	Disable all output of the program. Implies `--exit-code`.
+	Deshabilita toda salida del programa. Implica `--exit-code`.
 endif::git-log[]
 endif::git-format-patch[]
 
 --ext-diff::
-	Allow an external diff helper to be executed. If you set an external diff driver with linkgit:gitattributes[5], you need to use this option with linkgit:git-log[1] and friends.
+	Permite la ejecución de un diff auxiliar externo. Si configuras un controlador de diff externo con linkgit:gitattributes[5], necesitas usar esta opción con linkgit:git-log[1] y compañía.
 
 --no-ext-diff::
-	Disallow external diff drivers.
+	Rechaza controladores de diff externos.
 
 --textconv::
 --no-textconv::
-	Allow (or disallow) external text conversion filters to be run when comparing binary files. See linkgit:gitattributes[5] for details. Because textconv filters are typically a one-way conversion, the resulting diff is suitable for human consumption, but cannot be applied. For this reason, textconv filters are enabled by default only for linkgit:git-diff[1] and linkgit:git-log[1], but not for linkgit:git-format-patch[1] or diff plumbing commands.
+	Permite (o rechaza) que se ejecuten filtros de conversión de texto externos cuando se comparan ficheros binarios. Ver linkgit:gitattributes[5] para detalles. Dado que filtros conversores de texto son típicamente unidireccionales, la diferencia resultante es adecuada para consumo humano, pero no puede ser aplicada. Por esta razón, filtros textconv se habilitan predeterminadamente sólo para linkgit:git-diff[1] and linkgit:git-log[1], pero no para linkgit:git-format-patch[1] o comandos de plomería de diff.
 
 --ignore-submodules[=<cuando>]::
 	Ignore changes to submodules in the diff generation. <when> can be either "none", "untracked", "dirty" or "all", which is the default. Using "none" will consider the submodule modified when it either contains untracked or modified files or its HEAD differs from the commit recorded in the superproject and can be used to override any settings of the 'ignore' option in linkgit:git-config[1] or linkgit:gitmodules[5]. When "untracked" is used submodules are not considered dirty when they only contain untracked content (but they are still scanned for modified content). Using "dirty" ignores all changes to the work tree of submodules, only changes to the commits stored in the superproject are shown (this was the behavior until 1.7.0). Using "all" hides all changes to submodules.
@@ -536,12 +541,12 @@ endif::git-format-patch[]
 	No mostrar ningún prefijo de origen o de destino.
 
 --default-prefix::
-	Use the default source and destination prefixes ("a/" and "b/"). This is usually the default already, but may be used to override config such as `diff.noprefix`.
+	Usa los prefijos predeterminados de origen y destino ("a/" y "b/"). Esto ya es normalmente el predeterminado, pero puede ser usado para anular configuraciones como `diff.noprefix`.
 
 --line-prefix=<prefijo>::
 	Anteponer un prefijo adicional a cada línea mostrada.
 
 --ita-invisible-in-index::
-	By default entries added by "git add -N" appear as an existing empty file in "git diff" and a new file in "git diff --cached". This option makes the entry appear as a new file in "git diff" and non-existent in "git diff --cached". This option could be reverted with `--ita-visible-in-index`. Both options are experimental and could be removed in future.
+	Predeterminadamente las entradas agregadas por "git add -N" aparecen como un fichero vacío existente en "git diff" y como un fichero nuevo en "git diff --cached". Esta opción hace que la entrada aparezca como fichero nuevo en "git diff" y como inexistente en "git diff --cached". Esta opción puede revertirse con `--ita-visible-in-index`. Ambas opciones son experimentales y pueden ser removidas en el futuro.
 
-For more detailed explanation on these common options, see also linkgit:gitdiffcore[7].
+Para una explicación mas detallada sobre estas opciones comunes ver también linkgit:gitdiffcore[7].

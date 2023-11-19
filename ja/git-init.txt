@@ -22,7 +22,7 @@ git-init - 空のGitリポジトリを作成、または既存のリポジトリ
 
 環境変数 `$GIT_DIR` が設定されている場合は、リポジトリのベースとして `./.git` の代わりに使用するパスを指定します。
 
-オブジェクトストレージのディレクトリが環境変数 `$GIT_OBJECT_DIRECTORY` で指定されている場合は、その下に sha1 ディレクトリが作成されますが、そうでない場合は、デフォルトの `$GIT_DIR/objects` ディレクトリが使用されます。
+If the object storage directory is specified via the `$GIT_OBJECT_DIRECTORY` environment variable then the sha1 directories are created underneath; otherwise, the default `$GIT_DIR/objects` directory is used.
 
 既存のリポジトリで'git init'を実行しても安全です。すでにあるものを上書きすることはありません。再度 'git init' を実行する主な理由は、新しく追加されたテンプレートを取り込むためです (あるいは、--separate--git--dir が指定されている場合はリポジトリを別の場所に移動させるためです)。
 
@@ -50,9 +50,9 @@ include::object-format-disclaimer.txt[]
 
 --separate-git-dir=<git-dir>::
 
-リポジトリを `$GIT_DIR` や `./.git/` のようなディレクトリとして初期化するのではなく、実際のリポジトリへのパスを含むテキストファイルをそこに作成します。 このファイルは、ファイルシステムにとらわれない Git のリポジトリへのシンボリックリンクとして機能します。
+Instead of initializing the repository as a directory to either `$GIT_DIR` or `./.git/`, create a text file there containing the path to the actual repository. This file acts as a filesystem-agnostic Git symbolic link to the repository.
 +
-再初期化の場合は、指定したパスにリポジトリが移動します。
+If this is a reinitialization, the repository will be moved to the specified path.
 
 -b <branch-name>::
 --initial-branch=<branch-name>::
@@ -72,7 +72,7 @@ umask(2)で報告されたパーミッションを使用します。 `--shared` 
 
 'group' (or 'true')::
 
-リポジトリをグループ書き込み可能にします (git グループがすべてのユーザーのプライマリグループではない場合があるので、g+sx も)。これは、安全なumask(2)の値のパーミッションを緩めるために使われます。ただし、umask は他のパーミッションビットにも適用されることに注意しましょう (たとえば umask が '0022' の場合、'group' を使っても他の (グループではない) ユーザーから読み取り権限を奪うことはできません)。リポジトリのパーミッションを正確に指定する方法については、'0xxx'を参照してください。
+Make the repository group-writable, (and g+sx, since the git group may not be the primary group of all users). This is used to loosen the permissions of an otherwise safe umask(2) value. Note that the umask still applies to the other permission bits (e.g. if umask is '0022', using 'group' will not remove read privileges from other (non-group) users). See '0xxx' for how to exactly specify the repository permissions.
 
 'all' (or 'world' or 'everybody')::
 
@@ -80,7 +80,7 @@ umask(2)で報告されたパーミッションを使用します。 `--shared` 
 
 '<perm>'::
 
-'<perm>' は `0` の接頭辞が付いた3桁の8進数で、各ファイルのモードは '<perm>' になります。 '<perm>' は、ユーザーのumask(2)の値を上書きします（'group' や 'all' のようにパーミッションが緩くなるだけではありません）。'0640' は、グループでの読み取りは可能ですが、グループでの書き込みや他の人からのアクセスはできないリポジトリを作成します。'0660' は、現在のユーザーとグループは読み書き可能だが、他のユーザーにはアクセスできないリポジトリを作成します（ディレクトリと実行可能ファイルは対応するユーザークラスの `r` ビットから `x` ビットを取得します）。
+'<perm>' is a 3-digit octal number prefixed with `0` and each file will have mode '<perm>'. '<perm>' will override users' umask(2) value (and not only loosen permissions as 'group' and 'all' do). '0640' will create a repository which is group-readable, but not group-writable or accessible to others. '0660' will create a repo that is readable and writable to the current user and group, but inaccessible to others (directories and executable files get their `x` bit from the `r` bit for corresponding classes of users).
 --
 
 デフォルトでは、共有リポジトリでは設定フラグの `receive.denyNonFastForwards` が有効になっており、高速転送ではないプッシュを強制できません。

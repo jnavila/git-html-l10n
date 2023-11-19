@@ -90,7 +90,7 @@ Os espaços reservados são:
 - O Espaços reservados que se expandem para um único caractere literal:
 '%n':: newline
 '%%':: a raw '%'
-'%x00':: imprime um byte de um código hexadecimal
+'%x00':: '%x' seguido de dois dígitos hexadecimais é substituído por um byte com o valor dos dígitos hexadecimais (chamaremos isso de "código de formatação literal" no restante deste documento).
 
 - Espaços reservados que afetam a formatação de espaços reservados posteriores:
 '%Cred':: mudar de cor para o vermelho
@@ -143,7 +143,23 @@ Os espaços reservados são:
 '%ch':: a data de quem fez o commit, compreensível para pessoas (como a opção `--date=human` do linkgit:git-rev-list[1])
 '%d':: nomes de referência "ref", como a opção --decorate do linkgit:git-log[1]
 '%D':: nomes de referência "ref" sem quebra automática " (", ")".
-'%(describe[:options])':: nome legível para as pessoas, como linkgit:git-describe[1]; uma expressão vazia para os commits sem descrição. A expressão `describe` pode ser seguida por dois pontos e zero ou mais opções separadas por vírgulas. As descrições podem ser inconsistentes quando as etiquetas são adicionadas ou removidas ao mesmo tempo.
+'%(decorate[:<opções>])'::
+nomes de ref com decorações personalizadas. A string `decorate` pode ser seguida por dois pontos e zero ou mais opções separadas por vírgulas. Os valores das opções podem conter códigos de formatação literais. Eles devem ser usados para vírgulas (`%x2C`) e parênteses de fechamento (`%x29`), devido à sua função na sintaxe da opção.
++
+** 'prefix=<valor>': Exibido antes da lista de nomes de referência. O padrão é "{nbsp}`(`".
+** 'suffix=<valor>': Exibido após a lista de nomes de referência. O padrão é "`)`".
+** 'separator=<valor>': Mostrado entre os nomes das refs. O padrão é "`,`{nbsp}".
+** 'pointer=<valor>': Mostrado entre HEAD e o ramo para o qual aponta, se houver.
+		      A predefinição é "{nbsp}`->`{nbsp}".
+** 'tag=<valor>': Mostrado antes dos nomes das tags. A predefinição é "`tag:`{nbsp}".
+
++
+Por exemplo, para produzir decorações sem anotações nas tags, de envelopamento ou de espaços como separadores:
++
+`%(decorate:prefix=,suffix=,tag=,separator= )`
+
+'%(describe[:<opções>])'::
+nome legível para as pessoas, como linkgit:git-describe[1]; uma expressão vazia para os commits sem descrição. A expressão `describe` pode ser seguida por dois pontos e zero ou mais opções separadas por vírgulas. As descrições podem ser inconsistentes quando as etiquetas são adicionadas ou removidas ao mesmo tempo.
 +
 ** 'tags[=<bool-value>]': Em vez de considerar apenas as tags anotadas, considere também as lightweight tags.
 ** 'abbrev=<número>': Em vez de usar o número padrão com dígitos hexadecimais (que variam de acordo com a quantidade dos objetos no repositório com um padrão de 7) do nome abreviado do objeto, utilize `<número>` dígitos ou quantos dígitos forem necessários para formar um nome do objeto que seja único.
@@ -173,7 +189,8 @@ endif::git-rev-list[]
 '%ge':: e-mail da identidade reflog
 '%gE':: e-mail da identidade do reflog (respeitando .mailmap, consulte linkgit:git-shortlog[1] ou linkgit:git-blame[1])
 '%gs':: assunto reflog
-'%(trailers[:options])':: exibe os trechos do corpo como interpretado através do linkgit:git-interpret-trailers[1]. Os trechos do texto da resposta podem ser seguidas por dois pontos, zero ou mais opções separadas por vírgula: Caso qualquer opção seja usada várias vezes, a última ocorrência ganha.
+'%(trailers[:<opções>])'::
+exibe os trechos do corpo como interpretado através do linkgit:git-interpret-trailers[1]. Os trechos do texto da resposta podem ser seguidas por dois pontos, zero ou mais opções separadas por vírgula: Caso qualquer opção seja usada várias vezes, a última ocorrência ganha.
 +
 ** 'key=<chave>': exibe apenas os caracteres de resposta com as <chaves> que forem definidas. A combinação é feita sem distinção entre maiúsculas e minúsculas, os dois pontos à direita são opcionais. Caso a opção seja utilizada várias vezes, os atributos das linhas coincidentes a qualquer uma das teclas serão exibidas. Esta opção ativa automaticamente a opção `only`, para que as linhas de bloqueio não sejam ocultadas. Caso não seja o efeito desejado, pode ser desativado com a opção `only=false`. Por exemplo, `%(trailers:key=Revisado-por)` exibe as linhas com caracteres de resposta com a chave `Revisado-por`.
 ** 'only[=<bool>]': selecione se as linhas não relacionadas à resposta a partir do bloco de resposta, devem ser incluídas ou não.

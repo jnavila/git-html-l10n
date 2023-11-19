@@ -9,7 +9,7 @@ RESUMO
 ------
 [verse]
 'git interpret-trailers' [--in-place] [--trim-empty]
-			[(--trailer <token>[(=|:)<valor>])...]
+			[(--trailer (<chave>|<keyAlias>)[(=|:)<valor>])...]
 			[--parse] [<arquivo>...]
 
 DESCRIÇÃO
@@ -27,28 +27,38 @@ Assinado-por: Bob <bob@example.com>
 
 as duas últimas linhas começando com "Signed-off-by" são os "trailers".
 
-Esse comando lê as mensagens dos commits seja a partir dos argumentos do <arquivo> ou da entrada padrão caso nenhum <arquivo> seja especificado. Se `--parse` for especificado, a saída consistirá nos "trailers" analisados. Caso contrário, esse comando aplica os argumentos passados usando a opção `--trailer`, se houver, a cada arquivo de entrada. O resultado é omitido na saída normal.
+Esse comando lê as mensagens dos commits seja a partir dos argumentos do <arquivo> ou da entrada padrão caso nenhum <arquivo> seja especificado. Se `--parse` for especificado, a saída consistirá nos "trailers" provenientes da entrada, sem influenciá-los com nenhuma opção na linha de comando ou de variável de configuração.
+
+Caso contrário, esse comando aplica as variáveis de configuração `trailer.*` (que podem potencialmente adicionar novos trailers, bem como reposicioná-los), assim como quaisquer argumentos de linha de comando que possam substituir as variáveis de configuração (como `--trailer=...`, que também pode adicionar novos trailers), a cada arquivo de entrada. O resultado é emitido na saída padrão.
 
 Esse comando também pode operar na saída do linkgit:git-format-patch[1], que é mais elaborado do que uma simples mensagem de confirmação. Ou seja, essa saída inclui uma mensagem de confirmação (como acima), uma linha divisória "---" e uma parte do patch. Para essas entradas, as partes do divisor e do patch não são modificadas por esse comando e são emitidas como estão na saída, a menos que a opção `--no-divider` seja especificada.
 
 Algumas variáveis de configuração controlam a forma como os argumentos `--trailer` são aplicados a cada entrada e a forma como qualquer trailer existente na entrada é alterado. Eles também possibilitam a adição automática de alguns trailers.
 
-Por padrão, um argumento '<token>=<valor>' ou '<token>:<valor>' usado com `--trailer` será anexado após os trailers existentes apenas se o último trailer tiver um par (<token>, <valor>) diferente (ou se não houver nenhum trailer existente). As partes <token> e <valor> serão cortadas para remover os espaços em branco iniciais e finais, o <token> e o <valor> cortados resultantes aparecerão na saída desta maneira:
+Por padrão, um argumento '<key>=<valor>' ou '<key>:<valor>' usado com `--trailer` será anexado após os trailers existentes apenas se o último trailer tiver um par (<key>, <valor>) diferente (ou se não houver nenhum trailer existente). As partes <key> e <valor> serão cortadas para remover os espaços em branco iniciais e finais, o <key> e o <valor> cortados resultantes aparecerão na saída desta maneira:
 
 ------------------------------------------------
-token: valor
+key: valor
 ------------------------------------------------
 
-Isso significa que o <token> e o <valor> recortados serão separados por `': '` (dois-pontos seguidos de um espaço). Por conveniência, o <token> pode ser uma cadeia de caracteres abreviada (por exemplo, "sign") em vez da cadeia de caracteres completa que deve aparecer antes do separador na saída (por exemplo, "Signed-off-by"). Isso pode ser configurado usando a variável de configuração 'trailer.<token>.key'.
+Significa que o <key> e o <valor> ajustado será separado por um `': '` (dois pontos seguido por um espaço).
+
+Por conveniência, um <keyAlias> pode ser configurado para tornar o uso do `--trailer` mais curto para ser digitado na linha de comando. Isso pode ser configurado usando a variável de configuração 'trailer.<keyAlias>.key'. O <keyAlias> deve ser um prefixo completo de caracteres <key> , embora a distinção entre maiúsculas e minúsculas não seja importante. Por exemplo, se você tiver
+
+------------------------------------------------
+trailer.sign.key "Signed-off-by: "
+------------------------------------------------
+
+em sua configuração, você só precisa especificar `--trailer="sign: foo"` na linha de comando em vez de `--trailer="Signed-off-by: foo"`.
 
 É predefinido que o novo trailer apareça no final de todos os trailers já existentes. Caso não haja nenhum, o novo trailer aparecerá no final. Uma linha em branco será adicionada antes do novo trailer caso já não exista um.
 
 Os trailers já existentes são extraídos da entrada procurando um grupo de uma ou mais linhas que (i) sejam todos trailers, ou (ii) contenham pelo menos um trailer gerado pelo Git ou que tenha sido configurado pelo usuário e consista de pelo menos 25% de trailers. O grupo deve ser precedido por uma ou mais linhas vazias (ou somente com espaços). O grupo deve estar no final da entrada ou ser as últimas linhas sem espaços antes de uma linha que comece com '---' (seguida de um espaço ou do final da linha).
 
-Ao ler os caracteres de resposta, não pode haver espaço em branco antes ou dentro do <token>, mas qualquer quantidade de espaço regular e de caracteres de tabulação são permitidos entre o <token> e o separador. Pode existir espaço antes, dentr ou depois do <valor>. O <valor> pode ser dividido em várias linhas, com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822. Exemplo:
+Ao ler os caracteres de resposta, não pode haver espaço em branco antes ou dentro do <key>, mas qualquer quantidade de espaço regular e de caracteres de tabulação são permitidos entre o <key> e o separador. Pode existir espaço antes, durante ou depois do <valor>. O <valor> pode ser dividido em várias linhas, com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822. Exemplo:
 
 ------------------------------------------------
-token: Esse é um valor muito longo, com espaços e
+key: Esse é um valor muito longo, com espaços e
   novas linhas nele.
 ------------------------------------------------
 
@@ -62,32 +72,32 @@ OPÇÕES
 --trim-empty::
 	Se a parte <valor> de qualquer caractere de resposta tiver apenas espaços, todo o caractere de resposta será removido da saída. Isso se aplica tanto a caracteres de resposta já existentes e os novos.
 
---trailer <token>[(=|:)<valor>]::
-	Defina um par (<token>, <valor>) que deve ser aplicado como um caractere de resposta nas mensagens de entrada. Consulte a descrição deste comando.
+--trailer <key>[(=|:)<valor>]::
+	Defina um par (<key>, <valor>) que deve ser aplicado como um caractere de resposta nas mensagens de entrada. Consulte a descrição deste comando.
 
 --where <arranjo>::
 --no-where::
-	Especifique onde todos os novos caracteres de resposta serão adicionados. Uma configuração utilizada com '--where' substitui todas as variáveis de configuração e se aplica a todas as opções `--trailer` até a próxima ocorrência de '--where' ou '--no-where'. Os valores válidos são `after`, `before`, `end` or `start`.
+	Especifica onde todos os novos trailers serão adicionados. Uma configuração usada com '--where' substitui as variáveis de configuração `trailer.where` e qualquer variável aplicável `trailer.<keyAlias>.where` e se aplica a todas as opções '--trailer' até a próxima ocorrência de '--where' ou '--no-where'. Ao encontrar '--no-where', elimine o efeito de qualquer uso anterior de '--where', de modo que as variáveis de configuração relevantes não sejam mais substituídas. Os posicionamentos possíveis são `after`, `before`, `end` ou `start`.
 
 --if-exists <ação>::
 --no-if-exists::
-	Especifique a ação que será executada quando já houver pelo menos um caracter de resposta com o mesmo <token> na entrada. Uma configuração fornecida com "--if-exists" substitui todas as variáveis de configuração e se aplica a todas as opções "--trailer" até a próxima ocorrência de "--if-exists" ou "--no-if-exists". As possiveis ações são `addIfDifferent`, `addIfDifferentNeighbor`, `add`, `replace` e `doNothing`.
+	Especifique a ação que será executada quando já houver pelo menos um trailer com a mesma <key> na entrada. Uma configuração usada com '--if-exists' substitui as variáveis de configuração `trailer.ifExists` e qualquer variável de configuração `trailer.<keyAlias>.ifExists` aplicável e se aplica a todas as opções '--trailer' até a próxima ocorrência de '--if-exists' ou '--no-if-exists'. Ao encontrar '--no-if-exists, limpe o efeito de qualquer uso anterior de '--if-exists, de modo que as variáveis de configuração relevantes não sejam mais substituídas. As ações possíveis são `addIfDifferent`, `addIfDifferentNeighbor`, `add`, `replace` e `doNothing`.
 
 --if-missing <ação>::
 --no-if-missing::
-	Especifique a ação que será executada quando não houver outro trailer com o mesmo <token> na entrada. Uma configuração usada com "--if-missing" irá substituir todas as variáveis de configuração e se aplica a todas as opções "--trailer" até a próxima ocorrência de "--if-missing" ou "--no-if-missing". As possíveis ações são `doNothing` ou `add`.
+	Especifique a ação a ser executada quando não houver outro trailer com a mesma <key> na entrada. Uma configuração usada com '--if-missing' substitui as variáveis de configuração `trailer.ifMissing` e qualquer variável de configuração `trailer.<keyAlias>.ifMissing` aplicável e se aplica a todas as opções '--trailer' até a próxima ocorrência de '--if-missing' ou '--no-if-missing'. Ao encontrar '--no-if-missing, elimine o efeito de qualquer uso anterior de '--if-missing, de modo que as variáveis de configuração relevantes não sejam mais substituídas. As ações possíveis são `doNothing` ou `add`.
 
 --only-trailers::
 	Exibe apenas os caracteres de resposta e não quaisquer outras partes da entrada.
 
 --only-input::
-	Exibe apenas os caracteres de resposta que existam na entrada; não adicione qualquer outra linha de comando ou siga as regras `trailer.*` já configuradas.
+	Gera apenas aos trailers existentes na entrada; não adicione nenhum a partir da linha de comando ou aplicando as variáveis de configuração `trailer.*`.
 
 --unfold::
-	Remova qualquer continuação de espaço nos caracteres de resposta para que cada caractere apareça numa linha por si só, com o seu conteúdo completo.
+	Se um trailer tiver um valor que se estenda por diversas linhas (também conhecido como "dobrado"), reformate o valor em uma única linha.
 
 --parse::
-	É um atalho conveniente para os comandos `--only-trailers --only-input --unfold`.
+	Um alias conveniente para `--only-trailers --only-input --unfold`. Isso facilita a visualização apenas dos trailers provenientes da entrada, sem influenciá-los com nenhuma opção de linha de comando ou variável de configuração, ao mesmo tempo em que torna a saída amigável à máquina com `--unfold`.
 
 --no-divider::
 	Não trate `---` como o final da mensagem de commit. Utilize isso quando souber que a sua entrada tenha apenas a própria mensagem do commit (e não um e-mail ou a saída do `git format-patch`).
@@ -100,7 +110,7 @@ trailer.separators::
 +
 O primeiro caractere informado por esta opção será o caractere predefinido que será utilizado quando um outro separador não seja utilizado na configuração deste `caractere de resposta`.
 +
-Como por exemplo, caso o valor desta opção seja "%=$", apenas as linhas que usam o formato '<token><sep><valor>' com <sep> contendo '%', '=' ou '$' e os espaços, serão considerados `caracteres de resposta`. É predefinido que o sinal '%' será utilizado como um separador; portanto, os caracteres de resposta aparecerão como: '<token>% <valor>' (um sinal de porcentagem e um espaço aparecerão entre token e o valor).
+Como por exemplo, caso o valor desta opção seja "%=$", apenas as linhas que usam o formato '<key><sep><valor>' com <sep> contendo '%', '=' ou '$' e os espaços, serão considerados `caracteres de resposta`. É predefinido que o sinal '%' será utilizado como um separador; portanto, os caracteres de resposta aparecerão como: '<key>% <valor>' (um sinal de porcentagem e um espaço aparecerão entre key e o valor).
 
 trailer.where::
 	Esta opção informa onde um novo caractere de resposta será adicionado.
@@ -111,27 +121,27 @@ Caso seja `end`, então cada novo caractere de resposta aparecerá no final dos 
 +
 Caso seja `start`, cada novo caractere de resposta aparecerá no início, e não no final, dos caracteres de resposta já existentes.
 +
-Caso seja `after` , cada novo caractere de resposta aparecerá logo após o último caractere de resposta com o mesmo <token>.
+Caso seja `after` , cada novo caractere de resposta aparecerá logo após o último caractere de resposta com o mesmo <key>.
 +
-Caso seja `before`, então cada novo caractere de resposta aparecerá logo no começo do primeiro caractere de resposta com o mesmo <token>.
+Caso seja `before`, então cada novo caractere de resposta aparecerá logo no começo do primeiro caractere de resposta com o mesmo <key>.
 
 trailer.ifexists::
-	Essa opção permite escolher a ação a ser executada quando já houver pelo menos um caracter de resposta com o mesmo <token> na entrada.
+	Essa opção permite escolher a ação a ser executada quando já houver pelo menos um caractere de resposta com a mesma <key> na entrada.
 +
 Os valores válidos para esta opção são: `addIfDifferentNeighbor` (predefinido), `addIfDifferent`, `add`, `replace` ou `doNothing`.
 +
-Com `addIfDifferentNeighbor`, um novo caractere de resposta será adicionado apenas caso nenhum com o mesmo par (<token>,<valor>) esteja acima ou abaixo da linha onde o novo caractere de resposta será adicionado.
+Com `addIfDifferentNeighbor`, um novo caractere de resposta será adicionado apenas caso nenhum com o mesmo par (<key>,<valor>) esteja acima ou abaixo da linha onde o novo caractere de resposta será adicionado.
 +
-Com `addIfDifferent`, um novo caractere de resposta será adicionado somente se nenhum caractere de resposta com o mesmo par (<token>, <valor>) já estiver na entrada.
+Com `addIfDifferent`, um novo caractere de resposta será adicionado somente se nenhum caractere de resposta com o mesmo par (<key>, <valor>) já estiver na entrada.
 +
-Com `add`, um novo caracter de resposta será adicionado, mesmo que alguns caracteres de resposta com o mesmo par (<token>, <valor>) já estejam na entrada.
+Com `add`, um novo caractere de resposta será adicionado, mesmo que alguns caracteres de resposta com o mesmo par (<token>, <valor>) já estejam na entrada.
 +
-Com `replace`, um caractere de resposta existente com a mesmo <token> será excluído e um novo será adicionado. O caractere de resposta excluído será o mais próximo (com o mesmo <token>) do local onde o novo será adicionado.
+Com `replace`, um caractere de resposta existente com a mesmo <key> será excluído e um novo será adicionado. O caractere de resposta excluído será o mais próximo (com o mesmo <key>) do local onde o novo será adicionado.
 +
-Com `doNothing`, nada será feito, ou seja, nenhum novo caracter de resposta será adicionado se já houver um com o mesmo <token> na entrada.
+Com `doNothing`, nada será feito, ou seja, nenhum novo caractere de resposta será adicionado se já houver um com o mesmo <key> na entrada.
 
 trailer.ifmissing::
-	Essa opção permite escolher a ação a ser executada quando ainda não houver nenhum atrelado com o mesmo <token> na entrada.
+	Essa opção permite escolher a ação a ser executada quando ainda não houver nenhum atrelado com o mesmo <key> na entrada.
 +
 Os valores válidos para esta opção são: `add` (o valor predefinido) e `doNothing`.
 +
@@ -139,33 +149,35 @@ Com `add`, um novo caractere de resposta será adicionado.
 +
 Com `doNothing`, nada será feito.
 
-trailer.<token>.key::
-	Esta `key` será utilizada em vez do <token> no caractere de resposta. No final desta chave, um separador pode aparecer e em seguida, alguns caracteres de espaço. É predefinido que o único separador válido seja ':', mas isso pode ser alterado utilizando a variável de configuração `trailer.separators`.
+trailer.<keyAlias>.key::
+	Define um <keyAlias> para a <key>. O <keyAlias> deve ser um prefixo (as maiúsculas e minúsculas não importam) da <key>. Por exemplo, em `git config trailer.ack.key "Acked-by"`, "Acked-by" é a <key> e "ack" é o <keyAlias>. Essa configuração permite a invocação mais curta do `--trailer "ack:..."` na linha de comando usando o <keyAlias> "ack" em vez do `--trailer "Acked-by:..."` mais longo.
 +
-Caso haja um separador, a chave será utilizada no lugar do <token> e do separador predefinido ao adicionar o caractere de resposta.
+No final da <key>, pode aparecer um separador e, em seguida, alguns caracteres de espaço. Por padrão, o único separador válido é ':', mas isso pode ser alterado usando a variável de configuração `trailer.separators`.
++
+Se houver um separador na chave, ele substituirá o separador padrão ao adicionar o trailer.
 
-trailer.<token>.where::
-	Esta opção utiliza os mesmos valores da variável de configuração 'trailer.where' e substitui o que for especificado por essa opção para os caracteres de resposta com o `<token>` determinado.
+trailer.<keyAlias>.where::
+	Esta opção utiliza os mesmos valores da variável de configuração 'trailer.where' e substitui o que for especificado por essa opção para os caracteres de resposta com o `<keyAlias>` determinado.
 
-trailer.<token>.ifexists::
-	Essa opção utiliza os mesmos valores que a variável de configuração 'trailer.ifexists' e substitui o que for definido por esta opção para os caracteres de resposta com o <token> informado.
+trailer.<keyAlias>.ifexists::
+	Essa opção utiliza os mesmos valores que a variável de configuração 'trailer.ifexists' e substitui o que for definido por esta opção para os caracteres de resposta com o <keyAlias> informado.
 
-trailer.<token>.ifmissing::
-	Esta opção utiliza os mesmos valores que a variável de configuração 'trailer.ifmissing' e substitui o que for definido por esta opção para os caracteres de resposta com o <token> informado.
+trailer.<keyAlias>.ifmissing::
+	Esta opção utiliza os mesmos valores que a variável de configuração 'trailer.ifmissing' e substitui o que for definido por esta opção para os caracteres de resposta com o <keyAlias> informado.
 
-trailer.<token>.command::
-	Preterido em favor do 'trailer.<token>.cmd'. Essa opção se comporta da mesma forma que 'trailer.<token>.cmd', exceto pelo fato de não passar nada como argumento para o comando especificado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo <valor> que seria passado como argumento.
+trailer.<keyAlias>.command::
+	Preterido em favor do 'trailer.<keyAlias>.cmd'. Essa opção se comporta da mesma forma que 'trailer.<keyAlias>.cmd', exceto pelo fato de não passar nada como argumento para o comando especificado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo <valor> que seria passado como argumento.
 +
 Observe que $ARG no comando do usuário é substituído apenas uma vez e que a maneira original de substituir o $ARG não é segura.
 +
-Quando ambos 'trailer.<token>.cmd' e 'trailer.<token>.command' são oferecidos para o mesmo <token>, o 'trailer.<token>.cmd' é usado e o 'trailer.<token>.command' é ignorado.
+Quando ambos 'trailer.<keyAlias>.cmd' e 'trailer.<keyAlias>.command' são oferecidos para o mesmo <keyAlias>, o 'trailer.<keyAlias>.cmd' é usado e o 'trailer.<keyAlias>.command' é ignorado.
 
-trailer.<token>.cmd::
-	Essa opção pode ser usada para especificar um comando do shell que será chamado uma vez para adicionar automaticamente um caracter de resposta com o <token> especificado e, em seguida, chamado toda vez que o argumento '--trailer <token>=<valor>' for usado para alterar o <valor> do trailer que essa opção produziria.
+trailer.<keyAlias>.cmd::
+	Essa opção pode ser usada para especificar um comando do shell que será chamado uma vez para adicionar automaticamente um caractere de resposta com o <keyAlias> especificado e, em seguida, chamado toda vez que o argumento '--trailer <keyAlias>=<valor>' for usado para alterar o <valor> do trailer que essa opção produziria.
 +
-Quando o comando informado é chamado pela primeira vez para adicionar um atrelado com o <token> definido, o comportamento é como se um argumento especial '--trailer <token>=<valor>' fosse adicionado no início do comando "git interpret-trailers", onde o <valor> é considerado a saída padrão do comando com qualquer espaço em branco eliminado à esquerda e à direita.
+Quando o comando informado é chamado pela primeira vez para adicionar um atrelado com o <keyAlias> definido, o comportamento é como se um argumento especial '--trailer <keyAlias>=<valor>' fosse adicionado no início do comando "git interpret-trailers", onde o <valor> é considerado a saída padrão do comando com qualquer espaço em branco eliminado à esquerda e à direita.
 +
-Caso algumas opção '--trailer <token>=<valor>' também sejam passadosna linha de comando, o comando é invocado novamente uma vez para cada um destes argumentos que tenham o mesmo <token>. E a parte <valor> desses argumentos, caso hajam, será passada ao comando como sendo o seu primeiro argumento. Desta forma, o comando pode produzir um <valor> calculado a partir do <valor> informado na opção '--trailer <token>=<valor>'.
+Caso algumas opção '--trailer <keyAlias>=<valor>' também sejam passados na linha de comando, o comando é invocado novamente uma vez para cada um destes argumentos que tenham o mesmo <keyAlias>. E a parte <valor> desses argumentos, caso hajam, será passada ao comando como sendo o seu primeiro argumento. Desta forma, o comando pode produzir um <valor> calculado a partir do <valor> informado na opção '--trailer <keyAlias>=<valor>'.
 
 EXEMPLOS
 --------

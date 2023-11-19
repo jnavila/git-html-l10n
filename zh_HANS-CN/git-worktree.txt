@@ -159,7 +159,7 @@ REFS
 ----
 当使用多个工作区时，一些引用在所有工作区之间共享，但其他引用是特定于单个工作区的。比如：`HEAD`，它对每个工作树都是不同的。本节是关于共享规则，以及如何从另一个工作区访问一个工作区的引用。
 
-一般来说，所有的伪引用都是工作区特有的，所有以`refs/`开头的引用都是共享的。伪引用是像`HEAD`那样直接在`$GIT_DIR`下，而不是在`$GIT_DIR/refs`内的引用。但也有例外：`refs/bisect`和`refs/worktree`内的引用不被共享。
+In general, all pseudo refs are per-worktree and all refs starting with `refs/` are shared. Pseudo refs are ones like `HEAD` which are directly under `$GIT_DIR` instead of inside `$GIT_DIR/refs`. There are exceptions, however: refs inside `refs/bisect`, `refs/worktree` and `refs/rewritten` are not shared.
 
 每个工作区的引用仍然可以通过两个特殊的路径，即 `主工作区`和 `从工作区`，从另一个工作区访问。前者可以访问主工作区的每个工作区的引用，而后者可以访问所有链接的工作区。
 
@@ -195,7 +195,7 @@ DETAILS
 
 在一个链接工作区中，`$GIT_DIR`设置为指向这个私有目录（例如，例子中的`/path/main/.git/worktrees/test-next`），`$GIT_COMMON_DIR`会被设置为指向主工作区的`$GIT_DIR`（例如，`/path/main/.git`）。这些设置是在位于链接工作区顶级目录的`.git`文件中进行的。
 
-通过`git rev-parse --git-path`进行的路径解析使用`$GIT_DIR`或`$GIT_COMMON_DIR`，取决于路径。例如，在链接工作区中，`git rev-parse --git-path HEAD`命令返回`/path/main/.git/worktrees/test-next/HEAD`（而不是`/path/other/test-next/.git/HEAD`或者`/path/main/.git/HEAD`），而`git rev-parse --git-path refs/heads/master`则使用`$GIT_COMMON_DIR`并返回`/path/main/.git/refs/heads/master`，因为除了`refs/bisect`和`refs/worktree`，所有工作区都共享引用。
+Path resolution via `git rev-parse --git-path` uses either `$GIT_DIR` or `$GIT_COMMON_DIR` depending on the path. For example, in the linked worktree `git rev-parse --git-path HEAD` returns `/path/main/.git/worktrees/test-next/HEAD` (not `/path/other/test-next/.git/HEAD` or `/path/main/.git/HEAD`) while `git rev-parse --git-path refs/heads/master` uses `$GIT_COMMON_DIR` and returns `/path/main/.git/refs/heads/master`, since refs are shared across all worktrees, except `refs/bisect`, `refs/worktree` and `refs/rewritten`.
 
 更多信息见 linkgit:gitrepository-layout[5]。经验法则是，当你需要直接访问`$GIT_DIR`或`$GIT_COMMON_DIR`内的东西时，不要对路径是否属于`$GIT_DIR`做出任何假设。使用`git rev-parse --git-path`来获得最终路径。
 

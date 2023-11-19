@@ -22,13 +22,7 @@ ifndef::git-format-patch[]
 -p::
 -u::
 --patch::
-	Générer une rustine (voir la section appelée
-ifdef::git-log[]
-<<generate_patch_text_with_p, "Générer le texte de rustine avec -p">>).
-endif::git-log[]
-ifndef::git-log[]
-"Générer le texte de rustine avec -p").
-endif::git-log[]
+	Générer la rustine (voir <<generate_patch_text_with_p>>).
 ifdef::git-diff[]
 	C'est l'option par défaut.
 endif::git-diff[]
@@ -40,42 +34,53 @@ endif::git-diff[]
 endif::git-format-patch[]
 
 ifdef::git-log[]
---diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc|remerge|r)::
+-m::
+	Afficher les diffs pour les commits de fusion dans le format par défaut. Ceci est semblable à '--diff-merges=on', sauf que `-m` ne produira pas de sortie sauf si `-p` est donné aussi.
+
+-c::
+	Produire la sortie diff combinée pour les commits de fusion. Raccourcis pour '--diff-merges=combined -p'.
+
+--cc::
+	Produire la sortie diff combinée dense pour les commits de fusion. Raccourcis pour '--diff-merges=dense-combined -p'.
+
+--dd::
+	Produire un diff par rapport au premier parent pour les commits réguliers et de fusion. Raccourcis pour '--diff-merges=first-parent -p'.
+
+--remerge-diff::
+	Produire la sortie remerge-diff pour les commits de fusion. Raccourcis pour '--diff-merges=remerge -p'.
+
 --no-diff-merges::
+	Synonyme pour '--diff-merges=off'.
+
+--diff-merges=<format>::
 	Préciser le format de diff à utiliser pour les commits de fusion. La valeur par défaut est {diff-merges-default} sauf si `--first-parent` est utilisé, auquel cas `first-parent` est la valeur par défaut.
 +
---diff-merges=(off|none):::
---no-diff-merges:::
+Les formats suivants sont pris en charge :
++
+--
+off, none::
 	Désactive la sortie des diffs pour des commits de fusion. Utile pour passer outre la valeur sous-entendue.
 +
---diff-merges=on:::
---diff-merges=m:::
--m:::
-	Cette option permet d'afficher la sortie diff pour les commits de fusion dans le format par défaut. `-m` produira la sortie seulement si `-p` est aussi fourni. Le format par défaut peut être modifié en utilisant le paramètre de configuration `log.diffMerges`, dont la valeur par défaut est `separate`.
+on, m::
+	Permettre d'afficher la sortie diff pour les commits de fusion dans le format par défaut. Le format par défaut peut être modifié en utilisant le paramètre de configuration `log.diffMerges`, dont la valeur par défaut est `separate`.
 +
---diff-merges=first-parent:::
---diff-merges=1:::
-	Cette option fait en sorte que les commits de fusion montrent les différences complètes, mais seulement par rapport au premier parent.
+first-parent, 1::
+	Afficher la diff complète par rapport au premier parent. C'est le même format que `--patch` produit pour les commits réguliers.
 +
---diff-merges=separate:::
-	Cela fait que les commits de fusion montrent la différence complète par rapport à chacun des parents. Une entrée de journal et une différence séparées sont générées pour chaque parent.
+separate::
+	Montrer la différence complète par rapport à chacun des parents. Une entrée de journal et une différence séparées sont générées pour chaque parent.
 +
---diff-merges=remerge:::
---diff-merges=r:::
---remerge-diff:::
-	Avec cette option, les commits de fusion biparentaux sont fusionnés pour créer un objet arbre temporaire -- contenant potentiellement des fichiers avec des marqueurs de conflit et autres. Une différence est ensuite affichée entre cet arbre temporaire et le commit de fusion actuel.
+combined, c::
+	Montrer les différences de chacun des parents vers le résultat de la fusion simultanément au lieu de montrer une à une les différences par paires entre un parent et le résultat. De plus, il ne répertorie que les fichiers qui ont été modifiés par tous les parents.
++
+dense-combined, cc::
+	Compresser encore plus la sortie produite par `--diff-merges=combined` en omettant les sections inintéressantes dont le contenu dans les parents n'a que deux variantes et le résultat de la fusion choisit l'une d'entre elles sans modification.
++
+remerge, r::
+	Fusionner les commits de fusion biparentaux pour créer un objet arbre temporaire -- contenant potentiellement des fichiers avec des marqueurs de conflit et autres. Une différence est ensuite affichée entre cet arbre temporaire et le commit de fusion actuel.
 +
 La sortie émise lorsque cette option est utilisée est sujette à modification, ainsi que son interaction avec les autres options (sauf si elle est explicitement documentée).
-+
---diff-merges=combined:::
---diff-merges=c:::
--c:::
-	Avec cette option, la sortie de diff pour un commit de fusion montre les différences de chacun des parents vers le résultat de la fusion simultanément au lieu de montrer une à une les différences par paires entre un parent et le résultat. De plus, il ne répertorie que les fichiers qui ont été modifiés par tous les parents.`-c` implique `-p`.
-+
---diff-merges=dense-combined:::
---diff-merges=cc:::
---cc:::
-	Avec cette option, la sortie produite par `--diff-merges=combined` est encore compressée en omettant les sections inintéressantes dont le contenu dans les parents n'a que deux variantes et le résultat de la fusion choisit l'une d'entre elles sans modification. `--cc` implique `-p`.
+--
 
 --combined-all-paths::
 	Cet drapeau fait en sorte que les diffs combinés (utilisés pour les commits de fusion) listent le nom du fichier de tous les parents. Il n'a donc d'effet que lorsque `--diff-merges=[dense-]combined` est utilisé, et n'est probablement utile que si des changements de nom de fichier sont détectés (c.-à-d. lorsque la détection de renommage ou de copie a été demandée).
@@ -162,7 +167,7 @@ Si une ligne existe dans la source et la destination, n'existe qu'une seule fois
 Par exemple, si vous avez configuré la variable `diff.algorithm` à une valeur autre que celle par défaut et souhaitez utiliser la valeur par défaut, alors vous devez utiliser l'option `--diff-algorithm=default`.
 
 --stat[=<largeur>[,<largeur-de-nom>[,<nombre>]]]::
-	Générer un diffstat. Par défaut, autant d'espace que nécessaire sera utilisé pour la partie du nom de fichier et le reste pour la partie de graphe. La largeur maximum est par défaut la largeur du terminal, ou 80 colonnes si non connecté à un terminal, et peut être outrepassé avec `<largeur>`. La largeur du nom de fichier peut être limitée en fournissant une autre largeur `<largeur-de-nom>` après une virgule. La largeur de la partie du graphe peut être limitée en utilisant `--stat-graph-width=<largeur>` (affecte toutes les commandes générant un graphe de stat) ou en réglant `diff.statGraphWidth=<largeur>` (n'affecte pas `git format-patch`). En ajoutant un troisième paramètre `<nombre>`, vous pouvez limiter la sortie aux premières `<nombre>` lignes, suivies de `...` s'il y en a plus.
+	Générer un diffstat. Par défaut, autant d'espace que nécessaire sera utilisé pour la partie du nom de fichier et le reste pour la partie de graphe. La largeur maximum est par défaut la largeur du terminal, ou 80 colonnes si non connecté à un terminal, et peut être outrepassé avec `<largeur>`. La largeur du nom de fichier peut être limitée en fournissant une autre largeur `<largeur-de-nom>` après une virgule ou en réglant `diff.statNameWidth=<largeur>`. La largeur de la partie du graphe peut être limitée en utilisant `--stat-graph-width=<largeur> ou en réglant `diff.statGraphWidth=<largeur>`. L'utilisation de `--stat` ou `--stat-graph-width` affecte toutes les commandes qui génèrent un graphique de stat, tandis que régler `diff.statNameWidth` or `diff.statGraphWidth` n'affecte pas `git format-patch`. En ajoutant un troisième paramètre `<nombre>`, vous pouvez limiter la sortie aux premières `<nombre>` lignes, suivies de `...` s'il y en a plus.
 +
 Ces paramètres peuvent aussi être positionnés individuellement avec `--stat-width=<largeur>`, `--stat-name-width=<largeur-de-nom>` et `--stat-count=<nombre>`.
 

@@ -20,7 +20,7 @@ Cette commande a un mode moderne `--write-tree` et un mode `---trivial-merge`. �
 
 Exécute une fusion, mais ne fait pas de nouveaux commits et ne lit ni n'écrit ni l'arbre de travail ni l'index.
 
-La fusion effectuée utilisera la même caractéristique que le linkgit:git-merge[1] « réel », y compris :
+La fusion effectuée utilisera les mêmes caractéristiques que le linkgit:git-merge[1] « réel », y compris :
 
   * fusion de contenu à trois branches des fichiers individuels
   * détection de renommage
@@ -165,32 +165,32 @@ Le format d'entrée de 'git merge-tree --stdin' est entièrement textuel. Chaque
 
 	[<commit-de-base> -- ]<branche1> <branche2>
 
-If one line is separated by `--`, the string before the separator is used for specifying a merge-base for the merge and the string after the separator describes the branches to be merged.
+Si une ligne est séparée par `--`, la chaîne précédant le séparateur est utilisée pour spécifier une base de fusion pour la fusion et la chaîne suivant le séparateur décrit les branches à fusionner.
 
 ERREURS À ÉVITER
 ----------------
 
-Do NOT look through the resulting toplevel tree to try to find which files conflict; parse the <<CFI,Conflicted file info>> section instead. Not only would parsing an entire tree be horrendously slow in large repositories, there are numerous types of conflicts not representable by conflict markers (modify/delete, mode conflict, binary file changed on both sides, file/directory conflicts, various rename conflict permutations, etc.)
+Ne PAS traverser l'arbre supérieur résultant pour essayer de trouver quels fichiers sont en conflit ; analyser la section d'<<CFI,Info de fichiers en conflits>>. Non seulement analyser un arbre entier serait horriblement lent dans les grands dépôts, mais il y a de nombreux types de conflits non représentables par des marqueurs de conflit (modifier/enlever, conflit de mode, fichier binaire changé des deux côtés, conflits fichiers/répertoires, diverses permutations de conflit de renommage, etc.)
 
-Do NOT interpret an empty <<CFI,Conflicted file info>> list as a clean merge; check the exit status. A merge can have conflicts without having individual files conflict (there are a few types of directory rename conflicts that fall into this category, and others might also be added in the future).
+Ne PAS interpréter une liste d'<<CFI,info de fichiers en conflit>>fichiers comme une fusion propre ; vérifier l'état de sortie. Une fusion peut avoir des conflits sans avoir un conflit de fichiers individuels (il y a quelques types de conflits de renommage de répertoire qui tombent dans cette catégorie, et d'autres peuvent également être ajoutés à l'avenir).
 
-Do NOT attempt to guess or make the user guess the conflict types from the <<CFI,Conflicted file info>> list. The information there is insufficient to do so. For example: Rename/rename(1to2) conflicts (both sides renamed the same file differently) will result in three different file having higher order stages (but each only has one higher order stage), with no way (short of the <<IM,Informational messages>> section) to determine which three files are related. File/directory conflicts also result in a file with exactly one higher order stage. Possibly-involved-in-directory-rename conflicts (when "merge.directoryRenames" is unset or set to "conflicts") also result in a file with exactly one higher order stage. In all cases, the <<IM,Informational messages>> section has the necessary info, though it is not designed to be machine parseable.
+Ne PAS essayer de deviner ou de faire deviner à l'utilisateur les types de conflit de la liste <<CFI,info de fichiers en conflits>> . Les informations ne suffisent pas à le faire. Par exemple : les conflits renommage/renommage(1vers2) (les deux côtés ont renommé le même fichier différemment) se traduiront par trois fichiers différents ayant des étapes de commande supérieures (mais chacun n'a qu'une seule étape de commande supérieure), sans aucune façon ( à part la section de <<IM,messages d'information>>). Les conflits de fichiers/répertoire entraînent également un fichier avec exactement une étape de commande supérieure. Les conflits de renommage-possiblement-avec-des-répertoires (lorsque "merge.directoryRenames" est non réglé ou réglé sur "conflicts") entraînent également un fichier avec exactement une étape de commande supérieure. Dans tous les cas, la section des <<IM,messages informationnels>> a les informations nécessaires, bien qu'elle ne soit pas conçue pour être analysable par machine.
 
-Do NOT assume that each paths from <<CFI,Conflicted file info>>, and the logical conflicts in the <<IM,Informational messages>> have a one-to-one mapping, nor that there is a one-to-many mapping, nor a many-to-one mapping. Many-to-many mappings exist, meaning that each path can have many logical conflict types in a single merge, and each logical conflict type can affect many paths.
+Ne PAS supposer que chaque chemin d'<<CFI,info de fichiers en conflits>>, et les conflits logiques dans les <<IM, Messages informationnels>> ont une correspondance unique, ni qu'il y ait une correspondance unique, ni une correspondance plusieurs-vers-un. Il existe de nombreuses correspondances plusieurs-à-plusieurs, ce qui signifie que chaque chemin peut avoir de nombreux types de conflits logiques dans une fusion unique, et chaque type de conflit logique peut affecter de nombreux chemins.
 
-Do NOT assume all filenames listed in the <<IM,Informational messages>> section had conflicts. Messages can be included for files that have no conflicts, such as "Auto-merging <file>".
+Ne PAS assumer que tous les noms de fichiers répertoriés dans la section des <<IM,Messages informationnels>> avaient des conflits. Des messages peuvent être inclus pour des fichiers qui n'ont pas de conflits, comme "Auto-merging <fichier>".
 
-AVOID taking the OIDS from the <<CFI,Conflicted file info>> and re-merging them to present the conflicts to the user. This will lose information. Instead, look up the version of the file found within the <<OIDTLT,OID of toplevel tree>> and show that instead. In particular, the latter will have conflict markers annotated with the original branch/commit being merged and, if renames were involved, the original filename. While you could include the original branch/commit in the conflict marker annotations when re-merging, the original filename is not available from the <<CFI,Conflicted file info>> and thus you would be losing information that might help the user resolve the conflict.
+ÉVITER de prendre les OIDS de l'<<CFI,information de fichiers en conflit>> et les ré-fusionner pour présenter les conflits à l'utilisateur. Cela va perdre de l'information. Au lieu de cela, regarder la version du fichier trouvé dans le ­<<OIDTLT,OID d'arborescence de sommet>> et l'afficher. En particulier, ce dernier aura des marqueurs de conflit annotés avec le branche/commit original en cours de fusion et, si des renommages étaient impliqués, le nom de fichier original. Bien que vous pourriez inclure le branche/commit original dans les annotations de conflit lors de la nouvelle fusion, le nom de fichier original n'est pas disponible à partir de l'<<CFI,Information de fichiers en conflit>>et donc vous perdriez des informations qui pourraient aider l'utilisateur à résoudre le conflit.
 
 [[DEPMERGE]]
 DESCRIPTION DÉCONSEILLÉE
 ------------------------
 
-Per the <<NEWMERGE,DESCRIPTION>> and unlike the rest of this documentation, this section describes the deprecated `--trivial-merge` mode.
+Comme spécifié dans la section <<NEWMERGE,DESCRIPTION>> et contrairement au reste de la documentation, cette section décrit le mode déprécié `--trivial-merge'.
 
-Other than the optional `--trivial-merge`, this mode accepts no options.
+À part l'option `---trivial-merge' optionnelle, ce mode n'accepte aucune option.
 
-This mode reads three tree-ish, and outputs trivial merge results and conflicting stages to the standard output in a semi-diff format. Since this was designed for higher level scripts to consume and merge the results back into the index, it omits entries that match <branch1>. The result of this second form is similar to what three-way 'git read-tree -m' does, but instead of storing the results in the index, the command outputs the entries to the standard output.
+Ce mode lit trois arbres-esques, et produit des résultats triviaux de fusion et des étapes conflictuelles sur la sortie standard dans un format semi-diff. Comme cela a été conçu pour la consommation par des scripts de plus haut niveau et pour fusionner les résultats dans l'index, il omet les entrées qui correspondent à <branche1>. Le résultat de cette deuxième forme est semblable à ce que fait 'git read-tree -m', mais au lieu de stocker les résultats dans l'index, la commande produit les entrées sur la sortie standard.
 
 Ce formulaire n'a pas seulement une applicabilité limitée (une fusion triviale ne peut pas gérer les fusions de contenu de fichiers individuels, la détection de renom, la manipulation de conflits répertoires/fichiers, etc.), il est également difficile de travailler avec le format de sortie, et il sera généralement moins performant que la première même sur les fusions réussies (surtout dans les grands dépôts).
 

@@ -22,13 +22,7 @@ ifndef::git-format-patch[]
 -p::
 -u::
 --patch::
-	Gere um patch (consulte a seção intitulada
-ifdef::git-log[]
-<<gera_texto_correção_com_p, "Gerando o texto de correção com -p">>).
-endif::git-log[]
-ifndef::git-log[]
-"Gerando o texto de correção com -p").
-endif::git-log[]
+	Gerar patch (consulte <<gera_texto_correção_com_p>>).
 ifdef::git-diff[]
 	Esta é a predefinição.
 endif::git-diff[]
@@ -40,42 +34,53 @@ endif::git-diff[]
 endif::git-format-patch[]
 
 ifdef::git-log[]
---diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc|remerge|r)::
+-m::
+	Mostra os diffs dos commits mesclados no formato padrão. Isso é semelhante a '--diff-merges=on', exceto com a opção `-m` que não produzirá nada a menos que `-p` também seja usado.
+
+-c::
+	Gera um diff combinado nos commits mesclados. É um atalho para '--diff-merges=combined -p'.
+
+--cc::
+	Gera um diff denso e combinado nos commits mesclados. É um Atalho para '--diff-merges=dense-combined -p'.
+
+--dd::
+	Produzir um diff com relação ao primeiro arquivo principal para commits regulares e mesclados. É um atalho para '--diff-merges=first-parent -p'.
+
+--remerge-diff::
+	Gera um remerge-diff para commits mesclados. É um atalho para '--diff-merges=remerge -p'.
+
 --no-diff-merges::
+	È um sinônimo para '--diff-merges=off'.
+
+--diff-merges=<formato>::
 	Define o formato diff que será usado para a mesclagem dos commits. A predefinição é {diff-merges-default} a menos que a opção `--first-parent` esteja em uso, nesse caso a predefinição será `first-parent`.
 +
---diff-merges=(off|none):::
---no-diff-merges:::
+Os seguintes formatos são compatíveis:
++
+--
+off, none::
 	Desativa a saída dos diffs para a mesclagem dos commits. Útil para substituir valores implícitos.
 +
---diff-merges=on:::
---diff-merges=m:::
--m:::
-	Essa opção faz com que o diff gerado para a mesclagem dos commits seja mostrada no formato padrão. A opção `-m` produzirá uma saída caso a opção `-p` seja usada junto. O formato predefinido pode ser alterado usando o parâmetro de configuração `log.diffMerges`, onde o valor predefinido é `separate`.
+on, m::
+	Gera diff dos diferentes arquivos mesclados para que sejam mostrados no formato padrão. O formato padrão pode ser alterado usando a variável de configuração `log.diffMerges`, cujo valor padrão é `separate`.
 +
---diff-merges=first-parent:::
---diff-merges=1:::
-	Esta opção faz com que os commits mesclados mostrem a diferença total apenas com ao que estiver relacionado com a primeira origem.
+first-parent, 1::
+	Mostra o diff completo com relação ao primeiro arquivo principal. Esse é o mesmo formato que a opção `--patch` produz nos commits não mesclados.
 +
---diff-merges=separate:::
-	Faz com que os commits mesclados mostrem a diferença total com relação a cada uma das suas origens. É gerado uma entrada de registro separada e um diff para cada um dos commits relacionados.
+separate::
+	Mostra a diferença completa com relação a cada uma das origens. Uma entrada de registro e diff separadas são geradas para cada um dos arquivos principais.
 +
---diff-merges=remerge:::
---diff-merges=r:::
---remerge-diff:::
-	Com esta opção, os dois principais commits são mesclados novamente para criar um objeto temporário na árvore -- potencialmente contendo arquivos com os marcadores de conflito e tal. Uma diferença é então mostrada entre essa árvore temporária e o commit real da mesclagem.
+combined, c::
+	Mostra as diferenças de cada uma das origens para a mesclagem resultante de forma simultânea em vez de mostrar a diferença pareada entre uma origem e o resultado, um de cada vez. Além disso, lista apenas os arquivos que foram alterados a partir de todas as origens.
++
+dense-combined, cc::
+	Comprime ainda mais o arquivo gerado pelo comando `--diff-merges=combined` ao omitir os blocos menos importantes cujo conteúdo relacionado possua apenas duas variantes e o resultado da mesclagem escolhe um deles sem alteração.
++
+remerge, r::
+	Mescla novamente os dois principais commits para criar um objeto temporário na árvore--potencialmente contendo arquivos com os marcadores de conflito e tal. Um diff é então mostrado entre essa árvore temporária e o commit real da mesclagem.
 +
 A saída é gerada quando esta opção usada está sujeita a alterações, assim como a sua interação com as outras opções (a menos que esteja explicitamente documentada).
-+
---diff-merges=combined:::
---diff-merges=c:::
--c:::
-	Com esta opção, a saída "diff" para um commit de mesclagem exibe as diferenças de cada uma das origens para a mesclagem resultante de forma simultânea em vez de mostrar a diferença pareada entre uma origem e o resultado, um de cada vez. Além disso, lista apenas os arquivos que foram alterados a partir de todas as origens. A opção `-c` exige o uso de `-p`.
-+
---diff-merges=dense-combined:::
---diff-merges=cc:::
---cc:::
-	Com esta opção, a saída gerada pelo comando `--diff-merges=combined` é ainda mais comprimido ao omitir os blocos menos importantes cujo conteúdo relacionado possua apenas duas variantes e o resultado da mesclagem escolhe um deles sem alteração. A opção `-c` exige o uso de `-p`.
+--
 
 --combined-all-paths::
 	Esta opção faz com que os diffs combinados (usados para a mesclagem dos commits) listem o nome relacionados de todos os arquivos. Dessa forma, só tem efeito quando a opção `--diff-merges=[dense-]combined` são utilizados e provavelmente é útil apenas caso as alterações no nome do arquivo sejam detectados (ou seja, quando a renomeação ou a detecção da cópia forem solicitadas).
@@ -162,7 +167,7 @@ Caso uma linha exista na origem e no destino, exista apenas uma vez e comece com
 Caso tenha configurado uma variável `diff.algorithm` para um valor sem predefinição e quer utilizar a variável predefinida por exemplo, então utilize a opção `--diff-algorithm=default`.
 
 --stat[=<largura>[,<largura-do-nome>[,<count>]]]::
-	Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima a predefinição retorna para a largura do terminal ou 80 colunas, caso não esteja conectada num terminal e pode ser substituída por `<largura>`. A largura da parte do nome do arquivo pode ser limitada, fornecendo outra largura `<largura-do-nome>` após uma vírgula. A largura da parte do grafo pode ser limitada utilizando `--stat-graph-width=<largura>` (afeta todos os comandos que geram um grafo estatístico) ou definindo `diff.statGraphWidth=<largura>` (não afeta o `git format-patch`). Ao fornecer um terceiro parâmetro `<count>`, é possível limitar a saída às primeiras linhas `<count>`, seguidas por `...` caso haja mais.
+	Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima tem como padrão a largura do terminal ou 80 colunas caso não esteja conectado num terminal, e pode ser substituído por `<largura>`. A largura da parte do nome do arquivo pode ser limitado ao fornecer outra largura `<largura-do-nome>` após uma vírgula ou definindo com `diff.statNameWidth=<width>`. A largura da parte do gráfico pode ser limitada pelo uso de `--stat-graph-width=<largura>` ou pela configuração de `diff.statGraphWidth=<largura>`. A utilização de `--stat` ou `--stat-graph-width` afeta todos os comandos que geram um gráfico estatístico, enquanto a definição `diff.statNameWidth` ou `diff.statGraphWidth` não afeta o `git format-patch`. Ao fornecer um terceiro parâmetro `<count>`, você pode limitar a saída às primeiras `<count>` linhas, seguidas de `...` caso haja mais.
 +
 Estes parâmetros também podem ser ajustados individualmente com `--stat-width=<largura>`, `--stat-name-width=<largura-do-nome>` e `--stat-count=<count>`.
 
@@ -212,7 +217,7 @@ ifndef::git-format-patch[]
 
 -z::
 ifdef::git-log[]
-	Separe os commits com caracteres `NUL` em vez de novos caracteres "newlines" (novas linhas).
+	Separe os commits com caracteres `NUL` em vez de "newlines" (novas linhas).
 +
 Além disso, quando a opção `--raw` ou `--numstat` for utilizado, não una os nomes dos caminhos e utilize caracteres `NUL` como terminadores na saída dos campos.
 endif::git-log[]

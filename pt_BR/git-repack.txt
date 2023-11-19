@@ -42,6 +42,9 @@ Os arquivos de pacotes "promisor" são empacotados separadamente, caso haja arqu
 --cruft-expiration=<aproximado>::
 	Expira imediatamente os objetos inacessíveis que sejam mais antigos que `<aproximado>` em vez de esperar pela próxima chamada do `git gc`. Útil apenas com `--cruft -d`.
 
+--max-cruft-size=<n>::
+	Reembale os objetos em pacotes de tamanho igual a `<n>` bytes antes de criar novos pacotes. Desde que existam pacotes suficientes de cruft menores que `<n>`, o reempacotamento fará com que um novo pacote cruft seja criado contendo objetos de quaisquer pacotes cruft combinados, juntamente com quaisquer novos objetos inacessíveis. Os pacotes cruft maiores que `<n>` não serão modificados. Quando o novo pacote cruft for maior do que `<n>` bytes, ele será dividido em vários pacotes, sendo garantido que todos tenham no máximo `<n>` bytes de tamanho. Útil apenas com `--cruft -d`.
+
 --expire-to=<diretório>::
 	Escreva um pacote simples contendo objetos podados (se houver) no diretório `<diretório>`. Esta opção é útil para manter uma cópia de quaisquer objetos removidos num diretório separado como um backup. Só é útil se utilizado em conjunto com a opção `--cruft -d`.
 
@@ -76,6 +79,12 @@ O valor predefinido para a opção `--window` é 10 e o `--thp` é 50. O valor d
 --max-pack-size=<n>::
 	O Tamanho máximo de cada arquivo do pacote que foi gerado. O tamanho pode ter o sufixo "k", "m" ou "g". O tamanho mínimo permitido é limitado a 1 MiB. Caso seja definido, vários pacotes poderão ser criados, o que também previne a criação de um índice do bitmap. A predefinição é ilimitada, a menos que a variável de configuração `pack.packSizeLimit` esteja definida. Observe que esta opção pode criar um repositório maior e mais lento; consulte a discussão em `pack.packSizeLimit'.
 
+--filter=<filter-spec>::
+	Remove os objetos que correspondem à especificação do filtro do arquivo resultante do pacote e os coloca num arquivo separado do pacote. Observe que os objetos usados no diretório de trabalho não são filtrados. Portanto, para que a divisão funcione totalmente, é melhor executá-la em um repositório simples e usar as opções `-a` e `-d` junto com esta opção. Além disso, a opção `--no-write-bitmap-index` (ou a opção de configuração `repack.writebitmaps` definida como `false`) deve ser usada, caso contrário, a gravação do índice bitmap falhará, pois ela pressupõe um único arquivo de pacote contendo todos os objetos. Veja linkgit:git-rev-list[1] para formas válidas de `<filter-spec>`.
+
+--filter-to=<diretório>::
+	Grava o pacote contendo os objetos filtrados no diretório `<dir>`. Útil apenas com `--filter`. Isso pode ser usado para colocar o pacote num diretório de objetos separado que é acessado através do mecanismo alternativo do Git. **AVISO:** Se o arquivo do pacote que contém os objetos filtrados não estiver acessível, o repositório pode ficar corrompido, pois pode não ser possível acessar os objetos nesse arquivo de pacote. Consulte as seções `objects` e `objects/info/alternates` do linkgit:gitrepository-layout[5].
+
 -b::
 --write-bitmap-index::
 	Escreva um índice bitmap de acessibilidade como parte do reempacotamento. Isso só faz sentido quando utilizado com `-a`, `-A` ou `-m`, pois os bitmaps devem poder se referir para todos os objetos que sejam acessíveis. Esta opção substitui a configuração da variável de ambiente `GIT_CURL_VERBOSE`. Esta opção não tem efeito caso vários arquivos de pacotes sejam criados. a não ser que seja escrito um MIDX (neste caso é criado um bitmap multi-pack).
@@ -97,7 +106,7 @@ O valor predefinido para a opção `--window` é 10 e o `--thp` é 50. O valor d
 --delta-islands::
 	Encaminha a opção `--delta-islands` para `git-pack-objects`, consulte linkgit:git-pack-objects[1].
 
--g=<fator>::
+-g<fator>::
 --geometric=<fator>::
 	Organize a estrutura do pacote resultante de modo que cada sucessivo pacote contenha ao menos o `<fator>` vezes a quantidade de objetos como o próximo maior pacote.
 +
@@ -105,7 +114,7 @@ O comando `git repack` garante isso determinando um "corte" dos packfiles que pr
 +
 Ao contrário dos outros modos de reembalagem, o conjunto dos objetos que serão embalados é determinado exclusivamente pelo conjunto dos pacotes sendo "juntados"; em outras palavras, os pacotes determinados precisam ser combinados para restaurar uma progressão geométrica.
 +
-Quando a opção `--unpacked` é usada, os objetos soltos são implicitamente incluídos neste "ajuntamento", sem respeito à sua acessibilidade. Isso está sujeito a alterações no futuro. Esta opção (que implica num modo de repack drasticamente diferente) não tem garantia de funcionar com todas as outras combinações de opções para o comando `git repack`.
+Objetos soltos são implicitamente incluídos nesse "acumulador", independentemente de sua acessibilidade. Isso está sujeito a alterações no futuro.
 +
 Ao escrever um bitmap multi-pack, o comando `git repack` seleciona o maior pacote resultante como o pacote preferido para a seleção dos objetos pelo MIDX (consulte linkgit:git-multi-pack-index[1]).
 
