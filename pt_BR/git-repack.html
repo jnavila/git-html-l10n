@@ -500,6 +500,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Expira imediatamente os objetos inacessíveis que sejam mais antigos que <code>&lt;aproximado&gt;</code> em vez de esperar pela próxima chamada do <code>git gc</code>. Útil apenas com <code>--cruft -d</code>.</p>
 </dd>
+<dt class="hdlist1">--max-cruft-size=&lt;n&gt;</dt>
+<dd>
+<p>Reembale os objetos em pacotes de tamanho igual a <code>&lt;n&gt;</code> bytes antes de criar novos pacotes. Desde que existam pacotes suficientes de cruft menores que <code>&lt;n&gt;</code>, o reempacotamento fará com que um novo pacote cruft seja criado contendo objetos de quaisquer pacotes cruft combinados, juntamente com quaisquer novos objetos inacessíveis. Os pacotes cruft maiores que <code>&lt;n&gt;</code> não serão modificados. Quando o novo pacote cruft for maior do que <code>&lt;n&gt;</code> bytes, ele será dividido em vários pacotes, sendo garantido que todos tenham no máximo <code>&lt;n&gt;</code> bytes de tamanho. Útil apenas com <code>--cruft -d</code>.</p>
+</dd>
 <dt class="hdlist1">--expire-to=&lt;diretório&gt;</dt>
 <dd>
 <p>Escreva um pacote simples contendo objetos podados (se houver) no diretório <code>&lt;diretório&gt;</code>. Esta opção é útil para manter uma cópia de quaisquer objetos removidos num diretório separado como um backup. Só é útil se utilizado em conjunto com a opção <code>--cruft -d</code>.</p>
@@ -545,6 +549,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>O Tamanho máximo de cada arquivo do pacote que foi gerado. O tamanho pode ter o sufixo "k", "m" ou "g". O tamanho mínimo permitido é limitado a 1 MiB. Caso seja definido, vários pacotes poderão ser criados, o que também previne a criação de um índice do bitmap. A predefinição é ilimitada, a menos que a variável de configuração <code>pack.packSizeLimit</code> esteja definida. Observe que esta opção pode criar um repositório maior e mais lento; consulte a discussão em &#8216;pack.packSizeLimit&#8217;.</p>
 </dd>
+<dt class="hdlist1">--filter=&lt;filter-spec&gt;</dt>
+<dd>
+<p>Remove os objetos que correspondem à especificação do filtro do arquivo resultante do pacote e os coloca num arquivo separado do pacote. Observe que os objetos usados no diretório de trabalho não são filtrados. Portanto, para que a divisão funcione totalmente, é melhor executá-la em um repositório simples e usar as opções <code>-a</code> e <code>-d</code> junto com esta opção. Além disso, a opção <code>--no-write-bitmap-index</code> (ou a opção de configuração <code>repack.writebitmaps</code> definida como <code>false</code>) deve ser usada, caso contrário, a gravação do índice bitmap falhará, pois ela pressupõe um único arquivo de pacote contendo todos os objetos. Veja <a href="git-rev-list.html">git-rev-list(1)</a> para formas válidas de <code>&lt;filter-spec&gt;</code>.</p>
+</dd>
+<dt class="hdlist1">--filter-to=&lt;diretório&gt;</dt>
+<dd>
+<p>Grava o pacote contendo os objetos filtrados no diretório <code>&lt;dir&gt;</code>. Útil apenas com <code>--filter</code>. Isso pode ser usado para colocar o pacote num diretório de objetos separado que é acessado através do mecanismo alternativo do Git. <strong>AVISO:</strong> Se o arquivo do pacote que contém os objetos filtrados não estiver acessível, o repositório pode ficar corrompido, pois pode não ser possível acessar os objetos nesse arquivo de pacote. Consulte as seções <code>objects</code> e <code>objects/info/alternates</code> do <a href="gitrepository-layout.html">gitrepository-layout(5)</a>.</p>
+</dd>
 <dt class="hdlist1">-b</dt>
 <dt class="hdlist1">--write-bitmap-index</dt>
 <dd>
@@ -572,7 +584,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Encaminha a opção <code>--delta-islands</code> para <code>git-pack-objects</code>, consulte <a href="git-pack-objects.html">git-pack-objects(1)</a>.</p>
 </dd>
-<dt class="hdlist1">-g=&lt;fator&gt;</dt>
+<dt class="hdlist1">-g&lt;fator&gt;</dt>
 <dt class="hdlist1">--geometric=&lt;fator&gt;</dt>
 <dd>
 <p>Organize a estrutura do pacote resultante de modo que cada sucessivo pacote contenha ao menos o <code>&lt;fator&gt;</code> vezes a quantidade de objetos como o próximo maior pacote.</p>
@@ -583,7 +595,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Ao contrário dos outros modos de reembalagem, o conjunto dos objetos que serão embalados é determinado exclusivamente pelo conjunto dos pacotes sendo "juntados"; em outras palavras, os pacotes determinados precisam ser combinados para restaurar uma progressão geométrica.</p>
 </div>
 <div class="paragraph">
-<p>Quando a opção <code>--unpacked</code> é usada, os objetos soltos são implicitamente incluídos neste "ajuntamento", sem respeito à sua acessibilidade. Isso está sujeito a alterações no futuro. Esta opção (que implica num modo de repack drasticamente diferente) não tem garantia de funcionar com todas as outras combinações de opções para o comando <code>git repack</code>.</p>
+<p>Objetos soltos são implicitamente incluídos nesse "acumulador", independentemente de sua acessibilidade. Isso está sujeito a alterações no futuro.</p>
 </div>
 <div class="paragraph">
 <p>Ao escrever um bitmap multi-pack, o comando <code>git repack</code> seleciona o maior pacote resultante como o pacote preferido para a seleção dos objetos pelo MIDX (consulte <a href="git-multi-pack-index.html">git-multi-pack-index(1)</a>).</p>
@@ -631,7 +643,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:53 +0200
+Last updated 2023-12-10 16:15:31 +0100
 </div>
 </div>
 </body>

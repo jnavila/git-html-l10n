@@ -452,10 +452,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git notes</em> [list [&lt;objeto&gt;]]
-<em>git notes</em> add [-f] [--allow-empty] [-F &lt;arquivo&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objeto&gt;] [&lt;objeto&gt;]
-<em>git notes</em> copy [-f] ( --stdin | &lt;a-partir-do-objeto&gt; [&lt;para-o-objeto&gt;] )
-<em>git notes</em> append [--allow-empty] [-F &lt;arquivo&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objeto&gt;] [&lt;objeto&gt;]
-<em>git notes</em> edit [--allow-empty] [&lt;objeto&gt;]
+<em>git notes</em> add [-f] [--allow-empty] [--[no-]separator | --separator=&lt;quebra-parágrafo&gt;] [--[no-]stripspace] [-F &lt;file&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objeto&gt;] [&lt;objeto&gt;]
+<em>git notes</em> copy [-f] ( --stdin | &lt;do-objeto&gt; [&lt;para-o-objeto&gt;] )
+<em>git notes</em> append [--allow-empty] [--[no-]separator | --separator=&lt;quebra-parágrafo&gt;] [--[no-]stripspace] [-F &lt;file&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objeto&gt;] [&lt;objeto&gt;]
+<em>git notes</em> edit [--allow-empty] [&lt;objeto&gt;] [--[no-]stripspace]
 <em>git notes</em> show [&lt;objeto&gt;]
 <em>git notes</em> merge [-v | -q] [-s &lt;estratégia&gt; ] &lt;notes-ref&gt;
 <em>git notes</em> merge --commit [-v | -q]
@@ -500,7 +500,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">add</dt>
 <dd>
-<p>Adiciona anotações para um determinado objeto (a predefinição retorna para <code>HEAD</code>). Interrompa caso o objeto já tiver anotações (utilize <code>-f</code> para substituir as anotações já existentes). No entanto, caso você esteja utilizando <code>add</code> de forma interativa (utilizando um editor para editar o conteúdo das notas), então - em vez de interromper - as anotações já existentes serão abertas no editor (como o subcomando <code>edit</code>).</p>
+<p>Adiciona anotações para um determinado objeto (padrão para HEAD). Abortar se o objeto já tiver anotações (use <code>-f</code> para substituir as anotações existentes). No entanto, se estiver usando o <code>add</code> de forma interativa (usando um editor para fornecer o conteúdo das notas), em vez de abortar, as anotações existentes serão abertas no editor (como o subcomando <code>edit</code>). Se você especificar vários <code>-m</code> e <code>-F</code>, uma linha em branco será inserida entre as mensagens. Use a opção <code>--separator</code> para inserir outros delimitadores.</p>
 </dd>
 <dt class="hdlist1">copy</dt>
 <dd>
@@ -519,7 +519,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">append</dt>
 <dd>
-<p>Anexe às anotações de um objeto já existente (a predefinição retorna para <code>HEAD</code>). Cria uma nova anotação no objeto, caso seja necessário.</p>
+<p>Anexa nova(s) mensagem(ns) fornecida(s) pelas opções <code>-m</code> ou <code>-F</code> a uma anotação já existente ou as adiciona como uma nova anotação, caso não exista uma, para o objeto (o padrão é HEAD). Ao anexar a uma anotação existente, uma linha em branco é adicionada antes de cada nova mensagem como um separador entre os parágrafos. O separador pode ser personalizado com a opção <code>--separator</code>.</p>
 </dd>
 <dt class="hdlist1">edit</dt>
 <dd>
@@ -565,17 +565,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-m &lt;msg&gt;</dt>
 <dt class="hdlist1">--message=&lt;msg&gt;</dt>
 <dd>
-<p>Utilize uma mensagem da anotação informada (em vez de solicitar). Caso várias opções <code>-m</code> seja informadas, os seus valores serão concatenados como parágrafos separados. Serão removidas as linhas começando com <code>#</code> e as linhas vazias que não estejam numa única linha entre os parágrafos.</p>
+<p>Use a mensagem fornecida da anotação (em vez de solicitar). Se forem fornecidas várias opções <code>-m</code>, os seus valores serão concatenados como parágrafos separados. Serão removidas as linhas que começam com <code>#</code> e as linhas vazias que não sejam uma única linha entre parágrafos; se você quiser mantê-las textualmente, use a opção <code>--no-stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-F &lt;arquivo&gt;</dt>
 <dt class="hdlist1">--file=&lt;arquivo&gt;</dt>
 <dd>
-<p>Pegue a mensagem da anotação do arquivo informado. Utilize <em>-</em> para ler a mensagem da nota vindo da entrada padrão. Serão removidas as linhas começando com <code>#</code> e as linhas vazias que não estejam numa única linha entre os parágrafos.</p>
+<p>Obtém a mensagem de anotação a partir de um determinado arquivo. Use <em>-</em> para ler a mensagem da anotação na entrada padrão. As linhas que começam com <code>#</code> e as linhas vazias que não sejam uma única linha entre os parágrafos serão removidas; se você quiser mantê-las textualmente, use a opção <code>--no-stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-C &lt;objeto&gt;</dt>
 <dt class="hdlist1">--reuse-message=&lt;objeto&gt;</dt>
 <dd>
-<p>Tome o objeto bolha informada (outra nota por exemplo) como uma mensagem da nota. (Utiliza <code>git notes copy &lt;objeto&gt;</code> em vez da copia das notas entre os objetos.)</p>
+<p>Tome o objeto bolha fornecido (por exemplo, outra anotação) como a mensagem da anotação. (Em vez disso, use <code>git notes copy &lt;objeto&gt;</code> para copiar anotações entre os objetos). Por padrão, a mensagem será copiada literalmente, mas caso queira remover as linhas que começam com <code>#</code> e as linhas vazias que não sejam uma única linha entre parágrafos, use a opção <code>--stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-c &lt;objeto&gt;</dt>
 <dt class="hdlist1">--reedit-message=&lt;objeto&gt;</dt>
@@ -585,6 +585,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--allow-empty</dt>
 <dd>
 <p>Permita que uma anotação vazia do objeto seja armazenado. O comportamento predefinido é remover automaticamente as anotações que estiverem vazias.</p>
+</dd>
+<dt class="hdlist1">--[no-]separator, --separator=&lt;quebra-do-parágrafo&gt;</dt>
+<dd>
+<p>Especifique uma string usada como separador personalizado entre os parágrafos (uma nova linha é adicionada ao final, conforme seja necessário). caso a opção <code>--no-separator</code> seja usada, nenhum separador entre os parágrafos será adicionado. O padrão é uma linha em branco.</p>
+</dd>
+<dt class="hdlist1">--[no-]stripspace</dt>
+<dd>
+<p>Retire os espaços em branco iniciais e finais da mensagem de anotação. Remova também as linhas vazias que não sejam uma única linha entre os parágrafos. As linhas que começam com <code>#</code> serão removidas em casos não relacionados ao editor, como <code>-m</code>, <code>-F</code> e <code>-C</code>, mas não em casos relacionados ao editor, como <code>git notes edit</code>, <code>-c</code>, etc.</p>
 </dd>
 <dt class="hdlist1">--ref &lt;ref&gt;</dt>
 <dd>
@@ -760,7 +768,7 @@ $ git notes --ref=built add --allow-empty -C "$blob" HEAD</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:52 +0200
+Last updated 2023-12-10 16:15:30 +0100
 </div>
 </div>
 </body>

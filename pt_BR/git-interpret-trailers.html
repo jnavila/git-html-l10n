@@ -452,7 +452,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git interpret-trailers</em> [--in-place] [--trim-empty]
-                        [(--trailer &lt;token&gt;[(=|:)&lt;valor&gt;])&#8230;&#8203;]
+                        [(--trailer (&lt;chave&gt;|&lt;keyAlias&gt;)[(=|:)&lt;valor&gt;])&#8230;&#8203;]
                         [--parse] [&lt;arquivo&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
@@ -461,39 +461,72 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_descrição">DESCRIÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ajuda a analisar ou adicionar linhas com <em>caracteres de resposta</em> que se pareçam com os cabeçalhos de e-mail segundo a norma RFC 822 no final ou na parte livre de uma mensagem de commit.</p>
-</div>
-<div class="paragraph">
-<p>Este comando lê alguns patches ou faz o commit das mensagens dos argumentos &lt;arquivo&gt; ou da entrada padrão se nenhum &lt;arquivo&gt; seja definido. Caso <code>--parse</code> seja definido a saída consistirá nos caracteres de resposta analisados.</p>
-</div>
-<div class="paragraph">
-<p>Caso contrário, este comando aplica os argumentos passados utilizando a opção <code>--trailer</code>, caso exista, à parte da mensagem de commit de cada arquivo de entrada. O resultado é emitido na saída padrão.</p>
-</div>
-<div class="paragraph">
-<p>Algumas variáveis de configuração controlam a maneira como os argumentos do <code>--trailer</code> são aplicados a cada mensagem de commit e a maneira como qualquer <code>trailer</code> existente na mensagem de commit é alterado. Eles também possibilitam adicionar automaticamente alguns <code>trailers</code>.</p>
-</div>
-<div class="paragraph">
-<p>É predefinido que, usando um argumento <em>&lt;token&gt;=&lt;valor&gt;</em> ou <em>&lt;token&gt;:&lt;valor&gt;</em> utilizando a opção <code>--trailer</code> será anexado após os caracteres de resposta existentes caso o último tenha um par (&lt;token&gt;, &lt;valor&gt;), (ou caso não exista nenhum caractere de resposta). As partes &lt;token&gt; e &lt;valor&gt; serão aparados para remover os espaços iniciais e finais, o que sobrar aparecerá na mensagem da seguinte maneira:</p>
+<p>Adiciona ou analisa as linhas com <em>caracteres de resposta</em> que se assemelham aos cabeçalhos de e-mail RFC 822 no final de uma mensagem do commit. Por exemplo, na seguinte mensagem de commit</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>token: valor</pre>
+<pre>assunto
+
+Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+
+Assinado-por: Alice &lt;alice@example.com&gt;
+Assinado-por: Bob &lt;bob@example.com&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Significa que o &lt;token&gt; e o &lt;valor&gt; ajustado será separado por um <code>': '</code> (dois pontos seguido por um espaço).</p>
+<p>as duas últimas linhas começando com "Signed-off-by" são os "trailers".</p>
 </div>
 <div class="paragraph">
-<p>É predefinido que o novo caractere de resposta aparecerá no final de todos os caracteres de resposta já existentes. Caso não exista, o novo caractere de resposta aparecerá na saída após a parte da mensagem do commit, caso não haja uma linha com apenas espaços no final da parte da mensagem do commit, uma linha em branco será adicionada antes do novo caractere de resposta.</p>
+<p>Esse comando lê as mensagens dos commits seja a partir dos argumentos do &lt;arquivo&gt; ou da entrada padrão caso nenhum &lt;arquivo&gt; seja especificado. Se <code>--parse</code> for especificado, a saída consistirá nos "trailers" provenientes da entrada, sem influenciá-los com nenhuma opção na linha de comando ou de variável de configuração.</p>
 </div>
 <div class="paragraph">
-<p>Os caracteres de resposta já existentes são extraídos da mensagem da entrada ao procurar um grupo de uma ou mais linhas onde (i) tenha todos os caracteres de resposta ou (ii) contenha pelo menos um caractere de resposta gerado através do Git ou configurado pelo usuário que consista em pelo menos 25% dos caracteres de resposta. O grupo deve ser precedido por uma ou mais linhas vazias (ou somente com espaço). O grupo deve estar no final da mensagem ou ser as últimas linhas que não sejam espaços antes de uma linha que começa com <em>---</em> (seguida por um espaço ou o quebra da linha). Estes três sinais de menos (-) iniciam a parte do patch da mensagem. Consulte também a opção <code>--no-divider</code> abaixo.</p>
+<p>Caso contrário, esse comando aplica as variáveis de configuração <code>trailer.*</code> (que podem potencialmente adicionar novos trailers, bem como reposicioná-los), assim como quaisquer argumentos de linha de comando que possam substituir as variáveis de configuração (como <code>--trailer=...</code>, que também pode adicionar novos trailers), a cada arquivo de entrada. O resultado é emitido na saída padrão.</p>
 </div>
 <div class="paragraph">
-<p>Ao ler os caracteres de resposta, não poderá haver espaço antes ou dentro do token, porém qualquer quantidade de caracteres regulares de espaço e tabulação são permitidos entre o token e o separador. Pode haver espaços antes, dentro ou depois do valor. O valor pode ser dividido em várias linhas com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822.</p>
+<p>Esse comando também pode operar na saída do <a href="git-format-patch.html">git-format-patch(1)</a>, que é mais elaborado do que uma simples mensagem de confirmação. Ou seja, essa saída inclui uma mensagem de confirmação (como acima), uma linha divisória "---" e uma parte do patch. Para essas entradas, as partes do divisor e do patch não são modificadas por esse comando e são emitidas como estão na saída, a menos que a opção <code>--no-divider</code> seja especificada.</p>
 </div>
 <div class="paragraph">
-<p>Observe que caracteres de resposta não seguem e não se destinam a seguir muitas regras para os cabeçalhos da norma RFC 822. Por exemplo, eles não seguem as normas de codificação e muito provavelmente não sigam quaisquer outras.</p>
+<p>Algumas variáveis de configuração controlam a forma como os argumentos <code>--trailer</code> são aplicados a cada entrada e a forma como qualquer trailer existente na entrada é alterado. Eles também possibilitam a adição automática de alguns trailers.</p>
+</div>
+<div class="paragraph">
+<p>Por padrão, um argumento <em>&lt;key&gt;=&lt;valor&gt;</em> ou <em>&lt;key&gt;:&lt;valor&gt;</em> usado com <code>--trailer</code> será anexado após os trailers existentes apenas se o último trailer tiver um par (&lt;key&gt;, &lt;valor&gt;) diferente (ou se não houver nenhum trailer existente). As partes &lt;key&gt; e &lt;valor&gt; serão cortadas para remover os espaços em branco iniciais e finais, o &lt;key&gt; e o &lt;valor&gt; cortados resultantes aparecerão na saída desta maneira:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>key: valor</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Significa que o &lt;key&gt; e o &lt;valor&gt; ajustado será separado por um <code>': '</code> (dois pontos seguido por um espaço).</p>
+</div>
+<div class="paragraph">
+<p>Por conveniência, um &lt;keyAlias&gt; pode ser configurado para tornar o uso do <code>--trailer</code> mais curto para ser digitado na linha de comando. Isso pode ser configurado usando a variável de configuração <em>trailer.&lt;keyAlias&gt;.key</em>. O &lt;keyAlias&gt; deve ser um prefixo completo de caracteres &lt;key&gt; , embora a distinção entre maiúsculas e minúsculas não seja importante. Por exemplo, se você tiver</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>trailer.sign.key "Signed-off-by: "</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>em sua configuração, você só precisa especificar <code>--trailer="sign: foo"</code> na linha de comando em vez de <code>--trailer="Signed-off-by: foo"</code>.</p>
+</div>
+<div class="paragraph">
+<p>É predefinido que o novo trailer apareça no final de todos os trailers já existentes. Caso não haja nenhum, o novo trailer aparecerá no final. Uma linha em branco será adicionada antes do novo trailer caso já não exista um.</p>
+</div>
+<div class="paragraph">
+<p>Os trailers já existentes são extraídos da entrada procurando um grupo de uma ou mais linhas que (i) sejam todos trailers, ou (ii) contenham pelo menos um trailer gerado pelo Git ou que tenha sido configurado pelo usuário e consista de pelo menos 25% de trailers. O grupo deve ser precedido por uma ou mais linhas vazias (ou somente com espaços). O grupo deve estar no final da entrada ou ser as últimas linhas sem espaços antes de uma linha que comece com <em>---</em> (seguida de um espaço ou do final da linha).</p>
+</div>
+<div class="paragraph">
+<p>Ao ler os caracteres de resposta, não pode haver espaço em branco antes ou dentro do &lt;key&gt;, mas qualquer quantidade de espaço regular e de caracteres de tabulação são permitidos entre o &lt;key&gt; e o separador. Pode existir espaço antes, durante ou depois do &lt;valor&gt;. O &lt;valor&gt; pode ser dividido em várias linhas, com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822. Exemplo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>key: Esse é um valor muito longo, com espaços e
+  novas linhas nele.</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Observe que os trailers não seguem (nem pretendem seguir) muitas das regras dos cabeçalhos RFC 822. Por exemplo, eles não seguem a regra de codificação.</p>
 </div>
 </div>
 </div>
@@ -508,26 +541,26 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--trim-empty</dt>
 <dd>
-<p>Caso o &lt;valor&gt; da parte de qualquer <code>caractere de resposta</code> contenha apenas espaços, o <code>caractere de resposta</code> inteiro será removido da mensagem resultante. Isso se aplica os <code>caracteres de resposta</code> já existentes, bem como aos novos <code>caractere de resposta</code>.</p>
+<p>Se a parte &lt;valor&gt; de qualquer caractere de resposta tiver apenas espaços, todo o caractere de resposta será removido da saída. Isso se aplica tanto a caracteres de resposta já existentes e os novos.</p>
 </dd>
-<dt class="hdlist1">--trailer &lt;token&gt;[(=|:)&lt;valor&gt;]</dt>
+<dt class="hdlist1">--trailer &lt;key&gt;[(=|:)&lt;valor&gt;]</dt>
 <dd>
-<p>Defina um par (&lt;token&gt;, &lt;valor&gt;) que deve ser aplicado como um caractere de resposta nas mensagens de entrada. Consulte a descrição deste comando.</p>
+<p>Defina um par (&lt;key&gt;, &lt;valor&gt;) que deve ser aplicado como um caractere de resposta nas mensagens de entrada. Consulte a descrição deste comando.</p>
 </dd>
 <dt class="hdlist1">--where &lt;arranjo&gt;</dt>
 <dt class="hdlist1">--no-where</dt>
 <dd>
-<p>Especifique onde todos os novos caracteres de resposta serão adicionados. Uma configuração utilizada com <em>--where</em> substitui todas as variáveis de configuração e se aplica a todas as opções <code>--trailer</code> até a próxima ocorrência de <em>--where</em> ou <em>--no-where</em>. Os valores válidos são <code>after</code>, <code>before</code>, <code>end</code> or <code>start</code>.</p>
+<p>Especifica onde todos os novos trailers serão adicionados. Uma configuração usada com <em>--where</em> substitui as variáveis de configuração <code>trailer.where</code> e qualquer variável aplicável <code>trailer.&lt;keyAlias&gt;.where</code> e se aplica a todas as opções <em>--trailer</em> até a próxima ocorrência de <em>--where</em> ou <em>--no-where</em>. Ao encontrar <em>--no-where</em>, elimine o efeito de qualquer uso anterior de <em>--where</em>, de modo que as variáveis de configuração relevantes não sejam mais substituídas. Os posicionamentos possíveis são <code>after</code>, <code>before</code>, <code>end</code> ou <code>start</code>.</p>
 </dd>
 <dt class="hdlist1">--if-exists &lt;ação&gt;</dt>
 <dt class="hdlist1">--no-if-exists</dt>
 <dd>
-<p>Defina qual ação será executada quando já houver pelo menos um caractere de resposta com o mesmo &lt;token&gt; na mensagem. Uma configuração utilizada com <em>--if-exists</em> substitui todas as variáveis de configuração e se aplica a todas as opções <code>--trailer</code> até a próxima ocorrência do <em>--if-exists</em> ou <em>--no-if-exists</em>. As possíveis ações são <code>addIfDifferent</code>, <code>addIfDifferentNeighbor</code>, <code>add</code>, <code>replace</code> e <code>doNothing</code>.</p>
+<p>Especifique a ação que será executada quando já houver pelo menos um trailer com a mesma &lt;key&gt; na entrada. Uma configuração usada com <em>--if-exists</em> substitui as variáveis de configuração <code>trailer.ifExists</code> e qualquer variável de configuração <code>trailer.&lt;keyAlias&gt;.ifExists</code> aplicável e se aplica a todas as opções <em>--trailer</em> até a próxima ocorrência de <em>--if-exists</em> ou <em>--no-if-exists</em>. Ao encontrar '--no-if-exists, limpe o efeito de qualquer uso anterior de '--if-exists, de modo que as variáveis de configuração relevantes não sejam mais substituídas. As ações possíveis são <code>addIfDifferent</code>, <code>addIfDifferentNeighbor</code>, <code>add</code>, <code>replace</code> e <code>doNothing</code>.</p>
 </dd>
 <dt class="hdlist1">--if-missing &lt;ação&gt;</dt>
 <dt class="hdlist1">--no-if-missing</dt>
 <dd>
-<p>Especifique qual ação será executada quando não houver outro caractere de resposta com o mesmo &lt;token&gt; na mensagem. Uma configuração utilizada com o comando <code>--if-missing</code> substitui todas as variáveis de configuração e se aplica a todas as opções <code>--trailer</code> até a próxima ocorrência de <code>--if-missing</code> ou <code>--no-if-missing</code>. As possíveis ações são <code>doNothing</code> ou <code>add</code>.</p>
+<p>Especifique a ação a ser executada quando não houver outro trailer com a mesma &lt;key&gt; na entrada. Uma configuração usada com <em>--if-missing</em> substitui as variáveis de configuração <code>trailer.ifMissing</code> e qualquer variável de configuração <code>trailer.&lt;keyAlias&gt;.ifMissing</code> aplicável e se aplica a todas as opções <em>--trailer</em> até a próxima ocorrência de <em>--if-missing</em> ou <em>--no-if-missing</em>. Ao encontrar '--no-if-missing, elimine o efeito de qualquer uso anterior de '--if-missing, de modo que as variáveis de configuração relevantes não sejam mais substituídas. As ações possíveis são <code>doNothing</code> ou <code>add</code>.</p>
 </dd>
 <dt class="hdlist1">--only-trailers</dt>
 <dd>
@@ -535,15 +568,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--only-input</dt>
 <dd>
-<p>Exibe apenas os caracteres de resposta que existam na entrada; não adicione qualquer outra linha de comando ou siga as regras <code>trailer.*</code> já configuradas.</p>
+<p>Gera apenas aos trailers existentes na entrada; não adicione nenhum a partir da linha de comando ou aplicando as variáveis de configuração <code>trailer.*</code>.</p>
 </dd>
 <dt class="hdlist1">--unfold</dt>
 <dd>
-<p>Remova qualquer continuação de espaço nos caracteres de resposta para que cada caractere apareça numa linha por si só, com o seu conteúdo completo.</p>
+<p>Se um trailer tiver um valor que se estenda por diversas linhas (também conhecido como "dobrado"), reformate o valor em uma única linha.</p>
 </dd>
 <dt class="hdlist1">--parse</dt>
 <dd>
-<p>É um atalho conveniente para os comandos <code>--only-trailers --only-input --unfold</code>.</p>
+<p>Um alias conveniente para <code>--only-trailers --only-input --unfold</code>. Isso facilita a visualização apenas dos trailers provenientes da entrada, sem influenciá-los com nenhuma opção de linha de comando ou variável de configuração, ao mesmo tempo em que torna a saída amigável à máquina com <code>--unfold</code>.</p>
 </dd>
 <dt class="hdlist1">--no-divider</dt>
 <dd>
@@ -565,7 +598,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>O primeiro caractere informado por esta opção será o caractere predefinido que será utilizado quando um outro separador não seja utilizado na configuração deste <code>caractere de resposta</code>.</p>
 </div>
 <div class="paragraph">
-<p>Como por exemplo, caso o valor desta opção seja "%=$", apenas as linhas que usam o formato <em>&lt;token&gt;&lt;sep&gt;&lt;valor&gt;</em> com &lt;sep&gt; contendo <em>%</em>, <em>=</em> ou <em>$</em> e os espaços, serão considerados <code>caracteres de resposta</code>. É predefinido que o sinal <em>%</em> será utilizado como um separador; portanto, os caracteres de resposta aparecerão como: <em>&lt;token&gt;% &lt;valor&gt;</em> (um sinal de porcentagem e um espaço aparecerão entre token e o valor).</p>
+<p>Como por exemplo, caso o valor desta opção seja "%=$", apenas as linhas que usam o formato <em>&lt;key&gt;&lt;sep&gt;&lt;valor&gt;</em> com &lt;sep&gt; contendo <em>%</em>, <em>=</em> ou <em>$</em> e os espaços, serão considerados <code>caracteres de resposta</code>. É predefinido que o sinal <em>%</em> será utilizado como um separador; portanto, os caracteres de resposta aparecerão como: <em>&lt;key&gt;% &lt;valor&gt;</em> (um sinal de porcentagem e um espaço aparecerão entre key e o valor).</p>
 </div>
 </dd>
 <dt class="hdlist1">trailer.where</dt>
@@ -581,37 +614,37 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Caso seja <code>start</code>, cada novo caractere de resposta aparecerá no início, e não no final, dos caracteres de resposta já existentes.</p>
 </div>
 <div class="paragraph">
-<p>Caso seja <code>after</code> , cada novo caractere de resposta aparecerá logo após o último caractere de resposta com o mesmo &lt;token&gt;.</p>
+<p>Caso seja <code>after</code> , cada novo caractere de resposta aparecerá logo após o último caractere de resposta com o mesmo &lt;key&gt;.</p>
 </div>
 <div class="paragraph">
-<p>Caso seja <code>before</code>, então cada novo caractere de resposta aparecerá logo no começo do primeiro caractere de resposta com o mesmo &lt;token&gt;.</p>
+<p>Caso seja <code>before</code>, então cada novo caractere de resposta aparecerá logo no começo do primeiro caractere de resposta com o mesmo &lt;key&gt;.</p>
 </div>
 </dd>
 <dt class="hdlist1">trailer.ifexists</dt>
 <dd>
-<p>Essa opção permite escolher qual ação será executada quando já houver pelo menos um caractere de resposta com o mesmo &lt;token&gt; na mensagem.</p>
+<p>Essa opção permite escolher a ação a ser executada quando já houver pelo menos um caractere de resposta com a mesma &lt;key&gt; na entrada.</p>
 <div class="paragraph">
 <p>Os valores válidos para esta opção são: <code>addIfDifferentNeighbor</code> (predefinido), <code>addIfDifferent</code>, <code>add</code>, <code>replace</code> ou <code>doNothing</code>.</p>
 </div>
 <div class="paragraph">
-<p>Com <code>addIfDifferentNeighbor</code>, um novo caractere de resposta será adicionado apenas caso nenhum com o mesmo par (&lt;token&gt;,&lt;valor&gt;) esteja acima ou abaixo da linha onde o novo caractere de resposta será adicionado.</p>
+<p>Com <code>addIfDifferentNeighbor</code>, um novo caractere de resposta será adicionado apenas caso nenhum com o mesmo par (&lt;key&gt;,&lt;valor&gt;) esteja acima ou abaixo da linha onde o novo caractere de resposta será adicionado.</p>
 </div>
 <div class="paragraph">
-<p>Com <code>addIfDifferent</code>, um novo caractere de resposta será adicionado apenas caso nenhum com o mesmo par (&lt;token&gt;,&lt;valor&gt;) já esteja na mensagem.</p>
+<p>Com <code>addIfDifferent</code>, um novo caractere de resposta será adicionado somente se nenhum caractere de resposta com o mesmo par (&lt;key&gt;, &lt;valor&gt;) já estiver na entrada.</p>
 </div>
 <div class="paragraph">
-<p>Com <code>add</code>, um novo caractere de resposta será adicionado mesmo que alguns com o mesmo par (&lt;token&gt;,&lt;valor&gt;) já estejam na mensagem.</p>
+<p>Com <code>add</code>, um novo caractere de resposta será adicionado, mesmo que alguns caracteres de resposta com o mesmo par (&lt;token&gt;, &lt;valor&gt;) já estejam na entrada.</p>
 </div>
 <div class="paragraph">
-<p>Com <code>replace</code>, um caractere de resposta existente com a mesmo &lt;token&gt; será excluído e um novo será adicionado. O caractere de resposta excluído será o mais próximo (com o mesmo &lt;token&gt;) do local onde o novo será adicionado.</p>
+<p>Com <code>replace</code>, um caractere de resposta existente com a mesmo &lt;key&gt; será excluído e um novo será adicionado. O caractere de resposta excluído será o mais próximo (com o mesmo &lt;key&gt;) do local onde o novo será adicionado.</p>
 </div>
 <div class="paragraph">
-<p>Com <code>doNothing</code>, nada será feito; isso é, nenhum novo caractere de resposta será adicionado caso já haja um com o mesmo &lt;token&gt; na mensagem.</p>
+<p>Com <code>doNothing</code>, nada será feito, ou seja, nenhum novo caractere de resposta será adicionado se já houver um com o mesmo &lt;key&gt; na entrada.</p>
 </div>
 </dd>
 <dt class="hdlist1">trailer.ifmissing</dt>
 <dd>
-<p>Esta opção possibilita escolher qual ação será executada quando ainda não houver nenhum "caractere de resposta" com o mesmo <code>&lt;token&gt;</code> na mensagem.</p>
+<p>Essa opção permite escolher a ação a ser executada quando ainda não houver nenhum atrelado com o mesmo &lt;key&gt; na entrada.</p>
 <div class="paragraph">
 <p>Os valores válidos para esta opção são: <code>add</code> (o valor predefinido) e <code>doNothing</code>.</p>
 </div>
@@ -622,43 +655,46 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Com <code>doNothing</code>, nada será feito.</p>
 </div>
 </dd>
-<dt class="hdlist1">trailer.&lt;token&gt;.key</dt>
+<dt class="hdlist1">trailer.&lt;keyAlias&gt;.key</dt>
 <dd>
-<p>Esta <code>key</code> será utilizada em vez do &lt;token&gt; no caractere de resposta. No final desta chave, um separador pode aparecer e em seguida, alguns caracteres de espaço. É predefinido que o único separador válido seja <em>:</em>, mas isso pode ser alterado utilizando a variável de configuração <code>trailer.separators</code>.</p>
+<p>Define um &lt;keyAlias&gt; para a &lt;key&gt;. O &lt;keyAlias&gt; deve ser um prefixo (as maiúsculas e minúsculas não importam) da &lt;key&gt;. Por exemplo, em <code>git config trailer.ack.key "Acked-by"</code>, "Acked-by" é a &lt;key&gt; e "ack" é o &lt;keyAlias&gt;. Essa configuração permite a invocação mais curta do <code>--trailer "ack:..."</code> na linha de comando usando o &lt;keyAlias&gt; "ack" em vez do <code>--trailer "Acked-by:..."</code> mais longo.</p>
 <div class="paragraph">
-<p>Caso haja um separador, a chave será utilizada no lugar do &lt;token&gt; e do separador predefinido ao adicionar o caractere de resposta.</p>
-</div>
-</dd>
-<dt class="hdlist1">trailer.&lt;token&gt;.where</dt>
-<dd>
-<p>Esta opção utiliza os mesmos valores da variável de configuração <em>trailer.where</em> e substitui o que for especificado por essa opção para os caracteres de resposta com o <code>&lt;token&gt;</code> determinado.</p>
-</dd>
-<dt class="hdlist1">trailer.&lt;token&gt;.ifexists</dt>
-<dd>
-<p>Essa opção utiliza os mesmos valores que a variável de configuração <em>trailer.ifexists</em> e substitui o que for definido por esta opção para os caracteres de resposta com o &lt;token&gt; informado.</p>
-</dd>
-<dt class="hdlist1">trailer.&lt;token&gt;.ifmissing</dt>
-<dd>
-<p>Esta opção utiliza os mesmos valores que a variável de configuração <em>trailer.ifmissing</em> e substitui o que for definido por esta opção para os caracteres de resposta com o &lt;token&gt; informado.</p>
-</dd>
-<dt class="hdlist1">trailer.&lt;token&gt;.command</dt>
-<dd>
-<p>Esta opção se comporta da mesma maneira que o <em>trailer.&lt;token&gt;.cmd</em>, exceto que nada é oferecido como argumento para o comando informado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo valor que seria passado como argumento.</p>
-<div class="paragraph">
-<p>A opção <em>trailer.&lt;token&gt;.command</em> foi substituída por <em>trailer.&lt;token&gt;.cmd</em> pois o $ARG no comando do usuário ser substituído apenas uma vez e a maneira anterior de se substituir o $ARG não era segura.</p>
+<p>No final da &lt;key&gt;, pode aparecer um separador e, em seguida, alguns caracteres de espaço. Por padrão, o único separador válido é <em>:</em>, mas isso pode ser alterado usando a variável de configuração <code>trailer.separators</code>.</p>
 </div>
 <div class="paragraph">
-<p>Quando ambos <em>trailer.&lt;token&gt;.cmd</em> e <em>trailer.&lt;token&gt;.command</em> são oferecidos para o mesmo &lt;token&gt;, o <em>trailer.&lt;token&gt;.cmd</em> é usado e o <em>trailer.&lt;token&gt;.command</em> é ignorado.</p>
+<p>Se houver um separador na chave, ele substituirá o separador padrão ao adicionar o trailer.</p>
 </div>
 </dd>
-<dt class="hdlist1">trailer.&lt;token&gt;.cmd</dt>
+<dt class="hdlist1">trailer.&lt;keyAlias&gt;.where</dt>
 <dd>
-<p>Esta opção pode ser usada para definir um comando shell que será invocado: uma vez para adicionar um atrelado de forma automática com o &lt;token&gt; informado e, a seguir, a cada opção <em>--trailer &lt;token&gt;=&lt;valor&gt;</em> para alterar o &lt;valor&gt; do atrelado que esta opção produziria.</p>
+<p>Esta opção utiliza os mesmos valores da variável de configuração <em>trailer.where</em> e substitui o que for especificado por essa opção para os caracteres de resposta com o <code>&lt;keyAlias&gt;</code> determinado.</p>
+</dd>
+<dt class="hdlist1">trailer.&lt;keyAlias&gt;.ifexists</dt>
+<dd>
+<p>Essa opção utiliza os mesmos valores que a variável de configuração <em>trailer.ifexists</em> e substitui o que for definido por esta opção para os caracteres de resposta com o &lt;keyAlias&gt; informado.</p>
+</dd>
+<dt class="hdlist1">trailer.&lt;keyAlias&gt;.ifmissing</dt>
+<dd>
+<p>Esta opção utiliza os mesmos valores que a variável de configuração <em>trailer.ifmissing</em> e substitui o que for definido por esta opção para os caracteres de resposta com o &lt;keyAlias&gt; informado.</p>
+</dd>
+<dt class="hdlist1">trailer.&lt;keyAlias&gt;.command</dt>
+<dd>
+<p>Preterido em favor do <em>trailer.&lt;keyAlias&gt;.cmd</em>. Essa opção se comporta da mesma forma que <em>trailer.&lt;keyAlias&gt;.cmd</em>, exceto pelo fato de não passar nada como argumento para o comando especificado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo &lt;valor&gt; que seria passado como argumento.</p>
 <div class="paragraph">
-<p>Quando o comando informado é chamado pela primeira vez para adicionar um atrelado com o &lt;token&gt; definido, o comportamento é como se um argumento especial <em>--trailer &lt;token&gt;=&lt;valor&gt;</em> fosse adicionado no início do comando "git interpret-trailers", onde o &lt;valor&gt; é considerado a saída padrão do comando com qualquer espaço em branco eliminado à esquerda e à direita.</p>
+<p>Observe que $ARG no comando do usuário é substituído apenas uma vez e que a maneira original de substituir o $ARG não é segura.</p>
 </div>
 <div class="paragraph">
-<p>Caso algumas opção <em>--trailer &lt;token&gt;=&lt;valor&gt;</em> também sejam passadosna linha de comando, o comando é invocado novamente uma vez para cada um destes argumentos que tenham o mesmo &lt;token&gt;. E a parte &lt;valor&gt; desses argumentos, caso hajam, será passada ao comando como sendo o seu primeiro argumento. Desta forma, o comando pode produzir um &lt;valor&gt; calculado a partir do &lt;valor&gt; informado na opção <em>--trailer &lt;token&gt;=&lt;valor&gt;</em>.</p>
+<p>Quando ambos <em>trailer.&lt;keyAlias&gt;.cmd</em> e <em>trailer.&lt;keyAlias&gt;.command</em> são oferecidos para o mesmo &lt;keyAlias&gt;, o <em>trailer.&lt;keyAlias&gt;.cmd</em> é usado e o <em>trailer.&lt;keyAlias&gt;.command</em> é ignorado.</p>
+</div>
+</dd>
+<dt class="hdlist1">trailer.&lt;keyAlias&gt;.cmd</dt>
+<dd>
+<p>Essa opção pode ser usada para especificar um comando do shell que será chamado uma vez para adicionar automaticamente um caractere de resposta com o &lt;keyAlias&gt; especificado e, em seguida, chamado toda vez que o argumento <em>--trailer &lt;keyAlias&gt;=&lt;valor&gt;</em> for usado para alterar o &lt;valor&gt; do trailer que essa opção produziria.</p>
+<div class="paragraph">
+<p>Quando o comando informado é chamado pela primeira vez para adicionar um atrelado com o &lt;keyAlias&gt; definido, o comportamento é como se um argumento especial <em>--trailer &lt;keyAlias&gt;=&lt;valor&gt;</em> fosse adicionado no início do comando "git interpret-trailers", onde o &lt;valor&gt; é considerado a saída padrão do comando com qualquer espaço em branco eliminado à esquerda e à direita.</p>
+</div>
+<div class="paragraph">
+<p>Caso algumas opção <em>--trailer &lt;keyAlias&gt;=&lt;valor&gt;</em> também sejam passados na linha de comando, o comando é invocado novamente uma vez para cada um destes argumentos que tenham o mesmo &lt;keyAlias&gt;. E a parte &lt;valor&gt; desses argumentos, caso hajam, será passada ao comando como sendo o seu primeiro argumento. Desta forma, o comando pode produzir um &lt;valor&gt; calculado a partir do &lt;valor&gt; informado na opção <em>--trailer &lt;keyAlias&gt;=&lt;valor&gt;</em>.</p>
 </div>
 </dd>
 </dl>
@@ -671,18 +707,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p>Configure um caractere de resposta <em>sign</em> com uma chave <em>Assinada por</em> (Signed-off-by) e adicione dois destes caracteres de resposta numa mensagem:</p>
+<p>Configure uma "assinatura" como caractere de resposta com "Signed-off-by" e, em seguida, adicione dois desses caracteres de resposta a um arquivo de mensagem de confirmação:</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ git config trailer.sign.key "Assinado-por"
 $ cat msg.txt
 subject
 
-message
+corpo de texto
 $ git interpret-trailers --trailer 'sign: Alice &lt;alice@example.com&gt;' --trailer 'sign: Bob &lt;bob@example.com&gt;' &lt;msg.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Alice &lt;alice@example.com&gt;
 Assinado-por: Bob &lt;bob@example.com&gt;</pre>
@@ -690,20 +726,20 @@ Assinado-por: Bob &lt;bob@example.com&gt;</pre>
 </div>
 </li>
 <li>
-<p>Utilize a opção <code>- in-place</code> para editar um arquivo da mensagem no local:</p>
+<p>Use a opção <code>--in-place</code> para editar um arquivo de mensagem de confirmação no local:</p>
 <div class="listingblock">
 <div class="content">
 <pre>$ cat msg.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Bob &lt;bob@example.com&gt;
 $ git interpret-trailers --trailer 'Acked-by: Alice &lt;alice@example.com&gt;' --in-place msg.txt
 $ cat msg.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Bob &lt;bob@example.com&gt;
 Reconhecido-por: Alice &lt;alice@example.com&gt;</pre>
@@ -727,27 +763,27 @@ $ git interpret-trailers --trailer 'Cc: Alice &lt;alice@example.com&gt;' --trail
 <pre>$ cat msg1.txt
 subject
 
-message
+corpo do texto
 $ git config trailer.sign.key "Signed-off-by: "
 $ git config trailer.sign.ifmissing add
 $ git config trailer.sign.ifexists doNothing
 $ git config trailer.sign.cmd 'echo "$(git config user.name) &lt;$(git config user.email)&gt;"'
 $ git interpret-trailers --trailer sign &lt;msg1.txt
-subject
+assunto
 
-mensagem
+corpo do texto
 
 Signed-off-by: Bob &lt;bob@example.com&gt;
 $ cat msg2.txt
 subject
 
-mensagem
+corpo do texto
 
 Signed-off-by: Alice &lt;alice@example.com&gt;
 $ git interpret-trailers --trailer sign &lt;msg2.txt
 subject
 
-mensagem
+corpo do texto
 
 Assinado-por: Alice &lt;alice@example.com&gt;</pre>
 </div>
@@ -776,14 +812,14 @@ test -n "$1" &amp;&amp; git log --author="$1" --pretty="%an &lt;%ae&gt;" -1 || t
 $ cat msg.txt
 subject
 
-message
+corpo do texto
 $ git config trailer.help.key "Helped-by: "
 $ git config trailer.help.ifExists "addIfDifferentNeighbor"
 $ git config trailer.help.cmd "~/bin/glog-find-author"
 $ git interpret-trailers --trailer="help:Junio" --trailer="help:Couder" &lt;msg.txt
-subject
+assunto
 
-mensagem
+corpo do texto
 
 Auxiliado por: Junio C Hamano &lt;gitster@pobox.com&gt;
 Auxiliado por: Christian Couder &lt;christian.couder@gmail.com&gt;</pre>
@@ -800,14 +836,14 @@ test -n "$1" &amp;&amp; git log --grep "$1" --pretty=reference -1 || true
 $ cat msg.txt
 subject
 
-message
+corpo do texto
 $ git config trailer.ref.key "Reference-to: "
 $ git config trailer.ref.ifExists "replace"
 $ git config trailer.ref.cmd "~/bin/glog-grep"
 $ git interpret-trailers --trailer="ref:Add copyright notices." &lt;msg.txt
-subject
+assunto
 
-mensagem
+corpo do texto
 
 Refere-se ao: 8bc9a0c769 (Adicionado avisos de ireitos autorais., 2005-04-07)</pre>
 </div>
@@ -820,7 +856,7 @@ Refere-se ao: 8bc9a0c769 (Adicionado avisos de ireitos autorais., 2005-04-07)</p
 <pre>$ cat msg.txt
 subject
 
-mensagem
+corpo do texto
 
 see: HEAD~2
 $ cat ~/bin/glog-ref
@@ -833,7 +869,7 @@ $ git config trailer.see.cmd "glog-ref"
 $ git interpret-trailers --trailer=see &lt;msg.txt
 subject
 
-mensagem
+corpo do texto
 
 See-also: fe3187489d69c4 (assunto do commit relacionado)</pre>
 </div>
@@ -885,7 +921,7 @@ $ chmod +x .git/hooks/commit-msg</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:52 +0200
+Last updated 2023-12-10 16:15:30 +0100
 </div>
 </div>
 </body>

@@ -516,9 +516,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">init [--] [&lt;chemin&gt;&#8230;&#8203;]</dt>
 <dd>
-<p>Initialiser les sous-modules enregistrés dans l&#8217;index (qui ont été ajoutés et validés ailleurs) en définissant <code>submodule.$nom.url</code> dans .git/config. Il utilise le même paramètre de <code>.gitmodules</code> comme modèle. Si l&#8217;URL est relative, elle sera résolue en utilisant le distant par défaut. S&#8217;il n&#8217;y a pas de distant par défaut, le dépôt actuel sera supposé être en amont.</p>
+<p>Initialiser les sous-modules enregistrés dans l&#8217;index (qui ont été ajoutés et validés ailleurs) en définissant <code>submodule.$nom.url</code> dans <code>.git/config</code>, en utilisant le même paramètre de <code>.gitmodules</code> comme modèle. Si l&#8217;URL est relative, elle sera résolue en utilisant le distant par défaut. S&#8217;il n&#8217;y a pas de distant par défaut, le dépôt actuel sera supposé être en amont.</p>
 <div class="paragraph">
 <p>Les arguments facultatifs &lt;chemin&gt; limitent les sous-modules qui seront initialisés. Si aucun chemin n&#8217;est spécifié et que submodule.active a été configuré, les sous-modules configurés pour être actifs seront initialisés, sinon tous les sous-modules sont initialisés.</p>
+</div>
+<div class="paragraph">
+<p>La valeur de <code>submodule.$name.update`sera aussi copiée, si présente dans le fichier `.gitmodules</code>, dans <code>.git/config</code>, mais (1) cette commande ne modifie pas les informations existantes dans <code>.git/config</code>, et (2) <code>submodule.$name.update</code> qui est défini à une commande personnalisée n&#8217;est <strong>pas</strong> copié pour des raisons de sécurité.</p>
 </div>
 <div class="paragraph">
 <p>Lorsqu&#8217;il est présent, copie également la valeur de <code>submodule.$nom.update</code>. Cette commande ne modifie pas les informations existantes dans le fichier .git/config. Vous pouvez ensuite personnaliser les URL de clonage de sous-module dans .git/config pour votre configuration locale et passer à <code>git submodule update</code> ; vous pouvez aussi simplement utiliser <code>git submodule update --init</code> sans l&#8217;étape explicite <em>init</em> si vous n&#8217;avez pas l&#8217;intention de personnaliser l&#8217;emplacement des sous-module.</p>
@@ -545,7 +548,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="openblock">
 <div class="content">
 <div class="paragraph">
-<p>Mettre à jour les sous-modules enregistrés pour qu&#8217;ils correspondent aux attentes du superprojet en clonant les sous-modules manquants, en récupérant les commits manquants dans les sous-modules et en mettant à jour l&#8217;arbre de travail des sous-modules. La "mise à jour" peut être effectuée de plusieurs façons, en fonction des options de la ligne de commande et de la valeur de la variable de configuration <code>submodule.&lt;nom&gt;.update</code>. L&#8217;option de ligne de commande a la priorité sur la variable de configuration. Si aucune des deux n&#8217;est donnée, un <em>checkout</em> est effectué. Les procédures de 'update&#8217;supportées aussi bien en ligne de commande que par la configuration `submodule.&lt;nom&gt;.update`sont :</p>
+<p>Mettre à jour les sous-modules enregistrés pour qu&#8217;ils correspondent aux attentes du superprojet en clonant les sous-modules manquants, en récupérant les commits manquants dans les sous-modules et en mettant à jour l&#8217;arbre de travail des sous-modules. La "mise à jour" peut être effectuée de plusieurs façons, en fonction des options de la ligne de commande et de la valeur de la variable de configuration <code>submodule.&lt;nom&gt;.update</code>. L&#8217;option de ligne de commande a la priorité sur la variable de configuration. Si aucune des deux n&#8217;est donnée, un <em>checkout</em> est effectué. (note : ce qui est dans le fichier`.gitmodules` n&#8217;est pas pertinent à ce point ; voir <code>git submodule init</code> ci-dessus pour comment <code>.gitmodules</code> est utilisé). Les procédures de 'update&#8217;supportées aussi bien en ligne de commande que par la configuration `submodule.&lt;nom&gt;.update`sont :</p>
 </div>
 <div class="dlist">
 <dl>
@@ -567,17 +570,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dl>
 </div>
 <div class="paragraph">
-<p>Les procédures <em>update</em> suivantes sont uniquement disponibles via la variable de configuration <code>submodule.&lt;nom&gt;.update</code> :</p>
+<p>Les procédures de mise à jour suivantes ont des limites supplémentaires :</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">commande personnalisée</dt>
 <dd>
-<p>une commande shell arbitraire qui prend un seul argument (le sha1 du commit enregistré dans le superprojet) est exécuté. Lorsque `submodule.&lt;nom&gt;.update`est réglé sur <em>!command</em>, le reste après le point d&#8217;exclamation est la commande personnalisée.</p>
+<p>mécanisme pour exécuter des commandes arbitraires avec l&#8217;ID de commit comme argument. Plus précisément, si la variable de configuration <code>submodule&lt;nom&gt;.update</code> à <code>!&lt;commande personnalisée&gt;</code>', le nom de l&#8217;objet enregistré dans le superprojet pour le sous-module est ajouté à la fin de la chaîne <code>&lt;commande personnalisée&gt;</code> et celle-ci est exécutée. Notez que ce mécanisme n&#8217;est pas pris en charge dans le fichier <code>.gitmodules</code> ou sur la ligne de commande.</p>
 </dd>
 <dt class="hdlist1">none</dt>
 <dd>
-<p>le sous-module n&#8217;est pas mis à jour.</p>
+<p>le sous-module n&#8217;est pas mis à jour. Cette procédure de mise à jour n&#8217;est pas autorisée sur la ligne de commande.</p>
 </dd>
 </dl>
 </div>
@@ -679,12 +682,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--files</dt>
 <dd>
-<p>Cette option n&#8217;est valable que pour la commande sommaire. Cette commande compare le commit dans l&#8217;index avec celui du sous-module HEAD lorsque cette option est utilisée.</p>
+<p>Cette option n&#8217;est valable que pour la commande <em>summary</em>. Cette commande compare le commit dans l&#8217;index avec celui du sous-module HEAD lorsque cette option est utilisée.</p>
 </dd>
 <dt class="hdlist1">-n</dt>
 <dt class="hdlist1">--summary-limit</dt>
 <dd>
-<p>Cette option n&#8217;est valable que pour la commande sommaire. Limiter la taille du résumé (nombre de validations affichées au total). Donner 0 désactivera le résumé ; un nombre négatif signifie illimité (par défaut). Cette limite ne s&#8217;applique qu&#8217;aux sous-modules modifiés. La taille est toujours limitée à 1 pour les sous-modules ajoutés/supprimés/modifiés.</p>
+<p>Cette option n&#8217;est valable que pour la commande <em>summary</em>. Limiter la taille du résumé (nombre de validations affichées au total). Donner 0 désactivera le résumé ; un nombre négatif signifie illimité (par défaut). Cette limite ne s&#8217;applique qu&#8217;aux sous-modules modifiés. La taille est toujours limitée à 1 pour les sous-modules ajoutés/supprimés/modifiés.</p>
 </dd>
 <dt class="hdlist1">--remote</dt>
 <dd>
@@ -804,7 +807,7 @@ de <a href="git-clone.html">git-clone(1)</a>.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:03:36 +0200
+Last updated 2023-12-10 16:14:39 +0100
 </div>
 </div>
 </body>

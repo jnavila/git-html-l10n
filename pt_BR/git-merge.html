@@ -747,7 +747,10 @@ A opção <code>--edit</code> (ou <code>-e</code>) ainda é útil caso esteja en
 <p>Os caminhos que foram mesclados corretamente são atualizados no arquivo do índice e na sua árvore de trabalho.</p>
 </li>
 <li>
-<p>Para os caminhos conflitantes, o arquivo do índice registra até três versões: o estágio 1 armazena a versão do ancestral comum, o estágio 2 do <code>HEAD</code> e o estágio 3 do <code>MERGE_HEAD</code> (você pode inspecionar os estágios com <code>git ls-files -u</code>). Os arquivos da árvore de trabalho contêm o resultado do programa "merge"; ou seja, os resultados da mesclagem em três direções com os marcadores de conflito familiares <code>&lt;&lt;&lt;</code>, <code>===</code> e <code>&gt;&gt;&gt;</code>.</p>
+<p>Para caminhos conflitantes, o arquivo do índice registra até três versões: o estágio 1 armazena a versão do ancestral comum, o estágio 2 do <code>HEAD</code> e o estágio 3 de <code>MERGE_HEAD</code> (você pode inspecionar os estágios com <code>git ls-files -u</code>). Os arquivos da árvore de trabalho contêm o resultado da operação de mesclagem, ou seja, os resultados da mesclagem de três vias com marcadores de conflito familiares <code>&lt;&lt;&lt;</code> <code>===</code> <code>&gt;&gt;&gt;</code>.</p>
+</li>
+<li>
+<p>Uma ref especial <code>AUTO_MERGE</code> é gravada, apontando para uma árvore correspondente ao conteúdo atual da árvore de trabalho (incluindo os marcadores de conflito para conflitos textuais). Observe que essa referência só é gravada quando a estratégia de mesclagem "ort" é usada (o padrão).</p>
 </li>
 <li>
 <p>Nenhuma outra alteração é feita. Em particular, as alterações locais que você tinha antes de iniciar a mesclagem permanecerão as mesmas e as entradas do índice para elas permanecerão como estavam, ou seja, correspondendo com `HEAD '.</p>
@@ -877,10 +880,10 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 <div class="ulist">
 <ul>
 <li>
-<p>Utilize uma ferramenta de mesclagem "mergetool". <code>git mergetool</code> para iniciar uma ferramenta gráfica para lhe auxiliar através do processo de mesclagem.</p>
+<p>Utilize uma ferramenta de mesclagem "mergetool". <code>git mergetool</code> para iniciar uma interface gráfica para lhe auxiliar no processo de mesclagem.</p>
 </li>
 <li>
-<p>Veja as diferenças dos arquivos diff. O <code>git diff</code> exibirá um diff de três vias, destacando as alterações das versões` HEAD` e <code>MERGE_HEAD</code>.</p>
+<p>Olhando os diffs. O <code>git diff</code> mostrará um diff de três vias, destacando as alterações das versões <code>HEAD</code> e <code>MERGE_HEAD</code>. O <code>git diff AUTO_MERGE</code> mostrará as alterações que você fez até o momento para resolver os conflitos textuais.</p>
 </li>
 <li>
 <p>Veja as diferenças de cada ramo. O comando <code>git log --merge -p &lt;caminho&gt;</code> exibirá as diferenças primeiro para a versão <code>HEAD</code> e depois para a versão <code>MERGE_HEAD</code>.</p>
@@ -1065,7 +1068,7 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 <dl>
 <dt class="hdlist1">merge.conflictStyle</dt>
 <dd>
-<p>Especifique o estilo no qual os blocos em conflito são gravados nos arquivos da árvore de trabalho durante a mesclagem. A predefinição é "mesclar", onde exibe um marcador de conflito <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> nas modificações feitas por um lado, o <code>=======</code> marca as modificações feita pelo outro lado e então a marca <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Um estilo alternativo, "diff3", adiciona um marcador <code>|||||||</code> e o texto original antes do marcador <code>=======</code>. O estilo "merge" tende a produzir menos regiões com conflito se comparado com o diff3, seja por causa da exclusão do texto original, seja porque quando um subconjunto das linhas combine nos dois lados elas são retiradas da região em conflito. O outro estilo alternativo, "zdiff3", é semelhante ao diff3 mas remove as linhas correspondentes nos dois lados da região em conflito quando essas linhas correspondentes aparecem perto do início ou do fim de uma região em conflito.</p>
+<p>Especifique o estilo no qual os blocos em conflito são gravados nos arquivos da árvore de trabalho durante a mesclagem. A predefinição é "mesclar", onde exibe um marcador de conflito <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> nas modificações feitas por um lado, o <code>=======</code> marca as modificações feita pelo outro lado e então a marca <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code>. Um estilo alternativo, "diff3", adiciona um marcador <code>|||||||</code> e o texto original antes do marcador <code>=======</code>. O estilo "merge" tende a produzir menos regiões com conflito se comparado com o diff3, seja por causa da exclusão do texto original, seja porque quando um subconjunto das linhas combina nos dois lados, elas são retiradas da região em conflito. O outro estilo alternativo, "zdiff3", é semelhante ao diff3 mas remove as linhas correspondentes nos dois lados da região em conflito quando essas linhas correspondentes aparecem perto do início ou do fim de uma região em conflito.</p>
 </dd>
 <dt class="hdlist1">merge.defaultToUpstream</dt>
 <dd>
@@ -1125,14 +1128,143 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 <dt class="hdlist1">merge.guitool</dt>
 <dd>
 <p>Controla qual a ferramenta de mesclagem é utilizada pelo <a href="git-mergetool.html">git-mergetool(1)</a> quando a opção <code>-g/--gui</code> for utilizada. A lista abaixo exibe os valores predefinidos que são válidos . Qualquer outro valor é tratado como uma ferramenta de mesclagem personalizada e requer que uma variável <code>mergetool.&lt;guitool&gt;.cmd</code> correspondente seja definida.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>araxis</code></dt>
+<dd>
+<p>Use a mesclagem "Araxis" (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>bc</code></dt>
+<dd>
+<p>Use a comparação "Beyound" (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>bc3</code></dt>
+<dd>
+<p>Use a comparação "Beyound" (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>bc4</code></dt>
+<dd>
+<p>Use a comparação "Beyound" (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>codecompare</code></dt>
+<dd>
+<p>Use a comparação de código (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>deltawalker</code></dt>
+<dd>
+<p>Use o DeltaWalker (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>diffmerge</code></dt>
+<dd>
+<p>Use o DiffMerge (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>diffuse</code></dt>
+<dd>
+<p>Use o Diffuse (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>ecmerge</code></dt>
+<dd>
+<p>Use o ECMerge (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>emerge</code></dt>
+<dd>
+<p>Use o Emacs' Emerge</p>
+</dd>
+<dt class="hdlist1"><code>examdiff</code></dt>
+<dd>
+<p>Use o ExamDiff Pro (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>guiffy</code></dt>
+<dd>
+<p>Use a ferramenta Guiffy&#8217;s Diff (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff</code></dt>
+<dd>
+<p>Use o gVim (uma sessão gráfica é obrigatória) com um layout personalizado (consulte <code>git help mergetool</code> na seção <code>DICAS ESPECÍFICAS PARA CLIENTES</code>)</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff1</code></dt>
+<dd>
+<p>Use o gVim (uma sessão gráfica é obrigatória) com 2 painéis (LOCAL e REMOTO)</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff2</code></dt>
+<dd>
+<p>Use o gVim (uma sessão gráfica é obrigatória) com 3 painéis (LOCAL, MESCLADO e REMOTO)</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff3</code></dt>
+<dd>
+<p>Use o gVim (uma sessão gráfica é obrigatória) onde apenas o arquivo MESCLADO é mostrado</p>
+</dd>
+<dt class="hdlist1"><code>kdiff3</code></dt>
+<dd>
+<p>Use o KDiff3 (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>meld</code></dt>
+<dd>
+<p>Use o Meld (uma sessão gráfica é obrigatória) com a opção opcional <code>auto merge</code> (consulte <code>git help mergetool</code> na seção <code>CONFIGURAÇÃO</code>)</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff</code></dt>
+<dd>
+<p>Use o Neovim com um layout personalizado (consulte <code>git help mergetool</code> na seção <code>DICAS ESPECÍFICAS PARA CLIENTES</code>)</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff1</code></dt>
+<dd>
+<p>Use o Neovim com 2 painéis (LOCAL e REMOTO)</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff2</code></dt>
+<dd>
+<p>Use o Neovim com 3 painéis (LOCAL, MESCLADO e REMOTO)</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff3</code></dt>
+<dd>
+<p>Use o Neovim apenas onde o arquivo MESCLADO seja mostrado</p>
+</dd>
+<dt class="hdlist1"><code>opendiff</code></dt>
+<dd>
+<p>Use o FileMerge (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>p4merge</code></dt>
+<dd>
+<p>Use o HelixCore P4Merge (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>smerge</code></dt>
+<dd>
+<p>Use a mesclagem Sublime (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>tkdiff</code></dt>
+<dd>
+<p>Use o TkDiff (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>tortoisemerge</code></dt>
+<dd>
+<p>Use o TortoiseMerge (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff</code></dt>
+<dd>
+<p>Use o Vim com um layout personalizado (consulte <code>git help mergetool</code> na seção <code>DICAS ESPECÍFICAS PARA CLIENTES</code>)</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff1</code></dt>
+<dd>
+<p>Use o Vim com 2 painéis (LOCAL e REMOTO)</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff2</code></dt>
+<dd>
+<p>Use o Vim com 3 painéis (LOCAL, MESCLADO e REMOTO)</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff3</code></dt>
+<dd>
+<p>Use o Vim apenas onde o arquivo MESCLADO seja mostrado</p>
+</dd>
+<dt class="hdlist1"><code>winmerge</code></dt>
+<dd>
+<p>Use WinMerge (uma sessão gráfica é obrigatória)</p>
+</dd>
+<dt class="hdlist1"><code>xxdiff</code></dt>
+<dd>
+<p>Use xxdiff (uma sessão gráfica é obrigatória)</p>
 </dd>
 </dl>
 </div>
-<div class="paragraph">
-<p>Unresolved directive in config/merge.txt - include::../mergetools-merge.txt[]</p>
-</div>
-<div class="dlist">
-<dl>
+</dd>
 <dt class="hdlist1">merge.verbosity</dt>
 <dd>
 <p>Controla a quantidade de saída exibida pela estratégia de mesclagem recursiva. O level 0 não envia nada, exceto uma mensagem final de erro, caso conflitos sejam detectados. O level 1 gera apenas os conflitos na saída, o 2 gera conflitos e alterações nos arquivos. O level 5 e acima gera informações de depuração. 2 é o valor predefinido. Pode ser substituído pela variável de ambiente <code>GIT_MERGE_VERBOSITY</code>.</p>
@@ -1172,7 +1304,7 @@ E aqui está outra linha que foi claramente resolvida ou não foi modificada.</p
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:52 +0200
+Last updated 2023-12-10 16:15:30 +0100
 </div>
 </div>
 </body>

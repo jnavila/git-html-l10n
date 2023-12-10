@@ -452,7 +452,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git worktree add</em> [-f] [--detach] [--checkout] [--lock [--reason &lt;chaîne&gt;]]
-                   [-b &lt;nouvelle-branche&gt;] &lt;chemin&gt; [&lt;commit-esque&gt;]
+                   [--orphan] [(-b | -B) &lt;nouvelle-branche&gt;] &lt;chemin&gt; [&lt;commit-esque&gt;]
 <em>git worktree list</em> [-v | --porcelain [-z]]
 <em>git worktree lock</em> [--reason &lt;chaîne&gt;] &lt;arbre-de-travail&gt;
 <em>git worktree move</em> &lt;arbre-de-travail&gt; &lt;nouveau-chemin&gt;
@@ -507,6 +507,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="paragraph">
 <p>Si <code>&lt;commit-esque&gt;</code> est omis et que ni <code>-b</code> ni <code>-B</code> ni <code>--detach</code> ne sont utilisés, alors, par commodité, le nouvel arbre-de-travail est associé à une branche (appelez-la <code>&lt;branche&gt;</code>) nommée d&#8217;après <code>$(basename &lt;chemin&gt;)</code>. Si <code>&lt;branche&gt;</code> n&#8217;existe pas, une nouvelle branche basée sur <code>HEAD</code> est automatiquement créée comme si <code>-b &lt;branche&gt;</code> était donné. Si <code>&lt;branche&gt;</code> existe, elle sera extraite dans le nouvel arbre-de-travail, si elle n&#8217;est pas extraite ailleurs, sinon la commande refusera de créer l&#8217;arbre-de-travail (à moins que <code>--force</code> soit utilisé).</p>
+</div>
+<div class="paragraph">
+<p>Si l ' on omet <code>&lt;commit-esque&gt;</code>, que ni <code>---detach</code>, ni <code>--orphan</code> ne sont utilisés et qu&#8217;il n ' y a pas de branche locale valide (ou de branches distantes si`--guess-remote` est spécifié ), alors, par commodité, le nouvel arbre-de-travail est associé à une nouvelle branche orpheline dénommée <code>&lt;branche &gt;</code> (après <code>$(basename &lt;chemin&gt;)</code> si ni <code>-b`ni `-B</code> n ' est utilisé) comme si <code>--orphan</code> était passé à la commande. Dans le cas où le dépôt a un distant et où <code>--guess-remote</code> est utilisé, mais où il n&#8217;y a pas de branches distantes ou locales, alors la commande échoue avec un avertissement rappelant à l&#8217;utilisateur de récupérer depuis leur dépôt distant avant (ou passer outre en utilisant <code>-f/-force</code>).</p>
 </div>
 </dd>
 <dt class="hdlist1">list</dt>
@@ -600,6 +603,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Avec <code>prune</code>, ne rien supprimer ; montrer seulement ce qui serait supprimé.</p>
 </dd>
+<dt class="hdlist1">--orphan</dt>
+<dd>
+<p>Avec <code>add</code>, rendre le nouveau arbre-de-travail et index vides, associant l&#8217;arbre-de-travail avec une nouvelle branche orpheline/non-née nommée <code>&lt;nouvelle-branche&gt;</code>.</p>
+</dd>
 <dt class="hdlist1">--porcelain</dt>
 <dd>
 <p>Avec <code>list</code>, donner la sortie dans un format facile à analyser par script. Ce format restera stable à travers les versions de Git et sans tenir compte de la configuration utilisateur. Il est recommandé de combiner ceci avec <code>-z</code>. Voir ci-dessous pour de plus amples détails.</p>
@@ -650,7 +657,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Dans le cas de plusieurs arbres-de-travail utilisés, certaines réfs peuvent être partagées entre tous les arbres-de-travail, mais d&#8217;autres sont spécifiques aux arbres-de-travail individuels. Par exemple, <code>HEAD</code> est différente pour tous les arbres-de-travail. Cette section concerne les règles de partage et la manière d&#8217;accéder aux références d&#8217;un arbre-de-travail à partir d&#8217;un autre.</p>
 </div>
 <div class="paragraph">
-<p>En général, toutes les pseudo réfs sont par arbre-de-travail et toutes les réfs commençant par <code>refs/</code> sont partagées. Les pseudo réfs sont celles comme <code>HEAD</code> qui sont directement sous <code>$GIT_DIR</code> au lieu d&#8217;être à l&#8217;intérieur de <code>$GIT_DIR/refs</code>. Il y a cependant des exceptions à cela : les réfs à l&#8217;intérieur de <code>refs/bisect</code> et <code>refs/worktree</code> ne sont pas partagées.</p>
+<p>En général, toutes les pseudo réfs sont par arbre-de-travail et toutes les réfs commençant par <code>refs/</code> sont partagées. Les pseudo réfs sont celles comme <code>HEAD</code> qui sont directement sous <code>$GIT_DIR</code> au lieu d&#8217;être à l&#8217;intérieur de <code>$GIT_DIR/refs</code>. Il y a cependant des exceptions à cela : les réfs à l&#8217;intérieur de <code>refs/bisect</code>, <code>refs/worktree</code> et <code>refs/rewritten</code> ne sont pas partagées.</p>
 </div>
 <div class="paragraph">
 <p>Les références par arbre-de-travail sont toujours accessibles à partir d&#8217;un autre arbre-de-travail via deux chemins spéciaux, <code>main-worktree</code> et <code>worktrees</code>. Le premier donne accès aux références par arbre-de-travail de l&#8217;arbre de travail principal, tandis que le second donne accès à tous les arbres-de-travail liés.</p>
@@ -711,7 +718,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Dans un arbre-de-travail lié, <code>$GIT_DIR</code> est défini pour pointer vers ce répertoire privé (par exemple, <code>/chemin/principal/.git/worktrees/test-prochain</code> dans l&#8217;exemple) et <code>$GIT_COMMON_DIR</code> est défini pour pointer vers l&#8217;arbre-de-travail principal. <code>$GIT_DIR</code> (par exemple <code>/chemin/principal/.git</code>). Ces paramètres sont définis dans un fichier <code>.git</code> situé dans le répertoire supérieur de l&#8217;arbre-de-travail lié.</p>
 </div>
 <div class="paragraph">
-<p>La résolution du chemin via <code>git rev-parse --git-path</code> utilise soit <code>$GIT_DIR</code> soit <code>$GIT_COMMON_DIR</code> selon le chemin. Par exemple, dans l&#8217;arbre-de-travail lié <code>git rev-parse --git-path HEAD</code> renvoie <code>/chemin/principal/.git/worktrees/test-prochain/HEAD</code> (pas <code>/chemin/autre/test-prochain/.git/HEAD</code> ou <code>/chemin/principal/.git/HEAD</code>) tandis que <code>git rev-parse --git-path refs/heads/master</code> utilise <code>$GIT_COMMON_DIR</code> et retourne <code>/chemin/principal/.git/refs/heads/master</code>, puisque les réfs sont partagées sur tous les arbres-de-travail, sauf <code>refs/bisect</code> et <code>refs/worktree</code>.</p>
+<p>La résolution du chemin via <code>git rev-parse --git-path</code> utilise soit <code>$GIT_DIR</code> soit <code>$GIT_COMMON_DIR</code> selon le chemin. Par exemple, dans l&#8217;arbre-de-travail lié <code>git rev-parse --git-path HEAD</code> renvoie <code>/chemin/principal/.git/worktrees/test-prochain/HEAD</code> (pas <code>/chemin/autre/test-prochain/.git/HEAD</code> ou <code>/chemin/principal/.git/HEAD</code>) tandis que <code>git rev-parse --git-path refs/heads/master</code> utilise <code>$GIT_COMMON_DIR</code> et retourne <code>/chemin/principal/.git/refs/heads/master</code>, puisque les réfs sont partagées sur tous les arbres-de-travail, sauf <code>refs/bisect</code>,<code>refs/worktree</code> et <code>refs/rewritten</code>.</p>
 </div>
 <div class="paragraph">
 <p>Voir <a href="gitrepository-layout.html">gitrepository-layout(5)</a> pour plus d&#8217;informations. La règle de base est de ne pas faire d&#8217;hypothèse sur l&#8217;appartenance d&#8217;un chemin à <code>$GIT_DIR</code> ou <code>$GIT_COMMON_DIR</code> lorsque vous devez accéder directement à quelque chose à l&#8217;intérieur de ``$GIT_DIR`. Utilisez <code>git rev-parse --git-path</code> pour obtenir le chemin final.</p>
@@ -873,7 +880,7 @@ $ git worktree remove ../temp</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:03:37 +0200
+Last updated 2023-12-10 16:14:39 +0100
 </div>
 </div>
 </body>

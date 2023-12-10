@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="generator" content="Asciidoctor 2.0.12"/>
+<title>git-format-patch(1)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment @import statement to use as custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite::before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details>summary:first-of-type{cursor:pointer;display:list-item;outline:none;margin-bottom:.75em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{-webkit-border-radius:4px;border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class="highlight"],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);-webkit-border-radius:50%;border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>git-format-patch(1) Manual Page</h1>
+<h2 id="_名称">名称</h2>
+<div class="sectionbody">
+<p>git-format-patch - 为提交电子邮件准备补丁</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_概述">概述</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>git format-patch</em> [-k] [(-o|--output-directory) &lt;dir&gt; | --stdout]
+                   [--no-thread | --thread[=&lt;style&gt;]]
+                   [(--attach|--inline)[=&lt;boundary&gt;] | --no-attach]
+                   [-s | --signoff]
+                   [--signature=&lt;signature&gt; | --no-signature]
+                   [--signature-file=&lt;file&gt;]
+                   [-n | --numbered | -N | --no-numbered]
+                   [--start-number &lt;n&gt;] [--numbered-files]
+                   [--in-reply-to=&lt;message id&gt;] [--suffix=.&lt;sfx&gt;]
+                   [--ignore-if-in-upstream] [--always]
+                   [--cover-from-description=&lt;mode&gt;]
+                   [--rfc] [--subject-prefix=&lt;subject prefix&gt;]
+                   [(--reroll-count|-v) &lt;n&gt;]
+                   [--to=&lt;email&gt;] [--cc=&lt;email&gt;]
+                   [--[no-]cover-letter] [--quiet]
+                   [--[no-]encode-email-headers]
+                   [--no-notes | --notes[=&lt;ref&gt;]]
+                   [--interdiff=&lt;previous&gt;]
+                   [--range-diff=&lt;previous&gt; [--creation-factor=&lt;percent&gt;]]
+                   [--filename-max-length=&lt;n&gt;]
+                   [--progress]
+                   [&lt;common diff options&gt;]
+                   [ &lt;since&gt; | &lt;revision range&gt; ]</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_描述">描述</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>将每个非合并提交及其 “补丁” 准备在每个提交的一个 “消息” 中，格式类似于 UNIX 邮箱。 这条命令的输出便于提交电子邮件或与 "git am" 一起使用。</p>
+</div>
+<div class="paragraph">
+<p>命令产生的 "信息" 由三部分组成：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>一个简短的元数据头，以 "From &lt;提交&gt;" 开始，带有固定的 "Mon Sep 17 00:00:00 2001" 的日期，以帮助 "file(1)" 等程序识别该文件是该命令的输出，记录作者身份、作者日期和修改标题的字段（取自提交日志信息的第一段）。</p>
+</li>
+<li>
+<p>提交日志信息的第二段和后续段落。</p>
+</li>
+<li>
+<p>“补丁”，也就是该提交和其父辈之间的 "diff -p -stat" 输出（见 <a href="git-diff.html">git-diff(1)</a>）。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The log message and the patch are separated by a line with a three-dash line.</p>
+</div>
+<div class="paragraph">
+<p>有两种方法可以指定要对哪些提交进行操作。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>A single commit, &lt;since&gt;, specifies that the commits leading to the tip of the current branch that are not in the history that leads to the &lt;since&gt; to be output.</p>
+</li>
+<li>
+<p>通用的 &lt;修订范围&gt; 表达式（见 <a href="gitrevisions.html">gitrevisions(7)</a>中的 "指定修订" 一节）表示指定范围内的提交。</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>在只有一个 &lt;提交&gt; 的情况下，第一条规则具有优先权。 要应用第二条规则，即格式化从历史开始到 &lt;提交&gt; 为止的所有内容，使用 <code>--root</code> 选项：<code>git format-patch --root &lt;提交&gt;</code>。 如果你只想格式化 &lt;提交&gt; 本身，你可以用`git format-patch -1 &lt;提交&gt;`来做。</p>
+</div>
+<div class="paragraph">
+<p>默认情况下，每个输出文件从 1 开始依次编号，并使用提交信息的第一行（为保证路径名的安全而进行了调整）作为文件名。使用 <code>--numbered-files</code> 选项，输出文件名将只有数字，而没有附加提交信息的第一行。 除非指定 <code>--stdout</code> 选项，否则输出文件的名称将被打印到标准输出。</p>
+</div>
+<div class="paragraph">
+<p>如果指定了 <code>-o</code>，输出文件将在&lt;目录&gt;创建。 否则，它们将在当前工作目录下创建。默认路径可以通过 <code>format.outputDirectory</code> 配置选项来设置。 <code>-o</code> 选项优先于 <code>format.outputDirectory</code>。 要在当前工作目录下存储补丁，即使 <code>format.outputDirectory</code> 指向其他地方，使用 <code>-o .</code>。所有的目录组件都将被创建。</p>
+</div>
+<div class="paragraph">
+<p>默认情况下，单个补丁的主题是 "[PATCH]"，后面是提交信息到第一个空行的串联（见 <a href="git-commit.html">git-commit(1)</a> 的讨论部分）。</p>
+</div>
+<div class="paragraph">
+<p>当输出多个补丁时，主题前缀将改为 "[PATCH n/m] "。 要强制为单个补丁添加 1/1，使用 <code>-n</code>。 要从主题中省略补丁编号，使用 <code>-N</code>。</p>
+</div>
+<div class="paragraph">
+<p>如果给出 <code>--thread</code>，<code>git-format-patch</code> 将生成 <code>In-Reply-To</code> 和 <code>References</code> 头，使第二封和随后的补丁邮件显示为对第一封邮件的回复；这也会生成一个 <code>Message-ID</code> 头供参考。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_选项">选项</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Unresolved directive in git-format-patch.txt - include::diff-options.txt[]</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">-&lt;n&gt;</dt>
+<dd>
+<p>从最上面的 &lt;n&gt; 个提交中准备补丁。</p>
+</dd>
+<dt class="hdlist1">-o &lt;目录&gt;</dt>
+<dt class="hdlist1">--output-directory &lt;dir&gt;</dt>
+<dd>
+<p>使用 &lt;目录&gt; 来存储结果文件，而不是当前工作目录。</p>
+</dd>
+<dt class="hdlist1">-n</dt>
+<dt class="hdlist1">--numbered</dt>
+<dd>
+<p>以 <em>[PATCH n/m]</em> 的格式输出名称，即使只有一个补丁。</p>
+</dd>
+<dt class="hdlist1">-N</dt>
+<dt class="hdlist1">--no-numbered</dt>
+<dd>
+<p>以 <em>[PATCH]</em> 格式输出名称。</p>
+</dd>
+<dt class="hdlist1">--start-number &lt;n&gt;</dt>
+<dd>
+<p>从&lt;n&gt;开始个给补丁编号，替代默认从1开始。</p>
+</dd>
+<dt class="hdlist1">--numbered-files</dt>
+<dd>
+<p>输出文件名将是一个简单的数字序列，没有附加默认的第一行提交。</p>
+</dd>
+<dt class="hdlist1">-k</dt>
+<dt class="hdlist1">--keep-subject</dt>
+<dd>
+<p>不要从提交日志信息的第一行剥离/添加 <em>[PATCH]</em>。</p>
+</dd>
+<dt class="hdlist1">-s</dt>
+<dt class="hdlist1">--signoff</dt>
+<dd>
+<p>在提交信息中加入 <code>Signed-off-by</code> 的尾注，使用自己的提交者身份。 更多信息见 <a href="git-commit.html">git-commit(1)</a> 中的 signoff 选项。</p>
+</dd>
+<dt class="hdlist1">--stdout</dt>
+<dd>
+<p>以 mbox 格式将所有的提交打印到标准输出，而不是为每个提交创建一个文件。</p>
+</dd>
+<dt class="hdlist1">--attach[=&lt;boundary&gt;]</dt>
+<dd>
+<p>创建多部分/混合附件，第一部分是提交信息，第二部分是补丁本身，<code>Content-Disposition: attachment</code>。</p>
+</dd>
+<dt class="hdlist1">--no-attach</dt>
+<dd>
+<p>禁用附件的创建，覆盖配置设置。</p>
+</dd>
+<dt class="hdlist1">--inline[=&lt;boundary&gt;]</dt>
+<dd>
+<p>创建 multipart/mixed 附件，第一部分是提交信息，第二部分是补丁本身，使用 <code>Content-Disposition: inline</code>。</p>
+</dd>
+<dt class="hdlist1">--thread[=&lt;style&gt;]</dt>
+<dt class="hdlist1">--no-thread</dt>
+<dd>
+<p>控制添加 <code>In-Reply-To</code> 和 <code>References</code> 标头，使第二封及以后的邮件显示为对第一封邮件的回复。 还控制生成 <code>Message-ID</code> 头，以便参考。</p>
+<div class="paragraph">
+<p>可选的 &lt;风格&gt; 参数可以是 <code>shallow</code> 或 <code>deep</code>。 ‘浅’ 线程使每封邮件都是对该系列的头的回复，其中头是从封面信、<code>--in-reply-to</code> 和第一个补丁邮件中选择的，按这个顺序。 ‘深’ 线程使每封邮件都是对前一封的回复。</p>
+</div>
+<div class="paragraph">
+<p>默认是 <code>--no-thread</code>，除非设置了 <code>format.thread</code> 配置。 没有参数的 <code>--thread</code> 等同于 <code>--thread=shallow</code>。</p>
+</div>
+<div class="paragraph">
+<p>请注意，<em>git send-email</em> 的默认设置是对邮件本身进行线程处理。 如果你想让 <code>git format-patch</code> 负责线程，你要确保 <code>git send-email</code> 的线程被禁用。</p>
+</div>
+</dd>
+<dt class="hdlist1">--in-reply-to=&lt;message id&gt;</dt>
+<dd>
+<p>使第一封邮件（或所有带有 <code>--no-thread</code> 的邮件）作为给定的 &lt;消息 id&gt; 的回复出现，这可以避免破坏线程以提供一个新的补丁系列。</p>
+</dd>
+<dt class="hdlist1">--ignore-if-in-upstream</dt>
+<dd>
+<p>不包括与 &lt;until&gt;&#8230;&#8203;&lt;since&gt; 中的提交相匹配的补丁。 这将检查所有可从 &lt;since&gt; 到达但不在 &lt;until&gt; 的补丁，并将它们与正在生成的补丁进行比较，任何匹配的补丁都将被忽略。</p>
+</dd>
+<dt class="hdlist1">--always</dt>
+<dd>
+<p>包括那些没有引入任何变化的提交的补丁，这些补丁默认是省略的。</p>
+</dd>
+<dt class="hdlist1">--cover-from-description=&lt;mode&gt;</dt>
+<dd>
+<p>控制求职信的哪些部分将使用分支机构的描述自动填充。</p>
+<div class="paragraph">
+<p>如果 <code>&lt;模式&gt;</code> 是 <code>message</code> 或 <code>default</code>，求职信的主题将被填充为占位符文本。信函的正文将被填入分支的描述。这是没有指定配置或命令行选项时的默认模式。</p>
+</div>
+<div class="paragraph">
+<p>如果 <code>&lt;模式&gt;</code> 是 <code>subject</code>，分支描述的第一段将填入求职信的主题。描述的其余部分将填充到求职信的正文中。</p>
+</div>
+<div class="paragraph">
+<p>如果 <code>&lt;模式&gt;</code> 是 <code>auto</code>，如果分支描述的第一段大于100字节，那么模式将是 <code>message</code>，否则将使用 <code>subject</code>。</p>
+</div>
+<div class="paragraph">
+<p>如果 <code>&lt;模式&gt;</code> 为 <code>none</code>，求职信的主题和正文都将被填充为占位符文本。</p>
+</div>
+</dd>
+<dt class="hdlist1">--description-file=&lt;file&gt;</dt>
+<dd>
+<p>使用 &lt;文件&gt; 的内容而不是分支说明来生成求职信。</p>
+</dd>
+<dt class="hdlist1">--subject-prefix=&lt;subject prefix&gt;</dt>
+<dd>
+<p>Instead of the standard <em>[PATCH]</em> prefix in the subject line, instead use <em>[&lt;subject prefix&gt;]</em>. This can be used to name a patch series, and can be combined with the <code>--numbered</code> option.</p>
+<div class="paragraph">
+<p>配置变量 <code>format.subjectPrefix</code> 也可用于配置主题前缀，以适用于指定仓库的所有补丁。这在接收多个仓库补丁的邮件列表中通常很有用，可用于消除补丁的歧义（例如值为 "PATCH my-project"）。</p>
+</div>
+</dd>
+<dt class="hdlist1">--filename-max-length=&lt;n&gt;</dt>
+<dd>
+<p>代替标准的 64 字节，将生成的输出文件名压缩到 <em>&lt;n&gt;</em> 字节左右（太短的值会被默默提升到合理的长度）。 默认为 <code>format.filenameMaxLength</code> 配置变量的值，如果没有配置，则为 64。</p>
+</dd>
+<dt class="hdlist1">--rfc</dt>
+<dd>
+<p>Prepends "RFC" to the subject prefix (producing "RFC PATCH" by default). RFC means "Request For Comments"; use this when sending an experimental patch for discussion rather than application.</p>
+</dd>
+<dt class="hdlist1">-v &lt;n&gt;</dt>
+<dt class="hdlist1">--reroll-count=&lt;n&gt;</dt>
+<dd>
+<p>Mark the series as the &lt;n&gt;-th iteration of the topic. The output filenames have <code>v&lt;n&gt;</code> prepended to them, and the subject prefix ("PATCH" by default, but configurable via the <code>--subject-prefix</code> option) has ` v&lt;n&gt;` appended to it. E.g. <code>--reroll-count=4</code> may produce <code>v4-0001-add-makefile.patch</code> file that has "Subject: [PATCH v4 1/20] Add makefile" in it. <code>&lt;n&gt;</code> does not have to be an integer (e.g. "--reroll-count=4.4", or "--reroll-count=4rev2" are allowed), but the downside of using such a reroll-count is that the range-diff/interdiff with the previous version does not state exactly which version the new iteration is compared against.</p>
+</dd>
+<dt class="hdlist1">--to=&lt;e-mail&gt;</dt>
+<dd>
+<p>在邮件标题中增加一个 <code>To: ` 头。这是在任何配置的头信息之外的，可以多次使用。 否定的形式 `--no-to</code> 会丢弃到目前为止添加的所有 <code>To:</code> 头信息（来自配置或命令行）。</p>
+</dd>
+<dt class="hdlist1">--cc=&lt;email&gt;</dt>
+<dd>
+<p>在邮件标题中添加 <code>Cc: ` 标头。这是在任何配置的头信息之外的，可以多次使用。 否定的形式 `--no-cc</code> 会丢弃到目前为止添加的所有 <code>Cc:</code> 头信息（来自配置或命令行）。</p>
+</dd>
+<dt class="hdlist1">--from</dt>
+<dt class="hdlist1">--from=&lt;ident&gt;</dt>
+<dd>
+<p>在每封提交邮件的`From:` 标头中使用 <code>ident</code>。如果提交的作者身份与所提供的 <code>ident</code> 在文字上不一致，则在邮件正文中放置一个 <code>From: ` 头，注明原作者。如果没有给出 `ident</code>，则使用提交者的身份。</p>
+<div class="paragraph">
+<p>注意，这个选项只有在你实际发送邮件时才有用，并且想把你自己确定为发件人，但保留原作者（<code>git am</code> 会正确接收正文头）。还要注意的是，<code>git send-email</code> 已经为你处理了这种转换，如果你将结果反馈给 <code>git send-email</code>，就不应该使用这个选项。</p>
+</div>
+</dd>
+<dt class="hdlist1">--[no-]force-in-body-from</dt>
+<dd>
+<p>对于通过 <code>--from</code> 选项指定的电子邮件发件人，默认情况下，如果发件人与作者不同，会在提交日志信息的顶部添加一个内文 "From:"，以确定提交的真正作者。 有了这个选项，即使发件人和作者的名字和地址相同，也会在正文中加入 "From："，这在邮件列表软件混淆发件人身份时可能会有帮助。 默认为 <code>format.forceInBodyFrom</code> 配置变量的值。</p>
+</dd>
+<dt class="hdlist1">--add-header=&lt;header&gt;</dt>
+<dd>
+<p>在邮件头中添加一个任意的头。 这是在任何配置的头文件之外的，并且可以多次使用。 例如，<code>--add-header="Organization: git-foo"</code>。 否定的形式 <code>--no-add-header</code> 会丢弃 <strong>所有</strong>（<code>To:</code>, <code>Cc:</code>, 和自定义）从配置或命令行添加的头信息。</p>
+</dd>
+<dt class="hdlist1">--[no-]cover-letter</dt>
+<dd>
+<p>除了补丁之外，还要生成一个包含分支描述、短日志和整体差异状态的封面文件。 你可以在发送之前在文件中填写描述。</p>
+</dd>
+<dt class="hdlist1">--encode-email-headers</dt>
+<dt class="hdlist1">--no-encode-email-headers</dt>
+<dd>
+<p>用 "Q-encoding"（在RFC 2047中描述）对有非 ASCII 字符的邮件头进行编码，而不是逐字输出邮件头。默认为 <code>format.encodeEmailHeaders</code> 配置变量的值。</p>
+</dd>
+<dt class="hdlist1">--interdiff=&lt;previous&gt;</dt>
+<dd>
+<p>作为审查员的帮助，在封面信中插入一个 interdiff，或者作为1个补丁系列中唯一一个补丁的注释，显示补丁系列的前一个版本与当前被格式化的系列之间的差异。<code>previous</code> 是一个单一的修订，命名了与被格式化的系列有共同基础的前一个系列的提示（例如 <code>git format-patch --cover-letter --interdiff=feature/v1 -3 feature/v2</code>）。</p>
+</dd>
+<dt class="hdlist1">--range-diff=&lt;previous&gt;</dt>
+<dd>
+<p>作为审查员的辅助工具，在封面信中插入一个 range-diff（见 <a href="git-range-diff.html">git-range-diff(1)</a>），或者作为1个补丁系列中唯一一个补丁的注释，显示该补丁系列的前一个版本与当前被格式化的系列之间的差异。 <code>previous</code> 可以是一个单一的修订版，如果它与被格式化的系列有共同的基础，则命名为前一个系列的提示（例如 <code>git format-patch --cover-letter --range-diff=feature/v1 -3 feature/v2</code>），如果两个系列的版本不相干，则是一个修订范围（例如 <code>git format-patch --cover-letter --range-diff=feature/v1~3.feature/v1 -3 feature/v2</code>）。</p>
+<div class="paragraph">
+<p>请注意，传递给命令的差异选项会影响 <code>format-patch</code> 的主要产品如何生成，它们不会传递给用于生成封面材料的基础 `range-diff ` 机器（这在将来可能会改变）。</p>
+</div>
+</dd>
+<dt class="hdlist1">--creation-factor=&lt;百分比&gt;</dt>
+<dd>
+<p>与 <code>--range-diff</code> 一起使用，通过调整创建/删除成本的模糊系数，来调整匹配上一个和当前系列补丁之间提交的启发式方法。详情见 <a href="git-range-diff.html">git-range-diff(1)</a>）。</p>
+</dd>
+<dt class="hdlist1">--notes[=&lt;ref&gt;]</dt>
+<dt class="hdlist1">--no-notes</dt>
+<dd>
+<p>在三折线之后添加该提交的注释（见 <a href="git-notes.html">git-notes(1)</a>）。</p>
+<div class="paragraph">
+<p>预期的用例是为提交编写不属于提交日志信息本身的支持性解释，并将其包含在补丁提交中。虽然我们可以在 <code>format-patch</code> 运行后但在发送前简单地写下这些解释，但将其保留为 Git 笔记，可以在补丁系列的不同版本之间进行维护（但要使用这种工作流程，请参考 <a href="git-notes.html">git-notes(1)</a> 中关于`notes.rewrite` 配置选项的讨论）。</p>
+</div>
+<div class="paragraph">
+<p>默认为`--no-notes`，除非设置了 <code>format.notes</code> 配置。</p>
+</div>
+</dd>
+<dt class="hdlist1">--[no-]signature=&lt;signature&gt;</dt>
+<dd>
+<p>给每个产生的信息添加一个签名。根据 RFC 3676，签名与正文之间用一行 <em>--</em> 分隔。如果签名选项被省略，则签名默认为 Git 版本号。</p>
+</dd>
+<dt class="hdlist1">--signature-file=&lt;file&gt;</dt>
+<dd>
+<p>工作原理与&#8212;&#8203;签名相同，只是签名是从文件中读取的。</p>
+</dd>
+<dt class="hdlist1">--suffix=.&lt;sfx&gt;</dt>
+<dd>
+<p>不使用 <code>.patch</code> 作为生成文件名的后缀，而使用指定的后缀。 一个常见的选择是 <code>--suffix=.txt</code>。 将此留空将删除 <code>.patch</code> 后缀。</p>
+<div class="paragraph">
+<p>请注意，前导字符不一定是点；例如，你可以使用 <code>--suffix=-patch</code> 来获得 <code>0001-description-of-my-change-patch</code>。</p>
+</div>
+</dd>
+<dt class="hdlist1">-q</dt>
+<dt class="hdlist1">--quiet</dt>
+<dd>
+<p>不要将生成的文件名打印到标准输出。</p>
+</dd>
+<dt class="hdlist1">--no-binary</dt>
+<dd>
+<p>不输出二进制文件中的变化内容，而是显示这些文件变化的通知。 使用该选项生成的补丁不能被正确应用，但它们对代码审查仍然有用。</p>
+</dd>
+<dt class="hdlist1">--zero-commit</dt>
+<dd>
+<p>在每个补丁的 From 头中输出一个全零的哈希值，而不是提交的哈希值。</p>
+</dd>
+<dt class="hdlist1">--[no-]base[=&lt;commit&gt;]</dt>
+<dd>
+<p>记录基树信息，以确定该补丁系列所适用的状态。 详见下面的基树信息部分。如果 &lt;提交&gt; 是 "auto"，就会自动选择一个基数提交。<code>--no-base</code> 选项会覆盖 <code>format.useAutoBase</code> 配置。</p>
+</dd>
+<dt class="hdlist1">--root</dt>
+<dd>
+<p>将修订版参数视为 &lt;revision range&gt;，即使它只是一个单一的提交（通常会被视为 &lt;since&gt;）。 注意，包含在指定范围内的根提交总是被格式化为创建补丁，与此标志无关。</p>
+</dd>
+<dt class="hdlist1">--progress</dt>
+<dd>
+<p>在生成补丁时在标准错误流上显示进度报告。</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_配置">配置</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>你可以指定额外的邮件标题行添加到每封邮件中，主题前缀和文件后缀的默认值，在输出多个补丁时对补丁进行编号，添加 "To: " 或 "Cc: " 标题，配置附件，更改补丁输出目录，以及用配置变量签署补丁。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[format]
+        headers = "Organization: git-foo\n"
+        subjectPrefix = CHANGE
+        suffix = .txt
+        numbered = auto
+        to = &lt;email&gt;
+        cc = &lt;email&gt;
+        attach [ = mime-boundary-string ]
+        signOff = true
+        outputDirectory = &lt;directory&gt;
+        coverLetter = auto
+        coverFromDescription = auto</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_讨论">讨论</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>由 <em>git format-patch</em> 产生的补丁是 UNIX 邮箱格式，有一个固定的 "magic" 时间戳，以表明该文件是由 format-patch 输出的，而不是一个真正的邮箱，像这样：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>From 8f72bad1baf19a53459661343e21d6491c3908d3 Mon Sep 17 00:00:00 2001
+From: Tony Luck &lt;tony.luck@intel.com&gt;
+Date: Tue, 13 Jul 2010 11:42:54 -0700
+Subject: [PATCH] =?UTF-8?q?[IA64]=20Put=20ia64=20config=20files=20on=20the=20?=
+ =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig=20diet?=
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+arch/arm config files were slimmed down using a python script
+(见提交 c2330e286f68f1c408b4aa6515ba49d57f05beae 评论)
+
+为 ia64 做同样的事情，这样我们就可以有光滑和修长的外观了。
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>通常情况下，它会被放在 MUA 的 drafts 文件夹中，被编辑以添加及时的评论，这些评论不应该被放在 changelog 中的三个破折号之后，然后以消息的形式发送，在我们的例子中，其正文以 "arch/arm config files were&#8230;&#8203;" 开始。 在接收端，读者可以将有趣的补丁保存在 UNIX 邮箱中，并通过 <a href="git-am.html">git-am(1)</a> 应用它们。</p>
+</div>
+<div class="paragraph">
+<p>当一个补丁是正在进行的讨论的一部分时，由 <em>git format-patch</em> 生成的补丁可以进行调整，以利用 <em>git am --scissors</em> 功能。 在你对讨论的回应之后，有一行只由 "<code>-- &gt;8 --</code>"（剪刀和打孔）组成，后面是去除不必要的头域的补丁：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>...
+&gt; So we should do such-and-such.
+
+对我来说是有意义的。 这个补丁怎么样？
+
+-- &gt;8 --
+Subject: [IA64] Put ia64 config files on the Uwe Kleine-KÃ¶nig diet
+
+使用 python 脚本对 arch/arm 配置文件进行了精简
+...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>当用这种方式发送补丁时，大多数情况下是发送你自己的补丁，所以除了 "<code>From $SHA1 $magic_timestamp</code>" 标记外，你应该从补丁文件中省略 `From: ` 和 `Date: ` 行。 补丁的标题很可能与补丁所回应的讨论主题不同，所以很可能要保留 Subject: 这一行，就像上面的例子一样。</p>
+</div>
+<div class="sect2">
+<h3 id="_检查补丁是否损坏">检查补丁是否损坏</h3>
+<div class="paragraph">
+<p>许多邮件如果设置不当就会破坏空白。 以下是两种常见的损坏类型：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>没有「任何」空格的空的上下文行。</p>
+</li>
+<li>
+<p>非空的上下文行，在开头有一个额外的空白。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>测试你的 MUA 是否设置正确的一个方法是：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>将补丁发送给自己，完全按照你的方式，只是在 To: 和 Cc: 行中不包含列表和维护者地址。</p>
+</li>
+<li>
+<p>将该补丁保存为 UNIX 邮箱格式的文件。 称之为 a.patch，例如。</p>
+</li>
+<li>
+<p>应用它：</p>
+<div class="literalblock">
+<div class="content">
+<pre>$ git fetch &lt;project&gt; master:test-apply
+$ git switch test-apply
+$ git restore --source=HEAD --staged --worktree :/
+$ git am a.patch</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>如果它不能正确应用，可能有各种原因。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>补丁本身不能干净地应用。 这很糟糕，但与你的 MUA 没有多大关系。 在这种情况下，你可能要先用 <a href="git-rebase.html">git-rebase(1)</a> 把补丁重新归位，再重新生成。</p>
+</li>
+<li>
+<p>MUA 损坏了你的补丁；"am" 会抱怨补丁不适用。 查看 .git/rebase-apply/ 子目录，看看 "补丁" 文件包含哪些内容，并检查上面提到的常见损坏模式。</p>
+</li>
+<li>
+<p>同时，还要检查 <em>info</em> 和 <em>final-commit</em> 文件。 如果 <em>final-commit</em> 中的内容与你希望在提交日志信息中看到的不完全一样，那么很可能接收者在应用你的补丁时最终会手工编辑日志信息。 补丁邮件中的 "Hi, this is my first patch.\n" 等内容应该出现在提交信息末尾的三折线之后。</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_针对_mua_的提示">针对 Mua 的提示</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>这里有一些关于如何使用各种邮件工具成功地在线提交补丁的提示。</p>
+</div>
+<div class="sect2">
+<h3 id="_gmail">GMail</h3>
+<div class="paragraph">
+<p>GMail 没有办法在网页界面上关闭换行，所以它会把你发送的任何邮件弄得一团糟。 然而，你可以使用 "git send-email"，通过 GMail 的 SMTP 服务器发送你的补丁，或者使用任何 IMAP 电子邮件客户端连接到谷歌的 IMAP 服务器，并通过它转发电子邮件。</p>
+</div>
+<div class="paragraph">
+<p>关于使用 <em>git send-email</em> 通过 GMail SMTP 服务器发送补丁的提示，请参见 <a href="git-send-email.html">git-send-email(1)</a> 的案例部分。</p>
+</div>
+<div class="paragraph">
+<p>关于使用 IMAP 接口提交的提示，请参见 <a href="git-imap-send.html">git-imap-send(1)</a> 的案例部分。</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_thunderbird">Thunderbird</h3>
+<div class="paragraph">
+<p>默认情况下，Thunderbird 会将邮件包裹起来，并将其标记为 <em>format=flowed</em>，这两种情况都会使 Git 无法使用这些邮件。</p>
+</div>
+<div class="paragraph">
+<p>有三种不同的方法：使用插件来关闭换行，配置 Thunderbird 使其不纠缠补丁，或者使用外部编辑器来防止 Thunderbird 纠缠补丁。</p>
+</div>
+<div class="sect3">
+<h4 id="_办法1附加的">办法1（附加的）</h4>
+<div class="paragraph">
+<p>安装 Toggle Word Wrap 插件，该插件可从 <a href="https://addons.mozilla.org/thunderbird/addon/toggle-word-wrap/。它在作曲家的" class="bare">https://addons.mozilla.org/thunderbird/addon/toggle-word-wrap/。它在作曲家的</a> "选项" 菜单中增加了一个 "启用换行符" 的菜单项，你可以将其勾掉。现在你可以像其他方式一样编写信息（剪切+粘贴，<em>git format-patch</em>|<em>git imap-send</em>，等等），但你必须在你输入的任何文本中手动插入换行符。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_方法2配置">方法#2（配置）</h4>
+<div class="paragraph">
+<p>三个步骤：</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>将你的邮件服务器组成配置为纯文本： 编辑&#8230;&#8203;&#8230;&#8203;账户设置&#8230;&#8203;&#8230;&#8203;组成和地址，取消勾选 "以HTML编写邮件"。</p>
+</li>
+<li>
+<p>配置你的一般组成窗口，使其不被包裹。</p>
+<div class="paragraph">
+<p>在 Thunderbird 2 中：编辑&#8230;&#8203;偏好&#8230;&#8203;组成，将纯文本信息包在 0 处</p>
+</div>
+<div class="paragraph">
+<p>在 Thunderbird 3 中：编辑&#8230;&#8203;偏好&#8230;&#8203;高级&#8230;&#8203;配置编辑器。 搜索 "mail.wrap_long_lines"。 切换它，确保它被设置为 "false"。另外，搜索 "mailnews.wraplength" 并将其设置为 0。</p>
+</div>
+</li>
+<li>
+<p>禁止使用 format=flowed： 编辑&#8230;&#8203;偏好&#8230;&#8203;高级&#8230;&#8203;配置编辑器。 搜索 "mailnews.send_plaintext_flowed"。 拨动它，确保它被设置为 <code>false</code>。</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>完成后，你应该能够像其他方式一样编写电子邮件（剪切+粘贴，<em>git format-patch</em> | <em>git imap-send</em>，等等），而且补丁不会被弄乱。</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_方法三外部编辑">方法三（外部编辑）</h4>
+<div class="paragraph">
+<p>需要以下 Thunderbird 扩展： <a href="http://aboutconfig.mozdev.org/" class="bare">http://aboutconfig.mozdev.org/</a> 中的 AboutConfig和http://globs.org/articles.php?lng=en&amp;pg=8 中的 External Editor</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>用你选择的方法把补丁准备成一个文本文件。</p>
+</li>
+<li>
+<p>在打开撰写窗口之前，使用 Edit&#8594;Account Settingd 取消勾选要用来发送补丁的账户的 "Composition &amp; Addressing" 面板中的 "Compose messages in HTML format" 设置。</p>
+</li>
+<li>
+<p>在 Thunderbird 主窗口中，在你打开补丁的撰写窗口之前，使用 Tools&#8594;about:config 将以下内容设置为指定值：</p>
+<div class="listingblock">
+<div class="content">
+<pre>        mailnews.send_plaintext_flowed  =&gt; false
+        mailnews.wraplength             =&gt; 0</pre>
+</div>
+</div>
+</li>
+<li>
+<p>打开一个作曲窗口，点击外部编辑器图标。</p>
+</li>
+<li>
+<p>在外部编辑器窗口，读入补丁文件并正常退出编辑器。</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>题外话：也许可以用 about:config 和以下设置来完成第二步，但还没有人试过。</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>        mail.html_compose                       =&gt; false
+        mail.identity.default.compose_html      =&gt; false
+        mail.identity.id?.compose_html          =&gt; false</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>contrib/thunderbird-patch-inline 中有一个脚本，可以帮助你以一种简单的方式将补丁加入 Thunderbird。要使用它，请执行上面的步骤，然后使用该脚本作为外部编辑器。</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_kmail">KMail</h3>
+<div class="paragraph">
+<p>这应该有助于你使用 KMail 在线提交补丁。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>把补丁准备成一个文本文件。</p>
+</li>
+<li>
+<p>点击 "New Mail"。</p>
+</li>
+<li>
+<p>在合成器窗口的 "Otions" 下，确保没有设置 "Word warp"。</p>
+</li>
+<li>
+<p>Use Message &#8594; Insert file&#8230;&#8203; 并插入补丁。</p>
+</li>
+<li>
+<p>回到撰写窗口：在信息中添加你想要的任何其他文本，完成地址和主题字段，然后按发送。</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_基准树信息">基准树信息</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>基准树信息块用于维护者或第三方测试人员了解补丁系列所适用的确切状态。它由 ‘基本提交’ 和零个或多个 ‘前提补丁’ 组成，前者是众所周知的提交，是项目历史中稳定部分的一部分，而后者是正在运行的知名补丁，还不是 ‘基本提交’ 的一部分，在应用这些补丁之前需要在 ‘基本提交’ 之上按拓扑顺序应用。</p>
+</div>
+<div class="paragraph">
+<p>‘基本提交’ 显示为 "base-commit: "，后面是提交对象名称的 40-hex。 ‘先决补丁’ 显示为 "prerequisite-patch-id: "，后面是 40-hex 的 “补丁ID”，这个 ID 可以通过 <code>git patch-id --stable</code> 命令来获得。</p>
+</div>
+<div class="paragraph">
+<p>想象一下，在公开提交的 P 之上，你应用了别人的知名补丁 X、Y 和 Z，然后建立了你的三套补丁系列 A、B、C，历史会是这样：</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>---P---X---Y---Z---A---B---C</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>使用 <code>git format-patch --base=P -3 C</code>（或其变体，例如使用 <code>-cover-letter</code> 或使用 <code>Z...C</code> 代替 <code>-3 C</code> 来指定范围），基础树信息块会显示在命令输出的第一个信息（第一个补丁，或封面信）的末尾，像这样：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>base-commit: P
+prerequisite-patch-id: X
+prerequisite-patch-id: Y
+prerequisite-patch-id: Z</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>对于非线性拓扑结构，如</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>---P---X---A---M---C
+    \         /
+     Y---Z---B</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>你也可以使用 <code>git format-patch --base=P -3 C</code> 来生成 A、B 和 C 的补丁，P、X、Y、Z 的标识符被附加在第一条信息的末尾。</p>
+</div>
+<div class="paragraph">
+<p>如果在 cmdline 中设置 <code>--base=auto</code>，它将自动计算基础提交，作为远程跟踪分支和 cmdline 中指定的修订范围的提示提交的合并基础。 对于本地分支，在使用此选项之前，需要通过 <code>git branch --set-upstream-to</code> 使其跟踪远程分支。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_实例">实例</h2>
+<div class="sectionbody">
+<div class="ulist">
+<ul>
+<li>
+<p>提取 R1 和 R2 修订版之间的提交，并用 "git am" 将其应用于当前分支之上，以拣选它们：</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git format-patch -k --stdout R1..R2 | git am -3 -k</pre>
+</div>
+</div>
+</li>
+<li>
+<p>提取所有在当前分支但不在原生分支中的提交：</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git format-patch origin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>每次提交都会在当前目录下创建一个单独的文件。</p>
+</div>
+</li>
+<li>
+<p>提取自项目开始以来所有导致 <em>origin</em> 的提交：</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git format-patch --root origin</pre>
+</div>
+</div>
+</li>
+<li>
+<p>与前者相同：</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git format-patch -M -B origin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>此外，它还能智能地检测和处理重命名和完全重写，以产生重命名补丁。 重命名补丁减少了文本输出的数量，一般来说，它更容易审查。 注意，非 Git 的 “补丁” 程序不会理解重命名补丁，所以只有当你知道收件人使用 Git 来应用你的补丁时才会使用它。</p>
+</div>
+</li>
+<li>
+<p>从当前分支中提取三个最重要的提交，并将其格式化为可发送电子邮件的补丁：</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git format-patch -3</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_注意事项">注意事项</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>请注意，<code>format-patch</code> 将从输出中省略合并提交，即使它们是请求范围的一部分。一个简单的 “补丁” 并不包括足够的信息让接收端重现同一个合并提交。</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参见">参见</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="git-am.html">git-am(1)</a>, <a href="git-send-email.html">git-send-email(1)</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2023-12-10 16:16:08 +0100
+</div>
+</div>
+</body>
+</html>

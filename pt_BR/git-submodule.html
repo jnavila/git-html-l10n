@@ -516,12 +516,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">init [--] [&lt;caminho&gt;&#8230;&#8203;]</dt>
 <dd>
-<p>Inicialize os submódulos registrados no índice (que foram adicionados e onde os commits foram feitos em outros lugares) configurando o <code>submodule.$name.url</code> no <code>.git/config</code>. Ele usa a mesma configuração do <code>.gitmodules</code> como um modelo. Caso a URL seja relativa, será resolvido utilizando ramo remoto predefinido. Caso não nenhum ramo remoto seja predefinido, o repositório atual será reconhecido como sendo a upstream.</p>
+<p>Inicialize os submódulos registrados no índice (que foram adicionados e confirmados em outro lugar) definindo <code>submodule.$name.url</code> em <code>.git/config</code>, usando a mesma configuração de <code>.gitmodules</code> como modelo. Se o URL for relativo, ele será resolvido usando o ramo remoto padrão. Se não houver um ramo remoto padrão, o repositório atual será considerado upstream.</p>
 <div class="paragraph">
 <p>Os argumentos opcionais do <code>&lt;caminho&gt;</code> limitam quais foram os submódulos que serão inicializados. Caso nenhum caminho seja informado e o <code>submodule.active</code> tenha sido configurado, apenas os submódulos configurados para estarem ativos serão inicializados, caso contrário, todos os submódulos serão.</p>
 </div>
 <div class="paragraph">
-<p>Quando presente, também copiará o valor do <code>submodule.$name.update</code>. Este comando não altera as informações existentes no <code>.git/config</code>. É possível personalizar os clones dos submódulos das URLs no <code>.git/config</code> para sua configuração local e prosseguir para o <code>git submodule update</code>; tamém é possível utilizar o <code>git submodule update --init</code> sem a etapa <em>init</em> de forma explícita caso não pretenda personalizar nenhum local do submodule.</p>
+<p>Ele também copiará o valor de <code>submodule.$name.update</code>, se estiver presente no arquivo <code>.gitmodules</code>, para <code>.git/config</code>, mas (1) esse comando não altera as informações existentes em <code>.git/config</code> e (2) <code>submodule.$name.update</code> definido como um comando personalizado <strong>não</strong> é copiado por motivos de segurança.</p>
+</div>
+<div class="paragraph">
+<p>Em seguida, você pode personalizar os URLs do clone do submódulo em <code>.git/config</code> para a sua configuração local e prosseguir com <code>git submodule update</code>; você também pode usar <code>git submodule update --init</code> sem a etapa <em>init</em> explícita se não tiver a intenção de personalizar nenhum local do submódulo.</p>
 </div>
 <div class="paragraph">
 <p>Consulte o subcomando <code>add</code> para obter a definição predefinida do ramo remoto.</p>
@@ -545,7 +548,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="openblock">
 <div class="content">
 <div class="paragraph">
-<p>Atualize os submódulos registrados para que coincidam com o que o superprojeto espera, clonando os submódulos ausentes, capturando os commit que estejam ausentes nos submódulos e atualizando a árvore de trabalho dos submódulos. A "atualização" pode ser feita de várias maneiras, dependendo das opções da linha de comando e do valor da variável de configuração <code>submodule.&lt;nome&gt;.update</code>. A opção da linha de comando tem precedência sobre a variável de configuração. Caso nenhum seja informado, um <em>checkout</em> é realizado. Os procedimentos de <em>atualização</em> compatíveis tanto na linha de comando quanto na configuração <code>submodule.&lt;nome&gt;.update</code> são:</p>
+<p>Atualize os submódulos registrados para que correspondam ao que o superprojeto espera, clonando os submódulos ausentes, buscando os commits ausentes nos submódulos e atualizando a árvore de trabalho dos submódulos. A "atualização" pode ser feita de várias maneiras, dependendo das opções da linha de comando e do valor da variável de configuração <code>submodule.&lt;nome&gt;.update</code>. A opção da linha de comando tem precedência sobre a variável de configuração. Se nenhum dos dois for fornecido, será realizado um "checkout". (Observação: o que está no arquivo <code>.gitmodules</code> é irrelevante neste momento; consulte <code>git submodule init</code> acima para saber como o <code>.gitmodules</code> é usado). Os procedimentos de "atualização" compatíveis tanto com a linha de comando quanto com a configuração <code>submodule.&lt;nome&gt;.update</code> são:</p>
 </div>
 <div class="dlist">
 <dl>
@@ -567,17 +570,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dl>
 </div>
 <div class="paragraph">
-<p>Os seguintes procedimentos de <em>atualização</em> estão disponíveis apenas através da variável de configuração <code>submodule.&lt;nome&gt;.update</code>:</p>
+<p>Os procedimentos de atualização a seguir têm limitações adicionais:</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">comando personalizado</dt>
 <dd>
-<p>um comand shell arbitrário que usa um simples argumento (o sha1 do commit registrado no superprojeto) é executado. Quando o <code>submodule.&lt;nome&gt;.update</code> é definido como <em>!command</em>, o comando personalizado é o que sobra após o ponto de exclamação.</p>
+<p>para executar comandos arbitrários com o ID do commit como argumento. Especificamente, se a variável de configuração <code>submodule.&lt;nome&gt;.update</code> for definida como <code>!custom command</code>, o nome do objeto do commit registrado no superprojeto para o submódulo será anexado à string <code>custom command</code> e depois executado. Observe que esse mecanismo não é compatível com o arquivo <code>.gitmodules</code> ou com a linha de comando.</p>
 </dd>
 <dt class="hdlist1">none</dt>
 <dd>
-<p>o submódulo não é atualizado.</p>
+<p>o submódulo não é atualizado. Esse procedimento de atualização não é permitido na linha de comando.</p>
 </dd>
 </dl>
 </div>
@@ -796,7 +799,7 @@ com muita atenção.</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:54 +0200
+Last updated 2023-12-10 16:15:31 +0100
 </div>
 </div>
 </body>

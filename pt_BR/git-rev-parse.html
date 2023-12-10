@@ -621,7 +621,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 </dd>
 <dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
 <dd>
-<p>Do not include refs that would be hidden by <code>git-fetch</code>, <code>git-receive-pack</code> or <code>git-upload-pack</code> by consulting the appropriate <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> or <code>uploadpack.hideRefs</code> configuration along with <code>transfer.hideRefs</code> (see <a href="git-config.html">git-config(1)</a>). This option affects the next pseudo-ref option <code>--all</code> or <code>--glob</code> and is cleared after processing them.</p>
+<p>Não inclua refs que seriam ocultados por <code>git-fetch</code>, <code>git-receive-pack</code> ou <code>git-upload-pack</code> durante a consulta da configuração apropriada de <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> ou <code>uploadpack.hideRefs</code> junto com <code>transfer.hideRefs</code> (consulte <a href="git-config.html">git-config(1)</a>). Esta opção afeta a próxima opção pseudo-ref <code>--all</code> ou <code>--glob</code> e é zerada após o processamento.</p>
 </dd>
 <dt class="hdlist1">--disambiguate=&lt;prefixo&gt;</dt>
 <dd>
@@ -782,7 +782,7 @@ Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e outras
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>Caso <em>$GIT_DIR/&lt;refname&gt;</em> exista, quando é isso o que você quer dizer (geralmente é apenas útil para <code>HEAD</code>, <code>FETCH_HEAD</code>, <code>ORIG_HEAD</code>, <code>MERGE_HEAD</code> e <code>CHERRY_PICK_HEAD</code>);</p>
+<p>Se <em>$GIT_DIR/&lt;refname&gt;</em> existir, é isso que você quer dizer (isso geralmente é útil apenas para <code>HEAD</code>, <code>FETCH_HEAD</code>, <code>ORIG_HEAD</code>, <code>MERGE_HEAD</code>, <code>REBASE_HEAD</code>, <code>REVERT_HEAD</code>, <code>CHERRY_PICK_HEAD</code>, <code>BISECT_HEAD</code> e <code>AUTO_MERGE</code>);</p>
 </li>
 <li>
 <p>caso contrário, utilize <em>refs/&lt;refname&gt;</em> caso exista;</p>
@@ -798,14 +798,62 @@ Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e outras
 </li>
 <li>
 <p>caso contrário, utilize <em>refs/remotes/&lt;refname&gt;/HEAD</em> caso exista.</p>
-<div class="paragraph">
-<p><code>HEAD</code> informa o commit no qual você teve como base as alterações na árvore de trabalho. <code>FETCH_HEAD</code> registra em qual ramo você buscou no repositório remoto com a sua última invocação <code>git fetch</code>. <code>ORIG_HEAD</code> é criado por comandos que movem seu` HEAD` de uma maneira drástica (<code>git am</code>, <code>git merge</code>, <code>git rebase</code>, <code>git reset</code>), para registrar a posição do <code>HEAD</code> antes da sua operação, para que você possa facilmente mudar a ponta do ramo de volta ao estado anterior a sua execução. <code>MERGE_HEAD</code> registra os commits que você está mesclando no seu ramo quando você executa o comando <code>git merge</code>. <code>CHERRY_PICK_HEAD</code> registra o commit que você está escolhendo quando executa o comando <code>git cherry-pick</code>.</p>
-</div>
-<div class="paragraph">
-<p>Observe que em qualquer um dos casos o <em>refs/*</em> acima pode vir do diretório <code>$GIT_DIR/refs</code> ou do arquivo`$GIT_DIR/packed-refs`. Embora a codificação do nome de referência não seja especificado, o UTF-8 é o predefinido pois algum processamento de saída pode assumir nomes <code>ref</code> em UTF-8.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>HEAD</code></dt>
+<dd>
+<p>nomeia o commit no qual você baseou as alterações na árvore de trabalho.</p>
+</dd>
+<dt class="hdlist1"><code>FETCH_HEAD</code></dt>
+<dd>
+<p>registra o ramo que você obteve de um repositório remoto com
+a sua última invocação <code>git fetch</code>.</p>
+</dd>
+<dt class="hdlist1"><code>ORIG_HEAD</code></dt>
+<dd>
+<p>é criado por comandos que movem seu <code>HEAD</code> de forma drástica (<code>git
+am</code>, <code>git merge</code>, <code>git rebase</code>, <code>git reset</code>), para registrar a posição
+do <code>HEAD</code> antes de sua operação, para que você possa alterar
+facilmente o cume da ramificação de volta ao estado anterior à sua execução.</p>
+</dd>
+<dt class="hdlist1"><code>MERGE_HEAD</code></dt>
+<dd>
+<p>registra o(s) commit(s) que está(ão) sendo mesclado(s) no seu ramo quando você
+executar o <code>git merge</code>.</p>
+</dd>
+<dt class="hdlist1"><code>REBASE_HEAD</code></dt>
+<dd>
+<p>durante um rebase, registra o commit onde a operação está
+interrompida no momento, seja por causa de conflitos ou de um comando <code>edit</code>
+num rebase interativo.</p>
+</dd>
+<dt class="hdlist1"><code>REVERT_HEAD</code></dt>
+<dd>
+<p>registra o commit que está sendo revertido quando você executa o <code>git revert</code>.</p>
+</dd>
+<dt class="hdlist1"><code>CHERRY_PICK_HEAD</code></dt>
+<dd>
+<p>registra o commit que você está selecionando quando executa o <code>git
+cherry-pick</code>.</p>
+</dd>
+<dt class="hdlist1"><code>BISECT_HEAD</code></dt>
+<dd>
+<p>registra o commit atual a ser testado quando você executa <code>git bisect
+--no-checkout</code>.</p>
+</dd>
+<dt class="hdlist1"><code>AUTO_MERGE</code></dt>
+<dd>
+<p>registra um objeto da árvore correspondente ao estado da estratégia de mesclagem
+<em>ort</em> gravada na árvore de trabalho quando uma operação de mesclagem
+resultar em conflitos.</p>
+</dd>
+</dl>
 </div>
 </li>
 </ol>
+</div>
+<div class="paragraph">
+<p>Observe que em qualquer um dos casos o <em>refs/*</em> acima pode vir do diretório <code>$GIT_DIR/refs</code> ou do arquivo`$GIT_DIR/packed-refs`. Embora a codificação do nome de referência não seja especificado, o UTF-8 é o predefinido pois algum processamento de saída pode assumir nomes <code>ref</code> em UTF-8.</p>
 </div>
 </dd>
 <dt class="hdlist1"><em>@</em></dt>
@@ -1156,7 +1204,7 @@ algum-comando [&lt;opções&gt;] &lt;args&gt;...
 
 algum-comando faz 'foo' e 'bar'!
 --
-h,help    exibe a ajuda
+h,help!   exibe a ajuda
 
 foo       alguma opção bonita --foo
 bar=      alguma opção bacana --bar com um argumento
@@ -1182,10 +1230,10 @@ eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"</
     algum-comando faz 'foo' e 'bar'!
 
     -h, --help            exibe a ajuda
-    --foo                 alguma opção bacana --foo
-    --bar ...             alguma opção legal --bar com um argumento
-    --baz &lt;arg&gt;           outra opção legal --baz com um determinado argumento
-    --qux[=&lt;caminho&gt;]     o qux pode utilizar um argumento para o caminho mas significa ele mesmo
+    --[no-]foo                 alguma opção bacana --foo
+    --[no-]bar ...        alguma opção legal --bar com um argumento
+    --[no-]baz &lt;arg&gt;      outra opção legal --baz com um determinado argumento
+    --[no-]qux[=&lt;caminho&gt;]   o qux pode utilizar um argumento para o caminho mas significa ele mesmo
 
 Um cabeçalho do grupo de opções
     -C[...]               opção C com um argumento opcional</pre>
@@ -1271,7 +1319,7 @@ $ sh your-git-script.sh "a b'c"</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:53 +0200
+Last updated 2023-12-10 16:15:31 +0100
 </div>
 </div>
 </body>

@@ -709,7 +709,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--pathspec-from-file=&lt;file&gt;</dt>
 <dd>
-<p>Pathspec is passed in <code>&lt;file&gt;</code> instead of commandline args. If <code>&lt;file&gt;</code> is exactly <code>-</code> then standard input is used. Pathspec elements are separated by LF or CR/LF. Pathspec elements can be quoted as explained for the configuration variable <code>core.quotePath</code> (see <a href="git-config.html">git-config(1)</a>). See also <code>--pathspec-file-nul</code> and global <code>--literal-pathspecs</code>.</p>
+<p>Pathspec在 <code>&lt;file&gt;</code> 中传递，而不是在命令行参数中传递。如果 <code>&lt;file&gt;</code> 正好是 <code>-</code>，则使用标准输入。Pathspec 元素由 LF 或 CR/LF 分隔。可以引用配置变量 <code>core.quotePath</code> 的 Pathspec 元素（请参见 <a href="git-config.html">git-config(1)</a>）。另请参见 <code>--pathspec-file-nul `和全局 `--literal-pathspecs</code>。</p>
 </dd>
 <dt class="hdlist1">--pathspec-file-nul</dt>
 <dd>
@@ -905,60 +905,10 @@ GIT_COMMITTER_DATE</pre>
 <h2 id="_讨论">讨论</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>虽然不是必须的，但在提交信息的开头用一行简短（少于50个字符）的文字来概括修改内容是个好主意，接下来是空白行，然后是更详尽的描述。 提交信息中第一个空行之前的文字被视为提交标题，并且该标题在整个 Git 中使用。 例如，<a href="git-format-patch.html">git-format-patch(1)</a> 把提交变成了电子邮件，它在主题行使用标题，在正文中使用提交的其他内容。</p>
+<p>Though not required, it&#8217;s a good idea to begin the commit message with a single short (no more than 50 characters) line summarizing the change, followed by a blank line and then a more thorough description. The text up to the first blank line in a commit message is treated as the commit title, and that title is used throughout Git. For example, <a href="git-format-patch.html">git-format-patch(1)</a> turns a commit into email, and it uses the title on the Subject line and the rest of the commit in the body.</p>
 </div>
 <div class="paragraph">
-<p>Git在某种程度上是与字符编码无关的。</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>blob对象的内容是未经解释的字节序列。 在核心层没有编码转换。</p>
-</li>
-<li>
-<p>路径名以UTF-8规范化形式C编码，这适用于树对象、索引文件、参考名称，以及命令行参数、环境变量和配置文件（<code>.git/config</code>（见<a href="git-config.html">git-config(1)</a>），<a href="gitignore.html">gitignore(5)</a>，<a href="gitattributes.html">gitattributes(5)</a> 和<a href="gitmodules.html">gitmodules(5)</a>）中的路径名。</p>
-<div class="paragraph">
-<p>请注意，Git 在核心层将路径名简单地视为非 NUL 字节的序列，没有路径名编码的转换（除了 Mac 和 Windows）。因此，即使在使用传统的扩展ASCII编码的平台和文件系统上，使用非ASCII的路径名大多也能工作。然而，在这种系统上创建的仓库在基于UTF-8的系统（如Linux、Mac、Windows）上将无法正常工作，反之亦然。 此外，许多基于Git的工具简单地认为路径名称是UTF-8，而不能正确显示其他编码。</p>
-</div>
-</li>
-<li>
-<p>提交日志信息通常以UTF-8编码，但也支持其他扩展ASCII编码。这包括ISO-8859-x、CP125x和其他许多编码，但不包括UTF-16/32、EBCDIC和CJK多字节编码（GBK、Shift-JIS、Big5、EUC-x、CP9xx等）。</p>
-</li>
-</ul>
-</div>
-<div class="paragraph">
-<p>尽管我们鼓励提交日志信息使用UTF-8编码，但核心系统和Git Porcelain的设计并不强制要求项目使用UTF-8。 如果某个项目的所有参与者都认为使用传统编码更方便，Git也不会禁止。 然而，有几件事需要注意。</p>
-</div>
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>git commit "和 "git commit-tree "如果收到的提交日志信息不像是有效的UTF-8字符串，就会发出警告，除非你明确表示你的项目使用的是传统编码。 说这个的方法是在`.git/config`文件中设置`i18n.commitEncoding`，像这样。</p>
-<div class="listingblock">
-<div class="content">
-<pre>[i18n]
-        commitEncoding = ISO-8859-1</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>用上述设置创建的提交对象在其`encoding`头中记录了`i18n.commitEncoding`的值。 这是为了帮助以后看这些对象的人。 缺少这个头意味着提交日志信息是以UTF-8编码的。</p>
-</div>
-</li>
-<li>
-<p><em>git log</em>, <em>git show</em>, <em>git blame</em> and friends look at the <code>encoding</code> header of a commit object, and try to re-code the log message into UTF-8 unless otherwise specified. You can specify the desired output encoding with <code>i18n.logOutputEncoding</code> in <code>.git/config</code> file, like this:</p>
-<div class="listingblock">
-<div class="content">
-<pre>[i18n]
-        logOutputEncoding = ISO-8859-1</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>如果你没有这个配置变量，则使用`i18n.commitEncoding`的值来代替。</p>
-</div>
-</li>
-</ol>
-</div>
-<div class="paragraph">
-<p>请注意，我们特意选择在提交对象层面上，不对提交日志信息进行重新编码，因为重新编码为UTF-8不一定是一个可逆的操作。</p>
+<p>Unresolved directive in git-commit.txt - include::i18n.txt[]</p>
 </div>
 </div>
 </div>
@@ -1016,7 +966,7 @@ GIT_COMMITTER_DATE</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:05:48 +0200
+Last updated 2023-12-10 16:16:07 +0100
 </div>
 </div>
 </body>

@@ -443,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>git-notes(1) Manual Page</h1>
 <h2 id="_名称">名称</h2>
 <div class="sectionbody">
-<p>git-notes - Add or inspect object notes</p>
+<p>git-notes - 添加或查看对象注释</p>
 </div>
 </div>
 <div id="content">
@@ -452,15 +452,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git notes</em> [list [&lt;object&gt;]]
-<em>git notes</em> add [-f] [--allow-empty] [-F &lt;file&gt; | -m &lt;msg&gt; | (-c | -C) &lt;object&gt;] [&lt;object&gt;] 。
+<em>git notes</em> add [-f] [--allow-empty] [--[no-]separator | --separator=&lt;paragraph-break&gt;] [--[no-]stripspace] [-F &lt;file&gt; | -m &lt;msg&gt; | (-c | -C) &lt;object&gt;] [&lt;object&gt;]
 <em>git notes</em> copy [-f] ( --stdin | &lt;from-object&gt; [&lt;to-object&gt;] )
-<em>git notes</em> append [--allow-empty] [-F &lt;file&gt; | -m &lt;msg&gt; | (-c | -C) &lt;object&gt;] [&lt;object&gt;]
-<em>git notes</em> edit [--allow-empty] [&lt;object&gt;])
-<em>git notes</em> 显示 [&lt;object&gt;]
+<em>git notes</em> append [--allow-empty] [--[no-]separator | --separator=&lt;paragraph-break&gt;] [--[no-]stripspace] [-F &lt;file&gt; | -m &lt;msg&gt; | (-c | -C) &lt;object&gt;] [&lt;object&gt;]
+<em>git notes</em> edit [--allow-empty] [&lt;object&gt;] [--[no-]stripspace]
+<em>git notes</em> show [&lt;object&gt;]
 <em>git notes</em> merge [-v | -q] [-s &lt;strategy&gt; ] &lt;notes-ref&gt;
 <em>git notes</em> merge --commit [-v | -q]
 <em>git notes</em> merge --abort [-v | -q]
-<em>git notes</em> remove [--ignore-missing] [--stdin] [&lt;object&gt;&#8230;&#8203;]。
+<em>git notes</em> remove [--ignore-missing] [--stdin] [&lt;object&gt;&#8230;&#8203;]
 <em>git notes</em> prune [-n] [-v]
 <em>git notes</em> get-ref</pre>
 </div>
@@ -470,10 +470,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_描述">描述</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>添加、删除或读取附在物体上的注释，而不接触物体本身。</p>
+<p>添加、移除或读取附加在对象上的注释，而不影响对象本身。</p>
 </div>
 <div class="paragraph">
-<p>默认情况下，笔记被保存到`refs/notes/commits`并从那里读取，但这个默认值可以被覆盖。 参见下面的OPTIONS, CONFIGURATION和ENVIRONMENT部分。 如果这个参考文献不存在，当它第一次需要存储笔记时，它将被悄悄地创建。</p>
+<p>默认情况下，注释被保存在 <code>refs/notes/commits</code> 中，并且可以覆盖此默认设置。请参阅下面的 OPTIONS、CONFIGURATION 和 ENVIRONMENT 部分。如果该引用不存在，当首次需要存储注释时，它将被静默地创建。</p>
 </div>
 <div class="paragraph">
 <p>注释的一个典型用途是在不改变提交本身的情况下补充提交信息。注释可以通过 "git log "与原始提交信息一起显示。为了将这些注释与保存在提交对象中的消息区分开来，注释会像消息一样缩进，在未缩进的一行后面写上 "注释（&lt;参考名称&gt;）："（或 "注释："用于`参考/注释/提交`）。</p>
@@ -500,7 +500,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">add</dt>
 <dd>
-<p>为一个给定的对象添加注释（默认为HEAD）。如果该对象已经有了注释，则放弃（使用`-f`覆盖现有的注释）。 然而，如果你正在交互式地使用`add`（使用编辑器提供注释内容），那么&#8212;&#8203;而不是中止&#8212;&#8203;现有的注释将在编辑器中打开（像`edit`子命令）。</p>
+<p>Add notes for a given object (defaults to HEAD). Abort if the object already has notes (use <code>-f</code> to overwrite existing notes). However, if you&#8217;re using <code>add</code> interactively (using an editor to supply the notes contents), then - instead of aborting - the existing notes will be opened in the editor (like the <code>edit</code> subcommand). If you specify multiple <code>-m</code> and <code>-F</code>, a blank line will be inserted between the messages. Use the <code>--separator</code> option to insert other delimiters.</p>
 </dd>
 <dt class="hdlist1">copy</dt>
 <dd>
@@ -519,7 +519,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">append</dt>
 <dd>
-<p>附加到一个现有对象的注释中（默认为HEAD）。 如果需要的话，会创建一个新的注释对象。</p>
+<p>将 <code>-m</code> 或 <code>-F</code> 选项指定的新信息附加到现有注释中，或将不存在的信息作为新注释添加到对象中（默认为 HEAD）。 当添加到现有注释时，每条新信息前都会添加一个空行作为段间分隔符。 分隔符可使用 <code>--separator</code> 选项自定义。</p>
 </dd>
 <dt class="hdlist1">edit</dt>
 <dd>
@@ -565,17 +565,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-m &lt;消息&gt;</dt>
 <dt class="hdlist1">--message=&lt;msg&gt;</dt>
 <dd>
-<p>使用给定的注释信息（而不是提示）。 如果给定了多个`-m`选项，它们的值将作为单独的段落串联起来。 以`#`开头的行和段落之间的单行以外的空行将被剥离出来。</p>
+<p>Use the given note message (instead of prompting). If multiple <code>-m</code> options are given, their values are concatenated as separate paragraphs. Lines starting with <code>#</code> and empty lines other than a single line between paragraphs will be stripped out. If you wish to keep them verbatim, use <code>--no-stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-F &lt;文件&gt;</dt>
 <dt class="hdlist1">--file=&lt;文件&gt;</dt>
 <dd>
-<p>从给定的文件中获取注释信息。 使用'-'可以从标准输入中读取注释信息。 以 "#"开头的行和段落之间的单行以外的空行将被剥离出来。</p>
+<p>Take the note message from the given file. Use <em>-</em> to read the note message from the standard input. Lines starting with <code>#</code> and empty lines other than a single line between paragraphs will be stripped out. If you wish to keep them verbatim, use <code>--no-stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-C &lt;对象&gt;</dt>
 <dt class="hdlist1">--reuse-message=&lt;object&gt;</dt>
 <dd>
-<p>将给定的blob对象（例如，另一个笔记）作为笔记信息。(使用`git notes copy &lt;object&gt;`来代替在对象之间复制注释)。</p>
+<p>Take the given blob object (for example, another note) as the note message. (Use <code>git notes copy &lt;object&gt;</code> instead to copy notes between objects.). By default, message will be copied verbatim, but if you wish to strip out the lines starting with <code>#</code> and empty lines other than a single line between paragraphs, use with`--stripspace` option.</p>
 </dd>
 <dt class="hdlist1">-c &lt;对象&gt;</dt>
 <dt class="hdlist1">--reedit-message=&lt;object&gt;</dt>
@@ -585,6 +585,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--allow-empty</dt>
 <dd>
 <p>允许存储一个空的笔记对象。默认行为是自动删除空笔记。</p>
+</dd>
+<dt class="hdlist1">--[no-]separator, --separator=&lt;paragraph-break&gt;</dt>
+<dd>
+<p>指定用于自定义段落间分隔符的字符串（根据需要在末尾添加换行符）。如果使用 <code>--no-separator</code>，则段落之间不添加分隔符。 默认为空行。</p>
+</dd>
+<dt class="hdlist1">--[no-]stripspace</dt>
+<dd>
+<p>Strip leading and trailing whitespace from the note message. Also strip out empty lines other than a single line between paragraphs. Lines starting with <code>#</code> will be stripped out in non-editor cases like <code>-m</code>, <code>-F</code> and <code>-C</code>, but not in editor case like <code>git notes edit</code>, <code>-c</code>, etc.</p>
 </dd>
 <dt class="hdlist1">--ref &lt;ref&gt;</dt>
 <dd>
@@ -766,7 +774,7 @@ $ git notes --ref=built add --allow-empty -C "$blob" HEAD</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:05:50 +0200
+Last updated 2023-12-10 16:16:09 +0100
 </div>
 </div>
 </body>

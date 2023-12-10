@@ -548,7 +548,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--gpg-sign[=&lt;keyid&gt;]</dt>
 <dt class="hdlist1">--no-gpg-sign</dt>
 <dd>
-<p>对合并后的提交进行GPG签名。<code>keyid`参数是可选的，默认为提交者的身份；如果指定，它必须与选项连在一起，不能有空格。</code>--no-gpg-sign`对于反命令`commit.gpgSign`配置变量和早期的`--gpg-sign`都很有用。</p>
+<p>对合并后的提交进行 GPG 签名。<code>keyid</code> 参数是可选的，默认为提交者的身份；如果指定，它必须与选项连在一起，不能有空格。<code>--no-gpg-sign</code> 对于反命令 <code>commit.gpgSign</code> 配置变量和早期的 <code>--gpg-sign</code> 都很有用。</p>
 </dd>
 <dt class="hdlist1">--log[=&lt;n&gt;]</dt>
 <dt class="hdlist1">--no-log</dt>
@@ -747,7 +747,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>合并干净的路径在索引文件和你的工作区中都更新了。</p>
 </li>
 <li>
-<p>对于冲突的路径，索引文件最多记录三个版本：第1阶段存储来自共同祖先的版本，第2阶段来自`HEAD`，第3阶段来自`MERGE_HEAD`（你可以用`git ls-files -u`检查这些阶段）。 工作区文件包含了"合并"程序的结果；即带有熟悉的冲突标记`&lt;&lt;&lt;` <code>===`</code>&gt;&gt;&gt;`的三方合并结果。</p>
+<p>For conflicting paths, the index file records up to three versions: stage 1 stores the version from the common ancestor, stage 2 from <code>HEAD</code>, and stage 3 from <code>MERGE_HEAD</code> (you can inspect the stages with <code>git ls-files -u</code>). The working tree files contain the result of the merge operation; i.e. 3-way merge results with familiar conflict markers <code>&lt;&lt;&lt;</code> <code>===</code> <code>&gt;&gt;&gt;</code>.</p>
+</li>
+<li>
+<p>会写入一个特殊的 <code>AUTO_MERGE</code> 引用，指向一个与当前工作区内容（包括文本冲突的冲突标记）相对应的目录树。 请注意，只有在使用 <em>ort</em> 合并策略（默认）时，才会写入这个引用。</p>
 </li>
 <li>
 <p>没有其他变化。 特别是，你在开始合并之前的本地修改将保持不变，它们的索引条目保持原样，即匹配`HEAD`。</p>
@@ -877,10 +880,10 @@ And here is another line that is cleanly resolved or unmodified.</pre>
 <div class="ulist">
 <ul>
 <li>
-<p>使用一个mergetool。 `git mergetool`启动一个图形化的mergetool，它将帮助你完成合并工作。</p>
+<p>Use a mergetool. <code>git mergetool</code> to launch a graphical mergetool which will work through the merge with you.</p>
 </li>
 <li>
-<p>查看差异。`git diff`将会显示一个三向差异，突出显示从`HEAD`和`MERGE_HEAD`版本的变化。</p>
+<p>Look at the diffs. <code>git diff</code> will show a three-way diff, highlighting changes from both the <code>HEAD</code> and <code>MERGE_HEAD</code> versions. <code>git diff AUTO_MERGE</code> will show what changes you&#8217;ve made so far to resolve textual conflicts.</p>
 </li>
 <li>
 <p>看看每个分支的差异。`git log --merge -p &lt;路径&gt;`将首先显示`HEAD`版本的差异，然后是`MERGE_HEAD`版本。</p>
@@ -1065,7 +1068,7 @@ And here is another line that is cleanly resolved or unmodified.</pre>
 <dl>
 <dt class="hdlist1">merge.conflictStyle</dt>
 <dd>
-<p>Specify the style in which conflicted hunks are written out to working tree files upon merge. The default is "merge", which shows a <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> conflict marker, changes made by one side, a <code>=======</code> marker, changes made by the other side, and then a <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> marker. An alternate style, "diff3", adds a <code>|||||||</code> marker and the original text before the <code>=======</code> marker. The "merge" style tends to produce smaller conflict regions than diff3, both because of the exclusion of the original text, and because when a subset of lines match on the two sides they are just pulled out of the conflict region. Another alternate style, "zdiff3", is similar to diff3 but removes matching lines on the two sides from the conflict region when those matching lines appear near either the beginning or end of a conflict region.</p>
+<p>Specify the style in which conflicted hunks are written out to working tree files upon merge. The default is "merge", which shows a <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> conflict marker, changes made by one side, a <code>=======</code> marker, changes made by the other side, and then a <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> marker. An alternate style, "diff3", adds a <code>|||||||</code> marker and the original text before the <code>=======</code> marker. The "merge" style tends to produce smaller conflict regions than diff3, both because of the exclusion of the original text, and because when a subset of lines match on the two sides, they are just pulled out of the conflict region. Another alternate style, "zdiff3", is similar to diff3 but removes matching lines on the two sides from the conflict region when those matching lines appear near either the beginning or end of a conflict region.</p>
 </dd>
 <dt class="hdlist1">merge.defaultToUpstream</dt>
 <dd>
@@ -1117,14 +1120,143 @@ And here is another line that is cleanly resolved or unmodified.</pre>
 <dt class="hdlist1">merge.guitool</dt>
 <dd>
 <p>控制<a href="git-mergetool.html">git-mergetool(1)</a>在指定-g/-gui标志时使用的合并工具。下面的列表显示了有效的内置值。 任何其他值都被视为自定义的合并工具，需要定义一个相应的mergetool.&lt;guitool&gt;.cmd变量。</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>araxis</code></dt>
+<dd>
+<p>使用 Araxis 合并（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>bc</code></dt>
+<dd>
+<p>使用 Beyond Compare（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>bc3</code></dt>
+<dd>
+<p>使用 Beyond Compare（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>bc4</code></dt>
+<dd>
+<p>使用 Beyond Compare（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>codecompare</code></dt>
+<dd>
+<p>使用代码比较（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>deltawalker</code></dt>
+<dd>
+<p>使用 DeltaWalker（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>diffmerge</code></dt>
+<dd>
+<p>使用 DiffMerge（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>diffuse</code></dt>
+<dd>
+<p>使用 Diffuse（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>ecmerge</code></dt>
+<dd>
+<p>使用 ECMerge（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>emerge</code></dt>
+<dd>
+<p>使用 Emacs 的 Emerge</p>
+</dd>
+<dt class="hdlist1"><code>examdiff</code></dt>
+<dd>
+<p>使用 ExamDiff Pro（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>guiffy</code></dt>
+<dd>
+<p>使用 Guiffy 的 Diff 工具（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff</code></dt>
+<dd>
+<p>使用 gVim（需要图形会话）和自定义布局（参见 <code>git help mergetool</code> 的 <code>BACKEND SPECIFIC HINTS</code> 部分）</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff1</code></dt>
+<dd>
+<p>使用 gVim（需要图形会话），采用双窗格布局（本地和远程）</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff2</code></dt>
+<dd>
+<p>使用 gVim（需要图形会话），采用 3 个面板布局（本地、合并和远程）</p>
+</dd>
+<dt class="hdlist1"><code>gvimdiff3</code></dt>
+<dd>
+<p>使用 gVim（需要图形会话），只显示 MERGED 文件</p>
+</dd>
+<dt class="hdlist1"><code>kdiff3</code></dt>
+<dd>
+<p>使用 KDiff3（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>meld</code></dt>
+<dd>
+<p>使用带可选 <code>auto merge</code> 功能的 Meld（需要图形会话）（请参阅 <code>git help mergetool</code> 的 <code>配置</code> 部分）</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff</code></dt>
+<dd>
+<p>使用带有自定义布局的 Neovim（请参阅 <code>git help mergetool</code> 的 <code>BACKEND SPECIFIC HINTS</code> 部分）</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff1</code></dt>
+<dd>
+<p>使用 Neovim 的双窗格布局（本地和远程）</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff2</code></dt>
+<dd>
+<p>使用 Neovim 的 3 个面板布局（本地、合并和远程）</p>
+</dd>
+<dt class="hdlist1"><code>nvimdiff3</code></dt>
+<dd>
+<p>使用 Neovim，只显示合并文件</p>
+</dd>
+<dt class="hdlist1"><code>opendiff</code></dt>
+<dd>
+<p>使用文件合并（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>p4merge</code></dt>
+<dd>
+<p>使用 HelixCore P4Merge（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>smerge</code></dt>
+<dd>
+<p>使用 Sublime Merge（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>tkdiff</code></dt>
+<dd>
+<p>使用 TkDiff（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>tortoisemerge</code></dt>
+<dd>
+<p>使用 TortoiseMerge（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff</code></dt>
+<dd>
+<p>使用自定义布局的 Vim（请参阅 <code>git help mergetool</code> 的 <code>后端特定提示</code> 部分）</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff1</code></dt>
+<dd>
+<p>使用双窗格布局（本地和远程）的 Vim</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff2</code></dt>
+<dd>
+<p>使用 Vim 的 3 个面板布局（本地、合并和远程）</p>
+</dd>
+<dt class="hdlist1"><code>vimdiff3</code></dt>
+<dd>
+<p>使用 Vim，只显示合并后的文件</p>
+</dd>
+<dt class="hdlist1"><code>winmerge</code></dt>
+<dd>
+<p>使用 WinMerge（需要图形会话）</p>
+</dd>
+<dt class="hdlist1"><code>xxdiff</code></dt>
+<dd>
+<p>使用 xxdiff（需要图形会话）</p>
 </dd>
 </dl>
 </div>
-<div class="paragraph">
-<p>Unresolved directive in config/merge.txt - include::../mergetools-merge.txt[]</p>
-</div>
-<div class="dlist">
-<dl>
+</dd>
 <dt class="hdlist1">merge.verbosity</dt>
 <dd>
 <p>控制递归合并策略所显示的输出量。 0级除了在检测到冲突时有一个最终的错误信息外，什么都不输出。1级只输出冲突，2级输出冲突和文件变化。 5级及以上输出调试信息。 默认是第2级。 可以通过`GIT_MERGE_VERBOSITY`环境变量覆盖。</p>
@@ -1164,7 +1296,7 @@ And here is another line that is cleanly resolved or unmodified.</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:05:50 +0200
+Last updated 2023-12-10 16:16:09 +0100
 </div>
 </div>
 </body>

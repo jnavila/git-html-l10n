@@ -474,7 +474,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Para bolhas simples, exibe o conteúdo simples.</p>
 </div>
 <div class="paragraph">
-<p>O comando aceita as opções aplicáveis ao comando <code>git diff-tree</code> para controlar como as modificações feitas pelo commit são exibidas.</p>
+<p>Algumas opções que o comando <em>git log</em> entende podem ser utilizadas para controlar como as alterações introduzidas pelo commit são mostradas.</p>
 </div>
 <div class="paragraph">
 <p>Esta página do manual descreve apenas as opções utilizadas com mais frequência.</p>
@@ -524,7 +524,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--expand-tabs</dt>
 <dt class="hdlist1">--no-expand-tabs</dt>
 <dd>
-<p>Execute uma expansão de guia (substitua cada guia por espaços suficientes para preencher a próxima coluna da exibição que é o múltiplo de <em>&lt;n&gt;</em>) na mensagem do registro log antes de exibi-la na saída. A opção <code>--expand-tabs</code> é uma abreviação da opção <code>--expand-tabs=8</code>, a opção <code>--no-expand-tabs</code> é uma abreviação da opção <code>--expand-tabs=0</code>, que desativa a expansão da guia.</p>
+<p>Execute uma expansão de guia (substitua cada guia por espaços suficientes para preencher a próxima coluna da exibição que é um múltiplo de <em>&lt;n&gt;</em>) na mensagem do registro log antes de exibi-la na saída. A opção <code>--expand-tabs</code> é uma abreviação da opção <code>--expand-tabs=8</code>, a opção <code>--no-expand-tabs</code> é uma abreviação da opção <code>--expand-tabs=0</code>, que desativa a expansão da guia.</p>
 <div class="paragraph">
 <p>A predefinição é que as guias sejam expandidas em belos formatos que recuam a mensagem do registro log em 4 espaços (ou seja, <em>medium</em>, a predefinição, <em>full</em> e <em>fuller</em>).</p>
 </div>
@@ -536,7 +536,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>É predefinido que as anotações exibidas são das anotações refs listadas nas variáveis <code>core.notesRef</code> e <code>notes.displayRef</code> (ou substituições correspondentes do ambiente). Para mais detalhes consulte <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 <div class="paragraph">
-<p>Com um argumento opcional <em>&lt;ref&gt;</em>, usa a "ref" para encontrar as notas que serão exibidas. A "ref" pode definir o nome completo da "ref" quando começar com <code>refs/notes/</code>; quando começa com <code>notes/</code>, <code>refs/</code> e caso contrário <code>refs/notes/</code> é prefixado para formar um nome completo da "ref".</p>
+<p>Com um argumento opcional <em>&lt;ref&gt;</em>, usa a "ref" para encontrar as notas que serão exibidas. A "ref" pode definir o nome completo da "ref" quando começar com <code>refs/notes/</code>; quando começa com <code>notes/</code>, <code>refs/</code> e caso contrário <code>refs/notes/</code> é prefixado para formar o nome completo da "ref".</p>
 </div>
 <div class="paragraph">
 <p>Várias opções <code>--notes</code> podem ser combinadas para controlar quais as notas estão sendo exibidas. Exemplos: <code>--notes=foo</code> mostrará apenas as notas vindas de "refs/notes/foo"; <code>--notes=foo --notes</code> mostrará as notas vindas de "refs/notes/foo" e das notas ref(s) predefinidas.</p>
@@ -545,6 +545,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--no-notes</dt>
 <dd>
 <p>Não exiba as anotações. Isso nega a opção <code>--notes</code> acima, redefinindo a lista das anotações das <em>refs</em> a partir de onde as notas são exibidas. As opções são analisadas na ordem informada na linha de comando, portanto, "--notes --notes=foo --no-notes --notes=bar" exibirá apenas as anotações das "refs/notes/bar" por exemplo.</p>
+</dd>
+<dt class="hdlist1">--show-notes-by-default</dt>
+<dd>
+<p>Mostra as notas predefinidas, a menos que sejam fornecidas opções para a exibição de notas específicas.</p>
 </dd>
 <dt class="hdlist1">--show-notes[=&lt;ref&gt;]</dt>
 <dt class="hdlist1">--[no-]standard-notes</dt>
@@ -729,7 +733,7 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </dd>
 <dt class="hdlist1"><em>%x00</em></dt>
 <dd>
-<p>imprime um byte de um código hexadecimal</p>
+<p><em>%x</em> seguido de dois dígitos hexadecimais é substituído por um byte com o valor dos dígitos hexadecimais (chamaremos isso de "código de formatação literal" no restante deste documento).</p>
 </dd>
 </dl>
 </div>
@@ -937,7 +941,45 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <dd>
 <p>nomes de referência "ref" sem quebra automática " (", ")".</p>
 </dd>
-<dt class="hdlist1"><em>%(describe[:options])</em></dt>
+<dt class="hdlist1"><em>%(decorate[:&lt;opções&gt;])</em></dt>
+<dd>
+<p>nomes de ref com decorações personalizadas. A string <code>decorate</code> pode ser seguida por dois pontos e zero ou mais opções separadas por vírgulas. Os valores das opções podem conter códigos de formatação literais. Eles devem ser usados para vírgulas (<code>%x2C</code>) e parênteses de fechamento (<code>%x29</code>), devido à sua função na sintaxe da opção.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><em>prefix=&lt;valor&gt;</em>: Exibido antes da lista de nomes de referência. O padrão é "&#160;<code>(</code>".</p>
+</li>
+<li>
+<p><em>suffix=&lt;valor&gt;</em>: Exibido após a lista de nomes de referência. O padrão é "<code>)</code>".</p>
+</li>
+<li>
+<p><em>separator=&lt;valor&gt;</em>: Mostrado entre os nomes das refs. O padrão é "<code>,</code>&#160;".</p>
+</li>
+<li>
+<p><em>pointer=&lt;valor&gt;</em>: Mostrado entre HEAD e o ramo para o qual aponta, se houver.
+A predefinição é "&#160;<code>-&gt;</code>&#160;".</p>
+</li>
+<li>
+<p><em>tag=&lt;valor&gt;</em>: Mostrado antes dos nomes das tags. A predefinição é "<code>tag:</code>&#160;".</p>
+</li>
+</ul>
+</div>
+</dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Por exemplo, para produzir decorações sem anotações nas tags, de envelopamento ou de espaços como separadores:</p>
+</div>
+<div class="paragraph">
+<p>+
+<code>%(decorate:prefix=,suffix=,tag=,separator= )</code></p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><em>%(describe[:&lt;opções&gt;])</em></dt>
 <dd>
 <p>nome legível para as pessoas, como <a href="git-describe.html">git-describe(1)</a>; uma expressão vazia para os commits sem descrição. A expressão <code>describe</code> pode ser seguida por dois pontos e zero ou mais opções separadas por vírgulas. As descrições podem ser inconsistentes quando as etiquetas são adicionadas ou removidas ao mesmo tempo.</p>
 <div class="ulist">
@@ -1041,7 +1083,7 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <dd>
 <p>assunto reflog</p>
 </dd>
-<dt class="hdlist1"><em>%(trailers[:options])</em></dt>
+<dt class="hdlist1"><em>%(trailers[:&lt;opções&gt;])</em></dt>
 <dd>
 <p>exibe os trechos do corpo como interpretado através do <a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>. Os trechos do texto da resposta podem ser seguidas por dois pontos, zero ou mais opções separadas por vírgula: Caso qualquer opção seja usada várias vezes, a última ocorrência ganha.</p>
 <div class="ulist">
@@ -1071,9 +1113,6 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </div>
 </dd>
 </dl>
-</div>
-</li>
-</ul>
 </div>
 </li>
 </ul>
@@ -1148,62 +1187,81 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">-u</dt>
 <dt class="hdlist1">--patch</dt>
 <dd>
-<p>	Gere um patch (consulte a seção intitulada
-<a href="#gera_texto_correção_com_p">"Gerando o texto de correção com -p"</a>).</p>
+<p>Gerar patch (consulte <a href="#gera_texto_correção_com_p">[gera_texto_correção_com_p]</a>).</p>
 </dd>
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--no-patch</dt>
 <dd>
-<p>Suprime a saída diff. Útil para comandos como <code>git show</code> que por predefinição exibem a correção ou para cancelar o efeito de <code>--patch</code>.</p>
+<p>Suprime toda a saída do mecanismo, diff. É útil para comandos como <code>git show</code> que, por padrão, mostram o patch para abafar a sua saída, ou para cancelar o efeito de opções como <code>--patch</code>, <code>--stat</code> anteriormente na linha de comando num alias.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=(off|none|on|first-parent|1|separate|m|combined|c|dense-combined|cc|remerge|r)</dt>
+<dt class="hdlist1">-m</dt>
+<dd>
+<p>Mostra os diffs dos commits mesclados no formato padrão. Isso é semelhante a <em>--diff-merges=on</em>, exceto com a opção <code>-m</code> que não produzirá nada a menos que <code>-p</code> também seja usado.</p>
+</dd>
+<dt class="hdlist1">-c</dt>
+<dd>
+<p>Gera um diff combinado nos commits mesclados. É um atalho para <em>--diff-merges=combined -p</em>.</p>
+</dd>
+<dt class="hdlist1">--cc</dt>
+<dd>
+<p>Gera um diff denso e combinado nos commits mesclados. É um Atalho para <em>--diff-merges=dense-combined -p</em>.</p>
+</dd>
+<dt class="hdlist1">--dd</dt>
+<dd>
+<p>Produzir um diff com relação ao primeiro arquivo principal para commits regulares e mesclados. É um atalho para <em>--diff-merges=first-parent -p</em>.</p>
+</dd>
+<dt class="hdlist1">--remerge-diff</dt>
+<dd>
+<p>Gera um remerge-diff para commits mesclados. É um atalho para <em>--diff-merges=remerge -p</em>.</p>
+</dd>
 <dt class="hdlist1">--no-diff-merges</dt>
 <dd>
+<p>È um sinônimo para <em>--diff-merges=off</em>.</p>
+</dd>
+<dt class="hdlist1">--diff-merges=&lt;formato&gt;</dt>
+<dd>
 <p>Define o formato diff que será usado para a mesclagem dos commits. A predefinição é `dense-combined` a menos que a opção <code>--first-parent</code> esteja em uso, nesse caso a predefinição será <code>first-parent</code>.</p>
+<div class="paragraph">
+<p>Os seguintes formatos são compatíveis:</p>
+</div>
+<div class="openblock">
+<div class="content">
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--diff-merges=(off|none)</dt>
-<dt class="hdlist1">--no-diff-merges</dt>
+<dt class="hdlist1">off, none</dt>
 <dd>
 <p>Desativa a saída dos diffs para a mesclagem dos commits. Útil para substituir valores implícitos.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=on</dt>
-<dt class="hdlist1">--diff-merges=m</dt>
-<dt class="hdlist1">-m</dt>
+<dt class="hdlist1">on, m</dt>
 <dd>
-<p>Essa opção faz com que o diff gerado para a mesclagem dos commits seja mostrada no formato padrão. A opção <code>-m</code> produzirá uma saída caso a opção <code>-p</code> seja usada junto. O formato predefinido pode ser alterado usando o parâmetro de configuração <code>log.diffMerges</code>, onde o valor predefinido é <code>separate</code>.</p>
+<p>Gera diff dos diferentes arquivos mesclados para que sejam mostrados no formato padrão. O formato padrão pode ser alterado usando a variável de configuração <code>log.diffMerges</code>, cujo valor padrão é <code>separate</code>.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=first-parent</dt>
-<dt class="hdlist1">--diff-merges=1</dt>
+<dt class="hdlist1">first-parent, 1</dt>
 <dd>
-<p>Esta opção faz com que os commits mesclados mostrem a diferença total apenas com ao que estiver relacionado com a primeira origem.</p>
+<p>Mostra o diff completo com relação ao primeiro arquivo principal. Esse é o mesmo formato que a opção <code>--patch</code> produz nos commits não mesclados.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=separate</dt>
+<dt class="hdlist1">separate</dt>
 <dd>
-<p>Faz com que os commits mesclados mostrem a diferença total com relação a cada uma das suas origens. É gerado uma entrada de registro separada e um diff para cada um dos commits relacionados.</p>
+<p>Mostra a diferença completa com relação a cada uma das origens. Uma entrada de registro e diff separadas são geradas para cada um dos arquivos principais.</p>
 </dd>
-<dt class="hdlist1">--diff-merges=remerge</dt>
-<dt class="hdlist1">--diff-merges=r</dt>
-<dt class="hdlist1">--remerge-diff</dt>
+<dt class="hdlist1">combined, c</dt>
 <dd>
-<p>Com esta opção, os dois principais commits são mesclados novamente para criar um objeto temporário na árvore&#8201;&#8212;&#8201;potencialmente contendo arquivos com os marcadores de conflito e tal. Uma diferença é então mostrada entre essa árvore temporária e o commit real da mesclagem.</p>
+<p>Mostra as diferenças de cada uma das origens para a mesclagem resultante de forma simultânea em vez de mostrar a diferença pareada entre uma origem e o resultado, um de cada vez. Além disso, lista apenas os arquivos que foram alterados a partir de todas as origens.</p>
+</dd>
+<dt class="hdlist1">dense-combined, cc</dt>
+<dd>
+<p>Comprime ainda mais o arquivo gerado pelo comando <code>--diff-merges=combined</code> ao omitir os blocos menos importantes cujo conteúdo relacionado possua apenas duas variantes e o resultado da mesclagem escolhe um deles sem alteração.</p>
+</dd>
+<dt class="hdlist1">remerge, r</dt>
+<dd>
+<p>Mescla novamente os dois principais commits para criar um objeto temporário na árvore&#8212;&#8203;potencialmente contendo arquivos com os marcadores de conflito e tal. Um diff é então mostrado entre essa árvore temporária e o commit real da mesclagem.</p>
 <div class="paragraph">
 <p>A saída é gerada quando esta opção usada está sujeita a alterações, assim como a sua interação com as outras opções (a menos que esteja explicitamente documentada).</p>
 </div>
 </dd>
-<dt class="hdlist1">--diff-merges=combined</dt>
-<dt class="hdlist1">--diff-merges=c</dt>
-<dt class="hdlist1">-c</dt>
-<dd>
-<p>Com esta opção, a saída "diff" para um commit de mesclagem exibe as diferenças de cada uma das origens para a mesclagem resultante de forma simultânea em vez de mostrar a diferença pareada entre uma origem e o resultado, um de cada vez. Além disso, lista apenas os arquivos que foram alterados a partir de todas as origens. A opção <code>-c</code> exige o uso de <code>-p</code>.</p>
-</dd>
-<dt class="hdlist1">--diff-merges=dense-combined</dt>
-<dt class="hdlist1">--diff-merges=cc</dt>
-<dt class="hdlist1">--cc</dt>
-<dd>
-<p>Com esta opção, a saída gerada pelo comando <code>--diff-merges=combined</code> é ainda mais comprimido ao omitir os blocos menos importantes cujo conteúdo relacionado possua apenas duas variantes e o resultado da mesclagem escolhe um deles sem alteração. A opção <code>-c</code> exige o uso de <code>-p</code>.</p>
-</dd>
 </dl>
+</div>
+</div>
 </div>
 </dd>
 <dt class="hdlist1">--combined-all-paths</dt>
@@ -1305,7 +1363,7 @@ a opção <code>--format=raw</code>.</p>
 </dd>
 <dt class="hdlist1">--stat[=&lt;largura&gt;[,&lt;largura-do-nome&gt;[,&lt;count&gt;]]]</dt>
 <dd>
-<p>Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima a predefinição retorna para a largura do terminal ou 80 colunas, caso não esteja conectada num terminal e pode ser substituída por <code>&lt;largura&gt;</code>. A largura da parte do nome do arquivo pode ser limitada, fornecendo outra largura <code>&lt;largura-do-nome&gt;</code> após uma vírgula. A largura da parte do grafo pode ser limitada utilizando <code>--stat-graph-width=&lt;largura&gt;</code> (afeta todos os comandos que geram um grafo estatístico) ou definindo <code>diff.statGraphWidth=&lt;largura&gt;</code> (não afeta o <code>git format-patch</code>). Ao fornecer um terceiro parâmetro <code>&lt;count&gt;</code>, é possível limitar a saída às primeiras linhas <code>&lt;count&gt;</code>, seguidas por <code>...</code> caso haja mais.</p>
+<p>Gera um diffstat. É predefinido que o espaço necessário será utilizado para a parte do nome do arquivo e o restante para a parte do grafo. A largura máxima tem como padrão a largura do terminal ou 80 colunas caso não esteja conectado num terminal, e pode ser substituído por <code>&lt;largura&gt;</code>. A largura da parte do nome do arquivo pode ser limitado ao fornecer outra largura <code>&lt;largura-do-nome&gt;</code> após uma vírgula ou definindo com <code>diff.statNameWidth=&lt;width&gt;</code>. A largura da parte do gráfico pode ser limitada pelo uso de <code>--stat-graph-width=&lt;largura&gt;</code> ou pela configuração de <code>diff.statGraphWidth=&lt;largura&gt;</code>. A utilização de <code>--stat</code> ou <code>--stat-graph-width</code> afeta todos os comandos que geram um gráfico estatístico, enquanto a definição <code>diff.statNameWidth</code> ou <code>diff.statGraphWidth</code> não afeta o <code>git format-patch</code>. Ao fornecer um terceiro parâmetro <code>&lt;count&gt;</code>, você pode limitar a saída às primeiras <code>&lt;count&gt;</code> linhas, seguidas de <code>...</code> caso haja mais.</p>
 <div class="paragraph">
 <p>Estes parâmetros também podem ser ajustados individualmente com <code>--stat-width=&lt;largura&gt;</code>, <code>--stat-name-width=&lt;largura-do-nome&gt;</code> e <code>--stat-count=&lt;count&gt;</code>.</p>
 </div>
@@ -1376,12 +1434,12 @@ a opção <code>--format=raw</code>.</p>
 </dd>
 <dt class="hdlist1">-z</dt>
 <dd>
-<p>Separe os commits com caracteres <code>NUL</code> em vez de novos caracteres "newlines" (novas linhas).</p>
+<p>Separe os commits com caracteres <code>NUL</code> em vez de "newlines" (novas linhas).</p>
 <div class="paragraph">
 <p>Além disso, quando a opção <code>--raw</code> ou <code>--numstat</code> for utilizado, não una os nomes dos caminhos e utilize caracteres <code>NUL</code> como terminadores na saída dos campos.</p>
 </div>
 <div class="paragraph">
-<p>Sem esta opção, os nomes do caminho com caracteres "incomuns" são citados como explicado na variável de configuração <code>core.quotePath</code> (veja linkgit:git-config [1]).</p>
+<p>Sem esta opção, os nomes do caminho com caracteres "incomuns" são citados como explicado na variável de configuração <code>core.quotePath</code> (veja <a href="git-config.html">git-config(1)</a>).</p>
 </div>
 </dd>
 <dt class="hdlist1">--name-only</dt>
@@ -1784,7 +1842,7 @@ o mesmo que <code>-M5%</code>.  Para limitar a detecção para renomeações exa
 </dd>
 <dt class="hdlist1">--default-prefix</dt>
 <dd>
-<p>Use the default source and destination prefixes ("a/" and "b/"). This is usually the default already, but may be used to override config such as <code>diff.noprefix</code>.</p>
+<p>Use os prefixos predefinidos da origem e do destino ("a/" e "b/"). Geralmente já é o padrão, mas pode ser usado para sobrescrever as configurações como <code>diff.noprefix</code>.</p>
 </dd>
 <dt class="hdlist1">--line-prefix=&lt;prefixo&gt;</dt>
 <dd>
@@ -1883,7 +1941,7 @@ renomeie para a</pre>
 <h2 id="_o_formato_diff_combinado">O formato diff combinado</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Qualquer comando que gere um diff pode utilizar a opção <code>-c</code> ou`--cc` para produzir um <em>diff combinado</em> ao mostrar uma mesclagem. Este é o formato predefinido ao mostrar as mesclagens com <a href="git-diff.html">git-diff(1)</a> ou <a href="git-show.html">git-show(1)</a>. Observe também que é possível usar a opção <code>--diff-merges</code> que é adequada para qualquer um destes comandos para impor a geração dos diffs em um determinado formato.</p>
+<p>Qualquer comando que gere um diff pode utilizar a opção <code>-c</code> ou`--cc` para produzir um <em>diff combinado</em> ao mostrar uma mesclagem. Este é o formato predefinido ao mostrar as mesclagens com <a href="git-diff.html">git-diff(1)</a> ou <a href="git-show.html">git-show(1)</a>. Observe também que é possível usar a opção <code>--diff-merges</code> que é adequada para qualquer um destes comandos para impor a geração dos diffs num determinado formato.</p>
 </div>
 <div class="paragraph">
 <p>Um formato "diff combinado" fica assim:</p>
@@ -1952,7 +2010,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </div>
 </li>
 <li>
-<p>É seguido por duas linhas do cabeçalho do arquivo/para o arquivo</p>
+<p>É seguido por duas linhas do cabeçalho do arquivo/para o arquivo:</p>
 <div class="literalblock">
 <div class="content">
 <pre>--- a/arquivo
@@ -1963,7 +2021,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 <p>Semelhante ao cabeçalho de duas linhas para o formato diff tradicional <em>unificado</em>, o <code>/dev/null</code> é utilizado para sinalizar os arquivos criados ou excluídos.</p>
 </div>
 <div class="paragraph">
-<p>No entanto, caso a opção <code>--combined-all-paths</code> seja utilizada, em vez de duas linhas do arquivo/para o arquivo, será obtido um cabeçalho <code>N+1</code> do cabeçalho do arquivo de "origem" para o arquivo de "destino" onde N é a quantidade de origens na mesclagem do commit</p>
+<p>No entanto, caso a opção <code>--combined-all-paths</code> seja utilizada, em vez de duas linhas do arquivo/para o arquivo, será obtido um cabeçalho <code>N+1</code> do cabeçalho do arquivo de "origem" para o arquivo de "destino" onde N é a quantidade de origens na mesclagem do commit:</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -1997,7 +2055,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 <p>Um caractere <code>-</code> na coluna N significa que a linha aparece no "arquivoN", mas não aparece no resultado. Um caractere <code>+</code> na coluna N significa que a linha aparece no resultado e o arquivoN não possui essa linha (em outras palavras, a linha foi adicionada, do ponto de vista dessa origem).</p>
 </div>
 <div class="paragraph">
-<p>Na saída do exemplo acima, a assinatura da função foi alterada nos dois arquivos (portanto, duas remoções <code>-</code> do arquivo1 e do arquivo2, mais <code>++</code> significa que uma linha que foi adicionada não aparece no arquivo1 ou no arquivo2). Outras oito linhas também são iguais no arquivo1, mas não aparecem no arquivo2 (portanto, prefixadas com <code>+</code>).</p>
+<p>Na saída do exemplo acima, a assinatura da função foi alterada nos dois arquivos (portanto, duas remoções <code>-</code> do arquivo1 e do arquivo2, mais <code>++</code> significa que uma linha que foi adicionada não aparece no arquivo1 ou no arquivo2). Assim como, outras oito linhas também são iguais no arquivo1, mas não aparecem no arquivo2 (portanto, prefixadas com <code>+</code>).</p>
 </div>
 <div class="paragraph">
 <p>Quando exibido pelo comando <code>git diff-tree -c</code>, compara as origens de um commit mesclado com o resultado da mesclagem (ou seja, arquivo1..arquivoN são as origens). Quando exibido pelo comando <code>git diff-files -c</code>, as duas origens com as suas respectivas mesclagens não resolvidas com o arquivo da árvore de trabalho (ou seja, arquivo1 é o estágio 2, informado como "nossa versão", o arquivo2 é o estágio 3, informado como "a versão deles").</p>
@@ -2011,7 +2069,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 <dl>
 <dt class="hdlist1"><code>git show v1.0.0</code></dt>
 <dd>
-<p>Exibe a tag <code>v1.0.0</code> junto com o objeto que as tags apontarem.</p>
+<p>Exibe a tag <code>v1.0.0</code> junto com o objeto que a tag apontar.</p>
 </dd>
 <dt class="hdlist1"><code>git show v1.0.0^{tree}</code></dt>
 <dd>
@@ -2102,7 +2160,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:54 +0200
+Last updated 2023-12-10 16:15:31 +0100
 </div>
 </div>
 </body>

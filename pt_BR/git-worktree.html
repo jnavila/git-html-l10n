@@ -451,12 +451,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git worktree add</em> [-f] [--detach] [--checkout] [--lock [--reason &lt;texto&gt;]]
-                   [-b &lt;novo-ramo&gt;] &lt;caminho&gt; [&lt;commit-ish&gt;]
+<pre class="content"><em>git worktree add</em> [-f] [--detach] [--checkout] [--lock [--reason &lt;string&gt;]]
+                   [--orphan] [(-b | -B) &lt;novo-ramo&gt;] &lt;caminho&gt; [&lt;commit-ish&gt;]
 <em>git worktree list</em> [-v | --porcelain [-z]]
-<em>git worktree lock</em> [--reason &lt;texto&gt;] &lt;árvore-de-trabalho&gt;
-<em>git worktree move</em> &lt;árvore-de-trabalho&gt; &lt;novo-caminho&gt;
-<em>git worktree prune</em> [-n] [-v] [--expire &lt;expiração&gt;]
+<em>git worktree lock</em> [--reason &lt;string&gt;] &lt;árvore-de-trabalho&gt;
+<em>git worktree move</em> &lt;worktree&gt; &lt;novo-caminho&gt;
+<em>git worktree prune</em> [-n] [-v] [--expire &lt;expira&gt;]
 <em>git worktree remove</em> [-f] &lt;árvore-de-trabalho&gt;
 <em>git worktree repair</em> [&lt;caminho&gt;&#8230;&#8203;]
 <em>git worktree unlock</em> &lt;árvore-de-trabalho&gt;</pre>
@@ -507,6 +507,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="paragraph">
 <p>Caso o <code>&lt;commit-ish&gt;</code> seja omitido e nem a opção <code>-b</code>, <code>-B</code> ou <code>--detach</code> sejam utilizados, então, por conveniência, a nova árvore de trabalho será associada com um ramo (chame-o de <code>&lt;ramo&gt;</code>) nomeado após <code>$(basename &lt;caminho&gt;)</code>. Caso o <code>&lt;ramo&gt;</code> não exista, um novo ramo com base no <code>HEAD</code> será criado automaticamente como se a opção <code>-b &lt;ramo&gt;</code> fosse usado. Caso o <code>&lt;ramo&gt;</code> exista, ele será averiguado na nova árvore de trabalho, se não tiver sido averiguado em nenhum outro lugar, caso contrário, o comando se recusará a criar a árvore de trabalho (a menos que <code>--force</code> seja utilizado).</p>
+</div>
+<div class="paragraph">
+<p>Se <code>&lt;commit-ish&gt;</code> for omitido ou se nenhuma das opções <code>--detach</code> ou <code>--orphan</code> forem usados e não houver ramificações locais válidas (ou ramificações remotas especificadas via <code>--guess-remote</code>), então, por conveniência, a nova árvore de trabalho será associada a uma nova ramificação órfã denominada <code>&lt;ramo&gt;</code> (após o <code>$(basename &lt;path&gt;)</code> se nem <code>-b</code> ou <code>-B</code> forem usados) como se <code>--orphan</code> tivesse sido passado para o comando. Caso o repositório tenha um ramo remoto e <code>--guess-remote</code> seja usado, e não existam ramificações remotas ou locais, o comando falhará com um aviso lembrando o usuário para buscar primeiro no ramo remoto (ou substituir usando <code>-f/--force</code>).</p>
 </div>
 </dd>
 <dt class="hdlist1">list</dt>
@@ -600,6 +603,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Com <code>prune</code>, não remove nada; apenas relate o que seria removido.</p>
 </dd>
+<dt class="hdlist1">--orphan</dt>
+<dd>
+<p>Com <code>add</code>, torne a nova árvore de trabalho e o índice vazio associando a árvore de trabalho a um novo ramo órfão/não nascido chamado <code>&lt;novo-ramo&gt;</code>.</p>
+</dd>
 <dt class="hdlist1">--porcelain</dt>
 <dd>
 <p>Com <code>list</code> gere um formato para fácil análise dos scripts. Este formato permanecerá estável em todas as versões Git independentemente da configuração do usuário. É recomendado que seja usado em conjunto com a opção <code>-z</code>. Veja abaixo os detalhes.</p>
@@ -650,7 +657,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Quando utilizar diversas árvores de trabalho, algumas refs são compartilhadas entre todas as árvores de trabalho mas outras são específicas para cada árvore de trabalho individualmente. Um exemplo é o <code>HEAD</code>, que é único para cada a árvores de trabalho. Esta seção são sobre as regras de compartilhamento e de como acessar tais refs de uma árvore de trabalho para outra.</p>
 </div>
 <div class="paragraph">
-<p>Geralmente, cada árvore de trabalho possuí uma ref própria e todas as refs que iniciem com <code>refs/</code> podem ser compartilhados. Os pseudo-refs são aqueles como <code>HEAD</code> que estão diretamente sob <code>$GIT_DIR</code> ao invés de estarem dentro do <code>GIT_DIR/refs</code>. Contudo há exceções: as refs não serão compartilhadas quando estiverem dentro do <code>refs/bisect</code> e do <code>refs/worktree</code>.</p>
+<p>Geralmente, cada árvore de trabalho possuí uma ref própria e todas as refs que iniciem com <code>refs/</code> podem ser compartilhados. Os pseudo-refs são aqueles como <code>HEAD</code> que estão diretamente sob <code>$GIT_DIR</code> ao invés de estarem dentro do <code>GIT_DIR/refs</code>. Contudo há exceções: as refs não serão compartilhadas quando estiverem dentro do <code>refs/bisect</code>, <code>refs/worktree</code> e <code>refs/rewritten</code>.</p>
 </div>
 <div class="paragraph">
 <p>As refs individuais de cada árvore de trabalho ainda podem ser acessadas de uma outra árvore de trabalho através de dois caminhos especiais, <code>main-worktree</code> e <code>worktrees</code>. A primeira oferece acesso <code>ref</code> individual a cada principal árvore de trabalho, enquanto a última a todas as árvores de trabalho que forem vinculadas à ela.</p>
@@ -711,7 +718,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Dentro de uma árvore de trabalho vinculada, <code>$GIT_DIR</code> é configurado para apontar para este diretório privado (<code>/path/main/.git/worktrees/test-next</code> no exemplo) e <code>$GIT_COMMON_DIR</code> é configurado para apontar de volta para a principal árvore de trabalho <code>$GIT_DIR</code> (<code>/path/main/.git</code> por exemplo). Estas configurações são feitas em um arquivo <code>.git</code> localizado no diretório mais alto do vínculo da árvore de trabalho.</p>
 </div>
 <div class="paragraph">
-<p>A resolução do caminho através do comando <code>git rev-parse --git-path</code> utiliza <code>$GIT_DIR</code> ou <code>$GIT_COMMON_DIR</code>, dependendo do caminho. Na árvore de trabalho vinculada, o comando <code>git rev-parse --git-path HEAD</code> retorna <code>/path/main/.git/worktrees/test-next/HEAD</code> (não <code>/path/other/test-next/.git/HEAD</code> ou <code>/path/main/.git/HEAD</code>) enquanto o comando <code>git rev-parse --git-path refs/heads/master</code> usa <code>$GIT_COMMON_DIR</code> e retorna <code>/path/main/.git/refs/heads/master</code>, já que as refs são compartilhados em todas as árvores de trabalho, exceto <code>refs/bisect</code> e <code>refs/worktree</code>.</p>
+<p>A resolução do caminho através do comando <code>git rev-parse --git-path</code> utiliza <code>$GIT_DIR</code> ou <code>$GIT_COMMON_DIR</code>, dependendo do caminho. Na árvore de trabalho vinculada, o comando <code>git rev-parse --git-path HEAD</code> retorna <code>/path/main/.git/worktrees/test-next/HEAD</code> (não <code>/path/other/test-next/.git/HEAD</code> ou <code>/path/main/.git/HEAD</code>) enquanto o comando <code>git rev-parse --git-path refs/heads/master</code> usa <code>$GIT_COMMON_DIR</code> e retorna <code>/path/main/.git/refs/heads/master</code>, já que as refs são compartilhados em todas as árvores de trabalho, exceto <code>refs/bisect</code>, <code>refs/worktree</code> e <code>refs/rewritten</code>.</p>
 </div>
 <div class="paragraph">
 <p>Para mais informações consulte <a href="gitrepository-layout.html">gitrepository-layout(5)</a>. A regra geral é não fazer qualquer suposição sobre se um caminho pertence ao <code>$GIT_DIR</code> ou ao <code>$GIT_COMMON_DIR</code> quando você precisar acessar diretamente algo dentro do <code>$GIT_DIR</code>. Para obter o caminho final utilize o comando <code>git rev-parse --git-path</code>.</p>
@@ -865,7 +872,7 @@ $ git worktree remove ../temp</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:04:55 +0200
+Last updated 2023-12-10 16:15:32 +0100
 </div>
 </div>
 </body>

@@ -452,9 +452,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git notes</em> [list [&lt;objet&gt;]]
-<em>git notes</em> add [-f] [--allow-empty] [-F &lt;fichier&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objet&gt;] [&lt;objet&gt;]
+<em>git notes</em> add [-f] [--allow-empty] [--[no-]separator | --separator=&lt;coupure-paragraphe&gt;] [--[no-]stripspace] [-F &lt;fichier&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objet&gt;] [&lt;objet&gt;]
 <em>git notes</em> copy [-f] ( --stdin | &lt;objet-source&gt; [&lt;objet-cible&gt;] )
-<em>git notes</em> append [--allow-empty] [-F &lt;fichier&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objet&gt;] [&lt;objet&gt;]
+<em>git notes</em> append [--allow-empty] [--[no-]separator | --separator=&lt;coupure-paragraphe&gt;] [--[no-]stripspace] [-F &lt;fichier&gt; | -m &lt;msg&gt; | (-c | -C) &lt;objet&gt;] [&lt;objet&gt;]
 <em>git notes</em> edit [--allow-empty] [&lt;objet&gt;]
 <em>git notes</em> show [&lt;objet&gt;]
 <em>git notes</em> merge [-v | -q] [-s &lt;strategie&gt; ] &lt;ref-de-notes&gt;
@@ -500,7 +500,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">add</dt>
 <dd>
-<p>Ajouter des notes pour un objet donné (par défaut HEAD). Abandonner si l&#8217;objet a déjà des notes (utilisez <code>-f</code> pour écraser les notes existantes). Cependant, si vous utilisez <code>add</code> de manière interactive (en utilisant un éditeur pour fournir le contenu des notes), alors - au lieu d&#8217;abandonner - les notes existantes seront ouvertes dans l&#8217;éditeur (comme la sous-commande <code>edit</code>).</p>
+<p>Ajouter des notes pour un objet donné (par défaut HEAD). Abandonner si l&#8217;objet a déjà des notes (utilisez <code>-f</code> pour écraser les notes existantes). Cependant, si vous utilisez <code>add</code> de manière interactive (en utilisant un éditeur pour fournir le contenu des notes), alors - au lieu d&#8217;abandonner - les notes existantes seront ouvertes dans l&#8217;éditeur (comme la sous-commande <code>edit</code>). Si vous spécifiez plusieurs <code>-m</code> et <code>-F</code>, une ligne vierge sera insérée entre les messages. Utilisez l&#8217;option <code>--separator</code> pour insérer d&#8217;autres délimiteurs.</p>
 </dd>
 <dt class="hdlist1">copy</dt>
 <dd>
@@ -519,7 +519,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">append</dt>
 <dd>
-<p>Ajouter aux notes d&#8217;un objet existant (valeur par défaut : HEAD). Crée un nouvel objet notes si nécessaire.</p>
+<p>Appliquer un ou plusieurs nouveaux messages donnés par des options <code>-m</code> ou <code>-F</code> à une note existante, ou les ajouter comme une nouvelle note si aucune n&#8217;existe , pour l&#8217;objet (par défaut à HEAD). Lorsqu&#8217;elle continue une note existante, une ligne vierge est ajoutée avant chaque nouveau message en tant que séparateur inter-paragraphe. Le séparateur peut être personnalisé avec l&#8217;option <code>--separator</code>.</p>
 </dd>
 <dt class="hdlist1">edit</dt>
 <dd>
@@ -565,17 +565,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-m &lt;msg&gt;</dt>
 <dt class="hdlist1">--message=&lt;msg&gt;</dt>
 <dd>
-<p>Utiliser le message de note fourni (au lieu de le demander). Si plusieurs options <code>-m</code> sont fournies, leurs valeurs sont concaténées comme paragraphes séparés. Les lignes commençant par <code>#</code> et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes.</p>
+<p>Utiliser le message de note fourni (au lieu de le demander). Si plusieurs options <code>-m</code> sont fournies, leurs valeurs sont concaténées comme paragraphes séparés. Les lignes commençant par <code>#</code> et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes. Si vous souhaitez les garder verbatim, utilisez <code>--no-stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-F &lt;fichier&gt;</dt>
 <dt class="hdlist1">--file=&lt;fichier&gt;</dt>
 <dd>
-<p>Prendre le message de note depuis le fichier indiqué. Utilisez <em>-</em> pour lire le message depuis l&#8217;entrée standard. Les lignes commençant par <code>#</code> et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes.</p>
+<p>Prendre le message de note depuis le fichier indiqué. Utilisez <em>-</em> pour lire le message depuis l&#8217;entrée standard. Les lignes commençant par <code>#</code> et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes. Si vous souhaitez les garder verbatim, utilisez <code>--no-stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-C &lt;objet&gt;</dt>
 <dt class="hdlist1">--reuse-message=&lt;objet&gt;</dt>
 <dd>
-<p>Prendre l&#8217;objet blob donné (par exemple, une autre note) comme message de la note. (Utilisez plutôt <code>git notes copy &lt;objet&gt;</code> pour copier des notes entre objets).</p>
+<p>Prendre l&#8217;objet blob donné (par exemple, une autre note) comme message de note. (Utilisez <code>git notes copy &lt;objet&gt;</code> au lieu de copier les notes entre les objets). Par défaut, le message sera copié verbatim, mais si vous souhaitez supprimer les lignes commençant par <code>#</code> et les lignes vides autres que les lignes uniques entre les paragraphes, utilisez l&#8217;option <code>--stripspace</code>.</p>
 </dd>
 <dt class="hdlist1">-c &lt;objet&gt;</dt>
 <dt class="hdlist1">--reedit-message=&lt;objet&gt;</dt>
@@ -585,6 +585,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--allow-empty</dt>
 <dd>
 <p>Permettre de stocker un objet note vide. Le comportement par défaut consiste à supprimer automatiquement les notes vides.</p>
+</dd>
+<dt class="hdlist1">--[no-]separator, --separator=&lt;coupure-paragraphe&gt;</dt>
+<dd>
+<p>Spécifier une chaîne utilisée comme séparateur d&#8217;inter-paragraphe personnalisé (une nouvelle ligne est ajoutée à la fin si nécessaire). Si <code>--no-separator</code> , aucun séparateur ne sera ajouté entre les paragraphes. Par défaut, la valeur est une ligne vierge.</p>
+</dd>
+<dt class="hdlist1">--[no-]stripspace</dt>
+<dd>
+<p>Éliminer les espaces précédant et suivant le message de note. Également éliminer les lignes vides autres que les lignes uniques entre les paragraphes. Les lignes commençant par <code>#</code> seront nettoyées dans des cas sans éditeur comme <code>-m</code>, <code>-F</code> et <code>-C</code>, mais pas dans les cas avec éditeur comme <code>git notes edit</code>, <code>-c</code>, etc.</p>
 </dd>
 <dt class="hdlist1">--ref &lt;réf&gt;</dt>
 <dd>
@@ -774,7 +782,7 @@ $ git notes --ref=built add --allow-empty -C "$blob" HEAD</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:03:35 +0200
+Last updated 2023-12-10 16:14:38 +0100
 </div>
 </div>
 </body>

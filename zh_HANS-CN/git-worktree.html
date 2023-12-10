@@ -451,15 +451,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git worktree add</em> [-f] [--detach] [--checkout] [--lock [--reason &lt;字符串&gt;]]
-                   [-b &lt;新分支&gt;] &lt;路径&gt; [&lt;提交号&gt;]
+<pre class="content"><em>git worktree add</em> [-f] [--detach] [--checkout] [--lock [--reason &lt;string&gt;]]
+                   [--orphan] [(-b | -B) &lt;new-branch&gt;] &lt;path&gt; [&lt;commit-ish&gt;]
 <em>git worktree list</em> [-v | --porcelain [-z]]
-<em>git worktree lock</em> [--reason &lt;字符串&gt;] &lt;工作区&gt;
-<em>git worktree move</em> &lt;工作区&gt; &lt;新分支&gt;
-<em>git worktree prune</em> [-n] [-v] [--expire &lt;到期&gt;]
-<em>git worktree remove</em> [-f] &lt;工作区&gt;
-<em>git worktree repair</em> [&lt;路径&gt;&#8230;&#8203;]
-<em>git worktree unlock</em> &lt;工作区&gt;</pre>
+<em>git worktree lock</em> [--reason &lt;string&gt;] &lt;worktree&gt;
+<em>git worktree move</em> &lt;worktree&gt; &lt;new-path&gt;
+<em>git worktree prune</em> [-n] [-v] [--expire &lt;expire&gt;]
+<em>git worktree remove</em> [-f] &lt;worktree&gt;
+<em>git worktree repair</em> [&lt;path&gt;&#8230;&#8203;]
+<em>git worktree unlock</em> &lt;worktree&gt;</pre>
 </div>
 </div>
 </div>
@@ -507,6 +507,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="paragraph">
 <p>如果省略了`&lt;提交号&gt;<code>，也没有使用</code>-b`或`-B`或`-detach`，那么作为一种方便，新的工作树将与一个以`$(basename &lt;路径&gt;)<code>命名的分支（称为</code>&lt;分支&gt;<code>）相关联。 如果</code>&lt;分支&gt;<code>不存在，一个基于`HEAD`的新分支将被自动创建，就像给出</code>-b &lt;分支&gt;<code>一样。 如果</code>&lt;分支&gt;<code>确实存在，它将在新的工作树中被签出，如果它没有在其他地方被签出，否则命令将拒绝创建工作区（除非使用</code>--force`）。</p>
+</div>
+<div class="paragraph">
+<p>如果省略了 <code>&lt;commit-ish&gt;</code>，既没有使用 <code>--detach</code>，也没有使用 <code>--orphan</code>，并且没有有效的本地分支（或远程分支，如果指定了 <code>--guess-remote</code>），那么为了方便起见，新的工作树会与一个名为 <code>&lt;branch&gt;</code> 的新孤儿分支关联（如果没有使用 <code>-b</code> 或 <code>-B</code>，则在 <code>$(basename &lt;path&gt;)`之后），就像向命令传递了 `--orphan`一样。如果仓库有远程分支，并且使用了 `--guess-remote</code>，但不存在远程或本地分支，则命令会失败，并发出警告，提醒用户先从远程获取（或使用 <code>-f/-force</code> 覆盖）。</p>
 </div>
 </dd>
 <dt class="hdlist1">list</dt>
@@ -600,6 +603,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>在使用`prune`时，不会删除任何文件；只会报告它要删除的东西。</p>
 </dd>
+<dt class="hdlist1">--orphan</dt>
+<dd>
+<p>使用 <code>add</code> 使新的工作区和索引为空，并将工作树与名为 <code>&lt;new-branch&gt;</code> 的新孤儿/未出生分支关联起来。</p>
+</dd>
 <dt class="hdlist1">--porcelain</dt>
 <dd>
 <p>With <code>list</code>, output in an easy-to-parse format for scripts. This format will remain stable across Git versions and regardless of user configuration. It is recommended to combine this with <code>-z</code>. See below for details.</p>
@@ -650,7 +657,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>当使用多个工作区时，一些引用在所有工作区之间共享，但其他引用是特定于单个工作区的。比如：<code>HEAD</code>，它对每个工作树都是不同的。本节是关于共享规则，以及如何从另一个工作区访问一个工作区的引用。</p>
 </div>
 <div class="paragraph">
-<p>一般来说，所有的伪引用都是工作区特有的，所有以`refs/<code>开头的引用都是共享的。伪引用是像`HEAD`那样直接在</code>$GIT_DIR`下，而不是在`$GIT_DIR/refs`内的引用。但也有例外：`refs/bisect`和`refs/worktree`内的引用不被共享。</p>
+<p>In general, all pseudo refs are per-worktree and all refs starting with <code>refs/</code> are shared. Pseudo refs are ones like <code>HEAD</code> which are directly under <code>$GIT_DIR</code> instead of inside <code>$GIT_DIR/refs</code>. There are exceptions, however: refs inside <code>refs/bisect</code>, <code>refs/worktree</code> and <code>refs/rewritten</code> are not shared.</p>
 </div>
 <div class="paragraph">
 <p>每个工作区的引用仍然可以通过两个特殊的路径，即 <code>主工作区`和 `从工作区</code>，从另一个工作区访问。前者可以访问主工作区的每个工作区的引用，而后者可以访问所有链接的工作区。</p>
@@ -711,7 +718,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>在一个链接工作区中，<code>$GIT_DIR`设置为指向这个私有目录（例如，例子中的</code>/path/main/.git/worktrees/test-next`），<code>$GIT_COMMON_DIR`会被设置为指向主工作区的</code>$GIT_DIR`（例如，<code>/path/main/.git</code>）。这些设置是在位于链接工作区顶级目录的`.git`文件中进行的。</p>
 </div>
 <div class="paragraph">
-<p>通过`git rev-parse --git-path`进行的路径解析使用`$GIT_DIR`或`$GIT_COMMON_DIR`，取决于路径。例如，在链接工作区中，<code>git rev-parse --git-path HEAD`命令返回</code>/path/main/.git/worktrees/test-next/HEAD`（而不是`/path/other/test-next/.git/HEAD`或者`/path/main/.git/HEAD`），而`git rev-parse --git-path refs/heads/master`则使用`$GIT_COMMON_DIR`并返回`/path/main/.git/refs/heads/master`，因为除了`refs/bisect`和`refs/worktree`，所有工作区都共享引用。</p>
+<p>Path resolution via <code>git rev-parse --git-path</code> uses either <code>$GIT_DIR</code> or <code>$GIT_COMMON_DIR</code> depending on the path. For example, in the linked worktree <code>git rev-parse --git-path HEAD</code> returns <code>/path/main/.git/worktrees/test-next/HEAD</code> (not <code>/path/other/test-next/.git/HEAD</code> or <code>/path/main/.git/HEAD</code>) while <code>git rev-parse --git-path refs/heads/master</code> uses <code>$GIT_COMMON_DIR</code> and returns <code>/path/main/.git/refs/heads/master</code>, since refs are shared across all worktrees, except <code>refs/bisect</code>, <code>refs/worktree</code> and <code>refs/rewritten</code>.</p>
 </div>
 <div class="paragraph">
 <p>更多信息见 <a href="gitrepository-layout.html">gitrepository-layout(5)</a>。经验法则是，当你需要直接访问`$GIT_DIR`或`$GIT_COMMON_DIR`内的东西时，不要对路径是否属于`$GIT_DIR`做出任何假设。使用`git rev-parse --git-path`来获得最终路径。</p>
@@ -865,7 +872,7 @@ $ git worktree remove ../temp</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-05-21 19:05:52 +0200
+Last updated 2023-12-10 16:16:10 +0100
 </div>
 </div>
 </body>
