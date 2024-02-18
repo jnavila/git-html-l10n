@@ -3,35 +3,29 @@ git-init(1)
 
 名称
 --
-git-init - 创建一个空的Git仓库或重新初始化已有仓库
+git-init - 创建一个空的 Git 仓库或是重新初始化一个已经存在的仓库
 
 
 概述
 --
 [verse]
-'git init' [-q | --quiet] [--bare] [--template=<template_directory>]
-	  [--separate-git-dir <git dir>] [--object-format=<format>]
+'git init' [-q | --quiet] [--bare] [--template=<template-directory>]
+	  [--separate-git-dir <git-dir>] [--object-format=<format>]
+	  [--ref-format=<format>]
 	  [-b <branch-name> | --initial-branch=<branch-name>]
-	  [--shared[=<permissions>]] [directory]
+	  [--shared[=<permissions>]] [<directory>]
 
 
 描述
 --
 
-该命令创建一个空的Git存储库 - 本质上是一个 `.git` 目录，其中包含
-`objects`、`refs/heads`、`refs/tags`和模板文件的子目录。还将创建一个引用master分支 HEAD 的初始 `HEAD`
-文件。
+This command creates an empty Git repository - basically a `.git` directory with subdirectories for `objects`, `refs/heads`, `refs/tags`, and template files. An initial branch without any commits will be created (see the `--initial-branch` option below for its name).
 
-If the `$GIT_DIR` environment variable is set then it specifies a path to
-use instead of `./.git` for the base of the repository.
+如果设置了 `$GIT_DIR` 环境变量，那么它将指定用于仓库基础的路径，而不是 `./.git` .
 
-如果通过 `$GIT_OBJECT_DIRECTORY` 环境变量指定了对象存储目录，那么将在该目录下创建 sha1 目录，否则将使用默认的
-`$GIT_DIR/objects` 目录。
+如果通过 `$GIT_OBJECT_DIRECTORY` 环境变量指定了对象存储目录，那么将在该目录下创建 sha1 目录，否则将使用默认的 `$GIT_DIR/objects` 目录。
 
-Running 'git init' in an existing repository is safe. It will not overwrite
-things that are already there. The primary reason for rerunning 'git init'
-is to pick up newly added templates (or to move the repository to another
-place if --separate-git-dir is given).
+在现有仓库中运行 'git init' 是安全的。它不会覆盖已经存在的内容。重新运行 'git init' 的主要原因是选择新添加的模板（如果给定了 --separate-git-dir 参数，则将仓库移至另一个位置）。
 
 选项
 --
@@ -43,35 +37,38 @@ place if --separate-git-dir is given).
 
 --bare::
 
-创建一个纯仓库。如果未设置 `GIT_DIR` 环境变量，则将其设置为当前工作目录。
+创建一个裸仓库。如果未设置 `GIT_DIR` 环境变量，则将其设置为当前工作目录。
 
---object-format=<format>::
+--object-format=<格式>::
 
-指定存储库的对象格式（哈希算法）。有效值为 'sha1' 和（如果启用）'sha256'。'sha1' 是默认值。
+Specify the given object format (hash algorithm) for the repository. The valid values are 'sha1' and (if enabled) 'sha256'. 'sha1' is the default.
 +
 include::object-format-disclaimer.txt[]
 
---template = <模板目录>::
+--ref-format=<format>::
 
-指定要使用模板的目录。（请参见下面的“模板目录”部分。）
-
---separate-git-dir=<git目录>::
-
-并不将存储库初始化至 `$GIT_DIR` 或 `./.git/` 目录，而是在其中创建一个包含实际存储库路径的文本文件。此文件作为连接到仓库的 Git
-符号链接，其与文件系统无关。
+Specify the given ref storage format for the repository. The valid values are:
 +
-如果为重新初始化操作，则将存储库移动到指定的路径。
+include::ref-storage-format.txt[]
 
--b <branch-name>::
---initial-branch=<branch-name>::
+--template=<模板目录>::
 
-在新创建的仓库中为初始分支指定名称。如果没有指定，则使用默认名称：`master`。
+Specify the directory from which templates will be used. (See the "TEMPLATE DIRECTORY" section below.)
 
---shared[=(false|true|umask|group|all|world|everybody|0xxx)]::
+--separate-git-dir=<Git 目录>::
 
-指定 Git 存储库在多个用户之间共享。这允许属于同一组的用户推送到该存储库。指定时，将设置配置变量
-"core.sharedRepository"，以便使用请求的权限创建 `$GIT_DIR` 下的文件和目录。未指定时，Git 将使用 umask(2)
-返回的权限。
+Instead of initializing the repository as a directory to either `$GIT_DIR` or `./.git/`, create a text file there containing the path to the actual repository. This file acts as a filesystem-agnostic Git symbolic link to the repository.
++
+如果为重新初始化操作，则将仓库移动到指定的路径。
+
+-b <分支名>::
+--initial-branch=<分支名>::
+
+Use the specified name for the initial branch in the newly created repository. If not specified, fall back to the default name (currently `master`, but this is subject to change in the future; the name can be customized via the `init.defaultBranch` configuration variable).
+
+--shared[=(false|true|umask|group|all|world|everybody|<许可>)]::
+
+Specify that the Git repository is to be shared amongst several users. This allows users belonging to the same group to push into that repository. When specified, the config variable "core.sharedRepository" is set so that files and directories under `$GIT_DIR` are created with the requested permissions. When not specified, Git will use permissions reported by umask(2).
 +
 此选项可以有以下值，如果未给定值，则默认为 'group'：
 +
@@ -80,24 +77,20 @@ include::object-format-disclaimer.txt[]
 
 使用 umask(2) 返回的权限。未指定 `--shared` 时，此为默认值。
 
-'group'（或 'true'）::
+'group' (或是 'true')::
 
-使存储库组可写（并且 g+sx，因为 git 组可能不是所有用户的主要组）。这用于放宽原本安全的 umask(2) 值的权限。请注意，umask
-仍然适用于其他权限位（例如，如果 umask 为 '0022'，则使用 'group'
-不会删除其他（非组）用户的读取特权）。有关如何精确指定存储库权限的信息，请参见 '0xxx'。
+使仓库组可写（并且 g+sx，因为 git 组可能不是所有用户的主要组）。这用于放宽原本安全的 umask(2) 值的权限。请注意，umask 仍然适用于其他权限位（例如，如果 umask 为 '0022'，则使用 'group' 不会删除其他（非组）用户的读取特权）。有关如何精确指定仓库权限的信息，请参见 '0xxx'。
 
 'all' （或 'world' 或 'everybody'）::
 
-与使用 'group' 选项相同，但使存储库对所有用户可读。
+与使用 'group' 选项相同，但使仓库对所有用户可读。
 
-'0xxx'::
+'<perm>'::
 
-'0xxx' 是一个八进制数，每个文件的模式均为 '0xxx'。' 0xxx' 将覆盖用户的 umask(2) 值（不仅像 'group 和 'all'
-那样放宽权限）。'0640' 将创建一个组可读取但不能组写入且其他用户无法访问的存储库。'0660'
-将创建当前用户和组可读可写但其他用户无法访问的存储库。
+'<perm>' is a 3-digit octal number prefixed with `0` and each file will have mode '<perm>'. '<perm>' will override users' umask(2) value (and not only loosen permissions as 'group' and 'all' do). '0640' will create a repository which is group-readable, but not group-writable or accessible to others. '0660' will create a repo that is readable and writable to the current user and group, but inaccessible to others (directories and executable files get their `x` bit from the `r` bit for corresponding classes of users).
 --
 
-默认情况下，共享存储库中启用了配置标志 `receive.denyNonFastForwards`，因此您不能强制将非快速前进提交推送到其中。
+默认情况下，共享仓库中启用了配置标志 `receive.denyNonFastForwards`，因此您不能强制将非快速转发提交推送到该仓库中。
 
 如果提供 'dicrectory'，则命令在其中运行。如果此目录不存在，则创建它。
 
@@ -110,13 +103,13 @@ include::object-format-disclaimer.txt[]
 
  - 用 `--template` 选项给出的参数；
 
- - `$GIT_TEMPLATE_DIR` 环境变量；
+ - `$GIT_TEMPLATE_DIR` 环境变量的内容；
 
  - `init.templateDir` 配置变量；或者
 
  - 默认模板目录：`/usr/share/git-core/templates`。
 
-默认的模板目录包括一些目录结构，建议的“排除模式”（请参阅 linkgit:gitignore[5]）和示例钩子文件。
+默认的模板目录包括一些目录结构，建议的 “排除模式”（请参阅 linkgit:gitignore[5]）和示例钩子文件。
 
 默认情况下，样例钩子都被禁用。要启用一个示例挂钩，请通过删除其后缀 `.sample` 对其重命名。
 
@@ -138,6 +131,13 @@ $ git commit    <3>
 <2> 将所有现有文件添加到索引。
 <3> 将原始状态记录为历史记录中的第一次提交。
 
+配置
+--
+
+include::includes/cmd-config-section-all.txt[]
+
+include::config/init.txt[]
+
 GIT
 ---
-linkgit:git[1] 组件的一部分
+属于 linkgit:git[1] 文档

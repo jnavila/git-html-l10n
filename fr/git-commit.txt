@@ -9,7 +9,7 @@ SYNOPSIS
 --------
 [verse]
 'git commit' [-a | --interactive | --patch] [-s] [-v] [-u<mode>] [--amend]
-	   [--dry-run] [(-c | -C | -squash) <commit>] | --fixup [(amend|reword):]<commit>)]
+	   [--dry-run] [(-c | -C | --squash) <commit>] | --fixup [(amend|reword):]<commit>)]
 	   [-F <fichier> | -m <msg>] [--reset-author] [--allow-empty]
 	   [--allow-empty-message] [--no-verify] [-e] [--author=<auteur>]
 	   [--date=<date>] [--cleanup=<mode>] [--[no-]status]
@@ -58,7 +58,7 @@ OPTIONS
 	Comme '-C', mais avec '-c', l'éditeur est appelé pour permettre à l'utilisateur de modifier le message de validation.
 
 --fixup=[(amend|reword):]<commit>::
-	Créer un nouveau commit qui « répare » `<commit>` quand il est appliqué avec `git rebase --autosquash``. Un simple `--fixup=<commit>` crée un commit "fixup !" qui change le contenu de `<commit>` mais laisse son message de validation inchangé. `-fixup=amend:<commit>` est similaire mais crée un commit "amend !" qui remplace aussi le message de validation de `<commit>` par le message de validation du commit "amend !". `--fixup=reword:<commit>` crée un commit "amend !" qui remplace le message de validation de `<commit>` par son propre message de log mais ne fait aucun changement au contenu de `<commit>`.
+	Créer un nouveau commit qui « répare » `<commit>` quand il est appliqué avec `git rebase --autosquash``. Un simple `--fixup=<commit>` crée un commit "fixup!" qui change le contenu de `<commit>` mais laisse son message de validation inchangé. `--fixup=amend:<commit>` est similaire mais crée un commit "amend!" qui remplace aussi le message de validation de `<commit>` par le message de validation du commit "amend!". `--fixup=reword:<commit>` crée un commit "amend!" qui remplace le message de validation de `<commit>` par son propre message de log mais ne fait aucun changement au contenu de `<commit>`.
 +
 Le commit créé par le simple `--fixup=<commit>` a un sujet composé de "fixup !" suivi de la ligne de sujet de <commit>, et est reconnu spécialement par `git rebase --autosquash`. L'option `-m` peut être utilisée pour compléter le message du journal du commit créé, mais le commentaire supplémentaire sera jeté une fois que le commit "fixup !" sera écrasé dans `<commit>` par `git rebase --autosquash`.
 +
@@ -66,7 +66,7 @@ Le commit créé par `--fixup=amend:<commit>` est similaire mais son sujet est �
 +
 `--fixup=reword:<commit>` est un raccourci pour `--fixup=amend:<commit> --only`. Il crée un commit "amend !" qui touche seulement au message de validation (en ignorant les changements mis en place dans l'index). Lorsqu'il est écrasé par `git rebase --autosquash`, il remplace le message du validation de `<commit>` sans faire d'autres changements.
 +
-Ni les commits "fixup !" ni les commits "amend !" ne changent la paternité de `<commit>` quand ils sont appliqués par `git rebase --autosquash`. Voir linkgit:git-rebase[1] pour plus de détails.
+Ni les commits "fixup!" ni les commits "amend!" ne changent la paternité de `<commit>` quand ils sont appliqués par `git rebase --autosquash`. Voir linkgit:git-rebase[1] pour plus de détails.
 
 --squash=<commit>::
 	Construire un message de validation pour une utilisation avec `rebase --autosquash`. La ligne de titre du message de validation est tirée du commit spécifié préfixée par « squash! ». Peut être utilisée avec d'autres options de 'commit' (`-m`/`-c`/`-C`/`-F`). Référez-vous à linkgit:git-rebase[1] pour plus de détails.
@@ -195,9 +195,9 @@ Le paramètre de mode est optionnel (par défaut, 'all') et sert à spécifier l
 
 Les options possibles sont :
 
-	- 'no'     - Ne montrer aucun fichier non-suivi
+	- 'no' - Ne montrer aucun fichier non-suivi
 	- 'normal' - Montrer les fichiers non-suivis et les dossiers dont le contenu est non-suivi
-	- 'all'    - Montrer aussi les fichiers dans les dossiers dont le contenu n'est pas suivi.
+	- 'all' - Montrer aussi les fichiers dans les dossiers dont le contenu n'est pas suivi.
 
 La valeur par défaut est contenue dans la variable de configuration status.showUntrackedFiles documentée dans linkgit:git-config[1].
 --
@@ -236,7 +236,7 @@ Pour plus de détail, voir l'entrée 'spécificateur de chemin' dans linkgit:git
 
 EXEMPLES
 --------
-Lors de l'enregistrement de votre propre travail, le contenu des fichiers modifiés dans votre arbre de travail est temporairement stocké au moyen de `git add` dans une zone de stockage intermédiaire appelée « l'index ». Un fichier peut n'être ramené à son contenu correspondant au dernier commit seulement dans l'index mais pas dans l'arbre de travail grâce à `git restore --staged <fichier>`, ce qui inverse effectivement le 'git add' et empêche les modifications de ce fichier de participer à la prochaine validation. Après avoir construit l'état à valider de manière incrémentale avec ces commandes, `git commit` (sans aucun nom de chemin en paramètre) sert à enregistrer ce qui a été préparé jusqu'ici. C'est la forme la plus simple de la commande. Par exemple :
+Lors de l'enregistrement de votre propre travail, le contenu des fichiers modifiés dans votre arbre de travail est temporairement stocké au moyen de `git add` dans une zone de stockage intermédiaire appelée « l'index ». Un fichier peut n'être ramené à son contenu correspondant au dernier commit seulement dans l'index mais pas dans l'arbre de travail grâce à `git restore --staged <fichier>`, ce qui inverse effectivement le 'git add' et empêche les modifications de ce fichier de participer à la prochaine validation. Après avoir construit l'état à valider de manière incrémentale avec ces commandes, `git commit` (sans aucun nom de chemin en paramètre) sert à enregistrer ce qui a été préparé jusqu'ici. C'est la forme la plus simple de la commande. Par exemple :
 
 ------------
 $ edit hello.c
@@ -245,7 +245,7 @@ $ git add hello.c
 $ git commit
 ------------
 
-Au lieu d'indexer les fichiers après chaque modification individuelle, vous pouvez ordonner à `git commit` d'inspecter les modifications des fichiers dont le contenu est déjà suivi dans votre arbre de travail et de réaliser les `git add` et `git rm` correspondant pour vous. De fait, l'exemple suivant fait la même chose que l'exemple précédent si aucune autre modification n'a eu lieu dans votre arbre de travail :
+Au lieu d'indexer les fichiers après chaque modification individuelle, vous pouvez ordonner à `git commit` d'inspecter les modifications des fichiers dont le contenu est déjà suivi dans votre arbre de travail et de réaliser les `git add` et `git rm` correspondant pour vous. De fait, l'exemple suivant fait la même chose que l'exemple précédent si aucune autre modification n'a eu lieu dans votre arbre de travail :
 
 ------------
 $ edit hello.c
@@ -255,7 +255,7 @@ $ git commit -a
 
 La commande `git commit -a` inspecte votre arbre de travail, remarque que vous avez modifié hello.c et supprimé goodbye.c, puis réalise les `git add` et `git rm` nécessaires pour vous.
 
-Après l'indexation des modifications de nombreux fichiers, vous pouvez modifier l'ordre dans lequel les modifications sont enregistrées, en fournissant des chemins à `git commit`. Quand ces chemins sont fournis, la commande crée un commit qui n'enregistre que les modifications des chemins indiqués :
+Après l'indexation des modifications de nombreux fichiers, vous pouvez modifier l'ordre dans lequel les modifications sont enregistrées, en fournissant des chemins à `git commit`. Quand ces chemins sont fournis, la commande crée un commit qui n'enregistre que les modifications des chemins indiqués :
 
 ------------
 $ edit hello.c hello.h
@@ -264,7 +264,7 @@ $ edit Makefile
 $ git commit Makefile
 ------------
 
-Ceci crée un commit qui enregistre les modifications de `Makefile`. Les modifications indexées pour `hello.c` et `hello.h` ne sont pas incluses dans le commit résultant. Cependant, leurs modifications ne sont pas perdues -- elles sont toujours indexées et simplement suspendues. Après la séquence ci-dessus, si vous faites :
+Ceci crée un commit qui enregistre les modifications de `Makefile`. Les modifications indexées pour `hello.c` et `hello.h` ne sont pas incluses dans le commit résultant. Cependant, leurs modifications ne sont pas perdues -- elles sont toujours indexées et simplement suspendues. Après la séquence ci-dessus, si vous faites :
 
 ------------
 $ git commit
@@ -272,7 +272,7 @@ $ git commit
 
 cette seconde validation enregistrerait les modifications de `hello.c` et `hello.h` comme attendu.
 
-Après l'arrêt d'une fusion (commencée avec `git merge` ou `git pull`) pour cause de conflit, les chemins fusionnés proprement sont déjà indexés pour vous, et les chemins en conflit sont laissés dans un état non-fusionné. Vous auriez à chercher d'abord les chemins en conflit avec `git status` et après les avoir corrigés manuellement dans votre copie de travail, vous les indexeriez comme d'habitude avec `git add` :
+Après l'arrêt d'une fusion (commencée avec `git merge` ou `git pull`) pour cause de conflit, les chemins fusionnés proprement sont déjà indexés pour vous, et les chemins en conflit sont laissés dans un état non-fusionné. Vous auriez à chercher d'abord les chemins en conflit avec `git status` et après les avoir corrigés manuellement dans votre copie de travail, vous les indexeriez comme d'habitude avec `git add` :
 
 ------------
 $ git status | grep unmerged
@@ -281,7 +281,7 @@ $ edit hello.c
 $ git add hello.c
 ------------
 
-Après avoir résolu les conflits et indexé le résultat, `git ls-files -u` arrêterait de mentionner les chemins en conflit. Quand vous avez terminé, lancez `git commit` pour finaliser la validation de la fusion :
+Après avoir résolu les conflits et indexé le résultat, `git ls-files -u` arrêterait de mentionner les chemins en conflit. Quand vous avez terminé, lancez `git commit` pour finaliser la validation de la fusion :
 
 ------------
 $ git commit

@@ -19,7 +19,7 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Reitere todos as referências que coincidam com `<padrão>` e mostre-os de acordo com o `<formato>` utilizado após classificá-los de acordo com o conjunto informado por `<chave>`. Caso `<count>` seja utilizado, pare após exibir referências demais. Os valores interpolados no `<formato>` podem opcionalmente ser citados como literais de uma cadeia de caracteres no idioma do host utilizado, permitindo a sua avaliação direta neste idioma.
+Iterate over all refs that match `<pattern>` and show them according to the given `<format>`, after sorting them according to the given set of `<key>`. If `<count>` is given, stop after showing that many refs. The interpolated values in `<format>` can optionally be quoted as string literals in the specified host language allowing their direct evaluation in that language.
 
 OPÇÕES
 ------
@@ -30,13 +30,15 @@ OPÇÕES
 	Caso a opção `--stdin` seja usada, então a lista de padrões é lida a partir de entrada predefinida em vez da lista de argumentos.
 
 --count=<count>::
-	É predefinido que o comando exiba todos as referências que coincidam com `<padrão>`. Esta opção define um limite de quantidade para parar após a exibição de `<count>` referências.
+	By default the command shows all refs that match `<pattern>`. This option makes it stop after showing that many refs.
 
 --sort=<chave>::
-	A field name to sort on. O prefixo `-` é utilizado para classificar em ordem decrescente. When unspecified, `refname` is used. Você pode utilizar a opção `--sort=<chave>` mais de uma vez; nesse caso, a última chave se torna a chave primária.
+	A field name to sort on. Prefix `-` to sort in descending order of the value. When unspecified, `refname` is used. You may use the --sort=<key> option multiple times, in which case the last key becomes the primary key.
 
 --format=<formato>::
-	Uma cadeia de caracteres que interpola `%(fieldname)` vindo de uma referência sendo exibida e o objeto para o qual aponta. Caso `fieldname` seja prefixada com um asterisco (`*`) e a referência aponte para um objeto tag, utilize o valor do campo no objeto ao qual o objeto tag se refere (em vez do campo no objeto tag). Quando não especificado, o `<formato>` retorna para a predefinição `%(objectname) SPC %(objecttype) TAB %(refname)`. Também interpola `%%` para `%` e `% xx` onde `xx` são dígitos hexadecimais interpolados com caracteres que tenha um código hexadecimal `xx`; `% 00` interpola para `\0` (NUL) por exemplo, `%09` para `\t` (TAB) e `%0a` para `\n` (LF).
+	A string that interpolates `%(fieldname)` from a ref being shown and the object it points at. In addition, the string literal `%%` renders as `%` and `%xx` - where `xx` are hex digits - renders as the character with hex code `xx`. For example, `%00` interpolates to `\0` (NUL), `%09` to `\t` (TAB), and `%0a` to `\n` (LF).
++
+When unspecified, `<format>` defaults to `%(objectname) SPC %(objecttype) TAB %(refname)`.
 
 --color[=<quando>]::
 	Respeite todas as cores usadas com a opção `--format`. O campo `<quando>` deve ser `always`, `never` ou `auto` (comporte-se como `always` caso `<quando>` esteja ausente).
@@ -45,7 +47,7 @@ OPÇÕES
 --perl::
 --python::
 --tcl::
-	Se informado, as strings que substituem os espaços reservados `% (fieldname)` são citadas como literais de strings adequadas para o idioma do host especificado. Isso tem a intenção de produzir um "scriptlet" que possa ser diretamente "avaliado".
+	If given, strings that substitute `%(fieldname)` placeholders are quoted as string literals suitable for the specified host language. This is meant to produce a scriptlet that can directly be `eval`ed.
 
 --points-at=<objeto>::
 	Listar apenas as referências que apontem para o objeto especificado.
@@ -79,7 +81,7 @@ Há vários valores dos campos estruturados nas referências dos objetos que pod
 Os seguintes nomes podem ser utilizados para todos os objetos, :
 
 refname::
-	O nome da referência "ref" (a parte após $GIT_DIR/). Para um nome abreviado não ambíguo do ref, acrescente `: short`. A opção `core.warnAmbiguousRefs` é utilizada para selecionar o modo estrito de abreviação. Caso `lstrip=<N>` (`rstrip=<N>`) for anexado, retira `<N>` dos componentes de caminho separados por barra da frente (traseira) do refname (`%(refname:lstrip=2)` por exemplo, transforma `refs/tags/foo` em `foo` e`%(refname:rstrip=2)` transforma `refs/tags/foo` em `refs`). Caso `<N>` seja um número negativo, retire quantos componentes do caminho forem necessários do final especificado, deixando os componentes do caminho `-<N>`, por exemplo (`%(refname:lstrip=-2)` transforma `refs/tags/foo` em `tags/foo` e `%(refname:rstrip=-1)` transforma `refs/tags/foo` em `refs`). Quando uma ref não possui componentes suficientes, o resultado se torna uma cadeia de caracteres vazia caso seja removida com <N> positivo, ou se torna o refname completo caso seja removida com um <N> negativo. Nenhum dos dois é um erro.
+	The name of the ref (the part after $GIT_DIR/). For a non-ambiguous short name of the ref append `:short`. The option core.warnAmbiguousRefs is used to select the strict abbreviation mode. If `lstrip=<N>` (`rstrip=<N>`) is appended, strips `<N>` slash-separated path components from the front (back) of the refname (e.g. `%(refname:lstrip=2)` turns `refs/tags/foo` into `foo` and `%(refname:rstrip=2)` turns `refs/tags/foo` into `refs`). If `<N>` is a negative number, strip as many path components as necessary from the specified end to leave `-<N>` path components (e.g. `%(refname:lstrip=-2)` turns `refs/tags/foo` into `tags/foo` and `%(refname:rstrip=-1)` turns `refs/tags/foo` into `refs`). When the ref does not have enough components, the result becomes an empty string if stripping with positive <N>, or it becomes the full refname if stripping with negative <N>. Neither is an error.
 +
 O `strip` pode ser utilizado como sinônimo de `lstrip`.
 
@@ -87,18 +89,18 @@ objecttype::
 	O tipo do objeto (`blob`, `tree`, `commit`, `tag`).
 
 objectsize::
-	É o tamanho do objeto (o mesmo que relatórios 'git cat-file -s') Acrescente `: disk` para saber o quanto o objeto ocupa no disco, em bytes. Consulte a nota sobre os tamanhos do disco na seção `RESSALVAS` abaixo.
+	The size of the object (the same as 'git cat-file -s' reports). Append `:disk` to get the size, in bytes, that the object takes up on disk. See the note about on-disk sizes in the `CAVEATS` section below.
 objectname::
-	O nome do objeto (também informado como SHA-1) Para uma abreviação não ambígua do nome do objeto, adicione `: short`. Para uma abreviação do nome do objeto com o comprimento desejado, inclua `:short=<comprimento>`, onde o comprimento mínimo é `MINIMUM_ABBREV`. O comprimento pode ser excedido para garantir que os nomes dos objetos sejam únicos.
+	The object name (aka SHA-1). For a non-ambiguous abbreviation of the object name append `:short`. For an abbreviation of the object name with desired length append `:short=<length>`, where the minimum length is MINIMUM_ABBREV. The length may be exceeded to ensure unique object names.
 deltabase::
-	Isso se expande para o nome do objeto da base delta para o objeto especificado, caso ele esteja armazenado como um delta. Caso contrário, o objeto se expandirá para um nome nulo (todo zerado).
+	This expands to the object name of the delta base for the given object, if it is stored as a delta. Otherwise it expands to the null object name (all zeroes).
 
 upstream::
-	É o nome de uma "ref" local que pode ser considerada ``upstream'' da "ref" que está sendo exibida. Respeita `:short`, `:lstrip` e `:rstrip` da mesma maneira que o `refname` acima. Além disso, respeita também `:track` para exibir "[à frente N, atrás M]"e `:trackshort` para exibir a versão concisa: ">" (à frente), "<" (atrás), "<>" (à frente e atrás) ou "=" (em sincronia). `:track` também imprime "[gone]" sempre que uma "ref" "upstream" desconhecida seja encontrada. Acrescente `:track,nobracket` para exibir as informações de rastreamento sem colchetes (ou seja, "à frente de N, atrás de M").
+	The name of a local ref which can be considered ``upstream'' from the displayed ref. Respects `:short`, `:lstrip` and `:rstrip` in the same way as `refname` above. Additionally respects `:track` to show "[ahead N, behind M]" and `:trackshort` to show the terse version: ">" (ahead), "<" (behind), "<>" (ahead and behind), or "=" (in sync). `:track` also prints "[gone]" whenever unknown upstream ref is encountered. Append `:track,nobracket` to show tracking information without brackets (i.e "ahead N, behind M").
 +
 Para qualquer ramificação monitorada remotamente como `%(upstream)`, `%(upstream:nomeremoto)` e `%(upstream:remoteref)` consulte o nome remoto e o nome "ref" monitorado remotamente e assim sucessivamente. Em outras palavras, o ramo monitorado remotamente pode ser atualizado de forma explicita ou individualmente utilizando o "refspec" `%(upstream:remoteref):%(upstream)` para que seja capturado em `%(upstream:remotename)`.
 +
-Não tem nenhum efeito caso o ref não tenha informações de rastreamento associadas a ele. Todas as opções além de `nobracket` são mutuamente exclusivas, porém se utilizadas em conjunto, a última opção será selecionada.
+Has no effect if the ref does not have tracking information associated with it. All the options apart from `nobracket` are mutually exclusive, but if used together the last option is selected.
 
 push::
 	O nome de uma "ref" local que representa a localização `@{push}` para uma ref que está sendo exibido. Respeita as opções `:short`, `:lstrip`, `:rstrip`, `:track`, `:trackshort`, `:remotename`, e `:remoteref`; assim como a opção `upstream`. Produz uma cadeia de caracteres vazia caso nenhum `@{push}` "ref" esteja configurada.
@@ -107,13 +109,13 @@ HEAD::
 	'*' caso HEAD corresponda à ref atual (a ramificação que foi verificada), caso contrário ' '.
 
 color::
-	Muda a cor de saída. Seguido por `:<colorname>` onde os nomes das cores são descritos em Valores na seção "ARQUIVO DE CONFIGURAÇÃO" do linkgit:git-config[1]. Por exemplo, `%(color:bold red)`.
+	Change output color. Followed by `:<colorname>`, where color names are described under Values in the "CONFIGURATION FILE" section of linkgit:git-config[1]. For example, `%(color:bold red)`.
 
 align::
-	Alinhe o conteúdo à esquerda (Left-), ao meio (Middle-) ou à direita entre %(align:...) e %(end). O "align:" é seguido por `width=<largura>` e `position=<posição>` em qualquer ordem separado por vírgula, onde a `<posição>` é esquerda, direita ou meio, a predefinição retorna para esquerda e `<largura>` é o comprimento total do conteúdo com alinhamento. Por questões de brevidade, os prefixos "width=" ou "position=" podem ser omitidos, podendo ser utilizados <largura> e <posição> apenas. Por exemplo, `%(align:<largura>,<posição>)`. Caso o comprimento do conteúdo seja maior que a largura, nenhum alinhamento será realizado. Se utilizado com `--quote`, tudo entre %(align:...) e %(end) será citado, porém se aninhado, a citação ocorrerá apenas no nível mais alto.
+	Left-, middle-, or right-align the content between %(align:...) and %(end). The "align:" is followed by `width=<width>` and `position=<position>` in any order separated by a comma, where the `<position>` is either left, right or middle, default being left and `<width>` is the total length of the content with alignment. For brevity, the "width=" and/or "position=" prefixes may be omitted, and bare <width> and <position> used instead. For instance, `%(align:<width>,<position>)`. If the contents length is more than the width then no alignment is performed. If used with `--quote` everything in between %(align:...) and %(end) is quoted, but if nested then only the topmost level performs quoting.
 
 if::
-	Utilizado como %(if)...%(then)...%(end) ou %(if)...%(then)...%(else)...%(end). Caso haja um átomo com um valor ou uma cadeia de caracteres literal após o %(if), tudo após o %(then) será impresso; caso contrário, caso o átomo em %(else) seja utilizado, tudo será impresso após o %(else). Ignoramos o espaço ao avaliar uma cadeia de caracteres antes de %(then), isso é útil quando usamos o átomo %(HEAD) que imprime "*" ou " " e queremos aplicar a condição 'if' apenas no ref 'HEAD'. Anexar ":equals=<texto>" ou ":notequals=<texto>" para comparar o valor entre os átomos de %(if:...) e %(then) com a sequência usada.
+	Used as %(if)...%(then)...%(end) or %(if)...%(then)...%(else)...%(end). If there is an atom with value or string literal after the %(if) then everything after the %(then) is printed, else if the %(else) atom is used, then everything after %(else) is printed. We ignore space when evaluating the string before %(then), this is useful when we use the %(HEAD) atom which prints either "*" or " " and we want to apply the 'if' condition only on the 'HEAD' ref. Append ":equals=<string>" or ":notequals=<string>" to compare the value between the %(if:...) and %(then) atoms with the given string.
 
 symref::
 	O ref ao qual determinado ref simbólico se refere. Caso não seja um ref simbólico, nada será impresso. Respeita as opções `:short`, `:lstrip` e `:rstrip` da mesma maneira que o `refname` acima.
@@ -159,11 +161,13 @@ exclude=<padrão>;;
 	Não considere as tags informadas que correspondam ao padrão `glob(7)`, excluindo o prefixo "refs/tags/"; consulte a opção correspondente em linkgit:git-describe[1] para obter mais detalhes.
 --
 
-Além do que foi dito acima para os objetos commit e tag, os nomes dos campos do cabeçalho (`tree`, `parent`, `object`, `type`, e `tag`) podem ser utilizados para especificar o valor no campo do cabeçalho. Os campos `tree` e `parent` também podem ser utilizado com um modificador `:short` e `:short=<comprimento>` assim como `objectname`.
+In addition to the above, for commit and tag objects, the header field names (`tree`, `parent`, `object`, `type`, and `tag`) can be used to specify the value in the header field. Fields `tree` and `parent` can also be used with modifier `:short` and `:short=<length>` just like `objectname`.
 
-Para os objetos commit e tag, os campos especiais `creatordate` e `creator` coincidirão com a data apropriada ou ao termo ordenado nome-email-data dos campos `committer` ou `tagger`, dependendo do tipo do objeto. Estes são destinados para trabalhar com uma mistura de tags anotadas e leves.
+For commit and tag objects, the special `creatordate` and `creator` fields will correspond to the appropriate date or name-email-date tuple from the `committer` or `tagger` fields depending on the object type. These are intended for working on a mix of annotated and lightweight tags.
 
-Os campos que possuam um termo ordenado nome-email-data como o valor (`autor`, `committer` e `tagger`) podem ser sufixados com `nome`, `email` e `data` para extrair o componente informado. Para campos do email (`authoremail`, `committeremail` e `taggeremail`), o `:trim` pode ser anexado para obter o e-mail sem os colchetes e`:localpart` para obter a parte antes do símbolo `@` do endereço do e-mail. Além dessas, a opção `:mailmap` e as correspondentes `:mailmap,trim` e `:mailmap,localpart` podem ser usadas (a ordem não importa) para obter os valores do nome e do e-mail de acordo com o arquivo .mailmap ou de acordo com o arquivo definido na variável de configuração mailmap.file ou mailmap.blob (consulte linkgit:gitmailmap[5]).
+For tag objects, a `fieldname` prefixed with an asterisk (`*`) expands to the `fieldname` value of the peeled object, rather than that of the tag object itself.
+
+Fields that have name-email-date tuple as its value (`author`, `committer`, and `tagger`) can be suffixed with `name`, `email`, and `date` to extract the named component. For email fields (`authoremail`, `committeremail` and `taggeremail`), `:trim` can be appended to get the email without angle brackets, and `:localpart` to get the part before the `@` symbol out of the trimmed email. In addition to these, the `:mailmap` option and the corresponding `:mailmap,trim` and `:mailmap,localpart` can be used (order does not matter) to get values of the name and email according to the .mailmap file or according to the file set in the mailmap.file or mailmap.blob configuration variable (see linkgit:gitmailmap[5]).
 
 Os dados brutos num objeto são `raw`.
 
@@ -178,7 +182,7 @@ contents:size::
 	O tamanho em bytes da mensagem do commit ou da tag.
 
 contents:subject::
-	O primeiro parágrafo da mensagem, que geralmente é uma única linha, é tomado como o "assunto" do commit ou da mensagem da tag. Em vez de `contents:subject`, o campo `subject` também pode ser utilizado para obter os mesmos resultados. O campo `:sanitize` pode ser anexado ao `subject` para a linha apropriada do assunto para ser utilizada como o nome do arquivo.
+	The first paragraph of the message, which typically is a single line, is taken as the "subject" of the commit or the tag message. Instead of `contents:subject`, field `subject` can also be used to obtain same results. `:sanitize` can be appended to `subject` for subject line suitable for filename.
 
 contents:body::
 	O restante do commit ou a etiqueta da mensagem que segue o "assunto".
@@ -191,15 +195,15 @@ contents:lines=N::
 
 Além disso, os trailers interpretados por linkgit:git-interpret-trailers[1] são obtidos como `trailers[:opções]` (ou usando o pseudônimo histórico `contents:trailers[:opções]`). Para conhecer os valores válidos para as [:opções], consulte a seção `trailers` do linkgit:git-log[1].
 
-Para fins de classificação, os campos com os valores numéricos são classificados em ordem numérica (`objectsize`, `authordate`, `committerdate`, `creatordate`, `taggerdate`). Todos os outros campos são utilizados para classificar a sua ordem em valor de bytes.
+For sorting purposes, fields with numeric values sort in numeric order (`objectsize`, `authordate`, `committerdate`, `creatordate`, `taggerdate`). All other fields are used to sort in their byte-value order.
 
 Também existe uma opção de classificação por versões utilizando o nome do campo `version:refnamee` ou o seu apelido `v:refname`.
 
-De qualquer forma, nenhum erro é gerado caso um nome do campo seja referido a um campo inaplicável ao objeto "ref". Ele retorna uma cadeia de caracteres vazia.
+In any case, a field name that refers to a field inapplicable to the object referred by the ref does not cause an error. It returns an empty string instead.
 
 Como um caso especial para os campos do tipo data, você pode especificar um formato para a data adicionando `:` seguido pelo nome do formato da data (veja quais os valores a opção `--date` assume em linkgit:git-rev-list[1]).
 
-Alguns átomos como %(align) e %(if) sempre exige que um %(end) coincida. Nós os chamamos de "átomos de abertura" e às vezes os denotamos como %($open).
+Some atoms like %(align) and %(if) always require a matching %(end). We call them "opening atoms" and sometimes denote them as %($open).
 
 Quando uma citação específica da linguagem de script está em vigor, tudo entre um átomo de abertura no topo do nível e o seu %(end) correspondente é avaliado de acordo com a semântica do átomo de abertura e apenas o resultado do topo seja citado.
 
@@ -207,7 +211,7 @@ Quando uma citação específica da linguagem de script está em vigor, tudo ent
 EXEMPLOS
 --------
 
-Um exemplo que produz diretamente um texto formatado. Exibe as tags dos 3 commits mais recentes:
+An example directly producing formatted text. Show the most recent 3 tagged commits:
 
 ------------
 #!/bin/sh
@@ -223,7 +227,7 @@ Ref: %(*refname)
 ------------
 
 
-Um exemplo simples exibindo a utilização da saída do "eval" no shell, demonstrando a utilização da opção `--shell`. Liste os prefixos de todos os "heads":
+A simple example showing the use of shell eval on the output, demonstrating the use of --shell. List the prefixes of all heads:
 ------------
 #!/bin/sh
 
@@ -288,14 +292,14 @@ eval "$eval"
 ------------
 
 
-Um exemplo para exibir a utilização de %(if)...%(then)...%(else)...%(end). Isso prefixa o ramo atual com uma estrela.
+An example to show the usage of %(if)...%(then)...%(else)...%(end). This prefixes the current branch with a star.
 
 ------------
 git for-each-ref --format="%(if)%(HEAD)%(then)* %(else)  %(end)%(refname:short)" refs/heads/
 ------------
 
 
-Um exemplo para exibir a utilização de %(if)...%(then)...%(end). Isso imprime o authorname (nome do autor), caso esteja presente.
+An example to show the usage of %(if)...%(then)...%(end). This prints the authorname, if present.
 
 ------------
 git for-each-ref --format="%(refname)%(if)%(authorname)%(then) Criado por: %(authorname)%(end)"

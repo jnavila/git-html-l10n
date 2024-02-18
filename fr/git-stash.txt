@@ -36,7 +36,7 @@ Le dernier remisage que vous avez créé est stocké dans `refs/stash` ; les anc
 COMMANDES
 ---------
 
-push [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-u | --include-untracked] [-a | --all] [-q | --quiet] [(-m | --message= <message>] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [--] [<spéc-de-chemin>...]::
+push [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-u | --include-untracked] [-a | --all] [-q | --quiet] [(-m | --message) <message>] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [--] [<spéc-de-chemin>...]::
 
 	Enregistre vos modifications locales dans une nouvelle "entrée de remisage" et les ramène dans HEAD (dans l'arbre de travail et dans l'index). La partie <message> est facultative et donne la description ainsi que l'état du remisage.
 +
@@ -86,11 +86,11 @@ drop [-q|--quiet] [<remisage>]::
 
 create::
 
-	Créer une entrée de remisage (qui est un objet commit régulier) et renvoyer son nom d'objet, sans le stocker nulle part dans l'espace de noms de références. Ceci est destiné à être utilisé par les scripts. Ce n'est probablement pas la commande que vous voulez utiliser ; voir "push" ci-dessus.
+	Créer une entrée de remisage (qui est un objet commit régulier) et renvoyer son nom d'objet, sans le stocker nulle part dans l'espace de noms de références. Ceci est destiné à être utilisé par les scripts. Ce n'est probablement pas la commande que vous voulez utiliser ; voir "push" ci-dessus.
 
 store::
 
-	Stocker un remisage donné créé via 'git stash create' (qui est un commit de fusion en cours) dans la référence de remisage, en mettant à jour le reflog de remisage. Ceci est destiné à être utilisé par des scripts. Ce n'est probablement pas la commande que vous souhaitez utiliser ; voir "push" ci-dessus.
+	Stocker un remisage donné créé via 'git stash create' (qui est un commit de fusion en cours) dans la référence de remisage, en mettant à jour le reflog de remisage. Ceci est destiné à être utilisé par des scripts. Ce n'est probablement pas la commande que vous souhaitez utiliser ; voir "push" ci-dessus.
 
 OPTIONS
 -------
@@ -130,7 +130,7 @@ Tous les changements déjà ajoutés à l'index sont laissés intacts.
 +
 Sélectionner interactivement les section à remiser à partir de la différence entre HEAD et l'arbre de travail. L'entrée de remisage est construite de manière à ce que son état d'index soit le même que celui de votre dépôt, et son arbre de travail ne contient que les modifications que vous avez sélectionnées de manière interactive. Les modifications sélectionnées sont ensuite inversées à partir de votre arbre de travail. Voir la section "Mode interactif" de linkgit:git-add[1] pour savoir comment utiliser le mode `--patch`.
 +
-L'option `--patch` implique `--keep-index`. Vous pouvez utiliser l'option `--no keep-index` pour passer outre.
+L'option `--patch` implique `--keep-index`. Vous pouvez utiliser l'option `--no-keep-index` pour passer outre.
 
 -S::
 --staged::
@@ -176,7 +176,7 @@ Une référence de la forme `stash@{<révision>}`. Lorsqu'aucun `<remisage>` n'e
 DISCUSSION
 ----------
 
-Une entrée de remisage est représentée par un commit dont l'arbre enregistre l'état du répertoire de travail, et son premier parent est le commit à `HEAD` lorsque l'entrée a été créée. L'arborescence du second parent enregistre l'état de l'index lorsque l'entrée est créée, et il est considéré comme un enfant du commit `HEAD`. Le graphique d'ascendance ressemble à ceci :
+Une entrée de remisage est représentée par un commit dont l'arbre enregistre l'état du répertoire de travail, et son premier parent est le commit à `HEAD` lorsque l'entrée a été créée. L'arborescence du second parent enregistre l'état de l'index lorsque l'entrée est créée, et il est considéré comme un enfant du commit `HEAD`. Le graphique d'ascendance ressemble à ceci :
 
             .----W
            /    /
@@ -192,7 +192,7 @@ Tirer dans un arbre sale::
 
 Lorsque vous êtes au milieu de quelque chose, vous apprenez qu'il y a des changements en amont qui peuvent avoir un rapport avec ce que vous faites. Lorsque vos changements locaux n'entrent pas en conflit avec les changements en amont, un simple `git pull` vous permettra d'aller de l'avant.
 +
-Cependant, il y a des cas où vos modifications locales entrent en conflit avec les changements en amont, et `git pull` refuse d'écraser vos modifications. Dans ce cas, vous pouvez remiser vos modifications, effectuer un tirage, puis les déstocker, comme ceci :
+Cependant, il y a des cas où vos modifications locales entrent en conflit avec les changements en amont, et `git pull` refuse d'écraser vos modifications. Dans ce cas, vous pouvez remiser vos modifications, effectuer un tirage, puis les déstocker, comme ceci :
 +
 ----------------------------------------------------------------
 $ git pull
@@ -205,7 +205,7 @@ $ git stash pop
 
 Interruption du flux de travail::
 
-Lorsque vous êtes au milieu de quelque chose, votre patron arrive et vous demande de réparer quelque chose immédiatement. Traditionnellement, vous faîtes un commit dans une branche temporaire pour stocker vos modifications et vous retournez dans votre branche d'origine pour effectuer la réparation d'urgence, comme ceci :
+Lorsque vous êtes au milieu de quelque chose, votre patron arrive et vous demande de réparer quelque chose immédiatement. Traditionnellement, vous faîtes un commit dans une branche temporaire pour stocker vos modifications et vous retournez dans votre branche d'origine pour effectuer la réparation d'urgence, comme ceci :
 +
 ----------------------------------------------------------------
 # ... travail, travail, travail ...
@@ -253,16 +253,16 @@ Lorsque vous êtes au milieu de changements massifs et que vous trouvez un probl
 ----------------------------------------------------------------
 # ... travail, travail, travail ...
 $ git add --patch foo            # ajouter des modifications sans relation à l'index
-$ git stash push --keep-staged    # remiser toutes les autres modifications
+$ git stash push --staged        # remiser toutes les autres modifications
 $ #... code, code, code, pour finir les modifications actuelles
-$ git commit -m 'Massive'     # valider une modification complètement testée
+$ git commit -m 'Massive'        # valider une modification complètement testée
 $ git switch branche-correctif                  # basculer sur une autre branche
-$ git stash pop                 # pour terminer de travailler sur les modifications enregistrées
+$ git stash pop                  # pour terminer de travailler sur les modifications enregistrées
 ----------------------------------------------------------------
 
 Récupération des entrées de remisage qui ont été effacées/abandonnées par erreur::
 
-Si vous laissez tomber ou videz par erreur les entrées de remisage, elles ne peuvent pas être récupérées par les mécanismes de sécurité habituels. Cependant, vous pouvez essayer l'incantation suivante pour obtenir une liste des entrées de remisage qui sont toujours dans votre dépôt, mais qui ne sont plus accessibles :
+Si vous laissez tomber ou videz par erreur les entrées de remisage, elles ne peuvent pas être récupérées par les mécanismes de sécurité habituels. Cependant, vous pouvez essayer l'incantation suivante pour obtenir une liste des entrées de remisage qui sont toujours dans votre dépôt, mais qui ne sont plus accessibles :
 +
 ----------------------------------------------------------------
 git fsck --unreachable |

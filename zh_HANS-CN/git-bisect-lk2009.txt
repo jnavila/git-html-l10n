@@ -4,14 +4,14 @@
 :Email: chriscool@tuxfamily.org
 :Date: 2009/11/08
 
-Abstract
---------
+摘要
+--
 
 "Git二分查找"使软件用户和开发者能够轻松找到引入回退的提交。我们展示了为什么拥有好的工具来解决回退是很重要的。我们描述了 "Git二分查找 "从外部如何工作，以及它在内部使用的算法。然后我们解释如何利用 "Git二分查找"来改进当前的体验。我们还讨论了 "Git二分查找"在未来可以如何改进。
 
 
-Introduction to "git bisect"
-----------------------------
+"git bisect" 简介
+---------------
 
 Git是一个分布式版本控制系统（DVCS），由Linus Torvalds（一般指 林纳斯·本纳第克特·托瓦兹；Linux之父）创建，由Junio Hamano（ Junio C Hamano；滨野 纯）维护。
 
@@ -35,7 +35,7 @@ Git是一个分布式版本控制系统（DVCS），由Linus Torvalds（一般�
 有一些关于一般bug的数字，比如2002年NIST的一项研究<<1>>写道：
 
 _____________
-根据美国商务部国家标准与技术研究所（NIST）新近发布的一项研究，软件缺陷或错误是非常普遍且是灾难性的，以至于它们每年给美国经济造成约595亿美元的损失，或约占国内生产总值的0.6%。在全国范围内，超过一半的成本由软件用户承担，其余的由软件开发商/供应商承担。 该研究还发现，尽管所有的错误都无法消除，但通过改进测试基础架构，能够更早、更有效地识别和消除软件缺陷，可以消除这些成本的三分之一以上，即估计为222亿美元。这些都是在更接近错误发生的开发阶段发现更高比例（但不是100%）的错误所带来的节约。目前，超过一半的错误是在开发过程的 "下游 "或售后软件使用期间才被发现的。
+Software bugs, or errors, are so prevalent and so detrimental that they cost the U.S. economy an estimated $59.5 billion annually, or about 0.6 percent of the gross domestic product, according to a newly released study commissioned by the Department of Commerce's National Institute of Standards and Technology (NIST). At the national level, over half of the costs are borne by software users and the remainder by software developers/vendors. The study also found that, although all errors cannot be removed, more than a third of these costs, or an estimated $22.2 billion, could be eliminated by an improved testing infrastructure that enables earlier and more effective identification and removal of software defects. These are the savings associated with finding an increased percentage (but not 100 percent) of errors closer to the development stages in which they are introduced. Currently, over half of all errors are not found until "downstream" in the development process or during post-sale software use.
 _____________
 
 然后：
@@ -93,8 +93,8 @@ N * M * T 个测试
 
 而如果有些bug在你的测试套件中溜走了，那么你可以在你的测试套件中增加一个测试。但是，如果你想用你新改进的测试套件来找到bug溜进去的地方，那么你将不得不模仿一分为二的过程，或者你也许会直截了当地从你的 "坏 "提交开始向后测试每个提交，这可能是非常浪费的。
 
-"git bisect" overview
----------------------
+"git bisect" 概览
+---------------
 
 开始二分
 ~~~~
@@ -111,7 +111,7 @@ $ git bisect start [BAD [GOOD...]]
 $ git bisect bad [COMMIT]
 -------------
 
-and:
+与：
 
 -------------
 $ git bisect good [COMMIT...]
@@ -237,7 +237,7 @@ bisect run success
 
 有时会发生当前状态无法测试的情况，例如，因为当时有一个错误阻止了它的编译。这就是特殊退出代码125的作用。它告诉 "git bisect run"，当前的提交应该被标记为不可测试，应该选择另一个提交并进行检查。
 
-如果e=二分查找过程是手动驱动的，你可以使用 "git bisect skip "来做同样的事情。(事实上，特殊的退出代码125使 "git bisect run "在后台使用 "git bisect skip"）。
+如果二分查找过程是手动驱动的，你可以使用 "git bisect skip "来做同样的事情。(事实上，特殊的退出代码125使 "git bisect run" 在后台使用 "git bisect skip"。）
 
 或者如果你想要更多的控制，你可以使用 "git bisect visualize "检查当前状态。它将启动gitk（如果没有设置`DISPLAY`环境变量，则启动 "git log"）来帮助你找到一个更好的分界点。
 
@@ -271,8 +271,8 @@ $ git bisect replay bisect_log.txt
 -------------
 
 
-"git bisect" details
---------------------
+"git bisect" 详述
+---------------
 
 二分算法
 ~~~~
@@ -299,7 +299,7 @@ Y---G-W---W
  \ /   \
 Y-Y     X-X-X-X
 
--> time goes this way ->
+-> 走这条路 ->
 -------------
 
 其中B是 "坏 "的提交，"G "是 "好 "的提交，W、X、Y是其他的提交，经过这第一步，我们会得到以下的图：
@@ -448,7 +448,7 @@ information_if_bad（X） = N - number_of_ancestors（X） （TRUE）
 f(X) = min(number_of_ancestors(X), N - number_of_ancestors(X))
 -------------
 
-这很好，因为在步骤2）我们计算number_of_ancestors(X)，所以在步骤3）我们计算f(X)。
+And this is nice because at step 2) we compute number_of_ancestors(X) and so at step 3) we compute f(X).
 
 让我们以下图为例：
 
@@ -541,7 +541,7 @@ A-B-C-D-E-F         O
 
 在前面的例子中，我们认为 "好 "的提交是 "坏 "的提交的祖先。但这并不是 "git bisect "的要求。
 
-当然，"坏 "提交不可能是 "好 "提交的祖先，因为好提交的祖先应该是 "好 "的。而所有 "好 "的提交必须与坏的提交有关。 它们不可能在一个与 "坏 "提交的分支没有联系的分支上。但是，一个好的提交有可能与一个坏的提交有关系，但既不是它的祖先，也不是它的后代。
+Of course the "bad" commit cannot be an ancestor of a "good" commit, because the ancestors of the good commits are supposed to be "good". And all the "good" commits must be related to the bad commit. They cannot be on a branch that has no link with the branch of the "bad" commit. But it is possible for a good commit to be related to a bad commit and yet not be neither one of its ancestor nor one of its descendants.
 
 例如，可以有一个 "main"分支和一个 "dev"分支，后者是从main分支中提交名为 "D"的提交克隆出来的，如下所示：
 
@@ -639,7 +639,7 @@ $ git bisect run make
 将sh -c "一些命令 "传递给 "git bisect运行"
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For example:
+例如：
 
 -------------
 $ git bisect run sh -c "make || exit 125; ./my_app | grep 'good output'"
@@ -720,7 +720,7 @@ fi
 比如，以下是Andreas Ericsson使用的一个工作流程：
 
 * 在测试套件中，写一个测试脚本，暴露出回归的问题
-* use "git bisect run" to find the commit that introduced it
+* 使用 "git bisect run" 查找引入它的提交
 * 修复由上一步骤暴露出来的错误
 * 提交修复和测试脚本（如果需要更多测试）
 
@@ -746,7 +746,7 @@ _____________
 例如，David Miller写道<<6>>：
 
 _____________
-人们不明白的是，这是一个适用 "终端节点原则 "的情况。当你拥有有限的资源时（这里是指开发人员），你不会把大部分的负担推给他们。相反，你要把事情推给你拥有的大量资源，即终端节点（这里：用户），这样情况才会有实际的扩展。
+What people don't get is that this is a situation where the "end node principle" applies. When you have limited resources (here: developers) you don't push the bulk of the burden upon them. Instead you push things out to the resource you have a lot of, the end nodes (here: users), so that the situation actually scales.
 _____________
 
 这意味着，如果QA人员或终端用户能够做到这一点，往往会 "更便宜"。
@@ -784,7 +784,7 @@ _____________
 
 为了简化这个话题，我们将假设不可测试区是一串简单的提交，它是由一个提交（我们称它为BBC，意为双断裂提交）引起的断裂，后来被另一个提交修复（我们称它为BFC，意为双断裂修复提交）。
 
-For example:
+例如：
 
 -------------
 ...-Y-BBC-X1-X2-X3-X4-X5-X6-BFC-Z-...
@@ -794,7 +794,7 @@ For example:
 
 在这种情况下，如果你是手动二分，你可以在BBC开始之前创建一个特殊的分支。这个分支的第一次提交应该是将 BFC 与BBC压缩到一起的。分支中的其他提交应该是在BBC和BFC之间的提交，以该分支的第一次提交为基础，然后再以BFC之后的提交为基础。
 
-For example:
+例如：
 
 -------------
       (BBC+BFC)-X1'-X2'-X3'-X4'-X5'-X6'-Z'
@@ -816,7 +816,7 @@ $ git rebase -i Y Z
 
 之后，你可以像往常一样在新的分支中开始二分，最终你应该能找到第一个坏的提交。
 
-For example:
+例如：
 
 -------------
 $ git bisect start Z' Y
@@ -865,8 +865,8 @@ _____________
 
 但BBChop是独立于任何VCS的，并且对于Git用户来说，在Git中集成一些东西非常容易。
 
-Conclusion
-----------
+结论
+--
 
 我们已经了解到，回归是一个重要的问题，"git bisect"有强大的功能，同时也可以很好地补充和应用到其他工具中，尤其是通常被用来解决回归问题测试套件。但也需要改变一些工作流程和改正坏习惯，以获得它的最大效益。
 
@@ -888,8 +888,8 @@ a _lot_.
 因此，git bisect的善良不求回报——请随意引用这句话;-)
 _____________
 
-Acknowledgments
----------------
+致谢
+--
 
 非常感谢Junio Hamano在审阅本文时提供的帮助，感谢他审阅我发给Git邮件列表的补丁，感谢他讨论一些想法并帮助我改进，感谢他对 "git bisect"的大量改进，感谢他在维护和开发Git方面的出色工作。
 
@@ -901,8 +901,8 @@ Acknowledgments
 
 非常感谢Linux-Kongress计划委员会选择作者进行演讲并发表这篇论文。
 
-References
-----------
+引用
+--
 
 - [[[1]]] https://web.archive.org/web/20091206032101/http://www.nist.gov/public_affairs/releases/n02-10.htm['Software Errors Cost U.S. Economy $59.5 Billion Annually'. Nist News Release.] See also https://www.nist.gov/system/files/documents/director/planning/report02-3.pdf['The Economic Impacts of Inadequate Infratructure for Software Testing'. Nist Planning Report 02-3], Executive Summary and Chapter 8.
 - [[[2]]] https://www.oracle.com/java/technologies/javase/codeconventions-introduction.html['Code Conventions for the Java Programming Language: 1. Introduction'. Sun Microsystems.]

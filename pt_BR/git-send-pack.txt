@@ -24,10 +24,10 @@ Invoca o comando 'git-receive-pack' num repositório possivelmente remoto e atua
 
 OPÇÕES
 ------
---receive-pack=<git-recebe-pacote>::
-	O caminho para o programa 'git-receive-pack' na extremidade remota. Às vezes é útil ao enviar para um repositório remoto através do ssh e você não possui o programa no diretório no `$PATH` predefinido.
+--receive-pack=<git-receive-pack>::
+	Path to the 'git-receive-pack' program on the remote end. Sometimes useful when pushing to a remote repository over ssh, and you do not have the program in a directory on the default $PATH.
 
---exec=<git-recebe-pacote>::
+--exec=<git-receive-pack>::
 	O mesmo que --receive-pack=<git-receive-pack>.
 
 --all::
@@ -42,7 +42,7 @@ Caso `--stateless-rpc` seja utilizado junto com esta opção, a lista de referê
 	Faça tudo, exceto realmente enviar as atualizações.
 
 --force::
-	Normalmente, o comando se recusa a atualizar uma referência remota que não seja um ancestral da referência local usada para substituí-la. Esse sinalizador desativa a verificação. Isso significa que o repositório remoto pode perder commits; use-o com cautela.
+	Usually, the command refuses to update a remote ref that is not an ancestor of the local ref used to overwrite it. This flag disables the check. This means that the remote repository can lose commits; use it with care.
 
 --verbose::
 	Rode de forma loquaz.
@@ -55,13 +55,13 @@ Caso `--stateless-rpc` seja utilizado junto com esta opção, a lista de referê
 
 --[no-]signed::
 --signed=(true|false|if-asked)::
-	O GPG assina a solicitação impulsionamento para atualizar os `refs` no lado do recebimento permitindo que ele seja verificado pelos ganchos ou seja catalogado nos registros. Caso as opções `false` ou `--no-signed` sejam utilizadas, nenhuma tentativa de assinatura será feita. Caso as opções `true` ou `--signed` sejam utilizadas, o impulsionamento irá falhará caso o servidor não seja compatível com impulsionamentos assinados. Caso seja definido com `if-asked`, a assinatura só será realizada caso o servidor seja compatível com impulsionamentos assinados. O impulsionamento falhará caso a chamada atual para o comando `gpg --sign` falhe. Para obter detalhes sobre o recebimento na parte final, consulte linkgit:git-receive-pack[1].
+	GPG-sign the push request to update refs on the receiving side, to allow it to be checked by the hooks and/or be logged. If `false` or `--no-signed`, no signing will be attempted. If `true` or `--signed`, the push will fail if the server does not support signed pushes. If set to `if-asked`, sign if and only if the server supports signed pushes. The push will also fail if the actual call to `gpg --sign` fails. See linkgit:git-receive-pack[1] for the details on the receiving end.
 
 --push-option=<texto>::
-	Encaminha uma cadeia de caracteres específicos para uma opção `push` que será utilizada por ganchos no lado do servidor. Caso o servidor não seja compatível com as opções `push`, exibe erro. Para mais detalhes consulte linkgit:git-push[1] e linkgit:githooks[5].
+	Pass the specified string as a push option for consumption by hooks on the server side. If the server doesn't support push options, error out. See linkgit:git-push[1] and linkgit:githooks[5] for details.
 
 <host>::
-	Um host remoto para hospedar o repositório. Quando esta parte for definida, o comando 'git-receive-pack' é chamado através do ssh.
+	A remote host to house the repository. When this part is specified, 'git-receive-pack' is invoked via ssh.
 
 <diretório>::
 	O repositório que será atualizado.
@@ -75,13 +75,13 @@ ESPECIFICANDO AS REFS
 
 Existem três maneiras para definir quais as refs devem ser atualizadas na extremidade remota.
 
-Com a opção `--all`, todos as refs existentes localmente são transferidos para o lado remoto. Você não pode definir qualquer '<ref>' caso você utilize está opção.
+With the `--all` flag, all refs that exist locally are transferred to the remote side. You cannot specify any '<ref>' if you use this flag.
 
 Sem `--all` e sem qualquer '<ref>', os cabeçalhos existentes no lado local e no lado remoto são atualizadas.
 
-Quando uma ou mais '<ref>' sejam definidas de forma explicita (seja através da linha do comando ou através da opção `--stdin`), pode ser um único padrão ou o par deles separados por dois pontos ":" (significa que o nome da "ref" não pode ter dois pontos). Um único padrão '<nome>' é apenas uma abreviação para '<nome>:<nome>'.
+When one or more '<ref>' are specified explicitly (whether on the command line or via `--stdin`), it can be either a single pattern, or a pair of such patterns separated by a colon ":" (this means that a ref name cannot have a colon in it). A single pattern '<name>' is just shorthand for '<name>:<name>'.
 
-Cada par de padrões consiste no lado da origem (antes dos dois pontos) e no lado do destino (depois dos dois pontos). O `ref` a ser feito o `push` é determinado localizando uma coincidência que corresponda com a origem e a localização da origem é determinada usando o lado de destino. As regras utilizadas para coincidir com um `ref` são os mesmos utilizados por `git rev-parse` para resolver um nome `ref` simbólico. Consulte linkgit:git-rev-parse[1].
+Each pattern pair consists of the source side (before the colon) and the destination side (after the colon). The ref to be pushed is determined by finding a match that matches the source side, and where it is pushed is determined by using the destination side. The rules used to match a ref are the same rules used by 'git rev-parse' to resolve a symbolic ref name. See linkgit:git-rev-parse[1].
 
  - É um erro caso `<src>` não corresponda exatamente a um dos `refs` locais.
 
@@ -93,7 +93,7 @@ Cada par de padrões consiste no lado da origem (antes dos dois pontos) e no lad
 
    * <src> == <dst> e a referência que coincida com <src> não devem existir no conjunto de refs remotas; o "ref" que coincida com o <src> localmente é utilizado como o nome do destino.
 
-Sem `--force`, a fonte do `<src>` "ref" é armazenado no ramo remoto apenas caso o destino `<dst>` não exista ou o destino `<dst>` seja um subconjunto apropriado (ou seja, um ancestral) da origem `<src>`. Esta verificação, conhecida como uma "verificação de avanço rápido", é realizada para evitar sobrescrever acidentalmente a "ref" remota e perder os commits de outras pessoas a partir daí.
+Without `--force`, the <src> ref is stored at the remote only if <dst> does not exist, or <dst> is a proper subset (i.e. an ancestor) of <src>. This check, known as the "fast-forward check", is performed to avoid accidentally overwriting the remote ref and losing other people's commits from there.
 
 Com `--force`, a verificação do avanço rápido é desativado para todas as refs.
 

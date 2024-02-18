@@ -14,7 +14,7 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Este comando é utilizado para combinar todos os objetos que atualmente não residem num "pacote" dentro de um pacote. Também pode ser utilizado para reorganizar os pacotes já existentes, num único pacote mais eficiente.
+This command is used to combine all objects that do not currently reside in a "pack", into a pack. It can also be used to re-organize existing packs into a single, more efficient pack.
 
 Um pacote é uma coleção de objetos compactados de forma individual com a compactação delta aplicada, armazenados num único arquivo e com um arquivo do índice associado a ele.
 
@@ -24,23 +24,23 @@ OPÇÕES
 ------
 
 -a::
-	Em vez de empacotar de forma incremental os objetos que foram descompactados, empacote tudo num único pacote. É especialmente útil ao compactar um repositório utilizado para o desenvolvimento privado. Utilize com `-d`. Isso limpará os objetos que o `git prune` deixa para trás, porém o `git fsck --full --dangling` será exibido como se estivesse pendurado.
+	Instead of incrementally packing the unpacked objects, pack everything referenced into a single pack. Especially useful when packing a repository that is used for private development. Use with `-d`. This will clean up the objects that `git prune` leaves behind, but `git fsck --full --dangling` shows as dangling.
 +
 Observe que os usuários que buscam protocolos "burros" terão que buscar todo o novo pacote para obter o conteúdo de qualquer objeto, não importa quantos outros objetos nesse pacote eles já tenham localmente.
 +
 Os arquivos de pacotes "promisor" são empacotados separadamente, caso haja arquivos de pacote que tenham um arquivo ".promisor" associado, estes arquivos de pacote serão reempacotados em outro pacote separado e um arquivo ".promisor" vazio correspondente será gravado num novo pacote separado.
 
 -A::
-	O mesmo que `-a`, a menos que`-d` seja utilizado. Em seguida todos os objetos inacessíveis num pacote anterior tornam-se objetos soltos e descompactados em vez de serem deixados no pacote antigo. Objetos inacessíveis nunca são adicionados intencionalmente a um pacote, mesmo quando reempacotados. Essa opção previne que os objetos inacessíveis sejam excluídos imediatamente por terem sido deixados no pacote antigo e então removidos. Em vez disso, os objetos inacessíveis soltos serão removidos de acordo com as regras normais de expiração com a próxima invocação 'git gc'. Consulte linkgit:git-gc[1].
+	Same as `-a`, unless `-d` is used. Then any unreachable objects in a previous pack become loose, unpacked objects, instead of being left in the old pack. Unreachable objects are never intentionally added to a pack, even when repacking. This option prevents unreachable objects from being immediately deleted by way of being left in the old pack and then removed. Instead, the loose unreachable objects will be pruned according to normal expiry rules with the next 'git gc' invocation. See linkgit:git-gc[1].
 
 -d::
-	Após o empacotamento, caso os pacotes recém-criados recriem pacotes redundantes dos pacotes já existentes, remova os pacotes redundantes. Execute também o comando 'git prune-packed' para remover os arquivos redundantes dos objetos soltos.
+	After packing, if the newly created packs make some existing packs redundant, remove the redundant packs. Also run 'git prune-packed' to remove redundant loose object files.
 
 --cruft::
 	O mesmo que `-a`, a menos que `-d` seja usado. Em seguida, quaisquer objetos inacessíveis são embalados num pacote simples (cruft) separado. Os objetos inacessíveis podem ser removidos usando as regras normais de expiração com a próxima invocação do `git gc` (consulte linkgit:git-gc[1]). É incompatível com `-k`.
 
 --cruft-expiration=<aproximado>::
-	Expira imediatamente os objetos inacessíveis que sejam mais antigos que `<aproximado>` em vez de esperar pela próxima chamada do `git gc`. Útil apenas com `--cruft -d`.
+	Expire unreachable objects older than `<approxidate>` immediately instead of waiting for the next `git gc` invocation. Only useful with `--cruft -d`.
 
 --max-cruft-size=<n>::
 	Reembale os objetos em pacotes de tamanho igual a `<n>` bytes antes de criar novos pacotes. Desde que existam pacotes suficientes de cruft menores que `<n>`, o reempacotamento fará com que um novo pacote cruft seja criado contendo objetos de quaisquer pacotes cruft combinados, juntamente com quaisquer novos objetos inacessíveis. Os pacotes cruft maiores que `<n>` não serão modificados. Quando o novo pacote cruft for maior do que `<n>` bytes, ele será dividido em vários pacotes, sendo garantido que todos tenham no máximo `<n>` bytes de tamanho. Útil apenas com `--cruft -d`.
@@ -62,38 +62,38 @@ Os arquivos de pacotes "promisor" são empacotados separadamente, caso haja arqu
 	Não mostre nenhum progresso sobre o fluxo de erro padrão e repasse a opção `-q` para o comando 'git pack-objects'. Consulte linkgit:git-pack-objects[1].
 
 -n::
-	Não atualize a informação do servidor com 'git update-server-info'. Esta opção ignora a atualização dos arquivos de catálogo local necessários para publicar neste repositório (ou uma cópia direta do mesmo) por HTTP ou FTP. Consulte linkgit:git-update-server-info[1].
+	Do not update the server information with 'git update-server-info'. This option skips updating local catalog files needed to publish this repository (or a direct copy of it) over HTTP or FTP. See linkgit:git-update-server-info[1].
 
 --window=<n>::
 --depth=<n>::
 	Essas duas opções afetam como os objetos existentes no pacote são armazenados utilizando a compactação delta. Primeiramente os objetos são classificados internamente pelo tipo, tamanho e opcionalmente pelos nomes e comparados com os outros objetos existentes na opção `--window` para ver se a utilização da compactação delta economiza espaço. A opção `--depth` limita a profundidade delta máxima; torná-la muito profunda afeta o desempenho do lado do desempacotador, porque os dados delta precisam ser aplicados várias vezes para chegar ao objeto necessário.
 +
-O valor predefinido para a opção `--window` é 10 e o `--thp` é 50. O valor da profundidade máxima é 4095.
+O valor predefinido para a opção `--window` é 10 e o `--depth` é 50. O valor da profundidade máxima é 4095.
 
 --threads=<n>::
 	Esta opção é encaminhada para o comando `git pack-objects`.
 
 --window-memory=<n>::
-	Esta opção oferece um limite adicional em cima da opção `--window`; o tamanho da janela será reduzido dinamicamente para não ocupar mais do que '<n>' bytes na memória. É útil nos repositórios com uma mistura de objetos grandes e pequenos para não ficar sem memória com uma janela grande, mas ainda assim pode tirar proveito da janela grande para os objetos menores. O tamanho pode ter o sufixo "k", "m" ou "g". A opção `--window-memory=0` torna o uso da memória ilimitado. A predefinição é obtido da variável de configuração `pack.windowMemory`. Observe que a utilização atual da memória será o limite multiplicado pela quantidade de threads utilizados pelo linkgit:git-pack-objects[1].
+	This option provides an additional limit on top of `--window`; the window size will dynamically scale down so as to not take up more than '<n>' bytes in memory. This is useful in repositories with a mix of large and small objects to not run out of memory with a large window, but still be able to take advantage of the large window for the smaller objects. The size can be suffixed with "k", "m", or "g". `--window-memory=0` makes memory usage unlimited. The default is taken from the `pack.windowMemory` configuration variable. Note that the actual memory usage will be the limit multiplied by the number of threads used by linkgit:git-pack-objects[1].
 
 --max-pack-size=<n>::
-	O Tamanho máximo de cada arquivo do pacote que foi gerado. O tamanho pode ter o sufixo "k", "m" ou "g". O tamanho mínimo permitido é limitado a 1 MiB. Caso seja definido, vários pacotes poderão ser criados, o que também previne a criação de um índice do bitmap. A predefinição é ilimitada, a menos que a variável de configuração `pack.packSizeLimit` esteja definida. Observe que esta opção pode criar um repositório maior e mais lento; consulte a discussão em `pack.packSizeLimit'.
+	Maximum size of each output pack file. The size can be suffixed with "k", "m", or "g". The minimum size allowed is limited to 1 MiB. If specified, multiple packfiles may be created, which also prevents the creation of a bitmap index. The default is unlimited, unless the config variable `pack.packSizeLimit` is set. Note that this option may result in a larger and slower repository; see the discussion in `pack.packSizeLimit`.
 
 --filter=<filter-spec>::
-	Remove os objetos que correspondem à especificação do filtro do arquivo resultante do pacote e os coloca num arquivo separado do pacote. Observe que os objetos usados no diretório de trabalho não são filtrados. Portanto, para que a divisão funcione totalmente, é melhor executá-la em um repositório simples e usar as opções `-a` e `-d` junto com esta opção. Além disso, a opção `--no-write-bitmap-index` (ou a opção de configuração `repack.writebitmaps` definida como `false`) deve ser usada, caso contrário, a gravação do índice bitmap falhará, pois ela pressupõe um único arquivo de pacote contendo todos os objetos. Veja linkgit:git-rev-list[1] para formas válidas de `<filter-spec>`.
+	Remove objects matching the filter specification from the resulting packfile and put them into a separate packfile. Note that objects used in the working directory are not filtered out. So for the split to fully work, it's best to perform it in a bare repo and to use the `-a` and `-d` options along with this option. Also `--no-write-bitmap-index` (or the `repack.writebitmaps` config option set to `false`) should be used otherwise writing bitmap index will fail, as it supposes a single packfile containing all the objects. See linkgit:git-rev-list[1] for valid `<filter-spec>` forms.
 
 --filter-to=<diretório>::
 	Grava o pacote contendo os objetos filtrados no diretório `<dir>`. Útil apenas com `--filter`. Isso pode ser usado para colocar o pacote num diretório de objetos separado que é acessado através do mecanismo alternativo do Git. **AVISO:** Se o arquivo do pacote que contém os objetos filtrados não estiver acessível, o repositório pode ficar corrompido, pois pode não ser possível acessar os objetos nesse arquivo de pacote. Consulte as seções `objects` e `objects/info/alternates` do linkgit:gitrepository-layout[5].
 
 -b::
 --write-bitmap-index::
-	Escreva um índice bitmap de acessibilidade como parte do reempacotamento. Isso só faz sentido quando utilizado com `-a`, `-A` ou `-m`, pois os bitmaps devem poder se referir para todos os objetos que sejam acessíveis. Esta opção substitui a configuração da variável de ambiente `GIT_CURL_VERBOSE`. Esta opção não tem efeito caso vários arquivos de pacotes sejam criados. a não ser que seja escrito um MIDX (neste caso é criado um bitmap multi-pack).
+	Escreva um índice de bitmap de acessibilidade como parte do reempacotamento. Isso só faz sentido quando usado com as opções `-a`, `-A` ou `-m`, pois os bitmaps devem ser capazes de se referir a todos os objetos acessíveis. Essa opção substitui a configuração de `repack.writeBitmaps`. Essa opção não tem efeito se vários arquivos de pacote forem criados, a menos que esteja escrevendo um MIDX (nesse caso, um bitmap de vários pacotes é criado).
 
 --pack-kept-objects::
-	Inclua os objetos no arquivo `.keep` durante o reempacotamento. Observe que nós anda não excluímos os pacotes `.keep` depois da finalização dos objetos empacotados (`pack-objects`). Significa que podemos duplicar os objetos, porém isso torna a opção segura para ser utilizada quando existem impulsionamentos ou buscas simultâneos. Esta opção geralmente é útil apenas caso esteja escrevendo bitmaps com `-b` ou `repack.writeBitmaps`, pois garante que o pacote de bitmap tenha os objetos necessários.
+	Include objects in `.keep` files when repacking. Note that we still do not delete `.keep` packs after `pack-objects` finishes. This means that we may duplicate objects, but this makes the option safe to use when there are concurrent pushes or fetches. This option is generally only useful if you are writing bitmaps with `-b` or `repack.writeBitmaps`, as it ensures that the bitmapped packfile has the necessary objects.
 
 --keep-pack=<nome-do-pacote>::
-	Exclua o pacote informado do reempacotamento. Isso equivale a ter o arquivo `.keep` no pacote. O `<nome-do-pacote>` é o nome do arquivo do pacote sem o diretório principal (por exemplo, `pack-123.pack`). A opção pode ser utilizada várias vezes para manter os vários pacotes.
+	Exclude the given pack from repacking. This is the equivalent of having `.keep` file on the pack. `<pack-name>` is the pack file name without leading directory (e.g. `pack-123.pack`). The option can be specified multiple times to keep multiple packs.
 
 --unpack-unreachable=<quando>::
 	Ao afrouxar os objetos inacessíveis, não se preocupe em afrouxar os objetos anteriores a `<quando>`. Pode ser utilizado para otimizar a gravação de quaisquer objetos que seriam removidos imediatamente através de um comando de acompanhamento `git prune`.
@@ -120,7 +120,7 @@ Ao escrever um bitmap multi-pack, o comando `git repack` seleciona o maior pacot
 
 -m::
 --write-midx::
-	Escreva um índice multi-pack (consulte linkgit:git-multi-pack-index[1]) contendo pacotes não redundantes.
+	Write a multi-pack index (see linkgit:git-multi-pack-index[1]) containing the non-redundant packs.
 
 CONFIGURAÇÃO
 ------------

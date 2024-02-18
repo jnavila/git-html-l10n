@@ -40,7 +40,7 @@ ajouter <chemin> [<commit-esque>]::
 
 Créer un arbre-de-travail dans `<chemin>` et extraire `<commit-esque>` dans celui-ci. Le nouvel arbre-de-travail est lié au dépôt actuel, partageant tout sauf les fichiers spécifiques au répertoire-de-travail tels que `HEAD`, `index`, etc. Pour plus de commodité, `<commit-esque>` peut être un simple "`-`", qui est synonyme de `@{-1}`.
 +
-Si le `<commit-esque>` est un nom de branche (appelons-le '<branche>') et n'est pas trouvé, et ni '-b' ni '-B' ni '--detach' ne sont utilisés, mais qu'il existe une branche de suivi dans exactement un dépôt distant (appelons-le '<distant>') avec un nom correspondant, le traiter comme équivalent à :
+Si le `<commit-esque>` est un nom de branche (appelons-le '<branche>') et n'est pas trouvé, et ni '-b' ni '-B' ni '--detach' ne sont utilisés, mais qu'il existe une branche de suivi dans exactement un dépôt distant (appelons-le '<distant>') avec un nom correspondant, le traiter comme équivalent à :
 +
 ------------
 $ git worktree add --track -b <branche> <chemin> <distant>/<branche>
@@ -48,9 +48,9 @@ $ git worktree add --track -b <branche> <chemin> <distant>/<branche>
 +
 Si la branche existe dans plus d'un distant et que l'un d'entre eux est la valeur de la variable de configuration `checkout.defaultRemote`, celui-ci sera utilisé pour désambiguïser, même si la <branche> n'est pas unique parmi tous les distants. Réglez la variable `checkout.defaultRemote=origin` par exemple pour extraire toujours les branches distantes depuis celle-ci si <branche> est ambigüe mais existe sur le distant `origin`. Voir aussi `checkout.defaultRemote` dans linkgit:git-config[1].
 +
-Si `<commit-esque>` est omis et que ni `-b` ni `-B` ni `--detach` ne sont utilisés, alors, par commodité, le nouvel arbre-de-travail est associé à une branche (appelez-la `<branche>`) nommée d'après `$(basename <chemin>)`. Si `<branche>` n'existe pas, une nouvelle branche basée sur `HEAD` est automatiquement créée comme si `-b <branche>` était donné. Si `<branche>` existe, elle sera extraite dans le nouvel arbre-de-travail, si elle n'est pas extraite ailleurs, sinon la commande refusera de créer l'arbre-de-travail (à moins que `--force` soit utilisé).
+Si `<commit-esque>` est omis et que ni `-b` ni `-B` ni `--detach` ne sont utilisés, alors, par commodité, le nouvel arbre-de-travail est associé à une branche (appelons-la `<branche>`) nommée d'après `$(basename <chemin>)`. Si `<branche>` n'existe pas, une nouvelle branche basée sur `HEAD` est automatiquement créée comme si `-b <branche>` était donné. Si `<branche>` existe, elle sera extraite dans le nouvel arbre-de-travail, si elle n'est pas extraite ailleurs, sinon la commande refusera de créer l'arbre-de-travail (à moins que `--force` soit utilisé).
 +
-Si l ' on omet `<commit-esque>`, que ni `---detach`, ni `--orphan` ne sont utilisés et qu'il n ' y a pas de branche locale valide (ou de branches distantes si`--guess-remote` est spécifié ), alors, par commodité, le nouvel arbre-de-travail est associé à une nouvelle branche orpheline dénommée `<branche >` (après `$(basename <chemin>)` si ni `-b`ni `-B` n ' est utilisé) comme si `--orphan` était passé à la commande. Dans le cas où le dépôt a un distant et où `--guess-remote` est utilisé, mais où il n'y a pas de branches distantes ou locales, alors la commande échoue avec un avertissement rappelant à l'utilisateur de récupérer depuis leur dépôt distant avant (ou passer outre en utilisant `-f/-force`).
+Si l'on omet `<commit-esque>`, que ni `--detach`, ni `--orphan` ne sont utilisés et qu'il n'y a pas de branche locale valide (ou de branches distantes si`--guess-remote` est spécifié), alors, par commodité, le nouvel arbre-de-travail est associé à une nouvelle branche non née dénommée `<branche >` (après `$(basename <chemin>)` si ni `-b`ni `-B` n'est utilisé) comme si `--orphan` était passé à la commande. Dans le cas où le dépôt a un distant et où `--guess-remote` est utilisé, mais où il n'y a pas de branches distantes ou locales, alors la commande échoue avec un avertissement rappelant à l'utilisateur de récupérer depuis leur dépôt distant avant (ou passer outre en utilisant `-f/--force`).
 
 list::
 
@@ -124,7 +124,7 @@ Cela peut également être configuré comme le comportement par défaut en utili
 	Avec `prune`, ne rien supprimer ; montrer seulement ce qui serait supprimé.
 
 --orphan::
-	Avec `add`, rendre le nouveau arbre-de-travail et index vides, associant l'arbre-de-travail avec une nouvelle branche orpheline/non-née nommée `<nouvelle-branche>`.
+	Avec `add`, rendre le nouveau arbre-de-travail et index vides, associant l'arbre-de-travail avec une nouvelle branche non-née nommée `<nouvelle-branche>`.
 
 --porcelain::
 	Avec `list`, donner la sortie dans un format facile à analyser par script. Ce format restera stable à travers les versions de Git et sans tenir compte de la configuration utilisateur. Il est recommandé de combiner ceci avec `-z`. Voir ci-dessous pour de plus amples détails.
@@ -207,7 +207,7 @@ Lorsque `extensions.worktreeConfig` est activé, le fichier de configuration `.g
 
 FORMAT DE SORTIE DE LA LISTE
 ----------------------------
-La commande `worktree list` a deux formats de sortie. Le format par défaut affiche les détails sur une seule ligne avec des colonnes. Par exemple :
+La commande `worktree list` a deux formats de sortie. Le format par défaut affiche les détails sur une seule ligne avec des colonnes. Par exemple :
 
 ------------
 $ git worktree list
@@ -216,7 +216,7 @@ $ git worktree list
 /chemin/vers/autre-arbre-de-travail-lié  1234abc  (detached HEAD)
 ------------
 
-La commande affiche également des annotations pour chaque arbre-de-travail, en fonction de son état. Ces annotations sont :
+La commande affiche également des annotations pour chaque arbre-de-travail, en fonction de son état. Ces annotations sont :
 
  * `locked`, si l'arbre-de-travail est verrouillé.
  * `prunable`, si l'arbre-de-travail peut être élagué via` git worktree prune`.
@@ -244,7 +244,7 @@ Notez que l'annotation est déplacée à la ligne suivante si les informations s
 
 Format de la porcelaine
 ~~~~~~~~~~~~~~~~~~~~~~~
-Le format de porcelaine comporte une ligne par attribut. Si `-z` est fourni alors les lignes sont terminées par un caractère NUL au lieu d'un caractère nouvelle ligne Les attributs sont énumérés avec une étiquette et une valeur séparées par un seul espace. Les attributs booléens (comme `bare` et `detached`) sont énumérés sous forme d'étiquette uniquement, et ne sont présents que si la valeur est vraie. Certains attributs (comme `locked`) peuvent être listés comme étiquette seule ou avec une valeur si la raison de cet attribut est disponible Le premier attribut d'un arbre-de-travail est toujours `worktree`, une ligne vide indique la fin de l'enregistrement. Par exemple :
+Le format de porcelaine comporte une ligne par attribut. Si `-z` est fourni alors les lignes sont terminées par un caractère NUL au lieu d'un caractère nouvelle ligne Les attributs sont énumérés avec une étiquette et une valeur séparées par un seul espace. Les attributs booléens (comme `bare` et `detached`) sont énumérés sous forme d'étiquette uniquement, et ne sont présents que si la valeur est vraie. Certains attributs (comme `locked`) peuvent être listés comme étiquette seule ou avec une valeur si la raison de cet attribut est disponible Le premier attribut d'un arbre-de-travail est toujours `worktree`, une ligne vide indique la fin de l'enregistrement. Par exemple :
 
 ------------
 $ git worktree list --porcelain
@@ -276,7 +276,7 @@ prunable gitdir file points to non-existent location
 
 ------------
 
-À moins que `-z` ne soit utilisé, les caractères « inhabituels » dans la raison de verrouillage tels que des retours chariot sont échappés et la raison est entièrement citée comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Par exemple :
+À moins que `-z` ne soit utilisé, les caractères « inhabituels » dans la raison de verrouillage tels que des retours chariot sont échappés et la raison est entièrement citée comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Par exemple :
 
 ------------
 $ git worktree list --porcelain

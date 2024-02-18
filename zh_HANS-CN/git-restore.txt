@@ -26,8 +26,8 @@ git-restore - 恢复工作树文件
 
 选项
 --
--s <tree>::
---source=<tree>（来源）。::
+-s <目录树>::
+--source=<目录树>::
 	用给定树的内容恢复工作树的文件。通常是通过命名与之相关的提交、分支或标签来指定源树。
 +
 如果没有指定，如果给了`--staged`，则从`HEAD`恢复内容，否则从索引恢复。
@@ -36,7 +36,7 @@ git-restore - 恢复工作树文件
 
 -p::
 --patch::
-	交互式地选择还原源和还原位置之间的差异中的猎物。参见 linkgit:git-add[1] 的 "互动模式 "部分，了解如何操作"--补丁 "模式。
+	交互式地选择还原源和还原位置之间的差异中的猎物。参见 linkgit:git-add[1] 的 ''互动模式'' 部分，了解如何操作 `--patch` 模式。
 +
 请注意，`--patch`可以不接受任何pathspec，并会提示恢复所有修改的路径。
 
@@ -48,7 +48,7 @@ git-restore - 恢复工作树文件
 
 -q::
 --quiet::
-	安静，抑制反馈信息。意味着"--没有进展"。
+	安静，抑制反馈信息。意味着"--no-progress"。
 
 --progress::
 --no-progress::
@@ -64,14 +64,14 @@ git-restore - 恢复工作树文件
 --merge::
 	When restoring files on the working tree from the index, recreate the conflicted merge in the unmerged paths. This option cannot be used when checking out paths from a tree-ish (i.e. with the `--source` option).
 
---conflict=<style>::
+--conflict=<样式>::
 	The same as `--merge` option above, but changes the way the conflicting hunks are presented, overriding the `merge.conflictStyle` configuration variable. Possible values are "merge" (default), "diff3", and "zdiff3".
 
 --ignore-unmerged::
-	当从索引中恢复工作树上的文件时，如果有未合并的条目，并且没有指定`--我们的`、`--他们的`、`--合并`或`--冲突`，不要中止操作。工作树上未合并的路径将被忽略。
+	当从索引中恢复工作目录树上的文件时，如果有未合并的条目，并且没有指定 `--ours`、`--theirs` 、`--merge` 或 `--conflict` ，不要中止操作。工作目录树上未合并的路径将被忽略。
 
 --ignore-skip-worktree-bits::
-	In sparse checkout mode, the default is to only update entries matched by `<pathspec>` and sparse patterns in $GIT_DIR/info/sparse-checkout. This option ignores the sparse patterns and unconditionally restores any files in `<pathspec>`.
+	在稀疏检出模式下，默认情况下只更新由`<路径规范>`和$GIT_DIR/info/sparse-checkout 中稀疏模式匹配的条目。这个选项忽略了稀疏模式，无条件地恢复了符合 `<路径规范>` 中的任何文件。
 
 --recurse-submodules::
 --no-recurse-submodules::
@@ -79,13 +79,13 @@ git-restore - 恢复工作树文件
 
 --overlay::
 --no-overlay::
-	在覆盖模式下，该命令在恢复时不会删除文件。在无覆盖模式下，不出现在"--源 "树中的被追踪文件会被删除，以使它们与"<tree>"完全匹配。默认是无覆盖模式。
+	在覆盖模式下，该命令在恢复时不会删除文件。在无覆盖模式下，不出现在 `--source` 树中的被追踪文件会被删除，以使它们与 `<目录树>` 完全匹配。默认是无覆盖模式。
 
 --pathspec-from-file=<file>::
-	Pathspec在 `<file>` 中传递，而不是在命令行参数中传递。如果 `<file>` 正好是 `-`，则使用标准输入。Pathspec 元素由 LF 或 CR/LF 分隔。可以引用配置变量 `core.quotePath` 的 Pathspec 元素（请参见 linkgit:git-config[1]）。另请参见 `--pathspec-file-nul `和全局 `--literal-pathspecs`。
+	Pathspec在 `<文件>` 中传递，而不是在命令行参数中传递。如果 `<文件>` 正好是 `-`，则使用标准输入。路径规范元素由 LF 或 CR/LF 分隔。可以引用配置变量 `core.quotePath` 的路径规范元素（请参见 linkgit:git-config[1]）。另请参见 `--pathspec-file-nul` 和全局 `--literal-pathspecs`。
 
 --pathspec-file-nul::
-	Only meaningful with `--pathspec-from-file`. Pathspec elements are separated with NUL character and all other characters are taken literally (including newlines and quotes).
+	只有在使用 `--pathspec-from-file` 选项时才有意义。指定路径元素用 NUL 字符分隔，所有其他字符都按字面意思（包括换行符和引号）表示。
 
 \--::
 	不将之后的参数解释为选项。
@@ -116,7 +116,7 @@ $ git restore hello.c                     <2>
 $ git restore '*.c'
 ------------
 
-注意 "*.c "周围的引号。 文件`hello.c`也将被恢复，尽管它已经不在工作树中了，因为文件globbing是用来匹配索引中的条目的（不是由shell在工作树中）。
+Note the quotes around `*.c`. The file `hello.c` will also be restored, even though it is no longer in the working tree, because the file globbing is used to match entries in the index (not in the working tree by the shell).
 
 要恢复当前目录下的所有文件
 
@@ -124,25 +124,25 @@ $ git restore '*.c'
 $ git restore .
 ------------
 
-或者用'top'pathspec魔法恢复所有工作树文件（见linkgit:gitglossary[7]）。
+或者用 'top' 路径规范恢复所有工作目录树文件（见linkgit:gitglossary[7]）
 
 ------------
 $ git restore :/
 ------------
 
-将索引中的文件恢复到与`HEAD`中的版本一致（这与使用linkgit:git-reset[1]相同）。
+将索引中的文件恢复到与 `HEAD` 中的版本一致（这与使用linkgit:git-reset[1]相同）
 
 ------------
 $ git restore --staged hello.c
 ------------
 
-or you can restore both the index and the working tree (this is the same as using linkgit:git-checkout[1])
+或者你可以同时恢复索引和工作目录树（这与使用 linkgit:git-checkout[1] 相同）
 
 ------------
 $ git restore --source=HEAD --staged --worktree hello.c
 ------------
 
-或更实用但可读性较差的简短形式。
+或更实用但可读性较差的简短形式：
 
 ------------
 $ git restore -s@ -SW hello.c

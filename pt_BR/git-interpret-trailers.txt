@@ -27,11 +27,11 @@ Assinado-por: Bob <bob@example.com>
 
 as duas últimas linhas começando com "Signed-off-by" são os "trailers".
 
-Esse comando lê as mensagens dos commits seja a partir dos argumentos do <arquivo> ou da entrada padrão caso nenhum <arquivo> seja especificado. Se `--parse` for especificado, a saída consistirá nos "trailers" provenientes da entrada, sem influenciá-los com nenhuma opção na linha de comando ou de variável de configuração.
+This command reads commit messages from either the <file> arguments or the standard input if no <file> is specified. If `--parse` is specified, the output consists of the parsed trailers coming from the input, without influencing them with any command line options or configuration variables.
 
 Caso contrário, esse comando aplica as variáveis de configuração `trailer.*` (que podem potencialmente adicionar novos trailers, bem como reposicioná-los), assim como quaisquer argumentos de linha de comando que possam substituir as variáveis de configuração (como `--trailer=...`, que também pode adicionar novos trailers), a cada arquivo de entrada. O resultado é emitido na saída padrão.
 
-Esse comando também pode operar na saída do linkgit:git-format-patch[1], que é mais elaborado do que uma simples mensagem de confirmação. Ou seja, essa saída inclui uma mensagem de confirmação (como acima), uma linha divisória "---" e uma parte do patch. Para essas entradas, as partes do divisor e do patch não são modificadas por esse comando e são emitidas como estão na saída, a menos que a opção `--no-divider` seja especificada.
+This command can also operate on the output of linkgit:git-format-patch[1], which is more elaborate than a plain commit message. Namely, such output includes a commit message (as above), a "---" divider line, and a patch part. For these inputs, the divider and patch parts are not modified by this command and are emitted as is on the output, unless `--no-divider` is specified.
 
 Algumas variáveis de configuração controlam a forma como os argumentos `--trailer` são aplicados a cada entrada e a forma como qualquer trailer existente na entrada é alterado. Eles também possibilitam a adição automática de alguns trailers.
 
@@ -53,7 +53,7 @@ em sua configuração, você só precisa especificar `--trailer="sign: foo"` na 
 
 É predefinido que o novo trailer apareça no final de todos os trailers já existentes. Caso não haja nenhum, o novo trailer aparecerá no final. Uma linha em branco será adicionada antes do novo trailer caso já não exista um.
 
-Os trailers já existentes são extraídos da entrada procurando um grupo de uma ou mais linhas que (i) sejam todos trailers, ou (ii) contenham pelo menos um trailer gerado pelo Git ou que tenha sido configurado pelo usuário e consista de pelo menos 25% de trailers. O grupo deve ser precedido por uma ou mais linhas vazias (ou somente com espaços). O grupo deve estar no final da entrada ou ser as últimas linhas sem espaços antes de uma linha que comece com '---' (seguida de um espaço ou do final da linha).
+Existing trailers are extracted from the input by looking for a group of one or more lines that (i) is all trailers, or (ii) contains at least one Git-generated or user-configured trailer and consists of at least 25% trailers. The group must be preceded by one or more empty (or whitespace-only) lines. The group must either be at the end of the input or be the last non-whitespace lines before a line that starts with '---' (followed by a space or the end of the line).
 
 Ao ler os caracteres de resposta, não pode haver espaço em branco antes ou dentro do <key>, mas qualquer quantidade de espaço regular e de caracteres de tabulação são permitidos entre o <key> e o separador. Pode existir espaço antes, durante ou depois do <valor>. O <valor> pode ser dividido em várias linhas, com cada linha subsequente começando com pelo menos um espaço, como a "dobra" na RFC 822. Exemplo:
 
@@ -70,22 +70,22 @@ OPÇÕES
 	Edite os arquivos no local.
 
 --trim-empty::
-	Se a parte <valor> de qualquer caractere de resposta tiver apenas espaços, todo o caractere de resposta será removido da saída. Isso se aplica tanto a caracteres de resposta já existentes e os novos.
+	If the <value> part of any trailer contains only whitespace, the whole trailer will be removed from the output. This applies to existing trailers as well as new trailers.
 
 --trailer <key>[(=|:)<valor>]::
 	Defina um par (<key>, <valor>) que deve ser aplicado como um caractere de resposta nas mensagens de entrada. Consulte a descrição deste comando.
 
 --where <arranjo>::
 --no-where::
-	Especifica onde todos os novos trailers serão adicionados. Uma configuração usada com '--where' substitui as variáveis de configuração `trailer.where` e qualquer variável aplicável `trailer.<keyAlias>.where` e se aplica a todas as opções '--trailer' até a próxima ocorrência de '--where' ou '--no-where'. Ao encontrar '--no-where', elimine o efeito de qualquer uso anterior de '--where', de modo que as variáveis de configuração relevantes não sejam mais substituídas. Os posicionamentos possíveis são `after`, `before`, `end` ou `start`.
+	Specify where all new trailers will be added. A setting provided with '--where' overrides the `trailer.where` and any applicable `trailer.<keyAlias>.where` configuration variables and applies to all '--trailer' options until the next occurrence of '--where' or '--no-where'. Upon encountering '--no-where', clear the effect of any previous use of '--where', such that the relevant configuration variables are no longer overridden. Possible placements are `after`, `before`, `end` or `start`.
 
 --if-exists <ação>::
 --no-if-exists::
-	Especifique a ação que será executada quando já houver pelo menos um trailer com a mesma <key> na entrada. Uma configuração usada com '--if-exists' substitui as variáveis de configuração `trailer.ifExists` e qualquer variável de configuração `trailer.<keyAlias>.ifExists` aplicável e se aplica a todas as opções '--trailer' até a próxima ocorrência de '--if-exists' ou '--no-if-exists'. Ao encontrar '--no-if-exists, limpe o efeito de qualquer uso anterior de '--if-exists, de modo que as variáveis de configuração relevantes não sejam mais substituídas. As ações possíveis são `addIfDifferent`, `addIfDifferentNeighbor`, `add`, `replace` e `doNothing`.
+	Specify what action will be performed when there is already at least one trailer with the same <key> in the input. A setting provided with '--if-exists' overrides the `trailer.ifExists` and any applicable `trailer.<keyAlias>.ifExists` configuration variables and applies to all '--trailer' options until the next occurrence of '--if-exists' or '--no-if-exists'. Upon encountering '--no-if-exists, clear the effect of any previous use of '--if-exists, such that the relevant configuration variables are no longer overridden. Possible actions are `addIfDifferent`, `addIfDifferentNeighbor`, `add`, `replace` and `doNothing`.
 
 --if-missing <ação>::
 --no-if-missing::
-	Especifique a ação a ser executada quando não houver outro trailer com a mesma <key> na entrada. Uma configuração usada com '--if-missing' substitui as variáveis de configuração `trailer.ifMissing` e qualquer variável de configuração `trailer.<keyAlias>.ifMissing` aplicável e se aplica a todas as opções '--trailer' até a próxima ocorrência de '--if-missing' ou '--no-if-missing'. Ao encontrar '--no-if-missing, elimine o efeito de qualquer uso anterior de '--if-missing, de modo que as variáveis de configuração relevantes não sejam mais substituídas. As ações possíveis são `doNothing` ou `add`.
+	Specify what action will be performed when there is no other trailer with the same <key> in the input. A setting provided with '--if-missing' overrides the `trailer.ifMissing` and any applicable `trailer.<keyAlias>.ifMissing` configuration variables and applies to all '--trailer' options until the next occurrence of '--if-missing' or '--no-if-missing'. Upon encountering '--no-if-missing, clear the effect of any previous use of '--if-missing, such that the relevant configuration variables are no longer overridden. Possible actions are `doNothing` or `add`.
 
 --only-trailers::
 	Exibe apenas os caracteres de resposta e não quaisquer outras partes da entrada.
@@ -166,7 +166,7 @@ trailer.<keyAlias>.ifmissing::
 	Esta opção utiliza os mesmos valores que a variável de configuração 'trailer.ifmissing' e substitui o que for definido por esta opção para os caracteres de resposta com o <keyAlias> informado.
 
 trailer.<keyAlias>.command::
-	Preterido em favor do 'trailer.<keyAlias>.cmd'. Essa opção se comporta da mesma forma que 'trailer.<keyAlias>.cmd', exceto pelo fato de não passar nada como argumento para o comando especificado. Em vez disso, a primeira ocorrência da substring $ARG é substituída pelo <valor> que seria passado como argumento.
+	Deprecated in favor of 'trailer.<keyAlias>.cmd'. This option behaves in the same way as 'trailer.<keyAlias>.cmd', except that it doesn't pass anything as argument to the specified command. Instead the first occurrence of substring $ARG is replaced by the <value> that would be passed as argument.
 +
 Observe que $ARG no comando do usuário é substituído apenas uma vez e que a maneira original de substituir o $ARG não é segura.
 +

@@ -21,9 +21,9 @@ DESCRIÇÃO
 
 Atualiza as refs remotas utilizando as refs locais, enquanto envia os objetos necessários para que seja concluída as refs informadas.
 
-Você pode fazer com que coisas que intereçam aconteçam com um repositório toda vez que você o adiciona, configurando os 'ganchos' lá. Consulte a documentação para linkgit:git-receive-pack[1].
+You can make interesting things happen to a repository every time you push into it, by setting up 'hooks' there. See documentation for linkgit:git-receive-pack[1].
 
-Quando a linha de comando não informa para onde impulsionar (push) com a opção `<repositório>`, a configuração `branch.*.remote` é consultada para o ramo atual para determinar para onde o impulsionamento deve ser feito. Caso a configuração esteja ausente, a predefinição retorna para 'origin'.
+When the command line does not specify where to push with the `<repository>` argument, `branch.*.remote` configuration for the current branch is consulted to determine where to push. If the configuration is missing, it defaults to 'origin'.
 
 Quando a linha de comando não especifica o que impulsionar (push) com as opções `<refspec>...` ou com as opções `--all`, `--mirror`, `--tags`, o comando encontra a predefinição `<refspec>` consultando a configuração `remote.*.push` e caso ainda não tenha sido encontrado, honra a configuração do `push.default` para decidir o que enviar (para saber o significado de `push.default` consultelinkgit:git-config[1].
 
@@ -33,14 +33,14 @@ Quando nem a linha de comando nem a configuração informam o que enviar, o comp
 OPÇÕES[[OPÇÕES]]
 ----------------
 <repositório>::
-	O repositório "remoto" que é o destino de uma operação de envio através de uma operação "push". Este parâmetro pode ser uma URL (consulte a seção <<URLS, GIT URLS>> abaixo) ou o nome de um ramo remoto (consulte a seção <<REMOTES, REMOTES>> abaixo).
+	The "remote" repository that is the destination of a push operation. This parameter can be either a URL (see the section <<URLS,GIT URLS>> below) or the name of a remote (see the section <<REMOTES,REMOTES>> below).
 
 <refspec>...::
-	Defina qual a "ref" do destino para atualizar com qual objeto da origem. O formato de um parâmetro `<refspec>` é um opcional mais `+`, seguido pelo objeto da origem `<src>`, seguido de dois pontos `:`, seguido pelo destino da ref `<dst>`.
+	Specify what destination ref to update with what source object. The format of a <refspec> parameter is an optional plus `+`, followed by the source object <src>, followed by a colon `:`, followed by the destination ref <dst>.
 +
 Geralmente `<src>` é o nome do ramo que você deseja impulsionar, pode ser qualquer "expressão SHA-1" arbitrária, como `master~4` ou `HEAD` (consulte linkgit:gitrevisions[7]).
 +
-O <dst> informa qual a "ref" no lado remoto será atualizado com este impulsionamento "push". Expressões arbitrárias não podem ser utilizadas aqui, uma "ref" real deve ser determinada. Caso o comando `git push [<repositório>]` sem nenhum argumento `<refspec>` estiver definido para atualizar alguma "ref" no destino com `<src>` com a variável de configuração `remote.<repositório>.push`, a parte do comando `:<dst>` pode ser omitida, este empulsionamento "push" atualizará uma "ref" onde `<src>` normalmente atualiza sem qualquer `<refspec>` na linha de comando. Caso contrário, a falta de `:<dst>` significa atualizar a mesma referência que o `<src>`.
+The <dst> tells which ref on the remote side is updated with this push. Arbitrary expressions cannot be used here, an actual ref must be named. If `git push [<repository>]` without any `<refspec>` argument is set to update some ref at the destination with `<src>` with `remote.<repository>.push` configuration variable, `:<dst>` part can be omitted--such a push will update a ref that `<src>` normally updates without any `<refspec>` on the command line. Otherwise, missing `:<dst>` means to update the same ref as the `<src>`.
 +
 Caso o <dst> não comece com `refs/` (como `refs/heads/master` por exemplo), tentaremos inferir onde em `refs/*` no <repositório> de destino, ele pertença com base no tipo da <src> sendo impulsionado e caso o <dst> seja ambíguo.
 +
@@ -69,7 +69,7 @@ Todas as regras descritas acima sobre o que não é permitido como uma atualiza�
 +
 Fazer um impulsionamento "push" de um <src> vazio permite excluir o <dst> "ref" do repositório remoto. As exclusões sempre são aceitas sem um sinal `+` inicial no "refspec" (ou com a opção `--force`), exceto quando for proibido pela configuração ou pelos ganchos. Consulte `receive.denyDeletes` no linkgit:git-config[1] e `pre-receive` e `update` no linkgit:githooks[5].
 +
-O "refspec" especial `:` (ou `+:` para permitir as atualizações sem avanço rápido) instrui o Git para enviar as ramificações "coincidentes": para cada ramificação que exista no lado local, o lado remoto é atualizado caso uma ramificação do o mesmo nome já exista.
+The special refspec `:` (or `+:` to allow non-fast-forward updates) directs Git to push "matching" branches: for every branch that exists on the local side, the remote side is updated if a branch of the same name already exists on the remote side.
 +
 A `tag <tag>` significa o mesmo que `refs/tags/<tag>:refs/tags/<tag>`.
 
@@ -78,17 +78,17 @@ A `tag <tag>` significa o mesmo que `refs/tags/<tag>:refs/tags/<tag>`.
 	impulsione todos os ramos (ou seja, refs em `refs/heads/`); não pode ser utilizado com outro <refspec>.
 
 --prune::
-	Remova as ramificações remotas que não possuam uma contraparte local. Uma ramificação remota `tmp` será removida caso uma ramificação local com o mesmo nome não existir mais por exemplo. Isso também respeita os "refespecs", por exemplo O comando `git push --prune remote refs/heads/*:refs/tmp/*` garantiria que o `refs/tmp/foo` remoto seja removido caso o `refs/heads/foo` não exista.
+	Remove remote branches that don't have a local counterpart. For example a remote branch `tmp` will be removed if a local branch with the same name doesn't exist any more. This also respects refspecs, e.g. `git push --prune remote refs/heads/*:refs/tmp/*` would make sure that remote `refs/tmp/foo` will be removed if `refs/heads/foo` doesn't exist.
 
 --mirror::
-	Em vez de nomear cada "ref" para fazer o impulsionamento, determine que todos os refs no `refs/` (que incluem, mas não se limitam a `refs/heads/`, `refs/remotes/` e `refs/tags/`) sejam espelhados para o repositório remoto. As refs locais que foram recém-criadas serão enviadas para a extremidade remota, as refs que foram atualizadas localmente terão a sua atualização imposta no lado remoto e as refs que foram excluídas serão removidas remotamente. Esta é a predefinição caso a opção de configuração `remote.<remoto>.mirror` esteja definido.
+	Instead of naming each ref to push, specifies that all refs under `refs/` (which includes but is not limited to `refs/heads/`, `refs/remotes/`, and `refs/tags/`) be mirrored to the remote repository. Newly created local refs will be pushed to the remote end, locally updated refs will be force updated on the remote end, and deleted refs will be removed from the remote end. This is the default if the configuration option `remote.<remote>.mirror` is set.
 
 -n::
 --dry-run::
 	Faça tudo, exceto realmente enviar as atualizações.
 
 --porcelain::
-	Gere uma saída legível para uma máquina. A linha da condição geral para cada "ref" será separada por tabulação e encaminhada para o stdout em vez de stderr. Os nomes simbólicos completos das refs serão informados.
+	Produce machine-readable output. The output status line for each ref will be tab-separated and sent to stdout instead of stderr. The full symbolic names of the refs will be given.
 
 -d::
 --delete::
@@ -98,31 +98,31 @@ A `tag <tag>` significa o mesmo que `refs/tags/<tag>:refs/tags/<tag>`.
 	Todas as refs no `refs/tags` são impulsionadas, além das "refspecs" que forem explicitamente listados na linha de comando.
 
 --follow-tags::
-	Impulsione todas as refs que seriam enviadas sem esta opção e também as tags anotadas no `refs/tags` que estão ausentes no ramo remoto, mas estão apontando para o "commit-ish" acessível a partir das referências sendo impulsionadas. Também pode ser definido com a variável de configuração `push.followTags`. Para mais informações, consulte `push.followTags` no linkgit:git-config[1].
+	Push all the refs that would be pushed without this option, and also push annotated tags in `refs/tags` that are missing from the remote but are pointing at commit-ish that are reachable from the refs being pushed. This can also be specified with configuration variable `push.followTags`. For more information, see `push.followTags` in linkgit:git-config[1].
 
 --[no-]signed::
 --signed=(true|false|if-asked)::
-	O GPG assina a solicitação impulsionamento para atualizar os `refs` no lado do recebimento permitindo que ele seja verificado pelos ganchos ou seja catalogado nos registros. Caso as opções `false` ou `--no-signed` sejam utilizadas, nenhuma tentativa de assinatura será feita. Caso as opções `true` ou `--signed` sejam utilizadas, o impulsionamento irá falhará caso o servidor não seja compatível com impulsionamentos assinados. Caso seja definido com `if-asked`, a assinatura só será realizada caso o servidor seja compatível com impulsionamentos assinados. O impulsionamento falhará caso a chamada atual para o comando `gpg --sign` falhe. Para obter detalhes sobre o recebimento na parte final, consulte linkgit:git-receive-pack[1].
+	GPG-sign the push request to update refs on the receiving side, to allow it to be checked by the hooks and/or be logged. If `false` or `--no-signed`, no signing will be attempted. If `true` or `--signed`, the push will fail if the server does not support signed pushes. If set to `if-asked`, sign if and only if the server supports signed pushes. The push will also fail if the actual call to `gpg --sign` fails. See linkgit:git-receive-pack[1] for the details on the receiving end.
 
 --[no-]atomic::
-	Utilize uma transação atômica no lado remoto, caso esteja disponível. Ou todas as refs são atualizadas ou, por erro, nenhuma será. Caso o servidor não seja compatível com impulsionamento atômico, o impulsionamento "push" irá falhar.
+	Use an atomic transaction on the remote side if available. Either all refs are updated, or on error, no refs are updated. If the server does not support atomic pushes the push will fail.
 
 -o <opção>::
 --push-option=<opção>::
-	Transmita a sequência informada para o servidor, que o repassa ao gancho de pré recebimento assim como o de pré recebimento. A sequência informada não deve conter um caractere `NUL` ou `LF`. Quando várias opções `--push-option=<opção>` são utilizadas, todas elas são enviadas ao outro lado para que sejam listadas na linha de comando. Quando nenhum comando `--push-option=<option>` é utilizado, então os valores da configuração da variável `push.pushOption` passam a ser utilizados.
+	Transmit the given string to the server, which passes them to the pre-receive as well as the post-receive hook. The given string must not contain a NUL or LF character. When multiple `--push-option=<option>` are given, they are all sent to the other side in the order listed on the command line. When no `--push-option=<option>` is given from the command line, the values of configuration variable `push.pushOption` are used instead.
 
---receive-pack=<git-recebe-pacote>::
---exec=<git-recebe-pacote>::
-	O caminho para o programa 'git-receive-pack' na extremidade remota. Às vezes é útil ao enviar para um repositório remoto através do ssh e você não possui o programa no diretório no `$PATH` predefinido.
+--receive-pack=<git-receive-pack>::
+--exec=<git-receive-pack>::
+	Path to the 'git-receive-pack' program on the remote end. Sometimes useful when pushing to a remote repository over ssh, and you do not have the program in a directory on the default $PATH.
 
 --[no-]force-with-lease::
 --force-with-lease=<refname>::
 --force-with-lease=<refname>:<expect>::
 	Normalmente, o comando "git push" se recusa a atualizar uma "ref" remota que não seja um ancestral da "ref" local utilizada para substituí-la.
 +
-Esta opção substitui esta restrição caso o valor atual da "ref" remota seja o valor esperado. Caso contrário o "git push" vai falhar.
+This option overrides this restriction if the current value of the remote ref is the expected value. "git push" fails otherwise.
 +
-Imagine que você precise refazer o que já foi publicado. Você precisará ignorar a regra "deve avançar rapidamente" para substituir o histórico publicado originalmente através histórico que foi reformulado. Caso alguém construa no topo do seu histórico original enquanto você está fazendo um "rebase", o topo do ramo no ramo remoto pode avançar com o commit dela e impulsionar cegamente com o `--force` fará com que ela perca o trabalho dela.
+Imagine that you have to rebase what you have already published. You will have to bypass the "must fast-forward" rule in order to replace the history you originally published with the rebased history. If somebody else built on top of your original history while you are rebasing, the tip of the branch at the remote may advance with their commit, and blindly pushing with `--force` will lose their work.
 +
 Esta opção permite que você diga que vai esperar que o histórico que está sendo atualizando seja o que você reconstruiu com o "rebase" e vai querer substituir. Casi uma "ref" remota ainda aponte para um commit específico, você pode ter certeza que outras pessoas não fizeram nada com a "ref". É como fazer uma "concessão" na ref sem bloqueá-la diretamente, a "ref" remota será atualizada apenas caso a "concessão" ainda seja válida.
 +
@@ -130,7 +130,7 @@ Somente a opção `--force-with-lease`, sem qualquer outra definição, proteger
 +
 A opção `--force-with-lease=<refname>`, sem qualquer outro valor esperado, protegerá a "ref" que foi informado (sozinho), caso seja atualizado, exigindo que o seu valor atual seja o mesmo que o ramo monitorado remotamente que temos para isso.
 +
-`--force-with-lease=<refname>:<expect>` protegerá o ref informado (sozinho), caso seja atualizado, exigindo que o seu valor atual seja o mesmo que o valor definido `<expect >` (que pode ser diferente do ramo monitorado remotamente que temos para o refname ou nem precisamos ter esse ramo monitorado de forma remota quando este formulário é utilizado). Caso `<expect>` esteja vazio, então a ref informada já não deve existir.
+`--force-with-lease=<refname>:<expect>` will protect the named ref (alone), if it is going to be updated, by requiring its current value to be the same as the specified value `<expect>` (which is allowed to be different from the remote-tracking branch we have for the refname, or we do not even have to have such a remote-tracking branch when this form is used). If `<expect>` is the empty string, then the named ref must not already exist.
 +
 Observe que todas as formas diferentes da opção `--force-with-lease=<refname>:<expect>` que define o valor atual esperado para a "ref" de forma explicita, ainda são experimentais e sua semântica pode mudar à medida que adquiramos mais experiência com este recurso.
 +
@@ -162,11 +162,11 @@ Alternativamente, ao usar a opção `--force-if-includes` como uma opção auxil
 
 -f::
 --force::
-	Normalmente, o comando se recusa a atualizar uma "ref" remota que não seja um ancestral da "ref" local utilizada para substituí-la. Além disso, quando a opção `--force-with-lease` é utilizada, o comando se recusa a atualizar uma "ref" remota cujo valor atual não corresponda ao esperado.
+	Usually, the command refuses to update a remote ref that is not an ancestor of the local ref used to overwrite it. Also, when `--force-with-lease` option is used, the command refuses to update a remote ref whose current value does not match what is expected.
 +
 Esta opção desativa estas verificações e pode causar a perda do commit no repositório remoto; utilize com cuidado.
 +
-Observe que a opção `--force` se aplica a todos os refs que são impulsionados, portanto, utilizá-lo com `push.default` definido como `matching` ou com os vários impulsionamentos nos destinos configurados com `remote.*.push`, pode substituir as outras refs que não sejam o ramo atual (incluindo as refs locais que estão estritamente por trás de sua contraparte remota). Para impor um impulsionamento "push" em apenas um ramo, utilize um `+` na frente do "refspec" que será impulsionado (como `git push origin +master` para impor um impulsionamento "push" no ramo `master` por exemplo). Consulte a seção `<refspec>...` acima para obter mais detalhes.
+Note that `--force` applies to all the refs that are pushed, hence using it with `push.default` set to `matching` or with multiple push destinations configured with `remote.*.push` may overwrite refs other than the current branch (including local refs that are strictly behind their remote counterpart). To force a push to only one branch, use a `+` in front of the refspec to push (e.g `git push origin +master` to force a push to the `master` branch). See the `<refspec>...` section above for details.
 
 --[no-]force-if-includes::
 	Impõem uma atualização apenas se o topo da ref monitorada remotamente estiver integrada localmente.
@@ -200,12 +200,12 @@ Usando a opção `--no-force-if-includes` desativa este comportamento.
 
 --no-recurse-submodules::
 --recurse-submodules=check|on-demand|only|no::
-	Pode ser utilizado para garantir que todos os submódulo dos commits utilizadas pelas revisões que serão enviadas estejam disponíveis numa ramificação monitorada remotamente. Caso 'check' seja utilizado, o Git verificará se todos os commit do submódulo que foram alterados nas revisões que serão enviadas estão disponíveis em pelo menos um ramo remoto do submódulo. Caso algum commit esteja ausente, o push será abortado e encerrará com uma condição diferente de zero. Caso 'on demand' seja utilizado, todos os submódulos que foram alterados nas revisões que serão impulsionadas, serão impulsionadas. Caso 'on demand' não puder enviar todas as revisões necessárias, ela também será abortada e sairá com uma condição diferente de zero. Caso 'only' seja utilizado, todos os submódulos serão impulsionados enquanto o super projeto não seja deixado sem impulsionamento. Um valor de 'no' ou utilizando a opção `--no-recurse-submodules` pode ser utilizado para substituir a variável de configuração `push.recurseSubmodules` quando nenhuma recursão do submódulo for necessária.
+	May be used to make sure all submodule commits used by the revisions to be pushed are available on a remote-tracking branch. If 'check' is used Git will verify that all submodule commits that changed in the revisions to be pushed are available on at least one remote of the submodule. If any commits are missing the push will be aborted and exit with non-zero status. If 'on-demand' is used all submodules that changed in the revisions to be pushed will be pushed. If on-demand was not able to push all necessary revisions it will also be aborted and exit with non-zero status. If 'only' is used all submodules will be pushed while the superproject is left unpushed. A value of 'no' or using `--no-recurse-submodules` can be used to override the push.recurseSubmodules configuration variable when no submodule recursion is required.
 +
 Ao usar 'on-demand' ou 'only', caso um submódulo tenha uma configuração "push.recurseSubmodules={on-demand,only}" ou "submodule.recurse", haverá uma recursão adicional. Nesse caso, "only" é tratado como "on-demand"(sob demanda).
 
 --[no-]verify::
-	Alterna o gancho "pre-push" (consulte linkgit:githooks[5]). A opção `--verify` é a predefinição, dando ao gancho a chance de impedir o impulsionamento. Com a opção --no-verify, o gancho é completamente ignorado.
+	Toggle the pre-push hook (see linkgit:githooks[5]). The default is --verify, giving the hook a chance to prevent the push. With --no-verify, the hook is bypassed completely.
 
 -4::
 --ipv4::
@@ -255,7 +255,7 @@ rejeitado::
 	O Git não tenta encaminhar a "ref" de forma alguma, geralmente porque não é um avanço rápido e você não impôs a atualização.
 
 rejeitado remotamente::
-	Quando o lado remoto recusa a atualização. Geralmente cautilizada por um gancho no lado remoto ou porque o repositório remoto possui uma das seguintes opções de segurança em vigor: `receive.denyCurrentBranch` (para um `push` feiro num ramo verificado), `receive.denyNonFastForwards` (para atualizações impostas ou rápidas), `receive.denyDeletes` ou `receive.denyDeleteCurrent`. Consulte linkgit:git-config[1].
+	The remote end refused the update. Usually caused by a hook on the remote side, or because the remote repository has one of the following safety options in effect: `receive.denyCurrentBranch` (for pushes to the checked out branch), `receive.denyNonFastForwards` (for forced non-fast-forward updates), `receive.denyDeletes` or `receive.denyDeleteCurrent`. See linkgit:git-config[1].
 
 falha remota::
 	O lado remoto não relatou a atualização bem-sucedida da "ref", talvez por causa de um erro temporário, uma interrupção na conexão da rede ou um outro erro transitório.
@@ -275,9 +275,9 @@ NOTA SOBRE AVANÇOS RÁPIDOS
 
 Quando uma atualização altera um ramo (ou geralmente uma "ref") que costumava apontar para o commit 'A' que aponta para outro commit 'B', é chamado de atualização de avanço rápido apenas e somente se 'B' for descendente de 'A'.
 
-Em uma atualização de avanço rápido de A para B, o conjunto dos commits que o commit original A que construiu sobre ela é um subconjunto dos commits que o novo commit B constrói sobre ela. Portanto, não perde nenhum histórico.
+In a fast-forward update from A to B, the set of commits that the original commit A built on top of is a subset of the commits the new commit B builds on top of. Hence, it does not lose any history.
 
-Por outro lado, uma atualização sem avanço rápido perderá o histórico. Por exemplo, suponha que você e uma outra pessoa tenham iniciado o mesmo commit 'X' e você construiu um histórico que leva ao commit 'B', enquanto a outra pessoa construiu um histórico que leva ao commit 'A'. O histórico ficaria assim:
+In contrast, a non-fast-forward update will lose history. For example, suppose you and somebody else started at the same commit X, and you built a history leading to commit B while the other person built a history leading to commit A. The history looks like this:
 
 ----------------
 
@@ -289,15 +289,15 @@ Por outro lado, uma atualização sem avanço rápido perderá o histórico. Por
 
 Além disso, suponha que a outra pessoa já tenha enviado as alterações que levam "A" de volta ao repositório original, a partir do qual vocês dois obtiveram o commit "X" original.
 
-O impulsionamento feito pela outra pessoa atualizou o ramo que costumava apontar no commit 'X' para apontar no commit 'A'. É um avanço rápido.
+The push done by the other person updated the branch that used to point at commit X to point at commit A. It is a fast-forward.
 
-Porém caso você tente impulsionar, você tentará atualizar o ramo (que agora aponta para 'A') com o commit 'B'. Isso _não_ fa o avanço rapido. Se você fez isso, as alterações introduzidas pelo commit 'A' serão perdidas, porque todo mundo começará a construir em cima do 'B'.
+But if you try to push, you will attempt to update the branch (that now points at A) with commit B. This does _not_ fast-forward. If you did so, the changes introduced by commit A will be lost, because everybody will now start building on top of B.
 
 É predefinido que o comando não permita uma atualização que não seja um avanço rápido para impedir esta perda do histórico.
 
 Caso não queira perder o seu trabalho (histórico 'X' para 'B') ou o trabalho da outra pessoa (histórico de 'X' para 'A'), é necessário primeiro buscar o histórico no repositório, criar um histórico que contenha as alterações feitas por ambas as partes e que impulsione o resultado de volta.
 
-É possível executar o comando "git pull", para resolver os possíveis conflitos e comando "git push" o resultado. Um comando "git pull" criará um commit da mesclagem 'C' entre os commits 'A' e 'B'.
+You can perform "git pull", resolve potential conflicts, and "git push" the result. A "git pull" will create a merge commit C between commits A and B.
 
 ----------------
 
@@ -309,7 +309,7 @@ Caso não queira perder o seu trabalho (histórico 'X' para 'B') ou o trabalho d
 
 A atualização de "A" com a consolidação resultante da mesclagem, avançará rapidamente e o seu envio será aceito.
 
-Como alternativa, você pode reconstruir a sua alteração entre 'X' e o 'B' no topo de 'A', com o comando "git pull --rebase", e fazer o impulsionamento do resultado de volta. Uma reconstrução da fundação "rebase" criará um novo commit 'D' que gera a alteração entre 'X' e 'B' em cima de 'A'.
+Alternatively, you can rebase your change between X and B on top of A, with "git pull --rebase", and push the result back. The rebase will create a new commit D that builds the change between X and B on top of A.
 
 ----------------
 
@@ -335,19 +335,19 @@ EXEMPLOS
 +
 O comportamento predefinido deste comando quando nenhum <refspec> for informado, pode ser configurado definindo a opção `push` do ramo remoto ou a variável de configuração `push.default`.
 +
-Por exemplo, para utilizar como predefinido apenas no ramo atual para `origin`, utilize `git config remote.origin.push HEAD`. Qualquer <refspec> válido (como os exemplos abaixo) pode ser configurado como a predefinição para `git push origin`.
+For example, to default to pushing only the current branch to `origin` use `git config remote.origin.push HEAD`. Any valid <refspec> (like the ones in the examples below) can be configured as the default for `git push origin`.
 
 `git push origin :`::
 	Impulsiona (push) as ramificações "que coincidam" para `origin`. Consulte o <refspec> na seção <<OPTIONS,OPTIONS>> acima para obter uma descrição dos ramos "coincidentes".
 
 `git push origin master`::
-	Encontre uma "ref" que coincida com o `master` no repositório da origem (provavelmente encontrará `refs/heads/master`) e atualize a mesma "ref" (`refs/heads/master` por exemplo) no repositório `origin` com ela . Caso o `master` não existisse remotamente, ele seria criado.
+	Find a ref that matches `master` in the source repository (most likely, it would find `refs/heads/master`), and update the same ref (e.g. `refs/heads/master`) in `origin` repository with it. If `master` did not exist remotely, it would be created.
 
 `git push origin HEAD`::
 	Uma maneira prática de enviar a ramificação atual com o mesmo nome no ramo remoto.
 
 `git push mothership master:satellite/master dev:satellite/dev`::
-	Utilize a fonte "ref" que coincida com `master` (`refs/heads/ master` por exemplo) para atualizar a "ref" que coincida com `satellite/master` (provavelmente `refs/remotes/satellite/master`) no repositório `mothership`; faça o mesmo para `dev` e `satellite/dev`.
+	Use the source ref that matches `master` (e.g. `refs/heads/master`) to update the ref that matches `satellite/master` (most probably `refs/remotes/satellite/master`) in the `mothership` repository; do the same for `dev` and `satellite/dev`.
 +
 Consulte a seção que descreve `<refspec> ...` acima para uma discussão sobre a combinação semântica.
 +
@@ -359,13 +359,13 @@ Depois de executar o comando `git push` na máquina do `satellite`, você entrar
 	Envie o ramo atual para a referência remota que coincida com `master` no repositório `origin`. Este formulário é conveniente para impulsionar o ramo atual sem pensar no nome local.
 
 `git push origin master:refs/heads/experimental`::
-	Crie o ramo `experimental` no repositório `origin` copiando o ramo `master` atual. Este formulário é necessário apenas para criar um novo ramo ou a tag no repositório remoto quando o nome local e o nome remoto forem diferentes; caso contrário, o nome da "ref" por si só funcionará.
+	Create the branch `experimental` in the `origin` repository by copying the current `master` branch. This form is only needed to create a new branch or tag in the remote repository when the local name and the remote name are different; otherwise, the ref name on its own will work.
 
 `git push origin :experimental`::
 	Encontre uma "ref" que coincida com `experimental` no repositório `origin` (`refs/heads/experimental` por exemplo) e exclua-a.
 
 `git push origin +dev:master`::
-	Atualize o ramo principal na origem do repositório com o ramo 'dev', permitindo atualizações sem o avanço rápido. *Isso pode deixar os commits sem referência pendentes no repositório de origem.* Considere a seguinte situação, onde um avanço rápido não seja possível:
+	Update the origin repository's master branch with the dev branch, allowing non-fast-forward updates. *This can leave unreferenced commits dangling in the origin repository.* Consider the following situation, where a fast-forward is not possible:
 +
 ----
 	    o---o---o---A---B  origin/master
@@ -381,7 +381,7 @@ O comando acima alteraria o repositório de origem para
 	    o---o---o---X---Y---Z  master
 ----
 +
-Os commits 'A' e 'B' não pertenceriam mais a um ramo com um nome simbólico, portanto, seriam inacessíveis. Como tal, estes commits seriam removidos por um comando `git gc` no repositório de origem.
+Commits A and B would no longer belong to a branch with a symbolic name, and so would be unreachable. As such, these commits would be removed by a `git gc` command on the origin repository.
 
 include::transfer-data-leaks.txt[]
 

@@ -8,22 +8,22 @@ git-revert - 还原某些现有提交
 概述
 --
 [verse]
-'git revert' [--[no-]edit] [-n] [-m <parent-number>] [-s] [-S[<keyid>]] <commit>...
+'git revert' [--[no-]edit] [-n] [-m <父提交数量>] [-s] [-S[<键 ID>]] <提交>...
 'git revert' (--continue | --skip | --abort | --quit)
 
 描述
 --
 
-给定一个或多个现有提交，还原相关补丁引入的更改，并记录一些新提交来记录这些更改。 这要求你的工作区是干净的（没有对 HEAD 提交的修改）。
+Given one or more existing commits, revert the changes that the related patches introduce, and record some new commits that record them. This requires your working tree to be clean (no modifications from the HEAD commit).
 
-注意：'git revert' 用于记录一些新的提交，以扭转先前提交（通常只是错误的提交）的影响。 如果您想丢弃工作目录中所有未提交的改动，请参阅 linkgit:git-reset[1]，尤其是 `--hard` 选项。 如果你想提取其他提交中的特定文件，请参阅 linkgit:git-restore[1]，尤其是 `--source`选项。使用这些选项时要小心，因为它们都会丢弃工作目录中未提交的改动。
+Note: 'git revert' is used to record some new commits to reverse the effect of some earlier commits (often only a faulty one). If you want to throw away all uncommitted changes in your working directory, you should see linkgit:git-reset[1], particularly the `--hard` option. If you want to extract specific files as they were in another commit, you should see linkgit:git-restore[1], specifically the `--source` option. Take care with these alternatives as both will discard uncommitted changes in your working directory.
 
 关于这三个命令的区别，见linkgit:git[1]中的 "重置、恢复和还原"。
 
 选项
 --
-<commit>...::
-	要还原的提交。 更完整的提交名拼写方式，请参见 linkgit:gitrevisions[7]。 也可以给出提交集，但默认情况下不进行遍历，参见 linkgit:git-rev-list[1] 及其 `--no-walk`选项。
+<提交>...::
+	Commits to revert. For a more complete list of ways to spell commit names, see linkgit:gitrevisions[7]. Sets of commits can also be given but no traversal is done by default, see linkgit:git-rev-list[1] and its `--no-walk` option.
 
 -e::
 --edit::
@@ -31,9 +31,9 @@ git-revert - 还原某些现有提交
 
 -m 父编号::
 --mainline parent-number::
-	通常情况下，由于不知道合并的哪一方应被视为主线，因此无法还原合并。 该选项指定了主线的父线编号（从 1 开始），允许还原指令相对于指定的父线反向更改。
+	Usually you cannot revert a merge because you do not know which side of the merge should be considered the mainline. This option specifies the parent number (starting from 1) of the mainline and allows revert to reverse the change relative to the specified parent.
 +
-还原合并提交就意味着你永远不需要合并带来的目录树变化。 因此，以后的合并只会引入目录树变化，而这些变化不是由先前已还原合并的祖先提交引入的。 这可能是你想要的，也可能不是。
+Reverting a merge commit declares that you will never want the tree changes brought in by the merge. As a result, later merges will only bring in tree changes introduced by commits that are not ancestors of the previously reverted merge. This may or may not be what you want.
 +
 更多详情，请参阅 link:howto/revert-a-faulty-merge.html[revert-a-faulty-merge 如何操作]。
 
@@ -45,30 +45,30 @@ git-revert - 还原某些现有提交
 
 -n::
 --no-commit::
-	通常，该命令会自动创建一些提交，并在提交日志信息中说明哪些提交被还原。 该标记会对工作区和索引进行必要的修改，以还原指定的提交，但不会进行提交。 此外，使用该选项时，索引不必与 HEAD 提交相匹配。 还原是针对索引的起始状态进行的。
+	Usually the command automatically creates some commits with commit log messages stating which commits were reverted. This flag applies the changes necessary to revert the named commits to your working tree and the index, but does not make the commits. In addition, when this option is used, your index does not have to match the HEAD commit. The revert is done against the beginning state of your index.
 +
 这在连续恢复多个提交对索引的影响时非常有用。
 
 -S[<keyid>]::
---gpg-sign[=<keyid>]::
+--gpg-sign[=<键 ID>]::
 --no-gpg-sign::
 	GPG 签名提交。`keyid` 参数是可选的，默认为提交者身份；如果指定了，则必须与选项相连，不加空格。`--no-gpg-sign` 用于还原 `commit.gpgSign` 配置变量和先前的 `--gpg-sign`。
 
 -s::
 --signoff::
-	在提交信息的末尾添加一个 `Signed-off-by` 的尾注。 更多信息见 linkgit:git-commit[1] 中的 signoff 选项。
+	Add a `Signed-off-by` trailer at the end of the commit message. See the signoff option in linkgit:git-commit[1] for more information.
 
---strategy=<strategy>::
-	使用给定的合并策略。 应该只使用一次。 详见 linkgit:git-merge[1] 中的合并策略部分。
+--strategy=<策略>::
+	Use the given merge strategy. Should only be used once. See the MERGE STRATEGIES section in linkgit:git-merge[1] for details.
 
--X<option>::
---strategy-option=<option>::
-	将合并策略特有的选项传递给合并策略。 详见 linkgit:git-merge[1]。
+-X<选项>::
+--strategy-option=<选项>::
+	Pass the merge strategy-specific option through to the merge strategy. See linkgit:git-merge[1] for details.
 
 include::rerere-options.txt[]
 
 --reference::
-	而不是以 “他还原了 <完整的提交对象名称>。” 作为日志信息的开头，而是使用 "--pretty=reference" 格式来引用提交（参见 linkgit:git-log[1]）。 `revert.reference` 配置变量可用于默认启用此选项。
+	Instead of starting the body of the log message with "This reverts <full-object-name-of-the-commit-being-reverted>.", refer to the commit using "--pretty=reference" format (cf. linkgit:git-log[1]). The `revert.reference` configuration variable can be used to enable this option by default.
 
 
 序列器子命令
@@ -88,7 +88,7 @@ include::sequencer.txt[]
 讨论
 --
 
-虽然 git 会自动创建基本的提交信息，但强烈建议解释为什么要还原原始提交。 此外，反复还原会导致主题行越来越笨重，例如 "Reapply "Reapply "<original subject>""。 请考虑重新措辞，使其更简短、更独特。
+While git creates a basic commit message automatically, it is _strongly_ recommended to explain why the original commit is being reverted. In addition, repeatedly reverting reverts will result in increasingly unwieldy subject lines, for example 'Reapply "Reapply "<original-subject>""'. Please consider rewording these to be shorter and more unique.
 
 配置
 --

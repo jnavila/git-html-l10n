@@ -14,16 +14,16 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Dado um ou mais commits já existentes, reverta as alterações introduzidas pelos patches relacionados e registre alguns novos commits que registram neles. Isso requer que a sua árvore de trabalho esteja limpa (nenhuma alteração a partir do commit `HEAD`).
+Given one or more existing commits, revert the changes that the related patches introduce, and record some new commits that record them. This requires your working tree to be clean (no modifications from the HEAD commit).
 
-Nota: 'git revert' é utilizado para registrar alguns commits novos para reverter o efeito de alguns commits anteriores (geralmente apenas um com problema). Caso queira descartar todos os commits das alterações que não foram aplicados no seu diretório de trabalho, você deve consultar linkgit:git-reset[1], em particular a opção `--hard`. Caso queira extrair arquivos específicos da maneira que eles estavam em um outro commit, você deve consutar linkgit:git-restore[1], principalmente a opção `--source`. Tenha cuidado com ambas alternativas pois elas descartam qualquer modificação não aplicada no seu diretório de trabalho.
+Note: 'git revert' is used to record some new commits to reverse the effect of some earlier commits (often only a faulty one). If you want to throw away all uncommitted changes in your working directory, you should see linkgit:git-reset[1], particularly the `--hard` option. If you want to extract specific files as they were in another commit, you should see linkgit:git-restore[1], specifically the `--source` option. Take care with these alternatives as both will discard uncommitted changes in your working directory.
 
 Para as diferenças entre os três comandos consulte "Redefinir, restaurar e reverter" em linkgit:git[1].
 
 OPÇÕES
 ------
 <commit>...::
-	Commits que serão revertidos. Para obter uma lista mais completa das maneiras de como soletrar os nomes dos commits, consulte linkgit:gitrevisions[7] Um conjunto de commits também podem ser informados porém nenhuma travessia é feita por padrão, consulte linkgit:git-rev-list[1] e a sua opção `--no-walk`.
+	Commits to revert. For a more complete list of ways to spell commit names, see linkgit:gitrevisions[7]. Sets of commits can also be given but no traversal is done by default, see linkgit:git-rev-list[1] and its `--no-walk` option.
 
 -e::
 --edit::
@@ -31,9 +31,9 @@ OPÇÕES
 
 -m parent-number::
 --mainline parent-number::
-	Geralmente, você não pode reverter uma mesclagem porque não sabe qual o lado da mesclagem deve ser considerado a linha principal. Esta opção determina o número do pai (começando em 1) da linha principal e permite que a reversão reverta a alteração em relação ao pai informado.
+	Usually you cannot revert a merge because you do not know which side of the merge should be considered the mainline. This option specifies the parent number (starting from 1) of the mainline and allows revert to reverse the change relative to the specified parent.
 +
-A reversão da mesclagem de um commit declara que você nunca vai querer que as alterações na árvore sejam trazidas pela mesclagem. Como resultado, as mesclagens posteriores trarão apenas as alterações na árvore introduzidas pelos commits que não sejam os ancestrais da mesclagem revertida anteriormente. Isso pode ou não ser o que você queira.
+Reverting a merge commit declares that you will never want the tree changes brought in by the merge. As a result, later merges will only bring in tree changes introduced by commits that are not ancestors of the previously reverted merge. This may or may not be what you want.
 +
 Consulte o link:howto/revert-a-faulty-merge.html[Como fazer um 'revert-a-faulty-merge'] para mais detalhes.
 
@@ -45,7 +45,7 @@ Consulte o link:howto/revert-a-faulty-merge.html[Como fazer um 'revert-a-faulty-
 
 -n::
 --no-commit::
-	Geralmente, o comando cria automaticamente alguns commits com mensagens no registro log informando quais commits foram revertidos. Esta opção aplica as alterações necessárias para reverter os commits informados para a sua árvore de trabalho e o índice, mas não faz os commits. Além disso, quando esta opção é utilizada, o seu índice não precisa coincidir ao HEAD do commit. A reversão é feita na condição inicial do seu índice.
+	Usually the command automatically creates some commits with commit log messages stating which commits were reverted. This flag applies the changes necessary to revert the named commits to your working tree and the index, but does not make the commits. In addition, when this option is used, your index does not have to match the HEAD commit. The revert is done against the beginning state of your index.
 +
 Isso é útil durante ao reverter o efeito de um ou mais commits no seu índice, numa linha.
 
@@ -56,19 +56,19 @@ Isso é útil durante ao reverter o efeito de um ou mais commits no seu índice,
 
 -s::
 --signoff::
-	Adicione um `Assinado por` a linha de assinatura no final da mensagem do commit. Para mais informações, consulte a opção 'signoff' em linkgit:git-commit[1].
+	Add a `Signed-off-by` trailer at the end of the commit message. See the signoff option in linkgit:git-commit[1] for more information.
 
 --strategy=<estratégia>::
-	Use a estratégia de mesclagem fornecida. Deve ser usado apenas uma vez. Veja a seção MERGE STRATEGIES em linkgit:git-merge[1] para detalhes.
+	Use the given merge strategy. Should only be used once. See the MERGE STRATEGIES section in linkgit:git-merge[1] for details.
 
 -X<opção>::
 --strategy-option=<opção>::
-	Encaminhe a um opção específica até a estratégia de mesclagem. Para mais detalhes, consulte linkgit:git-merge[1].
+	Pass the merge strategy-specific option through to the merge strategy. See linkgit:git-merge[1] for details.
 
 include::rerere-options.txt[]
 
 --reference::
-	Em vez de iniciar o corpo da mensagem do registro log com "This reverts <full object name of the commit being reverted>.", consulte o commit usando o formato `--pretty=reference` (cf. linkgit:git-log[1] ). A variável de configuração `revert.reference` pode ser usada para ativar esta opção por padrão.
+	Instead of starting the body of the log message with "This reverts <full-object-name-of-the-commit-being-reverted>.", refer to the commit using "--pretty=reference" format (cf. linkgit:git-log[1]). The `revert.reference` configuration variable can be used to enable this option by default.
 
 
 SEQUENCER SUBCOMANDOS
@@ -88,7 +88,7 @@ EXEMPLOS
 DISCUSSÃO
 ---------
 
-Embora o git crie uma mensagem básica de commit automaticamente, é altamente recomendável explicar por que o commit original está sendo revertido. Além disso, reverter repetidamente as reversões resultará em linhas de assunto cada vez mais complicadas, por exemplo, 'Reaplicar "Reaplicar "<assunto original>"". Considere a possibilidade de reformulá-las para que sejam mais curtas e exclusivas.
+While git creates a basic commit message automatically, it is _strongly_ recommended to explain why the original commit is being reverted. In addition, repeatedly reverting reverts will result in increasingly unwieldy subject lines, for example 'Reapply "Reapply "<original-subject>""'. Please consider rewording these to be shorter and more unique.
 
 CONFIGURAÇÃO
 ------------

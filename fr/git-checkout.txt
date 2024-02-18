@@ -35,7 +35,7 @@ Vous pourriez omettre `<branche>`, auquel cas la commande dégénère en « extr
 
 'git checkout' -b|-B <nouvelle-branche> [<point-de-départ>]::
 
-	Spécifier `-b` provoque la création d'une nouvelle branche comme si linkgit:git-branch[1] était lancé puis la branche extraite. Dans ce cas, vous pouvez utiliser les options `--track` ou `--no-track`, qui seront passées à 'git branch'. Pour plus de confort, `--track` sans `-b` implique la création d'une branche ; voir la description de `--track` ci-dessous.
+	Spécifier `-b` provoque la création d'une nouvelle branche comme si linkgit:git-branch[1] était lancé puis la branche extraite. Dans ce cas, vous pouvez utiliser les options `--track` ou `--no-track`, qui seront passées à 'git branch'. Pour plus de confort, `--track` sans `-b` implique la création d'une branche ; voir la description de `--track` ci-dessous.
 +
 Si `-B` est fourni, `<nouvelle-branche>` est créée si elle n'existe pas ; sinon, elle est réinitialisée. C'est l'équivalent transactionnel de
 +
@@ -44,7 +44,7 @@ $ git branch -f <branche> [<point-de-départ>]
 $ git checkout <branche>
 ------------
 +
-ce qui veut dire que la branche n'est pas créée ou réinitialisée à moins que « git checkout » soit réussie.
+c'est-à-dire que la branche n'est pas réinitialisée/créée à moins que "git checkout" soit réussi (par exemple, lorsque la branche est utilisée dans un autre arbre de travail, pas seulement que la branche actuelle reste la même, mais la branche n'est pas réinitialisée au point de départ non plus).
 
 'git checkout' --detach [<branche>]::
 'git checkout' [--detach] <commit>::
@@ -93,7 +93,7 @@ C'est parce que `rebase` est utilisé dans une approche qui traite l'historique 
 	Créer une nouvelle branche nommée `<nouvelle-branche>`, la commencer à `<point-de-départ>` et extraire la branche résultante ; voir linkgit:git-branch[1] pour plus de détails.
 
 -B <nouvelle-branche>::
-	Créer la branche `<nouvelle-branche>`, la commencer à `<point-de-départ>` et l'extraire ; si elle existe déjà, alors la réinitialise à `<point-de-départ>`. C'est équivalent à lancer 'git branch' avec `-f` suivi de 'git checkout' de cette branche ; voir linkgit:git-branch[1] pour plus de détails.
+	Créer la branche `<nouvelle-branche>`, la commencer à `<point-de-départ>` et l'extraire ; si elle existe déjà, alors la réinitialise à `<point-de-départ>`. C'est équivalent à lancer 'git branch' avec `-f` suivi de 'git checkout' de cette branche ; voir linkgit:git-branch[1] pour plus de détails.
 
 -t::
 --track[=(direct|inherit)]::
@@ -126,7 +126,7 @@ Le comportement par défaut peut être défini via la variable de configuration 
 	Plutôt que d'extraire une branche pour travailler dessus, extraire un commit pour l'inspecter et faire des expériences jetables. C'est le comportement par défaut de `git checkout <commit>` quand `<commit>` n'est pas un nom de branche. Voir la section « HEAD DÉTACHÉE » plus bas pour plus de détails.
 
 --orphan <nouvelle-branche>::
-	Créer une nouvelle branche « orpheline », nommée `<nouvelle-branche>`, commençant depuis `<point-de-départ>` et basculer dessus. Le premier commit réalisé sur cette branche n'aura pas de parent et il sera la racine du nouvel historique totalement déconnecté de toutes les autres branches et des autres commits.
+	Créer une nouvelle branche non née, nommée `<nouvelle-branche>`, commençant depuis `<point-de-départ>` et basculer dessus. Le premier commit réalisé sur cette branche n'aura pas de parent et il sera la racine du nouvel historique totalement déconnecté de toutes les autres branches et des autres commits.
 +
 L'index et l'arbre de travail sont ajustés comme si vous aviez déjà lancé `git checkout <point-de-départ>`. Cela vous permet de démarrer un nouvel historique qui enregistre un ensemble de chemins similaires à `<point-de-départ>` en lançant simplement `git commit -a` pour créer le commit racine.
 +
@@ -163,7 +163,7 @@ Notez que cette option utilise par défaut le mode sans superposition (voir auss
 
 --overwrite-ignore::
 --no-overwrite-ignore::
-	Écraser silencieusement les fichiers ignorés lors du basculement de branche. C'est le comportement par défaut. Utilisez `--no overwrite-ignore` pour annuler l'opération lorsque la nouvelle branche contient des fichiers ignorés.
+	Écraser silencieusement les fichiers ignorés lors du basculement de branche. C'est le comportement par défaut. Utilisez `--no-overwrite-ignore` pour annuler l'opération lorsque la nouvelle branche contient des fichiers ignorés.
 
 --recurse-submodules::
 --no-recurse-submodules::
@@ -250,7 +250,7 @@ a---b---c---d  branch 'master' (se réfère au commit 'd')
   tag 'v2.0' (se réfère au commit 'b')
 ------------
 
-Veuillez noter que quelle que soit la commande d'extraction utilisée, `HEAD` pointe maintenant directement sur le commit `b`. C'est connu comme étant l'état `HEAD` détachée. Ceci signifie simplement que `HEAD` fait référence à un commit spécifique, par opposition à une référence à une branche nommée. Voyons ce qui arrive quand un commit est créé :
+Veuillez noter que quelle que soit la commande d'extraction utilisée, `HEAD` pointe maintenant directement sur le commit `b`. C'est connu comme étant l'état `HEAD` détachée. Ceci signifie simplement que `HEAD` fait référence à un commit spécifique, par opposition à une référence à une branche nommée. Voyons ce qui arrive quand un commit est créé :
 
 ------------
 $ edit; git add; git commit
@@ -344,7 +344,7 @@ $ git checkout -- '*.c'
 
 Notez les guillemets autour de `*.c`. Le fichier `hello.c` sera aussi extrait, même s'il n'est plus dans l'arbre de travail, parce que le patron de fichier est utilisé pour trouver les entrées dans l'index (et non dans l'arbre de travail par le shell).
 
-Si vous avez une branche qui s'appelle malheureusement `hello.c`, cette étape pourrait être confondue avec une instruction de basculer sur cette branche. Vous devriez alors plutôt écrire :
+Si vous avez une branche qui s'appelle malheureusement `hello.c`, cette étape pourrait être confondue avec une instruction de basculer sur cette branche. Vous devriez alors plutôt écrire :
 
 ------------
 $ git checkout -- hello.c
@@ -385,7 +385,7 @@ CONFLIT (contenu): Conflit de fusion dans frotz
 fatal: merge program failed
 ------------
 
-À ce stade, `git diff` affiche les modifications proprement fusionnées comme dans l'exemple précédent, ainsi que les modifications en conflit. Éditez et résolvez le conflit et marquez-le résolu avec `git add` comme d'habitude :
+À ce stade, `git diff` affiche les modifications proprement fusionnées comme dans l'exemple précédent, ainsi que les modifications en conflit. Éditez et résolvez le conflit et marquez-le résolu avec `git add` comme d'habitude :
 
 ------------
 $ edit frotz

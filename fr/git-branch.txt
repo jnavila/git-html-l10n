@@ -16,7 +16,7 @@ SYNOPSIS
 	[--points-at <objet>] [--format=<format>]
 	[(-r | --remotes) | (-a | --all)]
 	[--list] [<motif>...]
-'git branch' [--track [direct|inherit] | --no-track] [-f]
+'git branch' [--track[=(direct|inherit)] | --no-track] [-f]
 	[--recurse-submodules] <nom-de-branche> [<point-de-départ>]
 'git branch' (--set-upstream-to=<amont> | -u <amont>) [<nom-de-branche>]
 'git branch' --unset-upstream [<nom-de-branche>]
@@ -28,7 +28,7 @@ SYNOPSIS
 DESCRIPTION
 -----------
 
-Si `--list` est donné, ou s'il n'y a pas d'arguments sans option, les branches existantes sont listées ; la branche actuelle sera surlignée en vert et marquée d'un astérisque. Toutes les branches extraites dans les arbres de travail liés seront mis en évidence en cyan et marqués d'un signe plus. L'option `-r` ajoute la liste des branches de suivi à distance et l'option` -a` affiche les branches locales et distantes.
+Si `--list` est donné, ou s'il n'y a pas d'arguments sans option, les branches existantes sont listées ; la branche actuelle sera surlignée en vert et marquée d'un astérisque. Toutes les branches extraites dans les arbres de travail liés seront mis en évidence en cyan et marqués d'un signe plus. L'option `-r` ajoute la liste des branches de suivi à distance et l'option` -a` affiche les branches locales et distantes.
 
 Si un `<motif>` est donné, il est utilisé comme joker du shell pour restreindre la sortie aux branches correspondantes. Si plusieurs motifs sont donnés, une branche est affichée si elle correspond à l'un des motifs.
 
@@ -46,7 +46,7 @@ Avec une option `-m` ou `-M`, <ancienne-branche> sera renommée en <nouvelle-bra
 
 Les options `-c` et `-C` ont exactement la même sémantique que `-m` et `-M`, sauf qu'au lieu de renommer la branche,elle sera copiée sous un nouveau nom avec sa configuration et son reflog.
 
-Avec une option `-d` ou `-D`, `<branchname>` sera supprimé. Vous pouvez spécifier plus d'une branche pour la suppression. Si la branche a actuellement un reflog, alors le reflog sera aussi supprimé.
+Avec une option `-d` ou `-D`, `<nom-de-branche>` sera supprimé. Vous pouvez spécifier plus d'une branche pour la suppression. Si la branche a actuellement un reflog, alors le reflog sera aussi supprimé.
 
 Utilisez `-r` avec `-d` pour supprimer les branches de suivi à distance. Notez qu'il est logique de supprimer les branches de suivi à distance uniquement si elles n'existent plus dans le dépôt distant ou si "git fetch" a été configuré pour ne pas les récupérer à nouveau. Voir aussi la sous-commande « prune » de linkgit:git-remote[1] pour une méthode de nettoyage toutes les branches obsolètes de suivi à distance.
 
@@ -74,14 +74,14 @@ Notez que 'git branch -f <branche> [<point-de-départ>]', même avec '-f', refus
 	Déplacer/renommer une branche ainsi que sa config et son reflog .
 
 -M::
-	Raccourci pour `--move-force`.
+	Raccourci pour `--move --force`.
 
 -c::
 --copy::
 	Copier une branche, ainsi que sa config et son reflog.
 
 -C::
-	Raccourci pour `--copy-force`.
+	Raccourci pour `--copy --force`.
 
 --color[=<quand>]::
 	Colorier les branches pour mettre en évidence les branches actuelles, locales et de suivi à distance. La valeur doit être « always » (c-à-d toujours) (valeur par défaut), « never » (c-à-d jamais) ou « auto ».
@@ -98,13 +98,13 @@ Notez que 'git branch -f <branche> [<point-de-départ>]', même avec '-f', refus
 
 --column[=<options>]::
 --no-column::
-	Afficher la liste des branches en colonnes. Voir la variable de configuration `column.branch` pour la syntaxe des options.`-- column` et `--no-column` sans options équivalent respectivement à 'always' et 'never'.
+	Afficher la liste des branches en colonnes. Voir la variable de configuration `column.branch` pour la syntaxe des options.`--column` et `--no-column` sans options équivalent respectivement à 'always' et 'never'.
 +
 Cette option ne s’applique qu’en mode non verbeux.
 
 -r::
 --remotes::
-	Énumérer ou supprimer (si utilisé avec -d) les branches de suivi à distance. Combiner avec `-list` pour faire correspondre le(s) motif(s) optionnel(s).
+	Énumérer ou supprimer (si utilisé avec -d) les branches de suivi à distance. Combiner avec `--list` pour faire correspondre le(s) motif(s) optionnel(s).
 
 -a::
 --all::
@@ -136,7 +136,7 @@ Cette option ne s’applique qu’en mode non verbeux.
 --track[=(direct|inherit)]::
 	Lors de la création d'une nouvelle branche, configurer les entrées de configuration `branch.<nom>.remote` et `branch.<nom>.merge` pour pour définir la configuration du suivi "amont" de la nouvelle branche. Cette configuration indiquera à git de montrer la relation entre les deux branches dans "git status" et "git branch -v". En outre, il règle `git pull` sans arguments de tirer depuis l'amont lorsque la nouvelle branche est extraite.
 +
-La branche amont exacte est choisie en fonction de l'argument optionnel : `t`, `--track` ou `--track direct` signifie utiliser la branche du point de départ elle-même comme amont ; `--track=inherit` signifie copier la configuration amont de la branche du point de départ.
+La branche amont exacte est choisie en fonction de l'argument optionnel : `-t`, `--track` ou `--track=direct` signifie utiliser la branche du point de départ elle-même comme amont ; `--track=inherit` signifie copier la configuration amont de la branche du point de départ.
 +
 La variable de configuration branch.autoSetupMerge spécifie comment `git switch`, `git checkout` et `git branch` doivent se comporter lorsque ni `--track` ni `--no-track` ne sont spécifiés :
 +
@@ -184,7 +184,7 @@ Lorsqu'utilisé dans la création de branche, une nouvelle branche <nom-de-branc
 	La nouvelle tête de branche pointera sur ce commit. Il peut être donné sous la forme d'un nom de branche, d'un id de commit ou d'une étiquette. Si cette option est omise, la HEAD actuelle sera utilisée à la place.
 
 <anciennebranche>::
-	Nom d'une branche existante à renommer.
+	La nom d'une branche existante. Si cette option est omise, le nom de la branche actuelle sera utilisée à la place.
 
 <nouvelle_branche>::
 	Le nouveau nom d'une branche existante. Les mêmes restrictions que pour <nom-de-branche> s'appliquent.
@@ -264,7 +264,7 @@ include::ref-reachability-filters.txt[]
 
 VOIR AUSSI
 ----------
-linkgit:git-check-ref-format[1], linkgit:git-fetch[1], linkgit:git-remote[1], link:user-manual.html#what-is-a-branch [``Comprendre l'historique : Qu'est-ce qu'une branche ?''] dans le manuel d'utilisateur Git.
+linkgit:git-check-ref-format[1], linkgit:git-fetch[1], linkgit:git-remote[1], link:user-manual.html#what-is-a-branch[``Comprendre l'historique : Qu'est-ce qu'une branche ?''] dans le manuel d'utilisateur Git.
 
 GIT
 ---

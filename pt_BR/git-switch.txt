@@ -31,21 +31,23 @@ OPÇÕES
 <novo-ramo>::
 	Nome para o novo branch.
 
-<ponto-de-partida>::
+<início-ponto>::
 	O ponto de partida para criar o novo ramo. Definindo um `<ponto-de-partida>` permite criar um ramo com base em algum outro ponto na história que não seja o local onde o `HEAD` aponte atualmente. (Ou, no caso da opção `--detach`, permitir que você inspecione e desanexe de algum outro ponto.)
 +
-Você pode usar a sintaxe `@{-N}` para se referir ao último ramo/commit alternado utilizando as operações "git switch" ou "git checkout". Você também pode especificar `-` que é sinônimo de`@{-1}`. Isso geralmente é utilizado para alternar rapidamente entre duas ramificações ou para desfazer uma alternância de ramificação feita por engano.
+You can use the `@{-N}` syntax to refer to the N-th last branch/commit switched to using "git switch" or "git checkout" operation. You may also specify `-` which is synonymous to `@{-1}`. This is often used to switch quickly between two branches, or to undo a branch switch by mistake.
 +
 Como um caso especial, você pode usar `A...B` como um atalho para a mesclagem na base de `A` e` B` se houver exatamente uma base a ser mesclada. Você pode deixar de fora, no máximo, um de `A` e` B`, no caso, a predefinição retorna para `HEAD`.
 
 -c <novo-ramo>::
 --create <novo-ramo>::
-	Crie um novo ramo chamado `<novo-ramo>` começando em `<ponto-de-partida>` antes de mudar para o ramo. Este é um atalho conveniente para:
+	Create a new branch named `<new-branch>` starting at `<start-point>` before switching to the branch. This is the transactional equivalent of
 +
 ------------
 $ git branch <novo-ramo>
 $ git switch <novo-ramo>
 ------------
++
+that is to say, the branch is not reset/created unless "git switch" is successful (e.g., when the branch is in use in another worktree, not just the current branch stays the same, but the branch is not reset to the start-point, either).
 
 -C <novo-ramo>::
 --force-create <novo-ramo>::
@@ -83,7 +85,7 @@ O comportamento predefinido pode ser definido através da variável de configura
 
 -m::
 --merge::
-	Caso tenha alterações locais em um ou mais arquivos que sejam diferentes entre o ramo atual e o ramo para onde você está alternando, o comando se recusará a alternar as ramificações visando preservar as suas alterações dada a circunstância. Contudo, com esta opção, é feita uma mesclagem de três vias entre o ramo atual, o conteúdo da árvore de trabalho e o novo ramo, fazendo com que você esteja neste novo ramo.
+	If you have local modifications to one or more files that are different between the current branch and the branch to which you are switching, the command refuses to switch branches in order to preserve your modifications in context. However, with this option, a three-way merge between the current branch, your working tree contents, and the new branch is done, and you will be on the new branch.
 +
 Quando ocorre um conflito durante a mesclagem, as entradas do índice para os caminhos conflitantes não são mesclados, sendo necessário que você resolva os conflitos e marque os caminhos resolvidos com `git add` (ou `git rm` caso a mesclagem resulte na exclusão do caminho) .
 
@@ -100,15 +102,15 @@ Quando ocorre um conflito durante a mesclagem, as entradas do índice para os ca
 
 -t::
 --track [direct|inherit]::
-	Ao criar uma nova ramificação, defina a configuração "upstream". A opção `-c` está implícita. Para mais detalhes, consulte `--track` no linkgit:git-branch[1].
+	When creating a new branch, set up "upstream" configuration. `-c` is implied. See `--track` in linkgit:git-branch[1] for details.
 +
-Caso nenhuma opção `-c` seja utilizada, o nome do novo ramo será derivado do ramo monitorado remotamente, observando a parte local da "refspec" configurada para o ramo remoto correspondente e removendo a parte inicial para o "*" em seguida. Isso nos diria para usar um `hack` como um ramo local ao se ramificar do `origin/hack` (ou `remotes/origin/hack` ou até mesmo do `refs/remotes/origin/hack`). Caso o nome informado não tenha barra ou se a dedução acima resultar em um nome vazio, a dedução será abortada. Em tais casos, você pode explicitamente dar um nome com a opção `-c`.
+If no `-c` option is given, the name of the new branch will be derived from the remote-tracking branch, by looking at the local part of the refspec configured for the corresponding remote, and then stripping the initial part up to the "*". This would tell us to use `hack` as the local branch when branching off of `origin/hack` (or `remotes/origin/hack`, or even `refs/remotes/origin/hack`). If the given name has no slash, or the above guessing results in an empty name, the guessing is aborted. You can explicitly give a name with `-c` in such a case.
 
 --no-track::
 	Não configure "upstream" mesmo que a variável de configuração `branch.autoSetupMerge` seja verdadeira.
 
 --orphan <novo-ramo>::
-	Crie um novo ramo 'órfão', chamado `<novo-ramo>`. Todos os arquivos monitorados são removidos.
+	Create a new unborn branch, named `<new-branch>`. All tracked files are removed.
 
 --ignore-other-worktrees::
 	O comando `git switch` se recusa quando a "ref" desejada já está foi averiguada por uma outra árvore de trabalho. Esta opção faz com que ele averigue a "ref" mesmo assim. Em outras palavras, a "ref" pode ser mantida por mais de uma árvore de trabalho.

@@ -18,9 +18,9 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 --
 如果指定了 `<branch>`，`git rebase` 会自动执行 `git switch <branch>`，然后再做其他事情。 否则，它会保留在当前分支上。
 
-如果未指定 `<upstream>`，将使用 `branch.<name>.remote` 和 `branch.<name>.merge` 选项中配置的上游（详见 linkgit:git-config[1]），并假定使用 `-fork-point`选项。 如果您当前不在任何分支上，或者当前分支没有配置上游，变基操作会中止。
+如果未指定 `<upstream>`，将使用 `branch.<name>.remote` 和 `branch.<name>.merge` 选项中配置的上游（详见 linkgit:git-config[1]），并假定使用 `--fork-point`选项。 如果您当前不在任何分支上，或者当前分支没有配置上游，变基操作会中止。
 
-当前分支中的所有提交所做的改动，但不在 `<upstream>` 中的，都会被保存到一个临时区域。 这与 `git log <upstream>..HEAD` 或 `git log 'fork_point'..HEAD` 所显示的提交相同（如果启用了 `-fork-point`，请参阅下文关于 `-fork-point`的描述）；或者，如果指定了 `--root` 选项，则与 `git log HEAD` 所显示的提交相同。
+当前分支中的所有提交所做的改动，但不在 `<upstream>` 中的，都会被保存到一个临时区域。 这与 `git log <upstream>..HEAD` 或 `git log 'fork_point'..HEAD` 所显示的提交相同（如果启用了 `--fork-point`，请参阅下文关于 `--fork-point`的描述）；或者，如果指定了 `--root` 选项，则与 `git log HEAD` 所显示的提交相同。
 
 如果提供了 `--onto` 选项，当前分支会重置为 `<upstream>` 或 `<newbase>`。 这与 `git reset --hard <upstream>`（或 `<newbase>`）的效果完全相同。`ORIG_HEAD` 设置为指向重置前分支的顶端。
 
@@ -196,7 +196,7 @@ MODE OPTIONS
 +
 该选项适用于在上游分支上开发功能的情况。在开发功能的过程中，上游分支可能会前进，这时最好的办法可能不是继续在上游分支上重新加载，而是保持基本提交不变。由于基本提交保持不变，该选项意味着 `--reapply-cherry-picks`，以避免丢失提交。
 +
-虽然该选项和 `-fork-point` 都能找到 `<upstream>` 和 `<branch>` 之间的合并基数，但该选项使用合并基数作为创建新提交的_起点_，而 `-fork-point`则使用合并基数来确定将被重定向的_提交集_。
+虽然该选项和 `--fork-point` 都能找到 `<upstream>` 和 `<branch>` 之间的合并基数，但该选项使用合并基数作为创建新提交的_起点_，而 `--fork-point`则使用合并基数来确定将被重定向的_提交集_。
 +
 另请参阅下面的不兼容选项。
 
@@ -356,7 +356,7 @@ include::rerere-options.txt[]
 -r::
 --rebase-merges[=(rebase-cousins|no-rebase-cousins)]::
 --no-rebase-merges::
-	默认情况下，变基操作会简单地从待办事项列表中删除合并提交，并将被重置的提交放入一个单一的线性分支中。 使用 `--rebase-merges` 后，变基操作会通过重新创建合并提交，尝试保留要被重置的提交中的分支结构。在这些合并提交中，任何已解决的合并冲突或手动修正都必须手动解决/重新应用。`--no--rebase-merges` 可以用来抵消 `rebase.rebaseMerges` 配置选项和之前的 `--rebase-merges 选项。
+	默认情况下，变基操作会简单地从待办事项列表中删除合并提交，并将被重置的提交放入一个单一的线性分支中。 使用 `--rebase-merges` 后，变基操作会通过重新创建合并提交，尝试保留要被重置的提交中的分支结构。在这些合并提交中，任何已解决的合并冲突或手动修正都必须手动解决/重新应用。`--no-rebase-merges` 可以用来抵消 `rebase.rebaseMerges` 配置选项和之前的 `--rebase-merges 选项。
 +
 重定向合并时，有两种模式： `rebase-cousins` 和 `no-rebase-cousins`。如果未指定模式，则默认为 `no-rebase-cousins`。在 `no-rebase-cousins` 模式下，没有 `<上游仓库>` 作为直接祖先的提交将保留其原始分支点，也就是说，被 linkgit:git-log[1] 的 `--ancestry-path` 选项排除在外的提交将默认保留其原始祖先。在 `rebase-cousins` 模式下，此类提交会被重定向到 `<上游仓库>`（或是`<onto>`，如果指定了）。
 +
@@ -782,9 +782,9 @@ merge -C 6f5e4d report-a-bug # 合并 “报告一个错误”
 
 与常规的交互式变基不同，除了 `pick`（选取）命令外，还有 `label`（标签）、`reset`（重置） 和 `merge`（合并） 命令。
 
-The `label` command associates a label with the current HEAD when that command is executed. These labels are created as worktree-local refs (`refs/rewritten/<label>`) that will be deleted when the rebase finishes. That way, rebase operations in multiple worktrees linked to the same repository do not interfere with one another. If the `label` command fails, it is rescheduled immediately, with a helpful message how to proceed.
+`label` 命令会在执行该命令时将一个标签与当前 HEAD 关联。这些标签被创建为工作树本地引用（`refs/rewritten/<label>`），并将在重置完成后被删除。这样，链接到同一仓库的多个工作树中的重置操作就不会相互干扰。如果 `label` 命令失败，会立即重新安排，并给出如何继续的提示信息。
 
-The `reset` command resets the HEAD, index and worktree to the specified revision. It is similar to an `exec git reset --hard <label>`, but refuses to overwrite untracked files. If the `reset` command fails, it is rescheduled immediately, with a helpful message how to edit the todo list (this typically happens when a `reset` command was inserted into the todo list manually and contains a typo).
+`reset` 命令会将 HEAD、索引和工作树重置为指定的版本。它类似于 `exec git reset --hard <label>`，但拒绝覆盖未跟踪的文件。如果 `reset` 命令失败，会立即重新安排，并附带如何编辑待办事项列表的提示信息（这种情况通常发生在 `reset` 命令被手动插入待办事项列表且包含错字的情况下）。
 
 `merge`（合并）命令会将指定的版本合并到当时的 HEAD 中。使用 `-C <源提交>` 时，将使用指定合并提交的提交信息。如果将 `-C` 改为小写的 `-c`，合并成功后，提交信息将在编辑器中打开，以便用户编辑信息。
 

@@ -15,11 +15,11 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Incorpora as alterações de um repositório remoto no ramo atual. Caso o ramo atual esteja atrás do ramo remoto, então, é predefinido que ele avance rapidamente o ramo atual para corresponder ao ramo remoto. Se o ramo atual e o ramo remoto divergirem, o usuário precisa definir como conciliar os ramos divergentes com `--rebase` ou `--no-rebase` (ou a opção de configuração correspondente em `pull.rebase`).
+Incorporates changes from a remote repository into the current branch. If the current branch is behind the remote, then by default it will fast-forward the current branch to match the remote. If the current branch and the remote have diverged, the user needs to specify how to reconcile the divergent branches with `--rebase` or `--no-rebase` (or the corresponding configuration option in `pull.rebase`).
 
 Mais precisamente, o comando `git pull` executa `git fetch` com os parâmetros determinados e em seguida, dependendo das opções de configuração ou das sinalizações da linha de comando, invocará o comando `git rebase` ou `git merge` para conciliar os ramos divergentes.
 
-O <repositório> deve ser o nome de um repositório remoto, conforme passado para o linkgit:git-fetch[1]. O <refspec> pode nomear de forma arbitrária uma referência remota (por exemplo, o nome de uma tag) ou até mesmo uma coleção de referências com as ramificações dos ramos monitorados remotamente (`refs/heads/{asterisk}:refs/remotes/origin/{asterisk}` por exemplo), porém geralmente é o nome de uma ramificação no repositório remoto.
+<repository> should be the name of a remote repository as passed to linkgit:git-fetch[1]. <refspec> can name an arbitrary remote ref (for example, the name of a tag) or even a collection of refs with corresponding remote-tracking branches (e.g., refs/heads/{asterisk}:refs/remotes/origin/{asterisk}), but usually it is the name of a branch in the remote repository.
 
 Os valores predefinidos para o <repositório> e o <ramo> eles são lidos na configuração "remote" e "merge" do ramo atual, conforme for definido pelo linkgit:git-branch[1] `--track`.
 
@@ -33,7 +33,7 @@ Suponha que exista o seguinte histórico e o ramo atual seja `master`:
 	origin/master no seu repositório
 ------------
 
-Então, o comando "`git pull`" fara a captura e a reprodução das alterações do ramo remoto `master` por ter se divergido do `master` local (ou seja, `E`) até o seu commit atual (`C`) no topo do `master` e registra o resultado num novo commit, juntamente com os nomes dos dois commits principais e uma mensagem do registro log do usuário, descrevendo quais forma as alterações que foram feitas.
+Then "`git pull`" will fetch and replay the changes from the remote `master` branch since it diverged from the local `master` (i.e., `E`) until its current commit (`C`) on top of `master` and record the result in a new commit along with the names of the two parent commits and a log message from the user describing the changes.
 
 ------------
 	  A---B---C origin/master
@@ -43,9 +43,9 @@ Então, o comando "`git pull`" fara a captura e a reprodução das alterações 
 
 Para mais detalhes incluindo informações de como os conflitos são gerenciados e como eles são exibidos, consulte linkgit:git-merge[1].
 
-No Git 1.7.0 ou posterior, para cancelar uma mesclagem conflitante, utilize o comando `git reset --merge`. *Aviso*: Nas versões mais antigas do Git, a execução do 'git pull' com as alterações dos commits não realizados é desencorajado: enquanto for possível, deixa você numa condição onde a recuperação pode ser difícil no caso de um conflito.
+In Git 1.7.0 or later, to cancel a conflicting merge, use `git reset --merge`. *Warning*: In older versions of Git, running 'git pull' with uncommitted changes is discouraged: while possible, it leaves you in a state that may be hard to back out of in the case of a conflict.
 
-Caso alguma das alterações remotas se sobrepuserem às alterações dos commits locais que não foram realizados, a mesclagem será automaticamente cancelada e a árvore de trabalho se manterá intocada. Geralmente é melhor obter as alterações locais na ordem de trabalho antes de obtê-las (pull) ou armazená-las (stash) com o linkgit:git-stash[1].
+If any of the remote changes overlap with local uncommitted changes, the merge will be automatically canceled and the work tree untouched. It is generally best to get any local changes in working order before pulling or stash them away with linkgit:git-stash[1].
 
 OPÇÕES
 ------
@@ -85,7 +85,7 @@ Quando `interactive` (interativo) , ative o modo interativo da reconstrução da
 Consulte `pull.rebase`, `branch.<nome>.rebase` e `branch.autoSetupRebase` no linkgit:git-config[1] caso queira fazer o `git pull`, sempre utilize o comando `--rebase` em vez de mesclar .
 +
 [NOTE]
-Esse é um modo de operação potencialmente _perigoso_. Ele reescreve o histórico, o que não é um bom presságio quando você já o publicou. *Não* utilize esta opção, a menos que você leia o linkgit:git-rebase[1] com muita atenção.
+This is a potentially _dangerous_ mode of operation. It rewrites history, which does not bode well when you published that history already. Do *not* use this option unless you have read linkgit:git-rebase[1] carefully.
 
 --no-rebase::
 	Este é um atalho para a opção --rebase=false.
@@ -104,23 +104,23 @@ include::merge-strategies.txt[]
 COMPORTAMENTO PREDEFINIDO
 -------------------------
 
-Frequentemente, as pessoas utilizam o `git pull` sem informar qualquer parâmetro. Tradicionalmente, é o mesmo que dizer `git pull origin`. No entanto, quando a configuração `branch.<nome>.remote` está presente enquanto no ramo `<nome>`, esse valor é utilizado em vez de `origin`.
+Often people use `git pull` without giving any parameter. Traditionally, this has been equivalent to saying `git pull origin`. However, when configuration `branch.<name>.remote` is present while on branch `<name>`, that value is used instead of `origin`.
 
 Para determinar de qual URL usar, o valor da configuração `remote.<origin>.url` é consultado e caso não haja nenhuma variável, o valor na linha `URL:` em `$GIT_DIR/remotes/<origin>` é utilizado.
 
-Para determinar quais ramificações remotas buscar (e opcionalmente armazenar nas ramificações monitoradas remotamente) quando o comando é executado sem nenhum parâmetro "refspec" na linha de comando, os valores da variável de configuração `remote.<origin>.fetch` são consultados e caso não exista nenhum, então `$GIT_DIR/remotes/<origin>` é consultado e as suas linhas `Pull:` são utilizadas. Além dos formatos "refspec" descritos na seção OPÇÕES, você pode ter um englobamento do "refspec" parecido com este:
+In order to determine what remote branches to fetch (and optionally store in the remote-tracking branches) when the command is run without any refspec parameters on the command line, values of the configuration variable `remote.<origin>.fetch` are consulted, and if there aren't any, `$GIT_DIR/remotes/<origin>` is consulted and its `Pull:` lines are used. In addition to the refspec formats described in the OPTIONS section, you can have a globbing refspec that looks like this:
 
 ------------
 refs/heads/*:refs/remotes/origin/*
 ------------
 
-Um englobamento do "refspec" deve ter um RHS que não não seja vazio (ou seja, deve armazenar o que foi buscado nas ramificações monitoradas remotamente) e o seu `LHS` e `RHS` devem terminar com `/*`. A definição acima determina que todas as ramificações remotas sejam monitoradas utilizando os ramos monitorados remotamente em `refs/remotes/origin/` com o mesmo nome.
+A globbing refspec must have a non-empty RHS (i.e. must store what were fetched in remote-tracking branches), and its LHS and RHS must end with `/*`. The above specifies that all remote branches are tracked using remote-tracking branches in `refs/remotes/origin/` hierarchy under the same name.
 
 A regra para determinar qual a ramificação remota deve ser mesclada após a captura é um pouco complexo, para que não prejudique a compatibilidade com as versões anteriores.
 
 Caso "refspecs" explícitos sejam informados para o comando `git pull`, todos eles são mesclados.
 
-Quando nenhum "refspec" for informado na linha de comando, o `git pull` utiliza o "refspec" da configuração ou `$GIT_DIR/remotes/<origin>`. Nestes casos, as seguintes regras se aplicam:
+When no refspec was given on the command line, then `git pull` uses the refspec from the configuration or `$GIT_DIR/remotes/<origin>`. In such cases, the following rules apply:
 
 . Caso a configuração `branch.<nome>.merge` para o ramo atual `<nome>` exista, este é o nome do ramo no site remoto que é mesclado.
 
@@ -147,7 +147,7 @@ Normalmente o ramo mesclado fica no `HEAD` do repositório remoto, porém a esco
 $ git pull origin next
 ------------------------------------------------
 +
-Isto deixa uma cópia do `next` temporariamente no `FETCH_HEAD`, porém não atualiza nenhum outro ramo `origin/next` monitorado remotamente. O mesmo pode ser feito ao executar o `fetch` e o `merge`:
+This leaves a copy of `next` temporarily in FETCH_HEAD, and updates the remote-tracking branch `origin/next`. The same can be done by invoking fetch and merge:
 +
 ------------------------------------------------
 $ git fetch origin

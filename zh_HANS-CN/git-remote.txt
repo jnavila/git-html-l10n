@@ -3,25 +3,25 @@ git-remote(1)
 
 名称
 --
-git-remote - Manage set of tracked repositories
+git-remote - 管理一组追踪的仓库
 
 
 概述
 --
 [verse]
 'git remote' [-v | --verbose]
-'git remote add' [-t <branch>] [-m <master>] [-f] [--[no-]tags] [--mirror=(fetch|push)] <name> <URL>
-'git remote rename' [--[no-]progress] <old> <new>
-'git remote remove' <name>
-'git remote set-head' <name> (-a | --auto | -d | --delete | <branch>)
-'git remote set-branches' [--add] <name> <branch>...
-'git remote get-url' [--push] [--all] <name>
-'git remote set-url' [--push] <name> <newurl> [<oldurl>]
-'git remote set-url --add' [--push] <name> <newurl>
-'git remote set-url --delete' [--push] <name> <URL>
-'git remote' [-v | --verbose] 'show' [-n] <name>...
-'git remote prune' [-n | --dry-run] <name>...
-'git remote' [-v | --verbose] 'update' [-p | --prune] [(<group> | <remote>)...]
+'git remote add' [-t <分支>] [-m <master>] [-f] [--[no-]tags] [--mirror=(fetch|push)] <名称> <URL>
+'git remote rename' [--[no-]progress] <旧名> <新名>
+'git remote remove' <名称>
+'git remote set-head' <名称> (-a | --auto | -d | --delete | <分支>)
+'git remote set-branches' [--add] <名称> <分支>...
+'git remote get-url' [--push] [--all] <名称>
+'git remote set-url' [--push] <名称> <新地址> [<旧地址>]
+'git remote set-url --add' [--push] <名称> <新地址>
+'git remote set-url --delete' [--push] <名称> <地址>
+'git remote' [-v | --verbose] 'show' [-n] <名称>...
+'git remote prune' [-n | --dry-run] <名称>...
+'git remote' [-v | --verbose] 'update' [-p | --prune] [(<组> | <远程仓库>)...]
 
 描述
 --
@@ -34,27 +34,27 @@ git-remote - Manage set of tracked repositories
 
 -v::
 --verbose::
-	更详细一点，在名称后显示远程 URL。对于允诺者远程，还要显示配置了哪个过滤器(` blob: none` 等)。注意: 这必须放在 `remote` 和子命令之间。
+	Be a little more verbose and show remote url after name. For promisor remotes, also show which filter (`blob:none` etc.) are configured. NOTE: This must be placed between `remote` and subcommand.
 
 
 命令
 --
 
-不带参数，显示现有远程的列表。有几个子命令可用于对远程执行操作。
+With no arguments, shows a list of existing remotes. Several subcommands are available to perform operations on the remotes.
 
 'add'::
 
-在 <URL> 为存储库添加一个名为 <名称> 的远程名称。然后可以使用命令 `git get <名称>`创建和更新远程跟踪分支 <名称>/<分支> 。
+Add a remote named <name> for the repository at <URL>. The command `git fetch <name>` can then be used to create and update remote-tracking branches <name>/<branch>.
 +
 使用 `-f` 选项，在设置远程信息之后立即运行 `git get <名称>`。
 +
-使用 `--tag` 选项，`git get <名称>` 从远程仓库导入每个标记。
+使用 `--tags` 选项，`git get <名称>` 从远程仓库导入每个标记。
 +
 使用 `--no-tags` 选项，`git fetch <名称>` 不会从远程仓库导入标签。
 +
 默认情况下，只导入获取的分支上的标记（参见 linkgit:git-fetch[1]）。
 +
-使用 `-t <分支>` 选项，将创建一个仅跟踪 `refs/remotes/<名称>/` 命名空间下的所有分支的引用规范，而不是用于远程跟踪的默认引用规范通配符。您可以提供多个 `-t <分支>` 来跟踪多个分支，而不需要获取所有分支。
+With `-t <branch>` option, instead of the default glob refspec for the remote to track all branches under the `refs/remotes/<name>/` namespace, a refspec to track only `<branch>` is created. You can give more than one `-t <branch>` to track multiple branches without grabbing all branches.
 +
 使用 `-m <master>` 选项，可以设置一个符号引用 `/remotes/<名称>/HEAD` 来指向远程仓库的 `<master>` 分支。另请参见 set-head 命令。
 +
@@ -62,7 +62,7 @@ git-remote - Manage set of tracked repositories
 +
 当用 `--mirror=push` 创建推送镜像时，`git push` 的行为就像传递 `--mirror` 一样。
 
-'rename'::
+'rebase'::
 
 将名为 < 旧名称 > 的远程重命名为 < 新名称 > 。所有远程跟踪的分支和远程的配置设置都被更新。
 +
@@ -86,7 +86,7 @@ git-remote - Manage set of tracked repositories
 
 'set-branches'::
 
-改变命名的远程所追踪的分支列表。 这可以用来在最初设置一个远程分支后，追踪一个可用的远程分支子集。
+Changes the list of branches tracked by the named remote. This can be used to track a subset of the available remote branches after the initial setup for a remote.
 +
 被命名的分支将被解释为在 `git remote add`命令中用 `-t` 选项指定的。
 +
@@ -108,9 +108,9 @@ git-remote - Manage set of tracked repositories
 +
 使用 `--add`，不改变现有的 URLs，而是添加新的 URL。
 +
-使用 `--delete`选项，不是改变现有的 URL，而是删除远程 <名称> 的所有正则匹配 <URL> 的 URL。 试图删除所有非推送 URLs 是错的。
+With `--delete`, instead of changing existing URLs, all URLs matching regex <URL> are deleted for remote <name>. Trying to delete all non-push URLs is an error.
 +
-请注意，推送 URL 和获取 URL，即使它们的设置不同，也必须指的是同一个地方。 你推送到推送 URL 的内容应该是你立即从获取的 URL 中获取的内容。 如果你试图从一个地方（如你的上游）获取并推送到另一个地方（如你的发布库），请使用两个独立的远程。
+Note that the push URL and the fetch URL, even though they can be set differently, must still refer to the same place. What you pushed to the push URL should be what you would see if you immediately fetched from the fetch URL. If you are trying to fetch from one place (e.g. your upstream) and push to another (e.g. your publishing repository), use two separate remotes.
 
 
 'show'::
@@ -129,7 +129,7 @@ git-remote - Manage set of tracked repositories
 
 'update'::
 
-为仓库中由 `remotes.<组>` 定义的远程或远程组获取更新。如果在命令行中既没有指定组也没有指定远程，将使用配置参数 remotes.default；如果没有定义 remotes.default，所有没有将配置参数 `remote.<名称>.skipDefaultUpdate` 设置为 true 的远程将被更新。 (参见 linkgit:git-config[1]）。
+Fetch updates for remotes or remote groups in the repository as defined by `remotes.<group>`. If neither group nor remote is specified on the command line, the configuration parameter remotes.default will be used; if remotes.default is not defined, all remotes which do not have the configuration parameter `remote.<name>.skipDefaultUpdate` set to true will be updated. (See linkgit:git-config[1]).
 +
 使用 `--prune` 选项，对所有被更新的远程进行修剪。
 
@@ -137,7 +137,7 @@ git-remote - Manage set of tracked repositories
 讨论
 --
 
-远程配置是通过 `remote.origin.url` 和 `remote.origin.fetch` 配置变量实现的。 (见 linkgit:git-config[1]）。
+The remote configuration is achieved using the `remote.origin.url` and `remote.origin.fetch` configuration variables. (See linkgit:git-config[1]).
 
 退出状态码
 -----

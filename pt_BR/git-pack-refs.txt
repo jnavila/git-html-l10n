@@ -13,13 +13,13 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Tradicionalmente, o cume dos ramos e as tags (coletivamente conhecidas como 'refs') eram armazenadas um arquivo por "ref" num diretório (sub) no diretório `$GIT_DIR/refs`. Enquanto muitos cumes dos ramos tendem a ser atualizadas com frequência, a maioria das tags e alguns cumes dos ramos nunca são atualizadas. Quando um repositório possui centenas ou milhares de tags, este formato de um arquivo por referência desperdiça armazenamento e prejudica o desempenho.
+Traditionally, tips of branches and tags (collectively known as 'refs') were stored one file per ref in a (sub)directory under `$GIT_DIR/refs` directory. While many branch tips tend to be updated often, most tags and some branch tips are never updated. When a repository has hundreds or thousands of tags, this one-file-per-ref format both wastes storage and hurts performance.
 
-Este comando é utilizado para resolver o problema de armazenamento e desempenho, armazenando as refs num único arquivo, `$GIT_DIR/compact-refs`. Quando uma "ref" está ausente na hierarquia dos diretórios tradicionais `$GIT_DIR/refs`, ele é procurado neste arquivo e utilizado caso seja encontrado.
+This command is used to solve the storage and performance problem by storing the refs in a single file, `$GIT_DIR/packed-refs`. When a ref is missing from the traditional `$GIT_DIR/refs` directory hierarchy, it is looked up in this file and used if found.
 
 Atualizações subsequentes nos ramos sempre criam novos arquivos na hierarquia de diretórios `$GIT_DIR/refs`.
 
-Uma prática recomendada para lidar com um repositório com muitas refs é empacotar as suas refs com `--all` uma vez e ocasionalmente executar o comando `git pack-refs`. As tags são estacionárias por definição e não devem mudar. Os cabeçalhos da ramificação serão empacotadas com os `pack-refs --all` iniciais, mas apenas os cabeçalhos da ramificação atualmente ativas, serão descompactadas e as próximas `pack-refs` (sem a opção `--all`) as deixarão descompactadas.
+A recommended practice to deal with a repository with too many refs is to pack its refs with `--all` once, and occasionally run `git pack-refs`. Tags are by definition stationary and are not expected to change. Branch heads will be packed with the initial `pack-refs --all`, but only the currently active branch heads will become unpacked, and the next `pack-refs` (without `--all`) will leave them unpacked.
 
 
 OPÇÕES
@@ -27,11 +27,11 @@ OPÇÕES
 
 --all::
 
-O comando, por padrão, empacota todas as tags e as refs que já estão empacotadas e não mexe com as outras refs. Isso se deve ao fato onde se espera que as ramificações sejam ativamente desenvolvidas, e o empacotamento das suas pontas não auxilia no desempenho. Essa opção faz com que todas as refs também sejam empacotadas, com exceção das refs ocultas, das refs quebradas e das refs simbólicas. Útil para um repositório com muitos ramos de interesse histórico.
+The command by default packs all tags and refs that are already packed, and leaves other refs alone. This is because branches are expected to be actively developed and packing their tips does not help performance. This option causes all refs to be packed as well, with the exception of hidden refs, broken refs, and symbolic refs. Useful for a repository with many branches of historical interests.
 
 --no-prune::
 
-O comando normalmente remove as refs soltas na hierarquia `$GIT_DIR/refs` após empacotá-los. Esta opção diz para não fazê-lo.
+The command usually removes loose refs under `$GIT_DIR/refs` hierarchy after packing them. This option tells it not to.
 
 --include <padrão>::
 
@@ -39,7 +39,7 @@ Empacota refs com base num padrão `glob(7)`. As repetições dessa opção acum
 
 --exclude <padrão>::
 
-Não empacote refs que correspondam ao padrão `glob(7)` fornecido. As repetições dessa opção acumulam padrões de exclusão. Use `--no-include` para limpar e redefinir a lista de padrões. Se uma ref já estiver empacotada, ao incluí-la com a opção `--exclude` não a desempacotará.
+Não empacote refs que correspondam ao padrão `glob(7)` fornecido. As repetições dessa opção acumulam padrões de exclusão. Use `--no-exclude` para limpar e redefinir a lista de padrões. Se uma ref já estiver empacotada, ao incluí-la com a opção `--exclude` não a desempacotará.
 
 Quando usado com `--all`, empacota apenas as refs soltas que não correspondem a nenhum dos padrões `--exclude` fornecidos.
 

@@ -3,7 +3,7 @@ git-fetch(1)
 
 名称
 --
-git-fetch - Download objects and refs from another repository
+git-fetch - 从另一个仓库下载对象和引用
 
 
 概述
@@ -17,15 +17,15 @@ git-fetch - Download objects and refs from another repository
 
 描述
 --
-从一个或多个其它仓库获取分支和/或标记（统称为 "refs"），以及完成其历史所需的对象。 远程跟踪的分支会被更新（关于控制这种行为的方法，请参见下面 <引用规范> 的描述）。
+Fetch branches and/or tags (collectively, "refs") from one or more other repositories, along with the objects necessary to complete their histories. Remote-tracking branches are updated (see the description of <refspec> below for ways to control this behavior).
 
-默认情况下，任何指向被获取的历史的标签也会被获取；其效果是获取指向你感兴趣的分支的标签。 这个默认行为可以通过使用 --tags 或 --no-tags 选项或者配置 remote.<远程仓库名称>.tagOpt 来改变。 通过使用明确获取标签的引用规范，你也可以获取那些没有指向你感兴趣的分支的标签。
+By default, any tag that points into the histories being fetched is also fetched; the effect is to fetch tags that point at branches that you are interested in. This default behavior can be changed by using the --tags or --no-tags options or by configuring remote.<name>.tagOpt. By using a refspec that fetches tags explicitly, you can fetch tags that do not point into branches you are interested in as well.
 
-'git fetch' 可以从一个命名的仓库或 URL 中获取，或者如果给定了 <组> 并且在配置文件中有 remotes.<组> 项，则可以同时从几个仓库获取。 (参见 linkgit:git-config[1]）。
+'git fetch' can fetch from either a single named repository or URL, or from several repositories at once if <group> is given and there is a remotes.<group> entry in the configuration file. (See linkgit:git-config[1]).
 
 当没有指定远程仓库时，默认情况下将使用 `origin` 远程仓库，除非有一个上游分支配置在当前分支上。
 
-被获取的引用名称，以及它们所指向的对象名称，被写到 `.git/FETCH_HEAD`。 这些信息可以被脚本或其他 git 命令使用，比如linkgit:git-pull[1]。
+The names of refs that are fetched, together with the object names they point at, are written to `.git/FETCH_HEAD`. This information may be used by scripts or other git commands, such as linkgit:git-pull[1].
 
 选项
 --
@@ -42,7 +42,7 @@ include::urls-remotes.txt[]
 配置的远程跟踪分支 [[CRTB]]
 ------------------
 
-你通过经常定期和重复地从同一个远程仓库取东西来与之互动。 为了跟踪这种远程仓库的进度，`git fetch` 允许你配置 `remote.<仓库>.fetch` 配置变量。
+You often interact with the same remote repository by regularly and repeatedly fetching from it. In order to keep track of the progress of such a remote repository, `git fetch` allows you to configure `remote.<repository>.fetch` configuration variables.
 
 一般来说，这种变量可能看起来像这样：
 
@@ -53,9 +53,9 @@ include::urls-remotes.txt[]
 
 这种配置有两种使用方式：
 
-* 当 `git fetch` 运行时，没有在命令行中指定要取哪些分支和/或标记，例如 `git fetch origin` 或 `git fetch`，`remote.<仓库>.fetch` 值被用作引用规范——它们指定要取哪些引用和要更新哪些本地引用。 上面的例子将获取所有存在于 `origin` 中的分支（即任何与数值左边的`refs/heads/*`相匹配的引用），并更新 `refs/remotes/origin/*` 层次结构中相应的远程跟踪的分支。
+* When `git fetch` is run without specifying what branches and/or tags to fetch on the command line, e.g. `git fetch origin` or `git fetch`, `remote.<repository>.fetch` values are used as the refspecs--they specify which refs to fetch and which local refs to update. The example above will fetch all branches that exist in the `origin` (i.e. any ref that matches the left-hand side of the value, `refs/heads/*`) and update the corresponding remote-tracking branches in the `refs/remotes/origin/*` hierarchy.
 
-* 当 `git fetch` 运行时，命令行上有明确的要取的分支和/或标记，例如 `git fetch origin master`，命令行上给出的所有 <引用规范> 决定了要取的是什么（例如例子中的 `master` 是 `master:` 的简称，意思是 "获取 'master' 分支，但我没有明确说要在命令行中更新哪个远程跟踪分支"），而这个例子的命令将「只」获取 'master' 分支。 `remote.<仓库>.fetch`值决定了哪个远程跟踪分支（如果有的话）被更新。 当以这种方式使用时，`remote.<仓库>.fetch` 值对决定获取什么没有任何影响（即当命令行列出引用规范时，这些值不会被用作引用规范）；它们只是通过作为一个映射来决定获取的引用被存储在哪里。
+* When `git fetch` is run with explicit branches and/or tags to fetch on the command line, e.g. `git fetch origin master`, the <refspec>s given on the command line determine what are to be fetched (e.g. `master` in the example, which is a short-hand for `master:`, which in turn means "fetch the 'master' branch but I do not explicitly say what remote-tracking branch to update with it from the command line"), and the example command will fetch _only_ the 'master' branch. The `remote.<repository>.fetch` values determine which remote-tracking branch, if any, is updated. When used in this way, the `remote.<repository>.fetch` values do not have any effect in deciding _what_ gets fetched (i.e. the values are not used as refspecs when the command-line lists refspecs); they are only used to decide _where_ the refs that are fetched are stored by acting as a mapping.
 
 后者对 `remote.<仓库>.fetch` 值的使用可以通过在命令行中给出 `--refmap=<引用规范>` 参数去覆盖。
 
@@ -72,13 +72,13 @@ Git默认保留数据，除非它被明确地扔掉；这延伸到保留对远�
 # 在获取的时候
 $ git fetch --prune <名称>
 
-# Only prune, don't fetch
-$ git remote prune <name>
+# 只修剪，不获取
+$ git remote prune <名称>
 ------------------------------------------------
 
 要把修剪引用作为正常工作流程的一部分，而不需要记住运行该程序，可以在全局设置 `fetch.prune`，或者在配置中设置 `remote.<名称>.prune`，为每个远程仓库进行设置。见linkgit:git-config[1]。
 
-这里是事情变得棘手和更具体的地方。修剪功能实际上并不关心分支，相反，它将修剪本地<-->远程引用，作为远程的引用规范的函数（见上面的`<引用规范>`和上面的<<CRTB，配置远程跟踪分支>>）。
+这里是事情变得棘手和更具体的地方。修剪功能实际上并不关心分支，相反，它将修剪本地<-->远程引用，作为远程的引用规范的函数（见上面的`<引用规范>`和上面的<<CRTB,配置远程跟踪分支>>）。
 
 因此，如果远程的引用规范包括例如 `refs/tags/*:refs/tags/*`这样的规范，或者你手动运行例如 `git fetch --prune <名称> "refs/tags/*:refs/tags/*"`，那么被删除的就不是过时的远程跟踪分支，而是远程上不存在的任何本地标签。
 
@@ -105,8 +105,8 @@ $ git fetch --no-tags --prune-tags origin
 ------------------------------------------------
 $ git fetch origin --prune --prune-tags
 $ git fetch origin --prune 'refs/tags/*:refs/tags/*'
-$ git fetch <url of origin> --prune --prune-tags
-$ git fetch <url of origin> --prune 'refs/tags/*:refs/tags/*'
+$ git fetch <url-of-origin> --prune --prune-tags
+$ git fetch <url-of-origin> --prune 'refs/tags/*:refs/tags/*'
 ------------------------------------------------
 
 输出
@@ -117,7 +117,7 @@ $ git fetch <url of origin> --prune 'refs/tags/*:refs/tags/*'
 获取的状态以表格的形式输出，每一行代表一个引用的状态。每一行的形式是：
 
 -------------------------------
- <flag> <summary> <from> -> <to> [<reason>]
+ <标志> <概述> <起始> -> <结束> [<原因>]
 -------------------------------
 
 当使用 `--porcelain` 时，输出格式的目的是让机器可以解析。与人类可读的输出格式不同，它将打印到标准输出而不是标准错误。每一行都是这样的形式：
@@ -130,7 +130,7 @@ $ git fetch <url of origin> --prune 'refs/tags/*:refs/tags/*'
 
 在紧凑输出模式下，通过配置变量 fetch.output 指定，如果在另一个字符串中发现整个 `<起点>` 或 `<终点>`，它将被替换成另一个字符串中的 `*`。例如，`master -> origin/master` 变成 `master -> origin/*`。
 
-flag::
+标志::
 	表示引用状态的单个字符：
 （空格）;; 表示成功的快速合并；
 `+`;; 表示一个成功的强制更新；
@@ -140,16 +140,16 @@ flag::
 `!`;; 表示被拒绝或更新失败的引用；以及
 `=`;; 表示一个最新的、不需要获取的引用。
 
-summary::
+概述::
 	对于一个成功获取的引用，摘要以适合作为 `git log` 参数的形式显示该引用的新旧值（在大多数情况下是 `<旧>..<新>`，对于强制非快速合并是 `<旧>...<新>`）。
 
-from::
+起始::
 	被获取的远程引用的名称，减去其`refs/<类型>/`前缀。在删除的情况下，远程引用的名称是 "(none)"。
 
-to::
+结束::
 	被更新的本地引用的名称，去掉其 `refs/<类型>/` 前缀。
 
-reason::
+原因::
 	一个人类可读的解释。如果是成功获取的引用，不需要解释。对于失败的引用，将描述失败的原因。
 
 实例
@@ -169,7 +169,7 @@ $ git fetch origin
 $ git fetch origin +seen:seen maint:tmp
 ------------------------------------------------
 +
-这通过从远程存储库的分支（分别）获取 `seen` 和 `maint` 来更新（或根据需要创建）本地存储库中的分支 `seen` 和 `tmp`。
+This updates (or creates, as necessary) branches `seen` and `tmp` in the local repository by fetching from the branches (respectively) `seen` and `maint` from the remote repository.
 +
 即使不快进，`seen` 分支也会被更新，因为它的前缀是加号；`tmp` 则不会。
 
@@ -180,7 +180,7 @@ $ git fetch git://git.kernel.org/pub/scm/git/git.git maint
 $ git log FETCH_HEAD
 ------------------------------------------------
 +
-第一条命令从 `git://git.kernel.org/pub/scm/git.git` 的存储库中获取 `maint` 分支，第二条命令使用 `FETCH_HEAD` 用 linkgit:git-log[1] 来检查该分支。 取出的对象最终会被 git 内置的内务管理删除（见 linkgit:git-gc[1]）。
+The first command fetches the `maint` branch from the repository at `git://git.kernel.org/pub/scm/git/git.git` and the second command uses `FETCH_HEAD` to examine the branch with linkgit:git-log[1]. The fetched objects will eventually be removed by git's built-in housekeeping (see linkgit:git-gc[1]).
 
 include::transfer-data-leaks.txt[]
 

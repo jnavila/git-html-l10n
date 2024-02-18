@@ -28,13 +28,13 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Caso a opção `--list` seja utilizada ou caso não haja argumentos não opcionais, as ramificações existentes serão listadas; o ramo atual será destacado em verde e marcado com um asterisco. Quaisquer ramificações retiradas das áreas de trabalho vinculadas, serão destacadas em ciano e marcadas com um sinal de adição. A opção `-r` faz com que as ramificações monitoradas remotamente sejam listadas, a opção `-a` exibe as ramificações locais e as remotas.
+If `--list` is given, or if there are no non-option arguments, existing branches are listed; the current branch will be highlighted in green and marked with an asterisk. Any branches checked out in linked worktrees will be highlighted in cyan and marked with a plus sign. Option `-r` causes the remote-tracking branches to be listed, and option `-a` shows both local and remote branches.
 
 Caso um `<padrão>` seja informado, ele será utilizado como um curinga do shell para restringir a saída das ramificações correspondentes. Caso vários padrões sejam informados, um ramo será exibido caso coincida com qualquer um dos padrões.
 
 Note que ao fornecer um `<padrão>` você deve utilizar `--list`; caso contrário, o comando pode ser interpretado como uma criação do ramo.
 
-Com a opção `--contains`, exibe apenas os ramos que contenham o commit informado (em outras palavras, os ramos cujos commits do topo sejam os descendentes do commit informado),`--no-contains` funciona ao contrário. Com a opção `--merged`, apenas as ramificações mescladas no commit informado serão listados (ou seja, os ramos cujos commits do cume esteja acessível a partir do commit informado). Com `--no-merged', serão listados apenas as ramificações não mescladas do commit informado. Caso o argumento `<commit>` esteja ausente, a predefinição retorna para `HEAD` (ou seja, o do ramo atual).
+With `--contains`, shows only the branches that contain the named commit (in other words, the branches whose tip commits are descendants of the named commit), `--no-contains` inverts it. With `--merged`, only branches merged into the named commit (i.e. the branches whose tip commits are reachable from the named commit) will be listed. With `--no-merged` only branches not merged into the named commit will be listed. If the <commit> argument is missing it defaults to `HEAD` (i.e. the tip of the current branch).
 
 O segundo formulário do comando cria um novo cabeçalho do ramo informado `<nome-do-ramo>` (nome do ramo0), que aponta para o `HEAD` atual, ou o `<ponto-de-partida>` caso seja utilizado. Como um caso especial, para o `<ponto-de-partida>`, utilize `"A...B"` como um atalho para a base da mesclagem de `A` e `B` caso sejam exatamente uma base para ser mesclada. Você pode deixar de fora no máximo um de `A` e `B`, caso onde a predefinição retorna para `HEAD`.
 
@@ -42,11 +42,11 @@ Observe que isso criará a nova ramificação mas não mudará a árvore de trab
 
 Quando uma ramificação local é iniciada numa ramificação remotamente monitorada, o Git define a ramificação (especificamente as entradas da configuração `branch.<nome>.remote` e `branch.<nome>.merge`) para que o comando 'git pull' mescle adequadamente a partir do ramo monitorado remotamente. Este comportamento pode ser alterado através da variável de configuração global `branch.autoSetupMerge`. Esta configuração pode ser substituída utilizando as opções `--track` e `--no-track`, podendo ser alterada posteriormente utilizando o comando `git branch --set-upstream-to`.
 
-Com uma opção `-m` ou `-M`, o ramo antigo `<ramo-antigo>` será renomeado para o novo ramo `<novo-ramo>`. Caso o `<ramo-antigo>` tenha um reflog correspondente, ele será renomeado para coincidir com o `<novo-ramo>`, uma entrada de reflog será criada para lembrar da renomeação do ramo. Caso `<novo-ramo>` exista, -M deve ser utilizado para impor que a renomeação aconteça.
+With a `-m` or `-M` option, <oldbranch> will be renamed to <newbranch>. If <oldbranch> had a corresponding reflog, it is renamed to match <newbranch>, and a reflog entry is created to remember the branch renaming. If <newbranch> exists, -M must be used to force the rename to happen.
 
 As opções `-c` e `-C` têm exatamente a mesma semântica que `-m` e `-M`, exceto que em vez do ramo que está sendo renomeado, ele será copiado com um novo nome junto com a sua configuração e o reflog .
 
-Com uma opção `-d` ou `-D`, o `<nome-do-ramo>` será excluído. Você pode informar mais de uma ramificação para ser excluído. Caso o ramo tiver atualmente um reflog, este também será excluído.
+With a `-d` or `-D` option, `<branchname>` will be deleted. You may specify more than one branch for deletion. If the branch currently has a reflog then the reflog will also be deleted.
 
 Utilize a opção `-r` junto com `-d` para excluir o monitoramento das ramificações remotas. Observe que só faz sentido excluir o monitoramento das ramificações remotas caso elas não existam mais no repositório remoto ou caso o comando 'git fetch' tenha sido configurado para não resgatá-las novamente. Consulte também o subcomando 'prune' linkgit:git-remote[1] para conhecer uma maneira de limpar todos os monitoramentos obsoletos das ramificações remotas.
 
@@ -61,11 +61,11 @@ OPÇÕES
 	Um atalho para `--delete --force`.
 
 --create-reflog::
-	Crie o reflog do ramo. Ativa a gravação de todas as alterações feitas no "ref" do ramo, permitindo a utilização de expressões sha1 baseadas na data, como `<nome-do-ramo>@\{yesterday}`. Observe que nos repositórios que não estiverem vazios, é predefinido que os reflogs geralmente sejam ativados através da variável de configuração `core.logAllRefUpdates`. A forma negada o comando `--no-create-reflog` substitui apenas um `--create-reflog` anterior, mas atualmente não nega a configuração do `core.logAllRefUpdates`.
+	Create the branch's reflog. This activates recording of all changes made to the branch ref, enabling use of date based sha1 expressions such as "<branchname>@\{yesterday}". Note that in non-bare repositories, reflogs are usually enabled by default by the `core.logAllRefUpdates` config option. The negated form `--no-create-reflog` only overrides an earlier `--create-reflog`, but currently does not negate the setting of `core.logAllRefUpdates`.
 
 -f::
 --force::
-	Redefina o `<nome-do-ramo>` para `<start-point>`, mesmo se o `<nome-do-ramo>` já existir. Sem o `-f`, o comando 'git branch' se recusa a alterar uma ramificação já existente. Em combinação com `-d` (ou `--delete`), permita excluir a ramificação, independentemente da sua condição de mesclagem, ou mesmo se ele aponta para um commit válido. Em combinação com `-m` (ou `--move`), permita renomear a ramificação, mesmo que o novo nome do ramo já exista, o mesmo se aplica com `-c` (ou `--copy`).
+	Reset <branchname> to <start-point>, even if <branchname> exists already. Without `-f`, 'git branch' refuses to change an existing branch. In combination with `-d` (or `--delete`), allow deleting the branch irrespective of its merged status, or whether it even points to a valid commit. In combination with `-m` (or `--move`), allow renaming the branch even if the new branch name already exists, the same applies for `-c` (or `--copy`).
 +
 Observe que 'git branch -f <nome_do_ramo> [<ponto-inicial>]', mesmo com '-f', recusa-se a alterar um ramo já existente `<nome_do_ramo>' que é verificado em outra árvore de trabalho ligada ao mesmo repositório.
 
@@ -74,20 +74,20 @@ Observe que 'git branch -f <nome_do_ramo> [<ponto-inicial>]', mesmo com '-f', re
 	Move/renomeia uma ramificação junto com a sua configuração e o reflog.
 
 -M::
-	Atalho para `--mover --força`.
+	Atalho para `--mover --force`.
 
 -c::
 --copy::
 	Copia uma ramificação, junto com a sua configuração e o reflog.
 
 -C::
-	Shortcut for `--cópia --força`.
+	Atalho para `--copy --force`.
 
 --color[=<quando>]::
-	Colora as ramificações para dar destaque nas ramificações atuais, locais e monitoradas remotamente. Always (sempre) é o valor predefinido, as outras opções são "never" ou "auto".
+	Color branches to highlight current, local, and remote-tracking branches. The value must be always (the default), never, or auto.
 
 --no-color::
-	Desative as cores do ramo, mesmo quando o arquivo de configuração informar o valor predefinido para a saída das cores. O mesmo que `--color=never`.
+	Turn off branch colors, even when the configuration file gives the default to color output. Same as `--color=never`.
 
 -i::
 --ignore-case::
@@ -96,7 +96,7 @@ Observe que 'git branch -f <nome_do_ramo> [<ponto-inicial>]', mesmo com '-f', re
 --omit-empty::
 	Não imprima uma nova linha após a formatação das referências onde o formato se expande para a string vazia.
 
---coluna[=<opções>]::
+--column[=<opções>]::
 --no-column::
 	Exiba lista dos ramos em colunas. Para conhecer a sintaxe da opção, consulte a variável de configuração `column.branch`. `--column` e `--no-column` sem opções são respectivamente o mesmo que 'always' e 'never'.
 +
@@ -104,15 +104,15 @@ Esta opção é aplicável apenas no modo não detalhado.
 
 -r::
 --remotes::
-	Liste ou exclua (se utilizado com -d) as ramificações rastreadas remotamente. Combine com a opção `--list` para coincidir com os padrões opcionais.
+	List or delete (if used with -d) the remote-tracking branches. Combine with `--list` to match the optional pattern(s).
 
 -a::
 --all::
-	Liste ambas as ramificações rastreadas remotamente e as ramificações locais. Combine com a opção `--list` para que coincida com os padrões opcionais.
+	List both remote-tracking branches and local branches. Combine with `--list` to match optional pattern(s).
 
 -l::
 --list::
-	Lista as ramificações. Com o `<padrão>...` opcional, o comando `git branch --list 'maint-*'`, lista apenas as ramificações que coincidam com os padrões.
+	List branches. With optional `<pattern>...`, e.g. `git branch --list 'maint-*'`, list only the branches that match the pattern(s).
 
 --show-current::
 	Exiba o nome do ramo atual. Na condição onde `HEAD` esteja desanexado, nada é impresso.
@@ -120,14 +120,14 @@ Esta opção é aplicável apenas no modo não detalhado.
 -v::
 -vv::
 --verbose::
-	Quando estiver no modo de listagem, exiba o sha1 e confirme a linha do assunto para cada cabeçalho, juntamente com o relacionamento com o ramo "upstream" (caso haja). Se utilizado duas vezes, exiba a vinculação do caminho da árvore de trabalho (caso haja) e o nome do ramo "upstream" (consulte também `git remote show <remoto>`). Observe que o `HEAD` da árvore de trabalho atual não terá o seu caminho mostrado (sempre será seu diretório atual).
+	When in list mode, show sha1 and commit subject line for each head, along with relationship to upstream branch (if any). If given twice, print the path of the linked worktree (if any) and the name of the upstream branch, as well (see also `git remote show <remote>`). Note that the current worktree's HEAD will not have its path printed (it will always be your current directory).
 
 -q::
 --quiet::
 	Seja mais silencioso ao criar ou excluir uma ramificação, suprimindo as mensagens que não sejam de erro.
 
 --abbrev=<n>::
-	Na listagem louquaz que exibe o nome do objeto que foi feito o commit, exibe o prefixo mais curto que se refira de forma única ao objeto e que tenha até '<n>' hexdigits . O valor predefinido é 7, pode ser substituído através da variável de configuração `core.abbrev`.
+	In the verbose listing that show the commit object name, show the shortest prefix that is at least '<n>' hexdigits long that uniquely refers the object. The default value is 7 and can be overridden by the `core.abbrev` config option.
 
 --no-abbrev::
 	Exibe o sha1 completo na saída da listagem em vez de abreviá-los.
@@ -140,7 +140,7 @@ O exato ramo "upstream" é escolhido dependendo do argumento opcional: `-t`, `--
 +
 A variável de configuração branch.autoSetupMerge determina como os comandos `git switch`, `git checkout` e `git branch` devem se comportar quando nem uma opção `--track` nem `--no-track` são usados:
 +
-A opção padrão, `true`, se comporta como se `--track=direct` fosse usado sempre que o ponto inicial fosse um ramo de rastreamento remoto. A definição `false` se comporta como se `--no-track` fosse usado. A definição `always` se comporta como se `--track=direct` fosse usado. A definição `inherit` se comporta como se `--track=inherit` fosse usado. A definição `simple` se comporta como se `--track=direct` fosse usado apenas quando o ponto inicial for um ramo de rastreamento remoto e o novo ramo tenha o mesmo nome do ramo remoto.
+The default option, `true`, behaves as though `--track=direct` were given whenever the start-point is a remote-tracking branch. `false` behaves as if `--no-track` were given. `always` behaves as though `--track=direct` were given. `inherit` behaves as though `--track=inherit` were given. `simple` behaves as though `--track=direct` were given only when the start-point is a remote-tracking branch and the new branch has the same name as the remote branch.
 +
 Consulte linkgit:git-pull[1] e linkgit:git-config[1] para uma discussão adicional sobre como as opções `branch.<nome>.remote` e `branch.<nome>.merge` são utilizadas.
 
@@ -153,7 +153,7 @@ Consulte linkgit:git-pull[1] e linkgit:git-config[1] para uma discussão adicion
 Quando usado na criação dos ramos, um novo ramo <nome-do-ramo> será criado no super projeto (superproject) e todos os submódulos no super projeto <ponto-de-início>. Nos submódulos, o ramo irá apontar para o commit do submódulo no <ponto-de-inicio> do super projeto, porém a informação do rastreamento do ramo será configurado com base no submódulo's dos ramos locais e remotos por exemplo. O ramo `git --recurse-submodules topic origin/main` irá criar o ramo do submódulo "topic" que aponta para o commit do submódulo no super projeto "origin/main", contudo rastreia o submódulos "origin/main".
 
 --set-upstream::
-	Como esta opção tinha a sintaxe confusa, agora ela é obsoleta. Utilize `--track` ou `--set-upstream-to`.
+	As this option had confusing syntax, it is no longer supported. Please use `--track` or `--set-upstream-to` instead.
 
 -u <upstream>::
 --set-upstream-to=<upstream>::
@@ -178,13 +178,13 @@ Quando usado na criação dos ramos, um novo ramo <nome-do-ramo> será criado no
 	Liste apenas as ramificações cujas dicas não possam ser acessadas a partir do commit informado (`HEAD`, caso nenhum seja informado). Implica no uso da opção `--list`.
 
 <nome-do-ramo>::
-	O nome do ramo que será criada ou excluída. O nome da nova ramificação deve passar em todas as verificações definidas pelo linkgit:git-check-ref-format[1]. Algumas dessas verificações podem restringir os caracteres permitidos no nome de uma ramificação.
+	The name of the branch to create or delete. The new branch name must pass all checks defined by linkgit:git-check-ref-format[1]. Some of these checks may restrict the characters allowed in a branch name.
 
-<ponto-de-partida>::
-	O cabeçalho da nova ramificação apontará para este commit. Pode ser utilizado como um nome do ramo, um ID do commit ou uma tag. Caso esta opção seja omitida, o `HEAD` atual será utilizado.
+<início-ponto>::
+	The new branch head will point to this commit. It may be given as a branch name, a commit-id, or a tag. If this option is omitted, the current HEAD will be used instead.
 
 <ramo-antigo>::
-	O nome de uma ramificação existente que será renomeada.
+	The name of an existing branch. If this option is omitted, the name of the current branch will be used instead.
 
 <novo-ramo>::
 	Um novo nome para um ramo já existente. Se aplicam as mesmas restrições para `<nome-do-ramo>`.
@@ -197,11 +197,11 @@ Quando usado na criação dos ramos, um novo ramo <nome-do-ramo> será criado no
 	Apenas lista os objetos das ramificações informadas.
 
 --format <formato>::
-	Uma cadeia de caracteres que interpola `%(fieldname)` de uma tag "ref" que está sendo exibida e o objeto para o qual ele aponta. O formato é o mesmo do linkgit:git-for-each-ref[1].
+	A string that interpolates `%(fieldname)` from a branch ref being shown and the object it points at. The format is the same as that of linkgit:git-for-each-ref[1].
 
 CONFIGURAÇÃO
 ------------
-O `pager.branch` é respeitado apenas ao listar as ramificações, ou seja, quando a opção `--list` é utilizado ou implícito. A predefinição é utilizar um pager. Consulte linkgit:git-config[1].
+`pager.branch` is only respected when listing branches, i.e., when `--list` is used or implied. The default is to use a pager. See linkgit:git-config[1].
 
 include::includes/cmd-config-section-rest.txt[]
 
@@ -230,7 +230,7 @@ $ git branch -d -r origin/todo origin/html origin/man   <1>
 $ git branch -D test                                    <2>
 ------------
 +
-<1> Exclua as ramificações rastreadas remotamente "todo", "html" e "man". O próximo 'fetch' (resgate) ou 'pull' (captura) os criará novamente a menos que você os configure para não fazê-lo. Consulte linkgit:git-fetch[1].
+<1> Delete the remote-tracking branches "todo", "html" and "man". The next 'fetch' or 'pull' will create them again unless you configure them not to. See linkgit:git-fetch[1].
 <2> Exclua o ramo "teste", mesmo que o ramo "principal" (ou o ramo que está com a averiguação no momento) não tenha todos os commits do ramo do teste.
 
 Listando as ramificações de um determinado ponto remoto::

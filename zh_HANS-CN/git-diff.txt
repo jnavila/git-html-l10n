@@ -1,0 +1,164 @@
+git-diff(1)
+===========
+
+名称
+--
+git-diff - 显示提交和工作区等变化
+
+
+概述
+--
+[verse]
+'git diff' [<options>] [<commit>] [--] [<path>...]。
+'git diff' [<options>] --cached [--merge-base] [<commit>] [--] [<path>...]。
+'git diff' [<options>] [--merge-base] <commit> [<commit>...] <commit> [--] [<path>...]
+'git diff' [<options>] <commit>...<commit> [--] [<path>...]。
+'git diff' [<options>] <blob> <blob
+'git diff' [<options>] --no-index [--] <path> <path>。
+
+描述
+--
+显示工作树和索引或树之间的变化，索引和树之间的变化，两个树之间的变化，合并产生的变化，两个blob对象之间的变化，或者磁盘上两个文件之间的变化。
+
+'git diff' [<选项>] [--] [<路径>...]::
+
+	This form is to view the changes you made relative to the index (staging area for the next commit). In other words, the differences are what you _could_ tell Git to further add to the index but you still haven't. You can stage these changes by using linkgit:git-add[1].
+
+'git diff' [<选项>] --no-index [--] <路径> <路径>::
+
+	This form is to compare the given two paths on the filesystem. You can omit the `--no-index` option when running the command in a working tree controlled by Git and at least one of the paths points outside the working tree, or when running the command outside a working tree controlled by Git. This form implies `--exit-code`.
+
+'git diff' [<选项>] --cached [--merge-base] [<提交>] [--] [<路径>...]::
+
+	This form is to view the changes you staged for the next commit relative to the named <commit>. Typically you would want comparison with the latest commit, so if you do not give <commit>, it defaults to HEAD. If HEAD does not exist (e.g. unborn branches) and <commit> is not given, it shows all staged changes. --staged is a synonym of --cached.
++
+If --merge-base is given, instead of using <commit>, use the merge base of <commit> and HEAD. `git diff --cached --merge-base A` is equivalent to `git diff --cached $(git merge-base A HEAD)`.
+
+'git diff' [<选项>] [--merge-base] <提交> [--] [<路径>...]::
+
+	This form is to view the changes you have in your working tree relative to the named <commit>. You can use HEAD to compare it with the latest commit, or a branch name to compare with the tip of a different branch.
++
+If --merge-base is given, instead of using <commit>, use the merge base of <commit> and HEAD. `git diff --merge-base A` is equivalent to `git diff $(git merge-base A HEAD)`.
+
+'git diff' [<多个选项>] [--merge-base] <提交> <提交> [--] [<路径>...]::
+
+	这是为了查看两个任意<commit>之间的变化。
++
+If --merge-base is given, use the merge base of the two commits for the "before" side. `git diff --merge-base A B` is equivalent to `git diff $(git merge-base A B) B`.
+
+'git diff' [<选项>] <提交> <提交>... <提交> [--] [<路径>...]::
+
+	This form is to view the results of a merge commit. The first listed <commit> must be the merge itself; the remaining two or more commits should be its parents. Convenient ways to produce the desired set of revisions are to use the suffixes `^@` and `^!`. If A is a merge commit, then `git diff A A^@`, `git diff A^!` and `git show A` all give the same combined diff.
+
+'git diff' [<选项>] <提交>..<提交> [--] [<路径>...]::
+
+	This is synonymous to the earlier form (without the `..`) for viewing the changes between two arbitrary <commit>. If <commit> on one side is omitted, it will have the same effect as using HEAD instead.
+
+'git diff' [<选项>] <提交>\...<提交> [--] [<路径>...]::
+
+	This form is to view the changes on the branch containing and up to the second <commit>, starting at a common ancestor of both <commit>. `git diff A...B` is equivalent to `git diff $(git merge-base A B) B`. You can omit any one of <commit>, which has the same effect as using HEAD instead.
+
+Just in case you are doing something exotic, it should be noted that all of the <commit> in the above description, except in the `--merge-base` case and in the last two forms that use `..` notations, can be any <tree>. A tree of interest is the one pointed to by the ref named `AUTO_MERGE`, which is written by the 'ort' merge strategy upon hitting merge conflicts (see linkgit:git-merge[1]). Comparing the working tree with `AUTO_MERGE` shows changes you've made so far to resolve textual conflicts (see the examples below).
+
+For a more complete list of ways to spell <commit>, see "SPECIFYING REVISIONS" section in linkgit:gitrevisions[7]. However, "diff" is about comparing two _endpoints_, not ranges, and the range notations (`<commit>..<commit>` and `<commit>...<commit>`) do not mean a range as defined in the "SPECIFYING RANGES" section in linkgit:gitrevisions[7].
+
+'git diff' [<选项>] <blob> <blob>::
+
+	这种形式是为了查看两个blob对象的原始内容之间的差异。
+
+选项
+--
+:git-diff: 1
+include::diff-options.txt[]
+
+-1 --base::
+-2 --ours::
+-3 --theirs::
+	Compare the working tree with the "base" version (stage #1), "our branch" (stage #2) or "their branch" (stage #3). The index contains these stages only for unmerged entries i.e. while resolving conflicts. See linkgit:git-read-tree[1] section "3-Way Merge" for detailed information.
+
+-0::
+	Omit diff output for unmerged entries and just show "Unmerged". Can be used only when comparing the working tree with the index.
+
+<路径>...::
+	<paths>参数，当给出时，用于将diff限制在指定的路径上（你可以给出目录名称，并获得其下所有文件的diff）。
+
+
+include::diff-format.txt[]
+
+实例
+--
+
+检查你的工作树的各种方法::
++
+------------
+$ git diff            <1>
+$ git diff --cached   <2>
+$ git diff HEAD       <3>
+$ git diff AUTO_MERGE <4>
+------------
++
+<1> 工作树上的修改还没有为下一次提交做铺垫。
+<2> 索引和你最后一次提交之间的变化；如果你运行`git commit`而不使用`-a`选项，你将会提交的内容。
+<3> 自你上次提交后工作目录树上的变化；如果你运行 `git commit -a`，你将提交的内容
+<4> 您为解决文本冲突而对工作目录树所做的修改。
+
+与任意提交的比较::
++
+------------
+$ git diff test <1>
+$ git diff HEAD -- ./test <2>
+$ git diff HEAD^ HEAD <3>
+------------
++
+<1> 不使用当前分支的顶端，而是与 "测试 "分支的顶端比较。
+<2> 与其说是与 "test "分支的顶端比较，不如说是与当前分支的顶端比较，但只限于与 "test "文件比较。
+<3> 比较上次提交前的版本和上次提交的版本。
+
+比较分支机构::
++
+------------
+$ git diff topic master    <1>
+$ git diff topic..master   <2>
+$ git diff topic...master  <3>
+------------
++
+<1> 专题的提示和主分支之间的变化。
+<2> 同上。
+<3> 自专题分支开始以来，在主分支上发生的变化。
+
+限制差分输出::
++
+------------
+$ git diff --diff-filter=MRC            <1>
+$ git diff --name-status                <2>
+$ git diff arch/i386 include/asm-i386   <3>
+------------
++
+<1> 只显示修改、重命名和复制，但不显示增加或删除。
+<2> 只显示名称和变化的性质，但不显示实际的差异输出。
+<3> 将diff输出限制在命名的子树上。
+
+轧制差速器输出::
++
+------------
+$ git diff --find-copies-harder -B -C  <1>
+$ git diff -R                          <2>
+------------
++
+<1> 花费额外的周期来寻找重命名、复制和完全重写（非常昂贵）。
+<2> 反向输出差值。
+
+配置
+--
+
+include::includes/cmd-config-section-all.txt[]
+
+include::config/diff.txt[]
+
+参见
+--
+diff(1), linkgit:git-difftool[1], linkgit:git-log[1], linkgit:gitdiffcore[7], linkgit:git-format-patch[1], linkgit:git-apply[1], linkgit:git-show[1]
+
+GIT
+---
+属于 linkgit:git[1] 文档

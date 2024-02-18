@@ -1,22 +1,21 @@
 原始输出格式
 ------
 
-"git-diff-index"，"git-diff-tree"，"git-diff-files" 和 "git diff --raw"
-的原始输出格式非常相似。
+"git-diff-index"，"git-diff-tree"，"git-diff-files" 和 "git diff --raw" 的原始输出格式非常相似。
 
 这些命令都比较两组事物。但比较的内容有所不同：
 
-git-diff-index <tree-ish>::
-        比较 <文件树> 和文件系统上的文件。
+git-diff-index <目录树对象>::
+        比较 <目录树对象> 和文件系统上的文件。
 
-git-diff-index --cached <文件树>::
-        比较 <文件树> 和索引。
+git-diff-index --cached <目录树对象>::
+        比较 <目录树对象> 和索引。
 
-git-diff-tree [-r] <文件树1> <文件树2> [<模式>...]::
-        比较由两个参数传递的文件树。
+git-diff-tree [-r] <目录树对象 1> <目录树对象 2> [<模式>...]::
+        比较由两个参数传递的目录树。
 
 git-diff-files [<模式>...]::
-        compares the index and the files on the filesystem.
+        比较索引和文件系统上的文件。
 
 "git-diff-tree" 命令在最开始输出被比较对象的哈希值。之后，所有命令都会为每个更改的文件打印一个输出行。
 
@@ -33,14 +32,14 @@ unmerged       :000000 000000 0000000 0000000 U file6
 
 含义如下，从左到右依次：
 
-. a colon.
+. 冒号。
 . "src"（源文件）的模式；如果是新建或是未合并的，则为 000000。
 . 空格。
 . "dst"(目标文件）的模式；如果被删除或未合并则为 000000。
 . 空格。
 . "src"（源文件）的 sha1 值；如果为新建或未合并则为 0\{40\}。
 . 空格。
-. sha1 for "dst"; 0\{40\} if creation, unmerged or "look at work tree".
+. sha1 表示 "dst"（目标文件）；0\{40\} 表示删除、未合并或 “工作目录树与索引不同步”。
 . 空格。
 . 状态，在可选值 "score" 之后。
 . 当使用 `-z` 选项时为制表符或 NUL。
@@ -60,37 +59,30 @@ unmerged       :000000 000000 0000000 0000000 U file6
 - U：文件未合并（你必须在提交之前完成合并）
 - X："unknown"（未知）更改类型（可能为错误，请报告）
 
-状态字母 C 和 R 后面总是一个分数（表示移动或复制的源与目标之间的相似性百分比）。状态字母M后面可能有文件重写的分数（表示相异百分比）。
+Status letters C and R are always followed by a score (denoting the percentage of similarity between the source and target of the move or copy). Status letter M may be followed by a score (denoting the percentage of dissimilarity) for file rewrites.
 
 如果文件是文件系统上的新文件，并且与索引不同步，则 <sha1> 将显示为全0。
 
 例如：
 
 ------------------------------------------------
-:100644 100644 5be4a4a 0000000 M file.c
+:100644 100644 5be4a4a 0000000 M 文件.c
 ------------------------------------------------
 
-Without the `-z` option, pathnames with "unusual" characters are quoted as
-explained for the configuration variable `core.quotePath` (see
-linkgit:git-config[1]).  Using `-z` the filename is output verbatim and the
-line is terminated by a NUL byte.
+Without the `-z` option, pathnames with "unusual" characters are quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). Using `-z` the filename is output verbatim and the line is terminated by a NUL byte.
 
 合并的差异格式
 -------
 
-"git-diff-tree"、"git-diff-files" 和 "git-diff --raw" 可以使用 `-c` 或 `--cc`
-选项来生成差异输出，也可以用于合并提交。其输出与上面描述的格式有以下不同：
+"git-diff-tree", "git-diff-files" and "git-diff --raw" can take `-c` or `--cc` option to generate diff output also for merge commits. The output differs from the format described above in the following way:
 
 . 每个父提交都有一个冒号
-. there are more "src" modes and "src" sha1
+. 有更多的 "src" 文件模式和 "src" sha1
 . 状态是每个父提交的状态字符的合并
 . 无可选的分数（"score"）数字
 . 以制表符分隔的文件路径名
 
-For `-c` and `--cc`, only the destination or final path is shown even if the
-file was renamed on any side of history.  With `--combined-all-paths`, the
-name of the path in each parent is shown followed by the name of the path in
-the merge commit.
+For `-c` and `--cc`, only the destination or final path is shown even if the file was renamed on any side of history. With `--combined-all-paths`, the name of the path in each parent is shown followed by the name of the path in the merge commit.
 
 以下为带 `-c` 和 `--cc` 选项且不带 `--combined-all-paths` 选项的示例：
 ------------------------------------------------
@@ -116,17 +108,15 @@ include::diff-generate-patch.txt[]
 其他差异格式
 ------
 
-`--summary` 选项描述新添加、删除、重命名和复制的文件。`--stat` 选项将 diffstat(1)
-图添加到输出中。这些选项可以与其他选项组合在一起，如 `-p` 选项可以提高可读性。
+The `--summary` option describes newly added, deleted, renamed and copied files. The `--stat` option adds diffstat(1) graph to the output. These options can be combined with other options, such as `-p`, and are meant for human consumption.
 
-当显示一个涉及到重命名或复制的更改时，`--stat` 输出会将路径名的前缀和后缀结合在一起，会以较紧凑的方式显示。例如，将
-"arch/i386/Makefile" 移动到 "arch/x86/Makefile"，同时修改了4行，就会显示出这样的变化：
+When showing a change that involves a rename or a copy, `--stat` output formats the pathnames compactly by combining common prefix and suffix of the pathnames. For example, a change that moves `arch/i386/Makefile` to `arch/x86/Makefile` while modifying 4 lines will be shown like this:
 
 ------------------------------------
 arch/{i386 => x86}/Makefile    |   4 +--
 ------------------------------------
 
-`--numstat` 选项提供了 diffstat(1) 的信息，但其是为了方便程序使用而设计的。`--numstat` 输出中的一个条目如下：
+The `--numstat` option gives the diffstat(1) information but is designed for easier machine consumption. An entry in `--numstat` output looks like this:
 
 ----------------------------------------
 1	2	README
@@ -137,7 +127,7 @@ arch/{i386 => x86}/Makefile    |   4 +--
 
 . 添加的行数；
 . 制表符；
-. 删除的行数；
+. 已删除行数;
 . 制表符；
 . 路径名（可能有重命名/复制信息）；
 . 换行符。
@@ -153,16 +143,12 @@ arch/{i386 => x86}/Makefile    |   4 +--
 
 . 添加的行数；
 . 制表符；
-. 删除的行数；
+. 已删除行数;
 . 制表符；
 . NUL（仅在重命名/复制时存在）；
 . 完整路径名；
 . NUL（仅在重命名/复制时存在）；
 . 完整路径名（仅在重命名/复制时存在）；
-. NUL。
+. 一个 NUL 字符。
 
-The extra `NUL` before the preimage path in renamed case is to allow scripts
-that read the output to tell if the current record being read is a
-single-path record or a rename/copy record without reading ahead.  After
-reading added and deleted lines, reading up to `NUL` would yield the
-pathname, but if that is `NUL`, the record will show two paths.
+The extra `NUL` before the preimage path in renamed case is to allow scripts that read the output to tell if the current record being read is a single-path record or a rename/copy record without reading ahead. After reading added and deleted lines, reading up to `NUL` would yield the pathname, but if that is `NUL`, the record will show two paths.

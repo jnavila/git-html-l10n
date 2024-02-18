@@ -3,23 +3,23 @@ git-pull(1)
 
 名称
 --
-git-pull - Fetch from and integrate with another repository or a local branch
+git-pull - 从另一个仓库或本地分支撷取并与之集成
 
 
 概述
 --
 [verse]
-'git pull' [<options>] [<repository> [<refspec>...]]
+'git pull' [<选项>] [<仓库> [<引用规范>...]]
 
 
 描述
 --
 
-将远程版本库的修改并入当前分支。 如果当前分支落后于远程分支，那么默认情况下，它将快速合并当前分支以匹配远程分支。 如果当前分支和远程分支有分歧，用户需要用 `--rebase` 或 `--no-rebase`（或 `pull.rebase` 中的相应配置选项）来指定如何调和分歧的分支。
+Incorporates changes from a remote repository into the current branch. If the current branch is behind the remote, then by default it will fast-forward the current branch to match the remote. If the current branch and the remote have diverged, the user needs to specify how to reconcile the divergent branches with `--rebase` or `--no-rebase` (or the corresponding configuration option in `pull.rebase`).
 
 更确切地说，`git pull` 运行 `git fetch` 并给出参数，然后根据配置选项或命令行标志，调用 `git rebase` 或 `git merge` 来协调不同的分支。
 
-<仓库> 应该是传递给 linkgit:git-fetch[1] 的远程仓库的名称。 < 用引规范 > 可以命名一个任意的远程引用（例如，一个标签的名称），甚至是一个有相应远程跟踪分支的引用集合（例如，refs/heads/{asterisk}:refs/remotes/origin/{asterisk}），但通常它是远程仓库的一个分支名称。
+<repository> should be the name of a remote repository as passed to linkgit:git-fetch[1]. <refspec> can name an arbitrary remote ref (for example, the name of a tag) or even a collection of refs with corresponding remote-tracking branches (e.g., refs/heads/{asterisk}:refs/remotes/origin/{asterisk}), but usually it is the name of a branch in the remote repository.
 
 <仓库> 和 < 分支 > 的默认值是从 linkgit:git-branch[1] `--track` 设置的当前分支的 "远程" 和 "合并" 配置中读取。
 
@@ -33,7 +33,7 @@ git-pull - Fetch from and integrate with another repository or a local branch
 	你仓库中的 origin/master
 ------------
 
-然后，"`git pull`" 将从远程的 `master` 分支获取并重放自它与本地 `master`（即 `E`）分歧以来的变化，直到它在 `master` 之上的当前提交（`C`），并将结果与两个父提交的名称和用户描述变化的日志信息一起记录在一个新提交中。
+Then "`git pull`" will fetch and replay the changes from the remote `master` branch since it diverged from the local `master` (i.e., `E`) until its current commit (`C`) on top of `master` and record the result in a new commit along with the names of the two parent commits and a log message from the user describing the changes.
 
 ------------
 	  A---B---C origin/master
@@ -43,9 +43,9 @@ git-pull - Fetch from and integrate with another repository or a local branch
 
 详情见 linkgit:git-merge[1]，包括如何呈现和处理冲突。
 
-在 Git 1.7.0 或更高版本中，要取消一个冲突的合并，请使用 `git reset --merge`。 * 警告 *：在旧版本的 Git 中，不鼓励在未提交的情况下运行 "git pull"：虽然有可能，但在发生冲突的情况下，会让你处于一个难以恢复的状态。
+In Git 1.7.0 or later, to cancel a conflicting merge, use `git reset --merge`. *Warning*: In older versions of Git, running 'git pull' with uncommitted changes is discouraged: while possible, it leaves you in a state that may be hard to back out of in the case of a conflict.
 
-如果任何远程修改与本地未提交的修改重叠，合并将被自动取消，工作目录树不会被改动。 一般来说，最好是在拉取之前把任何本地的修改弄到工作状态，或者用 linkgit:git-stash[1] 把它们贮藏起来。
+If any of the remote changes overlap with local uncommitted changes, the merge will be automatically canceled and the work tree untouched. It is generally best to get any local changes in working order before pulling or stash them away with linkgit:git-stash[1].
 
 选项
 --
@@ -85,7 +85,7 @@ include::merge-options.txt[]
 如果你想让 `git pull` 总是使用 `--rebase` 而不是合并，请参见 linkgit:git-config[1] 中的 `pull.rebase`, `branch.< 分支名 >.rebase` 和 `branch.autoSetupRebase`。
 +
 [NOTE]
-这是一种潜在的「危险的」操作模式。 它重写了历史，当你已经发布了这些历史时，这并不是一个好兆头。 除非你仔细阅读了linkgit:git-rebase[1]，否则请「不要」使用这个选项。
+This is a potentially _dangerous_ mode of operation. It rewrites history, which does not bode well when you published that history already. Do *not* use this option unless you have read linkgit:git-rebase[1] carefully.
 
 --no-rebase::
 	这是对 --rebase=false 的简写。
@@ -104,27 +104,27 @@ include::merge-strategies.txt[]
 默认行为
 ----
 
-人们经常使用 `git pull` 而不给任何参数。 传统上，这等同于说 `git pull origin`。 然而，当配置 `branch.<分支名>.remote` 在分支 `< 分支名 >` 上出现时，该值会被用来代替 `origin`。
+Often people use `git pull` without giving any parameter. Traditionally, this has been equivalent to saying `git pull origin`. However, when configuration `branch.<name>.remote` is present while on branch `<name>`, that value is used instead of `origin`.
 
 为了确定使用什么 URL 来获取，将查询配置 `remote.<远程名>.url` 的值，如果没有这样的变量，将使用 `$GIT_DIR/remotes/< 远程名 >` 中 `URL:` 一行的值。
 
-当命令行上没有任何引用规范参数时，为了确定要获取哪些远程分支（并可选择存储在远程跟踪分支中），会查询配置变量 `remote.<远程名>.fetch` 的值，如果没有，会查询 `$GIT_DIR/remotes/< 远程名 >` 并使用其 `Pull:` 行。 除了在『选项』部分描述的引用规范格式之外，你还可以有一个看起来像这样的引用规范通配符：
+In order to determine what remote branches to fetch (and optionally store in the remote-tracking branches) when the command is run without any refspec parameters on the command line, values of the configuration variable `remote.<origin>.fetch` are consulted, and if there aren't any, `$GIT_DIR/remotes/<origin>` is consulted and its `Pull:` lines are used. In addition to the refspec formats described in the OPTIONS section, you can have a globbing refspec that looks like this:
 
 ------------
 refs/heads/*:refs/remotes/origin/*
 ------------
 
-一个引用规范通配符必须有一个非空的 RHS（即必须存储在远程跟踪分支中获取的内容），其 LHS 和 RHS 必须以 `/*` 结尾。 以上规定了所有远程分支都使用同名的 `refs/remotes/origin/` 层次结构中的远程跟踪分支进行跟踪。
+A globbing refspec must have a non-empty RHS (i.e. must store what were fetched in remote-tracking branches), and its LHS and RHS must end with `/*`. The above specifies that all remote branches are tracked using remote-tracking branches in `refs/remotes/origin/` hierarchy under the same name.
 
 为了不破坏后向兼容性，确定在获取后合并哪个远程分支的规则有点复杂。
 
 如果在 `git pull` 的命令行中给出了明确的引用规范，它们都会被合并。
 
-当命令行没有给出引用规范时，那么 `git pull` 使用配置或 `$GIT_DIR/remotes/<远程名>` 中的引用规范。 在这种情况下，以下规则适用：
+When no refspec was given on the command line, then `git pull` uses the refspec from the configuration or `$GIT_DIR/remotes/<origin>`. In such cases, the following rules apply:
 
 . 如果当前分支 `<分支名>` 的 `branch.< 分支名 >.merge` 配置存在，这就是被合并的远程站点的分支名称。
 
-. If the refspec is a globbing one, nothing is merged.
+. 如果引用规范是全局的， 则不合并任何信息。
 
 . 否则将合并第一个引用规范的远程分支。
 
@@ -147,7 +147,7 @@ $ git pull origin
 $ git pull origin next
 ------------------------------------------------
 +
-这将在 FETCH_HEAD 中暂时留下 `next` 的副本，并更新远程跟踪分支 `origin/next`。 同样可以通过调用 fetch 和 merge 来完成：
+This leaves a copy of `next` temporarily in FETCH_HEAD, and updates the remote-tracking branch `origin/next`. The same can be done by invoking fetch and merge:
 +
 ------------------------------------------------
 $ git fetch origin

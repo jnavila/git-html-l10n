@@ -31,7 +31,7 @@ FORMATO BUNDLE
 
 Os pacotes são arquivos `.pack` (consulte linkgit:git-pack-objects[1]) com um cabeçalho indicando quais as referências estão contidas nele.
 
-Como o próprio formato de um arquivo empacotado pode ser independente ou pode ser criado usando exclusões. Consulte a seção "PRÉ-REQUISITOS DO OBJETO" abaixo.
+Like the packed archive format itself bundles can either be self-contained, or be created using exclusions. See the "OBJECT PREREQUISITES" section below.
 
 Os pacotes criados usando exclusões de revisão são "pacotes finos" criados usando a opção `--thin` para linkgit:git-pack-objects[1] (empacotar os objetos), e descompactados usando a opção `--fix-thin` para linkgit:git-index-pack[1].
 
@@ -43,19 +43,19 @@ OPÇÕES
 ------
 
 create [options] <arquivo> <git-rev-list-args>::
-	Utilize para criar um pacote chamado 'arquivo'. Isso requer a utilização dos argumentos '<git-rev-list-args>' para definir o conteúdo do pacote. 'options' contém as opções específicas para o subcomando 'git bundle create'. Caso 'file' seja `-`, o pacote será gravado no stdout.
+	Used to create a bundle named 'file'. This requires the '<git-rev-list-args>' arguments to define the bundle contents. 'options' contains the options specific to the 'git bundle create' subcommand. If 'file' is `-`, the bundle is written to stdout.
 
 verify <arquivo>::
-	Utilizado para verificar se um arquivo do pacote é válido e se será aplicado de forma limpa ao repositório atual. Isso incluí as verificações no formato do pacote e também a que verificação dos pré-requisitos dos commits existam e estejam totalmente vinculados ao repositório atual. O comando 'git bundle' exibe uma lista dos commits que faltam, caso haja. Finalmente, a informação sobre as capacidades adicionais tais como "object filter" é exibida. Veja "Recursos" em linkgit:gitformat-bundle[5] para obter mais informações. O código de encerramento é zero em caso de sucesso, mas não será zero se o arquivo do pacote for inválido. Caso 'file' seja `-`, o pacote será gravado no stdout.
+	Used to check that a bundle file is valid and will apply cleanly to the current repository. This includes checks on the bundle format itself as well as checking that the prerequisite commits exist and are fully linked in the current repository. Then, 'git bundle' prints a list of missing commits, if any. Finally, information about additional capabilities, such as "object filter", is printed. See "Capabilities" in linkgit:gitformat-bundle[5] for more information. The exit code is zero for success, but will be nonzero if the bundle file is invalid. If 'file' is `-`, the bundle is read from stdin.
 
 list-heads <arquivo>::
-	Lista as referências definidas no pacote. Caso seja seguido por uma lista de referências, apenas as referências que coincidam com as informadas são exibidas. Caso 'file' seja `-`, o pacote será gravado no stdout.
+	Lists the references defined in the bundle. If followed by a list of references, only references matching those given are printed out. If 'file' is `-`, the bundle is read from stdin.
 
 unbundle <arquivo>::
-	Passa os objetos no pacote para o para armazenamento no repositório com o comando 'git index-pack' e depois imprime os nomes de todas as referências que foram definidas. Se uma lista de referências for informada, apenas as referências que coincidam às da lista serão exibidas. Este comando é realmente "plumbing", feito para ser chamado apenas através do 'git fetch'. Caso 'file' seja `-`, o pacote será gravado no stdout.
+	Passes the objects in the bundle to 'git index-pack' for storage in the repository, then prints the names of all defined references. If a list of references is given, only references matching those in the list are printed. This command is really plumbing, intended to be called only by 'git fetch'. If 'file' is `-`, the bundle is read from stdin.
 
 <git-rev-list-args>::
-	Uma lista de argumentos aceitáveis para o comando 'git rev-parse' e 'git rev-list' (contendo uma determinada referência, consulte ESPECIFICANDO AS REFERÊNCIAS logo abaixo), que determina quais os objetos e as referências específicas que serão transportados. Por exemplo, `master~10..master` faz com que a referência principal seja empacotada juntamente com todos os objetos que foram adicionados desde o seu décimo commit ancestral. Não há um limite explícito para a quantidade de referências e dos objetos que podem ser empacotados.
+	A list of arguments, acceptable to 'git rev-parse' and 'git rev-list' (and containing a named ref, see SPECIFYING REFERENCES below), that specifies the specific objects and references to transport. For example, `master~10..master` causes the current master reference to be packaged along with all objects added since its 10th ancestor commit. There is no explicit limit to the number of references and objects that may be packaged.
 
 
 [<refname>...]::
@@ -65,7 +65,7 @@ unbundle <arquivo>::
 	É predefinido que a condição geral do progresso seja relatada no fluxo de erros quando estiver conectado num terminal, a menos que `-q` seja utilizado. Esta opção impõem a condição geral do progresso, mesmo que o fluxo de erro predefinido não seja direcionado para um terminal.
 
 --version=<versão>::
-	Informe a versão do pacote. A versão 2 é o formato mais antigo e só pode ser usado com os repositórios SHA-1; a versão 3 mais recente contém recursos que permitem o uso de extensões. A predefinição é usar o formato compatível mais antigo com base no algoritmo hash em uso.
+	Specify the bundle version. Version 2 is the older format and can only be used with SHA-1 repositories; the newer version 3 contains capabilities that permit extensions. The default is the oldest supported format, based on the hash algorithm in use.
 
 -q::
 --quiet::
@@ -76,7 +76,7 @@ ESPECIFICANDO AS REFERÊNCIAS
 
 As revisões devem ser acompanhadas pelos nomes de referência que serão empacotados num pacote (bundle).
 
-Mais de uma referência pode ser empacotada e mais de um conjunto de pré-requisitos do objetos podem ser definidos. Os objetos empacotados são aqueles que não estão inclusos na união dos pré-requisitos.
+More than one reference may be packaged, and more than one set of prerequisite objects can be specified. The objects packaged are those not contained in the union of the prerequisites.
 
 O comando 'git bundle create' resolve para você, os nomes de referência, usando as mesmas regras do comando `git rev-parse --abbrev-ref=loose`. Cada pré-requisito pode ser definido de forma explicita (como `^master~10` por exemplo) ou implicitamente (`master~10..master`, `--since=10.days.ago master` por exemplo).
 
@@ -116,7 +116,7 @@ A alimentação de uma revisão como `new` (nova) para `git bundle create` criar
 $ git bundle create full.bundle new
 ----------------
 
-Uma linha de revisão como `old..new` produzirá um arquivo pacote que exigirá que a revisão `old` (antiga) (e quaisquer objetos alcançáveis a partir dele) exista para que o pacote possa ser descompactado:
+A revision range such as `old..new` will produce a bundle file that will require the revision `old` (and any objects reachable from it) to exist for the bundle to be "unbundle"-able:
 
 ----------------
 $ git bundle create full.bundle old..new
@@ -126,14 +126,14 @@ Um pacote independente e sem qualquer pré-requisito, pode ser extraído em qual
 
 É bom errar pelo excesso de zelo, fazendo com que o arquivo bundle (pacote) contenha os objetos já no destino, pois eles são ignorados durante a descompactação no destino.
 
-Caso queira combinar o comando `git clone --mirror`, que incluiria os seus refs como `refs/remotes/*`, utilize `--all`. Caso queira informar o mesmo conjunto de referências que um clone vindo direto do repositório da origem teria, utilize `--branches --tags` para o `<git-rev-list-args>`.
+If you want to match `git clone --mirror`, which would include your refs such as `refs/remotes/*`, use `--all`. If you want to provide the same set of refs that a clone directly from the source repository would get, use `--branches --tags` for the `<git-rev-list-args>`.
 
 O comando 'git bundle verify' pode ser usado para verificar se o repositório do destinatário tem os pré-requisitos necessários para fazer o commit de um pacote.
 
 EXEMPLOS
 --------
 
-Suponha que você queira transferir o histórico de um repositório R1 na máquina A para outro repositório R2 na máquina B. Por algum motivo, a conexão direta entre A e B não é permitida, mas podemos mover os dados de A para B através de algum mecanismo (CD , e-mail, etc.). Porém queremos atualizar o R2 com o desenvolvimento feito na ramificação master em R1.
+Assume you want to transfer the history from a repository R1 on machine A to another repository R2 on machine B. For whatever reason, direct connection between A and B is not allowed, but we can move data from A to B via some mechanism (CD, email, etc.). We want to update R2 with development made on the branch master in R1.
 
 Para inicializar o processo, você pode primeiro criar um pacote que não exista qualquer pré-requisitos. Você pode usar uma tag para ser lembrado até o último commit que for processado, serve para facilitar a atualização posterior do outro repositório com um pacote incremental:
 

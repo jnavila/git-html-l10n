@@ -25,35 +25,37 @@ git-switch - 切换分支
 
 选项
 --
-<branch>::
+<分支>::
 	转到的分支。
 
 <新分支>::
 	新分支的名称。
 
-<起始点::
-	新分支的起点。指定 `<start-point>` 后，就可以根据历史上的其他点创建分支，而不是 HEAD 当前指向的点。(或者，在 `--detach` 的情况下，允许你检查并从其他点分离）。
+<start-point>::
+	新分支的起点。指定 `<起始点>` 后，就可以根据历史上的其他点创建分支，而不是 HEAD 当前指向的点。(或者，在 `--detach` 的情况下，允许你检查并从其他点分离。）
 +
-您可以使用 `@{-N}` 语法来指使用 "git switch" 或 "git checkout" 操作切换到的第 N 个分支或提交。您也可以指定与 `@{-1}` 同义的 `-`。 这通常用于在两个分支之间快速切换，或撤销错误的分支切换。
+You can use the `@{-N}` syntax to refer to the N-th last branch/commit switched to using "git switch" or "git checkout" operation. You may also specify `-` which is synonymous to `@{-1}`. This is often used to switch quickly between two branches, or to undo a branch switch by mistake.
 +
 作为一种特殊情况，如果正好有一个合并基础，你可以使用`A...B`作为`A`和`B`的合并基础的快捷方式。你最多可以省略在`A`和`B`中默认为`HEAD`的一个分支。
 
 -c <新分支>::
---create <new-branch>::
-	在切换到分支之前，从 `<起点>` 开始创建一个名为 `<新分支>` 的新分支。这是一个方便的快捷方式：
+--create <新分支>::
+	Create a new branch named `<new-branch>` starting at `<start-point>` before switching to the branch. This is the transactional equivalent of
 +
 ------------
-$ git branch <new-branch>
-$ git switch <new-branch>
+$ git branch <新分支>
+$ git switch <新分支>
 ------------
++
+that is to say, the branch is not reset/created unless "git switch" is successful (e.g., when the branch is in use in another worktree, not just the current branch stays the same, but the branch is not reset to the start-point, either).
 
--C <new-branch>::
---force-create <new-branch>::
+-C <新分支>::
+--force-create <新分支>::
 	类似于 `--create`，但如果 `<新分支>` 已经存在，它将被重置为 `<起点>`。这是一个方便的快捷方式：
 +
 ------------
-$ git branch -f <new-branch>
-$ git switch <new-branch>
+$ git branch -f <新分支>
+$ git switch <新分支>
 ------------
 
 -d::
@@ -65,7 +67,7 @@ $ git switch <new-branch>
 	如果没有找到`<分支>`，但确实有一个远程分支（称为`<远程分支>`）的跟踪分支存在，且名称匹配，则视为等同于
 +
 ------------
-$ git switch -c <branch> --track <remote>/<branch>
+$ git switch -c <分支> --track <远程仓库>/<分支>
 ------------
 +
 如果该分支存在于多个远程，并且其中一个是由`checkout.defaultRemote`配置变量命名的，为了消除歧义，我们将使用该变量，即使`<分支>`在所有远程中并不唯一。将其设置为例如 `checkout.defaultRemote=origin`，以便在`<分支>`不明确但存在于'origin'远程时，总是从那里签出远程分支。参见 linkgit:git-config[1] 中的 `checkout.defaultRemote`。
@@ -83,11 +85,11 @@ $ git switch -c <branch> --track <remote>/<branch>
 
 -m::
 --merge::
-	如果你对一个或多个文件所做的本地修改在当前分支和要切换到的分支之间有所不同，命令会拒绝切换分支，以保留你在上下文中的修改。 不过，如果使用了该选项，当前分支、工作树内容和新分支之间的三方合并就会完成，而你也将进入新分支。
+	If you have local modifications to one or more files that are different between the current branch and the branch to which you are switching, the command refuses to switch branches in order to preserve your modifications in context. However, with this option, a three-way merge between the current branch, your working tree contents, and the new branch is done, and you will be on the new branch.
 +
 当合并冲突发生时，冲突路径的索引条目会被留下，你需要解决冲突，并用`git add`标记已解决的路径（如果合并应导致删除路径，则用`git rm`）。
 
---conflict=<style>::
+--conflict=<样式>::
 	The same as `--merge` option above, but changes the way the conflicting hunks are presented, overriding the `merge.conflictStyle` configuration variable. Possible values are "merge" (default), "diff3", and "zdiff3".
 
 -q::
@@ -100,15 +102,15 @@ $ git switch -c <branch> --track <remote>/<branch>
 
 -t::
 --track [direct|inherit]::
-	创建新分支时，请设置 "upstream"（上游仓库）配置。 选项 `-c` 是隐含的。详见 linkgit:git-branch[1] 中的 `-track`。
+	When creating a new branch, set up "upstream" configuration. `-c` is implied. See `--track` in linkgit:git-branch[1] for details.
 +
-如果没有给定 `-c` 选项，新分支的名称将从远程跟踪分支中导出，方法是查看为相应远程配置的引用规范的本地部分，然后去掉首部至 "*" 的部分。 这将告诉我们，在从 `origin/hack` （或 `remotes/origin/hack`，甚至 `refs/remotes/origin/hack`）分支时，使用 `hack` 作为本地分支。 如果给定的名称中没有斜线，或者上述猜测的结果是空名，猜测就会中止。 在这种情况下，可以用 `-c` 明确地给出一个名称。
+If no `-c` option is given, the name of the new branch will be derived from the remote-tracking branch, by looking at the local part of the refspec configured for the corresponding remote, and then stripping the initial part up to the "*". This would tell us to use `hack` as the local branch when branching off of `origin/hack` (or `remotes/origin/hack`, or even `refs/remotes/origin/hack`). If the given name has no slash, or the above guessing results in an empty name, the guessing is aborted. You can explicitly give a name with `-c` in such a case.
 
 --no-track::
 	不设置 "上游 "配置，即使`branch.autoSetupMerge`配置变量为true。
 
---orphan <new-branch>::
-	创建一个新的 'orphan' （孤儿）分支，命名为 `<新分支>`。所有被跟踪的文件都会被删除。
+--orphan <新分支>::
+	Create a new unborn branch, named `<new-branch>`. All tracked files are removed.
 
 --ignore-other-worktrees::
 	当想要的引用已被另一个工作树签出时，`git switch` 会拒绝签出。这个选项会让它无论如何都把引用签出。换句话说，该引用可以被多个工作树持有。
@@ -136,14 +138,14 @@ $ git switch mytopic
 
 ------------
 $ git switch mytopic
-error: You have local changes to 'frotz'; not switching branches.
+error: 你对 'footz' 进行了本地更改，而不是切换分支。
 ------------
 
 你可以给命令加上 `-m`标志，这样就可以尝试三方合并了：
 
 ------------
 $ git switch -m mytopic
-Auto-merging frotz
+自动合并 frotz 中
 ------------
 
 在这个三方合并之后，本地的修改并「没有」登记在你的索引文件中，所以`git diff`会显示你在新分支的提示下做了哪些修改。
@@ -158,22 +160,22 @@ $ git switch -
 
 ------------
 $ git switch -c fixup HEAD~3
-Switched to a new branch 'fixup'
+切换到新分支 'fixup'
 ------------
 
 如果要从同名的远程分支启动一个新分支：
 
 ------------
 $ git switch new-topic
-Branch 'new-topic' set up to track remote branch 'new-topic' from 'origin'
-Switched to a new branch 'new-topic'
+设置了分支 'new-topic'，以跟踪来自 'origin' 的远程分支 'new-topic'
+切换到一个新分支 'new-topic'
 ------------
 
 查看提交 `HEAD~3` 以进行临时检查或实验，而无需创建新分支：
 
 ------------
 $ git switch --detach HEAD~3
-HEAD is now at 9fc9555312 Merge branch 'cc/shared-index-permbits'
+HEAD 现为 9fc9555312 合并分支 'cc/shared-index-permbits'
 ------------
 
 如果发现你所做的任何事情都值得保留，你可以随时为它创建一个新名称（不需要换掉）：

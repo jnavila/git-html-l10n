@@ -14,7 +14,7 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Muitos comandos porcelana do Git utilizam uma mistura de opções (ou seja, parâmetros que começam com um traço '-') e os parâmetros destinados ao comando 'git rev-list' subjacente que eles utilizam internamente, as opções e os parâmetros para os outros comandos que utilizam na produção final do 'git rev-list '. Este comando é utilizado para se distinguir entre eles.
+Many Git porcelainish commands take a mixture of flags (i.e. parameters that begin with a dash '-') and parameters meant for the underlying 'git rev-list' command they use internally and flags and parameters for the other commands they use downstream of 'git rev-list'. This command is used to distinguish between them.
 
 
 OPÇÕES
@@ -38,7 +38,7 @@ As opções para `--parseopt`
 	Apenas faz sentido no modo `--parseopt`. Informa ao analisador das opções para ecoar o primeiro `--` encontrado em vez de ignorá-lo.
 
 --stop-at-non-option::
-	Apenas faz sentido no modo `--parseopt`. Permite que o analisador de opções pare no primeiro argumento sem opção. Pode ser usado para analisar os subcomandos que aceitam essas opções.
+	Only meaningful in `--parseopt` mode. Lets the option parser stop at the first non-option argument. This can be used to parse sub-commands that take options themselves.
 
 --stuck-long::
 	Apenas faz sentido no modo `--parseopt`. Gere as opções em sua forma longa, caso estejam disponíveis, e com os seus argumentos bloqueados.
@@ -65,9 +65,9 @@ Opções para a Saída
 	Caso não haja nenhum parâmetro informado pelo usuário, em vez disso utilize `<arg>`.
 
 --prefix <arg>::
-	Comporte-se como se o comando 'git rev-parse' fosse invocado no subdiretório `<arg>` da árvore de trabalho. Quaisquer nomes dos arquivos relativos são resolvidos como se fossem prefixados através do `<arg>` e serão impressos neste formulário.
+	Behave as if 'git rev-parse' was invoked from the `<arg>` subdirectory of the working tree. Any relative filenames are resolved as if they are prefixed by `<arg>` and will be printed in that form.
 +
-Pode ser utilizado para converter os argumentos num comando executado-o num subdiretório para que eles ainda possam ser utilizados após a mudança para o nível mais alto do repositório. Por exemplo:
+This can be used to convert arguments to a command run in a subdirectory so that they can still be used after moving to the top-level of the repository. For example:
 +
 ----
 prefix=$(git rev-parse --show-prefix)
@@ -79,25 +79,25 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 --verify::
 	Verifique que exatamente um parâmetro seja informado e se pode ser transformado num SHA-1 com 20 bytes brutos, que possa ser utilizado para acessar o banco de dados do objeto. Em caso positivo, emita-o para a saída padrão; caso contrário, gere um erro.
 +
-Caso queira garantir que a saída realmente nomeie um objeto no banco de dados dos objetos e/ou possam ser utilizados como um tipo específico que você precisa, é possível adicionar o operador de remoção `^{type}` ao parâmetro. Por exemplo, `git rev-parse" $VAR^{commit}"` garantirá que `$VAR` nomeie um objeto já existente que seja um "commit-ish" (ou seja, um commit ou uma tag anotada que aponte para um commit). Para garantir que o '$VAR` nomeie um objeto já existente de qualquer tipo, `git rev-parse "$VAR^{object}"` pode ser utilizado.
+If you want to make sure that the output actually names an object in your object database and/or can be used as a specific type of object you require, you can add the `^{type}` peeling operator to the parameter. For example, `git rev-parse "$VAR^{commit}"` will make sure `$VAR` names an existing object that is a commit-ish (i.e. a commit, or an annotated tag that points at a commit). To make sure that `$VAR` names an existing object of any type, `git rev-parse "$VAR^{object}"` can be used.
 +
 Note que se você estiver verificando um nome de uma fonte não confiável, é prudente usar a opção `--end-of-options` para que o argumento relacionado ao nome não seja confundido com uma outra opção.
 
 -q::
 --quiet::
-	Apenas faz sentido no modo `--verify`. Não produza uma mensagem de erro caso o primeiro argumento não for um nome válido do objeto; em vez disso, encerre com uma condição diferente de zero silenciosamente. O SHA-1 para os objetos com nomes válidos que são impressos com êxito no stdout.
+	Only meaningful in `--verify` mode. Do not output an error message if the first argument is not a valid object name; instead exit with non-zero status silently. SHA-1s for valid object names are printed to stdout on success.
 
 --sq::
-	Normalmente, a saída é feita uma linha por opção e parâmetro. Esta opção gera a saída numa única linha, devidamente citada para utilização do shell. Útil quando você espera que o seu parâmetro contenha espaços e novas linhas (por exemplo, ao utilizar a picareta `S` com 'git diff-{asterisk}'). Ao contrário da opção `--sq-quote`, a entrada do comando ainda é interpretada como de costume.
+	Usually the output is made one line per flag and parameter. This option makes output a single line, properly quoted for consumption by shell. Useful when you expect your parameter to contain whitespaces and newlines (e.g. when using pickaxe `-S` with 'git diff-{asterisk}'). In contrast to the `--sq-quote` option, the command input is still interpreted as usual.
 
---short[=comprimento]::
+--short[=length]::
 	O mesmo que `--verify` porém encurta o nome do objeto para um prefixo único com pelo menos um`comprimento` determinado de caracteres. A quantidade mínima é de 4 caracteres, o valor é predefinido na variável de configuração `core.abbrev` (consulte linkgit:git-config[1]).
 
 --not::
 	Ao exibir os nomes dos objetos, prefixe-os com '{caret}' e retire o prefixo '{caret}' dos nomes dos objetos que já possuam um.
 
 --abbrev-ref[=(strict|loose)]::
-	Para um nome abreviado não ambíguo dos nomes dos objetos. A opção `core.warnAmbiguousRefs` é utilizada para selecionar o modo estrito da abreviação.
+	A non-ambiguous short name of the objects name. The option core.warnAmbiguousRefs is used to select the strict abbreviation mode.
 
 --symbolic::
 	Normalmente, os nomes dos objetos são emitidos em formato SHA-1 (com possível prefixo '{caret}'); essa opção faz com que eles sejam impressos o mais próximo possíveis da entrada original.
@@ -112,14 +112,14 @@ Opções para os Objetos
 	Exibe todas as refs encontradas em `refs/`.
 
 --branches[=pattern]::
---tags[=padrão]::
---remotes[=padrão]::
+--tags[=pattern]::
+--remotes[=pattern]::
 	Exibe todos as ramificações, tags ou ramificações monitoradas remotamente, respectivamente (ou seja, as refs encontradas respectivamente em `refs/heads`, `refs/tags` ou `refs/remotes`).
 +
-Caso um `padrão` seja informado, apenas as refs coincidentes com o "shell glob" são exibidos. Caso o padrão não contenha um caractere curinga (`?`, `*` ou `[`), este será transformado num prefixo correspondente ao acrescentar `/*`.
+If a `pattern` is given, only refs matching the given shell glob are shown. If the pattern does not contain a globbing character (`?`, `*`, or `[`), it is turned into a prefix match by appending `/*`.
 
 --glob=pattern::
-	Exiba todos os árbitros que coincidam com o `padrão` (pattern) do "glob". Caso o padrão não comece com `refs /`, isto será anexado automaticamente. Caso o padrão não contenha um caractere curinga (`?`, `*` ou `[`), este será transformado num prefixo correspondente ao acrescentar `/*`.
+	Show all refs matching the shell glob pattern `pattern`. If the pattern does not start with `refs/`, this is automatically prepended. If the pattern does not contain a globbing character (`?`, `*`, or `[`), it is turned into a prefix match by appending `/*`.
 
 --exclude=<glob-pattern>::
 	Não inclua as refs que coincidam com `<glob-pattern>` em que as próximas opções `--all`, `--branches`, `--tags`, `--remotes` ou `--glob` considerariam de outra forma. As repetições destas opções acumulam padrões de exclusão até a próxima opção `--all`, `--branches`, `--tags`, `--remotes` ou `--glob` (outras opções ou argumentos não limpam os padrões acumulados).
@@ -130,16 +130,16 @@ Os padrões informados não devem começar com `refs/heads`, `refs/tags`, ou `re
 	Não inclua refs que seriam ocultados por `git-fetch`, `git-receive-pack` ou `git-upload-pack` durante a consulta da configuração apropriada de `fetch.hideRefs`, `receive.hideRefs` ou `uploadpack.hideRefs` junto com `transfer.hideRefs` (consulte linkgit:git-config[1]). Esta opção afeta a próxima opção pseudo-ref `--all` ou `--glob` e é zerada após o processamento.
 
 --disambiguate=<prefixo>::
-	Exiba todos os objetos cujo nome começa com o prefixo informado. O `<prefixo>` deve ter pelo menos 4 dígitos hexadecimais para evitar ter que listar por engano todos os objetos no repositório.
+	Show every object whose name begins with the given prefix. The <prefix> must be at least 4 hexadecimal digits long to avoid listing each and every object in the repository by mistake.
 
 Opções para os Arquivos
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 --local-env-vars::
-	Liste as variável de ambiente do GIT_* que são locais no repositório (`GIT_DIR` ou `GIT_WORK_TREE`, mas não o `GIT_EDITOR` por exemplo). Somente os nomes das variáveis são listadas, não o seu valor, mesmo que estejam definidos.
+	List the GIT_* environment variables that are local to the repository (e.g. GIT_DIR or GIT_WORK_TREE, but not GIT_EDITOR). Only the names of the variables are listed, not their value, even if they are set.
 
 --path-format=(absolute|relative)::
-	Controla o comportamento de algumas outras opções. Caso seja definido como absoluto, os caminhos impressos por estas opções serão absolutas e canônicas. Caso seja definido como relativo, os caminhos serão relativos ao diretório de trabalho atual, caso seja possível. A predefinição é opção específica.
+	Controls the behavior of certain other options. If specified as absolute, the paths printed by those options will be absolute and canonical. If specified as relative, the paths will be relative to the current working directory if that is possible. The default is option specific.
 +
 Esta opção pode ser usada várias vezes e afeta apenas os argumentos seguintes na linha de comando, seja no final da linha de comando ou na próxima instância desta opção.
 
@@ -154,7 +154,7 @@ Caso o `$GIT_DIR` não esteja definido e o diretório atual não for detectado c
 	Exibe o `$GIT_COMMON_DIR` caso seja definido, senão `$GIT_DIR`.
 
 --resolve-git-dir <caminho>::
-	Verifique se o <caminho> é um repositório válido ou um 'gitfile' que aponte para um repositório válido e imprima o local do repositório. Caso o <caminho> seja um gitfile, o caminho resolvido para o repositório real será impresso.
+	Check if <path> is a valid repository or a gitfile that points at a valid repository, and print the location of the repository. If <path> is a gitfile then the resolved path to the real repository is printed.
 
 --git-path <caminho>::
 	Resolva "$GIT_DIR/<caminho>" e leve em consideração as outras variáveis de realocação do caminho, como `$GIT_OBJECT_DIRECTORY`, `$GIT_INDEX_FILE`, etc. Caso `$GIT_OBJECT_DIRECTORY` seja definido para '/foo/bar' por exemplo, então o comando "git rev-parse --git-path objects/abc" returna '/foo/bar/abc'.
@@ -163,7 +163,7 @@ Caso o `$GIT_DIR` não esteja definido e o diretório atual não for detectado c
 	Mostra o caminho (absoluto) do cume do diretório da árvore de trabalho. Caso não haja uma árvore de trabalho, relate um erro.
 
 --show-superproject-working-tree::
-	Exibe o caminho absoluto da raiz da árvore de trabalho do superprojeto (caso exista) que usa o repositório atual como sendo o seu submódulo. Não produz nada caso o repositório atual não eja usado como um submódulo por nenhum projeto.
+	Show the absolute path of the root of the superproject's working tree (if exists) that uses the current repository as its submodule. Outputs nothing if the current repository is not used as a submodule by any project.
 
 --shared-index-path::
 	Exibe o caminho para o arquivo do índice compartilhado no modo de índice dividido ou vazio caso não esteja no modo do índice dividido.
@@ -192,7 +192,10 @@ As seguintes opções não são afetadas pela opção `--path-format`:
 	Quando o comando é invocado a partir de um subdiretório, exiba o caminho do diretório atual em relação ao nível mais alto do diretório.
 
 --show-object-format[=(storage|input|output)]::
-	Exiba o formato do objeto (algoritmo hash) usado no repositório para o armazenamento dentro do diretório `.git`, entrada ou saída. Para a entrada, vários algoritmos podem ser impressos, separados por espaço. Caso não seja definido, a predefinição retorna para "storage".
+	Show the object format (hash algorithm) used for the repository for storage inside the `.git` directory, input, or output. For input, multiple algorithms may be printed, space-separated. If not specified, the default is "storage".
+
+--show-ref-format::
+	Show the reference storage format used for the repository.
 
 
 Outras Opções
@@ -204,7 +207,7 @@ Outras Opções
 
 --until=datestring::
 --before=datestring::
-	Analise a cadeia de caracteres da data e exiba o parâmetro `--max-age=` que corresponda para o 'git rev-list'.
+	Analise a cadeia de caracteres da data e exiba o parâmetro --min-age= que corresponda para o 'git rev-list'.
 
 <args>...::
 	As opções e os parâmetros que serão analisados.
@@ -217,14 +220,14 @@ PARSEOPT
 
 No modo `--parseopt`, o comando 'git rev-parse' ajuda no processamento das opções trazendo aos scripts shell as mesmas facilidades integradas que o 'C' possuí. Funciona como um normalizador das opções (por exemplo, divide trocas únicas com valores agregados), quase como o que o `getopt(1)` faz.
 
-Ele assume na entrada padrão a definição das opções para analisar e entender, e ecoa na saída uma sequência adequada para o `sh(1)` `eval` para substituir os argumentos por argumentos normalizados. Em caso de erro, ele gera a utilização do fluxo de erros predefinidos e encerra com o código 129.
+It takes on the standard input the specification of the options to parse and understand, and echoes on the standard output a string suitable for `sh(1)` `eval` to replace the arguments with normalized ones. In case of error, it outputs usage on the standard error stream, and exits with code 129.
 
-Observação: Certifique-se de citar o resultado ao encaminhá-lo para o `eval`. Consulte um exemplo abaixo.
+Note: Make sure you quote the result when passing it to `eval`. See below for an example.
 
 Formato de Entrada
 ~~~~~~~~~~~~~~~~~~
 
-O formato da entrada do comando 'git rev-parse --parseopt' é texto puro. Possui duas partes, separadas por uma linha que contém apenas `--`. As linhas antes do separador (devem ser uma ou mais) são utilizadas para o uso. As linhas após o separador definem as opções.
+'git rev-parse --parseopt' input format is fully text based. It has two parts, separated by a line that contains only `--`. The lines before the separator (should be one or more) are used for the usage. The lines after the separator describe the options.
 
 As opções de cada linha possui este formato:
 
@@ -233,7 +236,7 @@ As opções de cada linha possui este formato:
 ------------
 
 `<opt-spec>`::
-	o seu formato é o caractere curto da opção e, em seguida, o nome da opção longa, separado por vírgula. Ambas as partes não são necessárias, embora pelo menos uma seja necessária. Não pode conter nenhum dos caracteres `<flags>`. `h,help`, `dry-run` e `f` são exemplos corretos do `<opt-spec>`.
+	its format is the short option character, then the long option name separated by a comma. Both parts are not required, though at least one is necessary. May not contain any of the `<flags>` characters. `h,help`, `dry-run` and `f` are examples of correct `<opt-spec>`.
 
 `<flags>`::
 	`<flags>` são do `*`, `=`, `?` ou `!`.
@@ -246,7 +249,7 @@ As opções de cada linha possui este formato:
 	* Utilize `!` para não fazer com que a opção longa que foi negada esteja disponível.
 
 `<arg-hint>`::
-	Caso `<arg-hint>` seja definido, é usado como um nome do argumento na saída da ajuda, para as opções que aceitem os argumentos. O `<arg-hint>` é finalizado através do primeiro espaço. É habitual utilizar um traço para separar as palavras numa dica de um argumento com várias palavras.
+	`<arg-hint>`, if specified, is used as a name of the argument in the help output, for options that take arguments. `<arg-hint>` is terminated by the first whitespace. It is customary to use a dash to separate words in a multi-word argument hint.
 
 O restante da linha, depois dos espaços removidos, é usado como ajuda associada à opção.
 
@@ -261,12 +264,9 @@ algum-comando [<opções>] <args>...
 
 algum-comando faz 'foo' e 'bar'!
 --
-h,help!   exibe a ajuda
+h,help! show the help
 
-foo       alguma opção bonita --foo
-bar=      alguma opção bacana --bar com um argumento
-baz=arg   outra opção bacana --baz com um argumento definido
-qux?path  qux talvez tenha um caminho como argumento porém significa ele mesmo
+foo some nifty option --foo bar= some cool option --bar with an argument baz=arg another cool option --baz with a named argument qux?path qux may take a path argument but has meaning by itself
 
   Um cabeçalho do grupo de opções
 C?        opção 'C' com um argumento opcional"

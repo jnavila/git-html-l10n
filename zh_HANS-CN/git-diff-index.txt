@@ -1,0 +1,85 @@
+git-diff-index(1)
+=================
+
+名称
+--
+git-diff-index - 比较树和工作树或索引
+
+
+概述
+--
+[verse]
+'git diff-index' [-m] [--cached] [--merge-base] [<提交差异选项>] <目录树对象> [<路径>...]
+
+描述
+--
+Compare the content and mode of the blobs found in a tree object with the corresponding tracked files in the working tree, or with the corresponding paths in the index. When <path> arguments are present, compare only paths matching those patterns. Otherwise all tracked files are compared.
+
+选项
+--
+include::diff-options.txt[]
+
+<tree-ish>::
+	树对象的 id。
+
+--cached::
+	完全不考虑磁盘文件。
+
+--merge-base::
+	Instead of comparing <tree-ish> directly, use the merge base between <tree-ish> and HEAD instead. <tree-ish> must be a commit.
+
+-m::
+	By default, files recorded in the index but not checked out are reported as deleted. This flag makes 'git diff-index' say that all non-checked-out files are up to date.
+
+include::diff-format.txt[]
+
+运行模式
+----
+You can choose whether you want to trust the index file entirely (using the `--cached` flag) or ask the diff logic to show any files that don't match the stat state as being "tentatively changed". Both of these operations are very useful indeed.
+
+缓存模式
+----
+如果指定了 `--cached`，则可以询问：
+
+	向我显示 HEAD 和当前索引
+	内容（即我使用 'git write-tree' 写入的内容）之间的差异
+
+举个例子，假设你在工作目录中工作，更新了索引中的一些文件，准备提交。你想知道你 *要* 提交的内容，而不需要写一个新的树对象并进行比较
+
+	git diff-index --cached HEAD
+
+Example: let's say I had renamed `commit.c` to `git-commit.c`, and I had done an `update-index` to make that effective in the index file. `git diff-files` wouldn't show anything at all, since the index file matches my working directory. But doing a 'git diff-index' does:
+
+  torvalds@ppc970:~/git> git diff-index --cached HEAD
+  -100644 blob    4161aecc6700a2eb579e842af0b7f22b98443f74        commit.c
+  +100644 blob    4161aecc6700a2eb579e842af0b7f22b98443f74        git-commit.c
+
+不难看出，以上是重命名。
+
+事实上，`git diff-index --cached` *应当* 总是完全等同于实际执行 'git write-tree' 并进行比较。只不过，这个方法更适合只想查看当前位置的情况。
+
+因此，当你问自己 “我已经标记了哪些内容要提交，与之前的树有什么不同” 时，使用 `git diff-index --cached` 基本上是非常有用的。
+
+非缓存模式
+-----
+The "non-cached" mode takes a different approach, and is potentially the more useful of the two in that what it does can't be emulated with a 'git write-tree' + 'git diff-tree'. Thus that's the default mode. The non-cached version asks the question:
+
+  向我显示 HEAD 与当前已签出树之间的差异 - 
+  索引内容 _ 和未更新的文件
+
+这显然也是一个非常有用的问题，因为它会告诉你*可能*提交的内容。同样，输出结果与 'git diff-tree -r' 的输出结果完全吻合，但又有所变化。
+
+问题在于，如果某个文件与索引不匹配，我们就不会为它建立备份存储，我们会使用 “全零” sha1 来显示这一点。比方说，你编辑了 `kernel/sched.c`，但实际上还没有执行 'git update-index' --没有与新状态相关联的 “对象”，你就会得到：
+
+  torvalds@ppc970:~/v2.6/linux> git diff-index --abbrev HEAD
+  :100644 100644 7476bb5ba 000000000 M	kernel/sched.c
+
+也就是说，它显示树已经改变，而且 `kernel/sched.c` 不是最新的，可能包含新的内容。全零的 sha1 意味着要获得真正的差异，需要直接查看工作目录中的对象，而不是进行对象间的差异。
+
+NOTE: 与其他同类命令一样，'git diff-index' 实际上并不查看文件内容。所以也许 `kernel/sched.c` 实际上并没有改变，只是你看了一下而已。无论哪种情况，都需要 'git update-index' 来使索引同步。
+
+NOTE: 你可以让各种文件同时显示为 “已更新” 和 “仍在工作目录中”。由于 “已更新” 的文件会显示有效的 sha1，而 “未与索引同步” 的文件则会显示特殊的全零 sha1，因此你总能分辨出哪个文件处于哪种状态。
+
+GIT
+---
+属于 linkgit:git[1] 文档

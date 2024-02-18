@@ -10,7 +10,7 @@ RESUMO
 ------
 [verse]
 'git fetch-pack' [--all] [--quiet|-q] [--keep|-k] [--thin] [--include-tag]
-	[--upload-pack=<pacote-de-upload-do-git>]
+	[--upload-pack=<git-upload-pack>]
 	[--depth=<n>] [--no-progress]
 	[-v] <repositório> [<refs>...]
 
@@ -18,7 +18,7 @@ DESCRIÇÃO
 ---------
 No lugar utilize 'git fetch' que é um wrapper de maior hierarquia deste comando.
 
-Invoca o 'git-upload-pack' num repositório possivelmente remoto e solicita que ele envie os objetos autilizentes deste repositório, para atualizar determinados `heads`. A lista dos commits disponíveis localmente é descoberta examinando os 'refs/' da hierarquia local e enviada para o 'git-upload-pack' durante a execução na outra extremidade.
+Invokes 'git-upload-pack' on a possibly remote repository and asks it to send objects missing from this repository, to update the named heads. The list of commits available locally is found out by scanning the local refs/ hierarchy and sent to 'git-upload-pack' running on the other end.
 
 Este comando deteriora durante o download de tudo para concluir os `refs` solicitados do lado remoto quando o lado local não possui um commit com um ancestral comum.
 
@@ -45,22 +45,22 @@ Caso `--stateless-rpc` seja utilizado junto com esta opção, a lista de referê
 	Busque um pacote "thin", que registra os objetos num formato "deltificado" com base nos objetos não inclusos no pacote para reduzir o tráfego de rede.
 
 --include-tag::
-	Caso haja compatibilidade com o lado remoto, os objetos das tags anotadas serão baixados na mesma conexão que os outros objetos, caso o objeto ao qual a tag faça referência seja baixado. Caso contrário, aquele que chama deve determinar as tags que esta opção deixou disponível.
+	If the remote side supports it, annotated tags objects will be downloaded on the same connection as the other objects if the object the tag references is downloaded. The caller must otherwise determine the tags this option made available.
 
---upload-pack=<pacote-de-upload-do-git>::
-	Utilize para informar o caminho para 'git-upload-pack' no lado remoto, caso não seja encontrado no seu $PATH. As instalações do sshd ignoram os scripts de configuração do ambiente do usuário para logins nas shells (.bash_profile por exemplo) e o a instalação do seu git pode não ser encontrado no $PATH predefinido do sistema. A outra solução sugerida é configurar o seu $PATH em ".bashrc", mas este flag são para pessoas que não desejam pagar o preço da sobrecarga em shells não interativos com um arquivo ".bashrc" enxuto (eles definem a maioria das coisas em .bash_profile).
+--upload-pack=<git-upload-pack>::
+	Use this to specify the path to 'git-upload-pack' on the remote side, if it is not found on your $PATH. Installations of sshd ignores the user's environment setup scripts for login shells (e.g. .bash_profile) and your privately installed git may not be found on the system default $PATH. Another workaround suggested is to set up your $PATH in ".bashrc", but this flag is for people who do not want to pay the overhead for non-interactive shells by having a lean .bashrc file (they set most of the things up in .bash_profile).
 
---exec=<pacote-de-upload-do-git>::
-	O mesmo que --upload-pack=<pacote-de-upload-do-git>.
+--exec=<git-upload-pack>::
+	O mesmo que --upload-pack=<git-upload-pack>.
 
 --depth=<n>::
-	Limite a captura para as cadeias de ancestrais não maiores que n. O 'git-upload-pack' trata a profundidade especial "2147483647" como infinita, mesmo que exista uma cadeia de ancestrais tão antiga.
+	Limit fetching to ancestor-chains not longer than n. 'git-upload-pack' treats the special depth 2147483647 as infinite even if there is an ancestor-chain that long.
 
 --shallow-since=<data>::
 	Aprofunde ou encurte o histórico de um repositório raso para incluir todas os commits acessíveis após a <data>.
 
 --shallow-exclude=<revisão>::
-	Aprofunde ou diminua o histórico de um repositório raso para excluir os commits acessíveis vindos de uma determinada tag ou ramificação remota. Esta opção pode ser utilizada várias vezes.
+	Deepen or shorten the history of a shallow repository to exclude commits reachable from a specified remote branch or tag. This option can be specified multiple times.
 
 --deepen-relative::
 	O argumento `--depth` determina a quantidade limite dos commits atual da superfície em vez do cume de cada histórico do ramo remoto.
@@ -81,7 +81,7 @@ Caso `--stateless-rpc` seja utilizado junto com esta opção, a lista de referê
 	A URL para o repositório remoto.
 
 <refs>...::
-	Os cabeçalhos remotos que serão atualizados. Isso é relativo ao $GIT_DIR ("HEAD", "refs/heads/master" por exemplo). Quando não especificado, receba a atualização de todos os cabeçalhos que o lado tiver.
+	The remote heads to update from. This is relative to $GIT_DIR (e.g. "HEAD", "refs/heads/master"). When unspecified, update from all heads the remote side has.
 +
 Caso o lado remoto tenha as opções `uploadpack.allowTipSHA1InWant`, `uploadpack.allowReachableSHA1InWant`, ou `uploadpack.allowAnySHA1InWant` ativadas, eles poderão alternativamente ser sha1 com 40-hex.
 

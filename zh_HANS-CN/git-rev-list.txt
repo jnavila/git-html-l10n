@@ -1,0 +1,109 @@
+git-rev-list(1)
+===============
+
+名称
+--
+git-rev-list 按照时间倒序列出提交对象
+
+
+概述
+--
+[verse]
+'git rev-list' [<选项>] <提交>... [[--] <路径>...]
+
+描述
+--
+
+:git-rev-list: 1
+include::rev-list-description.txt[]
+
+'rev-list' 是一个非常必要的Git命令，因为它提供了构建和遍历祖先图的功能。正因如此，它有很多不同的选项，使得它可以被不同的命令使用，如 'git bisect' 和 'git repack'。
+
+选项
+--
+
+:git-rev-list: 1
+include::rev-list-options.txt[]
+
+include::pretty-formats.txt[]
+
+实例
+--
+
+* 打印可从当前分支访问的提交列表。
++
+----------
+git rev-list HEAD
+----------
+
+* 打印该分支上但上游分支中没有的提交列表。
++
+----------
+git rev-list @{上游仓库}..HEAD
+----------
+
+* 将提交格式化为作者和提交信息（另见上层命令 linkgit:git-log[1]）。
++
+----------
+git rev-list --format=medium HEAD
+----------
+
+* 格式化提交及其差异（另请参阅上层命令 linkgit:git-log[1]，它可以在单个进程中完成此操作）。
++
+----------
+git rev-list HEAD |
+git diff-tree --stdin --format=medium -p
+----------
+
+* 打印当前分支中触及 `Documentation` 目录中任何文件的提交列表。
++
+----------
+git rev-list HEAD -- Documentation/
+----------
+
+* 打印您在过去一年中在任何分支、标记或其他引用上提交的提交列表。
++
+----------
+git rev-list --author=you@example.com --since=1.year.ago --all
+----------
+
+* 打印可从当前分支到达的对象列表（即所有提交及其包含的 blobs 和目录树）。
++
+----------
+git rev-list --objects HEAD
+----------
+
+* 比较所有可到达对象的磁盘大小、可从引用日志到达的对象的磁盘大小以及打包后的总大小。这可以告诉你运行 `git repack -ad` 是否会减少仓库的大小（通过丢弃无法访问的对象），以及过期的引用日志是否会有帮助。
++
+----------
+# 可达对象
+git rev-list --disk-usage --objects --all
+# 加上 reflog
+git rev-list --disk-usage --objects --all --reflog
+# 所有占用的磁盘空间
+du -c .git/objects/pack/*.pack .git/objects/??/*
+# 切换到 du: 将 "size" 和 "size-pack" 字段合计
+git count-objects -v
+----------
+
+* 报告每个分支的磁盘大小，不包括当前分支使用的对象。这样就能发现导致仓库大小臃肿的异常值（例如，因为有人不小心提交了大容量的构建工件）。
++
+----------
+git for-each-ref --format='%(引用名)' |
+while read branch
+do
+	size=$(git rev-list --disk-usage --objects HEAD..$branch)
+	echo "$size $branch"
+done |
+sort -n
+----------
+
+* 比较一组分支的磁盘大小，排除另一组分支。如果在单个版本库中共同混合了来自多个远程的对象，这可以显示哪些远程对仓库的大小有影响（以 `origin` 的大小为基准）。
++
+----------
+git rev-list --disk-usage --objects --remotes=$suspect --not --remotes=origin
+----------
+
+GIT
+---
+属于 linkgit:git[1] 文档

@@ -1,0 +1,347 @@
+git-rev-parse(1)
+================
+
+名称
+--
+git-rev-parse - 挑选并调整参数
+
+
+概述
+--
+[verse]
+'git rev-parse' [<选项>] <参数>...
+
+描述
+--
+
+Many Git porcelainish commands take a mixture of flags (i.e. parameters that begin with a dash '-') and parameters meant for the underlying 'git rev-list' command they use internally and flags and parameters for the other commands they use downstream of 'git rev-list'. This command is used to distinguish between them.
+
+
+选项
+--
+
+操作模式
+~~~~
+
+这些选项都必须在命令行中首先出现。
+
+--parseopt::
+	在选项解析模式下使用 'git rev-parse' （见下文 PARSEOPT 部分）。
+
+--sq-quote::
+	在 shell 引用模式下使用 'git rev-parse'（见下文 SQ-QUOTE 部分）。与下面的 `--sq` 选项不同，该模式只进行引用。对命令输入不做任何其他处理。
+
+--parseopt 的选项
+~~~~~~~~~~~~~~
+
+--keep-dashdash::
+	仅在 `--parseopt` 模式下有效。告诉选项解析器回显第一个`--` 而不是跳过它。
+
+--stop-at-non-option::
+	Only meaningful in `--parseopt` mode. Lets the option parser stop at the first non-option argument. This can be used to parse sub-commands that take options themselves.
+
+--stuck-long::
+	仅在 `--parseopt` 模式下有效。如果有的话，以长形式输出选项，并保留参数。
+
+筛选选项
+~~~~
+
+--revs-only::
+	不输出与 'git rev-list' 命令无关的标志和参数。
+
+--no-revs::
+	不输出用于 'git rev-list' 命令的标志和参数。
+
+--flags::
+	不输出非标志参数。
+
+--no-flags::
+	不输出标记参数。
+
+输出选项
+~~~~
+
+--default <参数>::
+	如果用户没有提供参数，则使用 `<参数>` 代替。
+
+--prefix <参数>::
+	Behave as if 'git rev-parse' was invoked from the `<arg>` subdirectory of the working tree. Any relative filenames are resolved as if they are prefixed by `<arg>` and will be printed in that form.
++
+This can be used to convert arguments to a command run in a subdirectory so that they can still be used after moving to the top-level of the repository. For example:
++
+----
+prefix=$(git rev-parse --show-prefix)
+cd "$(git rev-parse --show-toplevel)"
+# rev-parse 提供 'set' 所需的 --
+eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
+----
+
+--verify::
+	验证是否正好提供了一个参数，并且该参数可以转化为原始的 20 字节 SHA-1 用于访问对象数据库。如果可以，则将其输出到标准输出；否则，出错。
++
+If you want to make sure that the output actually names an object in your object database and/or can be used as a specific type of object you require, you can add the `^{type}` peeling operator to the parameter. For example, `git rev-parse "$VAR^{commit}"` will make sure `$VAR` names an existing object that is a commit-ish (i.e. a commit, or an annotated tag that points at a commit). To make sure that `$VAR` names an existing object of any type, `git rev-parse "$VAR^{object}"` can be used.
++
+请注意，如果要验证来自不可信来源的名称，最好使用 `--end-of-options`，以免名称参数被误认为其他选项。
+
+-q::
+--quiet::
+	Only meaningful in `--verify` mode. Do not output an error message if the first argument is not a valid object name; instead exit with non-zero status silently. SHA-1s for valid object names are printed to stdout on success.
+
+--sq::
+	Usually the output is made one line per flag and parameter. This option makes output a single line, properly quoted for consumption by shell. Useful when you expect your parameter to contain whitespaces and newlines (e.g. when using pickaxe `-S` with 'git diff-{asterisk}'). In contrast to the `--sq-quote` option, the command input is still interpreted as usual.
+
+--short[=length]::
+	与 `--verify` 模式相同，但会将对象名称缩短为至少包含 `长度` 字符的唯一前缀。最小长度为 4，默认值为配置变量 `core.abbrev` 的有效值（参见 linkgit:git-config[1]）。
+
+--not::
+	显示对象名称时，以 '{caret}' 作为前缀，并从已有前缀的对象名称中去掉 '{caret}'。
+
+--abbrev-ref[=(strict|loose)]::
+	A non-ambiguous short name of the objects name. The option core.warnAmbiguousRefs is used to select the strict abbreviation mode.
+
+--symbolic::
+	通常情况下，对象名称以 SHA-1 形式输出（可能带有 '{caret}' 前缀）；该选项使其输出形式尽可能接近原始输入。
+
+--symbolic-full-name::
+	这与 --symbolic 类似，但它会省略非引用输入（即分支或标记名称；或更明确的消歧义 "heads/master" 形式，当你想命名 "master" 分支时，却有一个不幸命名为 "master" 的标记），而显示为完整的引用名称（例如 "refs/heads/master"）。
+
+对象选项
+~~~~
+
+--all::
+	显示在 `refs/` 中找到的所有引用。
+
+--branches[=pattern]::
+--tags[=pattern]::
+--remotes[=pattern]::
+	分别显示所有分支、标记或远程跟踪分支（即分别在 `refs/heads`、`refs/tags` 或 `refs/remotes`中找到的引用）。
++
+If a `pattern` is given, only refs matching the given shell glob are shown. If the pattern does not contain a globbing character (`?`, `*`, or `[`), it is turned into a prefix match by appending `/*`.
+
+--glob=pattern::
+	Show all refs matching the shell glob pattern `pattern`. If the pattern does not start with `refs/`, this is automatically prepended. If the pattern does not contain a globbing character (`?`, `*`, or `[`), it is turned into a prefix match by appending `/*`.
+
+--exclude=<通配符模式>::
+	不包括匹配"<glob-pattern>"的参考文献，否则下一个`--all`、`--branches`、`--tags`、`--remotes`或`--glob`会考虑这些参考文献。重复这个选项可以累积排除模式，直到下一个`----all`、`---branches`、`---tags`、`---remotes`或`---glob`选项（其他选项或参数不清除累积模式）。
++
+当应用于 `--branches`、 `--tags` 或 `--remotes` 时，所给出的模式不应以 `refs/heads`、`refs/tags` 或 `refs/remotes` 开头；当应用于 `--glob` 或 `--all` 选项时，必须以 `refs/` 开头。如果要使用尾部的 '/{asterisk}'，则必须明确给出。
+
+--exclude-hidden=[fetch|receive|uploadpack]::
+	通过查阅相应的 `fetch.hideRefs` 、`receive.hideRefs` 或 `uploadpack.hideRefs` 配置和 `transfer.hideRefs` 配置（参见 linkgit:git-config[1]），不要包含会被 `git-fetch` 、`git-receive-pack` 或 `git-upload-pack` 隐藏的引用。该选项会影响下一个伪引用选项 `--all` 或 `--glob`，并在处理后清除。
+
+--disambiguate=<前缀>::
+	Show every object whose name begins with the given prefix. The <prefix> must be at least 4 hexadecimal digits long to avoid listing each and every object in the repository by mistake.
+
+文件选项
+~~~~
+
+--local-env-vars::
+	List the GIT_* environment variables that are local to the repository (e.g. GIT_DIR or GIT_WORK_TREE, but not GIT_EDITOR). Only the names of the variables are listed, not their value, even if they are set.
+
+--path-format=(absolute|relative)::
+	Controls the behavior of certain other options. If specified as absolute, the paths printed by those options will be absolute and canonical. If specified as relative, the paths will be relative to the current working directory if that is possible. The default is option specific.
++
+该选项可以多次指定，并且只影响命令行中该选项后面的参数，要么影响到命令行的末尾，要么影响到该选项的下一个实例。
+
+以下选项会被 `--path-format` 修改：
+
+--git-dir::
+	如果已定义，则显示 `$GIT_DIR`。否则显示 .git 目录的路径。如果是相对路径，则显示当前工作目录的相对路径。
++
+如果未定义 `$GIT_DIR`，且未检测到当前目录位于 Git 仓库或工作区中，则向标准错误流打印一条信息，并以非零状态退出。
+
+--git-common-dir::
+	如果定义了 `$GIT_COMMON_DIR`，则显示 `$GIT_COMMON_DIR` ，否则显示 `$GIT_DIR`。
+
+--resolve-git-dir <路径>::
+	Check if <path> is a valid repository or a gitfile that points at a valid repository, and print the location of the repository. If <path> is a gitfile then the resolved path to the real repository is printed.
+
+--git-path <路径>::
+	解析 "$GIT_DIR/<路径>"，并考虑其他路径重定位变量，如 $GIT_OBJECT_DIRECTORY、$GIT_INDEX_FILE...。例如，如果 $GIT_OBJECT_DIRECTORY 设置为 /foo/bar，那么 "git rev-parse --git-path objects/abc" 就会返回 /foo/bar/abc。
+
+--show-toplevel::
+	显示工作树顶层目录的路径（默认为绝对路径）。如果没有工作区，则会报错。
+
+--show-superproject-working-tree::
+	Show the absolute path of the root of the superproject's working tree (if exists) that uses the current repository as its submodule. Outputs nothing if the current repository is not used as a submodule by any project.
+
+--shared-index-path::
+	在分割索引模式下显示共享索引文件的路径，如果不在分割索引模式下则显示空路径。
+
+以下选项不受 `--path-format` 影响：
+
+--absolute-git-dir::
+	类似于 `--git-dir`，但其输出始终是规范化的绝对路径。
+
+--is-inside-git-dir::
+	当当前工作目录低于仓库目录时，打印 "true"，否则打印 "false"。
+
+--is-inside-work-tree::
+	当当前工作目录位于仓库工作区内时，打印 "true"，否则打印 "false"。
+
+--is-bare-repository::
+	当仓库为裸仓库时，打印 "true"，否则打印 "false"。
+
+--is-shallow-repository::
+	当仓库是浅克隆时打印 "true"，否则打印 "false"。
+
+--show-cdup::
+	从子目录调用命令时，显示顶层目录相对于当前目录的路径（通常是 ".../" 序列或空字符串）。
+
+--show-prefix::
+	从子目录调用命令时，显示当前目录相对于顶层目录的路径。
+
+--show-object-format[=(storage|input|output)]::
+	Show the object format (hash algorithm) used for the repository for storage inside the `.git` directory, input, or output. For input, multiple algorithms may be printed, space-separated. If not specified, the default is "storage".
+
+--show-ref-format::
+	Show the reference storage format used for the repository.
+
+
+其他选项
+~~~~
+
+--since=datestring::
+--after=datestring::
+	解析日期字符串，并为 'git rev-list' 输出相应的 --max-age= 参数。
+
+--until=datestring::
+--before=datestring::
+	解析日期字符串，并为 'git rev-list' 输出相应的 --min-age= 参数。
+
+<多个参数>...::
+	要解析的标志和参数。
+
+
+include::revisions.txt[]
+
+PARSEOPT
+--------
+
+在 `--parseopt` 模式下，'git rev-parse' 可以帮助处理选项，为 shell 脚本带来与 C 语言内置程序相同的功能。它可以作为一个选项规范化器工作（例如分割单值和总值），有点像 `getopt(1)`。
+
+It takes on the standard input the specification of the options to parse and understand, and echoes on the standard output a string suitable for `sh(1)` `eval` to replace the arguments with normalized ones. In case of error, it outputs usage on the standard error stream, and exits with code 129.
+
+Note: Make sure you quote the result when passing it to `eval`. See below for an example.
+
+输入格式
+~~~~
+
+'git rev-parse --parseopt' input format is fully text based. It has two parts, separated by a line that contains only `--`. The lines before the separator (should be one or more) are used for the usage. The lines after the separator describe the options.
+
+每行选项的格式如下：
+
+------------
+<指定选项><标记>*<参数提示>? SP+ help LF
+------------
+
+`<opt-spec>`::
+	its format is the short option character, then the long option name separated by a comma. Both parts are not required, though at least one is necessary. May not contain any of the `<flags>` characters. `h,help`, `dry-run` and `f` are examples of correct `<opt-spec>`.
+
+`<标志>`::
+	`<标志>` 是 `*`, `=`, `?` 或 `!` 其中一个。
+	* 如果选项需要一个参数，则使用 `=`。
+
+	* 使用 `?` 表示选项包含一个可选参数。你可能希望使用 `--stuck-long` 模式来明确地解析可选参数。
+
+	* 使用 `*` 表示该选项不应列在为 `-h` 参数生成的用法中。linkgit:gitcli[7] 中记录了 `--help-all` 的用法。
+
+	* 使用 `!` 不提供相应的否定长选项。
+
+`<参数提示>`::
+	`<arg-hint>`, if specified, is used as a name of the argument in the help output, for options that take arguments. `<arg-hint>` is terminated by the first whitespace. It is customary to use a dash to separate words in a multi-word argument hint.
+
+去掉空格后的剩余部分将用作与该选项相关的帮助。
+
+空行将被忽略，不符合此规范的行将用作选项组标题（以空格开头，以便有意创建此类行）。
+
+示例
+~~
+
+------------
+OPTS_SPEC="\
+some-command [<选项>] <参数>...
+
+some-command 会执行 foo 和 bar!
+--
+h,help! show the help
+
+foo some nifty option --foo bar= some cool option --bar with an argument baz=arg another cool option --baz with a named argument qux?path qux may take a path argument but has meaning by itself
+
+  一个选项组头
+C?        带着一个可选参数的 C 选项
+
+eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
+------------
+
+
+使用文本
+~~~~
+
+当 `"$@"` 为上例中的 `-h`或 `--help` 时，将显示以下使用文本：
+
+------------
+usage: some-command [<选项>] <参数>...
+
+    some-command 会执行 foo 和 bar!
+
+    -h, --help            显示磅帮助
+    --[no-]foo            一些简便的选项 --foo
+    --[no-]bar ...        一些很酷的选项 --bar 带着一个参数
+    --[no-]baz <arg>      另外很酷的选项 --baz 带着指定名称的参数
+    --[no-]qux[=<路径>]   qux 可能会带上一个对它自己有意义的路径参数
+
+一个选项组的头部
+    -C[...]               带着一个可选参数的选项 C
+------------
+
+SQ-QUOTE
+--------
+
+在 `--sq-quote` 模式下，'git rev-parse' 会在标准输出中输出一行适合 `sh(1)` `eval` 的参数。这一行是通过将 `--sq-quote` 后面的参数规范化而生成的。除了给参数加引号之外，不会做任何其他操作。
+
+如果希望在输出被 shell 引述之前，'git rev-parse' 仍能像往常一样解释命令输入，请参阅 `--sq` 选项。
+
+示例
+~~
+
+------------
+$ cat >your-git-script.sh <<\EOF
+#!/bin/sh
+args=$(git rev-parse --sq-quote "$@")   # 引用用户提供的参数
+command="git frotz -n24 $args"          # 并手动将它在内部使用
+					# 命令行
+eval "$command"
+EOF
+
+$ sh your-git-script.sh "a b'c"
+------------
+
+实例
+--
+
+* 打印当前提交的对象名称：
++
+------------
+$ git rev-parse --verify HEAD
+------------
+
+* 在 $REV shell 变量中打印修订版本中的提交对象名称：
++
+------------
+$ git rev-parse --verify --end-of-options $REV^{commit}
+------------
++
+如果 $REV 为空或不是有效版本，则会出错。
+
+* 与上述类似：
++
+------------
+$ git rev-parse --default master --verify --end-of-options $REV
+------------
++
+但如果 $REV 为空，则会打印 master 中的提交对象名称。
+
+GIT
+---
+属于 linkgit:git[1] 文档

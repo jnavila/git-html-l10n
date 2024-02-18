@@ -39,9 +39,7 @@ OPÇÕES
 +
 Se o repositório `$GIT_DIR/objects` tiver links simbólicos ou for um link simbólico, a clonagem falhará. Esta é uma medida de segurança para evitar uma cópia não intencional dos arquivos, removendo a referência dos links simbólicos.
 +
-*OBSERVAÇÃO*: esta operação pode competir com as alterações concomitantes ao
-código fonte no repositório, semelhante ao executar `cp -r src dst` enquanto altera
-o "crc".
+*OBSERVAÇÃO*: esta operação pode competir com as alterações concomitantes ao código fonte no repositório, semelhante ao executar `cp -r src dst` enquanto altera o "src".
 
 --no-hardlinks::
 	Impõem o processo de clonagem a partir de um repositório num sistema de arquivos local para copiar os arquivos no diretório `.git/objects` em vez de utilizar links físicos. Pode ser desejável caso esteja tentando fazer um backup do seu repositório.
@@ -50,15 +48,7 @@ o "crc".
 --shared::
 	Quando o repositório que será clonado estiver na máquina local, em vez de utilizar links físicos, configure automaticamente o `.git/objetos/info/alternates` para compartilhar os objetos com o repositório da origem. O repositório resultante é iniciado sem nenhum objeto próprio.
 +
-*OBSERVAÇÃO*: provavelmente está uma operação muito perigosa; *não*
-utilize a menos que compreenda o que ela faz. Caso clone o seu
-repositório utilizando esta opção e em seguida exclua os ramos (ou use qualquer
-outro comando Git que faz qualquer commit existente perder a referência) no
-repositório da origem, alguns objetos podem perder a referência (ou ficarem soltos).
-Estes objetos podem ser removidos através das operações normais do Git (como
-`git commit`) que chama automaticamente o comando `git maintenance run --auto`.
-(Consulte linkgit:git-maintenance[1].) Caso estes objetos sejam removidos
-e foram referenciados pelo repositório clonado, o repositório clonado se tornará corrompido.
+*OBSERVAÇÃO*: provavelmente está uma operação muito perigosa; *não* utilize a menos que compreenda o que ela faz. Caso clone o seu repositório utilizando esta opção e em seguida exclua os ramos (ou use qualquer outro comando Git que faz qualquer commit existente perder a referência) no repositório da origem, alguns objetos podem perder a referência (ou ficarem soltos). Estes objetos podem ser removidos através das operações normais do Git (como `git commit`) que chama automaticamente o comando `git-maintenance run --auto`. (Consulte linkgit:git-maintenance[1].) Caso estes objetos sejam removidos e foram referenciados pelo repositório clonado, o repositório clonado se tornará corrompido.
 +
 Observe que executar o comando `git repack` sem a opção `--local` em um repositório clonado com `--shared`, este irá copiar os objetos do repositório da origem em um pacote no repositório que foi clonado, removendo a economia de espaço em disco do `clone --shared`. É seguro, no entanto, executar o comando `git gc`, que por predefinição utiliza a opção `--local`.
 +
@@ -67,8 +57,7 @@ Caso queira quebrar a dependência de um repositório clonado com `--shared` no 
 --reference[-if-able] <repositório>::
 	Caso o repositório de referência estiver na máquina local, configure automaticamente o arquivo de configuração `.git/objects/info/alternates` para obter os objetos do repositório de referência. A utilização de um repositório já existente como alternativa, exigirá que menos objetos sejam copiados do repositório que está sendo clonado, reduzindo as despesas do armazenamento local e da rede. Ao utilizar o comando `--reference-if-able`, um diretório não existente é ignorado com um aviso em vez de interromper a clonagem.
 +
-*OBSERVAÇÃO*: consulte a OBSERVAÇÃO para a opção `--shared` e também
-para a opção `--dissociate`.
+*OBSERVAÇÃO*: consulte a OBSERVAÇÃO para a opção `--shared` e também para a opção `--dissociate`.
 
 --dissociate::
 	Emprestar os objetos dos repositórios a partir da referência utilizada com as opções `--reference` apenas para reduzir a transferência de rede e parar de tomar emprestado deles após a clonagem, fazendo cópias locais necessárias dos objetos emprestados. Esta opção também pode ser usada na clonagem local a partir de um repositório que já toma emprestado os objetos de um outro repositório--o novo repositório pegará emprestado os objetos do mesmo repositório, e esta opção pode ser usada para interromper o empréstimo.
@@ -95,7 +84,7 @@ para a opção `--dissociate`.
 	Falha caso o repositório de fontes for um repositório superficial. A variável de configuração 'clone.rejectShallow' pode ser usada para definir o padrão.
 
 --bare::
-	Faça um repositório Git 'vazio'. Ou seja, em vez de criar o `<diretório>` e colocar os arquivos administrativos dentro do `<diretório>/.git`, faça com que o próprio `<diretório>` seja o `$ GIT_DIR`. Por questões óbvias, há a obrigatoriedade da utilização da opção `--no-checkout` porque não há onde averiguar a árvore de trabalho. Além disso os cabeçalhos do ramo remoto são copiados diretamente para os cabeçalhos locais correspondentes, sem mapeá-los para `refs/remotes/origin/`. Quando essa opção é utilizada, nem as ramificações monitoradas remotamente tão pouco as variáveis de configuração relacionadas à elas são criadas.
+	Faça um repositório Git 'vazio'. Ou seja, em vez de criar o `<diretório>` e colocar os arquivos administrativos dentro do `<diretório>/.git`, faça com que o próprio `<diretório>` seja o `$GIT_DIR`. Por questões óbvias, há a obrigatoriedade da utilização da opção `--no-checkout` porque não há onde averiguar a árvore de trabalho. Além disso os cabeçalhos do ramo remoto são copiados diretamente para os cabeçalhos locais correspondentes, sem mapeá-los para `refs/remotes/origin/`. Quando essa opção é utilizada, nem as ramificações monitoradas remotamente tão pouco as variáveis de configuração relacionadas à elas são criadas.
 
 --sparse::
 	Empregue a averiguação esparsa (sparse-checkout), apenas nos arquivos inicialmente presentes no diretório do primeiro nível. O comando linkgit:git-sparse-checkout[1] para aumentar o diretório de trabalho sempre que for necessário.
@@ -160,6 +149,12 @@ Os submódulos são inicializados e clonados utilizando as suas respectivas conf
 
 --separate-git-dir=<dir-git>::
 	Em vez de colocar o repositório clonado onde deveria estar, coloque o repositório clonado no diretório especificado e em seguida, faça um link simbólico Git independente do sistema de arquivos para lá. O resultado é que o repositório Git pode ser separado da árvore de trabalho.
+
+--ref-format=<ref-format::
+
+Define o formato de armazenamento de referência fornecido para o repositório. Os valores válidos são:
++
+include::ref-storage-format.txt[]
 
 -j <n>::
 --jobs <n>::

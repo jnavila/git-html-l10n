@@ -38,7 +38,7 @@ Esta opción es internamente convertida a `git version ...` y acepta las mismas 
 --help::
 	Imprime la sinopsis y una lista de los comandos más usados comúnmente. Si se da la opción `--all` o `-a` entonces todos los comandos disponibles se imprimen. Si un comando Git es nombrado, esta opción traerá la página del manual para ese comando.
 +
-Hay otras opciones disponibles para controlar cómo se muestra la página del manual. Ver linkgit:git-help[1] para mayor información, porque `git-help ...` es convertido internamente en `git help ...`.
+Hay otras opciones disponibles para controlar cómo se muestra la página del manual. Ver linkgit:git-help[1] para mayor información, porque `git --help ...` es convertido internamente en `git help ...`.
 
 -C <ruta>::
 	Corre como si git hubiera iniciado en `<ruta>` en lugar del directorio de trabajo actual. Cuando se dan múltiples opciones `-C`, cada `-C <ruta>` no-absoluta subsecuente se interpreta como relativa al `-C <ruta>` precedente. Si `<ruta>` esta presente pero vacía, ej. `-C ""`, entonces el directorio de trabajo actual queda sin modificaciones.
@@ -114,7 +114,7 @@ Si sólo quieres correr git como si fuera arrancado en `<ruta>` entonces usa `gi
 --no-optional-locks::
 	No realiza operaciones opcionales que requieran bloqueos. Es equivalente a asignar `0` a `GIT_OPTIONAL_LOCKS`.
 
---list-cmds=grupo[,grupo...]::
+--list-cmds=<grupo>[,<grupo>...]::
 	Lista comandos por grupo. Es una opción interna/experimental y puede cambiar o ser removida en el futuro. Los grupos soportados son: builtins, parseopt (comandos interconstruidos que usan opciones de parseo), main (todos los comandos en el directorio libexec), others (todos los otros comandos en `$PATH` que tienen el prefijo git-), list-<categoría> (ver categorías en command-list.txt), nohelpers (excluye comandos auxiliares), alias y config (obtiene la lista de comandos de la variable de configuración completion.commands)
 
 --attr-source=<árbol-ismo>::
@@ -350,10 +350,13 @@ Entradas que comienzan con `"` (comilla doble) serán interpretadas como rutas e
 	Cuando se ejecuta en un directorio que no tiene directorio de repositorio ".git", Git intenta encontrarlo en los directorios padres para encontrar el tope del directorio de trabajo, pero predeterminadamente no cruza los límites del sistema de ficheros. A esta variable de ambiente booleana se le puede asignar true para indicarle a Git que no pare en los límites del sistema operativo. Así como `GIT_CEILING_DIRECTORIES`, no afectará un directorio de repositorio explícito configurado en `GIT_DIR` o en la línea de comandos.
 
 `GIT_COMMON_DIR`::
-	Si a esta variable se le asigna una ruta, los ficheros que no son del árbol de trabajo que normalmente están en $GIT_DIR serán tomados en cambio de esta ruta. Ficheros específicos del árbol de trabajo como HEAD y index se toman de $GIT_DIR. Ver linkgit:gitrepository-layout[5] y linkgit:git-worktree[1] para detalles. Esta variable tiene precedencia mas baja que otras variables de ruta como GIT_INDEX_FILE, GIT_OBJECT_DITECTORY...
+	Si a esta variable se le asigna una ruta, los ficheros que no son del árbol de trabajo que normalmente están en $GIT_DIR serán tomados en cambio de esta ruta. Ficheros específicos del árbol de trabajo como HEAD y index se toman de $GIT_DIR. Ver linkgit:gitrepository-layout[5] y linkgit:git-worktree[1] para detalles. Esta variable tiene precedencia mas baja que otras variables de ruta como GIT_INDEX_FILE, GIT_OBJECT_DIRECTORY...
 
 `GIT_DEFAULT_HASH`::
 	Si se configura esta variable, el algoritmo predeterminado de hash para repositorios nuevos será asignado con éste valor. Al clonar se ignora este valor y siempre se usa la configuración del repositorio remoto. El predeterminado es "sha1". Ver `--object-format` en linkgit:git-init[1].
+
+`GIT_DEFAULT_REF_FORMAT`::
+	Si se configura esta variable, el formato predeterminado de almacenamiento de referencias para repositorios nuevos será asignado con éste valor. El predeterminado es "files". Ver `--ref-format` en linkgit:git-init[1].
 
 Confirmaciones de Git
 ~~~~~~~~~~~~~~~~~~~~~
@@ -451,19 +454,10 @@ Usualmente es mas fácil configurar cualquier opción deseada por medio de tu fi
 	Toma la configuración de los ficheros dados en lugar de los ficheros de configuración global o a nivel sistema. Si `GIT_CONFIG_SYSTEM` es asignado, el fichero de configuración de sistema definido en tiempo de construcción (usualmente `/etc/gitconfig`) no será leído. En el mismo sentido, si `GIT_CONFIG_GLOBAL` es asignado, ninguno de `$HOME/.gitconfig` o `$XDG_CONFIG_HOME/git/config` será leído. Se le puede asignar `/dev/null` para saltar la lectura de ficheros de configuración del nivel respectivo.
 
 `GIT_CONFIG_NOSYSTEM`::
-	Si saltar la lectura de ajustes del fichero de ámbito de sistema `$(prefijo)/etc/gitconfig`. Esta variable de ambiente booleana puede ser usada junto con `$HOME` y `$XDG_CONFIG_HOME` para crear un ambiente predecible para un script quisquilloso, o puedes asignarle verdadero para evitar temporalmente usar un fichero defectuoso `/etc/gitconfig` mientras se espera a alguien con premisos suficientes para arreglarlo.
+	Si saltar la lectura de ajustes del fichero de ámbito de sistema `$(prefix)/etc/gitconfig`. Esta variable de ambiente booleana puede ser usada junto con `$HOME` y `$XDG_CONFIG_HOME` para crear un ambiente predecible para un script quisquilloso, o puedes asignarle verdadero para evitar temporalmente usar un fichero defectuoso `/etc/gitconfig` mientras se espera a alguien con premisos suficientes para arreglarlo.
 
 `GIT_FLUSH`::
-// NEEDSWORK: make it into a usual Boolean environment variable
-	Si a esta variable de ambiente se le asigna "1", entonces comandos como
-	'git-blame' (en modo incremental), 'git rev-list', 'git log',
-	'git check-attar' y 'git check-ignore' forzarán un desalojo
-	del flujo de salida después de que cada registro sea
-	desalojado. Si a esta
-	variable se le asigna "0", la salida de esos comandos se hará
-	usando búfer de E/S por completo. Si no se asigna esta variable de ambiente,
-	Git elegirá desalojo por búfer u orientada a registro
-	con base en si la salida estándar parece ser redirigida a un fichero o no.
+	Si a esta variable de ambiente booleana se le asigna true, entonces comandos como 'git-blame' (en modo incremental), 'git rev-list', 'git log', 'git check-attr' y 'git check-ignore' forzarán un desalojo del flujo de salida después de que cada registro sea desalojado. Si a esta variable se le asigna false, la salida de esos comandos se hará usando búfer de E/S por completo. Si no se asigna esta variable de ambiente, Git elegirá desalojo por búfer u orientada a registro con base en si la salida estándar parece ser redirigida a un fichero o no.
 
 `GIT_TRACE`::
 	Habilita mensajes de rastreo general, ej. expansión de alias, ejecución de comando interconstruido y ejecución de comando externo.
@@ -551,6 +545,11 @@ Ver link:technical/api-trace2.html[documentación de Trace2] para detalles compl
 `GIT_REF_PARANOIA`::
 	Si se asigna falso a esta variable de ambiente booleana, ignora referencias rotas o mal nombradas cuando se itera por la lista de referencias. Normalmente Git intentará incluir cualquiera de tales referencias, lo cual puede provocar que algunas operaciones fallen. Esto es usualmente preferible, ya que es mejor abortar operaciones potencialmente destructivas (ej. linkgit:git-prune[1]) en vez de ignorar referencias rotas (y por lo tanto considerar que no vale guardar el historial al que apuntan). El valor predeterminado es `1` (ej. ser paranoico en la detección y abortar todas las operaciones). Normalmente no deberías asignarle `0`, pero puede ser útil cuando se intenta salvar datos de un repositorio corrupto.
 
+`GIT_COMMIT_GRAPH_PARANOIA`::
+	When loading a commit object from the commit-graph, Git performs an existence check on the object in the object database. This is done to avoid issues with stale commit-graphs that contain references to already-deleted commits, but comes with a performance penalty.
++
+The default is "false", which disables the aforementioned behavior. Setting this to "true" enables the existence check so that stale commits will never be returned from the commit-graph at the cost of performance.
+
 `GIT_ALLOW_PROTOCOL`::
 	Si se le asigna una lista de protocolos separada por dos puntos, se comporta como si a `protocolo.allow` se le asigna `never`, y cada uno de los protocolos listados `protocol.<nombre>.allow` tuviera asignado `always` (anulando cualquier configuración existente). Ver la descripción de `protocol.allow` en linkgit:git-config[1] para mas detalles.
 
@@ -560,7 +559,7 @@ Ver link:technical/api-trace2.html[documentación de Trace2] para detalles compl
 `GIT_PROTOCOL`::
 	Sólo para uso interno. Usado en el protocolo de estrechamiento de manos de conexión. Contiene una lista de claves separadas por dos puntos ':' con valores opcionales 'clave[=valor]'. La presencia de claves y valores desconocidos debe ser ignorada.
 +
-Note que servidores pueden necesitar ser configurados para permitir que esta variable sobrepase algunos transportes. Será propagada automáticamente cuando se accesen repositorios locales (ej. `file://` o una ruta del sistema de ficheros), así como sobre el protocolo `git://`. Para git-sobre-http, debería funcionar automáticamente en la mayoría de las configuraciones, pero ver la discusión en linkgit:git-http-backend[1]. Para git-sobre-ssh, el servidor ssh puede necesitar ser configurado para permitir a los clientes pasar esta variable (ej. usando `AcceptEnv GIT_PROTOCOL` con OpenSSH).
+Note que servidores pueden necesitar ser configurados para permitir que esta variable sobrepase algunos transportes. Será propagada automáticamente cuando se accesen repositorios locales (ej. `file://` o una ruta del sistema de ficheros), así como sobre el protocolo `git://`. Para git-over-http, debería funcionar automáticamente en la mayoría de las configuraciones, pero ver la discusión en linkgit:git-http-backend[1]. Para git-over-ssh, el servidor ssh puede necesitar ser configurado para permitir a los clientes pasar esta variable (ej. usando `AcceptEnv GIT_PROTOCOL` con OpenSSH).
 +
 Esta configuración es opcional. Si la variable no es propagada, entonces los clientes caerán de vuelta a protocolo "v0" original (pero pueden perder algunas mejoras de desempeño o características). Esta variable afecta actualmente únicamente a clonados y fetchs; aún no es usada para empujes (pero podría serlo en el futuro).
 
@@ -592,7 +591,7 @@ Todos los objetos se nombran con un hash SHA-1 de su contenido, normalmente escr
 
 Recién creados, los objetos se almacenan en ficheros individuales, pero por eficiencia, posteriormente pueden ser comprimidos en conjunto en "paquetes de ficheros".
 
-Apuntadores nombrados llamados referencias marcan puntos interesantes en el historial. Una referencia puede contener el nombre SHA-1 de un objeto o el nombre de otra referencia. Referencias con nombres que comienzan con `ref/head/` contienen el nombre SHA-1 de la confirmación más reciente (o "head") de una rama bajo desarrollo. Los nombres SHA-1 de etiquetas de interés se almacenan bajo `ref/tags/`. Una referencia especial llamada `HEAD` contiene el nombre de la rama actualmente en revisión.
+Apuntadores nombrados llamados referencias marcan puntos interesantes en el historial. Una referencia puede contener el nombre SHA-1 de un objeto o el nombre de otra referencia (ésta última se le llama una "referencia simbólica"). Referencias con nombres que comienzan con `refs/head/` contienen el nombre SHA-1 de la confirmación más reciente (o "head") de una rama bajo desarrollo. Los nombres SHA-1 de etiquetas de interés se almacenan bajo `refs/tags/`. Una referencia simbólica llamada `HEAD` contiene el nombre de la rama actualmente en revisión.
 
 El fichero índice se inicializa con una lista de todas las rutas y, para cada ruta, un objeto blob y un conjunto de atributos. El objeto blob representa el contenido del fichero como en la cabeza de la rama actual. Los atributos (última hora de modificación, tamaño, etc.) se toman del fichero correspondiente en el árbol de trabajo. Cambios subsecuentes al árbol de trabajo se pueden encontrar al comparar esos atributos. El índice puede ser actualizado con contenido nuevo, y nuevas confirmaciones pueden ser creadas a partir del contenido almacenado en el índice.
 
@@ -616,7 +615,7 @@ Usuarios migrando de CVS querrían leer linkgit:gitcvs-migration[7].
 
 Autores
 -------
-Git lo comenzó Linus Torvalds, y actualmente es mantenido por Junio C Hamano. Numerosas contribuciones han venido de la lista de correos de Git <git@vger.kernel.org>. http://www.openhub.net/p/git/contributors/summary tiene una lista mas completa de contribuyentes.
+Git lo comenzó Linus Torvalds, y actualmente es mantenido por Junio C Hamano. Numerosas contribuciones han venido de la lista de correos de Git <git@vger.kernel.org>. http://openhub.net/p/git/contributors/summary tiene una lista mas completa de contribuyentes.
 
 Si tienes un clon mismo de git.git, la salida de linkgit:git-shortlog[1] y linkgit:git-blame[1] puede mostrarte los autores de partes específicas del proyecto.
 

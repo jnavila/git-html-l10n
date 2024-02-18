@@ -8,10 +8,14 @@ git-show-ref - Liste as referências no repositório local
 RESUMO
 ------
 [verse]
-'git show-ref' [-q | --quiet] [--verify] [--head] [-d | --dereference]
+'git show-ref' [--head] [-d | --dereference]
 	     [-s | --hash[=<n>]] [--abbrev[=<n>]] [--tags]
-	     [--heads] [--] [<padrão>...]
-'git show-ref' --exclude-existing[=<padrão>]
+	     [--heads] [--] [<pattern>...]
+'git show-ref' --verify [-q | --quiet] [-d | --dereference]
+	     [-s | --hash[=<n>]] [--abbrev[=<n>]]
+	     [--] [<ref>...]
+'git show-ref' --exclude-existing[=<pattern>]
+'git show-ref' --exists <ref>
 
 DESCRIÇÃO
 ---------
@@ -21,6 +25,8 @@ Exiba as referências disponíveis em um repositório local, juntamente com as I
 É predefinido que se exiba as tags, cabeçalhos e as referências remotas.
 
 O formulário `--exclude-existing` é um filtro que faz o inverso. Ele lê as refs do stdin, uma ref por linha, e mostra aquelas que não existem no repositório local.
+
+The `--exists` form can be used to check for the existence of a single references. This form does not verify whether the reference resolves to an actual object.
 
 O uso deste utilitário é incentivado em favor do acesso direto aos arquivos no diretório `.git`.
 
@@ -34,7 +40,7 @@ OPÇÕES
 --heads::
 --tags::
 
-	Limite para "refs/heads" e "refs/tags", respectivamente. Estas opções não são mutuamente exclusivas; quando utilizadas, as referências armazenadas em "refs/heads" e "refs/tags" são exibidas.
+	Limit to "refs/heads" and "refs/tags", respectively. These options are not mutually exclusive; when given both, references stored in "refs/heads" and "refs/tags" are displayed.
 
 -d::
 --dereference::
@@ -48,16 +54,20 @@ OPÇÕES
 
 --verify::
 
-	Ative a verificação de referência mais rigorosa, exigindo um caminho de referência exato. Além de retornar um código de erro 1, ele também imprimirá uma mensagem de erro caso a opção `--quiet` não tiver sido utilizada.
+	Enable stricter reference checking by requiring an exact ref path. Aside from returning an error code of 1, it will also print an error message if `--quiet` was not specified.
 
---abrev[=<n>]::
+--exists::
 
-	Abrevie o nome do objeto. Ao utilizar `--hash`, não é necessário a opção `--hash --abbrev`; a opção `--hash=n` já faz.
+	Check whether the given reference exists. Returns an exit code of 0 if it does, 2 if it is missing, and 1 in case looking up the reference failed with an error other than the reference being missing.
+
+--abbrev[=<n>]::
+
+	Abbreviate the object name. When using `--hash`, you do not have to say `--hash --abbrev`; `--hash=n` would do.
 
 -q::
 --quiet::
 
-	Não exiba nenhum resultado no stdout. Quando combinado com `--verify`, pode ser usado para verificar se uma referência existe silenciosamente.
+	Do not print any results to stdout. Can be used with `--verify` to silently check if a reference exists.
 
 --exclude-existing[=<padrão>]::
 
@@ -71,7 +81,7 @@ OPÇÕES
 
 <padrão>...::
 
-	Exiba as referências coincidentes a um ou mais padrões. Os padrões são coincididos a partir do final do nome completo e apenas as peças completas são coincididas, por exemplo, 'master' coincide com 'refs/heads/master', 'refs/remotes/origin/master', 'refs/tags/jedi/master' mas não com 'refs/heads/mymaster' ou 'refs/remotes/master/jedi'.
+	Show references matching one or more patterns. Patterns are matched from the end of the full name, and only complete parts are matched, e.g. 'master' matches 'refs/heads/master', 'refs/remotes/origin/master', 'refs/tags/jedi/master' but not 'refs/heads/mymaster' or 'refs/remotes/master/jedi'.
 
 SAÍDA
 -----

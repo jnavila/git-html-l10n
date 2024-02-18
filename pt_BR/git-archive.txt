@@ -11,14 +11,14 @@ RESUMO
 [verse]
 'git archive' [--format=<fmt>] [--list] [--prefix=<prefixo>/] [<extra>]
 	      [-o <arquivo> | --output=<arquivo>] [--worktree-attributes]
-	      [--remote=<repo> [--exec=<arquivo-de-upload-git>]] <árvore>
+	      [--remote=<repo> [--exec=<git-upload-archive>]] <árvore>
 	      [<caminho>...]
 
 DESCRIÇÃO
 ---------
-Cria um arquivo no formato informado que contenha uma estrutura de determinada árvore e grava na saída padrão. Caso o `<prefixo>` seja utilizado, ele será anexado aos nomes dos arquivos no arquivo.
+Creates an archive of the specified format containing the tree structure for the named tree, and writes it out to the standard output. If <prefix> is specified it is prepended to the filenames in the archive.
 
-O comando 'git archive' se comporta de forma diferente quando recebe um ID de uma árvore em vez de um ID de commit ou a ID da tag. Quando um ID de uma árvore é fornecido, a hora atual é usada como a hora de alteração de cada arquivo no arquivo. Por outro lado, quando um ID de commit ou de tag é fornecido, é usada a hora do commit registrada no objeto de commit referenciado. Além disso, o ID do commit é armazenado em um cabeçalho pax global estendido se o formato tar for usado; ele pode ser extraído usando o comando 'git get-tar-commit-id'. Nos arquivos ZIP, ele é armazenado como um comentário do arquivo.
+'git archive' behaves differently when given a tree ID as opposed to a commit ID or tag ID. When a tree ID is provided, the current time is used as the modification time of each file in the archive. On the other hand, when a commit ID or tag ID is provided, the commit time as recorded in the referenced commit object is used instead. Additionally the commit ID is stored in a global extended pax header if the tar format is used; it can be extracted using 'git get-tar-commit-id'. In ZIP files it is stored as a file comment.
 
 OPÇÕES
 ------
@@ -35,30 +35,30 @@ OPÇÕES
 	Relate o progresso para o stderr.
 
 --prefix=<prefixo>/::
-	Anexe o <prefix>/ aos caminhos no arquivo. Pode ser repetido; o seu valor mais à direita é usado para todos os arquivos que estejam sendo rastreados. Veja abaixo qual o valor é utilizado por `--add-file` e por `--add-virtual-file`.
+	Prepend <prefix>/ to paths in the archive. Can be repeated; its rightmost value is used for all tracked files. See below which value gets used by `--add-file` and `--add-virtual-file`.
 
 -o <arquivo>::
 --output=<arquivo>::
 	Escreva o arquivo para o `<arquivo>` em vez do stdout.
 
 --add-file=<arquivo>::
-	Adiciona um arquivo não rastreado ao arquivo. Pode ser repetido para que seja possível adicionar diversos arquivos. O caminho do arquivo no arquivo é construído concatenando o valor do último `--prefix` (caso haja) antes deste `--add-file` e o nome principal do <arquivo>.
+	Add a non-tracked file to the archive. Can be repeated to add multiple files. The path of the file in the archive is built by concatenating the value of the last `--prefix` option (if any) before this `--add-file` and the basename of <file>.
 
 --add-virtual-file=<caminho>:<conteúdo>::
-	Adicione o conteúdo especificado ao arquivo. Pode ser repetido para que seja possível adicionar diversos arquivos. O caminho do arquivo no arquivo é construído concatenando o valor da última opção `--prefix` (caso haja) antes deste `--add-virtual-file` e `<caminho>`.
+	Add the specified contents to the archive. Can be repeated to add multiple files. The path of the file in the archive is built by concatenating the value of the last `--prefix` option (if any) before this `--add-virtual-file` and `<path>`.
 +
 O argumento `<caminho>` pode começar e terminar com um caractere literal de aspas duplas; o nome do arquivo contido é interpretado como um texto estilo C, ou seja, a barra invertida é interpretada como caractere de escape. O caminho deve ser citado tenha dois pontos, para evitar que os dois pontos sejam mal interpretados como o separador entre o caminho e o conteúdo, ou, caso o caminho comece ou termine com um caractere de aspas duplas.
 +
 O modo do arquivo é limitado a um arquivo regular, a opção pode estar sujeita aos limites da linha de comando que dependem da plataforma. Para casos não triviais, grave um arquivo não rastreado e use `--add-file`.
 
 --worktree-attributes::
-	Procure pelos atributos nos arquivos `.gitattributes` da árvore de trabalho (consulte <<ATRIBUTOS>>).
+	Procure pelos atributos nos arquivos `.gitattributes` da árvore de trabalho (consulte <<ATTRIBUTES>>).
 
 --mtime=<hora>::
-	Defina a hora da alteração das entradas do arquivo. Sem esta opção, o tempo de quem faz o commit é usado caso `<tree-ish>` seja um commit, uma tag e o tempo atual caso seja uma árvore.
+	Set modification time of archive entries. Without this option the committer time is used if `<tree-ish>` is a commit or tag, and the current time if it is a tree.
 
 <extra>::
-	Pode ser qualquer opção que seja compatível com a estrutura do arquivador. Consulte a próxima seção.
+	This can be any options that the archiver backend understands. See next section.
 
 --remote=<repo>::
 	Em vez de criar um arquivo tar do repositório local, recupere um arquivo tar de um repositório remoto. Observe que o repositório remoto pode colocar restrições sobre quais as expressões sha1 podem ser permitidas na `<árvore>`. Para mais detalhes consulte linkgit:git-upload-archive[1].
@@ -70,7 +70,7 @@ O modo do arquivo é limitado a um arquivo regular, a opção pode estar sujeita
 	A árvore ou o commit que será utilizado para produzir um arquivo.
 
 <caminho>::
-	Sem um parâmetro opcional do caminho, todos os arquivos e os subdiretórios do diretório de trabalho atual serão incluídos no arquivo. Caso um ou mais caminhos sejam informados, apenas estes, serão incluídos.
+	Without an optional path parameter, all files and subdirectories of the current working directory are included in the archive. If one or more paths are specified, only these are included.
 
 OPÇÕES EXTRAS DA ESTRUTURA
 --------------------------
@@ -78,7 +78,7 @@ OPÇÕES EXTRAS DA ESTRUTURA
 zip
 ~~~
 -<digito>::
-	Especifica o nível da compressão. Valores maiores permitem que o comando passe mais tempo de compressão visando um tamanho menor. Os valores compatíveis vão de `-0` (apenas armazena) até `-9` (melhor proporção). A predefinição é `-6` caso nada seja usado.
+	Specify compression level. Larger values allow the command to spend more time to compress to smaller size. Supported values are from `-0` (store-only) to `-9` (best ratio). Default is `-6` if not given.
 
 tar
 ~~~
@@ -89,7 +89,7 @@ CONFIGURAÇÃO
 ------------
 
 tar.umask::
-	Essa variável pode ser utilizada para restringir os bits de permissão das entradas do arquivo tar. A predefinição é 0002, que desliga o bit de gravação global. O valor especial "user" (usuário) indica que o umask do arquivo do usuário será utilizado. Para mais detalhes consulte umask(2). Caso `--remote` seja utilizado, somente a configuração do repositório remoto entrará em vigor.
+	This variable can be used to restrict the permission bits of tar archive entries. The default is 0002, which turns off the world write bit. The special value "user" indicates that the archiving user's umask will be used instead. See umask(2) for details. If `--remote` is used then only the configuration of the remote repository takes effect.
 
 tar.<formato>.comando::
 	Esta variável define um comando shell por onde o tar será gerado pelo `git archive` através de um "pipe". O comando é executado utilizando o shell com o arquivo tar gerado na sua entrada padrão e deve produzir a saída final na sua saída padrão. Quaisquer opções do nível de compressão serão passadas ao comando (`-9` por exemplo).
@@ -104,12 +104,12 @@ ATRIBUTOS
 ---------
 
 export-ignore::
-	Arquivos e os diretórios com o atributo `export-ignore` não serão adicionados aos arquivos compactados. Para mais detalhes consulte linkgit:gitattributes[5].
+	Files and directories with the attribute export-ignore won't be added to archive files. See linkgit:gitattributes[5] for details.
 
 export-subst::
-	Caso o atributo `export-subst` esteja definido para um arquivo, o Git expandirá os vários espaços reservados ao adicionar este arquivo num arquivo. Para mais detalhes consulte linkgit:gitattributes[5].
+	If the attribute export-subst is set for a file then Git will expand several placeholders when adding this file to an archive. See linkgit:gitattributes[5] for details.
 
-Observe que, por predefinição, os atributos são obtidos através dos arquivos `.gitattributes` na árvore que está sendo arquivada. Caso queira ajustar a maneira como a saída é gerada após o fato (você fez um commit sem adicionar um `export-ignore` adequado no seus `.gitattributes` por exemplo), ajuste o arquivo `.gitattributes` conforme seja necessário e utilize a opção `--worktree-attributes`. Como alternativa, você pode manter os atributos necessários que devem ser aplicados ao arquivar qualquer árvore no seu arquivo `$GIT_DIR/info/attributes`.
+Note that attributes are by default taken from the `.gitattributes` files in the tree that is being archived. If you want to tweak the way the output is generated after the fact (e.g. you committed without adding an appropriate export-ignore in its `.gitattributes`), adjust the checked out `.gitattributes` file as necessary and use `--worktree-attributes` option. Alternatively you can keep necessary attributes that should apply while archiving any tree in your `$GIT_DIR/info/attributes` file.
 
 EXEMPLOS
 --------
@@ -147,7 +147,7 @@ EXEMPLOS
 
 `git config tar.tar.xz.command "xz -c"`::
 
-	Configure um formato "tar.xz" para criar arquivo tarfiles compactados com LZMA. Você pode utilizá-lo utilizando a opção `--format=tar.xz` ou criando um arquivo gerado com `-o foo.tar.xz`.
+	Configure a "tar.xz" format for making LZMA-compressed tarfiles. You can use it specifying `--format=tar.xz`, or by creating an output file like `-o foo.tar.xz`.
 
 
 VEJA TAMBÉM

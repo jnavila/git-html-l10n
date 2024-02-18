@@ -14,7 +14,7 @@
 	Obsoleto por: <<def_index,index>>.
 
 [[def_chain]]cadena::
-	Una lista de objetos, donde cada <<def_object,object>> en la lista contiene una referencia a su sucesor (por ejemplo, el sucesor de un <<def_commimt,commit>> podría ser uno de sus <<def_parent,parents>>).
+	Una lista de objetos, donde cada <<def_object,object>> en la lista contiene una referencia a su sucesor (por ejemplo, el sucesor de un <<def_commit,commit>> podría ser uno de sus <<def_parent,parents>>).
 
 [[def_changeset]]conjunto de cambios::
 	BitKeeper/cvsps habla de "<<def_commit,commit>>. Ya que Git no almacena cambios, sino estados, realmente no tiene sentido usar el término "conjunto de cambios" con Git.
@@ -40,10 +40,10 @@ Como verbo: La acción de guardar una nueva instantánea del estado del proyecto
 	El fichero "confirmación-grafo" (normalmente con guión medio) es un representación suplementaria del <<def_commit_graph_general,grafo de confirmaciones>> el cual acelera el recorrido del grafo de confirmaciones. El fichero "confirmación-grafo" es almacenado ya sea en el directorio .git/objects/info o en el directorio info de una base de datos alterna de objetos.
 
 [[def_commit_object]]objeto commit::
-	Un <<def_object,objeto>> que contiene la información de una <<def_revision,revisión>> en particular, como <<def_parents,ancestros>>, quien hizo commit, autor, fecha y el <<def_tree_object,árbol de objetos>> que corresponde al <<def_directory,directorio>> más arriba de la revisión almacenada.
+	Un <<def_object,objeto>> que contiene la información de una <<def_revision,revisión>> en particular, como <<def_parent,ancestros>>, quien hizo commit, autor, fecha y el <<def_tree_object,árbol de objetos>> que corresponde al <<def_directory,directorio>> más arriba de la revisión almacenada.
 
 [[def_commit-ish]]confirmación-ismo (también confirmacionismo)::
-	Un <<def_commit_object,objeto confirmación>> o un <<def_object,objeto>> que puede ser recursivamente de-referenciado a un objeto confirmación. Todos los siguientes son cuasi-confirmación: un objeto confirmación, un <<def_tag_object,objeto etiqueta>> que apunta a un objeto confirmación, un objeto etiqueta que apunta a un objeto etiqueta que apunta a un objeto confirmación, etc.
+	Un <<def_commit_object,objeto confirmación>> o un <<def_object,objeto>> que puede ser recursivamente <<def_dereference,desreferenciado>> a un objeto confirmación. Todos los siguientes son cuasi-confirmación: un objeto confirmación, un <<def_tag_object,objeto etiqueta>> que apunta a un objeto confirmación, un objeto etiqueta que apunta a un objeto etiqueta que apunta a un objeto confirmación, etc.
 
 [[def_core_git]]núcleo Git::
 	Estructuras de datos y utilerías fundamentales de Git. Expone únicamente herramientas limitadas de gestión de código fuente.
@@ -53,6 +53,15 @@ Como verbo: La acción de guardar una nueva instantánea del estado del proyecto
 
 [[def_dangling_object]]objeto colgado::
 	Un <<def_unreachable_object,objeto inalcanzable>> el cual no es <<def_reachable,alcanzable>> incluso desde otros objetos inalcanzables; un objeto colgado no tiene referencias a él desde cualquier referencia u <<def_object,objeto>> en el <<def_repository,repositorio>>.
+
+[[def_dereference]]desreferencia::
+	Refiriendo a una <<def_symref,referencia simbólica>>: la acción de accesar la <<def_ref,referencia>> a la que apunta una referencia simbólica. Desreferenciar recursivamente involucra repetir el proceso antes mencionado a la referencia resultante hasta que se encuentre un referencia no-simbólica.
++
+Referring to a <<def_tag_object,tag object>>: the action of accessing the <<def_object,object>> a tag points at. Tags are recursively dereferenced by repeating the operation on the result object until the result has either a specified <<def_object_type,object type>> (where applicable) or any non-"tag" object type. A synonym for "recursive dereference" in the context of tags is "<<def_peel,peel>>".
++
+Refiriendo a un <<def_commit_object,objeto confirmación>>: la acción de accesar al árbol de objetos de una confirmación. Las confirmaciones no se pueden desreferenciar recursivamente.
++
+A menos que se especifique lo contrario, "desreferenciar" como se usa en el contexto de comandos de Git o protocolos, es implícitamente recursivo.
 
 [[def_detached_HEAD]]HEAD separada::
 	Normalmente <<def_HEAD,HEAD>> almacena el nombre de una <<def_branch,rama>>, y los comandos que figuran en el historial de HEAD representan operaciones en el historial hacia la punta de la rama a la que apunta HEAD. Sin embargo, Git también te permite hacer <<def_checkout,checkout>> de un <<def_commit,commit>> arbitrario que no es necesariamente la punta de una rama en particular. Un HEAD en tal estado se le denomina "separado".
@@ -81,7 +90,7 @@ Nótese que los comandos que figuran en el historial de la rama actual (ej. `git
 	Sinónimo de <<def_repository,repository>> (para gente familiarizada con arch).
 
 [[def_gitfile]]fichero git::
-	Un simple fichero `.git` en la raíz de un árbol de trabajo que apunta al directorio que es el repositorio real.
+	Un simple fichero `.git` en la raíz de un árbol de trabajo que apunta al directorio que es el repositorio real. Para su uso apropiado ver linkgit:git-worktree[1] o linkgit:git-submodule[1]. Para sintaxis ver linkgit:gitrepository-layout[5].
 
 [[def_grafts]]injertos::
 	Injertos permiten juntar dos lineas distintas de desarrollo al guardar información falsa de antecesor para confirmaciones. De esta manera se puede hacer que Git asuma que el conjunto de <<def_parent,padres>> de una <<def_commit,confirmación>> sea diferente de lo que realmente fue guardado cuando la confirmación fue creada. Configurar mediante el fichero `.git/info/grafts`.
@@ -92,7 +101,7 @@ Notar que el mecanismo de injertos es obsoleto y puede provocar problemas al tra
 	En el contexto de Git, sinónimo de <<def_object_name,nombre de objeto>>.
 
 [[def_head]]cabeza::
-	Una <<def_ref,referencia nombrada>> a la <<def_commit,confirmación>> en la punta de una <<def_branch,rama>>. Los head se almacenan en un fichero en el directorio `$GIT_DIR/refs/heads/`, excepto cuando se usan referencias empaquetadas (Ver linkgit:git-pack-refs[1]).
+	Una <<def_ref,referencia nombrada>> a la <<def_commit,confirmación>> en la punta de una <<def_branch,rama>>. Los head se almacenan en un fichero en el directorio `$GIT_DIR/refs/heads/`, excepto cuando se usan referencias empaquetadas (Ver linkgit:git-pack-refs[1].)
 
 [[def_HEAD]]HEAD (angl.)::
 	La <<def_branch,rama>> actual. En mas detalle: Tu <<def_working_tree,árbol de trabajo>> se deriva normalmente del estado del árbol referido por HEAD. HEAD es una referencia a una de las <<def_head,heads>> en tu repositorio, excepto cuando se usa una <<def_detached_HEAD,HEAD separada>>, en cuyo caso hace referencia directa a un commit cualquiera.
@@ -113,7 +122,7 @@ Notar que el mecanismo de injertos es obsoleto y puede provocar problemas al tra
 	La <<def_branch,rama>> predeterminada de desarrollo. Siempre que creas un <<def_repository,repositorio>> Git, se crea una rama nombrada como "master" y se convierte en la rama activa. En la mayoría de los casos, ésta contiene el desarrollo local, aunque es meramente una convención y no es requerida.
 
 [[def_merge]]fusión::
-	Como verbo: Traer el contenido de otra <<def_branch,rama>> (posiblemente de un <<def_repository,repositorio>> externo) hacia la rama actual. En el caso donde la rama fusionada proviene de un repositorio diferente, primero se hace <def_fetch,fetch>> de la rama remota y luego se fusiona el resultado en la rama actual. Esta combinación de operaciones fetch y fusión se le llama <<def_pull,jalar>>. Las fusiones se realizan por un proceso automático que identifica cambios hechos desde que las ramas divergen, y entonces aplica todos esos cambios en conjunto. En casos donde los cambios conflictúan, se puede requerir intervención manual para completar la fusión.
+	Como verbo: Traer el contenido de otra <<def_branch,rama>> (posiblemente de un <<def_repository,repositorio>> externo) hacia la rama actual. En el caso donde la rama fusionada proviene de un repositorio diferente, primero se hace <<def_fetch,fetch>> de la rama remota y luego se fusiona el resultado en la rama actual. Esta combinación de operaciones fetch y fusión se le llama <<def_pull,jalar>>. Las fusiones se realizan por un proceso automático que identifica cambios hechos desde que las ramas divergen, y entonces aplica todos esos cambios en conjunto. En casos donde los cambios conflictúan, se puede requerir intervención manual para completar la fusión.
 +
 Como sustantivo: A menos que sea un <<def_fast_forward,fast-forward>>, una fusión exitosa resulta en la creación de una nueva <<def_commit,confirmación>> representando el resultado de la fusión, y teniendo como <<def_parent,antecesores>> las puntas de las <<def_branch,ramas>> fusionadas. Este commit es referido como "confirmación de fusión", o a veces simplemente como "fusión".
 
@@ -134,6 +143,9 @@ Como sustantivo: A menos que sea un <<def_fast_forward,fast-forward>>, una fusi�
 
 [[def_octopus]]pulpo::
 	Para <<def_merge,fusionar>> mas de dos <<def_branch,ramas>>.
+
+[[def_orphan]]huérfano::
+	The act of getting on a <<def_branch,branch>> that does not exist yet (i.e., an <<def_unborn,unborn>> branch). After such an operation, the commit first created becomes a commit without a parent, starting a new history.
 
 [[def_origin]]origen::
 	El <<def_repository,repositorio>> de subida predeterminado. La mayoría de los proyectos tienen por lo menos un proyecto principal a seguir; por default `origin` es usado para ése propósito. Nuevas actualizaciones al flujo principal serán extraídas en las <<def_remote_tracking_branch,ramas de seguimiento-remoto>> nombradas origin/nombre-de-la-rama-de-subida, las cuales puedes ver usando `git branch -r`.
@@ -215,6 +227,9 @@ exclude;;
 [[def_parent]]antecesor::
 	Un <<def_commit_object,objeto commit>> contiene una lista -posiblemente vacía- de predecesor(es) en la línea de desarrollo, ej. sus padres.
 
+[[def_peel]]pelar::
+	La acción de <<def_dereference,desreferenciar>> recursivamente un <<def_tag_object,objeto etiqueta>>.
+
 [[def_pickaxe]]pickaxe::
 	El término <<def_pickaxe,pickaxe>> se refiere a una opción para las rutinas de diffcore que ayudan a seleccionar los cambios que agregan o eliminan cierta cadena de texto. La opción `--pickaxe-all` puede usarse para ver el <<def_changeset,conjunto de cambios>> completo que introdujo o removió, digamos, a línea de texto en particular. Ver linkgit:git-diff[1].
 
@@ -234,10 +249,10 @@ exclude;;
 	Incorporar una <<def_branch,rama>> significa <<def_fetch,traer>>la y <<def_merge,fusion>>arla. Ver también linkgit:git-pull[1].
 
 [[def_push]]enviar::
-	Enviar una <<def_branch,rama>> significa obtener la <<def_head,referencia a head>> de la rama de un <<def_repository,repositorio>> remoto, determinar si es un ancestro de la referencia a head de la rama local, y en tal caso, poner todos los objetos que son <<def_reachable,alcanzables>> desde la referencia a head local y que son faltantes en el repositorio remoto en la <<def_object_database,base de datos de objetos>> remota actualizando la referencia a head remota. Si la <<def_head,head>> remota no es ancestro del head local, el envío falla.
+	Enviar una <<def_branch,rama>> significa obtener la <<def_head_ref,referencia a head>> de la rama de un <<def_repository,repositorio>> remoto, determinar si es un ancestro de la referencia a head de la rama local, y en tal caso, poner todos los objetos que son <<def_reachable,alcanzables>> desde la referencia a head local y que son faltantes en el repositorio remoto en la <<def_object_database,base de datos de objetos>> remota actualizando la referencia a head remota. Si la <<def_head,head>> remota no es ancestro del head local, el envío falla.
 
 [[def_reachable]]alcanzable::
-	Todos los ancestros de una <def_commit,confirmación> dada se dice que son "alcanzables" desde esa confirmación. Mas en general, un <<def_object,objeto>> es alcanzable por otro si podemos alcanzar uno desde otro por una <<def_chain,cadena>> que siga <<def_tag,etiquetas>> a lo que sea que etiqueten, <<def_commit_object,confirmaciones>> a sus antecesores o árboles, y <<def_tree_objects,árboles>> a los árboles o <<def_blob_object,blobs>> que los contengan.
+	Todos los ancestros de una <<def_commit,confirmación> dada se dice que son "alcanzables" desde esa confirmación. Mas en general, un <<def_object,objeto>> es alcanzable por otro si podemos alcanzar uno desde otro por una <<def_chain,cadena>> que siga <<def_tag,etiquetas>> a lo que sea que etiqueten, <<def_commit_object,confirmaciones>> a sus antecesores o árboles, y <<def_tree_object,árboles>> a los árboles o <<def_blob_object,blobs>> que los contengan.
 
 [[def_reachability_bitmap]]mapas de bits de alcance::
 	Los mapas de bits de alcance almacenan información acerca del <<def_reachable,alcance>> de un conjunto seleccionado de confirmaciones en un fichero de paquete, o un índice multi-paquete (MIDX), para acelerar la búsqueda de objetos. Los mapas de bits se almacenan en un fichero ".bitmap". Un repositorio puede tener a lo mucho un fichero de mapa de bits en uso. El fichero de mapa de bits puede pertenecer ya sea a un paquete, o al índice multi-paquete de un repositorio (si existe).
@@ -273,7 +288,7 @@ Hay unas cuantas referencias de propósito especial que no comienzan con `refs/`
 [[def_revision]]revisión::
 	Sinónimo para <<def_commit,confirmación>> (el sustantivo).
 
-retroceder::
+[[def_rewind]]retroceder::
 	Para descartar parte del desarrollo, ej. para asignar la <<def_head,head>> a una <<def_revision,revisión>> anterior.
 
 [[def_SCM]]GCF::
@@ -291,6 +306,15 @@ retroceder::
 [[def_stash]]entrada de reserva::
 	Un <<def_object,objeto>> usado para almacenar temporalmente el contenido de un directorio de trabajo <<def_dirty,sucio>> así como el índice para reuso futuro.
 
+[[def_special_ref]]referencia especial::
+	Una referencia que tiene semánticas diferentes a la referencias normales. Esas referencias pueden accesarse mediante comandos normales de Git pero en algunos casos podrían comportarse diferente a una referencia normal.
++
+Las siguientes referencias especiales son reconocidas por Git:
+
+ - "`FETCH_HEAD`" es escrito por linkgit:git-fetch[1] o linkgit:git-pull[1]. Se puede referir a múltiples identificadores de objeto. Cada identificador de objeto es anotado con metadatos indicando de dónde se obtuvo y el estado del fetch.
+
+ - "`MERGE_HEAD`" es escrito por linkgit:git-merge[1] cuando se resuelven conflictos de fusión. Contiene todos los identificadores de las confirmaciones que se están fusionando.
+
 [[def_submodule]]submódulo::
 	Un <<def_repository,repositorio>> que mantiene el historial de un proyecto separado dentro de otro repositorio; a este último se le llama <<def_superproject,superproyecto>>.
 
@@ -298,7 +322,7 @@ retroceder::
 	Un <<def_repository,repositorio>> que referencía repositorios de otros proyectos en su árbol de trabajo como <<def_submodule,submódulos>>. El superproyecto sabe de los nombres -mas no mantiene copias- de objetos commit de los submódulos contenidos.
 
 [[def_symref]]referencia simbólica::
-	Referencia simbólica; en lugar de contener el identificador <<def_SHA1,SHA-1>> por sí mismo, está en el formato: 'ref: referencia/a/algo' y cuando es referenciado, se des-referencía recursivamente de ésta referencia. <<def_HEAD,HEAD>> es el principal ejemplo de una referencia simbólica. Las referencias simbólicas son manipuladas con el comando linkgit:git-symbolic-ref[1].
+	Referencia simbólica; en lugar de contener el identificador <<def_SHA1,SHA-1>> por sí mismo, está en el formato: 'ref: referencia/a/algo' y cuando es referenciado, se <<def_dereference,desreferencía>> recursivamente de ésta referencia. '<<def_HEAD,HEAD>>' es el principal ejemplo de una referencia simbólica. Las referencias simbólicas son manipuladas con el comando linkgit:git-symbolic-ref[1].
 
 [[def_tag]]tag (etiqueta)::
 	Una <<def_ref,referencia>> bajo el espacio de nombres `refs/tags/`que apunta a un objeto de tipo arbitrario (típicamente una etiqueta que apunta ya sea a una <<def_tag_object,etiqueta>> o a un <<def_commit_object,commit>>). En contraste a <<def_head,head>>, una etiqueta no es actualizada por el comando `commit`. Una etiqueta Git no tiene nada que ver con una etiqueta Lisp (la cual sería llamada <<def_object_type,tipo de objeto>> en contexto Git). Una etiqueta es más típicamente usada para marcar un punto en particular en la <<def_chain,cadena>> de ascendencia.
@@ -316,7 +340,11 @@ retroceder::
 	Un <<def_object,objeto>> conteniendo una lista de nombres de fichero y modos junto con referencias al blob asociado y/o objetos árbol. Un <<def_tree,árbol>> es equivalente a un <<def_directory,directorio>>.
 
 [[def_tree-ish]]árbol-ismo (también arbolismo)::
-	Un <<def_tree_object,objeto árbol>> o un <<def_object,objeto>> que puede ser recursivamente dereferenciado a un objeto árbol. Dereferenciar un <<def_commit_object,objeto commit>> resulta en el objeto árbol correspondiente al <<def_directory,directorio>> raíz de la <<red_revision,revisión>>. Los siguientes son todos árbol-ismos: un <<def_commit-ish,confirmacion-ismo>>, un objeto árbol, un <<def_tag_object,objeto etiqueta>> que apunta a un objeto árbol, un objeto etiqueta que apunta a un objeto etiqueta que apunta a un objeto árbol, etc..
+	Un <<def_tree_object,objeto árbol>> o un <<def_object,objeto>> que puede ser recursivamente <<def_dereference,desreferenciado>> a un objeto árbol. Desreferenciar un <<def_commit_object,objeto commit>> resulta en el objeto árbol correspondiente al <<def_directory,directorio>> raíz de la <<def_revision,revisión>>. Los siguientes son todos árbol-ismos: un <<def_commit-ish,confirmacion-ismo>>, un objeto árbol, un <<def_tag_object,objeto etiqueta>> que apunta a un objeto árbol, un objeto etiqueta que apunta a un objeto etiqueta que apunta a un objeto árbol, etc..
+
+[[def_unborn]]no nacido::
+	The <<def_HEAD,HEAD>> can point at a <<def_branch,branch>> that does not yet exist and that does not have any commit on it yet, and such a branch is called an unborn branch. The most typical way users encounter an unborn branch is by creating a repository anew without cloning from elsewhere. The HEAD would point at the 'main' (or 'master', depending on your configuration) branch that is yet to be born. Also some operations can get you on an unborn branch with their <<def_orphan,orphan>> option.
+
 
 [[def_unmerged_index]]índice sin-fusionar::
 	Un <<def_index,índice>> que contiene <<def_index_entry,entradas de índice>> sin fusionar.

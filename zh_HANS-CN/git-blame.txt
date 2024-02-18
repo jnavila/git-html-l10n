@@ -3,16 +3,16 @@ git-blame(1)
 
 名称
 --
-git-blame - Show what revision and author last modified each line of a file
+git-blame - 显示文件每一行的最后修改版本和作者
 
 概述
 --
 [verse]
 'git blame' [-c] [-b] [-l] [--root] [-t] [-f] [-n] [-s] [-e] [-p] [-w] [--incremental]
-	    [-L <range>] [-S <revs-file>] [-M] [-C] [-C] [-C] [--since=<date>]
-	    [--ignore-rev <rev>] [--ignore-revs-file <file>]
+	    [-L <范围i>] [-S <revs-file>] [-M] [-C] [-C] [-C] [--since=<日期>]
+	    [--ignore-rev <rev>] [--ignore-revs-file <文件>]
 	    [--color-lines] [--color-by-age] [--progress] [--abbrev=<n>]
-	    [ --contents <file> ] [<rev> | --reverse <rev>..<rev>] [--] <file>
+	    [ --contents <文件> ] [<rev> | --reverse <rev>..<rev>] [--] <文件>
 
 描述
 --
@@ -29,7 +29,7 @@ git-blame - Show what revision and author last modified each line of a file
 
 -----------------------------------------------------------------------------
 $ git log --pretty=oneline -S'blame_usage'
-5040f17eba15504bad66b14a645bddd9b015ebb7 blame -S <ancestry-file>
+5040f17eba15504bad66b14a645bddd9b015ebb7 blame -S <祖先文件>
 ea4c7f9bf69e781dd0cd88d2bccb2bf5cc15c9a7 git-blame: Make the output
 -----------------------------------------------------------------------------
 
@@ -38,14 +38,14 @@ ea4c7f9bf69e781dd0cd88d2bccb2bf5cc15c9a7 git-blame: Make the output
 include::blame-options.txt[]
 
 -c::
-	Use the same output mode as linkgit:git-annotate[1] (Default: off).
+	使用与 linkgit:git-annotate[1] 相同的输出模式（默认：关闭）。
 
 --score-debug::
-	包括与文件之间行的移动（见 `-C`）和文件内行的移动（见 `-M`）有关的调试信息。 列出的第一个数字是分数。 这是检测到的在文件间或文件内移动的字母数字字符的数量。 这个数字必须超过一定的阈值，'git blame' 才会认为这些代码行被移动了。
+	Include debugging information related to the movement of lines between files (see `-C`) and lines moved within a file (see `-M`). The first number listed is the score. This is the number of alphanumeric characters detected as having been moved between or within files. This must be above a certain threshold for 'git blame' to consider those lines of code to have been moved.
 
 -f::
 --show-name::
-	显示原始提交中的文件名。 默认情况下，如果有任何一行来自不同名字的文件，由于重名检测，文件名会显示出来。
+	Show the filename in the original commit. By default the filename is shown if there is any line that came from a file with a different name, due to rename detection.
 
 -n::
 --show-number::
@@ -62,17 +62,17 @@ include::blame-options.txt[]
 	在比较父本和子本的版本时，忽略空白，以找到行的来源。
 
 --abbrev=<n>::
-	不要使用默认的7+1个十六进制数字作为对象的缩写，而是使用 <m>+1 个数字，其中 <m> 至少是 <n>，但确保提交对象的名称是唯一的。 请注意，有1列是用来标记边界提交的关健词。
+	Instead of using the default 7+1 hexadecimal digits as the abbreviated object name, use <m>+1 digits, where <m> is at least <n> but ensures the commit object names are unique. Note that 1 column is used for a caret to mark the boundary commit.
 
 
-THE DEFAULT FORMAT
-------------------
+默认格式
+----
 
 当既没有指定`--porcelain` 也没有指定`--incremental` 选项时，`git blame` 将为每一行输出注释：
 
 - 该行来自的提交的缩写对象名称；
-- author ident (by default the author name and date, unless `-s` or `-e` is specified); and
-- line number
+- 作者身份（默认为作者姓名和日期，除非指定`s`或`e`）；以及
+- --line-number
 
 在该行内容之前。
 
@@ -84,7 +84,7 @@ THE DEFAULT FORMAT
 - 该行所归属的提交的 40 字节 SHA-1；
 - 原始文件中该行的行号；
 - 最后文件中该行的行号；
-- 在开始一组与前一次不同的提交的行上，该组的行数。 在随后的行中，这个字段是不存在的。
+- on a line that starts a group of lines from a different commit than the previous one, the number of lines in this group. On subsequent lines this field is absent.
 
 这个标题行后面是以下信息，每次提交至少有一次：
 
@@ -92,11 +92,11 @@ THE DEFAULT FORMAT
 - 该行归属的提交中的文件名。
 - 提交日志信息的第一行（"摘要"）。
 
-The contents of the actual line are output after the above header, prefixed by a TAB. This is to allow adding more header elements later.
+实际行的内容会在上述标题之后输出，前缀为 TAB。这是为了允许以后添加更多的标题元素。
 
-上层命令格式通常会抑制已经看过的提交信息。例如，两行归咎于同一个提交的内容都会被显示出来，但该提交的细节只会被显示一次。这样做更有效率，但可能需要读者保存更多的状态：
+The porcelain format generally suppresses commit information that has already been seen. For example, two lines that are blamed to the same commit will both be shown, but the details for that commit will be shown only once. This is more efficient, but may require more state be kept by the reader. The `--line-porcelain` option can be used to output full commit information for each line, allowing simpler (but less efficient) usage like:
 
-	# count the number of lines attributed to each author
+	# 统计每位作者的作品数
 	git blame --line-porcelain file |
 	sed -n 's/^author //p' |
 	sort | uniq -c | sort -rn
@@ -125,7 +125,7 @@ The contents of the actual line are output after the above header, prefixed by a
 
 当修订范围指定符被用来限制注释时，自范围边界（在上面的例子中，提交 v2.6.18 或超过 3 周的最新提交）以来没有改变的行被指责为该范围边界提交。
 
-一个特别有用的方法是看一个新增的文件是否有从现有文件中复制和粘贴的行。 有时，这表明开发人员很马虎，没有正确地重构代码。 你可以首先找到引入该文件的提交：
+A particularly useful way is to see if an added file has lines created by copy-and-paste from existing files. Sometimes this indicates that the developer was being sloppy and did not refactor the code properly. You can first find the commit that introduced the file with:
 
 	git log --diff-filter=A --pretty=short -- foo
 
@@ -137,13 +137,13 @@ The contents of the actual line are output after the above header, prefixed by a
 增量输出
 ----
 
-当调用 `--incremental` 选项时，该命令在构建过程中输出结果。 一般来说，输出结果会先谈及最近提交的行（也就是说，这些行会被不按顺序的注释），并且是为了给交互式浏览者使用。
+When called with `--incremental` option, the command outputs the result as it is built. The output generally will talk about lines touched by more recent commits first (i.e. the lines will be annotated out of order) and is meant to be used by interactive viewers.
 
 输出格式类似于上层命令格式，但它不包含被注释的文件的实际行数。
 
 . 每个历史追溯条目总是以一行字开始：
 
-	<40-byte hex sha1> <sourceline> <resultline> <num_lines>
+	<40-byte-hex-sha1> <sourceline> <resultline> <num-lines>
 +
 行数从 1 开始计算。
 
@@ -151,18 +151,18 @@ The contents of the actual line are output after the above header, prefixed by a
 
 . 与上层命令格式不同，文件名信息总是给定的，并终止条目：
 
-	"filename" <whitespace-quoted-filename-goes-here>
+	"filename" <空白引号-片名-到此为止>
 +
 因此，对于一些面向行和字的解析器来说，它确实很容易解析（这对于大多数脚本语言来说应该是很自然的）。
 +
 [NOTE]
-对于做解析的人来说：为了使它更健壮，只要忽略第一和最后一个（"<sha1>" 和 "filename" 行）之间的任何行，在 "扩展信息" 行的开头，你不认识标签词（或关心那个特定的）。这样一来，如果有一天增加了信息（比如提交编码或扩展的提交注释），历史追溯查看者就不会在意。
+For people who do parsing: to make it more robust, just ignore any lines between the first and last one ("<sha1>" and "filename" lines) where you do not recognize the tag words (or care about that particular one) at the beginning of the "extended information" lines. That way, if there is ever added information (like the commit encoding or extended commit commentary), a blame viewer will not care.
 
 
 制图作者
 ----
 
-See linkgit:gitmailmap[5].
+参见 linkgit:gitmailmap[5]。
 
 配置
 --

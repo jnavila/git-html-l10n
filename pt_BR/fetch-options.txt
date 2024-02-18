@@ -1,9 +1,9 @@
---all::
-	Capture todos os ramos remotos.
+--[no-]all::
+	Fetch all remotes. This overrides the configuration variable `fetch.all`.
 
 -a::
 --append::
-	Acrescente nomes ao "ref" e os nomes dos objetos refs capturados ao conteúdo existente de `.git/FETCH_HEAD`. Sem esta opção, os dados antigos em `.git/FETCH_HEAD` serão substituídos.
+	Append ref names and object names of fetched refs to the existing contents of `.git/FETCH_HEAD`. Without this option old data in `.git/FETCH_HEAD` will be overwritten.
 
 --atomic::
 	Utilize uma transação atômica para atualizar as refs locais. Ou todas as refs são atualizadas ou por erro, nenhuma será.
@@ -18,7 +18,7 @@
 	Aprofunde ou encurte o histórico de um repositório raso para incluir todas os commits acessíveis após a <data>.
 
 --shallow-exclude=<revisão>::
-	Aprofunde ou diminua o histórico de um repositório raso para excluir os commits acessíveis vindos de uma determinada tag ou ramificação remota. Esta opção pode ser utilizada várias vezes.
+	Deepen or shorten the history of a shallow repository to exclude commits reachable from a specified remote branch or tag. This option can be specified multiple times.
 
 --unshallow::
 	Caso o repositório de origem esteja completo, converta um repositório raso num completo, removendo todas as limitações impostas pelos repositórios rasos.
@@ -29,7 +29,7 @@ Caso o repositório de origem seja superficial, busque o máximo possível para 
 	É predefinido que durante a captura num repositório superficial, o `git fetch` recuse os refs que exijam a atualização do `.git/shallow`. Esta opção atualiza o `.git/shallow` e aceita tais refs.
 
 --negotiation-tip=<commit|glob>::
-	É predefinido que o Git relatará ao servidor os commits acessíveis de todos as refs locais para que localize os commits comuns na tentativa de reduzir o tamanho do pacote que será recebido. Caso seja utilizado, o Git relatará apenas os commits acessíveis a partir das dicas informadas. Útil para acelerar o processo "fetch" quando o usuário sabe qual a ref local que provavelmente, haverá commits em comum com uma ref upstream que está sendo capturada.
+	By default, Git will report, to the server, commits reachable from all local refs to find common commits in an attempt to reduce the size of the to-be-received packfile. If specified, Git will only report commits reachable from the given tips. This is useful to speed up fetches when the user knows which local ref is likely to have commits in common with the upstream ref being fetched.
 +
 Esta opção pode ser utilizada mais de uma vez; Se assim for, o Git irá reportar os commits de qualquer um dos commits informados.
 +
@@ -40,7 +40,7 @@ Consulte também a variável de configuração `fetch.negotiationAlgorithm` e `p
 --negotiate-only::
 	Não busque nada do servidor e imprima os argumentos `--negotiation-tip=*` fornecidos anteriormente e que nós temos em comum com o servidor.
 +
-Isso é compatível com a opção `--recurse-submodules=[yes|on-demand]`. Internamente, isto é utilizado para implementar a opção `push.negotiate`, consulte linkgit:git-config[1].
+This is incompatible with `--recurse-submodules=[yes|on-demand]`. Internally this is used to implement the `push.negotiate` option, see linkgit:git-config[1].
 
 --dry-run::
 	Exiba apenas o que seria feito, sem fazer quaisquer alterações.
@@ -52,7 +52,7 @@ Isso é compatível com a opção `--recurse-submodules=[yes|on-demand]` e tem p
 
 ifndef::git-pull[]
 --[no-]write-fetch-head::
-	Escreva a lista de referências remotas buscadas no arquivo `FETCH_HEAD` diretamente no`$GIT_DIR`. Este é o padrão. Usando a opção `--no-write-fetch-head` na linha de comando diz ao Git para não escrever o arquivo. Com opção `--dry-run`, o arquivo nunca é escrito.
+	Write the list of remote refs fetched in the `FETCH_HEAD` file directly under `$GIT_DIR`. This is the default. Passing `--no-write-fetch-head` from the command line tells Git not to write the file. Under `--dry-run` option, the file is never written.
 endif::git-pull[]
 
 -f::
@@ -77,7 +77,7 @@ ifndef::git-pull[]
 
 --[no-]auto-maintenance::
 --[no-]auto-gc::
-	Caso seja necessário, execute o `git maintenance run --auto` no final para executar a manutenção automática do repositório. (`--[no-]auto-gc` is a synonym.) A predefinição é sempre ativo.
+	Run `git maintenance run --auto` at the end to perform automatic repository maintenance if needed. (`--[no-]auto-gc` is a synonym.) This is enabled by default.
 
 --[no-]write-commit-graph::
 	Grave um grafo do commit após a captura remota. Este sobrescreve a configuração `fetch.writeCommitGraph`.
@@ -88,7 +88,7 @@ endif::git-pull[]
 
 -p::
 --prune::
-	Antes de capturar, remova as referências do rastreamento remoto que não exista mais remotamente. As tags não estão sujeitas a remoção caso sejam capturadas apenas por causa do acompanhamento automático da tag predefinida ou devido a uma opção `--tags`. No entanto, caso as tags seja capturadas por causa de um "refspec" explícito (na linha de comandos ou na configuração remota, por exemplo, caso haja uma clonagem remota com a opção `--mirror`), elas também estarão sujeitas a remoção. Informar a opção `--prune-tags` é uma abreviação para informar a tag refspec.
+	Before fetching, remove any remote-tracking references that no longer exist on the remote. Tags are not subject to pruning if they are fetched only because of the default tag auto-following or due to a --tags option. However, if tags are fetched due to an explicit refspec (either on the command line or in the remote configuration, for example if the remote was cloned with the --mirror option), then they are also subject to pruning. Supplying `--prune-tags` is a shorthand for providing the tag refspec.
 ifndef::git-pull[]
 +
 Consulte a seção de PRUNING abaixo para mais detalhes.
@@ -105,7 +105,7 @@ ifndef::git-pull[]
 -n::
 endif::git-pull[]
 --no-tags::
-	É predefinido que as tags que apontem para os objetos baixados do repositório remoto sejam capturados e armazenadas localmente. Esta opção desativa essa tag automática a seguir. O comportamento remoto predefinido pode ser especificado com a configuração remote.<nome>.tagOpt. Consulte linkgit:git-config[1].
+	By default, tags that point at objects that are downloaded from the remote repository are fetched and stored locally. This option disables this automatic tag following. The default behavior for a remote may be specified with the remote.<name>.tagOpt setting. See linkgit:git-config[1].
 
 ifndef::git-pull[]
 --refetch::
@@ -113,19 +113,19 @@ ifndef::git-pull[]
 endif::git-pull[]
 
 --refmap=<refspec>::
-	Ao capturar as refs listadas na linha de comando, utilize o "refspec" informado (pode ser utilizado mais de uma vez) para mapear os refs para as ramificações rastreadas remotamente em vez dos valores das variáveis da configuração `remote.*.fetch` para o repositório remoto. Informe um `<refspec>` vazio à opção `--refmap` faz com que o Git ignore os "refspecs" configurados e confie inteiramente nos "refspecs" informados como os argumentos da linha de comando. Para mais detalhes consulte a seção "Configuração dos Ramos Monitorados Remotamente".
+	When fetching refs listed on the command line, use the specified refspec (can be given more than once) to map the refs to remote-tracking branches, instead of the values of `remote.*.fetch` configuration variables for the remote repository. Providing an empty `<refspec>` to the `--refmap` option causes Git to ignore the configured refspecs and rely entirely on the refspecs supplied as command-line arguments. See section on "Configured Remote-tracking Branches" for details.
 
 -t::
 --tags::
-	Capture todas as tags remotas (ou seja, capture as tags remotas `refs/tags/*` nas tags locais com o mesmo nome), além de qualquer outra coisa que possa ser capturada. O uso desta opção por si só não sujeita a remoção das tags, mesmo que `--prune` seja utilizado (embora as tags possam ser removidas de qualquer maneira, caso também sejam o destino de um "refspec" explícito; consulte `--prune`).
+	Fetch all tags from the remote (i.e., fetch remote tags `refs/tags/*` into local tags with the same name), in addition to whatever else would otherwise be fetched. Using this option alone does not subject tags to pruning, even if --prune is used (though tags may be pruned anyway if they are also the destination of an explicit refspec; see `--prune`).
 
 ifndef::git-pull[]
 --recurse-submodules[=yes|on-demand|no]::
-	Esta opção controla quais as condições do "if" e do "under" se os novos commits dos submódulos também devem ser buscados. Ao utilizar recursos recursivos através dos submódulos, o comando `git fetch` sempre tenta buscar os submódulos que tenham sido "alterados", ou seja, um submódulo que tem commits que cujas referências num commit do superprojeto sido buscado recentemente, mas que estão faltando no clone do submódulo local. Um submódulo alterado pode ser buscado desde que esteja presente localmente como em `$GIT_DIR/modules/`, por exemplo (consulte linkgit:gitsubmodules[7]); caso o "upstream" adicione um novo submódulo, este submódulo não poderá ser buscado até que o mesmo seja clonado através do comando `git submodule update` por exemplo.
+	This option controls if and under what conditions new commits of submodules should be fetched too. When recursing through submodules, `git fetch` always attempts to fetch "changed" submodules, that is, a submodule that has commits that are referenced by a newly fetched superproject commit but are missing in the local submodule clone. A changed submodule can be fetched as long as it is present locally e.g. in `$GIT_DIR/modules/` (see linkgit:gitsubmodules[7]); if the upstream adds a new submodule, that submodule cannot be fetched until it is cloned e.g. by `git submodule update`.
 +
 Quando for definido como 'sob demanda', apenas os submódulos que tenham sido alterados são buscados. Quando for definido como 'yes', todos os submódulos que tenham sido colonizados ou não, assim como tenham sido alterados, todos eles serão buscados . Quando for definido como 'no', os submódulos nunca serão buscados.
 +
-Quando não for definido, usa o valor de `fetch.recurseSubmodules`, quando não for (consulte linkgit:git-config[1]), usa o valor predefinido 'on-demand'. Quando esta opção é usada sem nenhum valor, o padrão é 'yes'.
+When unspecified, this uses the value of `fetch.recurseSubmodules` if it is set (see linkgit:git-config[1]), defaulting to 'on-demand' if unset. When this option is used without any value, it defaults to 'yes'.
 endif::git-pull[]
 
 -j::
@@ -146,14 +146,14 @@ endif::git-pull[]
 
 ifndef::git-pull[]
 --submodule-prefix=<caminho>::
-	Anexe o `<caminho>` para os caminhos impressos nas mensagens informativas como "Recolhendo o submódulo foo". Esta opção é utilizada internamente quando recorrer as submódulos.
+	Prepend <path> to paths printed in informative messages such as "Fetching submodule foo". This option is used internally when recursing over submodules.
 
 --recurse-submodules-default=[yes|on-demand]::
-	Esta opção é utilizada internamente para prover temporariamente um valor não negativo da forma predefinida para a opção `--recurse-submodules`. Todos os outros métodos de configurar a recursão do submódulo `fetch` (como as configurações em linkgit:gitmodules[5] e linkgit:git-config[1]) sobrescreva esta opção utilizando `--[no-]recurse-submodules` diretamente.
+	This option is used internally to temporarily provide a non-negative default value for the --recurse-submodules option. All other methods of configuring fetch's submodule recursion (such as settings in linkgit:gitmodules[5] and linkgit:git-config[1]) override this option, as does specifying --[no-]recurse-submodules directly.
 
 -u::
 --update-head-ok::
-	É predefinido que o 'git fetch' se recuse a atualizar o cabeçalho que corresponde ao ramo atual. Esta flag desativa esta verificação. Serve apenas para a utilização interna do 'git pull' para se comunicar com o 'git fetch', a menos que esteja implementando a sua própria porcelana, você não deve utilizá-la.
+	By default 'git fetch' refuses to update the head which corresponds to the current branch. This flag disables the check. This is purely for the internal use for 'git pull' to communicate with 'git fetch', and unless you are implementing your own Porcelain you are not supposed to use it.
 endif::git-pull[]
 
 --upload-pack <pacote-para-envio>::
@@ -177,7 +177,7 @@ endif::git-pull[]
 	Transmita a sequência usada para o servidor ao se comunicar utilizando o protocolo versão 2. A sequência informada não deve conter um caractere `NUL` ou `LF`. O tratamento das opções do servidor, incluindo os desconhecidos, é específico do servidor. Quando a opção `--server-option=<opção>` forem utilizadas várias vezes, todos serão enviados para o outro lado na ordem listada na linha de comando.
 
 --show-forced-updates::
-	É predefinido que o Git verifique se a atualização do ramo foi imposta durante uma captura. Pode ser desativado por meio de `fetch.showForcedUpdates`, porém a opção `--show-forced-updates garante que essa verificação ocorra. Consulte linkgit:git-config[1].
+	By default, git checks if a branch is force-updated during fetch. This can be disabled through fetch.showForcedUpdates, but the --show-forced-updates option guarantees this check occurs. See linkgit:git-config[1].
 
 --no-show-forced-updates::
 	É predefinido que o Git verifique se a atualização do ramo foi imposta durante uma captura. Utilize a opção `--no-show-forced-updates` ou defina `fetch.showForcedUpdates` como to `false` para ignorar esta verificação por questões de desempenho. Se utilizada durante o `git-pull`, a opção `--ff-only` ainda verificará quais as atualizações foram impostas antes de tentar uma atualização rápida. Consulte linkgit:git-config[1].

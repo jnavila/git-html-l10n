@@ -3,7 +3,7 @@ git-fsck(1)
 
 名称
 --
-git-fsck - Verifies the connectivity and validity of the objects in the database
+git-fsck - 验证数据库中对象的连接性和有效性
 
 
 概述
@@ -12,7 +12,7 @@ git-fsck - Verifies the connectivity and validity of the objects in the database
 'git fsck' [--tags] [--root] [--unreachable] [--cache] [--no-reflogs]
 	 [--[no-]full] [--strict] [--verbose] [--lost-found]
 	 [--[no-]dangling] [--[no-]progress] [--connectivity-only]
-	 [--[no-]name-objects] [<object>...]
+	 [--[no-]name-objects] [<对象>*]
 
 描述
 --
@@ -23,13 +23,13 @@ git-fsck - Verifies the connectivity and validity of the objects in the database
 <对象>::
 	一个要作为不可及性追踪的头的对象。
 +
-If no objects are given, 'git fsck' defaults to using the index file, all SHA-1 references in the `refs` namespace, and all reflogs (unless --no-reflogs is given) as heads.
+如果没有给出对象，'git fsck' 默认使用索引文件、`refs` 命名空间中的所有 SHA-1 引用，以及所有引用日志（除非 --no-reflogs 选项被给出）作为头。
 
 --unreachable::
 	打印出存在但不能从任何参考节点到达的对象。
 
 --[no-]dangling::
-	打印存在但从未 'directly ' 使用的对象（默认）。 `--no-dangling` 可以用来从输出中省略这一信息。
+	Print objects that exist but that are never 'directly' used (default). `--no-dangling` can be used to omit this information from the output.
 
 --root::
 	报告根节点。
@@ -41,13 +41,13 @@ If no objects are given, 'git fsck' defaults to using the index file, all SHA-1 
 	考虑将索引中记录的任何对象也作为不可达性追踪的头节点。
 
 --no-reflogs::
-	不认为那些只被引用日志中的条目引用的提交是可以达到的。 这个选项只是为了搜索那些曾经在引用中，但现在不在了，但仍在那个相应引用日志中的提交。
+	Do not consider commits that are referenced only by an entry in a reflog to be reachable. This option is meant only to search for commits that used to be in a ref, but now aren't, but are still in that corresponding reflog.
 
 --full::
-	不仅检查 GIT_OBJECT_DIRECTORY ($GIT_DIR/objects) 中的对象，还检查 GIT_ALTERNATE_OBJECT_DIRECTORIES 或 $GIT_DIR/objects/info/alternates 中列出的备用对象库中的对象，以及 $GIT_DIR/objects/pack 和备用对象库中相应 pack 子目录中的打包 Git 档案。 这现在是默认的；你可以用 --no-full 关闭它。
+	Check not just objects in GIT_OBJECT_DIRECTORY ($GIT_DIR/objects), but also the ones found in alternate object pools listed in GIT_ALTERNATE_OBJECT_DIRECTORIES or $GIT_DIR/objects/info/alternates, and in packed Git archives found in $GIT_DIR/objects/pack and corresponding pack subdirectories in alternate object pools. This is now default; you can turn it off with --no-full.
 
 --connectivity-only::
-	Check only the connectivity of reachable objects, making sure that any objects referenced by a reachable tag, commit, or tree are present. This speeds up the operation by avoiding reading blobs entirely (though it does still check that referenced blobs exist). This will detect corruption in commits and trees, but not do any semantic checks (e.g., for format errors). Corruption in blob objects will not be detected at all.
+	只检查可达对象的连接性，确保可达标签、提交或目录树所引用的任何对象都存在。这样可以完全避免读取 blobs，从而加快操作速度（尽管它仍然会检查被引用的 blobs 是否存在）。这将检测提交和树的损坏，但不做任何语义检查（例如，格式错误）。blob 对象中的损坏将完全不会被检测到。
 +
 无法到达的标签、提交和树也会被访问，以找到历史的悬空部分的提示。如果你不关心这个输出并想进一步加快它的速度，请使用 `--no-dangling`。
 
@@ -58,10 +58,10 @@ If no objects are given, 'git fsck' defaults to using the index file, all SHA-1 
 	要健谈。
 
 --lost-found::
-	将悬空的对象写入 .git/lost-found/commit/ 或 .git/lost-found/other/，具体取决于类型。 如果对象是一个 blob，其内容将被写入文件，而不是其对象名称。
+	Write dangling objects into .git/lost-found/commit/ or .git/lost-found/other/, depending on type. If the object is a blob, the contents are written into the file, rather than its object name.
 
 --name-objects::
-	当显示可达对象的名称时，除了 SHA-1外，还显示描述 *如何* 可达的名称，与 linkgit:git-rev-parse[1] 兼容，例如，`HEAD@{1234567890}~25^2:src/`。
+	When displaying names of reachable objects, in addition to the SHA-1 also display a name that describes *how* they are reachable, compatible with linkgit:git-rev-parse[1], e.g. `HEAD@{1234567890}~25^2:src/`.
 
 --[no-]progress::
 	除非指定 --no-progress 或 --verbose，否则当标准错误流连接到终端时，默认情况下会报告进度状态。--progress 即使标准错误流没有指向终端，也会强制显示进度状态。
@@ -86,7 +86,7 @@ git-fsck 测试 SHA-1和一般对象的正确性，并对结果的可及性和�
 -------
 
 无法到达 <类型> <对象> 的问题::
-	The <type> object <object>, isn't actually referred to directly or indirectly in any of the trees or commits seen. This can mean that there's another root node that you're not specifying or that the tree is corrupt. If you haven't missed a root node then you might as well delete unreachable nodes since they can't be used.
+	<类型> 对象 <对象>，实际上在看到的任何树或提交中都没有直接或间接地提到过。这可能意味着还有一个根节点没有被你指定，或者目录树被破坏了。如果你没有漏掉一个根节点，那么你不妨删除不可达的节点，因为它们不能被使用。
 
 缺少 <类型> <对象>::
 	<类型> 对象 <object>，被提及但不存在于数据库中。
@@ -95,19 +95,19 @@ git-fsck 测试 SHA-1和一般对象的正确性，并对结果的可及性和�
 	<类型> 对象 <object>，存在于数据库中，但从未 'directly' 使用。一个悬空的提交可能是一个根节点。
 
 哈希值不匹配 <对象>::
-	数据库中有一个对象的哈希值与对象数据库的值不一致。 这表明一个严重的数据完整性问题。
+	The database has an object whose hash doesn't match the object database value. This indicates a serious data integrity problem.
 
 
 FSCK 信息
 -------
 
-下面列出了 `git fsck` 检测的错误类型和每个错误的含义，以及它们的默认严重程度。 除了那些被标记为 "(FATAL)" 的错误，其他错误的严重程度可以通过设置相应的 `fsck.<msg-id>` 配置变量来调整。
+The following lists the types of errors `git fsck` detects and what each error means, with their default severity. The severity of the error, other than those that are marked as "(FATAL)", can be tweaked by setting the corresponding `fsck.<msg-id>` configuration variable.
 
 include::fsck-msgids.txt[]
 
 
-Environment Variables
----------------------
+环境变量
+----
 
 GIT_OBJECT_DIRECTORY::
 	用来指定对象数据库的根（通常是 $GIT_DIR/objects）

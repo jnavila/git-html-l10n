@@ -9,7 +9,7 @@ SYNOPSIS
 --------
 [verse]
 'git add' [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
-	  [--edit | -e] [--[no-]all | --[no-]ignore-removal | [--update | -u]] [--sparse]
+	  [--edit | -e] [--[no-]all | -A | --[no-]ignore-removal | [--update | -u]] [--sparse]
 	  [--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
 	  [--chmod=(+|-)x] [--pathspec-from-file=<fichier> [--pathspec-file-nul]]
 	  [--] [<spécificateur de chemin>...]
@@ -20,7 +20,7 @@ Cette commande met à jour l'index en utilisant le contenu actuel trouvé dans l
 
 L'« index » contient un instantané du contenu de la copie de travail et c'est cet instantané qui sera utilisé comme contenu du prochain commit. Ainsi, après avoir réalisé des modifications dans la copie de travail, et avant de lancer la commande commit, vous devez utiliser la commande `add` pour ajouter tout fichier nouveau ou modifié à l'index.
 
-Cette commande peut être effectuée plusieurs fois avant la validation. Elle n'ajoute que le contenu des fichiers spécifiés au moment où la commande `add` est lancée ; si vous souhaitez inclure des modifications postérieures à un `add` dans la prochaine validation, vous devez alors lancer `git add` à nouveau pour ajouter le nouveau contenu à l'index.
+Cette commande peut être effectuée plusieurs fois avant la validation. Elle n'ajoute que le contenu des fichiers spécifiés au moment où la commande `add` est lancée ; si vous souhaitez inclure des modifications postérieures à un `add` dans la prochaine validation, vous devez alors lancer `git add` à nouveau pour ajouter le nouveau contenu à l'index.
 
 La commande `git status` permet d'obtenir un résumé des fichiers modifiés qui sont préparés pour la prochaine validation.
 
@@ -32,7 +32,7 @@ Référez-vous linkgit:git-commit[1] pour des méthodes alternatives d'ajout de 
 OPTIONS
 -------
 <spécificateur de chemin>...::
-	Fichiers dont le contenu doit être ajouté. Les patrons (ex : `*.c`) permettent de restreindre à tous les fichiers correspondants. Un nom de répertoire (ex : `rep` pour ajouter `rep/fichier1` et `rep/fichier2`) permet d'ajouter récursivement tous les fichiers d'un répertoire (par exemple spécifier `rep` n'enregistrera pas seulement le fichier modifié dans l'arbre de travail `rep/fichier1` ou un fichier ajouté `rep/fichier2`, mais aussi un fichier `rep/fichier3` supprimé de l'arbre de travail). Veuillez noter que des version anciennes de Git ignoraient les fichiers supprimés ; utilisez l'option `--no-all` si vous souhaitez ajouter les fichiers nouveaux ou modifiés mais ignorer les fichiers supprimés.
+	Fichiers dont le contenu doit être ajouté. Les patrons (ex : `*.c`) permettent de restreindre à tous les fichiers correspondants. Un nom de répertoire (ex : `rep` pour ajouter `rep/fichier1` et `rep/fichier2`) permet d'ajouter récursivement tous les fichiers d'un répertoire (par exemple spécifier `rep` n'enregistrera pas seulement le fichier modifié dans l'arbre de travail `rep/fichier1` ou un fichier ajouté `rep/fichier2`, mais aussi un fichier `rep/fichier3` supprimé de l'arbre de travail). Veuillez noter que des version anciennes de Git ignoraient les fichiers supprimés ; utilisez l'option `--no-all` si vous souhaitez ajouter les fichiers nouveaux ou modifiés mais ignorer les fichiers supprimés.
 +
 Pour de plus amples détails sur la syntaxe <spécificateur de chemin>, référez-vous à la section 'pathspec' dans linkgit:gitglossary[7].
 
@@ -141,7 +141,7 @@ MODE INTERACTIF
 ---------------
 Quand la commande entre en mode interactif, elle affiche le résultat de la sous-commande 'status', puis entre en boucle de commande interactive.
 
-La boucle de commande affiche la liste des sous-commandes disponibles et affiche le prompt « What now> » (Que faire maintenant). En général, lorsque le prompt se termine par un '>' unique, vous ne pouvez choisir qu'une seule des propositions et appuyer Entrée, comme cela :
+La boucle de commande affiche la liste des sous-commandes disponibles et affiche le prompt « What now> » (Que faire maintenant). En général, lorsque le prompt se termine par un '>' unique, vous ne pouvez choisir qu'une seule des propositions et appuyer Entrée, comme cela :
 
 ------------
     *** Commands ***
@@ -156,7 +156,7 @@ La boucle de commande principale propose 6 sous-commandes (plus help (aide) et q
 
 status::
 
-   Ceci affiche les modifications entre HEAD et l'index (c-à-d ce qui seraient validées si vous lanciez `git commit`), et entre l'index et les fichiers de la copie de travail (c-à-d ce que vous pourriez indexer au moyen de `git add` avant de lancer `git commit`) pour chaque chemin. Un exemple d'affichage ressemble à ceci :
+   Ceci affiche les modifications entre HEAD et l'index (c-à-d ce qui seraient validées si vous lanciez `git commit`), et entre l'index et les fichiers de la copie de travail (c-à-d ce que vous pourriez indexer au moyen de `git add` avant de lancer `git commit`) pour chaque chemin. Un exemple d'affichage ressemble à ceci :
 +
 ------------
               staged     unstaged path
@@ -196,7 +196,7 @@ add untracked::
 
 patch::
 
-  Ceci permet de choisir un chemin depuis une sélection similaire à 'status'. Après le choix du chemin, la différence entre l'index et le fichier dans l'arbre de travail est présentée et il vous est demandé si vous souhaitez indexer chaque section de modification. Vous pouvez sélectionner une des options suivantes et taper Entrée :
+  Ceci permet de choisir un chemin depuis une sélection similaire à 'status'. Après le choix du chemin, la différence entre l'index et le fichier dans l'arbre de travail est présentée et il vous est demandé si vous souhaitez indexer chaque section de modification. Vous pouvez sélectionner une des options suivantes et taper Entrée :
 
        y - stage this hunk
        n - do not stage this hunk
@@ -215,7 +215,7 @@ patch::
 +
 Après avoir décidé du devenir de chaque section, l'index est mis à jour avec les sections sélectionnées.
 +
-Vous pouvez vous éviter de taper Entrée ici, en mettant la variable de configuration `interactive.singlekey` à `true`.
+Vous pouvez vous éviter de taper Entrée ici, en mettant la variable de configuration `interactive.singleKey` à `true`.
 
 diff::
 
@@ -225,7 +225,7 @@ diff::
 ÉDITER LES CORRECTIFS
 ---------------------
 
-Invoquer `git add -e` ou sélectionner `e` depuis le sélecteur interactif de sections ouvre un correctif dans votre éditeur ; après avoir quitté l'éditeur, le résultat est appliqué à l'index. Vous êtes libre de modifier en tout point le correctif, mais notez cependant que certaines modifications provoquent des résultats inattendus ou même créent des correctifs inapplicables. Si vous souhaitez abandonner complètement l'opération (c'est-à-dire ne rien ajouter à l'index), effacez toutes les lignes du correctif. La liste ci-dessous décrit des formes habituelles dans les correctifs et quelles opérations d'édition peuvent être réalisées.
+Invoquer `git add -e` ou sélectionner `e` depuis le sélecteur interactif de sections ouvre un correctif dans votre éditeur ; après avoir quitté l'éditeur, le résultat est appliqué à l'index. Vous êtes libre de modifier en tout point le correctif, mais notez cependant que certaines modifications provoquent des résultats inattendus ou même créent des correctifs inapplicables. Si vous souhaitez abandonner complètement l'opération (c'est-à-dire ne rien ajouter à l'index), effacez toutes les lignes du correctif. La liste ci-dessous décrit des formes habituelles dans les correctifs et quelles opérations d'édition peuvent être réalisées.
 
 --
 contenu ajouté::
@@ -238,10 +238,10 @@ Le contenu supprimé est représenté par des lignes commençant par "-". Vous p
 
 contenu modifié::
 
-Le contenu modifié est représenté par des lignes "-" (supprimant l'ancien contenu) suivies de lignes "{plus}" (ajoutant le nouveau contenu). Vous pouvez empêcher l'indexation de ces modifications en convertissant les lignes "-" en lignes " " et en supprimant les lignes "{plus}". Méfiez-vous : ne modifier que la moitié de la paire de lignes a de fortes chances de créer des modifications inattendues dans l'index.
+Le contenu modifié est représenté par des lignes "-" (supprimant l'ancien contenu) suivies de lignes "{plus}" (ajoutant le nouveau contenu). Vous pouvez empêcher l'indexation de ces modifications en convertissant les lignes "-" en lignes " " et en supprimant les lignes "{plus}". Méfiez-vous : ne modifier que la moitié de la paire de lignes a de fortes chances de créer des modifications inattendues dans l'index.
 --
 
-Il existe aussi des opérations plus complexes qui peuvent être réalisées. Méfiez-vous : quand le correctif n'est appliqué que dans l'index et pas dans l'arbre de travail, l'arbre de travail semblera « défaire » les modifications de l'index. Par exemple, l'introduction dans l'index d'une nouvelle ligne qui n’apparaît ni dans HEAD ni dans l'arbre de travail indexera la nouvelle ligne pour validation, mais cette ligne semblera être supprimée dans l'arbre de travail.
+Il existe aussi des opérations plus complexes qui peuvent être réalisées. Méfiez-vous : quand le correctif n'est appliqué que dans l'index et pas dans l'arbre de travail, l'arbre de travail semblera « défaire » les modifications de l'index. Par exemple, l'introduction dans l'index d'une nouvelle ligne qui n’apparaît ni dans HEAD ni dans l'arbre de travail indexera la nouvelle ligne pour validation, mais cette ligne semblera être supprimée dans l'arbre de travail.
 
 Évitez d'utiliser ces constructions, ou faites-le avec une extrême précaution.
 

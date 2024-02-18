@@ -3,13 +3,13 @@ git-gc(1)
 
 名称
 --
-git-gc - Cleanup unnecessary files and optimize the local repository
+git-gc - 清理不必要的文件并优化本地仓库
 
 
 概述
 --
 [verse]
-'git gc' [--aggressive] [--auto] [--quiet] [--prune=<date> | --no-prune] [--force] [--keep-largest-pack]
+'git gc' [--aggressive] [--auto] [--quiet] [--prune=<日期> | --no-prune] [--force] [--keep-largest-pack]
 
 描述
 --
@@ -23,7 +23,7 @@ git-gc - Cleanup unnecessary files and optimize the local repository
 --
 
 --aggressive::
-	通常，'git gc' 运行得非常快，同时提供良好的磁盘空间利用率和性能。 这个选项会使 'git gc' 更积极地优化仓库，代价是花费更多的时间。 这种优化的效果大多是持续性的。详情见下面的 "AGGRESSIVE" 部分。
+	Usually 'git gc' runs very quickly while providing good disk space utilization and performance. This option will cause 'git gc' to more aggressively optimize the repository at the expense of taking much more time. The effects of this optimization are mostly persistent. See the "AGGRESSIVE" section below for details.
 
 --auto::
 	有了这个选项，'git gc' 就会检查是否需要任何内务处理；如果不需要，它就会退出，不执行任何工作。
@@ -37,10 +37,10 @@ git-gc - Cleanup unnecessary files and optimize the local repository
 	当无法到达的对象过期时，将它们单独打包到一个 cruft 包中，而不是将它们作为散装对象存储。`--cruft` 是默认开启的。
 
 --max-cruft-size=<n>::
-	在将无法访问的对象打包到 Cruft 包时，限制新 Cruft 包的大小最多为 `<n>` 字节。覆盖通过 `gc.maxCruftSize` 配置指定的任何值。参见 linkgit:git-repack[1] 的 `-max-cruft-size`选项了解更多。
+	在将无法访问的对象打包到 Cruft 包时，限制新 Cruft 包的大小最多为 `<n>` 字节。覆盖通过 `gc.maxCruftSize` 配置指定的任何值。参见 linkgit:git-repack[1] 的 `--max-cruft-size`选项了解更多。
 
 --prune=<日期>::
-	修剪超过日期的松散对象（默认是 2 周前，可由配置变量 `gc.pruneExpire` 覆盖）。 --prune=now 删减松散对象，无论其年龄大小，如果有其他进程同时向仓库写入，则会增加损坏的风险；见下面的 “注意事项”。--prune 默认是打开的。
+	Prune loose objects older than date (default is 2 weeks ago, overridable by the config variable `gc.pruneExpire`). --prune=now prunes loose objects regardless of their age and increases the risk of corruption if another process is writing to the repository concurrently; see "NOTES" below. --prune is on by default.
 
 --no-prune::
 	不要修剪任何松散的对象。
@@ -54,8 +54,8 @@ git-gc - Cleanup unnecessary files and optimize the local repository
 --keep-largest-pack::
 	除了最大的非破坏性包，任何标有 `.keep` 文件的包，以及任何破坏性的包，都会被合并为一个包。当使用这个选项时，`gc.bigPackThreshold` 被忽略。
 
-AGGRESSIVE
-----------
+侵略的
+---
 
 当提供 `--aggressive` 选项时，linkgit:git-repack[1] 将被调用，并带有 `-f` 标志，这又将把 `--no-reuse-delta` 传递给 linkgit:git-pack-objects[1]。这将丢弃任何现有的 delta 并重新计算，代价是在重新打包上花费更多的时间。
 
@@ -72,8 +72,8 @@ include::includes/cmd-config-section-all.txt[]
 
 include::config/gc.txt[]
 
-NOTES
------
+注释
+--
 
 'git gc' 非常努力地不删除在你的仓库中任何地方被引用的对象。特别是，它不仅会保留当前分支和标记集所引用的对象，还会保留索引、远程跟踪分支、 引用日志（可能引用了后来被修改或回绕的分支中的提交）以及 refs/* 名称空间中的任何其他对象。请注意，附在一个对象上的注释（由 'git notes' 创建的那种）并不有助于保持该对象的活力。如果你期待一些对象被删除，而它们没有被删除，请检查所有这些位置，并决定在你的情况下，删除这些引用是否有意义。
 
@@ -85,8 +85,8 @@ NOTES
 
 然而，这些功能并不是一个完整的解决方案，所以同时运行命令的用户不得不忍受一些损坏的风险（在实践中似乎很低）。
 
-HOOKS
------
+钩子
+--
 
 The 'git gc --auto' command will run the 'pre-auto-gc' hook. See linkgit:githooks[5] for more information.
 

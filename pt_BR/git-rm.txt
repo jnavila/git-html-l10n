@@ -14,17 +14,17 @@ RESUMO
 
 DESCRIÇÃO
 ---------
-Exclui os arquivos correspondentes ao pathspec do índice ou da árvore de trabalho e do índice. O comando `git rm` não irá remover um arquivo apenas do seu diretório de trabalho. (Não há opção para remover um arquivo apenas da árvore de trabalho e ainda mantê-lo no índice; use `/bin/rm` caso queira fazer isso.) Os arquivos que estão sendo removidos devem ser idênticos ao topo do ramo, assim como, nenhuma atualização de seu conteúdo pode ser testada no índice, embora este comportamento predefinido possa ser alterado ao usar a opção `-f`. Quando `--cached` é usado, o conteúdo testado deve corresponder ao topo do ramo ou ao arquivo no disco, permitindo que o arquivo seja removido apenas do índice. Quando "sparse-checkouts" estão em uso (consulte linkgit:git-sparse-checkout[1]), o comando `git rm` apenas removerá os caminhos que estiverem dentro dos padrões do "sparse-checkout".
+Remove files matching pathspec from the index, or from the working tree and the index. `git rm` will not remove a file from just your working directory. (There is no option to remove a file only from the working tree and yet keep it in the index; use `/bin/rm` if you want to do that.) The files being removed have to be identical to the tip of the branch, and no updates to their contents can be staged in the index, though that default behavior can be overridden with the `-f` option. When `--cached` is given, the staged content has to match either the tip of the branch or the file on disk, allowing the file to be removed from just the index. When sparse-checkouts are in use (see linkgit:git-sparse-checkout[1]), `git rm` will only remove paths within the sparse-checkout patterns.
 
 
 OPÇÕES
 ------
 <pathspec>...::
-	Arquivos para serem removidos. Um nome do diretório principal (por exemplo, `dir` para remover `dir/arquivo1` e `dir/arquivo2`) pode ser utilizadopara remover todos os arquivos do diretório e recursivamente de todos os subdiretórios, porém isso requer o uso da opção `-r` de forma explicita.
+	Files to remove. A leading directory name (e.g. `dir` to remove `dir/file1` and `dir/file2`) can be given to remove all files in the directory, and recursively all sub-directories, but this requires the `-r` option to be explicitly given.
 +
 O comando remove apenas os caminhos que sejam informados pelo Git.
 +
-As coincidência do mascaramento do nome do arquivo através dos limites do diretório. Assim, os dados dos dois diretórios `d` e `d2`, existe uma diferença entre o uso do comando `git rm 'd*'` e `git rm 'd/*'`, pois o primeiro também removerá todo o diretório `d2` .
+File globbing matches across directory boundaries. Thus, given two directories `d` and `d2`, there is a difference between using `git rm 'd*'` and `git rm 'd/*'`, as the former will also remove all of directory `d2`.
 +
 Para mais detalhes sobre a sintaxe, consulte a entrada 'pathspec' em linkgit:gitglossary[7].
 
@@ -34,7 +34,7 @@ Para mais detalhes sobre a sintaxe, consulte a entrada 'pathspec' em linkgit:git
 
 -n::
 --dry-run::
-	Na verdade, não remova nenhum arquivo. Em vez disso, exiba apenas se eles existem no índice e caso contrário, seriam removidos pelo comando.
+	Don't actually remove any file(s). Instead, just show if they exist in the index and would otherwise be removed by the command.
 
 -r::
         Permita a remoção recursiva quando um nome do diretório principal for informado.
@@ -43,17 +43,17 @@ Para mais detalhes sobre a sintaxe, consulte a entrada 'pathspec' em linkgit:git
 	Esta opção pode ser utilizada para separar as opções da linha de comandos da lista dos arquivos (útil quando os nomes do arquivo puderem ser confundidos com as opções da linha de comando).
 
 --cached::
-	Utilize esta opção para desestabilizar e remover os caminhos do índice apenas. Os arquivos da árvore de trabalho, modificados ou não, serão deixados em paz.
+	Use this option to unstage and remove paths only from the index. Working tree files, whether modified or not, will be left alone.
 
 --ignore-unmatch::
 	Encerre com uma condição zero, ainda que não haja a coincidência com nenhum arquivo.
 
 --sparse::
-	Permitir a atualização das entradas do índice fora do cônica do sparse-checkout. Geralmente, o comando 'git rm' se recusa a atualizar as entradas do índice cujos caminhos não se encaixem dentro da cônica do sparse-checkout. Consulte linkgit:git-sparse-checkout[1] para obter mais informações.
+	Allow updating index entries outside of the sparse-checkout cone. Normally, `git rm` refuses to update index entries whose paths do not fit within the sparse-checkout cone. See linkgit:git-sparse-checkout[1] for more.
 
 -q::
 --quiet::
-	O comando `git rm` normalmente gera uma linha (na forma de um comando `rm`) para cada arquivo removido. Esta opção suprime essa saída.
+	`git rm` normally outputs one line (in the form of an `rm` command) for each file removed. This option suppresses that output.
 
 --pathspec-from-file=<arquivo>::
 	O "pathspec" é passado com `<arquivo>` em vez dos argumentos da linha de comando. Caso o `<arquivo>` seja exatamente `-`, a entrada padrão será utilizada. Os elementos do "pathspec" são separados por caracteres de término de linha `LF` ou `CR/LF`. Os elementos do "pathspec" podem ser citados conforme explicado na variável de configuração `core.quotePath` (consulte linkgit:git-config[1]). Consulte também opção `--pathspec-file-nul` e o global `--literal-pathspecs`.
@@ -68,7 +68,7 @@ Não há uma opção para o comando `git rm` para remover do índice apenas os c
 
 Utilizando o `git commit -a`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Caso tenha pretensão de que o seu próximo commit registre todas as modificações dos arquivos rastreados na árvore de trabalho e registre todas as remoções dos arquivos que foram removidos da árvore de trabalho com `rm` (ao contrário de `git rm`), utilize `git commit -a`, pois alertará e registrará automaticamente todas as remoções. É possível ter também um efeito semelhante sem fazer um commit utilizando o comando `git add -u`.
+If you intend that your next commit should record all modifications of tracked files in the working tree and record all removals of files that have been removed from the working tree with `rm` (as opposed to `git rm`), use `git commit -a`, as it will automatically notice and record all removals. You can also have a similar effect without committing by using `git add -u`.
 
 Utilizando `git add -A`
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,9 +100,9 @@ git diff --name-only --diff-filter=D -z | xargs -0 git rm --cached
 
 SUBMÓDULOS
 ----------
-Somente os submódulos que usam um arquivo git (o que significa que foram clonados com uma versão 1.7.8 ou mais recente do Git) serão removidos da árvore de trabalho, pois seu repositório vive dentro do diretório .git do `superproject`. Caso um submódulo (ou um dos aninhados dentro dele) ainda utilize um diretório .git, `git rm` moverá o diretório dos submódulos git para o diretório `superprojects` git para proteger o histórico do submódulo. Caso exista, a seção submodule.<nome> no arquivo linkgit:gitmodules[5] também será removido e esse arquivo será preparado (a menos que `--cached` ou `-n` sejam utilizados).
+Only submodules using a gitfile (which means they were cloned with a Git version 1.7.8 or newer) will be removed from the work tree, as their repository lives inside the .git directory of the superproject. If a submodule (or one of those nested inside it) still uses a .git directory, `git rm` will move the submodules git directory into the superprojects git directory to protect the submodule's history. If it exists the submodule.<name> section in the linkgit:gitmodules[5] file will also be removed and that file will be staged (unless --cached or -n are used).
 
-Um submódulo é considerado atualizado quando `HEAD` for o mesmo que o registrado no índice, nenhum arquivo rastreado é modificado e nenhum arquivo que não for rastreado não é ignorado, está presente na árvore de trabalho do submódulo. Os arquivos ignorados são considerados dispensáveis e não impedem que a árvore de trabalho de um submódulo seja removida.
+A submodule is considered up to date when the HEAD is the same as recorded in the index, no tracked files are modified and no untracked files that aren't ignored are present in the submodule's work tree. Ignored files are deemed expendable and won't stop a submodule's work tree from being removed.
 
 Caso queira remover apenas a averiguação local de um submódulo vindo da sua árvore de trabalho sem fazer o commit de remoção, em vez disso utilize o linkgit:git-submodule[1] `deinit`. Para obter mais detalhes sobre a remoção do submódulo, veja também linkgit:gitsubmodules[7].
 

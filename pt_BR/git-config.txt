@@ -29,15 +29,15 @@ DESCRIÇÃO
 ---------
 Você pode consultar, definir, substituir e remover opções com este comando. Na verdade o nome é a seção e a chave são separadas por um ponto, e seu valor será escapado.
 
-Várias linhas podem ser adicionadas utilizando a opção `--add`. Caso queira atualizar ou remover alguma opção que pode ocorrer em várias linhas, um `value-pattern` (que é uma expressão regular extendida a menos que a opção `--fixed-value` seja usada) precisa ser utilizado. Apenas os valores existentes que correspondam à um pattern são atualizados ou não definidos. Caso queira manipular as linhas que *não* correspondam com o pattern, basta colocar um único ponto de exclamação na frente (consulte também <<EXEMPLOS>>), observe porém que isso só funciona quando a opção `--fixed-value` não estiver em uso.
+Multiple lines can be added to an option by using the `--add` option. If you want to update or unset an option which can occur on multiple lines, a `value-pattern` (which is an extended regular expression, unless the `--fixed-value` option is given) needs to be given. Only the existing values that match the pattern are updated or unset. If you want to handle the lines that do *not* match the pattern, just prepend a single exclamation mark in front (see also <<EXAMPLES>>), but note that this only works when the `--fixed-value` option is not in use.
 
-A opção `--type=<tipo>` instrui o 'git config' para garantir que os valores que chegam e os que saem sejam canonicamente compatíveis com o <tipo>. Caso nenhum `--type=<tipo>` seja utilizado, nenhuma canonização será realizada. Os autores dos chamados podem desconfigurar um `--type` existente com a opção `--no-type`.
+The `--type=<type>` option instructs 'git config' to ensure that incoming and outgoing values are canonicalize-able under the given <type>. If no `--type=<type>` is given, no canonicalization will be performed. Callers may unset an existing `--type` specifier with `--no-type`.
 
-A leitura destes valores são lidos do sistema nos arquivos de configuração global local e do repositório, é predefinido que as opções `system`, `global`, `local`, `worktree` e `file` possam ser utilizadas para dizer ao comando para ler somente deste local (consulte <<ARQUIVOS>>).
+A leitura destes valores são lidos do sistema nos arquivos de configuração global local e do repositório, é predefinido que as opções `--system`, `--global`, `--local`, `--worktree` e `--file` possam ser utilizadas para dizer ao comando para ler somente deste local (consulte <<FILES>>).
 
-Durante a escrita, é predefinido que o novo valor é gravado no arquivo de configuração local do repositório e as opções `system`, `global`, `worktree`, `file` possam ser utilizadas para dizer ao comando para gravar nesse local (você pode dizer `--local`, porém esta é a predefinição).
+Durante a escrita, é predefinido que o novo valor é gravado no arquivo de configuração local do repositório e as opções `--system`, `--global`, `--worktree`, `--file` possam ser utilizadas para dizer ao comando para gravar nesse local (você pode dizer `--local`, porém esta é a predefinição).
 
-Este comando falhará com uma condição diferente de zero em caso de erro. Alguns códigos de saída são:
+This command will fail with non-zero status upon error. Some exit codes are:
 
 - A seção ou chave é inválida (`ret=1`),
 - nenhuma seção ou nome foi informado (`ret=2`),
@@ -59,7 +59,7 @@ OPÇÕES
 	O comportamento predefinido é substituir pelo menos uma linha. Isso substitui todas as linhas que coincidam com a chave (e opcionalmente ao `value-pattern`).
 
 --add::
-	Adiciona uma nova linha à opção, sem alterar nenhum valor já existente. É o mesmo que informar '^$' como o `value-pattern` na opção `--replace-all`.
+	Adds a new line to the option without altering any existing values. This is the same as providing '^$' as the `value-pattern` in `--replace-all`.
 
 --get::
 	Obtenha o valor para uma determinada chave (opcionalmente filtrada por uma expressão regular que coincida com o valor). Retorna o código de erro '1' caso a chave não seja encontrada e o último valor caso vários valores da chave sejam encontrados.
@@ -68,31 +68,31 @@ OPÇÕES
 	Como get, mas retorna todos os valores para uma chave com vários valores.
 
 --get-regexp::
-	Como a opção `--get-all`, porém interpreta o nome como uma expressão regular e escreve os nomes das chaves. A coincidência comum da expressão regular é sensível a maiúsculas e minúsculas, é feita contra uma versão canonizado da chave onde a seção e os nomes das variáveis são minúsculas, porém os nomes das subseções não são.
+	Like --get-all, but interprets the name as a regular expression and writes out the key names. Regular expression matching is currently case-sensitive and done against a canonicalized version of the key in which section and variable names are lowercased, but subsection names are not.
 
 --get-urlmatch <nome> <URL>::
-	Quando é utilizado em um nome com duas partes `section.key`, o valor da `section.<URL>.key` cuja parte da <URL> coincida para o retorno da melhor URL informada (caso essa chave não exista, o valor do `section.key` será usado como substituto). Quando receber apenas a seção como nome, faça-o para todas as chaves da seção e liste-as. Retorna o código de erro 1 caso nenhum valor seja encontrado.
+	When given a two-part <name> as <section>.<key>, the value for <section>.<URL>.<key> whose <URL> part matches the best to the given URL is returned (if no such key exists, the value for <section>.<key> is used as a fallback). When given just the <section> as name, do so for all the keys in the section and list them. Returns error code 1 if no value is found.
 
 --global::
 	Para escrever opções: escreva para o arquivo global `~/.gitconfig` em vez do repositório `.git/config`, escreva para o arquivo `$XDG_CONFIG_HOME/git/config` se este arquivo existir e o arquivo `~/.gitconfig` não faz.
 +
 Para opções de leitura: leia somente do global `~/.gitconfig` e de` $XDG_CONFIG_HOME/git/config` ao invés de todos os arquivos disponíveis.
 +
-Consulte também <<ARQUIVOS>>.
+Consulte também <<FILES>>.
 
 --system::
-	Para opções de escrita: escreva para o `$(prefixo)/etc/gitconfig` do sistema em vez do repositório `.git/config`.
+	Para opções de escrita: escreva para o `$(prefix)/etc/gitconfig` do sistema em vez do repositório `.git/config`.
 +
-Para opções de leitura: leia somente do `$(prefixo)/etc/gitconfig` em todo o sistema, e não de todos os arquivos disponíveis.
+Para opções de leitura: leia somente do `$(prefix)/etc/gitconfig` em todo o sistema, e não de todos os arquivos disponíveis.
 +
-Consulte também <<ARQUIVOS>>.
+Consulte também <<FILES>>.
 
 --local::
-	Para as opções de escrita: escreva no arquivo do repositório `.git/config`. Este é o comportamento predefinido.
+	For writing options: write to the repository `.git/config` file. This is the default behavior.
 +
 Para as opções da leitura: leia somente no repositório `.git/config` em vez de todos os arquivos disponíveis.
 +
-Consulte também <<ARQUIVOS>>.
+Consulte também <<FILES>>.
 
 --worktree::
 	Similar ao comando `--local` exceto quando o `$GIT_DIR/config.worktree` for lido ou escrito e se `extensions.worktreeConfig` estiver ativado. Se não estiver, é o mesmo que a opção `--local`. Observe que `$GIT_DIR` é igual a `$GIT_COMMON_DIR` para a árvore principal de trabalho, mas é da forma `$GIT_DIR/worktrees/<id>/` nas outras árvores de trabalho. Consulte linkgit:git-worktree[1] para aprender como ativar o `extensions.worktreeConfig`.
@@ -103,10 +103,10 @@ Consulte também <<ARQUIVOS>>.
 +
 Para as opções da leitura: leia somente no arquivo definido em vez de todos os arquivos disponíveis.
 +
-Consulte também <<ARQUIVOS>>.
+Consulte também <<FILES>>.
 
 --blob <bolha>::
-	É semelhante a opção `--file` porém utilize a bolha informada em vez de um arquivo. Como por exemplo, é possível utilizar 'master:.gitmodules' para ler os valores de um arquivo '.gitmodules' no ramo "master". Para conhecer uma lista completa das diferentes maneiras de soletrar os nomes das bolhas, consulte a seção "DEFININDO AS REVISÕES" em linkgit:gitrevisions[7].
+	Similar to `--file` but use the given blob instead of a file. E.g. you can use 'master:.gitmodules' to read values from the file '.gitmodules' in the master branch. See "SPECIFYING REVISIONS" section in linkgit:gitrevisions[7] for a more complete list of ways to spell blob names.
 
 --remove-section::
 	Remova a seção dada do arquivo de configuração.
@@ -148,7 +148,7 @@ Os `<tipo>`'s válidos incluem:
   Opções históricas para selecionar um especificador de tipo. Em vez disso, prefira opção `--type` (veja acima).
 
 --no-type::
-  Indetermine o tipo do especificador definido anteriormente (caso tenha sido definido anteriormente). Esta opção solicita que o comando 'git config' não canonize a variável recuperada. A opção `--no-type` não tem qualquer efeito sem a opção `--type=<tipo>` ou `--<tipo>`.
+  Un-sets the previously set type specifier (if one was previously set). This option requests that 'git config' not canonicalize the retrieved variable. `--no-type` has no effect without `--type=<type>` or `--<type>`.
 
 -z::
 --null::
@@ -165,11 +165,11 @@ Os `<tipo>`'s válidos incluem:
 
 --get-colorbool <nome> [<stdout-is-tty>]::
 
-	Encontre a configuração das cores para `<nome>` (por exemplo, `color.diff`) e gere 'true' ou 'false'. O `<stdout-is-tty>` deve ser 'true' ou 'false' e é levado em consideração quando a configuração diz "auto". Caso `<stdout-is-tty>` esteja ausente, verifique a saída padrão do próprio comando e encerre com a condição '0' caso a cor deva ser utilizada, ou caso contrário, encerre com a condição '1'. Quando a configuração das cores para `nome` for indefinida, o comando retroage e em vez disso usa `color.ui`.
+	Find the color setting for `<name>` (e.g. `color.diff`) and output "true" or "false". `<stdout-is-tty>` should be either "true" or "false", and is taken into account when configuration says "auto". If `<stdout-is-tty>` is missing, then checks the standard output of the command itself, and exits with status 0 if color is to be used, or exits with status 1 otherwise. When the color setting for `name` is undefined, the command uses `color.ui` as fallback.
 
 --get-color <nome> [<padrão>]::
 
-	Localize a cor configurada para `nome` (`color.diff.new` por exemplo) e gere a sequência no padrão ANSI de cor. Em vez disso o parâmetro opcional `default` é utilizado, caso não haja uma cor configurada para `nome`.
+	Find the color configured for `name` (e.g. `color.diff.new`) and output it as the ANSI color escape sequence to the standard output. The optional `default` parameter is used instead, if there is no color configured for `name`.
 +
 `--type=color [--default=<default>]` é preferível em vez de `--get-color` (porém repare que a opção `--get-color` omitirá a nova linha impressa por `--type=color`).
 
@@ -185,7 +185,7 @@ Os `<tipo>`'s válidos incluem:
 
 CONFIGURAÇÃO
 ------------
-O `pager.config` somente é respeitado durante a listagem da configuração, ou seja, ao utilizar a opção `--list` ou qualquer um dos `--get-*` que podem retornar diversos resultados. A predefinição é utilizar um pager.
+`pager.config` is only respected when listing configuration, i.e., when using `--list` or any of the `--get-*` which may return multiple results. The default is to use a pager.
 
 [[FILES]]
 ARQUIVOS
@@ -193,7 +193,7 @@ ARQUIVOS
 
 É predefinido que o comado 'git config' leia as opções de configuração a partir de diversos arquivos:
 
-$(prefixo)/etc/gitconfig::
+$(prefix)/etc/gitconfig::
 	Arquivo de configuração do sistema.
 
 $XDG_CONFIG_HOME/git/config::
@@ -212,11 +212,11 @@ Você também poderá fornecer parâmetros adicionais de configuração ao execu
 
 As opções serão lidas a partir de todos os arquivos disponíveis. Caso os arquivos de configuração global ou de todo o sistema estiverem ausentes ou ilegíveis, eles serão ignorados. Se o arquivo de configuração do repositório estiver ausente ou ilegível, o comando 'git config' encerrará com um código de erro diferente de zero. Uma mensagem de erro será produzida caso o arquivo esteja ilegível, mas não se estiver ausente.
 
-Os arquivos são lidos na ordem dada acima, com o último valor encontrado tendo precedência sobre os valores lidos anteriormente. Quando vários valores são obtidos, então todos os valores de uma chave de todos os arquivos, serão usados.
+The files are read in the order given above, with last value found taking precedence over values read earlier. When multiple values are taken then all values of a key from all files will be used.
 
 É predefinido que as opções sejam gravadas apenas no arquivo específico de configuração do repositório. Observe que isso também afeta opções como `--replace-all` e `--unset`. O comando *'git config' só alterará um arquivo por vez*.
 
-Você pode limitar quais fontes de configuração serão lidas ou quais serão gravadas ao definir o caminho de um arquivo com a opção `--file`, ou definindo um escopo de configuração com `--system`, `--global`, `-- local` ou `--worktree`. Consulte <<OPÇÕES>> acima para obter mais informações.
+You can limit which configuration sources are read from or written to by specifying the path of a file with the `--file` option, or by specifying a configuration scope with `--system`, `--global`, `--local`, or `--worktree`. For more, see <<OPTIONS>> above.
 
 [[SCOPES]]
 ESCOPOS
@@ -225,7 +225,7 @@ ESCOPOS
 Cada fonte de configuração está dentro de um escopo de configuração. Os escopos são:
 
 system::
-	$(prefixo)/etc/gitconfig
+	$(prefix)/etc/gitconfig
 
 global::
 	$XDG_CONFIG_HOME/git/config
@@ -239,20 +239,20 @@ local::
 	$GIT_DIR/config.worktree
 
 comando::
-	GIT_CONFIG_{COUNT,KEY,VALUE} variáveis de ambiente (consulte <<AMBIENTE>> abaixo)
+	GIT_CONFIG_{COUNT,KEY,VALUE} variáveis de ambiente (consulte <<ENVIRONMENT>> abaixo)
 +
 a opção `-c`
 
 Com exceção do 'command', cada escopo corresponde a uma opção da linha de comando: `--system`, `--global`, `--local`, `--worktree`.
 
-Ao ler as opções, ao especificar um escopo lerá apenas as opções dos arquivos que estejam dentro deste escopo. Ao gravar as opções, ao especificar um escopo ele será gravado nos arquivos dentro deste escopo (em vez do arquivo de configuração específico do repositório). Consulte <<OPÇÕES>> acima para obter uma descrição completa.
+Ao ler as opções, ao especificar um escopo lerá apenas as opções dos arquivos que estejam dentro deste escopo. Ao gravar as opções, ao especificar um escopo ele será gravado nos arquivos dentro deste escopo (em vez do arquivo de configuração específico do repositório). Consulte <<OPTIONS>> acima para obter uma descrição completa.
 
 Independentemente da definição do escopo, a maioria das opções de configuração são respeitadas, porém, algumas opções são respeitadas apenas em determinados escopos. Consulte a documentação da respectiva opção para obter mais informações.
 
 Configuração protegida
 ~~~~~~~~~~~~~~~~~~~~~~
 
-A configuração protegida refere-se aos escopos 'system', 'global' e 'command'. Por questões de segurança, certas opções são obedecidas apenas quando definidas na configuração protegida, caso contrário, serão ignoradas.
+Protected configuration refers to the 'system', 'global', and 'command' scopes. For security reasons, certain options are only respected when they are specified in protected configuration, and ignored otherwise.
 
 O Git trata estes escopos como se fossem controlados pelo usuário ou por um administrador confiável. Isso ocorre porque um invasor que controla esses escopos pode causar danos substanciais sem usar o Git, portanto, presume-se que o ambiente do usuário proteja estes escopos contra invasores.
 
@@ -267,7 +267,7 @@ GIT_CONFIG_SYSTEM::
 GIT_CONFIG_NOSYSTEM::
 	Independente se você vai ignorar as configurações de leitura do arquivo `$(prefix)/etc/gitconfig` do sistema. Para mais detalhes, consulte linkgit:git[1].
 
-Consulte também <<ARQUIVOS>>.
+Consulte também <<FILES>>.
 
 GIT_CONFIG_COUNT::
 GIT_CONFIG_KEY_<n>::
