@@ -3,24 +3,24 @@ git-merge(1)
 
 名称
 --
-git-merge - Join two or more development histories together
+git-merge - 将两个或多个开发历史合并在一起
 
 
 概述
 --
 [verse]
 'git merge' [-n] [--stat] [--no-commit] [--squash] [--[no-]edit]
-	[--no-verify] [-s <strategy>] [-X <strategy-option>] [-S[<keyid>]]
+	[--no-verify] [-s <策略>] [-X <策略选项>] [-S[<键 ID>]]
 	[--[no-]allow-unrelated-histories]
-	[--[no-]rerere-autoupdate] [-m <msg>] [-F <file>]
-	[--into-name <branch>] [<commit>...]
-'git merge' (--continue | --abort | --quit)
+	[--[no-]rerere-autoupdate] [-m <信息>] [-F <文件>]
+	[--into-name <分支>] [<提交>...］
+'git merge' (--continue |--abort |--quit)
 
 描述
 --
 将指定的提交内容（从它们的历史与当前分支相分离时起）并入当前分支。 这条命令被 "git pull "用来合并另一个仓库的改动，也可以用手将一个分支的改动合并到另一个分支。
 
-假设存在以下历史，且当前分支为"`master`"：
+假设存在以下历史，且当前分支为 `master`：
 
 ------------
 	  A---B---C topic
@@ -28,7 +28,7 @@ git-merge - Join two or more development histories together
     D---E---F---G master
 ------------
 
-然后"`git merge topic`"将重现`topic`分支从`master`（即`E`）分流到`master`之上的当前提交（`C`）所做的修改，并将结果与两个父提交的名称和用户描述修改的日志信息一起记录在一个新提交中。在操作之前，`ORIG_HEAD`被设置为当前分支（`C`）的顶端。
+然后 `git merge topic` 将重现 `topic` 分支从 `master`（即 `E`）分流到 `master` 之上的当前提交（ `C` ）所做的修改，并将结果与两个父提交的名称和用户描述修改的日志信息一起记录在一个新提交中。在操作之前，`ORIG_HEAD`被设置为当前分支（`C`）的顶端。
 
 ------------
 	  A---B---C topic
@@ -36,13 +36,11 @@ git-merge - Join two or more development histories together
     D---E---F---G---H master
 ------------
 
-第二种语法（"`git merge --abort`"）只能在合并导致冲突后运行。"git merge --abort"将中止合并过程，并尝试重建合并前的状态。然而，如果合并开始时有未提交的修改（特别是如果这些修改在合并开始后被进一步修改），'git merge --abort'在某些情况下将无法重建原始（合并前）修改。因此：
+如果出现无法自动解决的冲突，或者在启动合并时提供了 `--no-commit` 选项，合并就会停止。这时可以运行 `git merge --abort` 或 `git merge --continue` 。
 
-*警告*：在非重要的未提交的修改中运行 "git merge "是不可取的。
-不鼓励这样做：虽然有可能，但它可能会让你处于一个很难在冲突中恢复的状态。
-并且如果发生冲突的话会处于一个很难退出的状态。
+`git merge --abort` 会中止合并过程，并尝试重建合并前的状态。然而，如果合并开始时有未提交的修改（尤其是合并开始后这些修改被进一步修改），`git merge --abort` 在某些情况下将无法重建原始的（合并前的）修改。因此：
 
-第三种语法（"`git merge --continue`"）只能在合并导致冲突后运行。
+*警告*：在非重要的未提交的修改中运行 `git merge`是不可取的。不鼓励这样做：虽然有可能，但它可能会让你处于一个很难在冲突中恢复的状态。并且如果发生冲突的话会处于一个很难退出的状态。
 
 选项
 --
@@ -55,9 +53,9 @@ include::merge-options.txt[]
 +
 如果指定了`--log`，正在合并的提交的简短日志将被附加到指定的消息中。
 +
-The 'git fmt-merge-msg' command can be used to give a good default for automated 'git merge' invocations. The automated message can include the branch description.
+`git fmt-merge-msg` 命令可以为自动 `git merge` 调用提供一个良好的默认值。自动信息可以包括分支描述。
 
---into-name <branch>::
+--into-name <分支>::
 	准备默认的合并信息，就像合并到分支`<分支>`一样，而不是真正要合并的分支名称。
 
 -F <文件>::
@@ -75,17 +73,17 @@ include::rerere-options.txt[]
 --abort::
 	中止当前的冲突解决过程，并尝试重建合并前的状态。工作区会自动应用自动存储条目。
 +
-如果合并开始时有未提交的工作区变化，'git merge --abort'在某些情况下将无法重现这些变化。因此，建议在运行'git merge'之前，一定要提交或储存你的修改。
+如果合并开始时有未提交的工作区变化，`git merge --abort` 在某些情况下将无法重现这些变化。因此，建议在运行 `git merge` 之前，一定要提交或储存你的修改。
 +
-'git merge --abort' is equivalent to 'git reset --merge' when `MERGE_HEAD` is present unless `MERGE_AUTOSTASH` is also present in which case 'git merge --abort' applies the stash entry to the worktree whereas 'git reset --merge' will save the stashed changes in the stash list.
+当 `MERGE_HEAD` 存在时，`git merge --abort` 等同于 `git reset --merge` ，除非 `MERGE_AUTOSTASH`也存在，在这种情况下 `git merge --abort` 会将暂存项应用到工作区重，而 `git reset --merge` 则会将暂存的改动保存在暂存列表中。
 
 --quit::
 	忘记当前正在进行的合并。让索引和工作区保持原样。如果`MERGE_AUTOSTASH`存在，储藏库条目将被保存到储藏库列表。
 
 --continue::
-	在 "git merge "因冲突而停止后，你可以通过运行 "git merge --continue "来结束当前合并（见下文 "如何解决冲突"部分）。
+	在 `git merge` 因冲突而停止后，你可以通过运行 `git merge --continue` 来结束当前合并（见下文“如何解决冲突”部分）。
 
-<commit>...::
+<提交>...::
 	提交，通常是其他分支负责人，合并到我们的分支中。 指定多个提交将创建具有两个以上父项的合并（亲切地称为八爪/多路合并）。
 +
 如果命令行没有给出提交，则合并当前分支被配置为上游的远程跟踪分支。 参见本手册页的配置部分。
@@ -96,11 +94,11 @@ include::rerere-options.txt[]
 合并前检查
 -----
 
-在应用外部的修改之前，你应该把自己的工作做好，并在本地提交，这样在有冲突的时候就不会被打乱了。 参见 linkgit:git-stash[1]。 "git pul "和 "git merge "会在本地未提交的修改与 "git pull"/"git merge "可能需要更新的文件重叠时会不做任何操作，立即停止。
+在应用外部的修改之前，你应该把自己的工作做好，并在本地提交，这样在有冲突的时候就不会被打乱了。 参见 linkgit:git-stash[1]。 `git pul` 和 `git merge` 会在本地未提交的修改与 `git pull`/`git merge` 可能需要更新的文件重叠时会不做任何操作，立即停止。
 
-为了避免在合并提交中记录不相关的变化，'git pull'和'git merge'也会在相对于`HEAD`提交的索引中存在任何变化时中止。 (根据使用的合并策略，这一规则可能存在特殊的狭义例外，但一般来说，索引必须与HEAD相匹配。)
+为了避免在合并提交中记录不相关的变化，`git pull` 和 `git merge` 也会在相对于`HEAD`提交的索引中存在任何变化时中止。 (根据使用的合并策略，这一规则可能存在特殊的狭义例外，但一般来说，索引必须与HEAD相匹配。)
 
-如果所有命名的提交都已经是`HEAD`的祖先，'git merge'将提前退出，提示 "已经是最新的。"
+如果所有命名的提交都已经是`HEAD`的祖先，`git merge` 将提前退出，提示 "已经是最新的。"
 
 快进式合并
 -----
@@ -121,8 +119,8 @@ include::rerere-options.txt[]
 1. `HEAD`的指针保持不变。
 2. `MERGE_HEAD`参数被设置为指向另一个分支头部。
 3. 合并干净的路径在索引文件和你的工作区中都更新了。
-4. For conflicting paths, the index file records up to three versions: stage 1 stores the version from the common ancestor, stage 2 from `HEAD`, and stage 3 from `MERGE_HEAD` (you can inspect the stages with `git ls-files -u`). The working tree files contain the result of the merge operation; i.e. 3-way merge results with familiar conflict markers `<<<` `===` `>>>`.
-5. 会写入一个特殊的 `AUTO_MERGE` 引用，指向一个与当前工作区内容（包括文本冲突的冲突标记）相对应的目录树。 请注意，只有在使用 'ort' 合并策略（默认）时，才会写入这个引用。
+4. 对于冲突的路径，索引文件最多记录三个版本：第1阶段存储来自共同祖先的版本，第2阶段来自 `HEAD` ，第3阶段来自 `MERGE_HEAD` （你可以用`git ls-files -u` 检查这些阶段）。 工作目录树文件包含了 “合并” 程序的结果；即带有熟悉的冲突标记 `<<<` `===` `>>>` 的三方合并结果。
+5. 会写入一个引用名为 `AUTO_MERGE` 的引用，指向一个与当前工作区内容（包括文本冲突的冲突标记）相对应的目录树。 请注意，只有在使用 'ort' 合并策略（默认）时，才会写入这个引用。
 6. 没有其他变化。 特别是，你在开始合并之前的本地修改将保持不变，它们的索引条目保持原样，即匹配`HEAD`。
 
 如果你尝试的合并导致了复杂的冲突，并想重新开始，你可以用`git merge --abort`恢复。
@@ -143,8 +141,8 @@ git merge --ff-only v1.2.3
 ----
 
 
-HOW CONFLICTS ARE PRESENTED
----------------------------
+冲突如何呈现
+------
 
 在合并过程中，工作区文件被更新以反映合并的结果。 在对共同祖先的版本所做的修改中，非重叠的修改（即你改变了文件的某个区域，而另一方则保留了该区域，反之亦然）会被逐字纳入最终结果中。 然而，当双方都对同一区域进行了修改时，Git不能随机地选择一方而不是另一方，而是要求你通过保留双方对该区域的修改来解决这个问题。
 
@@ -186,22 +184,22 @@ Git使冲突解决变得容易。
 而这里是另一行被干净地解决或未修改的。
 ------------
 
-while in "zdiff3" style, it may look like this:
+而在 "zdiff3" 样式中，它可能看起来像这样：
 
 ------------
-Here are lines that are either unchanged from the common
-ancestor, or cleanly resolved because only one side changed,
-or cleanly resolved because both sides changed the same way.
+这里是与共同的祖先相比没有变化的行。
+祖先没有变化，或者因为只有一方发生了变化而得到干净的解决、
+或者因为两边都有相同的变化而被干净地解决了。
 <<<<<<< yours:sample.txt
-Conflict resolution is hard;
-let's go shopping.
+冲突的解决是困难的；
+让我们去购物吧。
 ||||||| base:sample.txt
-or cleanly resolved because both sides changed identically.
-Conflict resolution is hard.
+或干净利落地解决，因为双方的变化都一样。
+冲突的解决是很难的。
 =======
-Git makes conflict resolution easy.
+Git 让冲突解决变得简单。
 >>>>>>> theirs:sample.txt
-And here is another line that is cleanly resolved or unmodified.
+而这里是另一行被干净地解决或未修改的内容。
 ------------
 
 除了`<<<<<<<`、`=======`和`>>>>>>>`标记外，它还使用了另一个`|||||||`标记，后面是原文。 你可以看出，原文只是陈述了一个事实，而你的一方只是屈服于这个陈述而放弃了，而另一方则试图有一个更积极的态度。 你有时可以通过查看原文得出一个更好的解决方案。
@@ -214,13 +212,13 @@ And here is another line that is cleanly resolved or unmodified.
 
  * 决定不进行合并。 唯一需要清理的是将索引文件重置为`HEAD`提交，以逆转2.，并清理2.和3.对工作树的修改；可以用`git merge --abort`来做这份工作。
 
- * 解决冲突。 Git会在工作树上标记冲突。 将文件编辑成形，然后'git add'它们到索引中。 使用'git commit'或'git merge --continue'解决。后一个命令在调用'git commit'之前会检查是否有一个（中断的）合并正在进行。
+ * 解决冲突。 Git会在工作树上标记冲突。 将文件编辑成形，然后 `git add` 它们到索引中。 使用 `git commit` 或 `git merge --continue` 解决。后一个命令在调用 `git commit` 之前会检查是否有一个（中断的）合并正在进行。
 
 你可以用一些工具来解决冲突：
 
- * Use a mergetool. `git mergetool` to launch a graphical mergetool which will work through the merge with you.
+ * 使用一个合并工具。 `git mergetool` 启动一个图形化的合并工具，它将帮助你完成合并工作。
 
- * Look at the diffs. `git diff` will show a three-way diff, highlighting changes from both the `HEAD` and `MERGE_HEAD` versions. `git diff AUTO_MERGE` will show what changes you've made so far to resolve textual conflicts.
+ * 查看差异。 `git diff` 会显示三向差异，突出显示来自 `HEAD` 和 `MERGE_HEAD` 两个版本的改动。`git diff AUTO_MERGE` 会显示您为解决文本冲突所做的改动。
 
  * 看看每个分支的差异。`git log --merge -p <路径>`将首先显示`HEAD`版本的差异，然后是`MERGE_HEAD`版本。
 
@@ -230,10 +228,10 @@ And here is another line that is cleanly resolved or unmodified.
 实例
 --
 
-* 合并分支 `fixes` 和 `enhancements`到当前分支之上, 进行多路合并。
+* 合并分支 `fixes` 和 `enhancements` 到当前分支之上，进行多路合并：
 +
 ------------------------------------------------
-$ git merge fixes enhancements
+$ git merge 修复增强功能
 ------------------------------------------------
 
 * 将分支`obsolete`合并到当前分支，使用`ours`的合并策略：
@@ -259,7 +257,7 @@ include::merge-strategies.txt[]
 --
 
 分支 .<名字>.合并操作选项::
-	设置合并到分支<分支名>的默认选项。语法和支持的选项与'git merge'相同，不过目前不支持包含空格的选项值。
+	设置合并到分支 <分支名> 的默认选项。语法和支持的选项与 `git merge` 相同，不过目前不支持包含空格的选项值。
 
 include::includes/cmd-config-section-rest.txt[]
 

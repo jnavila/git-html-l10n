@@ -3,7 +3,7 @@ git-pack-objects(1)
 
 名称
 --
-git-pack-objects - Create a packed archive of objects
+git-pack-objects - 创建打包的对象档案
 
 
 概述
@@ -12,10 +12,10 @@ git-pack-objects - Create a packed archive of objects
 'git pack-objects' [-q | --progress | --all-progress] [--all-progress-implied]
 	[--no-reuse-delta] [--delta-base-offset] [--non-empty]
 	[--local] [--incremental] [--window=<n>] [--depth=<n>]
-	[--revs [--unpacked | --all]] [--keep-pack=<pack-name>]
-	[--cruft] [--cruft-expiration=<time>]
-	[--stdout [--filter=<filter-spec>] | <base-name>]
-	[--shallow] [--keep-true-parents] [--[no-]sparse] < <object-list>
+	[--revs [--unpacked | --all]] [--keep-pack=<包名>]
+	[--cruft] [--cruft-expiration=<时间>]
+	[--stdout [--filter=<过滤选项>] | <基础名>]
+	[--shallow] [--keep-true-parents] [--[no-]sparse] < <对象列表>
 
 
 描述
@@ -33,7 +33,7 @@ git-pack-objects - Create a packed archive of objects
 
 选项
 --
-base-name::
+基础名::
 	写入成对的文件（.pack 和 .idx），使用 <base-name> 来确定创建的文件名。 当使用该选项时，一对中的两个文件被写入 <base-name>-<SHA-1>.{pack,idx} 文件。 <SHA-1> 是一个基于 pack 内容的哈希值，会写入命令的标准输出中。
 
 --stdout::
@@ -61,16 +61,16 @@ base-name::
 +
 当输入列出一个包含所有可达对象的包（并将所有其他包列为待删除），相应的 cruft 包将包含所有不可达对象（其 mtime 比 `--cruft-expiration` 新），以及任何 mtime 比 `--cruft-expiration` 早，但可从 mtime 比 `--cruft-expiration` 新的不可达对象到达的不可达对象）。
 +
-Incompatible with `--unpack-unreachable`, `--keep-unreachable`, `--pack-loose-unreachable`, `--stdin-packs`, as well as any other options which imply `--revs`.
+与 `--unpack-unreachable`、 `--keep-unreachable`、 `--pack-loose-unreachable`、 `--stdin-packs`，以及其他暗示 `--revs` 的选项不兼容。
 
---cruft-expiration=<approxidate>::
-	如果指定了，且对象的 mtime 超过 `<approxidate>`，就会从 cruft 包中剔除。如果没有指定（并给出 `--cruft'），那么没有对象被淘汰。
+--cruft-expiration=<近似值>::
+	如果指定了，且对象的 mtime 超过 `<approxidate>`，就会从 cruft 包中剔除。如果没有指定（并给出 `--cruft`），那么没有对象被淘汰。
 
 --window=<n>::
 --depth=<n>::
 	这两个选项影响了使用 delta 压缩法存储数据包中的对象的方式。 这些对象首先按照类型、大小和可选的名称进行内部排序，并与 --window 内的其他对象进行比较，看使用 delta 压缩是否节省了空间。 --depth 限制了最大的 delta 深度；使其过深会影响到解包方的性能，因为 delta 数据需要应用那么多次才能到达必要的对象。
 +
-The default value for --window is 10 and --depth is 50. The maximum depth is 4095.
+--window 的默认值为 10，--depth 的默认值为 50。最大深度为 4095。
 
 --window-memory=<n>::
 	这个选项在 `--window` 的基础上提供了一个额外的限制；窗口的大小将动态地缩小，以便不占用超过 '<n>' 字节的内存。 这对有大有小的对象的存储库很有用，它不会因为大窗口而耗尽内存，但仍然能够利用大窗口来处理小对象。 大小可以以 "k"、"m "或 "g "为后缀。 `--window-memory=0` 使内存使用不受限制。 默认值取自`pack.windowMemory` 配置变量。
@@ -81,7 +81,7 @@ The default value for --window is 10 and --depth is 50. The maximum depth is 409
 --honor-pack-keep::
 	这个标志会使一个已经在本地打包的对象被忽略，即使它本来会被打包。
 
---keep-pack=<pack-name>::
+--keep-pack=<包名>::
 	这个标志使已经在给定包中的对象被忽略，即使它本来已经被打包。`<pack-name>` 是不带前导目录的包文件名（例如：`pack-123.pack`）。该选项可以被多次指定以保留多个包。
 
 --incremental::
@@ -133,19 +133,19 @@ The default value for --window is 10 and --depth is 50. The maximum depth is 409
 --threads=<n>::
 	指定搜索最佳 delta 匹配时产生的线程数。 这要求 pack-objects 使用 pthreads 编译，否则该选项将被忽略并发出警告。 这样做的目的是在多处理器机器上减少打包时间。 然而，delta 搜索窗口所需的内存会乘以线程数。 指定 0 将导致 Git 自动检测 CPU 数量并相应设置线程数量。
 
---index-version=<version>[,<offset>]::
+--index-version=<版本>[,<偏移>]::
 	这是为测试套件准备的。它允许为生成的数据包索引强制选择版本，并对位于给定偏移量以上的对象强制选择 64 位索引条目。
 
 --keep-true-parents::
 	通过这种方法，被移植物覆盖的父母还是会被打包。
 
 --filter=<过滤器定义>::
-	Omits certain objects (usually blobs) from the resulting packfile. See linkgit:git-rev-list[1] for valid `<filter-spec>` forms.
+	从生成的包文件中省略某些对象（通常是 blob）。 有关有效的 `<过滤规则>` 形式，请参见 linkgit:git-rev-list[1]。
 
 --no-filter::
 	关闭之前的 `--filter=` 参数。
 
---missing=<missing-action>（缺失）。::
+--missing=<缺失行为>::
 	一个调试选项，帮助未来的 "部分克隆 "开发。 这个选项指定了如何处理丢失的对象。
 +
 表格 '--missing=error' 请求在遇到丢失对象时以错误停止 pack-objects。 如果仓库是部分克隆，在宣布丢失之前会尝试获取丢失的对象。 这是默认行为。

@@ -15,17 +15,17 @@ git-bisect - 使用二进制搜索查找引入错误的提交
 --
 该命令采取不同的子命令，并根据子命令有不同的选项：
 
- git bisect start [--term-(new|bad)=<term-new> --term-(old|good)=<term-old>]
-		  [--no-checkout] [--first-parent] [<bad> [<good>...]] [--] [<pathspec>...]
- git bisect (bad|new|<term-new>) [<rev>]
- git bisect (good|old|<term-old>) [<rev>...]
+ git bisect start [--term-{new,bad}=<term> --term-{old,good}=<term>]
+		  [--no-checkout] [--first-parent] [<坏的> [<好的>...]] [--] [<路径规范>...]
+ git bisect (bad|new|<新 term>) [<修订>]
+ git bisect (good|old|<旧 term>) [<修订>...]
  git bisect terms [--term-good | --term-bad]
- git bisect skip [(<rev>|<range>)...]
- git bisect reset [<commit>]
+ git bisect skip [(<修订>|<范围>)...]
+ git bisect reset [<提交>]
  git bisect (visualize|view)
- git bisect replay <logfile>
+ git bisect replay <日志文件>
  git bisect log
- git bisect run <cmd> [<arg>...]
+ git bisect run <命令>...
  git bisect help
 
 这个命令使用二分搜索算法来查找项目历史中哪个提交引入了一个错误。使用该命令时，首先告诉它一个已知包含错误的 "坏" 提交，以及一个已知在错误出现之前的 "好" 提交。然后 `git bisect` 在这两个端点之间挑选一个提交，并询问你所选的提交是 "好" 还是 "坏"。它继续缩小范围，直到找到引入该修改的确切提交。
@@ -81,7 +81,7 @@ Bisecting: 337 revisions left to test after this (roughly 9 steps) | 在这之�
 $ git bisect reset
 ------------------------------------------------
 
-By default, this will return your tree to the commit that was checked out before `git bisect start`. (A new `git bisect start` will also do that, as it cleans up the old bisection state.)
+默认情况下，这将使你的树返回到 `git bisect start` 之前检查出来的提交。 (新的 `git bisect start` 也会这样做，因为它清理了旧的分界状态）
 
 通过一个可选参数，你可以返回到一个不同的提交，而不是：
 
@@ -152,9 +152,9 @@ git bisect start --term-new fixed --term-old broken
 $ git bisect visualize
 ------------
 
-Git detects a graphical environment through various environment variables: `DISPLAY`, which is set in X Window System environments on Unix systems. `SESSIONNAME`, which is set under Cygwin in interactive desktop sessions. `MSYSTEM`, which is set under Msys2 and Git for Windows. `SECURITYSESSIONID`, which may be set on macOS in interactive desktop sessions.
+Git 通过各种环境变量检测图形环境：`DISPLAY`，在 Unix 系统的 X 窗口系统环境中设置。 `SESSIONNAME` （会话名），在 Cygwin 下的交互式桌面会话中设置。 `MSYSTEM`，在 Msys2 和 Git for Windows 下设置。 `SECURITYSESSIONID`，可在 macOS 上的交互式桌面会话中设置。
 
-If none of these environment variables is set, 'git log' is used instead. You can also give command-line options such as `-p` and `--stat`.
+如果没有设置这些环境变量，则会使用 'git log'。 您也可以提供命令行选项，如 `-p` 和 `--stat`。
 
 ------------
 $ git bisect visualize --stat
@@ -224,7 +224,7 @@ $ git bisect skip v2.5 v2.5..v2.6
 通过提供更多的参数来削减二分查找的起点
 ~~~~~~~~~~~~~~~~~~~
 
-You can further cut down the number of trials, if you know what part of the tree is involved in the problem you are tracking down, by specifying pathspec parameters when issuing the `bisect start` command:
+如果你知道你要追踪的问题涉及到树的哪一部分，你可以通过在发出 `bisect start` 命令时指定路径参数来进一步减少试验的数量：
 
 ------------
 $ git bisect start -- arch/i386 include/asm-i386
@@ -255,13 +255,13 @@ $ git bisect run my_script arguments
 
 你可能经常发现，在一个二分查找会话中，你想让临时的修改（例如，头文件中的 /#define DEBUG 0/#define DEBUG 1/，或者 “没有这个提交的版本需要应用这个补丁来解决这个查找不感兴趣的另一个问题”）应用到正在测试的版本中。
 
-To cope with such a situation, after the inner 'git bisect' finds the next revision to test, the script can apply the patch before compiling, run the real test, and afterwards decide if the revision (possibly with the needed patch) passed the test and then rewind the tree to the pristine state. Finally the script should exit with the status of the real test to let the `git bisect run` command loop determine the eventual outcome of the bisect session.
+为了应对这种情况，在内部的 'git bisect' 找到要测试的下一个修订版后，脚本可以在编译前应用补丁，运行真正的测试，之后决定该修订版（可能有需要的补丁）是否通过测试，然后将树倒回原始状态。 最后，脚本应该以真实测试的状态退出，让 `git bisect run` 命令循环决定二分查找会话的最终结果。
 
 选项
 --
 --no-checkout::
 +
-Do not checkout the new working tree at each iteration of the bisection process. Instead just update the reference named `BISECT_HEAD` to make it point to the commit that should be tested.
+在二分查找过程的每个迭代中，不要检出新的工作区。相反，只需更新一个名为 `BISECT_HEAD` 的引用，使其指向应被测试的提交。
 +
 当你在每个步骤中执行的测试不需要检查出来的目录树时，这个选项可能很有用。
 +
@@ -306,7 +306,7 @@ $ git bisect run ~/test.sh
 $ git bisect reset                   # 退出二分查找会话
 ------------
 +
-Here we use a `test.sh` custom script. In this script, if `make` fails, we skip the current commit. `check_test_case.sh` should `exit 0` if the test case passes, and `exit 1` otherwise.
+这里我们使用一个 `test.sh `自定义脚本。在这个脚本中，如果 `make` 失败，我们就跳过当前的提交。 `check_test_case.sh` 如果测试用例通过，应该 `exit 0`，否则 `exit 1`。
 +
 如果 `test.sh` 和 `check_test_case.sh `都在仓库之外，以防止 bisect、make 和 test 进程与脚本之间的相互作用，这样会更安全。
 
@@ -387,7 +387,7 @@ $ git bisect broken HEAD~10
 
 参见
 --
-link:git-bisect-lk2009.html[Fighting regressions with git bisect], linkgit:git-blame[1].
+link:git-bisect-lk2009.html[用 git bisect 对抗回归]，linkgit:git-blame[1]。
 
 GIT
 ---

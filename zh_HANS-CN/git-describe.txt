@@ -3,7 +3,7 @@ git-describe(1)
 
 名称
 --
-git-describe - 根据一个可用的参考文献，给一个对象起一个人类可读的名字。
+git-describe - 根据一个可用的引用，给一个对象起一个人类可读的名字
 
 概述
 --
@@ -22,11 +22,11 @@ git-describe - 根据一个可用的参考文献，给一个对象起一个人�
 
 选项
 --
-<commit-ish>...::
+<提交号>...::
 	要描述的类似于承诺的对象名称。 如果省略，则默认为HEAD。
 
---dirty[=<mark>]::
---broken[=<mark>]::
+--dirty[=<标记>]::
+--broken[=<标记>]::
 	描述工作树的状态。 当工作树与HEAD匹配时，其输出与 "git describe HEAD "相同。 如果工作树有本地修改，"-dirty "会被附加到它上面。 如果一个仓库被破坏了，而Git不能确定是否有本地修改，Git会出错，除非给了`--broken'，它将附加后缀"-broken"。
 
 --all::
@@ -36,7 +36,7 @@ git-describe - 根据一个可用的参考文献，给一个对象起一个人�
 	而不是只使用注释过的标签，使用在`refs/tags`命名空间中发现的任何标签。 这个选项可以匹配轻量级（非注释的）标签。
 
 --contains::
-	与其寻找提交前的标签，不如寻找提交后的标签，从而包含该标签。 自动暗示--标签。
+	与其寻找提交前的标签，不如寻找提交后的标签，从而包含该标签。 自动暗含 --tags。
 
 --abbrev=<n>::
 	不要使用缩写对象名称的默认十六进制数字（根据存储库中对象的数量而变化，默认为7），而是使用<n>数字，或根据需要使用任意多的数字来形成唯一的对象名称。<n>为0将抑制长格式，仅显示最近的标记。
@@ -53,10 +53,10 @@ git-describe - 根据一个可用的参考文献，给一个对象起一个人�
 --long::
 	总是输出长格式（标签、提交数量和提交名称的缩写），即使它与一个标签相匹配。 当你想在 "describe "输出中看到提交对象的部分名称时，这很有用，即使相关的提交恰好是一个有标签的版本。 它不会只发出标签名称，而是将这样的提交描述为v1.2-0-gdeadbee（标签v1.2后的第0次提交，指向对象deadbee....）。
 
---match <pattern>::
+--match <模式>::
 	只考虑与给定的 `glob(7)` 模式匹配的标签，不包括 "refs/tags/" 前缀。如果和`--all`一起使用，它也会考虑匹配该模式的本地分支和远程跟踪引用，分别排除 "refs/heads/"和 "refs/remotes/"前缀；其他类型的引用永远不会被考虑。如果给出多次，将积累一个模式列表，匹配任何模式的标签都会被考虑。 使用`--no-match`来清除和重置模式列表。
 
---排除<pattern>。::
+--exclude <模式>::
 	不考虑与给定的 `glob(7)` 模式匹配的标签，排除 "refs/tags/"前缀。如果和`--all`一起使用，也不考虑匹配模式的本地分支和远程跟踪引用，分别排除 "refs/heads/"和 "refs/remotes/"前缀；其他类型的引用从不考虑。如果给定多次，将积累一个模式列表，匹配任何模式的标签将被排除。当与--match结合时，当一个标签至少匹配一个--match模式且不匹配任何--exclude模式时，将被考虑。使用`--no-exclude`来清除和重置模式列表。
 
 --always::
@@ -68,21 +68,21 @@ git-describe - 根据一个可用的参考文献，给一个对象起一个人�
 实例
 --
 
-用git.git当前树这样的东西，我得到了。
+使用类似 git.git current tree 这样的工具，我得到的结果是：
 
 	[torvalds@g5 git]$ git describe parent
 	v1.0.4-14-g2414721
 
 也就是说，我的 "父 "分支的当前头部是基于v1.0.4的，但由于它在此基础上有一些提交，所以describe在最后添加了额外的提交数量（"14"）和提交本身的缩写对象名称（"2414721"）。
 
-The number of additional commits is the number of commits which would be displayed by "git log v1.0.4..parent". The hash suffix is "-g" + an unambiguous abbreviation for the tip commit of parent (which was `2414721b194453f058079d897d13c4e377f92dc6`). The length of the abbreviation scales as the repository grows, using the approximate number of objects in the repository and a bit of math around the birthday paradox, and defaults to a minimum of 7. The "g" prefix stands for "git" and is used to allow describing the version of a software depending on the SCM the software is managed with. This is useful in an environment where people may use different SCMs.
+额外提交的次数是 "git log v1.0.4.parent" 显示的提交次数。 哈希后缀是"-g" + 父提交（即 `2414721b194453f058079d897d13c4e377f92dc6` ）顶端提交的明确缩写。缩写的长度会随着仓库的增长而缩减，使用的是仓库中对象的大致数量和生日悖论的数学计算方法，默认最小长度为 7。"g" 前缀代表 "git" ，用于根据管理软件的 SCM 来描述软件的版本。这在人们使用不同 SCM 的环境中非常有用。
 
-对一个标签名做 "git describe"，只会显示标签名。
+对一个标签名做 'git describe'，只会显示标签名：
 
 	[torvalds@g5 git]$ git describe v1.0.4
 	v1.0.4
 
-使用--all，命令可以使用分支头作为参考，所以输出也会显示参考路径。
+使用 --all 选项，命令可以使用分支头作为参考，所以输出也会显示引用路径：
 
 	[torvalds@g5 git]$ git describe --all --abbrev=4 v1.0.5^2
 	tags/v1.0.0-21-g975b
@@ -90,7 +90,7 @@ The number of additional commits is the number of commits which would be display
 	[torvalds@g5 git]$ git describe --all --abbrev=4 HEAD^
 	heads/lt/describe-7-g975b
 
-在--abbrev设置为0的情况下，该命令可以用来寻找最接近的没有任何后缀的tagname。
+在 --abbrev 选项设置为0的情况下，该命令可以用来寻找最接近的没有任何后缀的标签名：
 
 	[torvalds@g5 git]$ git describe --abbrev=0 v1.0.5^2
 	tags/v1.0.0
@@ -110,7 +110,7 @@ The number of additional commits is the number of commits which would be display
 漏洞
 --
 
-Tree objects as well as tag objects not pointing at commits, cannot be described. When describing blobs, the lightweight tags pointing at blobs are ignored, but the blob is still described as <commit-ish>:<path> despite the lightweight tag being favorable.
+树对象以及不指向提交的标签对象，不能被描述。 在描述 blob 时，指向 blob 的轻量级标签会被忽略，但尽管轻量级标签是有利的，blob 仍然被描述为 <提交号>:<路径>。
 
 GIT
 ---

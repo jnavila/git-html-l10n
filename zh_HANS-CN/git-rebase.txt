@@ -8,10 +8,10 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 概述
 --
 [verse]
-'git rebase' [-i | --interactive] [<options>] [--exec <cmd>]
-	[--onto <newbase> | --keep-base] [<upstream> [<branch>]]
-'git rebase' [-i | --interactive] [<options>] [--exec <cmd>] [--onto <newbase>]
-	--root [<branch>]
+'git rebase' [-i | --interactive] [<选项>] [--exec <命令>]
+	[--onto <新基础> | --keep-base] [<上游仓库> [<分支>]]
+'git rebase' [-i | --interactive] [<选项>] [--exec <命令>] [--onto <新基础>]
+	--root [<分支>]
 'git rebase' (--continue | --skip | --abort | --quit | --edit-todo | --show-current-patch)
 
 描述
@@ -53,9 +53,7 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
     D---E---F---G master
 ------------
 
-*注：* 后一种形式只是 `git checkout topic` 的简写。
-后接 `git rebase master`。当 rebase 退出时，`topic` 将
-仍是已签出的分支。
+*注：* 后一种形式只是 `git checkout topic` 的简写。后接 `git rebase master`。当 rebase 退出时，`topic` 将仍是已签出的分支。
 
 如果上游分支已经包含了您所做的修改（例如，因为您邮寄的补丁被应用到了上游），那么该提交将被跳过，并发出警告（如果使用了 “合并” 后台）。 例如，在以下历史记录上运行 `git rebase master`（其中 `A'` 和 `A` 引入了相同的变更集，但提交者信息不同）：
 
@@ -100,7 +98,7 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
     git rebase --onto master next topic
 
 
-Another example of --onto option is to rebase part of a branch. If we have the following situation:
+--onto 选项的另一个示例是重新基点分支的一部分。 如果我们有以下情况：
 
 ------------
                             H---I---J topicB
@@ -161,8 +159,8 @@ Another example of --onto option is to rebase part of a branch. If we have the f
 
     git rebase --abort
 
-MODE OPTIONS
-------------
+模式选项
+----
 
 本节中的选项不能与任何其他选项一起使用，包括不能相互使用：
 
@@ -186,7 +184,7 @@ MODE OPTIONS
 
 选项
 --
---onto <newbase>::
+--onto <新基础>::
 	创建新提交的起点。如果未指定 `--onto` 选项，则起点为 `<upstream>`。 可以是任何有效的提交，而不仅仅是现有的分支名称。
 +
 作为一种特殊情况，如果 A 和 B 的合并库只有一个，则可以使用 "A\...B "作为合并库的快捷方式。您最多可以省略 A 和 B 中的一个，在这种情况下，它默认为 HEAD。
@@ -200,10 +198,10 @@ MODE OPTIONS
 +
 另请参阅下面的不兼容选项。
 
-<upstream>::
+<上游仓库>::
 	要与之比较的上游分支。 可以是任何有效的提交，而不仅仅是现有的分支名称。默认为当前分支配置的上游分支。
 
-<branch>::
+<分支>::
 	工作分支；默认为 `HEAD`。
 
 --apply::
@@ -211,7 +209,7 @@ MODE OPTIONS
 +
 另请参阅下面的不兼容选项。
 
---empty={drop,keep,ask}::
+--empty=(drop|keep|ask)::
 	如何处理开始时不是空的提交，也不是对上游提交的纯粹撷取，但在重排序后变为空的提交（因为它们包含了上游修改的子集）。 如果使用 drop（默认），则会丢弃变为空的提交。 如果使用 keep，则会保留此类提交。 如果使用 ask（隐含 `--interactive`），当应用空提交时，变基停止，允许你选择是丢弃它、编辑更多文件，还是只提交空改动。 其他选项，如 `--exec`，除非明确指定了 `-i`/`-interactive`，否则将使用默认的 drop。
 +
 需要注意的是，开始时为空的提交会被保留（除非指定了 `--no-keep-empty`），而干净的 cherry-picks 提交（由 `git log --cherry-mark ...`）会被检测到并作为第一步被丢弃（除非通过了 `--reapply-cherry-picks`或 `--keep-base`）。
@@ -230,7 +228,7 @@ MODE OPTIONS
 
 --reapply-cherry-picks::
 --no-reapply-cherry-picks::
-	重新应用任何上游提交中所有干净的拣选，而不是先发制人地丢弃它们。(如果这些提交在重排后成为空提交，因为它们包含了上游修改的子集，则对它们的行为由 `--empty` 标志控制）。
+	重新应用任何上游提交中所有干净的拣选，而不是先发制人地丢弃它们。(如果这些提交在重排后成为空提交，因为它们包含了上游修改的子集，则对它们的行为由 `--empty` 标志控制。）
 +
 如果没有 `--keep-base`（或给出了 `--no-reapply-cherry-picks`），这些提交将被自动放弃。 由于这需要读取所有上游提交，对于需要读取大量上游提交的仓库来说，代价可能会很高。使用 'merge' 后端时，每次丢弃提交都会发出警告（除非给出 `--quiet`）。除非将 `advice.skippedCherryPicks` 设为 false，否则也会发出警告（参见 linkgit:git-config[1]）。
 +
@@ -251,16 +249,16 @@ MODE OPTIONS
 +
 另请参阅下面的不兼容选项。
 
--s <strategy>::
---strategy=<strategy>::
+-s <策略>::
+--strategy=<策略>::
 	使用给定的合并策略，而不是默认的 `ort`。暗指 `--merge`。
 +
 由于 `git rebase` 会使用给定的策略在 `<上游>` 分支之上重复工作分支的每次提交，因此使用 `ours` 策略只会清空 `<分支>` 中的所有补丁，这没有什么意义。
 +
 另请参阅下面的不兼容选项。
 
--X <strategy-option>::
---strategy-option=<strategy-option>::
+-X <策略选项>::
+--strategy-option=<策略选项>::
 	将 <策略选项> 传递给合并策略。 这意味着 `--merge`，如果没有指定策略，则是 `--s ort`。 请注意 'ours' 和 'theirs' 的颠倒，就像上面的 `-m`选项一样。
 +
 另请参阅下面的不兼容选项。
@@ -268,17 +266,17 @@ MODE OPTIONS
 include::rerere-options.txt[]
 
 -S[<keyid>]::
---gpg-sign[=<keyid>]::
+--gpg-sign[=<键 ID>]::
 --no-gpg-sign::
 	GPG 签名提交。`keyid` 参数是可选的，默认为提交者身份；如果指定了，则必须与选项相连，不加空格。`--no-gpg-sign` 用于还原 `commit.gpgSign` 配置变量和先前的 `--gpg-sign`。
 
 -q::
 --quiet::
-	Be quiet. Implies `--no-stat`.
+	静默。暗含 `--no-stat` 选项。
 
 -v::
 --verbose::
-	Be verbose. Implies `--stat`.
+	详尽输出。暗含 `--stat` 选项。
 
 --stat::
 	显示上次变基后上游变化的差异状态。差异状态也由配置选项 rebase.stat 控制。
@@ -311,7 +309,7 @@ include::rerere-options.txt[]
 +
 当启用 `--fork-point` 时，将使用 'fork_point' 而不是 `<上游仓库>` 来计算要重置的提交集，其中 'fork_point' 是 `git merge-base --fork-point <上游仓库> <分支>` 命令的结果（参见 linkgit:git-merge-base[1]）。 如果 'fork_point' 最终为空，`<上游仓库>` 将作为备用。
 +
-如果在命令行中提供了 `<上游仓库> ` 或 `--keep-base ` 参数，则默认为 `--no-fork-point`，否则默认为 `--fork-point`。另请参阅 linkgit:git-config[1] 中的 `rebase.forkpoint`。
+如果在命令行中提供了 `<上游仓库> ` 或 `--keep-base` 参数，则默认为 `--no-fork-point`，否则默认为 `--fork-point`。另请参阅 linkgit:git-config[1] 中的 `rebase.forkpoint`。
 +
 如果你的分支基于 `<上游仓库>`，但 `<上游仓库>` 被回退了，而你的分支包含了被删除的提交，那么可以使用 `--keep-base` 选项来从你的分支中删除那些提交。
 +
@@ -326,7 +324,7 @@ include::rerere-options.txt[]
 合并后端;;
 	在合并时，将仅包含空格更改的行视为未更改。不幸的是，这意味着任何旨在修改空格而不涉及其他更改的补丁块将被丢弃，即使另一方没有发生冲突的更改。
 
---whitespace=<option>::
+--whitespace=<选项>::
 	这个标志被传递给应用补丁的 `git apply` 程序（参阅 linkgit:git-apply[1]）。它隐含了 `--apply`。
 +
 另请参阅下面的不兼容选项。
@@ -365,7 +363,7 @@ include::rerere-options.txt[]
 另请参阅下面的重置合并和不兼容选项。
 
 -x <命令>::
---exec <cmd>::
+--exec <命令>::
 	在最终历史记录中创建提交的每一行后添加 "exec <命令>"。`<命令>` 将被解释为一个或多个 shell 命令。任何失败的命令都会中断重置，退出代码为 1。
 +
 您可以通过使用一个包含多个命令的 `--exec` 实例来执行多个命令：
@@ -389,9 +387,13 @@ include::rerere-options.txt[]
 
 --autosquash::
 --no-autosquash::
-	当提交日志信息以 "squash！..." 或 "fixup！..." 或 "amend！......"，并且待办事项列表中已经有一个与相同的 `...` 匹配的提交时，就会自动修改 `rebase -i` 的待办事项列表，使标记为压扁的提交紧跟在要修改的提交之后，并将移动提交的操作从 `pick` 分别改为 `squash` 或 `fixup` 或 `fixup -C`。如果提交主题匹配 `...`，或者 `...` 指的是提交的哈希值，则该提交匹配 `...`。作为后备，提交主题的部分匹配也会起作用。建议使用 linkgit:git-commit[1] 的 `--fixup`、`--fixup=amend:` 或 `--fixup=reword:`、`--squash` 选项来创建 fixup/amend/squash 提交。
+	自动将带有特殊格式信息的提交压制到正在重建的前提交中。如果提交信息以 "squash!"、"fixup!" 或 "amend!" 开头，则主题行的其余部分将作为提交说明符，如果与主题行或该提交的哈希值相匹配，则与之前的提交相匹配。如果没有完全匹配的提交，则会考虑与提交主题开头的指定符匹配。
 +
-如果默认情况下使用配置变量 `rebase.autoSquash` 启用了 `--autosquash` 选项，则可以使用此选项覆盖并禁用此设置。
+在 rebase todo 列表中，squash、fixup 和 amend 提交的操作将分别从 `pick` 改为 `squash`、`fixup` 或 `fixup -C`，而且它们会被移到所修改的提交之后。在继续之前，可以使用 `--interactive` 选项查看和编辑待办事项列表。
++
+建议使用 linkgit:git-commit[1] 的 `--squash`、`--fixup`、`--fixup=amend:` 或 `--fixup=reword:` 选项来创建带有压扁标记的提交。
++
+将配置变量 `rebase.autoSquash` 设为 true，可启用交互式变基默认自动清空功能。可以使用 `--no-autosquash`选项来覆盖该设置。
 +
 另请参阅下面的不兼容选项。
 
@@ -403,7 +405,9 @@ include::rerere-options.txt[]
 --no-reschedule-failed-exec::
 	自动重新安排执行失败的 `exec` 命令。这只有在交互模式下（或提供了 `--exec` 选项时）才有意义。
 +
-尽管该选项在启动一个变基操作时就会应用，但它会在启动时根据 `rebase.rescheduleFailedExec` 配置（参见 linkgit:git-config[1] 或下面的 “配置”）或是否提供了该选项为整个变基的设置。否则，如果存在 `rebase.rescheduleFailedExec=true` 配置，一开始明确的 `--no-reschedule-failed-exec` 就会被覆盖。
+一旦启动变基程序，该选项就会生效。它会在整个变基过程和中保留，依次基于初始 `git rebase` 所提供的命令行选项、`rebase.rescheduleFailedExec` 配置（参见 linkgit:git-config[1] 或下文的“配置”），或者默认为 false。
++
+为整个 rebase 记录该选项是为了方便起见。否则，当调用 `git rebase --continue` 时，在开始时显式的 `--no-reschedule-failed-exec` 会被 `rebase.rescheduleFailedExec=true` 配置覆盖。目前，不能向 `git rebase --continue` 传递 `--[no-]reschedule-failed-exec`。
 
 --update-refs::
 --no-update-refs::
@@ -448,14 +452,14 @@ include::rerere-options.txt[]
 
 `git rebase` 有两个主要的后台：‘应用’ 和 ‘合并’（‘应用’ 后台曾被称为 'am' 后台，但这个名字看起来像动词而非名词，因此引起了混淆）。 此外，‘合并’ 后台曾被称为交互式后台，但现在也用于非交互式情况。 两者都是根据各自的底层功能重新命名的）。这两个后台在行为方式上有一些微妙的区别：
 
-Empty commits
-~~~~~~~~~~~~~
+空提交
+~~~
 
 不幸的是，‘应用’ 后台会丢弃故意为空的提交，即开始时为空的提交，不过这种情况在实践中并不多见。 它还会丢弃变为空的提交，而且没有控制这种行为的选项。
 
 默认情况下，‘合并’ 后台会保留故意为空的提交（不过，如果使用 `-i` 选项，这些提交会在待办事项列表编辑器中标记为空，或者使用 `--no-keep-empty` 自动删除）。
 
-与应用后端类似，合并后端默认情况下也会丢弃变为空的提交，除非指定了 `-i` 或 `--interactive` 选项（在这种情况下，合并会停止并询问用户该怎么做）。 合并后端还有一个 `--empty={drop,keep,ask}` 选项，用于改变处理变为空的提交的行为。
+与应用后端类似，合并后端默认情况下也会丢弃变为空的提交，除非指定了 `-i` 或 `--interactive` 选项（在这种情况下，合并会停止并询问用户该怎么做）。 合并后端还有一个 `--empty=(drop|keep|ask)` 选项，用于改变处理变为空的提交的行为。
 
 目录重命名检测
 ~~~~~~~
@@ -464,22 +468,22 @@ Empty commits
 
 目录重命名检测与 ‘合并’ 后台协同工作，在这种情况下会向你发出警告。
 
-Context
-~~~~~~~
+上下文
+~~~
 
 ‘应用’ 后台的工作方式是创建一系列补丁（在内部调用 `format-patch`），然后依次应用这些补丁（在内部调用 `am`）。 补丁由多个块组成，每个块包含行号、上下文区域和实际更改。 行号的获取必须谨慎，因为另一方很可能在文件中插入或删除了更早的行。 上下文区域的目的是帮助找到如何调整行号，以便将更改应用到正确的行上。 但是，如果代码的多个区域有相同的上下文行，就可能选错。 在现实世界中，这种情况曾导致提交被错误地重新应用，而没有报告任何冲突。 将 `diff.context` 设置为更大的值可能会避免此类问题，但会增加发生虚假冲突的几率（因为需要更多行匹配的上下文才能应用）。
 
 ‘合并’ 后台使用每个相关文件的完整副本，从而避免了此类问题。
 
-Labelling of conflicts markers
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+给冲突标记贴标签
+~~~~~~~~
 
 当出现内容冲突时，合并机制会尝试在每一方的冲突标记上标注内容来源的提交。 由于 ‘应用’ 后台丢弃了关于重建的提交及其父提交的原始信息（而是根据生成的补丁中的有限信息生成新的假提交），因此无法识别这些提交，而只能使用提交摘要。 此外，当 `merge.conflictStyle` 设置为 `diff3` 或 `zdiff3` 时，‘应用’ 后端将使用 "constructed merge base"（构建的合并基础）来标注来自合并基础的内容，因此不会提供任何关于合并基础提交的信息。
 
 ‘合并’ 后台使用历史上双方的完整提交，因此没有这些限制。
 
-Hooks
-~~~~~
+钩子
+~~
 
 传统上，‘应用’ 后台并不调用提交后（post-commit）钩子，而 ‘合并’ 后台却调用了。 虽然 ‘合并’ 后台已取消了其输出，但两者都调用了检出后（post-checkout）钩子。 此外，这两个后端都只调用了变基操作的起点提交，而不是中间提交或最终提交的检出后（post-checkout）钩子。 在每种情况下，调用这些钩子都是偶然的，而不是设计出来的（两个后台最初都是以 shell 脚本的形式实现的，碰巧调用了其他会调用钩子的命令，如 `git checkout` 或 `git commit`）。 这两个后台应该具有相同的行为，但目前还不完全清楚哪一个才是正确的。 我们将来可能会让变基操作停止调用这些钩子。
 
@@ -506,10 +510,10 @@ Hooks
 
 include::merge-strategies.txt[]
 
-NOTES
------
+注释
+--
 
-You should understand the implications of using `git rebase` on a repository that you share. See also RECOVERING FROM UPSTREAM REBASE below.
+您应该了解在共享的版本库中使用 `git rebase` 的影响。 另请参阅下面的从上游重建中恢复。
 
 在运行变基命令时，如果存在 `pre-rebase` （变基前）钩子，它会首先执行该钩子。 您可以使用此钩子进行正确性检查，并在不合适时拒绝重置。 有关示例，请参阅模板 `pre-rebase`（变基前） 钩子脚本。
 
@@ -525,26 +529,26 @@ You should understand the implications of using `git rebase` on a repository tha
 1. 灵机一动
 2. 敲代码
 3. 编写提交系列
-4. submit
+4. 提交
 
 其中第 2 点由以下几个实例组成
 
 a) 常规使用
 
  1. 完成值得提交的事情
- 2. commit
+ 2. 提交
 
 b) 独立修复
 
  1. 发现有什么东西没有用
- 2. fix that
+ 2. 解决这个问题
  3. 提交
 
 有时，b.2.中修正的内容无法修正到它所修正的并不完美的提交中，因为该提交深埋在一系列补丁中。 这正是交互式变基的用途：在大量的 "a" 和 "b" 之后使用它，重新排列和编辑提交，将多个提交合并为一个提交。
 
 从您希望保留原样的最后一次提交开始：
 
-	git rebase -i <after-this-commit>
+	git rebase -i <本次提交后>
 
 编辑器会弹出当前分支的所有提交（忽略合并提交），这些提交都在给定提交之后。 你可以随心所欲地调整列表中提交的顺序，也可以删除它们。 列表大致如下：
 
@@ -606,7 +610,7 @@ exec cd subdir; make test
 
 当命令失败（即以非 0 状态退出）时，交互式变基操作就会停止，以便您有机会解决问题。您可以使用 `git rebase --continue` 继续。
 
-"exec" 命令在 shell（在 `$SHELL` 中指定的 shell，如果未设置 `$SHELL`，则使用默认 shell）中执行命令，因此可以使用 shell 功能（如 "cd"、">"、";"......）。命令从工作区的根目录运行。
+"exec" 命令在 shell（默认的 shell，通常是/bin/sh）中执行命令，因此可以使用 shell 功能（如 "cd"、">"、";"......）。命令从工作目录树的根目录运行。
 
 ----------------------------------
 $ git rebase -i --exec "make test"
@@ -747,14 +751,14 @@ NOTE: 虽然 ‘简单恢复案例’ 有时看似成功
 在下面的示例中，开发人员在一个重构了按钮定义方式的特性分支上工作，并在另一个特性分支上使用重构实现了 “报告错误” 按钮。`git log --graph --format=%s -5` 的输出可能是这样的：
 
 ------------
-*   Merge branch 'report-a-bug'
+*   合并分支 'report-a-bug'
 |\
-| * Add the feedback button
-* | Merge branch 'refactor-button'
+| * 添加反馈按钮
+* | 合并分支 'refactor-button'
 |\ \
 | |/
-| * Use the Button class for all buttons
-| * Extract a generic Button class from the DownloadButton one
+| * 为所有的按钮使用 Button 类
+| * 从 DownloadButton 类中提取一个通用 Button 类
 ------------
 
 开发人员可能希望在保留分支拓扑的同时，将这些提交重定向到更新的 `master` 分支，例如，当第一个特性分支比第二个分支更早集成到 `master` 分支时，开发人员可能希望解决与 “下载按钮” 类的合并冲突，因为 “下载按钮” 类已经集成到了 `master` 分支。

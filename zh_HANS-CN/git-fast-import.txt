@@ -43,7 +43,7 @@ fast-import 从标准输入端读取混合命令/数据流，并将一个或多�
 --cat-blob-fd=<fd>::
 	将对 `get-mark`、`cat-blob` 和 `ls` 查询的响应写入文件描述符 <fd> 而不是 `stdout`。 允许将面向最终用户的 `progress` 输出与其他输出分开。
 
---date-format=<fmt>::
+--date-format=<格式>::
 	指定前台在 `author`, `committer` 和 `tagger` 命令中提供给快速导入的日期类型。 有关支持的格式及其语法的详细信息，请参阅下面的 "日期格式"。
 
 --done::
@@ -52,13 +52,13 @@ fast-import 从标准输入端读取混合命令/数据流，并将一个或多�
 标记文件的位置
 ~~~~~~~
 
---export-marks=<file>::
+--export-marks=<文件>::
 	完成后将内部标记表转存到 <文件> 中。 标记以 `:markid SHA-1` 的形式每行写一个。 前端可在导入完成后使用此文件验证导入，或在增量运行时保存标记表。 由于 <文件> 只在检查点（或完成时）打开和截断，因此同样的路径也可以安全地提供给 --import-marks 文件。
 
---import-marks=<file>::
+--import-marks=<文件>::
 	在处理任何输入之前，加载 <文件> 中指定的标记。 输入文件必须存在，必须可读，必须使用与 --export-marks 生成的相同格式。 可以提供多个选项来导入多组标记。 如果一个标记被定义为不同的值，则以最后一个文件为准。
 
---import-marks-if-exists=<file>::
+--import-marks-if-exists=<文件>::
 	与 --import-marks 类似，但不会出错，而是在文件不存在时自动跳过。
 
 --[no-]relative-marks::
@@ -69,8 +69,8 @@ fast-import 从标准输入端读取混合命令/数据流，并将一个或多�
 重写子模块
 ~~~~~
 
---rewrite-submodules-from=<name>:<file>::
---rewrite-submodules-to=<name>:<file>::
+--rewrite-submodules-from=<名称>:<文件>::
+--rewrite-submodules-to=<名称>:<文件>::
 将 <名称> 指定的子模块的对象 ID 从 from <文件> 中使用的值重写为 to <文件> 中使用的值。from 标记应由 `git fast-export` 创建，而 to 标记应在导入同一子模块时由 `git fast-import` 创建。
 +
 <名称> 可以是不含冒号的任意字符串，但在指定相应标记时，两个选项必须使用相同的值。 可以使用不同的 <名称> 值指定多个子模块。不在相应的选项对中使用这些选项是错误的。
@@ -89,17 +89,17 @@ fast-import 从标准输入端读取混合命令/数据流，并将一个或多�
 --depth=<n>::
 	用于 blob 和树形脱模的最大脱模深度。 默认值为 50。
 
---export-pack-edges=<file>::
+--export-pack-edges=<文件>::
 	创建 packfile 后，向 <文件> 打印一行数据，列出 packfile 的文件名和写入该 packfile 的每个分支的最后一次提交。 在导入总对象集超过 4 GiB packfile 限制的项目后，这些信息可能会很有用，因为在调用 'git pack-objects' 时，这些提交可以用作边缘点。
 
 --max-pack-size=<n>::
 	每个输出包文件的最大大小。 默认为无限大。
 
 fastimport.unpackLimit::
-	See linkgit:git-config[1]
+	参见 linkgit:git-config[1]
 
-PERFORMANCE
------------
+性能
+--
 fast-import 的设计使其能够以最少的内存占用和处理时间导入大型项目。 假设前端能够跟上 fast-import 的速度，并向其提供源源不断的数据流，那么对于拥有 10 年以上历史、包含 100,000 多次单独提交的项目，通常只需 1-2 个小时就能完成导入，而且硬件配置也不高（约 2,000 美元）。
 
 大多数瓶颈似乎都出现在国外源数据访问（源无法以足够快的速度提取修订）或磁盘 IO（快速导入写入的速度与磁盘接受数据的速度一样快）上。 如果源数据存储在与目标 Git 仓库不同的驱动器上，导入速度会更快（因为 IO 竞争更少）。
@@ -135,8 +135,8 @@ fast-import 对输入的要求非常严格。 我们在下文中所说的 SP 是
 ~~~
 为了帮助调试前端，fast-import 会忽略任何以 `#`（ASCII 磅/散列）开头的行，包括以 `LF` 结尾的行。 注释行可以包含任何不包含 LF 的字节序列，因此可以用来包含任何详细的调试信息，这些信息可能是前端特有的，在检查 fast-import 数据流时也很有用。
 
-Date Formats
-~~~~~~~~~~~~
+日期格式
+~~~~
 支持以下日期格式。 前台应通过在 --date-format=<日期格式> 命令行选项中传递格式名称来选择导入时使用的格式。
 
 `raw`::
@@ -175,8 +175,8 @@ Date Formats
 +
 如果在 `commit` 中分别使用了 `authoe` 和 `committer` 命令，时间戳可能会不一致，因为系统时钟会轮询两次（每条命令一次）。 确保作者和提交者身份信息具有相同时间戳的唯一方法是省略 `author` 命令（因此从 `committer` 命令复制），或使用除 `now` 以外的其他日期格式。
 
-Commands
-~~~~~~~~
+命令
+~~
 fast-import 接受多条命令来更新当前仓库和控制当前导入过程。 稍后将对每条命令进行更详细的讨论（附示例）。
 
 `commit`::
@@ -306,7 +306,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 	文件的数据内容已由之前的 `blob` 命令提供。 前台只需将其连接起来即可。
 +
 ....
-	'M' SP <mode> SP <dataref> SP <path> LF
+	'M' SP <模式> SP <引用日期> SP <路径> LF
 ....
 +
 通常情况下，`<数据引用>` 必须是由之前的 `blob` 命令设置的标记引用 (`:<idnum>`)，或者是现有 Git blob 对象的完整 40 字节 SHA-1 值。 如果 `<模式>` 是 `040000``，则 `<数据引用>` 必须是现有 Git 树对象的完整 40 字节 SHA-1 或用 `--import-marks` 设置的标记引用。
@@ -326,7 +326,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 * `100644` 或 `644`： 普通（不可执行）文件。 大多数项目中的大部分文件都使用这种模式。 如果不知道用什么格式，请使用这种模式。
 * `100755` 或 `755`： 一个普通但可执行的文件。
 * `120000` ：符号链接，文件内容将成为链接目标。
-* `160000`: A gitlink, SHA-1 of the object refers to a commit in another repository. Git links can only be specified either by SHA or through a commit mark. They are used to implement submodules.
+* `160000` ： 一个 Git 链接，对象的 SHA-1 指向另一个仓库中的提交。Git 链接只能通过 SHA 或提交标记指定。它们用于实现子模块。
 * `040000` ：子目录。 子目录只能通过 SHA 或使用 `--import-marks` 设置的树形标记来指定。
 
 在这两种格式中，`<路径>` 都是要添加（如果尚未存在）或修改（如果已经存在）的文件的完整路径。
@@ -361,7 +361,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 递归复制现有文件或子目录到分支内的不同位置。 现有文件或目录必须存在。 如果目标位置存在，它将被从源位置复制的内容完全取代。
 
 ....
-	'C' SP <path> SP <path> LF
+	'C' SP <路径> SP <路径> LF
 ....
 
 这里第一个 `<路径>` 是源位置，第二个 `<路径>` 是目标位置。 关于 `<路径>` 的详细说明，请参阅上文的 `filemodify` 。 要使用包含 SP 的源路径，路径必须加引号。
@@ -373,7 +373,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 将现有文件或子目录重命名到分支内的不同位置。 现有文件或目录必须存在。如果目标目录存在，它将被源目录取代。
 
 ....
-	'R' SP <path> SP <path> LF
+	'R' SP <路径> SP <路径> LF
 ....
 
 这里第一个 `<路径>` 是源位置，第二个 `<路径>` 是目标位置。 关于 `<路径>` 的详细说明，请参阅上文的 `filemodify` 。 要使用包含 SP 的源路径，路径必须加引号。
@@ -402,7 +402,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 	注释的数据内容已由先前的 `blob` 命令提供。 前台只需将其连接到要注释的提交。
 +
 ....
-	'N' SP <dataref> SP <commit-ish> LF
+	'N' SP <引用日期> SP <提交号> LF
 ....
 +
 这里的 `<数据引用>` 既可以是之前的 `blob` 命令设置的标记引用（`:<idnum>`），也可以是现有 Git blob 对象的完整 40 字节 SHA-1 值。
@@ -526,9 +526,9 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 	fast-import 将通过搜索分隔符来计算长度。 这种格式主要用于测试，不建议用于真实数据。
 +
 ....
-	'data' SP '<<' <delim> LF
-	<raw> LF
-	<delim> LF
+	'data' SP '<<' <分隔符> LF
+	<原始格式> LF
+	<分隔符> LF
 	LF?
 ....
 +
@@ -599,7 +599,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 使 fast-import 将 blob 打印到先前用 `--cat-blob-fd` 参数安排的文件描述符。 该命令不会对当前导入产生任何影响；其主要目的是检索 fast-import 内存中的 blob，但目标存储库无法访问这些 blob。
 
 ....
-	'cat-blob' SP <dataref> LF
+	'cat-blob' SP <引用日期> LF
 ....
 
 `<数据引用>` 可以是之前设置的标记引用 (`:<idnum>`)，也可以是 Git blob 的完整 40 字节 SHA-1，可以是预先存在的，也可以是准备写入的。
@@ -625,14 +625,14 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 	这种形式只能在 `commit` 过程中使用。 路径命名 fast-import 活动提交中的目录条目。 在这种情况下，路径必须加引号。
 +
 ....
-	'ls' SP <path> LF
+	'ls' SP <路径> LF
 ....
 
 从命名树读取数据::
 	`<数据引用>` 可以是一个标记引用 ( `:<idnum>` )，也可以是 Git 标签、提交或树对象的完整 40 字节 SHA-1，可以是已存在的，也可以是等待写入的。 路径是相对于由 `<数据引用>` 命名的树的顶层的。
 +
 ....
-	'ls' SP <dataref> SP <path> LF
+	'ls' SP <引用日期> SP <路径> LF
 ....
 
 有关 `<路径>` 的详细说明，请参阅上文的 `filemodify` 。
@@ -640,7 +640,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 输出格式与 `git ls-tree <目录树> -- <路径>`相同：
 
 ====
-	<mode> SP ('blob' | 'tree' | 'commit') SP <dataref> HT <path> LF
+	<模式> SP ('blob' | 'tree' | 'commit') SP <引用日期> HT <路径> LF
 ====
 
 <数据引用> 表示 <路劲> 中的 blob、树或提交对象，可用于后面的 'get-mark'、'cat-blob'、'filemodify' 或 'ls' 命令。
@@ -667,7 +667,7 @@ date-format（日期格式）::
 export-marks（出口标记）::
 relative-marks::
 no-relative-marks::
-force::
+强制::
 	就像在命令行中传递了带前导 `--` 的相应命令行选项一样（见上文选项）。
 
 import-marks（入口标记）::
@@ -679,10 +679,10 @@ cat-blob::
 ls::
 	要求后端分别支持 'get-mark'、'cat-blob' 或 'ls' 命令。 不支持指定命令的 fast-import 版本在退出时会给出提示信息。 这样，导入过程中就不会在检测到不支持的命令之前浪费时间，而会在早期就出现明确的错误信息。
 
-notes::
+备注::
 	要求后端支持 'commit' 命令的 'notemodify'（N）子命令。 不支持备注的 fast-import 版本在退出时会显示相关信息。
 
-done::
+完成::
 	如果数据流在没有 'done' （完成）命令的情况下结束，就会出错。 如果没有这项功能，导致前端在流中某个适当位置突然结束的错误就可能不会被发现。 例如，如果一个导入前端在操作中途死亡，而没有在其下属的 git fast-import 实例中发出 SIGTERM 或 SIGKILL，就可能发生这种情况。
 
 `option`
@@ -693,7 +693,7 @@ done::
     'option' SP <选项> LF
 ....
 
-The `<option>` part of the command may contain any of the options listed in the OPTIONS section that do not change import semantics, without the leading `--` and is treated in the same way.
+`<选项>` 命令的一部分可能包含选项部分中列出的不更改导入语义的任何选项，而不更改前导 `--`，并且处理方式相同。
 
 选项命令必须是输入的第一条命令（不包括功能命令），在任何非选项命令之后给出选项命令都是错误的。
 
@@ -703,7 +703,7 @@ The `<option>` part of the command may contain any of the options listed in the 
 * import-marks（入口标记）
 * export-marks（出口标记）
 * cat-blob-fd
-* force
+* 强制
 
 `done`
 ~~~~~~
@@ -739,12 +739,12 @@ The `<option>` part of the command may contain any of the options listed in the 
 
 ====
 	$ cat >in <<END_OF_INPUT
-	# my very first test commit
+	# 我的第一次测试提交
 	commit refs/heads/master
 	committer Shawn O. Pearce <spearce> 19283 -0400
-	# who is that guy anyway?
+	# 那家伙到底是谁？
 	data <<EOF
-	this is my commit
+	这是我的提交
 	EOF
 	M 644 inline .gitignore
 	data <<EOF
@@ -805,7 +805,7 @@ last pack   :
 ~~~~~~~~~~
 在进行仓转换时，每个提交使用一个唯一的标记（`标记 :<n>`），并在命令行中提供 --export-marks 选项。 如果前端能将标记与源代码仓库绑定，就能通过比较每个 Git 提交和相应的源代码版本，轻松验证导入的准确性和完整性。
 
-Coming from a system such as Perforce or Subversion, this should be quite simple, as the fast-import mark can also be the Perforce changeset number or the Subversion revision number.
+从 Perforce 或 Subversion 等系统导入时，这应该非常简单，因为快速导入标记也可以是 Perforce 更改集编号或 Subversion 修订编号。
 
 自由跳转分支
 ~~~~~~
@@ -890,7 +890,7 @@ fast-import 根据一种简单的最近最少使用算法，自动将活动分�
 
 每个活动文件条目
 ~~~~~~~~
-活动树中的文件（和指向子树的指针）每个条目需要 52 或 64 字节（32/64 位平台）。 为了节省空间，文件名和树名被集中到一个通用的字符串表中，这样无论文件名 ''Makefile'' 在项目中出现多少次，都只需使用 16 个字节（包括字符串头开销）。
+活动目录树中的文件（和指向子目录树的指针）每个条目需要 52 或 64 字节（32/64 位平台）。 为了节省空间，文件名和目录树名被集中到一个通用的字符串表中，这样无论文件名 ''Makefile'' 在项目中出现多少次，都只需使用 16 个字节（包括字符串头开销）。
 
 活动分支 LRU 与文件名字符串池和子树的懒加载相结合，使 fast-import 能够在非常有限的内存空间内（每个活动分支小于 2.7 MiB）高效导入包含 2,000 多个分支和 45,114 多个文件的项目。
 

@@ -12,28 +12,28 @@ git-http-backend - Git 在 HTTP 上的服务器端实现
 
 描述
 --
-A simple CGI program to serve the contents of a Git repository to Git clients accessing the repository over http:// and https:// protocols. The program supports clients fetching using both the smart HTTP protocol and the backwards-compatible dumb HTTP protocol, as well as clients pushing using the smart HTTP protocol. It also supports Git's more-efficient "v2" protocol if properly configured; see the discussion of `GIT_PROTOCOL` in the ENVIRONMENT section below.
+一个简单的 CGI 程序，为通过 http:// 和 https:// 协议访问仓库的 Git 客户提供内容。 该程序支持客户端使用智能 HTTP 协议和向后兼容的哑 HTTP 协议获取内容，以及客户端使用智能 HTTP 协议推送内容。如果配置得当，它还支持 Git 更高效的 "v2" 协议；见下文环境部分关于`GIT_PROTOCOL` 的讨论。
 
 它验证该目录是否有魔术文件 "git-daemon-export-ok"，它将拒绝导出任何没有明确标记为这种方式导出的 Git 目录（除非设置了 `GIT_HTTP_EXPORT_ALL` 环境变量）。
 
-By default, only the `upload-pack` service is enabled, which serves 'git fetch-pack' and 'git ls-remote' clients, which are invoked from 'git fetch', 'git pull', and 'git clone'. If the client is authenticated, the `receive-pack` service is enabled, which serves 'git send-pack' clients, which is invoked from 'git push'.
+默认情况下，只有 `upload-pack` 服务被启用，它为 'git fetch-pack' 和 'git ls-remote' 客户端服务，这些客户端被 'git fetch'、'git pull' 和 'git clone' 调用。 如果客户端经过认证，`receive-pack` 服务将被启用，它为 'git send-pack' 客户端服务，该服务由 'git push' 调用。
 
 服务
 --
 这些服务可以使用每个库的配置文件来启用/禁用：
 
 http.getanyfile::
-	This serves Git clients older than version 1.6.6 that are unable to use the upload pack service. When enabled, clients are able to read any file within the repository, including objects that are no longer reachable from a branch but are still present. It is enabled by default, but a repository can disable it by setting this configuration value to `false`.
+	这是为 1.6.6 版本以上的 Git 客户端提供服务，它们无法使用上传包服务。 启用后，客户端能够读取仓库内的任何文件，包括不再能从分支到达但仍然存在的对象。 默认情况下是启用的，但仓库可以通过将此配置项设置为 `false` 来禁用它。
 
 http.uploadpack::
-	This serves 'git fetch-pack' and 'git ls-remote' clients. It is enabled by default, but a repository can disable it by setting this configuration value to `false`.
+	这为 'git fetch-pack' 和 'git ls-remote' 客户端服务。 它在默认情况下是启用的，但仓库可以通过将此配置项设置为`false`来禁用它。
 
 http.receivepack::
-	This serves 'git send-pack' clients, allowing push. It is disabled by default for anonymous users, and enabled by default for users authenticated by the web server. It can be disabled by setting this item to `false`, or enabled for all users, including anonymous users, by setting it to `true`.
+	这为 'git send-pack' 客户提供服务，允许推送。 默认情况下，它对匿名用户是禁用的，而对通过网络服务器认证的用户是启用的。 可以通过设置该项为 `false` 来禁用它，或者通过设置为 `true` 来为所有用户（包括匿名用户）启用。
 
 地址翻译
 ----
-To determine the location of the repository on disk, 'git http-backend' concatenates the environment variables PATH_INFO, which is set automatically by the web server, and GIT_PROJECT_ROOT, which must be set manually in the web server configuration. If GIT_PROJECT_ROOT is not set, 'git http-backend' reads PATH_TRANSLATED, which is also set automatically by the web server.
+为了确定磁盘上仓库的位置，'git http-backend' 将环境变量 PATH_INFO 和 GIT_PROJECT_ROOT 连接起来，前者由 Web 服务器自动设置，后者则必须在 Web 服务器配置中手动设置。 如果 GIT_PROJECT_ROOT 没有设置，'git http-backend '会读取 PATH_TRANSLATED，这也是由网络服务器自动设置的。
 
 实例
 --
@@ -90,7 +90,7 @@ RewriteRule ^/git/ - [E=AUTHREQUIRED:yes]
 </LocationMatch>
 ----------------------------------------------------------------
 +
-In this mode, the server will not request authentication until the client actually starts the object negotiation phase of the push, rather than during the initial contact. For this reason, you must also enable the `http.receivepack` config option in any repositories that should accept a push. The default behavior, if `http.receivepack` is not set, is to reject any pushes by unauthenticated users; the initial request will therefore report `403 Forbidden` to the client, without even giving an opportunity for authentication.
+在这种模式下，服务器将不会请求认证，直到客户端实际开始推送的对象协商阶段，而不是在最初的接触中。 由于这个原因，你必须在任何应该接受推送的存储库中启用 `http.receivepack` 配置选项。如果没有设置 `http.receivepack`，默认行为是拒绝任何未经认证的用户的推送；因此初始请求将向客户端报告 `403 Forbidden`，甚至不给认证机会。
 +
 要对读和写都要求认证，可以在仓库或它的一个父目录周围使用 Location 指令：
 +
@@ -126,7 +126,7 @@ ScriptAliasMatch ^/git/[^/]*(.*) /usr/libexec/git-core/git-http-backend/storage.
 ----------------------------------------------------------------
 
 加速静态 Apache 2.x::
-	Similar to the above, but Apache can be used to return static files that are stored on disk. On many systems this may be more efficient as Apache can ask the kernel to copy the file contents from the file system directly to the network:
+	与上述情况类似，但 Apache 可以用来返回存储在磁盘上的静态文件。 在许多系统上，这可能更有效率，因为 Apache 可以要求内核将文件内容从文件系统直接复制到网络上：
 +
 ----------------------------------------------------------------
 SetEnv GIT_PROJECT_ROOT /var/www/git
@@ -212,7 +212,7 @@ $HTTP["url"] =~ "^/git/private" {
 
 `GIT_HTTP_EXPORT_ALL` 环境变量可以传递给 'git-http-backend'，以绕过在允许导出每个仓库前对 "git-daemon-export-ok" 文件的检查。
 
-The `GIT_HTTP_MAX_REQUEST_BUFFER` environment variable (or the `http.maxRequestBuffer` config option) may be set to change the largest ref negotiation request that git will handle during a fetch; any fetch requiring a larger buffer will not succeed. This value should not normally need to be changed, but may be helpful if you are fetching from a repository with an extremely large number of refs. The value can be specified with a unit (e.g., `100M` for 100 megabytes). The default is 10 megabytes.
+`GIT_HTTP_MAX_REQUEST_BUFFER` 环境变量（或 `http.maxRequestBuffer` 配置变量）可以被设置为改变 git 在获取过程中所处理的最大引用协商请求；任何需要更大缓冲区的获取将不会成功。 这个值通常不需要改变，但如果你从一个有大量引用的仓库中获取，可能会有帮助。 这个值可以指定一个单位（例如，`100M` 表示 100 兆字节）。默认是 10 兆字节。
 
 客户端可以使用 `Git-Protocol` HTTP 头来探测可选的协议能力（如 v2 协议）。为了支持这些，该标头的内容必须出现在 `GIT_PROTOCOL` 环境变量中。大多数网络服务器将通过 `HTTP_GIT_PROTOCOL` 变量把这个头传递给 CGI，`git-http-backend` 将自动把它复制到 `GIT_PROTOCOL`。然而，一些网络服务器可能对他们要传递的头信息更有选择性，在这种情况下，他们需要明确配置（见前面例子部分的 Apache 配置中对 `Git-Protocol` 的提及）。
 

@@ -25,7 +25,7 @@ git-send-pack - 通过 Git 协议将对象推送到另一个仓库
 选项
 --
 --receive-pack=<git-receive-pack>::
-	Path to the 'git-receive-pack' program on the remote end. Sometimes useful when pushing to a remote repository over ssh, and you do not have the program in a directory on the default $PATH.
+	到远端的 'git-receive-pack' 程序的路径。 当通过 ssh 推送到远程版本库，而你没有在默认的 $PATH 目录下的程序时，有时会很有用。
 
 --exec=<git-receive-pack>::
 	与 --receive-pack=<git-receive-pack> 相同。
@@ -42,7 +42,7 @@ git-send-pack - 通过 Git 协议将对象推送到另一个仓库
 	做除了实际发送更新外的所有事。
 
 --force::
-	Usually, the command refuses to update a remote ref that is not an ancestor of the local ref used to overwrite it. This flag disables the check. This means that the remote repository can lose commits; use it with care.
+	通常情况下，命令拒绝更新一个不是用来覆盖它的本地引用的祖先远程引用。 这个标志可以禁止这种检查。 这意味着远程仓库可能会丢失提交，使用时要小心。
 
 --verbose::
 	详细运行。
@@ -55,13 +55,13 @@ git-send-pack - 通过 Git 协议将对象推送到另一个仓库
 
 --[no-]signed::
 --signed=(true|false|if-asked)::
-	GPG-sign the push request to update refs on the receiving side, to allow it to be checked by the hooks and/or be logged. If `false` or `--no-signed`, no signing will be attempted. If `true` or `--signed`, the push will fail if the server does not support signed pushes. If set to `if-asked`, sign if and only if the server supports signed pushes. The push will also fail if the actual call to `gpg --sign` fails. See linkgit:git-receive-pack[1] for the details on the receiving end.
+	对推送请求进行 GPG 签名，以更新接收方的引用，使其能够被钩子检查和/或被记录下来。 如果指定 `false` 或 `--no-signed`，将不尝试签名。 如果指定 `true` 或 `--signed`，且服务器不支持签名推送，推送将失败。 如果设置为 `if-asked`，仅当服务器支持签名推送时才签名。 如果实际调用 `gpg --sign` 失败，推送也将失败。 关于接收端的细节，见 linkgit:git-receive-pack[1]。
 
 --push-option=<字符串>::
-	Pass the specified string as a push option for consumption by hooks on the server side. If the server doesn't support push options, error out. See linkgit:git-push[1] and linkgit:githooks[5] for details.
+	传递指定字符串作为推送选项，供服务器端的钩子使用。 如果服务器不支持推送选项，则会出错。 详情参见 linkgit:git-push[1] 和 linkgit:githooks[5]。
 
 <主机>::
-	A remote host to house the repository. When this part is specified, 'git-receive-pack' is invoked via ssh.
+	存放仓库的远程主机。 如果指定了这一部分，就会通过 ssh 调用 "git-receive-pack"。
 
 <目录>::
 	要更新的仓库。
@@ -75,13 +75,13 @@ git-send-pack - 通过 Git 协议将对象推送到另一个仓库
 
 有三种方法可以指定在远程端更新哪些参考文件。
 
-With the `--all` flag, all refs that exist locally are transferred to the remote side. You cannot specify any '<ref>' if you use this flag.
+使用 `--all` 标志时，本地存在的所有引用都会被传输到远端。 使用该标记时，不能指定任何 `<引用>`。
 
 如果不使用 `--all`，也不使用任何 `<引用>`，本地和远程都存在的磁头都会被更新。
 
-When one or more '<ref>' are specified explicitly (whether on the command line or via `--stdin`), it can be either a single pattern, or a pair of such patterns separated by a colon ":" (this means that a ref name cannot have a colon in it). A single pattern '<name>' is just shorthand for '<name>:<name>'.
+当一个或多个 '<引用>' 被明确指定时（无论是在命令行还是通过 `--stdin`），它既可以是一个单独的模式，也可以是一对由冒号 ":" 分隔的模式（这意味着引用名称中不能有冒号）。 单一模式 '<名称>' 只是 '<名称>:<名称>' 的简称。
 
-Each pattern pair consists of the source side (before the colon) and the destination side (after the colon). The ref to be pushed is determined by finding a match that matches the source side, and where it is pushed is determined by using the destination side. The rules used to match a ref are the same rules used by 'git rev-parse' to resolve a symbolic ref name. See linkgit:git-rev-parse[1].
+每个模式对包括源端（冒号前）和目标端（冒号后）。 要推送的引用是通过找到与源侧相匹配的匹配来确定的，而推送到哪里则是通过目的地侧来确定的。用于匹配引用的规则与 "git rev-parse" 用于解析符号引用名称的规则相同。参见 linkgit:git-rev-parse[1]。
 
  - 如果 <源端> 与一个本地引用不完全匹配，则会出错。
 
@@ -93,7 +93,7 @@ Each pattern pair consists of the source side (before the colon) and the destina
 
    * <src> == <dst>，并且与 <src> 相匹配的引用必须不存在于远程引用集合中；本地匹配的 <src>引用被用作目的地的名称。
 
-Without `--force`, the <src> ref is stored at the remote only if <dst> does not exist, or <dst> is a proper subset (i.e. an ancestor) of <src>. This check, known as the "fast-forward check", is performed to avoid accidentally overwriting the remote ref and losing other people's commits from there.
+如果不使用 `--force`，只有当 <目标> 不存在，或者 <目标> 是 <源> 的适当子集（即祖先）时，<源> 引用才会被存储到远程引用中。 这种检查被称为 "快进检查"（fast-forward check），执行这种检查是为了避免意外覆盖远程引用并丢失其他人从那里提交的内容。
 
 使用 `--force`，所有裁判的快进检查都被禁用。
 
