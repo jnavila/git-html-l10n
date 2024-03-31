@@ -458,17 +458,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>git bisect start [--term-(new|bad)=&lt;term-new&gt; --term-(old|good)=&lt;term-old&gt;]
-	  [--no-checkout] [--first-parent] [&lt;bad&gt; [&lt;good&gt;...]] [--] [&lt;pathspec&gt;...]
-git bisect (bad|new|&lt;term-new&gt;) [&lt;rev&gt;]
-git bisect (good|old|&lt;term-old&gt;) [&lt;rev&gt;...]
+<pre>git bisect start [--term-{new,bad}=&lt;term&gt; --term-{old,good}=&lt;term&gt;]
+	  [--no-checkout] [--first-parent] [&lt;坏的&gt; [&lt;好的&gt;...]] [--] [&lt;路径规范&gt;...]
+git bisect (bad|new|&lt;新 term&gt;) [&lt;修订&gt;]
+git bisect (good|old|&lt;旧 term&gt;) [&lt;修订&gt;...]
 git bisect terms [--term-good | --term-bad]
-git bisect skip [(&lt;rev&gt;|&lt;range&gt;)...]
-git bisect reset [&lt;commit&gt;]
+git bisect skip [(&lt;修订&gt;|&lt;范围&gt;)...]
+git bisect reset [&lt;提交&gt;]
 git bisect (visualize|view)
-git bisect replay &lt;logfile&gt;
+git bisect replay &lt;日志文件&gt;
 git bisect log
-git bisect run &lt;cmd&gt; [&lt;arg&gt;...]
+git bisect run &lt;命令&gt;...
 git bisect help</pre>
 </div>
 </div>
@@ -540,7 +540,7 @@ $ git bisect good v2.6.13-rc2    # v2.6.13-rc2 已知为好</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>By default, this will return your tree to the commit that was checked out before <code>git bisect start</code>. (A new <code>git bisect start</code> will also do that, as it cleans up the old bisection state.)</p>
+<p>默认情况下，这将使你的树返回到 <code>git bisect start</code> 之前检查出来的提交。 (新的 <code>git bisect start</code> 也会这样做，因为它清理了旧的分界状态）</p>
 </div>
 <div class="paragraph">
 <p>通过一个可选参数，你可以返回到一个不同的提交，而不是：</p>
@@ -634,10 +634,10 @@ $ git bisect good v2.6.13-rc2    # v2.6.13-rc2 已知为好</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Git detects a graphical environment through various environment variables: <code>DISPLAY</code>, which is set in X Window System environments on Unix systems. <code>SESSIONNAME</code>, which is set under Cygwin in interactive desktop sessions. <code>MSYSTEM</code>, which is set under Msys2 and Git for Windows. <code>SECURITYSESSIONID</code>, which may be set on macOS in interactive desktop sessions.</p>
+<p>Git 通过各种环境变量检测图形环境：<code>DISPLAY</code>，在 Unix 系统的 X 窗口系统环境中设置。 <code>SESSIONNAME</code> （会话名），在 Cygwin 下的交互式桌面会话中设置。 <code>MSYSTEM</code>，在 Msys2 和 Git for Windows 下设置。 <code>SECURITYSESSIONID</code>，可在 macOS 上的交互式桌面会话中设置。</p>
 </div>
 <div class="paragraph">
-<p>If none of these environment variables is set, <em>git log</em> is used instead. You can also give command-line options such as <code>-p</code> and <code>--stat</code>.</p>
+<p>如果没有设置这些环境变量，则会使用 <em>git log</em>。 您也可以提供命令行选项，如 <code>-p</code> 和 <code>--stat</code>。</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -725,7 +725,7 @@ $ git reset --hard HEAD~3               # 尝试 3 次修改，然后再
 <div class="sect2">
 <h3 id="_通过提供更多的参数来削减二分查找的起点">通过提供更多的参数来削减二分查找的起点</h3>
 <div class="paragraph">
-<p>You can further cut down the number of trials, if you know what part of the tree is involved in the problem you are tracking down, by specifying pathspec parameters when issuing the <code>bisect start</code> command:</p>
+<p>如果你知道你要追踪的问题涉及到树的哪一部分，你可以通过在发出 <code>bisect start</code> 命令时指定路径参数来进一步减少试验的数量：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -766,7 +766,7 @@ $ git reset --hard HEAD~3               # 尝试 3 次修改，然后再
 <p>你可能经常发现，在一个二分查找会话中，你想让临时的修改（例如，头文件中的 /#define DEBUG 0/#define DEBUG 1/，或者 “没有这个提交的版本需要应用这个补丁来解决这个查找不感兴趣的另一个问题”）应用到正在测试的版本中。</p>
 </div>
 <div class="paragraph">
-<p>To cope with such a situation, after the inner <em>git bisect</em> finds the next revision to test, the script can apply the patch before compiling, run the real test, and afterwards decide if the revision (possibly with the needed patch) passed the test and then rewind the tree to the pristine state. Finally the script should exit with the status of the real test to let the <code>git bisect run</code> command loop determine the eventual outcome of the bisect session.</p>
+<p>为了应对这种情况，在内部的 <em>git bisect</em> 找到要测试的下一个修订版后，脚本可以在编译前应用补丁，运行真正的测试，之后决定该修订版（可能有需要的补丁）是否通过测试，然后将树倒回原始状态。 最后，脚本应该以真实测试的状态退出，让 <code>git bisect run</code> 命令循环决定二分查找会话的最终结果。</p>
 </div>
 </div>
 </div>
@@ -779,7 +779,7 @@ $ git reset --hard HEAD~3               # 尝试 3 次修改，然后再
 <dt class="hdlist1">--no-checkout</dt>
 <dd>
 <div class="paragraph">
-<p>Do not checkout the new working tree at each iteration of the bisection process. Instead just update the reference named <code>BISECT_HEAD</code> to make it point to the commit that should be tested.</p>
+<p>在二分查找过程的每个迭代中，不要检出新的工作区。相反，只需更新一个名为 <code>BISECT_HEAD</code> 的引用，使其指向应被测试的提交。</p>
 </div>
 <div class="paragraph">
 <p>当你在每个步骤中执行的测试不需要检查出来的目录树时，这个选项可能很有用。</p>
@@ -843,7 +843,7 @@ $ git bisect reset                   # 退出二分查找会话</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Here we use a <code>test.sh</code> custom script. In this script, if <code>make</code> fails, we skip the current commit. <code>check_test_case.sh</code> should <code>exit 0</code> if the test case passes, and <code>exit 1</code> otherwise.</p>
+<p>这里我们使用一个 <code>test.sh `自定义脚本。在这个脚本中，如果 `make</code> 失败，我们就跳过当前的提交。 <code>check_test_case.sh</code> 如果测试用例通过，应该 <code>exit 0</code>，否则 <code>exit 1</code>。</p>
 </div>
 <div class="paragraph">
 <p>如果 <code>test.sh</code> 和 `check_test_case.sh `都在仓库之外，以防止 bisect、make 和 test 进程与脚本之间的相互作用，这样会更安全。</p>
@@ -947,7 +947,7 @@ $ git bisect broken HEAD~10</pre>
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>link:git-bisect-lk2009.html [用 git bisect 对抗回归]，<a href="git-blame.html">git-blame(1)</a>。</p>
+<p><a href="git-bisect-lk2009.html">用 git bisect 对抗回归</a>，<a href="git-blame.html">git-blame(1)</a>。</p>
 </div>
 </div>
 </div>
@@ -962,7 +962,7 @@ $ git bisect broken HEAD~10</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-02-10 19:07:35 +0100
+Last updated 2024-03-31 10:42:45 +0200
 </div>
 </div>
 </body>

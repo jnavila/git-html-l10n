@@ -463,7 +463,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>对于标签，它显示标签信息和引用的对象。</p>
 </div>
 <div class="paragraph">
-<p>对于目录树，它显示名字（相当于&#8217;git ls-tree&#8217;添加了&#8212;&#8203;name-only选项）。</p>
+<p>对于目录树，它显示名字（相当于 <em>git ls-tree</em> 添加了 --name-only 选项）。</p>
 </div>
 <div class="paragraph">
 <p>对于普通二进制对象，它显示普通内容。</p>
@@ -483,12 +483,78 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">&lt;对象&gt;&#8230;&#8203;</dt>
 <dd>
-<p>The names of objects to show (defaults to <em>HEAD</em>). For a more complete list of ways to spell object names, see "SPECIFYING REVISIONS" section in <a href="gitrevisions.html">gitrevisions(7)</a>.</p>
+<p>要显示的对象的名称（默认为&#8217;HEAD'）。 更完整的对象名称拼写方式列表，请参见 <a href="gitrevisions.html">gitrevisions(7)</a> 中的 "特别修订" 部分。</p>
 </dd>
-</dl>
+<dt class="hdlist1">--pretty[=&lt;格式&gt;]</dt>
+<dt class="hdlist1">--format=&lt;格式&gt;</dt>
+<dd>
+<p>以指定的格式打印提交日志的内容，其中'&lt;format&gt;'可以是&#8217;oneline'、<em>short</em>、<em>medium</em>、<em>full</em>、<em>fuller</em>、<em>reference</em>、<em>email</em>、<em>raw</em>、<em>format:&lt;string&gt;'和&#8217;tformat:&lt;string&gt;'之一。 当</em>&lt;format&gt;'不是上述任何一种，并且其中有'%placeholder&#8217;时，它的作用就像给出'--pretty=tformat:&lt;format&gt;'一样。</p>
+<div class="paragraph">
+<p>参见 "PRETTY FORMATS "部分，了解每种格式的一些额外细节。 当'=&lt;格式&gt;'部分被省略时，它默认为&#8217;中等'。</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-show.txt - include::pretty-options.txt[]</p>
+<p>注意：你可以在版本库配置中指定默认的漂亮格式（见<a href="git-config.html">git-config(1)</a>）。</p>
+</div>
+</dd>
+<dt class="hdlist1">--abbrev-commit</dt>
+<dd>
+<p>不要显示完整的40字节的十六进制提交对象名称，而是显示一个前缀，以唯一的方式命名该对象。 "--abbrev=&lt;n&gt;"选项可以用来指定前缀的最小长度（如果显示的话，它也会修改diff输出）。</p>
+<div class="paragraph">
+<p>这应该使"--pretty=oneline "对于使用80列终端的人来说更容易阅读。</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-abbrev-commit</dt>
+<dd>
+<p>显示完整的40字节十六进制的提交对象名称。这否定了`--abbrev-commit`，无论是明确的还是由其他选项如"--oneline "暗示的。它还覆盖了`log.abbrevCommit`变量。</p>
+</dd>
+<dt class="hdlist1">--oneline</dt>
+<dd>
+<p>这是"--pretty=oneline --abbrev-commit "的简写，一起使用。</p>
+</dd>
+<dt class="hdlist1">--encoding=&lt;编码&gt;</dt>
+<dd>
+<p>提交对象会在其编码头中记录日志信息使用的字符编码；该选项可用于告诉命令以用户偏好的编码重新编码提交日志信息。 对于非底层命令，默认编码为 UTF-8。需要注意的是，如果对象声称以 <code>X</code> 编码，而我们以 <code>X</code> 输出，我们将逐字输出该对象；这意味着原始提交中的无效序列可能会被复制到输出中。同样，如果 iconv(3) 无法转换提交，我们也会静静地逐字输出原始对象。</p>
+</dd>
+<dt class="hdlist1">--expand-tabs=&lt;n&gt;</dt>
+<dt class="hdlist1">--expand-tabs</dt>
+<dt class="hdlist1">--no-expand-tabs</dt>
+<dd>
+<p>在输出中显示之前，在日志信息中进行标签扩展（用足够的空格替换每个标签，以填充到下一个显示列的 <em>&lt;n&gt;</em> 的倍数）。 <code>--expand-tabs</code> 是 <code>--expand-tabs=8</code> 的简写，<code>--no-expand-tabs</code> 是 <code>--expand-tabs=0</code> 的简写，它禁止标签扩展。</p>
+<div class="paragraph">
+<p>默认情况下，标签会以漂亮的格式展开，将日志信息缩进4个空格（即 "中"，这是默认的，"全"，和 "更全"）。</p>
+</div>
+</dd>
+<dt class="hdlist1">--notes[=&lt;引用&gt;]</dt>
+<dd>
+<p>在显示提交日志信息时，显示注释提交的说明（见<a href="git-notes.html">git-notes(1)</a>）。 这是`git log`、<code>git show`和`git whatchanged`命令的默认设置，当命令行中没有给出</code>--pretty`、<code>--format`或</code>--oneline`选项时。</p>
+<div class="paragraph">
+<p>默认情况下，显示的注释来自于`core.notesRef`和`notes.displayRef`变量（或相应的环境覆盖）中列出的注释参考。更多细节见<a href="git-config.html">git-config(1)</a>。</p>
+</div>
+<div class="paragraph">
+<p>有了一个可选的 <em>&lt;引用&gt;</em> 参数，就可以使用引用来寻找要显示的笔记。 当引用以 <code>refs/notes/</code> 开头时，可以指定完整的引用名称；当它以 <code>notes/</code> 开头时， <code>refs/</code> ，否则 <code>refs/notes/</code> 前缀，形成引用的全名。</p>
+</div>
+<div class="paragraph">
+<p>多个&#8212;&#8203;音符选项可以组合起来，控制哪些音符被显示。例如。"--notes=foo "将只显示来自 "refs/notes/foo "的注释；"--notes=foo --notes "将同时显示来自 "refs/notes/foo "和默认注释的注释。</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-notes</dt>
+<dd>
+<p>不显示注释。这否定了上面的`--notes`选项，因为它重新设置了显示注释的注释列表。 选项按照命令行给出的顺序进行解析，因此，例如"--notes --notes=foo --no-notes --notes=bar "将只显示来自 "refs/notes/bar "的注释。</p>
+</dd>
+<dt class="hdlist1">--show-notes-by-default</dt>
+<dd>
+<p>显示默认备注，除非给出了显示特定备注的选项。</p>
+</dd>
+<dt class="hdlist1">--show-notes[=&lt;引用&gt;]</dt>
+<dt class="hdlist1">--[no-]standard-notes</dt>
+<dd>
+<p>这些选项已被废弃。请使用上面的 --notes/--no-notes 选项来代替。</p>
+</dd>
+<dt class="hdlist1">--show-signature</dt>
+<dd>
+<p>通过将签名传递给 <code>gpg --verify</code> 来检查已签名的提交对象的有效性，并显示输出。</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
@@ -496,7 +562,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_漂亮的格式">漂亮的格式</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If the commit is a merge, and if the pretty-format is not <em>oneline</em>, <em>email</em> or <em>raw</em>, an additional line is inserted before the <em>Author:</em> line. This line begins with "Merge: " and the hashes of ancestral commits are printed, separated by spaces. Note that the listed commits may not necessarily be the list of the <strong>direct</strong> parent commits if you have limited your view of history: for example, if you are only interested in changes related to a certain directory or file.</p>
+<p>如果提交是一个合并，并且如果pretty-format不是 "oneline"、"email "或 "raw"，那么在 "Author: "一行之前会插入一个附加行。 这一行的开头是 "Merge:这一行以 "Merge: "开头，并打印出祖先提交的哈希值，用空格分隔。 请注意，如果你限制了你的历史视图，那么列出的提交不一定是*直接*父级提交的列表：例如，如果你只对与某个目录或文件有关的修改感兴趣。</p>
 </div>
 <div class="paragraph">
 <p>有几种内置的格式，你可以通过将 pretty.&lt;名称&gt; 配置选项设置为另一种格式名称或 <em>format:</em> 字符串来定义额外的格式，如下所述（见 <a href="git-config.html">git-config(1)</a> ）。下面是内置格式的细节：</p>
@@ -598,7 +664,7 @@ CommitDate: &lt;提交者提交日期&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This format is used to refer to another commit in a commit message and is the same as <code>--pretty='format:%C(auto)%h (%s, %ad)'</code>. By default, the date is formatted with <code>--date=short</code> unless another <code>--date</code> option is explicitly specified. As with any <code>format:</code> with format placeholders, its output is not affected by other options like <code>--decorate</code> and <code>--walk-reflogs</code>.</p>
+<p>这种格式用于在提交信息中引用另一个提交，与`--pretty='format:%C(auto)%h (%s, %ad)'相同。 默认情况下，日期的格式为`--date=short`，除非明确指定其他`--date`选项。 与任何带有格式占位符的`format:<code>一样，其输出不受其他选项的影响，如</code>--decorate`和`--walk-reflogs`。</p>
 </div>
 </li>
 <li>
@@ -626,7 +692,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <li>
 <p><em>raw</em></p>
 <div class="paragraph">
-<p>The <em>raw</em> format shows the entire commit exactly as stored in the commit object. Notably, the hashes are displayed in full, regardless of whether --abbrev or --no-abbrev are used, and <em>parents</em> information show the true parent commits, without taking grafts or history simplification into account. Note that this format affects the way commits are displayed, but not the way the diff is shown e.g. with <code>git log --raw</code>. To get full object names in a raw diff format, use <code>--no-abbrev</code>.</p>
+<p>原始 "格式显示的是整个提交对象中存储的内容。 值得注意的是，无论是否使用了 --abbrev 或 --no-abbrev，哈希值都会被完整地显示出来，而&#8217;parent&#8217;信息会显示真正的父级提交，不会考虑移花接木或历史简化。注意，这种格式会影响提交的显示方式，但不会影响diff的显示方式，比如用`git log --raw`来显示。要获得原始差异格式的完整对象名称，请使用`--no-abbrev`。</p>
 </div>
 </li>
 <li>
@@ -689,7 +755,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 </dd>
 <dt class="hdlist1"><em>%C(&#8230;&#8203;)</em></dt>
 <dd>
-<p>color specification, as described under Values in the "CONFIGURATION FILE" section of <a href="git-config.html">git-config(1)</a>. By default, colors are shown only when enabled for log output (by <code>color.diff</code>, <code>color.ui</code>, or <code>--color</code>, and respecting the <code>auto</code> settings of the former if we are going to a terminal). <code>%C(auto,...)</code> is accepted as a historical synonym for the default (e.g., <code>%C(auto,red)</code>). Specifying <code>%C(always,...)</code> will show the colors even when color is not otherwise enabled (though consider just using <code>--color=always</code> to enable color for the whole output, including this format and anything else git might color). <code>auto</code> alone (i.e. <code>%C(auto)</code>) will turn on auto coloring on the next placeholders until the color is switched again.</p>
+<p>颜色规范，如<a href="git-config.html">git-config(1)</a>的 "配置文件 "部分中的数值描述。 默认情况下，只有在启用日志输出时才会显示颜色（通过 <code>color.diff</code>, <code>color.ui</code>, 或 <code>--color</code>, 如果我们要去终端，要尊重前者的`auto`设置）。<code>%C(auto,...)`被接受为默认的历史同义词（例如，</code>%C(auto,red)<code>）。指定</code>%C(always,&#8230;&#8203;)<code>将显示颜色，即使没有启用颜色（尽管考虑使用</code>--color=always`来启用整个输出的颜色，包括这个格式和其他任何git可能的颜色）。 <code>auto`单独使用（即</code>%C(auto)`）将在下一个占位符上开启自动着色，直到再次切换颜色。</p>
 </dd>
 <dt class="hdlist1"><em>%m</em></dt>
 <dd>
@@ -701,11 +767,11 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 </dd>
 <dt class="hdlist1"><em>%&lt;(&lt;N&gt;[,trunc|ltrunc|mtrunc])</em></dt>
 <dd>
-<p>make the next placeholder take at least N column widths, padding spaces on the right if necessary. Optionally truncate (with ellipsis <em>..</em>) at the left (ltrunc) <code>..ft</code>, the middle (mtrunc) <code>mi..le</code>, or the end (trunc) <code>rig..</code>, if the output is longer than N columns. Note 1: that truncating only works correctly with N &gt;= 2. Note 2: spaces around the N and M (see below) values are optional. Note 3: Emojis and other wide characters will take two display columns, which may over-run column boundaries. Note 4: decomposed character combining marks may be misplaced at padding boundaries.</p>
+<p>使下一个占位符至少占用 N 列宽，必要时在右侧填充空格。 如果输出超过 N 列，可选择在左侧（ltrunc）<code>..ft</code>、中间（mtrunc）<code>mi..le</code> 或末尾（trunc）<code>rig..</code> 截断（用省略号 <em>..</em> ）。 注意 1：截断只在 N &gt;= 2 时有效。 注 2：N 和 M（见下文）值周围的空格为可选项。 注 3：表情符号和其他宽字符将占用两个显示列，可能会超出列边界。 注 4：分解字符组合标记可能会在填充边界处错位。</p>
 </dd>
 <dt class="hdlist1"><em>%&lt;|(&lt;M&gt;)</em></dt>
 <dd>
-<p>make the next placeholder take at least until Mth display column, padding spaces on the right if necessary. Use negative M values for column positions measured from the right hand edge of the terminal window.</p>
+<p>使下一个占位符至少显示到第 M 列，必要时在右侧填充空格。 从终端窗口右侧边缘测量的列位置使用负 M 值。</p>
 </dd>
 <dt class="hdlist1"><em>%&gt;(&lt;N&gt;)</em>, <em>%&gt;|(&lt;M&gt;)</em></dt>
 <dd>
@@ -876,13 +942,13 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <div class="ulist">
 <ul>
 <li>
-<p><em>prefix=&lt;value&gt;</em>: Shown before the list of ref names. Defaults to "&#160;<code>(</code>".</p>
+<p><em>prefix=&lt;值&gt;</em>： 显示在引用名称列表之前。 默认为 "&#160;<code>(</code>"。</p>
 </li>
 <li>
-<p><em>suffix=&lt;value&gt;</em>: Shown after the list of ref names. Defaults to "<code>)</code>".</p>
+<p><em>suffix=&lt;值&gt;</em>： 显示在引用名称列表之后。 默认为 "<code>)</code>"。</p>
 </li>
 <li>
-<p><em>separator=&lt;value&gt;</em>: Shown between ref names. Defaults to "<code>,</code>&#160;".</p>
+<p><em>separator=&lt;值&gt;</em>： 显示在引用名称之间。 默认为 "<code>,</code>&#160;"。</p>
 </li>
 <li>
 <p><em>point=&lt;值&gt;</em>： 显示在 HEAD 和其指向的分支（如果有）之间。
@@ -910,7 +976,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <dl>
 <dt class="hdlist1"><em>%(describe[:&lt;选项&gt;])</em></dt>
 <dd>
-<p>human-readable name, like <a href="git-describe.html">git-describe(1)</a>; empty string for undescribable commits. The <code>describe</code> string may be followed by a colon and zero or more comma-separated options. Descriptions can be inconsistent when tags are added or removed at the same time.</p>
+<p>人类可读的名字，像<a href="git-describe.html">git-describe(1)</a>；空字符串表示不可描述的提交。 `describe`字符串后面可以有冒号和零个或多个逗号分隔的选项。 当标签同时被添加或删除时，描述可能不一致。</p>
 <div class="ulist">
 <ul>
 <li>
@@ -962,7 +1028,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 </dd>
 <dt class="hdlist1"><em>%G?</em></dt>
 <dd>
-<p>show "G" for a good (valid) signature, "B" for a bad signature, "U" for a good signature with unknown validity, "X" for a good signature that has expired, "Y" for a good signature made by an expired key, "R" for a good signature made by a revoked key, "E" if the signature cannot be checked (e.g. missing key) and "N" for no signature</p>
+<p>显示 "G" 代表一个好的（有效的）签名，"B" 代表一个坏的签名，"U" 代表一个有效性未知的好的签名，"X" 代表一个已经过期的好的签名，"Y" 代表一个由过期的钥匙制作的好的签名，"R" 代表一个由撤销的 钥匙制作的好的签名，"E" 如果不能检查签名（如缺少钥匙），"N" 代表没有签名</p>
 </dd>
 <dt class="hdlist1"><em>%GS</em></dt>
 <dd>
@@ -1018,7 +1084,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <div class="ulist">
 <ul>
 <li>
-<p><em>key=&lt;key&gt;</em>: only show trailers with specified &lt;key&gt;. Matching is done case-insensitively and trailing colon is optional. If option is given multiple times trailer lines matching any of the keys are shown. This option automatically enables the <code>only</code> option so that non-trailer lines in the trailer block are hidden. If that is not desired it can be disabled with <code>only=false</code>. E.g., <code>%(trailers:key=Reviewed-by)</code> shows trailer lines with key <code>Reviewed-by</code>.</p>
+<p><em>key=&lt;键&gt;</em>：只显示具有指定密钥的为主。匹配是不分大小写的，后面的冒号是可选的。如果多次给出选项，则显示与任何键匹配的为主行。该选项自动启用 <code>only</code> 选项，使拖车块中的非尾注行被隐藏。如果不希望这样，可以用 <code>only=false</code> 禁用。 例如，<code>%(trailers:key=Reviewed-by)</code> 显示键为 <code>Reviewed-by</code> 的拖车行。</p>
 </li>
 <li>
 <p><em>only[=&lt;布尔值&gt;]</em> ：选择是否应该包括来自尾注块的非尾注行。</p>
@@ -1075,7 +1141,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <li>
 <p><em>t格式:</em></p>
 <div class="paragraph">
-<p>The <em>tformat:</em> format works exactly like <em>format:</em>, except that it provides "terminator" semantics instead of "separator" semantics. In other words, each commit has the message terminator character (usually a newline) appended, rather than a separator placed between entries. This means that the final entry of a single-line format will be properly terminated with a new line, just as the "oneline" format does. For example:</p>
+<p><em>tformat:</em> 格式的工作原理与 <em>format:</em> 完全一样，只是它提供了 “终止符” 语义，而不是 “分隔符” 语义。换句话说，每个提交都附加了信息结束符（通常是换行符），而不是在条目之间放置一个分隔符。 这意味着单行格式的最后一个条目将正确地以新行结束，就像 “单行” 格式那样。 比如说：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1091,7 +1157,7 @@ $ git log -2 --pretty=tformat:%h 4da45bef \
 </div>
 </div>
 <div class="paragraph">
-<p>In addition, any unrecognized string that has a <code>%</code> in it is interpreted as if it has <code>tformat:</code> in front of it. For example, these two are equivalent:</p>
+<p>此外，任何未被识别的字符串，如果其中有 <code>%</code> ，将被解释为前面有 <code>tformat:</code> 。 例如，这两个是等同的：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1116,12 +1182,12 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">-u</dt>
 <dt class="hdlist1">--patch</dt>
 <dd>
-<p>生成补丁（请参阅 <a href="#generate_patch_text_with_p">[generate_patch_text_with_p]</a> ）。</p>
+<p>生成补丁（请参阅 <a href="#generate_patch_text_with_p">使用选项 <code>-p</code> 生成补丁文本</a> ）。</p>
 </dd>
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--no-patch</dt>
 <dd>
-<p>Suppress all output from the diff machinery. Useful for commands like <code>git show</code> that show the patch by default to squelch their output, or to cancel the effect of options like <code>--patch</code>, <code>--stat</code> earlier on the command line in an alias.</p>
+<p>抑制差异（diff）工具的所有输出。 对于默认显示补丁的 <code>git show</code> 等命令，可以压制其输出，或在别名中取消命令行中的 <code>--patch</code>、<code>--stat</code> 等选项的效果。</p>
 </dd>
 <dt class="hdlist1">-m</dt>
 <dd>
@@ -1129,19 +1195,19 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">-c</dt>
 <dd>
-<p>Produce combined diff output for merge commits. Shortcut for <em>--diff-merges=combined -p</em>.</p>
+<p>生成合并提交的合并差异输出。 <em>--diff-merges=combined -p</em> 的快捷方式。</p>
 </dd>
 <dt class="hdlist1">--cc</dt>
 <dd>
-<p>Produce dense combined diff output for merge commits. Shortcut for <em>--diff-merges=dense-combined -p</em>.</p>
+<p>生成合并提交的密集合并差异输出。 <em>--diff-merges=dense-combined -p</em> 的快捷方式。</p>
 </dd>
 <dt class="hdlist1">--dd</dt>
 <dd>
-<p>Produce diff with respect to first parent for both merge and regular commits. Shortcut for <em>--diff-merges=first-parent -p</em>.</p>
+<p>为合并提交和常规提交生成与第一父提交的差异。 <em>--diff-merges=first-parent -p</em> 的快捷方式。</p>
 </dd>
 <dt class="hdlist1">--remerge-diff</dt>
 <dd>
-<p>Produce remerge-diff output for merge commits. Shortcut for <em>--diff-merges=remerge -p</em>.</p>
+<p>生成合并提交的 remerge-diff 输出。 <em>--diff-merges=remerge -p</em> 的快捷方式。</p>
 </dd>
 <dt class="hdlist1">--no-diff-merges</dt>
 <dd>
@@ -1171,7 +1237,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">separate</dt>
 <dd>
-<p>Show full diff with respect to each of parents. Separate log entry and diff is generated for each parent.</p>
+<p>显示每个父代的完整差异。 每个父代都会生成单独的日志条目和差异。</p>
 </dd>
 <dt class="hdlist1">combined, c</dt>
 <dd>
@@ -1183,7 +1249,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">remerge, r</dt>
 <dd>
-<p>Remerge two-parent merge commits to create a temporary tree object&#8212;&#8203;potentially containing files with conflict markers and such. A diff is then shown between that temporary tree and the actual merge commit.</p>
+<p>重合双亲合并提交以创建临时目录树对象——可能包含冲突标记等文件。 然后会显示临时目录树与实际合并提交之间的差异。</p>
 <div class="paragraph">
 <p>使用该选项时发出的输出是可以改变的，它与其他选项的互动也是可以改变的（除非有明确的记录）。</p>
 </div>
@@ -1195,7 +1261,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--combined-all-paths</dt>
 <dd>
-<p>This flag causes combined diffs (used for merge commits) to list the name of the file from all parents. It thus only has effect when <code>--diff-merges=[dense-]combined</code> is in use, and is likely only useful if filename changes are detected (i.e. when either rename or copy detection have been requested).</p>
+<p>这个标志会使合并后的差异文件（用于合并提交）列出所有父提交的名称。，因此它只在使用 <code>--diff-merges=[dense-]combined</code> 时有效。其可能在检测到文件名变化时有用（例如，当要求检测重命名或复制时）。</p>
 </dd>
 <dt class="hdlist1">-U&lt;n&gt;</dt>
 <dt class="hdlist1">--unified=&lt;n&gt;</dt>
@@ -1292,7 +1358,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--stat[=&lt;宽度&gt;[,&lt;名称宽度&gt;[,&lt;数值&gt;]]]</dt>
 <dd>
-<p>Generate a diffstat. By default, as much space as necessary will be used for the filename part, and the rest for the graph part. Maximum width defaults to terminal width, or 80 columns if not connected to a terminal, and can be overridden by <code>&lt;width&gt;</code>. The width of the filename part can be limited by giving another width <code>&lt;name-width&gt;</code> after a comma or by setting <code>diff.statNameWidth=&lt;width&gt;</code>. The width of the graph part can be limited by using <code>--stat-graph-width=&lt;width&gt;</code> or by setting <code>diff.statGraphWidth=&lt;width&gt;</code>. Using <code>--stat</code> or <code>--stat-graph-width</code> affects all commands generating a stat graph, while setting <code>diff.statNameWidth</code> or <code>diff.statGraphWidth</code> does not affect <code>git format-patch</code>. By giving a third parameter <code>&lt;count&gt;</code>, you can limit the output to the first <code>&lt;count&gt;</code> lines, followed by <code>...</code> if there are more.</p>
+<p>生成差异统计（diffstat）。默认情况下，文件名部分将使用尽可能多的空间，其余空间用于图表部分。最大宽度默认为终端宽度，如果未连接终端，则为 80 列，可以用 <code>&lt;最大宽度&gt;`覆盖。文件名部分的宽度可以通过在逗号后另加宽度 `&lt;文件名宽度&gt;`或设置 `diff.statNameWidth=&lt;文件名宽度&gt;`来限制。图形部分的宽度可以通过使用 `--stat-graph-width=&lt;图形宽度&gt;`或设置 `diff.statGraphWidth=&lt;图像宽度&gt;</code> 来限制。使用 <code>--stat</code> 或 <code>--stat-graph-width</code> 选项会影响所有生成统计图的命令，而设置 <code>diff.statNameWidth</code> 或 <code>diff.statGraphWidth</code> 则不会影响 <code>git format-patch</code>。 通过给出第三个参数 <code>&lt;行数&gt;</code>，可以将输出限制在前 <code>&lt;行数&gt;`行，如果行数更多，则在后面加上 `...</code>。</p>
 <div class="paragraph">
 <p>这些参数也可以用 <code>--stat-width=&lt;宽度&gt;</code>，<code>--stat-name-width=&lt;名称宽度&gt;</code> 和 <code>--stat-count=&lt;数量&gt;</code> 单独设置。</p>
 </div>
@@ -1303,7 +1369,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--numstat</dt>
 <dd>
-<p>Similar to <code>--stat</code>, but shows number of added and deleted lines in decimal notation and pathname without abbreviation, to make it more machine friendly. For binary files, outputs two <code>-</code> instead of saying <code>0 0</code>.</p>
+<p>类似于 <code>--stat</code>，但是使用小数点和不含缩写的路径名显示添加和删除的行数，使其对程序更友好。对于二进制文件，输出两个 <code>-</code>，而不是 <code>0 0</code>。</p>
 </dd>
 <dt class="hdlist1">--shortstat</dt>
 <dd>
@@ -1312,14 +1378,14 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">-X[&lt;参数1,参数2,&#8230;&#8203;&gt;]</dt>
 <dt class="hdlist1">--dirstat[=&lt;参数1,参数2,&#8230;&#8203;&gt;]</dt>
 <dd>
-<p>Output the distribution of relative amount of changes for each sub-directory. The behavior of <code>--dirstat</code> can be customized by passing it a comma separated list of parameters. The defaults are controlled by the <code>diff.dirstat</code> configuration variable (see <a href="git-config.html">git-config(1)</a>). The following parameters are available:</p>
+<p>输出每个子目录的相对变化量的分布。<code>--dirstat</code> 的行为可以通过传递一个以逗号分隔的参数列表来自定义。默认值由`diff.dirstat` 配置变量控制 (参见 <a href="git-config.html">git-config(1)</a>)。以下是可用的参数：</p>
 <div class="openblock">
 <div class="content">
 <div class="dlist">
 <dl>
 <dt class="hdlist1"><code>changes</code></dt>
 <dd>
-<p>Compute the dirstat numbers by counting the lines that have been removed from the source, or added to the destination. This ignores the amount of pure code movements within a file. In other words, rearranging lines in a file is not counted as much as other changes. This is the default behavior when no parameter is given.</p>
+<p>通过计算从源文件中删除的行数或添加到目标文件中的行数来计算分布状态的数字。这忽略了文件内的代码移动行为。也就是说，在文件中重新排列的行不会像其他变化一样被计算在内。这是在没有给出参数时的默认行为。</p>
 </dd>
 <dt class="hdlist1"><code>lines</code></dt>
 <dd>
@@ -1327,15 +1393,15 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1"><code>files</code></dt>
 <dd>
-<p>Compute the dirstat numbers by counting the number of files changed. Each changed file counts equally in the dirstat analysis. This is the computationally cheapest <code>--dirstat</code> behavior, since it does not have to look at the file contents at all.</p>
+<p>通过计算被改变的文件数量来计算分布状态的数字。在分布状态分析中，每一个被改变的文件都会被平等地计算。这是计算上开销最小的 <code>--dirstat</code> 行为，因为它无需查看文件内容。</p>
 </dd>
 <dt class="hdlist1"><code>cumulative</code></dt>
 <dd>
-<p>Count changes in a child directory for the parent directory as well. Note that when using <code>cumulative</code>, the sum of the percentages reported may exceed 100%. The default (non-cumulative) behavior can be specified with the <code>noncumulative</code> parameter.</p>
+<p>子目录中的变化计算到父目录中。 注意，当使用 <code>cumulative</code> 选项时，报告的百分比之和可能超过 100%。默认的（非累积）行为可以用 <code>noncumulative</code> 参数指定。</p>
 </dd>
 <dt class="hdlist1">&lt;limit&gt;</dt>
 <dd>
-<p>An integer parameter specifies a cut-off percent (3% by default). Directories contributing less than this percentage of the changes are not shown in the output.</p>
+<p>一个整数参数，其指定一个截止百分比（默认为 3%）。贡献值小于这个百分比的目录不显示在输出中。</p>
 </dd>
 </dl>
 </div>
@@ -1351,7 +1417,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--dirstat-by-file[=&lt;参数1,参数2&gt;&#8230;&#8203;]</dt>
 <dd>
-<p>Synonym for --dirstat=files,&lt;param1&gt;,&lt;param2&gt;&#8230;&#8203;</p>
+<p>与 --dirstat=files,&lt;参数 1&gt;,&lt;参数 2&gt; 同义</p>
 </dd>
 <dt class="hdlist1">--summary</dt>
 <dd>
@@ -1359,7 +1425,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--patch-with-stat</dt>
 <dd>
-<p>同义词 <em>-p --stat</em>。</p>
+<p>同义词 <code>-p --stat</code>。</p>
 </dd>
 <dt class="hdlist1">-z</dt>
 <dd>
@@ -1373,19 +1439,19 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--name-only</dt>
 <dd>
-<p>Show only names of changed files. The file names are often encoded in UTF-8. For more information see the discussion about encoding in the <a href="git-log.html">git-log(1)</a> manual page.</p>
+<p>只显示更改过的文件的名称。文件名通常以 UTF-8 编码。 更多信息见 <a href="git-log.html">git-log(1)</a> 手册页中关于编码的讨论。</p>
 </dd>
 <dt class="hdlist1">--name-status</dt>
 <dd>
-<p>Show only names and status of changed files. See the description of the <code>--diff-filter</code> option on what the status letters mean. Just like <code>--name-only</code> the file names are often encoded in UTF-8.</p>
+<p>仅显示已更改文件的名称和状态。有关状态字母的含义，请参阅 <code>--diff-filter</code> 选项的说明。 与 <code>--name-only</code> 一样，文件名通常使用 UTF-8 编码。</p>
 </dd>
 <dt class="hdlist1">--submodule[=&lt;格式&gt;]</dt>
 <dd>
-<p>Specify how differences in submodules are shown. When specifying <code>--submodule=short</code> the <em>short</em> format is used. This format just shows the names of the commits at the beginning and end of the range. When <code>--submodule</code> or <code>--submodule=log</code> is specified, the <em>log</em> format is used. This format lists the commits in the range like <a href="git-submodule.html">git-submodule(1)</a> <code>summary</code> does. When <code>--submodule=diff</code> is specified, the <em>diff</em> format is used. This format shows an inline diff of the changes in the submodule contents between the commit range. Defaults to <code>diff.submodule</code> or the <em>short</em> format if the config option is unset.</p>
+<p>指定子模块中的差异如何显示。当指定 <code>--submodule=short</code> 选项时，会使用 <em>short</em> 格式。这种格式只显示范围的开头和结尾处的提交名称。当指定了 <code>--submodule</code> 或 <code>--submodule=log</code> 时，会使用 <em>log</em> 格式。这种格式会像 <a href="git-submodule.html">git-submodule(1)</a> <code>summary</code> 那样，列出该范围内的提交。当指定了 <code>--submodule=diff</code> 时，会使用 <em>diff</em> 格式。这个格式显示的是子模块内在提交范围之间的变化差异。默认为 <code>diff.submodule</code>，如果配置选项未设置， 则为 <code>short</code> 格式。</p>
 </dd>
 <dt class="hdlist1">--color[=&lt;when&gt;]</dt>
 <dd>
-<p>Show colored diff. <code>--color</code> (i.e. without <em>=&lt;when&gt;</em>) is the same as <code>--color=always</code>. <em>&lt;when&gt;</em> can be one of <code>always</code>, <code>never</code>, or <code>auto</code>.</p>
+<p>显示有颜色的差异。<code>--color</code>（即不含 <em>=&lt;何时&gt;</em>）与 <code>--color=always</code> 相同。<em>&lt;何时&gt;</em> 可以是 <code>always</code>、<code>never</code> 或 <code>auto</code>。</p>
 </dd>
 <dt class="hdlist1">--no-color</dt>
 <dd>
@@ -1412,11 +1478,11 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">plain</dt>
 <dd>
-<p>Any line that is added in one location and was removed in another location will be colored with <em>color.diff.newMoved</em>. Similarly <em>color.diff.oldMoved</em> will be used for removed lines that are added somewhere else in the diff. This mode picks up any moved line, but it is not very useful in a review to determine if a block of code was moved without permutation.</p>
+<p>任何在某个位置被添加，且在另一个位置被删除的行，都会被用 <em>color.diff.newMoved</em> 着色。同样的，在差异中在某处删除且在其它地方添加的行会使用 <em>color.diff.oldMoved</em> 着色。这种模式可以读取任何被移动的行，但在代码审查中，它不能确定一个代码块是否未经排列而进行了移动。</p>
 </dd>
 <dt class="hdlist1">blocks</dt>
 <dd>
-<p>Blocks of moved text of at least 20 alphanumeric characters are detected greedily. The detected blocks are painted using either the <em>color.diff.{old,new}Moved</em> color. Adjacent blocks cannot be told apart.</p>
+<p>使用贪心方法检测含至少 20 个字母数字字符的移动文本块。检测到的区块使用 <em>color.diff.{old,new}Moved</em> 的颜色。相邻的区块不能被区分开。</p>
 </dd>
 <dt class="hdlist1">zebra</dt>
 <dd>
@@ -1424,7 +1490,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">dimmed-zebra</dt>
 <dd>
-<p>Similar to <em>zebra</em>, but additional dimming of uninteresting parts of moved code is performed. The bordering lines of two adjacent blocks are considered interesting, the rest is uninteresting. <code>dimmed_zebra</code> is a deprecated synonym.</p>
+<p>类似于 <em>zebra</em> 模式，但对使移动的代码中不关注的部分变暗。相邻两个区块的边界线被认为是重要，其余的部分是无关紧要的。<code>dimmed_zebra</code> 是一个被废弃的同义词。</p>
 </dd>
 </dl>
 </div>
@@ -1453,7 +1519,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">ignore-space-change</dt>
 <dd>
-<p>Ignore changes in amount of whitespace. This ignores whitespace at line end, and considers all other sequences of one or more whitespace characters to be equivalent.</p>
+<p>忽略空格数量的变化。这会忽略行尾的空格，并认为包含一个或多个空格字符的其他序列都是等同的。</p>
 </dd>
 <dt class="hdlist1">ignore-all-space</dt>
 <dd>
@@ -1474,22 +1540,22 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--word-diff[=&lt;模式&gt;]</dt>
 <dd>
-<p>Show a word diff, using the &lt;mode&gt; to delimit changed words. By default, words are delimited by whitespace; see <code>--word-diff-regex</code> below. The &lt;mode&gt; defaults to <em>plain</em>, and must be one of:</p>
+<p>显示词的差异，用 &lt;模式&gt; 来分隔已更改的词。默认情况下，单词是以空格分隔；请参考 <code>--word-diff-regex</code>。&lt;模式&gt; 默认为 <code>plain</code>，并且必须是以下其中之一：</p>
 <div class="openblock">
 <div class="content">
 <div class="dlist">
 <dl>
 <dt class="hdlist1">color</dt>
 <dd>
-<p>Highlight changed words using only colors. Implies <code>--color</code>.</p>
+<p>只用颜色突出显示已更改的单词。暗含 <code>--color</code> 选项。</p>
 </dd>
 <dt class="hdlist1">plain</dt>
 <dd>
-<p>Show words as <code>[-removed-]</code> and <code>{+added+}</code>. Makes no attempts to escape the delimiters if they appear in the input, so the output may be ambiguous.</p>
+<p>显示更改的词为 <code>[-removed-]</code> 和 <code>{+added+}</code>。如果在输入中出现定界符，则不尝试转义，所以输出可能是多义的。</p>
 </dd>
 <dt class="hdlist1">porcelain</dt>
 <dd>
-<p>Use a special line-based format intended for script consumption. Added/removed/unchanged runs are printed in the usual unified diff format, starting with a <code>+</code>/<code>-</code>/` ` character at the beginning of the line and extending to the end of the line. Newlines in the input are represented by a tilde <code>~</code> on a line of its own.</p>
+<p>使用一种特殊的、基于行的格式，供脚本使用。添加/删除/未更改的运行数据以通常的统一的差异格式输出，行的开头以 <code>+</code> / <code>-</code> / ` ` 字符开始，一直到行的结尾。输入中的新行用单行上的 `~`表示。</p>
 </dd>
 <dt class="hdlist1">none</dt>
 <dd>
@@ -1505,15 +1571,15 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--word-diff-regex=&lt;正则表达式&gt;</dt>
 <dd>
-<p>Use &lt;regex&gt; to decide what a word is, instead of considering runs of non-whitespace to be a word. Also implies <code>--word-diff</code> unless it was already enabled.</p>
+<p>使用 &lt;正则表达式&gt; 来确定单词的格式，而不是将一串非空白行视为单词。除非已启用，否则还暗含 <code>--word-diff</code> 选项。</p>
 <div class="paragraph">
-<p>Every non-overlapping match of the &lt;regex&gt; is considered a word. Anything between these matches is considered whitespace and ignored(!) for the purposes of finding differences. You may want to append <code>|[^[:space:]]</code> to your regular expression to make sure that it matches all non-whitespace characters. A match that contains a newline is silently truncated(!) at the newline.</p>
+<p>&lt;正则表达式&gt; 匹配的的每一个非重叠的匹配都被视为一个单词。在这些匹配项之间的任何内容都被认为是空白，并且在查找差异时被忽略(!)。您可能需要在您的正则表达式中附加 <code>|[^[:space:]]</code>，以确保它匹配所有非空格字符。包含换行的匹配会在换行处被截断(!)。</p>
 </div>
 <div class="paragraph">
 <p>例如，<code>--word-diff-regex=.</code> 将把每个字符当作一个单词，并相应地逐个字符显示差异。</p>
 </div>
 <div class="paragraph">
-<p>The regex can also be set via a diff driver or configuration option, see <a href="gitattributes.html">gitattributes(5)</a> or <a href="git-config.html">git-config(1)</a>. Giving it explicitly overrides any diff driver or configuration setting. Diff drivers override configuration settings.</p>
+<p>正则表达式也可以通过差异程序或配置选项来设置，参见 <a href="gitattributes.html">gitattributes(5)</a> 或 <a href="git-config.html">git-config(1)</a>。显式指明会覆盖任何程序或配置。差异程序会覆盖配置。</p>
 </div>
 </dd>
 <dt class="hdlist1">--color-words[=&lt;正则表达式&gt;]</dt>
@@ -1530,11 +1596,11 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--check</dt>
 <dd>
-<p>Warn if changes introduce conflict markers or whitespace errors. What are considered whitespace errors is controlled by <code>core.whitespace</code> configuration. By default, trailing whitespaces (including lines that consist solely of whitespaces) and a space character that is immediately followed by a tab character inside the initial indent of the line are considered whitespace errors. Exits with non-zero status if problems are found. Not compatible with --exit-code.</p>
+<p>如果更改引入冲突标记或空格错误，则发出警告。哪些被认为是空格错误是由 <code>core.whitespace</code> 配置控制的。默认情况下，行尾部的空格字符（包括仅由空格字符组成的行）和紧跟在行初缩进内 tab 字符后的空格字符，都被认为是空格字符错误。如果发现问题，则以非零状态退出。与 --exit-code 选项不兼容。</p>
 </dd>
 <dt class="hdlist1">--ws-error-highlight=&lt;种类&gt;</dt>
 <dd>
-<p>Highlight whitespace errors in the <code>context</code>, <code>old</code> or <code>new</code> lines of the diff. Multiple values are separated by comma, <code>none</code> resets previous values, <code>default</code> reset the list to <code>new</code> and <code>all</code> is a shorthand for <code>old,new,context</code>. When this option is not given, and the configuration variable <code>diff.wsErrorHighlight</code> is not set, only whitespace errors in <code>new</code> lines are highlighted. The whitespace errors are colored with <code>color.diff.whitespace</code>.</p>
+<p>突出显示差异中 <code>context</code>（上下文）、<code>old</code>（旧）或 <code>new</code>（新）行中的空格错误。多个值用逗号隔开，<code>none</code> 选项会重置以前的值，<code>default</code> 重置列表为 <code>new</code>，<code>all</code> 是 <code>old,new,context</code> 的简写。当没有给定这个选项，并且配置变量 <code>diff.wsErrorHighlight</code> 没有设置时，只有 <code>new</code> 行中的空格错误会被高亮显示。空格错误会用 <code>color.diff.whitespace</code> 配置进行着色。</p>
 </dd>
 <dt class="hdlist1">--full-index</dt>
 <dd>
@@ -1547,7 +1613,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--abbrev[=&lt;n&gt;]</dt>
 <dd>
-<p>Instead of showing the full 40-byte hexadecimal object name in diff-raw format output and diff-tree header lines, show the shortest prefix that is at least <em>&lt;n&gt;</em> hexdigits long that uniquely refers the object. In diff-patch output format, <code>--full-index</code> takes higher precedence, i.e. if <code>--full-index</code> is specified, full blob names will be shown regardless of <code>--abbrev</code>. Non default number of digits can be specified with <code>--abbrev=&lt;n&gt;</code>.</p>
+<p>在 diff-raw 格式输出和 diff-tree 头文件行中，不显示完整的 40 字节十六进制对象名称，而是显示唯一指向对象的最短前缀，长度至少为 <em>&lt;n&gt;</em> 位十六进制数字。 在 diff-patch 输出格式中，<code>--full-index</code> 优先，也就是说，如果指定了 <code>--full-index</code>，则无论 <code>--abbrev</code> 如何，都会显示完整的 blob 名称。 可以使用 <code>--abbrev=&lt;n&gt;</code> 指定非默认位数。</p>
 </dd>
 <dt class="hdlist1">-B[&lt;n&gt;][/&lt;m&gt;]</dt>
 <dt class="hdlist1">--break-rewrites[=[&lt;n&gt;][/&lt;m&gt;]]</dt>
@@ -1575,11 +1641,11 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">-C[&lt;n&gt;]</dt>
 <dt class="hdlist1">--find-copies[=&lt;n&gt;]</dt>
 <dd>
-<p>Detect copies as well as renames. See also <code>--find-copies-harder</code>. If <code>n</code> is specified, it has the same meaning as for <code>-M&lt;n&gt;</code>.</p>
+<p>检测复制与重命名。参见 <code>--find-copies-harder</code>。如果指定了 <code>n</code>，则其与 <code>-M&lt;n&gt;</code> 含义相同。</p>
 </dd>
 <dt class="hdlist1">--find-copies-harder</dt>
 <dd>
-<p>For performance reasons, by default, <code>-C</code> option finds copies only if the original file of the copy was modified in the same changeset. This flag makes the command inspect unmodified files as candidates for the source of copy. This is a very expensive operation for large projects, so use it with caution. Giving more than one <code>-C</code> option has the same effect.</p>
+<p>出于性能考虑，默认情况下，<code>-C</code> 选项只在复制的原始文件在相同的变更集中被修改时才会查找复制。这个标志使命令检查未修改的文件作为复制源的候选文件。 对于大型项目来说，这是一个非常耗时的操作，所以要谨慎使用。 给出一个以上的 <code>-C</code> 选项有同样的效果。</p>
 </dd>
 <dt class="hdlist1">-D</dt>
 <dt class="hdlist1">--irreversible-delete</dt>
@@ -1591,13 +1657,13 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">-l&lt;数量&gt;</dt>
 <dd>
-<p>The <code>-M</code> and <code>-C</code> options involve some preliminary steps that can detect subsets of renames/copies cheaply, followed by an exhaustive fallback portion that compares all remaining unpaired destinations to all relevant sources. (For renames, only remaining unpaired sources are relevant; for copies, all original sources are relevant.) For N sources and destinations, this exhaustive check is O(N^2). This option prevents the exhaustive portion of rename/copy detection from running if the number of source/destination files involved exceeds the specified number. Defaults to diff.renameLimit. Note that a value of 0 is treated as unlimited.</p>
+<p><code>-M</code> 和 <code>-C</code> 选项涉及一些初步步骤，可以廉价地检测重命名/副本的子集，然后是详尽的后备部分，将所有剩余的未配对目的地与所有相关源进行比较。 （对于重命名，只有剩余的未配对源是相关的；对于副本，所有原始源都是相关的。）对于 N 个源和目的地，这个详尽的检查是 O(N^2)。如果涉及的源/目标文件数量超过指定数量，则此选项可防止重命名/复制检测的详尽部分运行。默认为 diff.renameLimit。请注意，值 0 被视为无限制。</p>
 </dd>
 <dt class="hdlist1">--diff-filter=[(A|C|D|M|R|T|U|X|B)&#8230;&#8203;[*]]</dt>
 <dd>
-<p>Select only files that are Added (<code>A</code>), Copied (<code>C</code>), Deleted (<code>D</code>), Modified (<code>M</code>), Renamed (<code>R</code>), have their type (i.e. regular file, symlink, submodule, &#8230;&#8203;) changed (<code>T</code>), are Unmerged (<code>U</code>), are Unknown (<code>X</code>), or have had their pairing Broken (<code>B</code>). Any combination of the filter characters (including none) can be used. When <code>*</code> (All-or-none) is added to the combination, all paths are selected if there is any file that matches other criteria in the comparison; if there is no file that matches other criteria, nothing is selected.</p>
+<p>只选择添加（<code>A</code>）、复制（<code>C</code>）、删除（<code>D</code>）、修改（<code>M</code>）、重命名（<code>R</code>）、类型（即常规文件、符号链接、子模块&#8230;&#8203;&#8230;&#8203;）改变（<code>T</code>）、未合并（<code>U</code>）、未知（<code>X</code>）或配对被破坏（<code>B</code>）的文件。可以使用过滤字符的任何组合（包括空）。当组合中加入 <code>*</code>（全部或空）时，如果在比较中有任何文件与其他条件匹配，则选择所有路径；如果没有符合其他条件的文件，则不会选择任何内容。</p>
 <div class="paragraph">
-<p>Also, these upper-case letters can be downcased to exclude. E.g. <code>--diff-filter=ad</code> excludes added and deleted paths.</p>
+<p>另外，这些大写字母也可以通过使用小写排除。例如：<code>--diff-filter=ad</code> 排除添加和删除的路径。</p>
 </div>
 <div class="paragraph">
 <p>请注意，并非所有差异都能显示所有类型。例如，如果禁用了复制和重命名条目类型的检测，这些条目就不会出现。</p>
@@ -1605,7 +1671,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">-S&lt;string&gt;</dt>
 <dd>
-<p>Look for differences that change the number of occurrences of the specified string (i.e. addition/deletion) in a file. Intended for the scripter&#8217;s use.</p>
+<p>寻找改变文件中指定字符串出现次数的差异（即增加/删除）。供脚本编写者使用。</p>
 <div class="paragraph">
 <p>当您正在寻找确切的代码块（如结构体），并且想知道该块自首次出现以来的历史记录时，这将非常有用：通过 <code>-S</code> 选项迭代，将原文件中的感兴趣的块显示出，并继续进行，直到获得该块的第一个版本。</p>
 </div>
@@ -1653,9 +1719,9 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">-O&lt;顺序控制文件&gt;</dt>
 <dd>
-<p>Control the order in which files appear in the output. This overrides the <code>diff.orderFile</code> configuration variable (see <a href="git-config.html">git-config(1)</a>). To cancel <code>diff.orderFile</code>, use <code>-O/dev/null</code>.</p>
+<p>控制文件在输出中出现的顺序。这将覆盖 <code>diff.orderFile</code> 配置变量（参见 <a href="git-config.html">git-config(1)</a>）。要取消 <code>diff.orderFile</code>，请使用 <code>-O/dev/null</code>。</p>
 <div class="paragraph">
-<p>The output order is determined by the order of glob patterns in &lt;orderfile&gt;. All files with pathnames that match the first pattern are output first, all files with pathnames that match the second pattern (but not the first) are output next, and so on. All files with pathnames that do not match any pattern are output last, as if there was an implicit match-all pattern at the end of the file. If multiple pathnames have the same rank (they match the same pattern but no earlier patterns), their output order relative to each other is the normal order.</p>
+<p>输出顺序由 &lt;顺序控制文件&gt; 中的 glob 模式的顺序决定。所有路径名与第一个模式匹配的文件首先输出，路径名与第二个模式匹配（但不与第一个模式匹配）的文件其次输出，以此类推。所有路径名与任何模式匹配的文件会最后输出，就像在文件末尾有一个隐含的全部匹配模式。如果多个路径名具有相同的等级（它们匹配相同的模式，但没有匹配先前的模式），它们相对于彼此的输出顺序是正常的。</p>
 </div>
 <div class="paragraph">
 <p>&lt;顺序控制文件&gt; 格式如下：</p>
@@ -1668,7 +1734,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <p>空白行会被忽略，因此可以用它们作为分隔符，以保证可读性。</p>
 </li>
 <li>
-<p>Lines starting with a hash ("<code>#</code>") are ignored, so they can be used for comments. Add a backslash ("<code>\</code>") to the beginning of the pattern if it starts with a hash.</p>
+<p>以井号（"<code>#</code>"）开头的行会被忽略，所以它们可以用来做注释。如果模式以井号开头，则需要在模式的开头加上反斜杠（"<code>\</code>"）。</p>
 </li>
 <li>
 <p>每一行都包含一个模式。</p>
@@ -1678,13 +1744,13 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Patterns have the same syntax and semantics as patterns used for fnmatch(3) without the FNM_PATHNAME flag, except a pathname also matches a pattern if removing any number of the final pathname components matches the pattern. For example, the pattern "<code>foo*bar</code>" matches "<code>fooasdfbar</code>" and "<code>foo/bar/baz/asdf</code>" but not "<code>foobarx</code>".</p>
+<p>模式的语法和语义与 fnmatch(3) 中使用的相同，不包括 FNM_PATHNAME 标志，但在删除路径名中结尾任意几个成分后匹配的情况下例外。例如，模式 "<code>foo*bar</code>" 匹配 "<code>fooasdfbar</code>" 和 "<code>foo/bar/baz/asdf</code>"，但不匹配 "<code>foobarx</code>"。</p>
 </div>
 </dd>
 <dt class="hdlist1">--skip-to=&lt;文件&gt;</dt>
 <dt class="hdlist1">--rotate-to=&lt;文件&gt;</dt>
 <dd>
-<p>Discard the files before the named &lt;file&gt; from the output (i.e. <em>skip to</em>), or move them to the end of the output (i.e. <em>rotate to</em>). These options were invented primarily for the use of the <code>git difftool</code> command, and may not be very useful otherwise.</p>
+<p>从输出中丢弃命名 &lt;文件&gt; 之前的文件（即 <em>skip to</em>），或将它们移到输出的末尾（即 <em>rotate to</em>）。 这些选项主要是为使用 <code>git difftool</code> 命令而发明的，在其他情况下可能用处不大。</p>
 </dd>
 <dt class="hdlist1">-R</dt>
 <dd>
@@ -1693,7 +1759,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">--relative[=&lt;路径&gt;]</dt>
 <dt class="hdlist1">--no-relative</dt>
 <dd>
-<p>When run from a subdirectory of the project, it can be told to exclude changes outside the directory and show pathnames relative to it with this option. When you are not in a subdirectory (e.g. in a bare repository), you can name which subdirectory to make the output relative to by giving a &lt;path&gt; as an argument. <code>--no-relative</code> can be used to countermand both <code>diff.relative</code> config option and previous <code>--relative</code>.</p>
+<p>当从项目的子目录中运行时，可以排除目录外的变化，并通过这个选项显示相对于它的路径名。当你不在子目录中时（例如在纯仓库中），你可以通过 &lt;路径&gt; 参数来指明要使输出相对于哪个子目录。<code>--no-relative</code> 可以用来取消 <code>diff.relative`配置选项和之前的 `--relative</code> 选项。</p>
 </dd>
 <dt class="hdlist1">-a</dt>
 <dt class="hdlist1">--text</dt>
@@ -1711,7 +1777,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">-b</dt>
 <dt class="hdlist1">--ignore-space-change</dt>
 <dd>
-<p>Ignore changes in amount of whitespace. This ignores whitespace at line end, and considers all other sequences of one or more whitespace characters to be equivalent.</p>
+<p>忽略空格数量的变化。这会忽略行尾的空格，并认为包含一个或多个空格字符的其他序列都是等同的。</p>
 </dd>
 <dt class="hdlist1">-w</dt>
 <dt class="hdlist1">--ignore-all-space</dt>
@@ -1725,16 +1791,16 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <dt class="hdlist1">-I&lt;正则表达式&gt;</dt>
 <dt class="hdlist1">--ignore-matching-lines=&lt;正则表达式&gt;</dt>
 <dd>
-<p>Ignore changes whose all lines match &lt;regex&gt;. This option may be specified more than once.</p>
+<p>忽略所有行均匹配 &lt;正则表达式&gt; 的更改。 此选项可指定多次。</p>
 </dd>
 <dt class="hdlist1">--inter-hunk-context=&lt;行数&gt;</dt>
 <dd>
-<p>Show the context between diff hunks, up to the specified number of lines, thereby fusing hunks that are close to each other. Defaults to <code>diff.interHunkContext</code> or 0 if the config option is unset.</p>
+<p>显示块差异之间的上下文，最多显示指定的行数，从而合并彼此接近的块。 默认认为 <code>diff.interHunkContext</code>，如果配置选项未设置，则默认为0。</p>
 </dd>
 <dt class="hdlist1">-W</dt>
 <dt class="hdlist1">--function-context</dt>
 <dd>
-<p>Show whole function as context lines for each change. The function names are determined in the same way as <code>git diff</code> works out patch hunk headers (see <em>Defining a custom hunk-header</em> in <a href="gitattributes.html">gitattributes(5)</a>).</p>
+<p>在每个修改中的上下文行显示整个函数。函数名称的确定方式与 <code>git diff</code> 计算补丁头的方式相同（参见 <a href="gitattributes.html">gitattributes(5)</a> 中的 <em>自定义区块头</em> ）。</p>
 </dd>
 <dt class="hdlist1">--ext-diff</dt>
 <dd>
@@ -1751,7 +1817,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--ignore-submodules[=&lt;when&gt;]</dt>
 <dd>
-<p>Ignore changes to submodules in the diff generation. &lt;when&gt; can be either "none", "untracked", "dirty" or "all", which is the default. Using "none" will consider the submodule modified when it either contains untracked or modified files or its HEAD differs from the commit recorded in the superproject and can be used to override any settings of the <em>ignore</em> option in <a href="git-config.html">git-config(1)</a> or <a href="gitmodules.html">gitmodules(5)</a>. When "untracked" is used submodules are not considered dirty when they only contain untracked content (but they are still scanned for modified content). Using "dirty" ignores all changes to the work tree of submodules, only changes to the commits stored in the superproject are shown (this was the behavior until 1.7.0). Using "all" hides all changes to submodules.</p>
+<p>在生成差异时忽略子模块的修改。&lt;when&gt; 可以是 "none"、"untracked"、"dirty " 或 "all"，"all" 是默认选项。使用 "none" 会在子模块包含未跟踪或修改的文件，或者它的HEAD 与上级项目中记录的提交不同时，认为它被修改了，并且可以用来覆盖 <a href="git-config.html">git-config(1)</a> 或 <a href="gitmodules.html">gitmodules(5)</a> 中 <em>忽略</em> 选项的设置。当使用 "untracked" 时，当子模块只包含未跟踪的内容时，它们不会被认为是有改动的（但它们仍然会被扫描是否有被修改的内容）。使用 "dirty" 会忽略所有对子模块工作树的修改，只有存储在上级项目中的提交的修改才会被显示出来（这是在1.7.0之前的行为）。使用 "all" 会隐藏所有对子模块的修改。</p>
 </dd>
 <dt class="hdlist1">--src-prefix=&lt;前缀&gt;</dt>
 <dd>
@@ -1767,7 +1833,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--default-prefix</dt>
 <dd>
-<p>Use the default source and destination prefixes ("a/" and "b/"). This is usually the default already, but may be used to override config such as <code>diff.noprefix</code>.</p>
+<p>使用默认的源和目标前缀（"a/"和 "b/"）。 这通常已经是默认的，但可以用来覆盖配置，如 <code>diff.noprefix</code>。</p>
 </dd>
 <dt class="hdlist1">--line-prefix=&lt;prefix&gt;</dt>
 <dd>
@@ -1775,15 +1841,215 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </dd>
 <dt class="hdlist1">--ita-invisible-in-index</dt>
 <dd>
-<p>By default entries added by "git add -N" appear as an existing empty file in "git diff" and a new file in "git diff --cached". This option makes the entry appear as a new file in "git diff" and non-existent in "git diff --cached". This option could be reverted with <code>--ita-visible-in-index</code>. Both options are experimental and could be removed in future.</p>
+<p>默认情况下，通过 "git add -N" 添加的条目在 "git diff" 中显示为现有的空文件，在 "git diff --cached" 中显示为新文件。这个选项使得条目在 "git diff" 中显示为一个新文件，而在 "git diff --cached" 中显示为不存在的文件。这个选项可以用 <code>--ita-visible-in-index</code> 来还原。这两个选项都是试验性的，将来可能会被删除。</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
 <p>关于这些常用选项的更多解释，请参见 <a href="gitdiffcore.html">gitdiffcore(7)</a>。</p>
 </div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="generate_patch_text_with_p">使用选项 <code>-p</code> 生成补丁文本</h2>
+<div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-show.txt - include::diff-generate-patch.txt[]</p>
+<p>使用 <code>-p</code> 选项运行 <a href="git-diff.html">git-diff(1)</a>、<a href="git-log.html">git-log(1)</a>、<a href="git-show.html">git-show(1)</a>、<a href="git-diff-index.html">git-diff-index(1)</a>、<a href="git-diff-tree.html">git-diff-tree(1)</a> 或 <a href="git-diff-files.html">git-diff-files(1)</a> 会生成补丁文本。 你可以通过 <code>GIT_EXTERNAL_DIFF</code> 和 <code>GIT_DIFF_OPTS</code> 环境变量（参见 <a href="git.html">git(1)</a>），以及 <code>diff</code> 属性（参见 <a href="gitattributes.html">gitattributes(5)</a>）自定义补丁文本的创建。</p>
+</div>
+<div class="paragraph">
+<p>-p 选项产生的内容与传统的差异格式略有不同：</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>它前面有一个 <code>git diff</code> 头，如下所示：</p>
+<div class="literalblock">
+<div class="content">
+<pre>diff --git a/file1 b/file2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>a/</code> 和 <code>b/</code> 的文件名相同，除非涉及到重命名/复制。特别地，即使是创建或删除，也 <em>不</em> 使用 <code>/dev/null</code> 来代替 <code>a/</code> 或 <code>b/</code> 文件名。</p>
+</div>
+<div class="paragraph">
+<p>当涉及重命名/复制时，<code>file1</code> 和 <code>file2</code> 分别显示重命名/复制的源文件名和重命名/复制产生的文件名。</p>
+</div>
+</li>
+<li>
+<p>它的后面是一个或多个扩展头信息行：</p>
+<div class="literalblock">
+<div class="content">
+<pre>old mode &lt;模式&gt;
+new mode &lt;模式&gt;
+deleted file mode &lt;模式&gt;
+new file mode &lt;模式&gt;
+copy from &lt;路径&gt;
+copy to &lt;路径&gt;
+rename from &lt;路径&gt;
+rename to &lt;路径&gt;
+similarity index &lt;数字&gt;
+dissimilarity index &lt;数字&gt;
+index &lt;哈希&gt;..&lt;哈希&gt; &lt;模式&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>文件模式被打印为6位八进制数字，包括文件类型和文件权限位。</p>
+</div>
+<div class="paragraph">
+<p>扩展头信息中的路径名称不包括 <code>a/</code> 和 <code>b/</code> 前缀。</p>
+</div>
+<div class="paragraph">
+<p>相似性指数是未改变的行占比，而不相似性指数是改变的行占比。它是四舍五入的整数，后有百分号。因此，100%的相似度指数指为两个文件相等，而 100% 的不相似度意味着入新文件中没有旧文件中的行。</p>
+</div>
+<div class="paragraph">
+<p>索引行包括改变前和改变后的 blob 对象名称。如果文件模式没有变化，则包含 &lt;模式&gt;；否则，分别显示新旧模式。</p>
+</div>
+</li>
+<li>
+<p>含有 "不常见" 字符的路径名会被引用，这一点在配置变量` core.quotePath` 中有所解释（见 <a href="git-config.html">git-config(1)</a>）。</p>
+</li>
+<li>
+<p>输出中所有的 <code>file1</code> 文件都是指提交前的文件，而所有的 <code>file2</code> 文件都是指提交后的文件。按顺序对每个文件进行修改是不正确的。例如，这个补丁将交换文件 a 和 b：</p>
+<div class="literalblock">
+<div class="content">
+<pre>diff --git a/a b/b
+rename from a
+rename to b
+diff --git a/b b/a
+rename from b
+rename to a</pre>
+</div>
+</div>
+</li>
+<li>
+<p>块头提到了块头所适用的函数的名称。 参见 <a href="gitattributes.html">gitattributes(5)</a> 中的 “定义自定义 hunk-header”，以了解如何针对特定语言进行定制。</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_合并的差异格式">合并的差异格式</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>任何生成差异的命令都可以使用 <code>-c</code> 或 <code>--cc</code> 选项，在显示合并时产生一个 “合并差异”。当用 <a href="git-diff.html">git-diff(1)</a> 或 <a href="git-show.html">git-show(1)</a> 显示合并时，这默认格式。还需要注意的是，你可以给这些命令适当的 <code>--diff-merges</code> 选项来强制生成特定格式的差异。</p>
+</div>
+<div class="paragraph">
+<p>"合并的差异" 的格式如下：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>diff --combined describe.c
+index fabadb8,cc95eb0..4866510
+--- a/describe.c
++++ b/describe.c
+@@@ -98,20 -98,12 +98,20 @@@
+        return (a_date &gt; b_date) ? -1 : (a_date == b_date) ? 0 : 1;
+  }
+
+- static void describe(char *arg)
+ -static void describe(struct commit *cmit, int last_one)
+++static void describe(char *arg, int last_one)
+  {
+ +      unsigned char sha1[20];
+ +      struct commit *cmit;
+        struct commit_list *list;
+        static int initialized = 0;
+        struct commit_name *n;
+
+ +      if (get_sha1(arg, sha1) &lt; 0)
+ +              usage(describe_usage);
+ +      cmit = lookup_commit_reference(sha1);
+ +      if (!cmit)
+ +              usage(describe_usage);
+ +
+        if (!initialized) {
+                initialized = 1;
+                for_each_ref(get_name);</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>它前面有 "git diff" 头，如下（当使用 <code>-c</code> 选项时）：</p>
+<div class="literalblock">
+<div class="content">
+<pre>diff --combined file</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>或如下（当使用 <code>--cc</code> 选项时）：</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>diff --cc file</pre>
+</div>
+</div>
+</li>
+<li>
+<p>它的后面是一个或多个扩展头信息行（本例显示的是与两个父提交的合并）：</p>
+<div class="literalblock">
+<div class="content">
+<pre>index &lt;哈希&gt;,&lt;哈希&gt;..&lt;哈希&gt;
+mode &lt;模式&gt;,&lt;模式&gt;..&lt;模式&gt;
+new file mode &lt;模式&gt;
+deleted file mode &lt;模式&gt;,&lt;模式&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p><code>mode&lt;模式&gt;，&lt;模式&gt;..&lt;模式&gt;</code> 行仅在 &lt;模式&gt; 中至少有一个与其余的不同时才会出现。包含有关检测到的内容移动的信息 (重命名和复制检测) 的扩展标头设计为使用两个 &lt;目录树对象&gt; 的 diff，不能用于组合的 diff 格式。</p>
+</div>
+</li>
+<li>
+<p>它的后面是两行源文件/目标文件的头信息：</p>
+<div class="literalblock">
+<div class="content">
+<pre>--- a/file
++++ b/file</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>与传统 ‘统一’ diff 格式的双行标题类似，<code>/dev/null</code> 用于表示已创建或已删除的文件。</p>
+</div>
+<div class="paragraph">
+<p>但是，如果提供了 --combined-all-paths 选项，你就会得到一个 N+1 行的源文件/目标文件头，其中 N 是合并提交中的父提交数量：</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>--- a/file
+--- a/file
+--- a/file
++++ b/file</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果重命名或复制检测处于活动状态，这种扩展格式可能很有用，可以让你在不同的父提交中看到文件的原始名称。</p>
+</div>
+</li>
+<li>
+<p>修改了文件块头信息的格式，以防止不小心将其送入 <code>patch -p1</code>。合并的差异格式是为审查合并提交的修改而创建的，并不是为了应用。这个变化类似于扩展的 "索引" 头信息的变化：</p>
+<div class="literalblock">
+<div class="content">
+<pre>@@@ &lt;from-file-range&gt; &lt;from-file-range&gt; &lt;to-file-range&gt; @@@</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>块中有（父提交数量+1）<code>@</code> 字符，用于合并的差异格式。</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>与传统的 "统一" 差异格式不同，这种格式显示两个文件 A 和 B 的列，其中有 <code>-</code>（减号&#8201;&#8212;&#8201;在 A 中出现，但在 B 中删除），<code>+</code>（加号&#8201;&#8212;&#8201;在 A 中缺少，但在 B 中增加），或 <code>" "</code>（空格&#8201;&#8212;&#8201;不变）前缀，这种格式比较两个或多个文件与一个文件 X，并显示 X 与其中每个文件的差异。文件中的每一个都有一列被前置在输出行中，以指出 X 的行与它的不同之处。</p>
+</div>
+<div class="paragraph">
+<p>第 N 列中的 <code>-</code> 字符意味着该行出现在文件 N 中，但它没有出现在结果文件中。第 N 列中的 <code>+</code> 字符意味着该行出现在结果文件中，而文件 N 中没有该行（换句话说，从该父提交的角度来看，该行是被添加的）。</p>
+</div>
+<div class="paragraph">
+<p>在上面的输出示例中，两个文件中的函数签名都被改变了（因此从文件 1 和文件 2 中都有表示删除的 <code>-</code>，而 <code>++</code> 表示被添加的一行没有出现在文件 1 或文件 2 中）。另外还有 8 行与文件 1 中的相同，但没有出现在文件 2 中（因此前缀为 <code>+</code>）。</p>
+</div>
+<div class="paragraph">
+<p>当用 <code>git diff-tree -c</code> 显示时，它将合并提交的父提交文件与合并结果进行比较（即文件 1 &#8230;&#8203; 文件 N 是父提交文件）。当用 <code>git diff-files -c</code> 显示时，它将两个未解决的合并父提交文件与工作树文件进行比较（即文件 1 是阶段 2 ，又称 "我们的版本"，文件 2 是阶段 3，又称 "他们的版本"）。</p>
 </div>
 </div>
 </div>
@@ -1820,7 +2086,57 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <h2 id="_讨论">讨论</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-show.txt - include::i18n.txt[]</p>
+<p>Git在某种程度上是与字符编码无关的。</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>blob对象的内容是未经解释的字节序列。 在核心层没有编码转换。</p>
+</li>
+<li>
+<p>路径名以UTF-8规范化形式C编码，这适用于树对象、索引文件、参考名称，以及命令行参数、环境变量和配置文件（<code>.git/config</code>（见<a href="git-config.html">git-config(1)</a>），<a href="gitignore.html">gitignore(5)</a>，<a href="gitattributes.html">gitattributes(5)</a> 和<a href="gitmodules.html">gitmodules(5)</a>）中的路径名。</p>
+<div class="paragraph">
+<p>请注意，Git 在核心层将路径名简单地视为非 NUL 字节的序列，没有路径名编码的转换（除了 Mac 和 Windows）。因此，即使在使用传统的扩展ASCII编码的平台和文件系统上，使用非ASCII的路径名大多也能工作。然而，在这种系统上创建的仓库在基于UTF-8的系统（如Linux、Mac、Windows）上将无法正常工作，反之亦然。 此外，许多基于Git的工具简单地认为路径名称是UTF-8，而不能正确显示其他编码。</p>
+</div>
+</li>
+<li>
+<p>提交日志信息通常以UTF-8编码，但也支持其他扩展ASCII编码。这包括ISO-8859-x、CP125x和其他许多编码，但不包括UTF-16/32、EBCDIC和CJK多字节编码（GBK、Shift-JIS、Big5、EUC-x、CP9xx等）。</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>尽管我们鼓励提交日志信息使用UTF-8编码，但核心系统和Git Porcelain的设计并不强制要求项目使用UTF-8。 如果某个项目的所有参与者都认为使用传统编码更方便，Git也不会禁止。 然而，有几件事需要注意。</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><em>git commit</em> 和 <em>git commit-tree</em> 如果收到的提交日志信息不像是有效的 UTF-8 字符串，就会发出警告，除非你明确表示你的项目使用的是传统编码。 说这个的方法是在 <code>.git/config</code> 文件中设置 <code>i18n.commitEncoding</code>，像这样：</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        commitEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>用上述设置创建的提交对象在它的 <code>encoding</code> 头中记录了 <code>i18n.commitEncoding</code> 的值。 这是为了帮助以后看这些对象的人。 缺少这个头意味着提交日志信息是以 UTF-8 编码的。</p>
+</div>
+</li>
+<li>
+<p><em>git log</em> 、<em>git show</em> 、<em>git blame</em> 和它们的朋友们会查看提交对象的 <code>encoding</code> 头，并尝试将日志信息重新编码为 UTF-8，除非另有指定。 您可以在`.git/config` 文件中使用 <code>i18n.logOutputEncoding</code> 指定所需的输出编码，像这样：</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        logOutputEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果你没有这个配置变量，则使用`i18n.commitEncoding`的值来代替。</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>请注意，我们特意选择在提交对象层面上，不对提交日志信息进行重新编码，因为重新编码为UTF-8不一定是一个可逆的操作。</p>
 </div>
 </div>
 </div>
@@ -1835,7 +2151,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-02-10 19:07:38 +0100
+Last updated 2024-03-31 10:42:48 +0200
 </div>
 </div>
 </body>

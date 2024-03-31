@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="generator" content="Asciidoctor 2.0.20"/>
+<title>git-send-email(1)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>git-send-email(1) Manual Page</h1>
+<h2 id="_名称">名称</h2>
+<div class="sectionbody">
+<p>git-send-email - 以电子邮件形式发送补丁集</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_概述">概述</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><em>git send-email</em> [&lt;选项&gt;] &lt;文件或是目录&gt;&#8230;&#8203;
+git send-email' [&lt;选项&gt;] &lt;格式补丁选项&gt;
+git send-email' --dump-aliases</pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_描述">描述</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>获取命令行中给出的补丁并将其发送出去。 补丁可以指定为文件、目录（将发送目录中的所有文件），或直接指定为修订列表。 在最后一种情况下，<a href="git-format-patch.html">git-format-patch(1)</a> 接受的任何格式，以及 <a href="git-format-patch.html">git-format-patch(1)</a> 可以理解的选项，都可以传递给 git send-email。</p>
+</div>
+<div class="paragraph">
+<p>电子邮件的标题可通过命令行选项进行配置。 如果未在命令行中指定，系统将在启用读取行的界面上提示用户提供必要的信息。</p>
+</div>
+<div class="paragraph">
+<p>补丁文件有两种格式：</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>mbox 格式文件</p>
+<div class="paragraph">
+<p>这就是 <a href="git-format-patch.html">git-format-patch(1)</a> 生成的内容。 大部分头文件和 MIME 格式都会被忽略。</p>
+</div>
+</li>
+<li>
+<p>Greg Kroah-Hartman 的 <em>send_lots_of_email.pl</em> 脚本使用的原始格式</p>
+<div class="paragraph">
+<p>这种格式希望文件的第一行包含 "Cc:"（抄送）值，第二行包含邮件的 "主题："。</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_选项">选项</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_撰写">撰写</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--annotate</dt>
+<dd>
+<p>审核并编辑您即将发送的每个补丁。默认为 <code>sendemail.annotate</code> 的值。有关 <code>sendemail.multiEdit</code> 请参阅配置部分。</p>
+</dd>
+<dt class="hdlist1">--bcc=&lt;地址&gt;,&#8230;&#8203;</dt>
+<dd>
+<p>为每封电子邮件指定一个 "Bcc："（密送）值。默认为 <code>sendemail.bcc</code> 的值。</p>
+<div class="paragraph">
+<p>该选项可指定多次。</p>
+</div>
+</dd>
+<dt class="hdlist1">--cc=&lt;地址&gt;,&#8230;&#8203;</dt>
+<dd>
+<p>为每封电子邮件指定一个起始 "Cc："（抄送）值。 默认值为 <code>sendemail.cc</code>。</p>
+<div class="paragraph">
+<p>该选项可指定多次。</p>
+</div>
+</dd>
+<dt class="hdlist1">--compose</dt>
+<dd>
+<p>调用文本编辑器（参见 <a href="git-var.html">git-var(1)</a> 中的 GIT_EDITOR）编辑补丁系列的介绍信息。</p>
+<div class="paragraph">
+<p>当使用 <code>--compose</code> 时，git send-email 将使用邮件中指定的发件人、收件人、抄送人、密送人、主题、回复人和收件人标题。如果邮件正文（在标题和空行之后输入的内容）只包含空行（或 Git: 前缀），摘要将不会被发送，但上述标题将被使用，除非它们被移除。</p>
+</div>
+<div class="paragraph">
+<p>将提示是否有缺失的发件人或收件人标题。</p>
+</div>
+<div class="paragraph">
+<p>请参阅 <code>sendemail.multiEdit</code> 的配置部分。</p>
+</div>
+</dd>
+<dt class="hdlist1">--from=&lt;地址&gt;</dt>
+<dd>
+<p>指定电子邮件的发件人。 如果未在命令行中指定，则使用配置选项 <code>sendemail.from</code> 的值。 如果命令行选项和 <code>sendemail.from</code> 均未设置，则会提示用户输入值。 提示的默认值是 GIT_AUTHOR_IDENT 的值，如果没有设置 GIT_COMMITTER_IDENT，则使用 "git var -l" 返回的值。</p>
+</dd>
+<dt class="hdlist1">--reply-to=&lt;地址&gt;</dt>
+<dd>
+<p>指定收件人回复的地址。 如果邮件的回复地址与 --from 参数指定的地址不同，请使用此参数。</p>
+</dd>
+<dt class="hdlist1">--in-reply-to=&lt;标识符&gt;</dt>
+<dd>
+<p>使第一封邮件（或所有带有 <code>--no-thread</code>（无线程）的邮件）作为给定 Message-ID 的回复出现，从而避免为提供新的补丁系列而中断线程。 第二封及其后的邮件将根据 "--[no-]chain-reply-to "设置作为回复发送。</p>
+<div class="paragraph">
+<p>例如，如果指定了 <code>--thread</code> 和 <code>--no-chain-reply-to</code>，则第二个和后续补丁将是对第一个补丁的回复，如下图所示，<code>[PATCH v2 0/3]</code> 是对 <code>[PATCH 0/2]</code> 的回复：</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>[PATCH 0/2] 我是这样做的...
+  [PATCH 1/2] 清理和测试
+  [PATCH 2/2] 实施情况
+  [PATCH v2 0/3] 这里是重选
+    [PATCH v2 1/3] 清理
+    [PATCH v2 2/3] 新测试
+    [PATCH v2 3/3] 实施情况</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>只有同时设置了 --compose 时才有必要。 如果未设置 --compose，则会提示。</p>
+</div>
+</dd>
+<dt class="hdlist1">--subject=&lt;字符串&gt;</dt>
+<dd>
+<p>指定电子邮件线程的初始主题。 只有同时设置了 --compose 时才需要。 如果未设置 --compose，系统将提示输入。</p>
+</dd>
+<dt class="hdlist1">--to=&lt;地址&gt;,&#8230;&#8203;</dt>
+<dd>
+<p>指定所生成电子邮件的主要收件人。一般来说，这将是相关项目的上游维护者。默认值是 <code>sendemail.to</code> 配置值的值，如果未指定该值，且未指定 --to-cmd 参数，则会提示该值。</p>
+<div class="paragraph">
+<p>该选项可指定多次。</p>
+</div>
+</dd>
+<dt class="hdlist1">--8bit-encoding=&lt;编码&gt;</dt>
+<dd>
+<p>当遇到未声明其编码的非 ASCII 邮件或主题时，添加标头/引号以表明它是以 &lt;编码&gt; 编码的。 默认值是 'sendemail.assume8bitEncoding ' 的值；如果未指定该值，则在遇到任何非 ASCII 文件时会提示使用该值。</p>
+<div class="paragraph">
+<p>请注意，我们不会尝试验证编码。</p>
+</div>
+</dd>
+<dt class="hdlist1">--compose-encoding=&lt;编码&gt;</dt>
+<dd>
+<p>指定撰写邮件的编码。默认值是 <em>sendemail.composeencoding</em> 的值；如果未指定，则假定为 UTF-8。</p>
+</dd>
+<dt class="hdlist1">--transfer-encoding=(7bit|8bit|quoted-printable|base64|auto)</dt>
+<dd>
+<p>指定通过 SMTP 发送邮件时使用的传输编码。 如仓本库中包含含有回车的文件，quoted-printable 会很有用，但会使原始补丁邮件文件（从 MUA 中保存）更难手动检查。</p>
+<div class="paragraph">
+<p>默认为 <code>sendemail.transferEncoding</code> 配置值的值，如果未指定，则默认为 <code>auto</code>。</p>
+</div>
+</dd>
+<dt class="hdlist1">--xmailer</dt>
+<dt class="hdlist1">--no-xmailer</dt>
+<dd>
+<p>添加（或阻止添加）"X-Mailer: " 标头。 默认情况下会添加，但可以通过将配置变量 <code>sendemail.xmailer</code> 设为 `false`来关闭。</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_发送中">发送中</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--envelope-sender=&lt;地址&gt;</dt>
+<dd>
+<p>指定用于发送电子邮件的信封发件人。 如果您的默认地址不是订阅列表的地址，这将非常有用。为了使用 <em>From</em>（发件人）地址，请将值设置为 "auto"。如果使用 sendmail 二进制文件，必须为 -f 参数设置适当的权限。 默认值是 <code>sendemail.envelopeSender</code> 配置变量的值；如果未指定，则由 MTA 选择信封发件人。</p>
+</dd>
+<dt class="hdlist1">--sendmail-cmd=&lt;命令&gt;</dt>
+<dd>
+<p>指定发送电子邮件时要运行的命令。该命令应类似于 sendmail；具体来说，它必须支持 <code>-i</code> 选项。 如有必要，该命令将在 shell 中执行。 默认值为 <code>sendemail.sendmailcmd</code>。 如果未指定，并且 --smtp-server 也未指定，git-send-email 将在 <code>/usr/sbin</code>、<code>/usr/lib</code> 和 $PATH 中搜索 <code>sendmail</code>。</p>
+</dd>
+<dt class="hdlist1">--smtp-encryption=&lt;加密&gt;</dt>
+<dd>
+<p>指定 SMTP 连接的加密方式。 有效值为 <em>ssl</em> 和 <em>tls</em>。任何其他值都将恢复为普通（未加密）SMTP，默认端口为 25。 尽管名称不同，但这两个值都将使用相同的 TLS 更新版本，只是由于历史原因才使用了这些名称。<em>ssl</em> 指 “隐式” 加密（有时称为 SMTPS），默认使用 465 端口。 <em>tls</em> 指 “显式” 加密（通常称为 STARTTLS），默认使用 25 端口。SMTP 服务器还可能使用其他端口，但这些端口并非默认端口。常见的 <em>tls</em> 和未加密的替代端口是 587。您需要查看供应商的文档或服务器配置，以确定自己的情况。默认值为 <code>sendemail.smtpEncryption</code>。</p>
+</dd>
+<dt class="hdlist1">--smtp-domain=&lt;FQDN&gt;</dt>
+<dd>
+<p>指定发送到 SMTP 服务器的 HELO/EHLO 命令中使用的完全限定域名 (FQDN)。 有些服务器要求 FQDN 与您的 IP 地址匹配。 如果未设置，git send-email 会尝试自动确定您的 FQDN。 默认值为 <code>sendemail.smtpDomain</code>。</p>
+</dd>
+<dt class="hdlist1">--smtp-auth=&lt;验证机制&gt;</dt>
+<dd>
+<p>以空白分隔的允许 SMTP-AUTH 机制列表。此设置只强制使用列出的机制。例如：</p>
+<div class="listingblock">
+<div class="content">
+<pre>$ git send-email --smtp-auth="PLAIN LOGIN GSSAPI" ...</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果指定的机制中至少有一种与 SMTP 服务器公布的机制相匹配，且受所使用的 SASL 库支持，则该机制将用于身份验证。如果既未指定 <em>sendemail.smtpAuth</em>，也未指定 <code>--smtp-auth`参数，则可使用 SASL 库支持的所有机制。如果指定了特殊值 'none'，则可以完全禁用与 `--smtp-user</code> 参数无关的身份验证</p>
+</div>
+</dd>
+<dt class="hdlist1">--smtp-pass[=&lt;密码&gt;]</dt>
+<dd>
+<p>SMTP-AUTH 的密码。参数为可选参数：如果未指定参数，则使用空字符串作为密码。默认值是 <code>sendemail.smtpPass</code> 的值，但 <code>--smtp-pass</code> 始终会覆盖该值。</p>
+<div class="paragraph">
+<p>此外，无需在配置文件或命令行中指定密码。如果已指定用户名（使用 <code>--smtp-user</code> 或 <code>sendemail.smtpUser</code>），但未指定密码（使用 <code>--smtp-pass</code> 或 <code>sendemail.smtpPass</code>），则使用 <em>git-credential</em> 获取密码。</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-smtp-auth</dt>
+<dd>
+<p>禁用 SMTP 验证。<code>--smtp-auth=none</code> 的简称</p>
+</dd>
+<dt class="hdlist1">--smtp-server=&lt;主机&gt;</dt>
+<dd>
+<p>如果设置，则指定要使用的外发 SMTP 服务器（例如 <code>smtp.example.com</code> 或原始 IP 地址）。 如果未指定，而且`--sendmail-cmd` 也未指定，默认情况下会在`/usr/sbin`、<code>/usr/lib</code> 和 $PATH 中搜索 <code>sendmail</code>（如果有），否则会返回到 <code>localhost</code>。</p>
+<div class="paragraph">
+<p>为了向后兼容，该选项也可以指定一个类似于 sendmail 的程序的完整路径名；该程序必须支持 <code>-i</code> 选项。 这种方法不支持传递参数或使用纯命令名。 在这些情况下，请考虑使用 <code>--sendmail-cmd</code>。</p>
+</div>
+</dd>
+<dt class="hdlist1">--smtp-server-port=&lt;端口&gt;</dt>
+<dd>
+<p>指定一个不同于默认端口的端口（SMTP 服务器通常监听 smtp 端口 25，但也可能监听 submission 端口 587 或常用的 SSL smtp 端口 465）；也接受符号端口名称（如用 "submission" 代替 587）。端口也可以通过 <code>sendemail.smtpServerPort</code> 配置变量来设置。</p>
+</dd>
+<dt class="hdlist1">--smtp-server-option=&lt;选项&gt;</dt>
+<dd>
+<p>如果设置，则指定要使用的外发 SMTP 服务器选项。 默认值可由 <code>sendemail.smtpServerOption</code> 配置选项指定。</p>
+<div class="paragraph">
+<p>对于要传递给服务器的每个选项，都必须重复使用 --smtp-server-option 选项。同样，每个选项必须在配置文件中使用不同的行。</p>
+</div>
+</dd>
+<dt class="hdlist1">--smtp-ssl</dt>
+<dd>
+<p><em>--smtp-encryption ssl</em> 的遗留别名。</p>
+</dd>
+<dt class="hdlist1">--smtp-ssl-cert-path</dt>
+<dd>
+<p>用于 SMTP SSL/TLS 证书验证的可信 CA 证书存储的路径（可以是已被 <em>c_rehash</em> 处理过的目录，也可以是包含一个或多个 PEM 格式证书的单个文件：请参阅 verify(1) -CAfile 和 -CApath，了解更多相关信息）。将其设置为空字符串可禁用证书验证。如果设置了，默认值为 <code>sendemail.smtpsslcertpath</code> 配置变量的值，否则默认值为备用 SSL 库编译后的默认值（这应该是大多数平台上的最佳选择）。</p>
+</dd>
+<dt class="hdlist1">--smtp-user=&lt;用户&gt;</dt>
+<dd>
+<p>SMTP-AUTH 的用户名。默认值是 <code>sendemail.smtpUser</code> 的值；如果未指定用户名（使用 <code>--smtp-user</code> 或 <code>sendemail.smtpUser</code>），则不会尝试验证。</p>
+</dd>
+<dt class="hdlist1">--smtp-debug=0|1</dt>
+<dd>
+<p>启用 (1) 或禁用 (0) 调试输出。如果启用，将打印 SMTP 命令和回复。用于调试 TLS 连接和身份验证问题。</p>
+</dd>
+<dt class="hdlist1">--batch-size=&lt;数值&gt;</dt>
+<dd>
+<p>某些邮件服务器（如 smtp.163.com）限制每次会话（连接）发送的邮件数量，这将导致发送大量邮件时出现故障。 有了这个选项，send-email 会在发送 $&lt;数值&gt; 邮件后断开连接，等待几秒钟（参见 --relogin-delay ），然后重新连接，以规避这种限制。 你可能需要使用某种形式的凭证助手，以避免每次都要重新输入密码。 默认为 <code>sendemail.smtpBatchSize</code> 配置变量。</p>
+</dd>
+<dt class="hdlist1">--relogin-delay=&lt;整数&gt;</dt>
+<dd>
+<p>重新连接 SMTP 服务器前等待 $&lt;整数&gt; 秒。与 --batch-size 选项一起使用。 默认为 <code>sendemail.smtpReloginDelay</code> 配置变量。</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_自动化">自动化</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--no-[to|cc|bcc]</dt>
+<dd>
+<p>清除之前通过配置设置的 "To:"（收件人）、"Cc:"（抄送人）、"Bcc:"（密送人）地址列表。</p>
+</dd>
+<dt class="hdlist1">--no-identity</dt>
+<dd>
+<p>清除先前读取的通过配置设置的 <code>sendemail.identity</code> 值（如果有）。</p>
+</dd>
+<dt class="hdlist1">--to-cmd=&lt;命令&gt;</dt>
+<dd>
+<p>指定每个补丁文件执行一次的命令，该命令应生成补丁文件特定的 "To:"（收件人）条目。 该命令的输出必须是每行一个电子邮件地址。 默认值为 <em>sendemail.tocmd</em> 配置值。</p>
+</dd>
+<dt class="hdlist1">--cc-cmd=&lt;命令&gt;</dt>
+<dd>
+<p>指定每个补丁文件执行一次的命令，该命令应生成补丁文件特定的 "Cc:"（抄送人）条目。 该命令的输出必须是每行一个电子邮件地址。 默认值为 <code>sendemail.ccCmd</code> 配置值。</p>
+</dd>
+<dt class="hdlist1">--header-cmd=&lt;命令&gt;</dt>
+<dd>
+<p>指定一条命令，每封发送邮件执行一次，并输出 RFC 2822 样式的标题行插入其中。如果设置了 <code>sendemail.headerCmd</code> 配置变量，则始终使用其值。在命令行中提供 --header-cmd 参数时，其值优先于 <code>sendemail.headerCmd</code> 配置变量。</p>
+</dd>
+<dt class="hdlist1">--no-header-cmd</dt>
+<dd>
+<p>禁用任何正在使用的标题命令。</p>
+</dd>
+<dt class="hdlist1">--[no-]chain-reply-to</dt>
+<dd>
+<p>如果设置了此项，每封邮件都将作为对前一封邮件的回复发送。 如果使用 "--no-chain-reply-to" 禁用该选项，则第一封邮件之后的所有邮件都将作为对第一封邮件的回复发送。 使用此功能时，建议给出的第一个文件是整个补丁系列的概述。默认情况下已禁用，但可以使用 <code>sendemail.chainReplyTo</code> 配置变量启用它。</p>
+</dd>
+<dt class="hdlist1">--identity=&lt;身份&gt;</dt>
+<dd>
+<p>配置标识。给定后，<em>sendemail.&lt;认证&gt;</em> 分节中的值将优先于 <em>sendemail</em> 部分中的值。默认身份是 <code>sendemail.identity</code> 的值。</p>
+</dd>
+<dt class="hdlist1">--[no-]signed-off-by-cc</dt>
+<dd>
+<p>如果设置了此选项，请将“ Signed-off-by”预告或抄送：行中的电子邮件添加到抄送列表中。默认为`sendemail.signedoffbycc`配置值的值；如果未指定，则默认为&#8212;&#8203;signed-off-by-cc。</p>
+</dd>
+<dt class="hdlist1">--[no-]cc-cover</dt>
+<dd>
+<p>如果设置了此项，在系列邮件的第一个补丁（通常是封面信）的抄送标题中找到的电子邮件将被添加到每个邮件集的抄送列表中。默认值为 <em>sendemail.cccover</em> 配置值；如果未指定，默认值为 --no-cc-cover。</p>
+</dd>
+<dt class="hdlist1">--[no-]to-cover</dt>
+<dd>
+<p>如果设置了此项，在系列邮件的第一个补丁（通常是封面信函）的收件人标题中找到的邮件将被添加到每个邮件集的收件人列表中。默认值为 <em>sendemail.tocover</em> 配置值；如果未指定，默认值为&#8212;&#8203;no-to-cover。</p>
+</dd>
+<dt class="hdlist1">--suppress-cc=&lt;类别&gt;</dt>
+<dd>
+<p>指定一个额外的收件人类别，以禁止自动收件：</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><em>author</em> 将避免包含补丁作者。</p>
+</li>
+<li>
+<p><em>self</em> 将避免包括发件人。</p>
+</li>
+<li>
+<p><em>cc</em> 将避免包括补丁头中抄送行提到的任何人，但自己除外（使用 <em>self</em> 即可）。</p>
+</li>
+<li>
+<p><em>bodycc</em> 将避免在补丁正文（提交信息）中包含抄送行中提到的任何人，但自己除外（为此使用 <em>self</em>）。</p>
+</li>
+<li>
+<p><em>sob</em> 将避免包括签名行中提到的任何人， 除了自我 （为此使用 "自我" ）。</p>
+</li>
+<li>
+<p><em>misc-by</em> 将避免包含补丁正文中的 Acked-by、Reviewed-by、Tested-by 和其他 "-by " 行提到的任何人，但 Signed-off-by 除外（使用 <em>sob</em> ）。</p>
+</li>
+<li>
+<p><em>cccmd</em> 将避免运行 --cc-cmd 命令。</p>
+</li>
+<li>
+<p><em>body</em> 等同于 <em>sob</em> + <em>bodycc</em> + <em>misc-by</em>。</p>
+</li>
+<li>
+<p><em>all</em> 会抑制所有自动抄送值。</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>默认值是 <code>sendemail.suppresscc</code> 配置值的值，如果未指定，则在指定 --suppress-from 参数时默认为 <em>self</em>，在指定 --no-signed-off-cc 参数时默认为 <em>body</em>。</p>
+</div>
+</dd>
+<dt class="hdlist1">--[no-]suppress-from</dt>
+<dd>
+<p>如果设置了此项，则不会将发件人地址添加到抄送地址列表中。 默认值是 <code>sendemail.suppressFrom</code> 配置值的值，如果未指定，则默认为 --no-suppress-from 参数。</p>
+</dd>
+<dt class="hdlist1">--[no-]thread</dt>
+<dd>
+<p>如果设置了此项，每封邮件都会添加 In-Reply-To 和 References 标头。 每封邮件是引用前一封邮件（<em>git format-patch</em> 中的 <code>deep</code> 线程），还是引用第一封邮件（<code>shallow</code> 线程），由 "--[no-]chain-reply-to" 决定。</p>
+<div class="paragraph">
+<p>如果使用"--no-thread" 禁用，则不会添加这些标题（除非使用 --in-reply-to 指定）。 默认值是 "sendemail.thread" 配置值；如果未指定，则默认为 --thread 选项。</p>
+</div>
+<div class="paragraph">
+<p>当 <em>git send-email</em> 被要求添加 In-Reply-To 头信息时，用户应确保该头条信息不存在（特别要注意的是，<em>git format-patch</em> 可被配置为自行进行线程处理）。 否则可能无法在收件人的 MUA 中产生预期结果。</p>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_管理">管理</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--confirm=&lt;模式&gt;</dt>
+<dd>
+<p>发送前确认：</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><em>always</em> 总会在发送前确认</p>
+</li>
+<li>
+<p><em>never</em> 在发送前不会确认</p>
+</li>
+<li>
+<p>如果发送邮件已自动将补丁中的地址添加到抄送列表中，<em>cc</em> 将在发送前进行确认</p>
+</li>
+<li>
+<p>当使用 --compose 选项时，<em>compose</em> 会在发送第一条信息前进行确认。</p>
+</li>
+<li>
+<p><em>auto</em> 等同于 <em>cc</em> + <em>compose</em></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>默认值是 <code>sendemail.confirm</code> 配置值的值，如果未指定，则默认为 <em>auto</em>，除非指定了任何抑制选项，在这种情况下默认为 <em>compose</em>。</p>
+</div>
+</dd>
+<dt class="hdlist1">--dry-run</dt>
+<dd>
+<p>除了实际发送邮件外，什么都做。</p>
+</dd>
+<dt class="hdlist1">--[no-]format-patch</dt>
+<dd>
+<p>当参数可以理解为引用或文件名时，选择将其理解为格式补丁参数（<code>--format-patch</code>）或文件名（<code>--no-format-patch</code>）。默认情况下，当出现这种冲突时，git send-email 操作将失败。</p>
+</dd>
+<dt class="hdlist1">--quiet</dt>
+<dd>
+<p>让 git-send-email 少输出一些。 每封邮件只输出一行即可。</p>
+</dd>
+<dt class="hdlist1">--[no-]validate</dt>
+<dd>
+<p>对补丁进行正确性检查。 目前，验证的含义如下：</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>调用 sendemail-validate （发送邮件验证）钩子（如果存在）（参见 <a href="githooks.html">githooks(5)</a>)。</p>
+</li>
+<li>
+<p>警告含有长于
+998 个字符，除非使用了合适的传输编码
+(<em>auto</em>、<em>base64</em> 或 <em>quoted-printable</em>）都会使用；
+这是因为 SMTP 的限制，如
+<a href="https://www.ietf.org/rfc/rfc5322.txt。" class="bare">https://www.ietf.org/rfc/rfc5322.txt。</a></p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>默认为 <code>sendemail.validate</code> 的值；如果未设置，则默认为 <code>--validate</code> 参数。</p>
+</div>
+</dd>
+<dt class="hdlist1">--force</dt>
+<dd>
+<p>即使安全检查不允许，也要发送电子邮件。</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_信息">信息</h3>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">--dump-aliases</dt>
+<dd>
+<p>不执行正常操作，而是从配置的别名文件中按字母顺序每行转存一个速记别名。注意，这只包括别名，不包括其扩展的电子邮件地址。 有关别名的更多信息，请参阅 <em>sendemail.aliasesfile</em>。</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_配置">配置</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>本节中这一行以下的内容都是从 <a href="git-config.html">git-config(1)</a> 文档中摘录的。其内容与那里的内容相同：</p>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in git-send-email.txt - include::config/sendemail.txt[]</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_实例">实例</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_使用_gmail_作为_smtp_服务器">使用 gmail 作为 smtp 服务器</h3>
+<div class="paragraph">
+<p>要使用 <em>git send-email</em> 通过 GMail SMTP 服务器发送补丁，请编辑 ~/.gitconfig 指定账户设置：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[sendemail]
+        smtpEncryption = tls
+        smtpServer = smtp.gmail.com
+        smtpUser = yourname@gmail.com
+        smtpServerPort = 587</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>如果您的 Gmail 账户设置了多因素身份验证，您可以生成一个应用程序专用密码，供 <em>git send-email</em> 使用。请访问 <a href="https://security.google.com/settings/security/apppasswords" class="bare">https://security.google.com/settings/security/apppasswords</a> 创建密码。</p>
+</div>
+<div class="paragraph">
+<p>一旦您的提交已准备好发送至邮件列表，请运行以下命令：</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>$ git format-patch --cover-letter -M origin/master -o outgoing/
+$ edit outgoing/0000-*
+$ git send-email outgoing/*</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>首次运行时，系统会提示您输入凭据。 请根据情况输入特定于应用程序的密码或常规密码。 如果配置了凭据助手（参见 <a href="git-credential.html">git-credential(1)</a>），密码会保存在凭据存储区，下次就不用再输入了。</p>
+</div>
+<div class="paragraph">
+<p>注意：需要安装以下 Perl 核心模块，这些模块可能已随 Perl 发行版一起安装： MIME::Base64、MIME::QuotedPrint、Net::Domain 和 Net::SMTP。 还需要安装这些额外的 Perl 模块： Authen::SASL 和 Mail::Address。</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_参见">参见</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><a href="git-format-patch.html">git-format-patch(1)</a>, <a href="git-imap-send.html">git-imap-send(1)</a>, mbox(5)</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2024-03-31 10:42:48 +0200
+</div>
+</div>
+</body>
+</html>

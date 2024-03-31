@@ -458,7 +458,39 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_描述">描述</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-rev-list.txt - include::rev-list-description.txt[]</p>
+<p>列出可以从给定的提交中通过 "父 "链接到达的提交，但不包括可以从前面有"^"的提交中到达的提交。 默认情况下，输出结果是按时间顺序倒置的。</p>
+</div>
+<div class="paragraph">
+<p>你可以把它看成是一个集合操作。从命令行上给出的任何一个提交中可以到达的提交形成一个集合，然后从这个集合中减去任何一个前面带有'^'的提交。 剩下的提交内容就是命令的输出结果。 其他各种选项和路径参数也可以用来进一步限制结果。</p>
+</div>
+<div class="paragraph">
+<p>因此，可以执行以下命令：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git rev-list foo bar ^baz</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>意思是 "列出所有可以从&#8217;foo&#8217;或&#8217;bar'，但不能从&#8217;baz&#8217;到达的提交"。</p>
+</div>
+<div class="paragraph">
+<p>一个特殊的符号 "<em>&lt;提交 1&gt;</em>&#8230;&#8203;<em>&lt;提交 2&gt;</em>" 可以作为 "^<em>&lt;提交 1&gt;</em> <em>&lt;提交 2&gt;</em>" 的简称。例如，以下两种情况可以互换使用：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git rev-list origin..HEAD
+$ git rev-list HEAD ^origin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>另一个特殊的符号是 "<em>&lt;提交 1&gt;</em>&#8230;&#8203;<em>&lt;提交 2&gt;</em>"，对合并很有用。 由此产生的提交集合是两个操作数之间的对称差。 以下两个命令是等价的：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git rev-list A B --not $(git merge-base --all A B)
+$ git rev-list A...B</pre>
+</div>
 </div>
 <div class="paragraph">
 <p><em>rev-list</em> 是一个非常必要的Git命令，因为它提供了构建和遍历祖先图的功能。正因如此，它有很多不同的选项，使得它可以被不同的命令使用，如 <em>git bisect</em> 和 <em>git repack</em>。</p>
@@ -474,7 +506,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>除了使用描述中解释的特殊符号指定应列出的提交范围，还可以应用额外的提交限制。</p>
 </div>
 <div class="paragraph">
-<p>Using more options generally further limits the output (e.g. <code>--since=&lt;date1&gt;</code> limits to commits newer than <code>&lt;date1&gt;</code>, and using it with <code>--grep=&lt;pattern&gt;</code> further limits to commits whose log message has a line that matches <code>&lt;pattern&gt;</code>), unless otherwise noted.</p>
+<p>使用更多的选项通常会进一步限制输出（例如，<code>--since=&lt;date1&gt;`限制在比</code>&lt;date1&gt;<code>新的提交，与</code>--grep=&lt;pattern&gt;<code>一起使用会进一步限制在日志信息中有一行符合</code>&lt;pattern&gt;`的提交），除非另有说明。</p>
 </div>
 <div class="paragraph">
 <p>请注意，这些都是在提交排序和格式化选项之前应用的，如 <code>--reverse</code>。</p>
@@ -513,15 +545,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--author=&lt;模式&gt;</dt>
 <dt class="hdlist1">--committer=&lt;模式&gt;</dt>
 <dd>
-<p>Limit the commits output to ones with author/committer header lines that match the specified pattern (regular expression). With more than one <code>--author=&lt;pattern&gt;</code>, commits whose author matches any of the given patterns are chosen (similarly for multiple <code>--committer=&lt;pattern&gt;</code>).</p>
+<p>将提交文件的输出限制在作者/提交人标题行符合指定模式（正则表达式）的文件。 如果有多个`--author=&lt;pattern&gt;<code>，则会选择作者符合任何一个给定模式的提交（对于多个</code>--committer=&lt;pattern&gt;`也是如此）。</p>
 </dd>
 <dt class="hdlist1">--grep-reflog=&lt;模式&gt;</dt>
 <dd>
-<p>Limit the commits output to ones with reflog entries that match the specified pattern (regular expression). With more than one <code>--grep-reflog</code>, commits whose reflog message matches any of the given patterns are chosen. It is an error to use this option unless <code>--walk-reflogs</code> is in use.</p>
+<p>将提交文件的输出限制在有符合指定模式（正则表达式）的reflog条目的提交文件。如果有多个 <code>--grep-reflog</code>，则会选择那些 reflog 信息符合任何指定模式的提交。 除非使用了`--walk-reflogs`，否则使用此选项是错误的。</p>
 </dd>
 <dt class="hdlist1">--grep=&lt;模式&gt;</dt>
 <dd>
-<p>Limit the commits output to ones with a log message that matches the specified pattern (regular expression). With more than one <code>--grep=&lt;pattern&gt;</code>, commits whose message matches any of the given patterns are chosen (but see <code>--all-match</code>).</p>
+<p>将提交结果限制在日志信息与指定模式（正则表达式）相匹配的提交。 如果有多个 <code>--grep=&lt;模式&gt;</code>，则会选择那些日志信息与任何指定模式相匹配的提交（但见 <code>--all-match</code>）。</p>
 </dd>
 <dt class="hdlist1">--all-match</dt>
 <dd>
@@ -575,22 +607,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--no-min-parents</dt>
 <dt class="hdlist1">--no-max-parents</dt>
 <dd>
-<p>Show only commits which have at least (or at most) that many parent commits. In particular, <code>--max-parents=1</code> is the same as <code>--no-merges</code>, <code>--min-parents=2</code> is the same as <code>--merges</code>. <code>--max-parents=0</code> gives all root commits and <code>--min-parents=3</code> all octopus merges.</p>
+<p>只显示至少（或最多）有那么多父提交的提交。特别是，<code>--max-parents=1`等同于</code>--no-merges`，<code>--min-parents=2`等同于</code>--merges`。 <code>--max-parents=0`给出所有根提交，</code>--min-parents=3`给出所有章鱼合并。</p>
 <div class="paragraph">
-<p><code>--no-min-parents</code> and <code>--no-max-parents</code> reset these limits (to no limit) again. Equivalent forms are <code>--min-parents=0</code> (any commit has 0 or more parents) and <code>--max-parents=-1</code> (negative numbers denote no upper limit).</p>
+<p><code>--no-min-parents</code> 和 <code>--no-max-parents</code> 会再次重置这些限制（为无限制）。 等价形式是 <code>--min-parents=0</code>（任何提交都有 0 个或更多父代）和 <code>--max-parents=-1</code>（负数表示无上限）。</p>
 </div>
 </dd>
 <dt class="hdlist1">--first-parent</dt>
 <dd>
-<p>When finding commits to include, follow only the first parent commit upon seeing a merge commit. This option can give a better overview when viewing the evolution of a particular topic branch, because merges into a topic branch tend to be only about adjusting to updated upstream from time to time, and this option allows you to ignore the individual commits brought in to your history by such a merge.</p>
+<p>查找要包含的提交时，在看到合并提交时只跟随第一个父提交。 在查看某个特性分支的演变时，该选项可以提供更好的概览，因为合并到特性分支往往只是为了不时地适应上游的更新，而该选项可以让你忽略由合并带来的历史中的单个提交。</p>
 </dd>
 <dt class="hdlist1">--exclude-first-parent-only</dt>
 <dd>
-<p>When finding commits to exclude (with a <em>^</em>), follow only the first parent commit upon seeing a merge commit. This can be used to find the set of changes in a topic branch from the point where it diverged from the remote branch, given that arbitrary merges can be valid topic branch changes.</p>
+<p>在寻找要排除的提交（用'^'）时，在看到合并提交时只跟随第一个父提交。 考虑到任意的合并都可以成为有效的主题分支变化，这可以用来查找主题分支中从它与远程分支的分歧点开始的变化集合。</p>
 </dd>
 <dt class="hdlist1">--not</dt>
 <dd>
-<p>Reverses the meaning of the <em>^</em> prefix (or lack thereof) for all following revision specifiers, up to the next <code>--not</code>. When used on the command line before --stdin, the revisions passed through stdin will not be affected by it. Conversely, when passed via standard input, the revisions passed on the command line will not be affected by it.</p>
+<p>反转 <em>^</em> 前缀（或无前缀）对后面所有版本说明符的意义，直到下一个 <code>--not</code>。 在 --stdin 之前的命令行中使用时，通过标准输入流传递的修订版本不会受其影响。反之，通过标准输入传递时，命令行上传递的修订版本也不会受其影响。</p>
 </dd>
 <dt class="hdlist1">--all</dt>
 <dd>
@@ -606,7 +638,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--remotes[=&lt;模式&gt;]</dt>
 <dd>
-<p>Pretend as if all the refs in <code>refs/remotes</code> are listed on the command line as <em>&lt;commit&gt;</em>. If <em>&lt;pattern&gt;</em> is given, limit remote-tracking branches to ones matching given shell glob. If pattern lacks <em>?</em>, <em>*</em>, or <em>[</em>, <em>/*</em> at the end is implied.</p>
+<p>假设`refs/remotes`中的所有 refs 在命令行中被列为 <em>&lt;commit&gt;</em>。如果给出了'&lt;pattern&gt;'，将远程跟踪分支限制在与给定的shell glob相匹配的分支。 如果pattern缺少'?<em>、</em>*'或'[<em>，则末尾的</em>/*'是暗示的。</p>
 </dd>
 <dt class="hdlist1">--glob=&lt;通配符模式&gt;</dt>
 <dd>
@@ -629,11 +661,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--alternate-refs</dt>
 <dd>
-<p>Pretend as if all objects mentioned as ref tips of alternate repositories were listed on the command line. An alternate repository is any repository whose object directory is specified in <code>objects/info/alternates</code>. The set of included objects may be modified by <code>core.alternateRefsCommand</code>, etc. See <a href="git-config.html">git-config(1)</a>.</p>
+<p>假设所有提到的作为备用仓库的参考提示的对象都列在命令行上。备用资源库是任何资源库，其对象目录在`objects/info/alternates`中指定。 包含的对象集可以通过`core.alternateRefsCommand`等修改。见<a href="git-config.html">git-config(1)</a>。</p>
 </dd>
 <dt class="hdlist1">--single-worktree</dt>
 <dd>
-<p>By default, all working trees will be examined by the following options when there are more than one (see <a href="git-worktree.html">git-worktree(1)</a>): <code>--all</code>, <code>--reflog</code> and <code>--indexed-objects</code>. This option forces them to examine the current working tree only.</p>
+<p>默认情况下，当有多个工作树时，所有工作树都会被以下选项检查（见<a href="git-worktree.html">git-worktree(1)</a>）：<code>--all</code>，<code>--reflog`和</code>--indexed-objects`。 这个选项强制它们只检查当前的工作树。</p>
 </dd>
 <dt class="hdlist1">--ignore-missing</dt>
 <dd>
@@ -645,12 +677,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--quiet</dt>
 <dd>
-<p>Don&#8217;t print anything to standard output. This form is primarily meant to allow the caller to test the exit status to see if a range of objects is fully connected (or not). It is faster than redirecting stdout to <code>/dev/null</code> as the output does not have to be formatted.</p>
+<p>不要打印任何东西到标准输出。 这种形式主要是为了让调用者测试退出状态，看看一系列的对象是否完全连接（或没有）。 它比将stdout重定向到`/dev/null`要快，因为输出不需要被格式化。</p>
 </dd>
 <dt class="hdlist1">--disk-usage</dt>
 <dt class="hdlist1">--disk-usage=human</dt>
 <dd>
-<p>Suppress normal output; instead, print the sum of the bytes used for on-disk storage by the selected commits or objects. This is equivalent to piping the output into <code>git cat-file --batch-check='%(objectsize:disk)'</code>, except that it runs much faster (especially with <code>--use-bitmap-index</code>). See the <code>CAVEATS</code> section in <a href="git-cat-file.html">git-cat-file(1)</a> for the limitations of what "on-disk storage" means. With the optional value <code>human</code>, on-disk storage size is shown in human-readable string(e.g. 12.24 Kib, 3.50 Mib).</p>
+<p>抑制正常输出；相反，打印所选提交或对象用于磁盘存储的字节数之和。这相当于用管道将输出写入 <code>git cat-file --batch-check='%(objectsize:disk)'</code> ，只是它的运行速度要快得多（尤其是在使用 <code>--use-bitmap-index</code> 时）。参见 <a href="git-cat-file.html">git-cat-file(1)</a> 中的 <code>注意事项</code> 部分，了解 “磁盘存储” 的限制。 如果使用可选值 <code>human</code>，磁盘存储大小将以人类可读字符串显示（如 12.24 Kib、3.50 Mib）。</p>
 </dd>
 <dt class="hdlist1">--cherry-mark</dt>
 <dd>
@@ -668,7 +700,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>只列出对称性差异各自一侧的提交，即只列出那些通过 <code>--left-right</code> 标记的 <code>&lt;</code> 或 <code>&gt;</code>。</p>
 <div class="paragraph">
-<p>For example, <code>--cherry-pick --right-only A...B</code> omits those commits from <code>B</code> which are in <code>A</code> or are patch-equivalent to a commit in <code>A</code>. In other words, this lists the <code>+</code> commits from <code>git cherry A B</code>. More precisely, <code>--cherry-pick --right-only --no-merges</code> gives the exact list.</p>
+<p>例如，<code>--cherry-pick --right-only A...B`省略了`B`中那些在`A`中的提交或与`A`中的提交相等的补丁。换句话说，它列出了 "git cherry A B "的 "+"的提交。 更准确地说，</code>--cherry-pick --right-only --no-merges`可以得到准确的列表。</p>
 </div>
 </dd>
 <dt class="hdlist1">--cherry</dt>
@@ -678,9 +710,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-g</dt>
 <dt class="hdlist1">--walk-reflogs</dt>
 <dd>
-<p>Instead of walking the commit ancestry chain, walk reflog entries from the most recent one to older ones. When this option is used you cannot specify commits to exclude (that is, <em>^commit</em>, <em>commit1..commit2</em>, and <em>commit1...commit2</em> notations cannot be used).</p>
+<p>不走提交祖先链，而走从最近的提交到更早的提交的reflog条目。 使用这个选项时，你不能指定要排除的提交（也就是说，不能使用'^commit'、'commit1&#8230;&#8203;commit2&#8217;和&#8217;commit1/&#8230;&#8203;commit2&#8217;的符号）。</p>
 <div class="paragraph">
-<p>With <code>--pretty</code> format other than <code>oneline</code> and <code>reference</code> (for obvious reasons), this causes the output to have two extra lines of information taken from the reflog. The reflog designator in the output may be shown as <code>ref@{Nth}</code> (where <code>Nth</code> is the reverse-chronological index in the reflog) or as <code>ref@{timestamp}</code> (with the timestamp for that entry), depending on a few rules:</p>
+<p>在 <code>--pretty</code> 格式下，除了 <code>oneline</code> 和 <code>reference</code> （由于明显的原因），这将导致输出有两行额外的信息来自引用日志。 输出中的引用日志代号可以显示为 <code>ref@{Nth}</code>（其中 <code>Nth</code> 是引用日志中的逆序索引）或 <code>ref@{timestamp}</code> （带有该条目的时间戳），取决于一些规则：</p>
 </div>
 <div class="openblock">
 <div class="content">
@@ -703,7 +735,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Under <code>--pretty=oneline</code>, the commit message is prefixed with this information on the same line. This option cannot be combined with <code>--reverse</code>. See also <a href="git-reflog.html">git-reflog(1)</a>.</p>
+<p>在`--pretty=oneline`下，提交信息的前缀是同一行中的这些信息。 这个选项不能与 `--reverse`结合使用。 参见 <a href="git-reflog.html">git-reflog(1)</a>。</p>
 </div>
 <div class="paragraph">
 <p>在`--pretty=reference`下，这些信息将完全不显示。</p>
@@ -782,7 +814,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--ancestry-path[=&lt;提交&gt;]</dt>
 <dd>
-<p>When given a range of commits to display (e.g. <em>commit1..commit2</em> or <em>commit2 ^commit1</em>), only display commits in that range that are ancestors of &lt;commit&gt;, descendants of &lt;commit&gt;, or &lt;commit&gt; itself. If no commit is specified, use <em>commit1</em> (the excluded part of the range) as &lt;commit&gt;. Can be passed multiple times; if so, a commit is included if it is any of the commits given or if it is an ancestor or descendant of one of them.</p>
+<p>如果给定了一个要显示的提交范围（例如 <em>提交1..提交2</em> 或 <em>提交2 ^-提交1</em> ），则只会显示该范围内属于 &lt;提交&gt; 的祖先、&lt;提交&gt; 的后代或 &lt;提交&gt; 本身的提交。 如果没有指定提交，则使用 <em>提交1</em>（范围中排除的部分）作为 &lt;提交&gt;。 可以多次传递；如果是这样，如果某个提交是所给定提交中的任何一个，或者是其中一个提交的祖先或后代，则该提交将被包括在内。</p>
 </dd>
 </dl>
 </div>
@@ -790,10 +822,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>以下是更详细的解释。</p>
 </div>
 <div class="paragraph">
-<p>Suppose you specified <code>foo</code> as the &lt;paths&gt;. We shall call commits that modify <code>foo</code> !TREESAME, and the rest TREESAME. (In a diff filtered for <code>foo</code>, they look different and equal, respectively.)</p>
+<p>假设你指定了 <code>foo</code> 作为 &lt;路径&gt;。 我们将把修改 <code>foo</code> 的提交称为 !TREESAME，其余的称为 TREESAME。 (在为 <code>foo</code> 过滤的差异中，它们看起来分别是不同的和相同的。）</p>
 </div>
 <div class="paragraph">
-<p>In the following, we will always refer to the same example history to illustrate the differences between simplification settings. We assume that you are filtering for a file <code>foo</code> in this commit graph:</p>
+<p>在下文中，我们将始终引用同一个历史实例来说明简化设置之间的差异。 我们假设你在这个提交图中过滤的是一个文件 <code>foo</code>：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -805,7 +837,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>The horizontal line of history A---Q is taken to be the first parent of each merge. The commits are:</p>
+<p>历史 A---Q 的横线被认为是每次合并的第一个父本。 这些提交是：</p>
 </div>
 <div class="ulist">
 <ul>
@@ -816,7 +848,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>在`A`中，&#8216;foo`只包含`foo&#8217;'。</p>
 </li>
 <li>
-<p><code>B</code> contains the same change as <code>A</code>. Its merge <code>M</code> is trivial and hence TREESAME to all parents.</p>
+<p>`B`包含与`A`相同的变化。 它的合并`M`是微不足道的，因此对所有父类来说是TREESAME。</p>
 </li>
 <li>
 <p><code>C`没有改变`foo</code>，但是它的合并`N`将其改为`foobar''，所以它与任何父类都不存在TREESAME。</p>
@@ -839,7 +871,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">默认模式</dt>
 <dd>
-<p>Commits are included if they are not TREESAME to any parent (though this can be changed, see <code>--sparse</code> below). If the commit was a merge, and it was TREESAME to one parent, follow only that parent. (Even if there are several TREESAME parents, follow only one of them.) Otherwise, follow all parents.</p>
+<p>如果提交的内容与任何父类不相干，则被包括在内（当然这一点可以改变，见下面的`--sparse`）。 如果该提交是一个合并，并且它与一个父类是同源的，则只跟随该父类。 (即使有几个TREESAME父类，也只跟随其中一个。) 否则，跟随所有父类。</p>
 <div class="paragraph">
 <p>这将实现：</p>
 </div>
@@ -851,7 +883,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Note how the rule to only follow the TREESAME parent, if one is available, removed <code>B</code> from consideration entirely. <code>C</code> was considered via <code>N</code>, but is TREESAME. Root commits are compared to an empty tree, so <code>I</code> is !TREESAME.</p>
+<p>请注意，如果有TREESAME父类的话，只遵循TREESAME父类的规则，将`B&#8217;完全排除在考虑之外。 `C`是通过`N`考虑的，但也是TREESAME。 根提交是与空树比较的，所以`I`是!!TREESAME。</p>
 </div>
 <div class="paragraph">
 <p>父/子关系只有在使用 <code>--parents</code> 选项的情况下才能看到，但这并不影响在默认模式下选择的提交，所以我们显示了父行。</p>
@@ -859,14 +891,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--full-history 无父级重写的完整历史记录</dt>
 <dd>
-<p>This mode differs from the default in one point: always follow all parents of a merge, even if it is TREESAME to one of them. Even if more than one side of the merge has commits that are included, this does not imply that the merge itself is! In the example, we get</p>
+<p>这种模式与默认模式有一点不同：总是跟随一个合并的所有父本，即使它与其中一个父本是TREESAME。 即使合并的一方有多个提交被包括在内，这也不意味着合并本身也是如此在这个例子中，我们得到</p>
 <div class="listingblock">
 <div class="content">
 <pre>        I  A  B  N  D  O  P  Q</pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>M</code> was excluded because it is TREESAME to both parents. <code>E</code>, <code>C</code> and <code>B</code> were all walked, but only <code>B</code> was !TREESAME, so the others do not appear.</p>
+<p><code>M</code> 被排除在外，因为它与父母都是TREESAME。 <code>E</code> 、<code>C</code> 和`B` 都走了，但只有`B` 是 !TREESAME，所以其他的都没有出现。</p>
 </div>
 <div class="paragraph">
 <p>请注意，如果没有父子重写，其实是不可能谈论提交之间的父子关系的，所以我们显示它们是不相连的。</p>
@@ -876,7 +908,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>普通的提交只有当它们是！TREESAME时才会被包括在内（尽管这一点可以改变，见下面的`--sparse`）。</p>
 <div class="paragraph">
-<p>Merges are always included. However, their parent list is rewritten: Along each parent, prune away commits that are not included themselves. This results in</p>
+<p>合并总是被包括在内。 然而，他们的父级列表会被重写。沿着每个父级，修剪掉那些不包括自己的提交。 这样做的结果是</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -888,7 +920,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Compare to <code>--full-history</code> without rewriting above. Note that <code>E</code> was pruned away because it is TREESAME, but the parent list of P was rewritten to contain <code>E</code>'s parent <code>I</code>. The same happened for <code>C</code> and <code>N</code>, and <code>X</code>, <code>Y</code> and <code>Q</code>.</p>
+<p>与上面的`--full-history`相比，没有重写。 请注意，<code>E`被修剪掉了，因为它是TREESAME，但是P的父列表被改写为包含`E`的父`I</code>。 同样的情况发生在`C`和`N`，以及`X`、<code>Y`和`Q</code>。</p>
 </div>
 </dd>
 </dl>
@@ -923,17 +955,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>将 "C "设为 "C"。</p>
 </li>
 <li>
-<p>Replace each parent <code>P</code> of <code>C'</code> with its simplification <code>P'</code>. In the process, drop parents that are ancestors of other parents or that are root commits TREESAME to an empty tree, and remove duplicates, but take care to never drop all parents that we are TREESAME to.</p>
+<p>将`C'<code>的每个父类`P'替换成其简化的`P'</code>。 在这个过程中，放弃那些是其他父类的祖先的父类，或者是根部提交TREESAME的空树，并删除重复的父类，但注意不要放弃所有我们是TREESAME的父类。</p>
 </li>
 <li>
-<p>If after this parent rewriting, <code>C'</code> is a root or merge commit (has zero or &gt;1 parents), a boundary commit, or !TREESAME, it remains. Otherwise, it is replaced with its only parent.</p>
+<p>如果在这次父级改写之后，&#8216;C&#8217;`是一个根或合并提交（有0个或&gt;1个父级），一个边界提交，或！TREESAME，那么它将被保留。 否则，它将被替换为其唯一的父类。</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>The effect of this is best shown by way of comparing to <code>--full-history</code> with parent rewriting. The example turns into:</p>
+<p>通过与 <code>--full-history</code> 选项的父级改写进行比较，可以最好地显示其效果。 这个例子变成了：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -952,10 +984,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>N</code>'s parent list had <code>I</code> removed, because it is an ancestor of the other parent <code>M</code>. Still, <code>N</code> remained because it is !TREESAME.</p>
+<p><code>N`的父列表中删除了`I</code>，因为它是另一个父`M`的一个祖先。 但是，`N`仍然存在，因为它是!TREESAME。</p>
 </li>
 <li>
-<p><code>P</code>'s parent list similarly had <code>I</code> removed. <code>P</code> was then removed completely, because it had one parent and is TREESAME.</p>
+<p><code>P`的父级列表也同样删除了`I</code>。 然后`P`被完全删除，因为它有一个父本，并且是TREESAME。</p>
 </li>
 <li>
 <p><code>Q`的父列表中有`Y`简化为`X</code>。然后`X`被删除，因为它是一个TREESAME根。然后`Q`被完全删除，因为它有一个父级，是TREESAME。</p>
@@ -991,7 +1023,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>有规律的 "D&#8230;&#8203;M "会计算出作为`M`的祖先的提交集合，但不包括作为`D`的祖先的提交。这对了解`M&#8217;的历史在`D&#8217;之后发生了什么很有用，也就是说`M&#8217;有什么东西是`D&#8217;没有的'。这个例子中的结果是所有的提交，除了`A`和`B`（当然还有`D`本身）。</p>
 </div>
 <div class="paragraph">
-<p>When we want to find out what commits in <code>M</code> are contaminated with the bug introduced by <code>D</code> and need fixing, however, we might want to view only the subset of <em>D..M</em> that are actually descendants of <code>D</code>, i.e. excluding <code>C</code> and <code>K</code>. This is exactly what the <code>--ancestry-path</code> option does. Applied to the <em>D..M</em> range, it results in:</p>
+<p>然而，当我们想找出`M&#8217;中哪些提交被`D&#8217;引入的错误所污染而需要修复时，我们可能只想查看&#8217;D&#8230;&#8203;M&#8217;中实际上是`D&#8217;的后代的子集，即排除`C&#8217;和`K'。这正是`--ancestry-path`选项的作用。应用于&#8217;D&#8230;&#8203;M&#8217;范围，它的结果是：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1006,7 +1038,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>我们也可以用`--ancestry-path=D`来代替`--ancestry-path`，这在应用于&#8217;D&#8230;&#8203;M&#8217;范围时意思相同，只是更加明确。</p>
 </div>
 <div class="paragraph">
-<p>If we instead are interested in a given topic within this range, and all commits affected by that topic, we may only want to view the subset of <code>D..M</code> which contain that topic in their ancestry path. So, using <code>--ancestry-path=H D..M</code> for example would result in:</p>
+<p>如果我们感兴趣的是这个范围内的某个主题，以及受该主题影响的所有提交，我们可能只想查看祖先路径中包含该主题的`D&#8230;&#8203;M`子集。 因此，以`--ancestry-path=H D&#8230;&#8203;M`为例，会形成以下结果：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1045,7 +1077,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>For this example, suppose <code>I</code> created <code>file.txt</code> which was modified by <code>A</code>, <code>B</code>, and <code>X</code> in different ways. The single-parent commits <code>C</code>, <code>Z</code>, and <code>Y</code> do not change <code>file.txt</code>. The merge commit <code>M</code> was created by resolving the merge conflict to include both changes from <code>A</code> and <code>B</code> and hence is not TREESAME to either. The merge commit <code>R</code>, however, was created by ignoring the contents of <code>file.txt</code> at <code>M</code> and taking only the contents of <code>file.txt</code> at <code>X</code>. Hence, <code>R</code> is TREESAME to <code>X</code> but not <code>M</code>. Finally, the natural merge resolution to create <code>N</code> is to take the contents of <code>file.txt</code> at <code>R</code>, so <code>N</code> is TREESAME to <code>R</code> but not <code>C</code>. The merge commits <code>O</code> and <code>P</code> are TREESAME to their first parents, but not to their second parents, <code>Z</code> and <code>Y</code> respectively.</p>
+<p>在这个例子中，假设`I`创建了`file.txt`，并被`A`、<code>B`和`X`以不同方式修改。单亲提交的`C</code>、<code>Z`和`Y`没有修改`file.txt</code>。合并提交 <code>M`是通过解决合并冲突而产生的，包括了 `A `和 `B `的修改，因此与其中任何一个都不是同源的。然而，合并提交`R`是通过忽略`M`处的`file.txt`的内容，而只采用`X`处的`file.txt`的内容而产生的。因此，`R`与`X`是同源的，但不是`M</code>。最后，创建`N&#8217;的自然合并决议是取`file.txt`在`R&#8217;的内容，所以`N&#8217;与`R`是同源的，但不是`C`。 合并提交的 <code>O</code> 和 <code>P</code> 与它们的第一代父母是同源的，但与它们的第二代父母 <code>Z</code> 和 `Y `则不是同源的。</p>
 </div>
 <div class="paragraph">
 <p>当使用默认模式时，`N&#8217;和`R`都有一个TREESAME父级，所以这些边被展示出来，其他边被忽略。由此产生的历史图是：</p>
@@ -1129,7 +1161,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dl>
 </div>
 <div class="paragraph">
-<p>The <code>--simplify-by-decoration</code> option allows you to view only the big picture of the topology of the history, by omitting commits that are not referenced by tags. Commits are marked as !TREESAME (in other words, kept after history simplification rules described above) if (1) they are referenced by tags, or (2) they change the contents of the paths given on the command line. All other commits are marked as TREESAME (subject to be simplified away).</p>
+<p><code>--simplify-by-decoration</code> 选项允许你只查看历史拓扑的全貌，省略那些没有被标签引用的提交。 如果 (1) 提交被标签引用，或者 (2) 提交改变了命令行上给出的路径内容，则被标记为 TREESAME（换句话说，按照上述历史简化规则保留）。 所有其他的提交都被标记为 TREESAME（会被简化掉）。</p>
 </div>
 </div>
 <div class="sect2">
@@ -1154,7 +1186,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>would be of roughly the same length. Finding the change which introduces a regression is thus reduced to a binary search: repeatedly generate and test new 'midpoint&#8217;s until the commit chain is of length one.</p>
+<p>的长度大致相同。 因此，找到引入回归的变化就变成了一个二进制搜索：反复生成和测试新的 "中点"，直到提交链的长度为1。</p>
 </div>
 </dd>
 <dt class="hdlist1">--bisect-vars</dt>
@@ -1225,7 +1257,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">--objects</dt>
 <dd>
-<p>Print the object IDs of any object referenced by the listed commits. <code>--objects foo ^bar</code> thus means &#8220;send me all object IDs which I need to download if I have the commit object <em>bar</em> but not <em>foo</em>&#8221;. See also <code>--object-names</code> below.</p>
+<p>打印列出的提交对象所引用的任何对象的ID。 <code>--objects foo ^bar</code> 因此意味着 <em>'给我发送所有我需要下载的对象ID，如果我有提交对象_bar_但没有_foo_的话</em>'。另请参阅下面的 <code>--object-names</code> 选项。</p>
 </dd>
 <dt class="hdlist1">--in-commit-order</dt>
 <dd>
@@ -1233,19 +1265,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--objects-edge</dt>
 <dd>
-<p>Similar to <code>--objects</code>, but also print the IDs of excluded commits prefixed with a &#8220;-&#8221; character. This is used by <a href="git-pack-objects.html">git-pack-objects(1)</a> to build a &#8220;thin&#8221; pack, which records objects in deltified form based on objects contained in these excluded commits to reduce network traffic.</p>
+<p>类似于 <code>--objects</code>，但也会打印被排除的提交物的 ID，前缀为 &#8216;-&#8217;'字符。 这被 <a href="git-pack-objects.html">git-pack-objects(1)</a> 用来建立一个 "瘦身 "包，它基于这些被排除的提交中包含的对象，以删除的形式记录对象，以减少网络流量。</p>
 </dd>
 <dt class="hdlist1">--objects-edge-aggressive</dt>
 <dd>
-<p>Similar to <code>--objects-edge</code>, but it tries harder to find excluded commits at the cost of increased time. This is used instead of <code>--objects-edge</code> to build &#8220;thin&#8221; packs for shallow repositories.</p>
+<p>类似于 <code>--objects-edge</code>，但它更努力地寻找被排除的提交，代价是增加时间。 它被用来代替`--objects-edge`，为浅层仓库建立 "薄 "的包。</p>
 </dd>
 <dt class="hdlist1">--indexed-objects</dt>
 <dd>
-<p>Pretend as if all trees and blobs used by the index are listed on the command line. Note that you probably want to use <code>--objects</code>, too.</p>
+<p>假设索引使用的所有树和blobs都列在命令行中。 注意，你可能也想使用`--objects`。</p>
 </dd>
 <dt class="hdlist1">--unpacked</dt>
 <dd>
-<p>只对 <code>---objects</code> 有用；打印不在包中的对象 ID。</p>
+<p>只对 <code>--objects</code> 有用；打印不在包中的对象 ID。</p>
 </dd>
 <dt class="hdlist1">--object-names</dt>
 <dd>
@@ -1257,12 +1289,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--filter=&lt;过滤器定义&gt;</dt>
 <dd>
-<p>Only useful with one of the <code>--objects*</code>; omits objects (usually blobs) from the list of printed objects. The <em>&lt;filter-spec&gt;</em> may be one of the following:</p>
+<p>只对其中一个 <code>--objects*</code> 选项有用；从打印对象列表中省略对象（通常是 blobs）。 <em>&lt;过滤规则&gt;</em> 可以是下列之一：</p>
 <div class="paragraph">
 <p>'--filter=blob:none&#8217;的形式可以省略所有的blob。</p>
 </div>
 <div class="paragraph">
-<p>The form <em>--filter=blob:limit=&lt;n&gt;[kmg]</em> omits blobs of size at least n bytes or units. n may be zero. The suffixes k, m, and g can be used to name units in KiB, MiB, or GiB. For example, <em>blob:limit=1k</em> is the same as <em>blob:limit=1024</em>.</p>
+<p>格式 <em>--filter=blob:limit=&lt;n&gt;[kmg]</em> 会忽略大小至少为 n 字节或单位的 blob。后缀 k、m 和 g 可用来命名 KiB、MiB 或 GiB 单位。例如，<em>blob:limit=1k</em> 与 <em>blob:limit=1024</em> 相同。</p>
 </div>
 <div class="paragraph">
 <p>'--filter=object:type=(tag|commit|tree|blob)'的形式会省略所有不属于请求类型的对象。</p>
@@ -1280,7 +1312,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>可以指定多个'--filter=' 标志来组合过滤器。只有那些被每个过滤器接受的对象才会被包括在内。</p>
 </div>
 <div class="paragraph">
-<p>The form <em>--filter=combine:&lt;filter1&gt;+&lt;filter2&gt;+&#8230;&#8203;&lt;filterN&gt;</em> can also be used to combined several filters, but this is harder than just repeating the <em>--filter</em> flag and is usually not necessary. Filters are joined by <em>&#43;</em> and individual filters are %-encoded (i.e. URL-encoded). Besides the <em>&#43;</em> and <em>%</em> characters, the following characters are reserved and also must be encoded: <code>~!@#$^&amp;*()[]{}\;",&lt;&gt;?</code><code>&#39;&#96;</code> as well as all characters with ASCII code &lt;= <code>0x20</code>, which includes space and newline.</p>
+<p><em>--filter=combine:&lt;filter1&gt;+&lt;filter2&gt;+&#8230;&#8203;&lt;filterN&gt;'的形式也可以用来组合几个过滤器，但这比重复</em>--filter&#8217;标志要难，通常没有必要。过滤器用'&#43;'连接，单个过滤器用%编码（即用URL编码）。 除了'&#43;'和'%'字符，以下字符是保留字符，也必须进行编码：<code>~！@#$^&amp;*()[]{}/;",&lt;&gt;?</code>+&#39;&#96;+以及所有ASCII代码为&lt;=`0x20`的字符，其中包括空格和换行。</p>
 </div>
 <div class="paragraph">
 <p>其他任意的字符也可以被编码。例如，'combined:tree:3+blob:none&#8217;和&#8217;combined:tree%3A3+blob%3Anone&#8217;是等同的。</p>
@@ -1296,31 +1328,31 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--filter-print-omitted</dt>
 <dd>
-<p>Only useful with <code>--filter=</code>; prints a list of the objects omitted by the filter. Object IDs are prefixed with a &#8220;~&#8221; character.</p>
+<p>只对`--filter=<code>有用；打印出被过滤器省略的对象的列表。 对象ID的前缀是`</code>~''字符。</p>
 </dd>
 <dt class="hdlist1">--missing=&lt;缺失行为&gt;</dt>
 <dd>
-<p>A debug option to help with future "partial clone" development. This option specifies how missing objects are handled.</p>
+<p>一个调试选项，帮助未来的 "部分克隆 "开发。 这个选项指定了如何处理丢失的对象。</p>
 <div class="paragraph">
-<p>The form <em>--missing=error</em> requests that rev-list stop with an error if a missing object is encountered. This is the default action.</p>
+<p>形式'--missing=error&#8217;要求rev-list在遇到丢失的对象时以错误方式停止。 这是默认动作。</p>
 </div>
 <div class="paragraph">
-<p>The form <em>--missing=allow-any</em> will allow object traversal to continue if a missing object is encountered. Missing objects will silently be omitted from the results.</p>
+<p>'--missing=allow-any&#8217;的形式将允许在遇到缺失对象时继续进行对象遍历。 缺少的对象将被默默地从结果中省略掉。</p>
 </div>
 <div class="paragraph">
-<p>The form <em>--missing=allow-promisor</em> is like <em>allow-any</em>, but will only allow object traversal to continue for EXPECTED promisor missing objects. Unexpected missing objects will raise an error.</p>
+<p>'--missing=allow-promisor&#8217;的形式与&#8217;allow-any&#8217;相似，但只允许对预期的promisor缺失对象继续进行遍历。 意外的缺失对象将引发一个错误。</p>
 </div>
 <div class="paragraph">
-<p>The form <em>--missing=print</em> is like <em>allow-any</em>, but will also print a list of the missing objects. Object IDs are prefixed with a &#8220;?&#8221; character.</p>
+<p>'--missing=print&#8217;的形式与&#8217;allow-any&#8217;相似，但也会打印出遗失对象的列表。 对象ID的前缀是"？"。</p>
 </div>
 </dd>
 <dt class="hdlist1">--exclude-promisor-objects</dt>
 <dd>
-<p>(For internal use only.) Prefilter object traversal at promisor boundary. This is used with partial clone. This is stronger than <code>--missing=allow-promisor</code> because it limits the traversal, rather than just silencing errors about missing objects.</p>
+<p>仅供内部使用。）在希望者边界预过滤对象的遍历。 这是与部分克隆一起使用的。 这比`--missing=allow-promisor`更强，因为它限制了遍历，而不仅仅是消除了关于丢失对象的错误。</p>
 </dd>
 <dt class="hdlist1">--no-walk[=(sorted|unsorted)]</dt>
 <dd>
-<p>Only show the given commits, but do not traverse their ancestors. This has no effect if a range is specified. If the argument <code>unsorted</code> is given, the commits are shown in the order they were given on the command line. Otherwise (if <code>sorted</code> or no argument was given), the commits are shown in reverse chronological order by commit time. Cannot be combined with <code>--graph</code>.</p>
+<p>只显示给定的提交，但不遍历其祖先。 如果指定了范围，这一点就没有影响。如果给了参数 <code>unsorted</code>，提交会按照命令行上的顺序显示。否则（如果 <code>sorted</code> 或者没有给出参数），提交将按照提交时间的倒序显示。 不能与 <code>--graph</code> 选项结合使用。</p>
 </dd>
 <dt class="hdlist1">--do-walk</dt>
 <dd>
@@ -1334,11 +1366,51 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="paragraph">
 <p>使用这些选项，<a href="git-rev-list.html">git-rev-list(1)</a> 的作用类似于更专业的提交日志工具系列：<a href="git-log.html">git-log(1)</a>，<a href="git-show.html">git-show(1)</a>，和<a href="git-whatchanged.html">git-whatchanged(1)</a></p>
 </div>
-<div class="paragraph">
-<p>Unresolved directive in rev-list-options.txt - include::pretty-options.txt[]</p>
-</div>
 <div class="dlist">
 <dl>
+<dt class="hdlist1">--pretty[=&lt;格式&gt;]</dt>
+<dt class="hdlist1">--format=&lt;格式&gt;</dt>
+<dd>
+<p>以指定的格式打印提交日志的内容，其中'&lt;format&gt;'可以是&#8217;oneline'、<em>short</em>、<em>medium</em>、<em>full</em>、<em>fuller</em>、<em>reference</em>、<em>email</em>、<em>raw</em>、<em>format:&lt;string&gt;'和&#8217;tformat:&lt;string&gt;'之一。 当</em>&lt;format&gt;'不是上述任何一种，并且其中有'%placeholder&#8217;时，它的作用就像给出'--pretty=tformat:&lt;format&gt;'一样。</p>
+<div class="paragraph">
+<p>参见 "PRETTY FORMATS "部分，了解每种格式的一些额外细节。 当'=&lt;格式&gt;'部分被省略时，它默认为&#8217;中等'。</p>
+</div>
+<div class="paragraph">
+<p>注意：你可以在版本库配置中指定默认的漂亮格式（见<a href="git-config.html">git-config(1)</a>）。</p>
+</div>
+</dd>
+<dt class="hdlist1">--abbrev-commit</dt>
+<dd>
+<p>不要显示完整的40字节的十六进制提交对象名称，而是显示一个前缀，以唯一的方式命名该对象。 "--abbrev=&lt;n&gt;"选项可以用来指定前缀的最小长度（如果显示的话，它也会修改diff输出）。</p>
+<div class="paragraph">
+<p>这应该使"--pretty=oneline "对于使用80列终端的人来说更容易阅读。</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-abbrev-commit</dt>
+<dd>
+<p>显示完整的40字节十六进制的提交对象名称。这否定了`--abbrev-commit`，无论是明确的还是由其他选项如"--oneline "暗示的。它还覆盖了`log.abbrevCommit`变量。</p>
+</dd>
+<dt class="hdlist1">--oneline</dt>
+<dd>
+<p>这是"--pretty=oneline --abbrev-commit "的简写，一起使用。</p>
+</dd>
+<dt class="hdlist1">--encoding=&lt;编码&gt;</dt>
+<dd>
+<p>提交对象会在其编码头中记录日志信息使用的字符编码；该选项可用于告诉命令以用户偏好的编码重新编码提交日志信息。 对于非底层命令，默认编码为 UTF-8。需要注意的是，如果对象声称以 <code>X</code> 编码，而我们以 <code>X</code> 输出，我们将逐字输出该对象；这意味着原始提交中的无效序列可能会被复制到输出中。同样，如果 iconv(3) 无法转换提交，我们也会静静地逐字输出原始对象。</p>
+</dd>
+<dt class="hdlist1">--expand-tabs=&lt;n&gt;</dt>
+<dt class="hdlist1">--expand-tabs</dt>
+<dt class="hdlist1">--no-expand-tabs</dt>
+<dd>
+<p>在输出中显示之前，在日志信息中进行标签扩展（用足够的空格替换每个标签，以填充到下一个显示列的 <em>&lt;n&gt;</em> 的倍数）。 <code>--expand-tabs</code> 是 <code>--expand-tabs=8</code> 的简写，<code>--no-expand-tabs</code> 是 <code>--expand-tabs=0</code> 的简写，它禁止标签扩展。</p>
+<div class="paragraph">
+<p>默认情况下，标签会以漂亮的格式展开，将日志信息缩进4个空格（即 "中"，这是默认的，"全"，和 "更全"）。</p>
+</div>
+</dd>
+<dt class="hdlist1">--show-signature</dt>
+<dd>
+<p>通过将签名传递给 <code>gpg --verify</code> 来检查已签名的提交对象的有效性，并显示输出。</p>
+</dd>
 <dt class="hdlist1">--relative-date</dt>
 <dd>
 <p>`--date=relative`的同义词。</p>
@@ -1355,7 +1427,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><code>--date=local`是</code>--date=default-local`的一个别名。</p>
 </div>
 <div class="paragraph">
-<p><code>--date=iso</code> (or <code>--date=iso8601</code>) shows timestamps in a ISO 8601-like format. The differences to the strict ISO 8601 format are:</p>
+<p><code>--date=iso</code>（或 <code>--date=iso8601</code> ）以类似 ISO 8601 的格式显示时间戳。 与严格的 ISO 8601 格式的区别是：</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1380,19 +1452,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><code>--date=short`只显示日期，而不是时间，格式为`YYYY-MM-DD</code>。</p>
 </div>
 <div class="paragraph">
-<p><code>--date=raw</code> shows the date as seconds since the epoch (1970-01-01 00:00:00 UTC), followed by a space, and then the timezone as an offset from UTC (a <code>+</code> or <code>-</code> with four digits; the first two are hours, and the second two are minutes). I.e., as if the timestamp were formatted with <code>strftime("%s %z")</code>). Note that the <code>-local</code> option does not affect the seconds-since-epoch value (which is always measured in UTC), but does switch the accompanying timezone value.</p>
+<p><code>--date=raw`显示日期为自纪元以来的秒数（1970-01-01 00:00:00 UTC），后面是空格，然后是时区为UTC的偏移量（一个</code>+<code>或</code>-<code>的四位数字；前两位是小时，后两位是分钟）。也就是说，就像时间戳的格式为`strftime("%s %z")</code>)。 请注意，`-local`选项不影响自始至终的秒数值（它总是以UTC为单位），但会切换伴随的时区值。</p>
 </div>
 <div class="paragraph">
-<p><code>--date=human</code> shows the timezone if the timezone does not match the current time-zone, and doesn&#8217;t print the whole date if that matches (ie skip printing year for dates that are "this year", but also skip the whole date itself if it&#8217;s in the last few days and we can just say what weekday it was). For older dates the hour and minute is also omitted.</p>
+<p>`--date=human`如果时区与当前时区不匹配，则显示时区，如果匹配则不打印整个日期（即对于 "今年 "的日期，跳过打印年份，但如果是最近几天的日期，也跳过整个日期本身，我们可以只说是哪个工作日）。 对于较早的日期，小时和分钟也被省略了。</p>
 </div>
 <div class="paragraph">
-<p><code>--date=unix</code> shows the date as a Unix epoch timestamp (seconds since 1970). As with <code>--raw</code>, this is always in UTC and therefore <code>-local</code> has no effect.</p>
+<p><code>--date=unix`显示日期为Unix纪元时间戳（自1970年以来的秒数）。 与</code>--raw`一样，这总是以UTC为单位，因此`--local`没有影响。</p>
 </div>
 <div class="paragraph">
-<p><code>--date=format:...</code> feeds the format <code>...</code> to your system <code>strftime</code>, except for %s, %z, and %Z, which are handled internally. Use <code>--date=format:%c</code> to show the date in your system locale&#8217;s preferred format. See the <code>strftime</code> manual for a complete list of format placeholders. When using <code>-local</code>, the correct syntax is <code>--date=format-local:...</code>.</p>
+<p><code>--date=format:...</code> 将格式 <code>...</code> 输入到系统的 <code>strftime</code> 中，%z 和 %Z 除外，它们由内部处理。 使用 <code>--date=format:%c</code>，以系统语言首选的格式显示日期。 有关格式占位符的完整列表，请参阅 <code>strftime</code> 手册。使用 <code>-local</code> 时，正确的语法是 <code>--date=format-local:...</code>。</p>
 </div>
 <div class="paragraph">
-<p><code>--date=default</code> is the default format, and is based on ctime(3) output. It shows a single line with three-letter day of the week, three-letter month, day-of-month, hour-minute-seconds in "HH:MM:SS" format, followed by 4-digit year, plus timezone information, unless the local time zone is used, e.g. <code>Thu Jan 1 00:00:00 1970 +0000</code>.</p>
+<p><code>--date=default`是默认格式，基于ctime(3)输出。 它仅仅在一行中显示缩写的星期、缩写的月份、一月中的第几天、"HH:MM:SS "格式的小时-分钟-秒，然后是年份，除非使用本地时区，在末尾都会加上时区信息，例如`Thu Jan 1 00:00:00 1970 +0000</code>。</p>
 </div>
 </div>
 </div>
@@ -1403,7 +1475,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--no-commit-header</dt>
 <dd>
-<p>Suppress the header line containing "commit" and the object ID printed before the specified format. This has no effect on the built-in formats; only custom formats are affected.</p>
+<p>抑制包含“提交”的标题行和在指定格式之前打印的对象 ID。这对内置格式没有影响；只有自定义格式会受到影响。</p>
 </dd>
 <dt class="hdlist1">--commit-header</dt>
 <dd>
@@ -1411,11 +1483,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--parents</dt>
 <dd>
-<p>Print also the parents of the commit (in the form "commit parent&#8230;&#8203;"). Also enables parent rewriting, see <em>History Simplification</em> above.</p>
+<p>也可以打印提交的父类（以 "提交父类&#8230;&#8203; "的形式）。 也可以启用父级改写，见上面的 "历史简化"。</p>
 </dd>
 <dt class="hdlist1">--children</dt>
 <dd>
-<p>Print also the children of the commit (in the form "commit child&#8230;&#8203;"). Also enables parent rewriting, see <em>History Simplification</em> above.</p>
+<p>同时打印提交的子项（以 "提交子项&#8230;&#8203; "的形式）。 也可以启用父级改写，见上面的 "历史简化"。</p>
 </dd>
 <dt class="hdlist1">--timestamp</dt>
 <dd>
@@ -1423,7 +1495,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--left-right</dt>
 <dd>
-<p>Mark which side of a symmetric difference a commit is reachable from. Commits from the left side are prefixed with <code>&lt;</code> and those from the right with <code>&gt;</code>. If combined with <code>--boundary</code>, those commits are prefixed with <code>-</code>.</p>
+<p>标明提交可以从对称性差异的哪一边到达。 左边的提交以 <code>&lt;</code> 为前缀，右边的则以 <code>&gt;</code> 为前缀。 如果与 <code>--boundary</code> 结合，这些提交的前缀为 <code>-</code>。</p>
 <div class="paragraph">
 <p>例如，如果你有这样的拓扑结构：</p>
 </div>
@@ -1454,7 +1526,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--graph</dt>
 <dd>
-<p>Draw a text-based graphical representation of the commit history on the left hand side of the output. This may cause extra lines to be printed in between commits, in order for the graph history to be drawn properly. Cannot be combined with <code>--no-walk</code>.</p>
+<p>在输出的左手边绘制基于文本的提交历史图表。 这可能会导致在提交之间打印出额外的行，以便正确地绘制图形历史。 不能与`--no-walk`结合使用。</p>
 <div class="paragraph">
 <p>这可以使父代改写，见上面的&#8217;历史简化'。</p>
 </div>
@@ -1468,7 +1540,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--count</dt>
 <dd>
-<p>Print a number stating how many commits would have been listed, and suppress all other output. When used together with <code>--left-right</code>, instead print the counts for left and right commits, separated by a tab. When used together with <code>--cherry-mark</code>, omit patch equivalent commits from these counts and print the count for equivalent commits separated by a tab.</p>
+<p>打印一个数字，说明有多少提交会被列出，并抑制所有其他输出。 当与 <code>--left-right</code> 选项一起使用时，会打印左和右的提交计数，用制表符分开。当与 <code>--cherry-mark</code> 选项一起使用时，从这些计数中省略补丁等价提交，而打印等价提交的计数，用制表符分隔。</p>
 </dd>
 </dl>
 </div>
@@ -1479,7 +1551,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_漂亮的格式">漂亮的格式</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If the commit is a merge, and if the pretty-format is not <em>oneline</em>, <em>email</em> or <em>raw</em>, an additional line is inserted before the <em>Author:</em> line. This line begins with "Merge: " and the hashes of ancestral commits are printed, separated by spaces. Note that the listed commits may not necessarily be the list of the <strong>direct</strong> parent commits if you have limited your view of history: for example, if you are only interested in changes related to a certain directory or file.</p>
+<p>如果提交是一个合并，并且如果pretty-format不是 "oneline"、"email "或 "raw"，那么在 "Author: "一行之前会插入一个附加行。 这一行的开头是 "Merge:这一行以 "Merge: "开头，并打印出祖先提交的哈希值，用空格分隔。 请注意，如果你限制了你的历史视图，那么列出的提交不一定是*直接*父级提交的列表：例如，如果你只对与某个目录或文件有关的修改感兴趣。</p>
 </div>
 <div class="paragraph">
 <p>有几种内置的格式，你可以通过将 pretty.&lt;名称&gt; 配置选项设置为另一种格式名称或 <em>format:</em> 字符串来定义额外的格式，如下所述（见 <a href="git-config.html">git-config(1)</a> ）。下面是内置格式的细节：</p>
@@ -1581,7 +1653,7 @@ CommitDate: &lt;提交者提交日期&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This format is used to refer to another commit in a commit message and is the same as <code>--pretty='format:%C(auto)%h (%s, %ad)'</code>. By default, the date is formatted with <code>--date=short</code> unless another <code>--date</code> option is explicitly specified. As with any <code>format:</code> with format placeholders, its output is not affected by other options like <code>--decorate</code> and <code>--walk-reflogs</code>.</p>
+<p>这种格式用于在提交信息中引用另一个提交，与`--pretty='format:%C(auto)%h (%s, %ad)'相同。 默认情况下，日期的格式为`--date=short`，除非明确指定其他`--date`选项。 与任何带有格式占位符的`format:<code>一样，其输出不受其他选项的影响，如</code>--decorate`和`--walk-reflogs`。</p>
 </div>
 </li>
 <li>
@@ -1609,7 +1681,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <li>
 <p><em>raw</em></p>
 <div class="paragraph">
-<p>The <em>raw</em> format shows the entire commit exactly as stored in the commit object. Notably, the hashes are displayed in full, regardless of whether --abbrev or --no-abbrev are used, and <em>parents</em> information show the true parent commits, without taking grafts or history simplification into account. Note that this format affects the way commits are displayed, but not the way the diff is shown e.g. with <code>git log --raw</code>. To get full object names in a raw diff format, use <code>--no-abbrev</code>.</p>
+<p>原始 "格式显示的是整个提交对象中存储的内容。 值得注意的是，无论是否使用了 --abbrev 或 --no-abbrev，哈希值都会被完整地显示出来，而&#8217;parent&#8217;信息会显示真正的父级提交，不会考虑移花接木或历史简化。注意，这种格式会影响提交的显示方式，但不会影响diff的显示方式，比如用`git log --raw`来显示。要获得原始差异格式的完整对象名称，请使用`--no-abbrev`。</p>
 </div>
 </li>
 <li>
@@ -1672,7 +1744,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 </dd>
 <dt class="hdlist1"><em>%C(&#8230;&#8203;)</em></dt>
 <dd>
-<p>color specification, as described under Values in the "CONFIGURATION FILE" section of <a href="git-config.html">git-config(1)</a>. By default, colors are shown only when enabled for log output (by <code>color.diff</code>, <code>color.ui</code>, or <code>--color</code>, and respecting the <code>auto</code> settings of the former if we are going to a terminal). <code>%C(auto,...)</code> is accepted as a historical synonym for the default (e.g., <code>%C(auto,red)</code>). Specifying <code>%C(always,...)</code> will show the colors even when color is not otherwise enabled (though consider just using <code>--color=always</code> to enable color for the whole output, including this format and anything else git might color). <code>auto</code> alone (i.e. <code>%C(auto)</code>) will turn on auto coloring on the next placeholders until the color is switched again.</p>
+<p>颜色规范，如<a href="git-config.html">git-config(1)</a>的 "配置文件 "部分中的数值描述。 默认情况下，只有在启用日志输出时才会显示颜色（通过 <code>color.diff</code>, <code>color.ui</code>, 或 <code>--color</code>, 如果我们要去终端，要尊重前者的`auto`设置）。<code>%C(auto,...)`被接受为默认的历史同义词（例如，</code>%C(auto,red)<code>）。指定</code>%C(always,&#8230;&#8203;)<code>将显示颜色，即使没有启用颜色（尽管考虑使用</code>--color=always`来启用整个输出的颜色，包括这个格式和其他任何git可能的颜色）。 <code>auto`单独使用（即</code>%C(auto)`）将在下一个占位符上开启自动着色，直到再次切换颜色。</p>
 </dd>
 <dt class="hdlist1"><em>%m</em></dt>
 <dd>
@@ -1684,11 +1756,11 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 </dd>
 <dt class="hdlist1"><em>%&lt;(&lt;N&gt;[,trunc|ltrunc|mtrunc])</em></dt>
 <dd>
-<p>make the next placeholder take at least N column widths, padding spaces on the right if necessary. Optionally truncate (with ellipsis <em>..</em>) at the left (ltrunc) <code>..ft</code>, the middle (mtrunc) <code>mi..le</code>, or the end (trunc) <code>rig..</code>, if the output is longer than N columns. Note 1: that truncating only works correctly with N &gt;= 2. Note 2: spaces around the N and M (see below) values are optional. Note 3: Emojis and other wide characters will take two display columns, which may over-run column boundaries. Note 4: decomposed character combining marks may be misplaced at padding boundaries.</p>
+<p>使下一个占位符至少占用 N 列宽，必要时在右侧填充空格。 如果输出超过 N 列，可选择在左侧（ltrunc）<code>..ft</code>、中间（mtrunc）<code>mi..le</code> 或末尾（trunc）<code>rig..</code> 截断（用省略号 <em>..</em> ）。 注意 1：截断只在 N &gt;= 2 时有效。 注 2：N 和 M（见下文）值周围的空格为可选项。 注 3：表情符号和其他宽字符将占用两个显示列，可能会超出列边界。 注 4：分解字符组合标记可能会在填充边界处错位。</p>
 </dd>
 <dt class="hdlist1"><em>%&lt;|(&lt;M&gt;)</em></dt>
 <dd>
-<p>make the next placeholder take at least until Mth display column, padding spaces on the right if necessary. Use negative M values for column positions measured from the right hand edge of the terminal window.</p>
+<p>使下一个占位符至少显示到第 M 列，必要时在右侧填充空格。 从终端窗口右侧边缘测量的列位置使用负 M 值。</p>
 </dd>
 <dt class="hdlist1"><em>%&gt;(&lt;N&gt;)</em>, <em>%&gt;|(&lt;M&gt;)</em></dt>
 <dd>
@@ -1859,13 +1931,13 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <div class="ulist">
 <ul>
 <li>
-<p><em>prefix=&lt;value&gt;</em>: Shown before the list of ref names. Defaults to "&#160;<code>(</code>".</p>
+<p><em>prefix=&lt;值&gt;</em>： 显示在引用名称列表之前。 默认为 "&#160;<code>(</code>"。</p>
 </li>
 <li>
-<p><em>suffix=&lt;value&gt;</em>: Shown after the list of ref names. Defaults to "<code>)</code>".</p>
+<p><em>suffix=&lt;值&gt;</em>： 显示在引用名称列表之后。 默认为 "<code>)</code>"。</p>
 </li>
 <li>
-<p><em>separator=&lt;value&gt;</em>: Shown between ref names. Defaults to "<code>,</code>&#160;".</p>
+<p><em>separator=&lt;值&gt;</em>： 显示在引用名称之间。 默认为 "<code>,</code>&#160;"。</p>
 </li>
 <li>
 <p><em>point=&lt;值&gt;</em>： 显示在 HEAD 和其指向的分支（如果有）之间。
@@ -1893,7 +1965,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <dl>
 <dt class="hdlist1"><em>%(describe[:&lt;选项&gt;])</em></dt>
 <dd>
-<p>human-readable name, like <a href="git-describe.html">git-describe(1)</a>; empty string for undescribable commits. The <code>describe</code> string may be followed by a colon and zero or more comma-separated options. Descriptions can be inconsistent when tags are added or removed at the same time.</p>
+<p>人类可读的名字，像<a href="git-describe.html">git-describe(1)</a>；空字符串表示不可描述的提交。 `describe`字符串后面可以有冒号和零个或多个逗号分隔的选项。 当标签同时被添加或删除时，描述可能不一致。</p>
 <div class="ulist">
 <ul>
 <li>
@@ -1941,7 +2013,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 </dd>
 <dt class="hdlist1"><em>%G?</em></dt>
 <dd>
-<p>show "G" for a good (valid) signature, "B" for a bad signature, "U" for a good signature with unknown validity, "X" for a good signature that has expired, "Y" for a good signature made by an expired key, "R" for a good signature made by a revoked key, "E" if the signature cannot be checked (e.g. missing key) and "N" for no signature</p>
+<p>显示 "G" 代表一个好的（有效的）签名，"B" 代表一个坏的签名，"U" 代表一个有效性未知的好的签名，"X" 代表一个已经过期的好的签名，"Y" 代表一个由过期的钥匙制作的好的签名，"R" 代表一个由撤销的 钥匙制作的好的签名，"E" 如果不能检查签名（如缺少钥匙），"N" 代表没有签名</p>
 </dd>
 <dt class="hdlist1"><em>%GS</em></dt>
 <dd>
@@ -1997,7 +2069,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <div class="ulist">
 <ul>
 <li>
-<p><em>key=&lt;key&gt;</em>: only show trailers with specified &lt;key&gt;. Matching is done case-insensitively and trailing colon is optional. If option is given multiple times trailer lines matching any of the keys are shown. This option automatically enables the <code>only</code> option so that non-trailer lines in the trailer block are hidden. If that is not desired it can be disabled with <code>only=false</code>. E.g., <code>%(trailers:key=Reviewed-by)</code> shows trailer lines with key <code>Reviewed-by</code>.</p>
+<p><em>key=&lt;键&gt;</em>：只显示具有指定密钥的为主。匹配是不分大小写的，后面的冒号是可选的。如果多次给出选项，则显示与任何键匹配的为主行。该选项自动启用 <code>only</code> 选项，使拖车块中的非尾注行被隐藏。如果不希望这样，可以用 <code>only=false</code> 禁用。 例如，<code>%(trailers:key=Reviewed-by)</code> 显示键为 <code>Reviewed-by</code> 的拖车行。</p>
 </li>
 <li>
 <p><em>only[=&lt;布尔值&gt;]</em> ：选择是否应该包括来自尾注块的非尾注行。</p>
@@ -2054,7 +2126,7 @@ Subject: [PATCH] &lt;标题行&gt;</pre>
 <li>
 <p><em>t格式:</em></p>
 <div class="paragraph">
-<p>The <em>tformat:</em> format works exactly like <em>format:</em>, except that it provides "terminator" semantics instead of "separator" semantics. In other words, each commit has the message terminator character (usually a newline) appended, rather than a separator placed between entries. This means that the final entry of a single-line format will be properly terminated with a new line, just as the "oneline" format does. For example:</p>
+<p><em>tformat:</em> 格式的工作原理与 <em>format:</em> 完全一样，只是它提供了 “终止符” 语义，而不是 “分隔符” 语义。换句话说，每个提交都附加了信息结束符（通常是换行符），而不是在条目之间放置一个分隔符。 这意味着单行格式的最后一个条目将正确地以新行结束，就像 “单行” 格式那样。 比如说：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2070,7 +2142,7 @@ $ git log -2 --pretty=tformat:%h 4da45bef \
 </div>
 </div>
 <div class="paragraph">
-<p>In addition, any unrecognized string that has a <code>%</code> in it is interpreted as if it has <code>tformat:</code> in front of it. For example, these two are equivalent:</p>
+<p>此外，任何未被识别的字符串，如果其中有 <code>%</code> ，将被解释为前面有 <code>tformat:</code> 。 例如，这两个是等同的：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2100,7 +2172,7 @@ $ git log -2 --pretty=%h 4da45bef</pre>
 <p>打印该分支上但上游分支中没有的提交列表。</p>
 <div class="listingblock">
 <div class="content">
-<pre>git rev-list @{上游仓库}..HEAD</pre>
+<pre>git rev-list @{upstream}..HEAD</pre>
 </div>
 </div>
 </li>
@@ -2197,7 +2269,7 @@ sort -n</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-02-10 19:07:38 +0100
+Last updated 2024-03-31 10:42:47 +0200
 </div>
 </div>
 </body>
