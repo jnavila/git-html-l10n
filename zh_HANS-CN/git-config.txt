@@ -148,7 +148,7 @@ git-config - 获取和设置仓库或全局选项
   选择类型指定器的历史选项。更倾向于选择 `--type`（见上文）。
 
 --no-type::
-  取消先前设置的类型指定器（如果先前有的话）。这个选项要求 'git config' 不对检索的变量进行规范化处理。 `--no-type` 在没有 `--type=<类型>` 或 `--<类型>` 的情况下没有作用。
+  取消先前设置的类型指定器（如果先前有的话）。这个选项要求 'git config' 不对检索的变量进行规范化处理。 `--no-type` 在没有 `--type=<类型>` 或 `--<类型>` 选项的情况下没有作用。
 
 -z::
 --null::
@@ -161,15 +161,15 @@ git-config - 获取和设置仓库或全局选项
 	用来源类型（文件、标准输入、blob、命令行）和实际来源（配置文件路径、引用或 blob id（如适用））对所有查询到的配置选项的输出进行扩充。
 
 --show-scope::
-	类似于 `--show-origin`，它用该值的范围（工作树、本地、全局、系统、命令）来增加所有查询的配置选项的输出。
+	类似于 `--show-origin` 选项，它用该值的范围（工作区、本地、全局、系统、命令）来增加所有查询的配置选项的输出。
 
 --get-colorbool <名称> [<stdout-is-tty>]::
 
-	找到 `<名称>` 的颜色设置（例如 `color.diff`），并输出 "true" 或 "false"。 `<stdout-is-tty>` 应该是 "true" 或 "false"，当配置为 "auto" 时将被考虑。 如果 `<stdout-is-tty>` 缺失，则检查命令本身的标准输出，如果要使用颜色则以状态 0 退出，否则以状态 1 退出。 当 `name` 的颜色设置未被定义时，该命令使用 `color.ui` 作为回退。
+	找到 `<名称>` 的颜色设置（例如 `color.diff`），并输出 "true" 或 "false"。 `<stdout-is-tty>` 应该是 "true" 或 "false"，同样考虑配置为 "auto" 的情况。 如果 `<stdout-is-tty>` 缺失，则检查命令本身的标准输出，如果要使用颜色则以状态 0 退出，否则以状态 1 退出。 当 `名称` 的颜色设置未被定义时，该命令使用 `color.ui` 作为回退（stdout 是 "standard output" 的缩写，而 tty 是 "teletypewriter" 的缩写，通常指的是终端或控制台。）。
 
---get-color <名称> [<默认>]::
+--get-color <名称> [<默认值>]::
 
-	找到为 `name` 配置的颜色（例如：`color.diff.new`），并将其作为 ANSI 颜色转义序列输出到标准输出。 如果没有为 `name` 配置的颜色，则使用可选的 `default` 参数来代替。
+	找到为 `名称` 配置的颜色（例如：`color.diff.new`），并将其作为 ANSI 颜色转义序列输出到标准输出。 如果没有为 `名称` 配置的颜色，则使用可选的 `默认值` 参数来代替。
 +
 `--type=color [--default=<默认>]` 比 `--get-color` 更受欢迎（但注意 `--get-color` 会省略 `--type=color` 打印的尾部换行）。
 
@@ -181,7 +181,7 @@ git-config - 获取和设置仓库或全局选项
 	在查找数值时尊重配置文件中的 `include.*` 指令。当给出一个特定的文件时，默认为 `off`（例如，使用 `--file`、`--global` 等），当搜索所有配置文件时，默认为 `on`。
 
 --default <值>::
-  当使用 `--get` 时，如果没有找到所要求的变量，则表现为 <值> 是分配给该变量的值。
+  当使用 `--get` 时，如果没有找到所要求的变量，那么表现得就像是该变量被赋予了 <值> 这个值。
 
 配置
 --
@@ -277,7 +277,7 @@ GIT_CONFIG_VALUE_<n>::
 这在你想用一个共同的配置催生多个 git 命令，但又不能依赖一个配置文件的情况下很有用，例如在编写脚本时。
 
 GIT_CONFIG::
-	如果 `git config` 没有提供 `--file` 选项，则使用 `GIT_CONFIG` 提供的文件，就像通过 `--file` 提供的一样。这个变量对其他 Git 命令没有影响，主要是为了历史兼容性；通常没有理由用它来代替 `--file` 选项。
+	如果 `git config` 没有提供 `--file` 选项，则命令会使用 `GIT_CONFIG` 提供的文件，就像通过 `--file` 选项提供的一样。这个变量对其他 Git 命令没有影响，主要是为了兼容历史版本；通常不会用它来代替 `--file` 选项。
 
 [[EXAMPLES]]
 实例
@@ -288,7 +288,7 @@ GIT_CONFIG::
 ------------
 #
 # 这就是配置文件，并且
-# 一个'#'或';'字符表示
+# 一个'#' 或 ';' 字符表示
 # 一个注释
 #
 
@@ -337,7 +337,7 @@ GIT_CONFIG::
 
 如果你想删除一个多变量的条目（如上面的 core.gitproxy），你必须提供一个与恰好一行的值相匹配的正则表达式。
 
-要查询一个给定键的值，请做
+要查询一个给定键的值，可以这样做
 
 ------------
 % git config --get core.filemode
@@ -355,13 +355,13 @@ GIT_CONFIG::
 % git config --get core.gitproxy "for kernel.org$"
 ------------
 
-如果你想知道一个多变量的所有值，请做：
+如果你想知道一个多变量的所有值，可以这么做：
 
 ------------
 % git config --get-all core.gitproxy
 ------------
 
-如果你喜欢危险的生活，你可以用一个新的核心.gitproxy来取代 *所有* core.gitproxy，用的是
+如果你喜欢危险操作，你可以用一个新的 core.gitproxy 来取代 *所有* core.gitproxy
 
 ------------
 % git config --replace-all core.gitproxy ssh
@@ -410,14 +410,14 @@ include::config.txt[]
 
 漏洞
 --
-当使用废弃的 `[section.subsection]` 语法时，如果 subsection 至少有一个大写字母，改变一个值将导致添加一个多行键而不是改变。例如，当配置看起来像
+当使用废弃的 `[section.subsection]` 语法时，如果 subsection 至少有一个大写字母，改变一个值将导致添加一个多行键而不是改变。例如，有以下配置
 
 --------
   [section.subsection]
     key = value1
 --------
 
-并运行 `git config section.Subsection.key value2` 将导致
+并运行 `git config section.Subsection.key value2` 将导致如下的结果
 
 --------
   [section.subsection]
