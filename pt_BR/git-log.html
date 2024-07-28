@@ -457,7 +457,39 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Exibe os registros log do commit.</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-log.txt - include::rev-list-description.txt[]</p>
+<p>Liste os commits que podem ser acessados seguindo os links <code>parent</code> do(s) commit(s) mencionado(s), mas exclua os commits que podem ser acessados a partir do(s) commit(s) mencionado(s) com um <em>^</em> na frente deles. É predefinido que a saída é fornecida em ordem cronológica inversa.</p>
+</div>
+<div class="paragraph">
+<p>Você pode pensar nisso como uma operação de conjunto. Os commits acessíveis a partir de qualquer um dos commits fornecidos na linha de comando formam um conjunto e, em seguida, os commits acessíveis a partir de qualquer um dos fornecidos com <em>^</em> na frente são subtraídos desse conjunto. Os commits restantes são o que aparece na saída do comando. Várias outras opções e parâmetros de caminhos podem ser usados para limitar ainda mais o resultado.</p>
+</div>
+<div class="paragraph">
+<p>Assim, o seguinte comando:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git log foo bar ^baz</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>significa "listar todos os commits acessíveis a partir do <em>foo</em> ou <em>bar</em>, porém não de <em>baz</em>".</p>
+</div>
+<div class="paragraph">
+<p>Uma notação especial "<em>&lt;commit1&gt;</em>..<em>&lt;commit2&gt;</em>" pode ser usada como uma abreviação para "^<em>&lt;commit1&gt;</em> <em>&lt;commit2&gt;</em>". Por exemplo, qualquer um dos seguintes podem ser usados de forma intercambiável:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git log origin..HEAD
+$ git log HEAD ^origin</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Outra notação especial é "<em>&lt;commit1&gt;</em>&#8230;&#8203;<em>&lt;commit2&gt;</em>", que é útil para as mesclagens. O conjunto dos commits resultante é a diferença simétrica entre os dois operandos. Os dois comandos a seguir são equivalentes:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git log A B --not $(git merge-base --all A B)
+$ git log A...B</pre>
+</div>
 </div>
 <div class="paragraph">
 <p>O comando aceita as opções aplicáveis ao comando <a href="git-rev-list.html"><b>git-rev-list</b>(1)</a> para controlar o que é exibido e como. As opções aplicáveis ao comando <a href="git-diff.html"><b>git-diff</b>(1)</a> serve para controlar como as alterações que cada commit faz são exibidas.</p>
@@ -476,7 +508,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--no-decorate</dt>
 <dt class="hdlist1">--decorate[=short|full|auto|no]</dt>
 <dd>
-<p>Print out the ref names of any commits that are shown. If <em>short</em> is specified, the ref name prefixes <em>refs/heads/</em>, <em>refs/tags/</em> and <em>refs/remotes/</em> will not be printed. If <em>full</em> is specified, the full ref name (including prefix) will be printed. If <em>auto</em> is specified, then if the output is going to a terminal, the ref names are shown as if <em>short</em> were given, otherwise no ref names are shown. The option <code>--decorate</code> is short-hand for <code>--decorate=short</code>. Default to configuration value of <code>log.decorate</code> if configured, otherwise, <code>auto</code>.</p>
+<p>Imprima os nomes de referência de todos os commits exibidos. Se <em>short</em> for usado, os prefixos de nome de referência <em>refs/heads/</em>, <em>refs/tags/</em> e <em>refs/remotes/</em> não serão impressos. Se <em>full</em> for usado , o nome completo da referência (incluindo o prefixo) será impresso. Se <em>auto</em> for usado, se a saída estiver indo para um terminal, os nomes de referência serão mostrados como se <em>short</em> tivesse sido usado; caso contrário, nenhum nome de referência será mostrado. A opção <code>--decorate</code> é um atalho para <code>--decorate=short</code>. Se configurado é a predefinição para o valor de configuração de <code>log.decorate</code>; caso contrário, <code>auto</code>.</p>
 </dd>
 <dt class="hdlist1">--decorate-refs=&lt;padrão&gt;</dt>
 <dt class="hdlist1">--decorate-refs-exclude=&lt;padrão&gt;</dt>
@@ -501,29 +533,55 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--full-diff</dt>
 <dd>
-<p>Without this flag, <code>git log -p &lt;path&gt;...</code> shows commits that touch the specified paths, and diffs about the same specified paths. With this, the full diff is shown for commits that touch the specified paths; this means that "&lt;path&gt;&#8230;&#8203;" limits only commits, and doesn&#8217;t limit diff for those commits.</p>
+<p>Sem esta opção, o <code>git log -p &lt;caminho&gt;...</code> mostra os commits que tocam os caminhos especificados e os diffs sobre os mesmos caminhos especificados. Com isso, o diff completo é mostrado para os commits que tocam os caminhos especificados; isso significa que "&lt;caminho&gt;&#8230;&#8203;" limita apenas os commits e não limita o diff para estes commits.</p>
 <div class="paragraph">
 <p>Observe que isso afeta todos os tipos de saída baseados em "diff", por exemplo os produzidos pelas opções <code>--stat</code>, etc.</p>
 </div>
 </dd>
 <dt class="hdlist1">--log-size</dt>
 <dd>
-<p>Include a line &#8220;log size &lt;number&gt;&#8221; in the output for each commit, where &lt;number&gt; is the length of that commit&#8217;s message in bytes. Intended to speed up tools that read log messages from <code>git log</code> output by allowing them to allocate space in advance.</p>
+<p>Inclua uma linha &#8220;log size &lt;número&gt;&#8221; na saída para cada commit, onde &lt;número&gt; é o tamanho da mensagem deste commit em bytes. Destina-se a acelerar as ferramentas que leem mensagens de registro da saída do comando <code>git log</code>, permitindo que elas aloquem espaço antecipadamente.</p>
 </dd>
-</dl>
+<dt class="hdlist1">-L&lt;inicio&gt;,&lt;fim&gt;:&lt;arquivo&gt;</dt>
+<dt class="hdlist1">-L:&lt;nome-da-função&gt;:&lt;arquivo&gt;</dt>
+<dd>
+<p>Rastreia a evolução do intervalo das linhas que foram mencionados por <em>&lt;inicio&gt;,&lt;fim&gt;</em> ou pelo nome da função regex <em>&lt;funcname&gt;</em>, dentro do <em>&lt;arquivo&gt;</em>. Você não pode fornecer nenhum limitador pathpec. Atualmente, isso está limitado a uma caminhada a partir de uma única revisão, ou seja, você só pode fornecer zero ou um argumento positivo de revisão, e <em>&lt;inicio&gt;</em> e <em>&lt;fim&gt;</em> (ou <em>&lt;funcname&gt;</em>) devem existir na revisão inicial. Você pode especificar esta opção mais de uma vez. Implica no uso da opção <code>--patch</code>. A geração das correções (patch) pode ser suprimida com o uso de da opção <code>--no-patch</code>, mas outros formatos diff (como <code>--raw</code>, <code>--numstat</code>, <code>--shortstat</code>, <code>--dirstat</code>, <code>--summary</code>, <code>--name-only</code>, <code>--name-status</code>, <code>--check</code>) não estão implementados no momento.</p>
+<div class="paragraph">
+<p><em>&lt;inicio&gt;</em> e <em>&lt;fim&gt;</em> podem assumir uma destas formas:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>número</p>
+<div class="paragraph">
+<p>Caso <em>&lt;inicio&gt;</em> ou <em>&lt;fim&gt;</em> seja um número, ele especifica um número de linha absoluto (as linhas contam a partir do 1).</p>
+</div>
+</li>
+<li>
+<p><code>/regex/</code></p>
+<div class="paragraph">
+<p>Este formulário usará a primeira linha que corresponder ao regex POSIX informado. Se <em>&lt;inicio&gt;</em> for um regex, ele pesquisará a partir do final do intervalo <code>-L</code> anterior, se houver, caso contrário, a partir do início do arquivo. Se <em>&lt;inicio&gt;</em> for um <code>^/regex/</code>, ele pesquisará a partir do início do arquivo. Se <em>&lt;fim&gt;</em> for um regex, ele pesquisará a partir da linha indicada por <em>&lt;inicio&gt;</em>.</p>
+</div>
+</li>
+<li>
+<p>+offset ou -offset</p>
+<div class="paragraph">
+<p>Válido apenas para <em>&lt;fim&gt;</em> que definirá uma quantidade de linhas antes ou depois da linha utilizada por <em>&lt;inicio&gt;</em>.</p>
+</div>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-log.txt - include::line-range-options.txt[]</p>
+<p>Caso <code>:&lt;funcname&gt;</code> seja informado no lugar do <em>&lt;inicio&gt;</em> e <em>&lt;fim&gt;</em>, é uma expressão regular que indica o intervalo da primeira <code>&lt;funcname&gt;</code> que coincida com <em>&lt;funcname&gt;</em> até a próxima linha funcname. <code>:&lt;funcname&gt;</code> pesquisa no final do intervalo <code>-L</code> anterior, se houver, caso contrário, a pesquisa ocorrerá desde o início do arquivo. <code>^:&lt;funcname&gt;</code> pesquisa desde o início do arquivo. Os nomes das funções são determinados da mesma maneira que o comando <code>git diff</code> lida com os pedaços dos cabeçalhos do patch (consulte <em>Definindo um cabeçalho personalizado do hunk</em> em <a href="gitattributes.html"><b>gitattributes</b>(5)</a>).</p>
 </div>
-<div class="dlist">
-<dl>
+</dd>
 <dt class="hdlist1">&lt;revisão-faixa&gt;</dt>
 <dd>
-<p>Show only commits in the specified revision range. When no &lt;revision-range&gt; is specified, it defaults to <code>HEAD</code> (i.e. the whole history leading to the current commit). <code>origin..HEAD</code> specifies all the commits reachable from the current commit (i.e. <code>HEAD</code>), but not from <code>origin</code>. For a complete list of ways to spell &lt;revision-range&gt;, see the <em>Specifying Ranges</em> section of <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a>.</p>
+<p>Mostra apenas os commits no intervalo de revisão especificado. Quando nenhum &lt;faixa-da-revisão&gt; é especificada, a predefinição é <code>HEAD</code> (ou seja, todo o histórico que leva ao commit atual). <code>origin..HEAD</code> especifica todos os commits acessíveis a partir do commit atual (ou seja, <code>HEAD</code>), mas não a partir de <code>origin</code>. Para obter uma lista mais completa de maneiras de soletrar &lt;faixa-da-revisão&gt;, consulte a seção "Especificando intervalos" de <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a>.</p>
 </dd>
 <dt class="hdlist1">[--] &lt;caminho&gt;&#8230;&#8203;</dt>
 <dd>
-<p>Show only commits that are enough to explain how the files that match the specified paths came to be. See <em>History Simplification</em> below for details and other simplification modes.</p>
+<p>Mostra apenas os commits que são suficientes para explicar como os arquivos que coincidam com determinados caminhos foram criados. Consulte "Simplificação do histórico" abaixo para obter detalhes e outros modos de simplificação.</p>
 <div class="paragraph">
 <p>Os caminhos podem precisar ser prefixados com um <code>--</code> para separá-los das opções ou do intervalo de revisões, quando um conflito surgir.</p>
 </div>
@@ -536,7 +594,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Além de especificar uma série de commits que devem ser listados utilizando as notações especiais explicadas na descrição, podem ser aplicadas limitações adicionais ao commit.</p>
 </div>
 <div class="paragraph">
-<p>Using more options generally further limits the output (e.g. <code>--since=&lt;date1&gt;</code> limits to commits newer than <code>&lt;date1&gt;</code>, and using it with <code>--grep=&lt;pattern&gt;</code> further limits to commits whose log message has a line that matches <code>&lt;pattern&gt;</code>), unless otherwise noted.</p>
+<p>O uso de mais opções geralmente limita ainda mais a saída (por exemplo, <code>--since=&lt;date1&gt;</code> limita os commits mais recentes do que <code>&lt;date1&gt;</code>, e ao usá-lo com <code>--grep=&lt;pattern&gt;</code> limita ainda mais os commits cuja mensagem de registro tenha uma linha que corresponda a <code>&lt;padrão&gt;</code>), a menos que seja indicado o contrário.</p>
 </div>
 <div class="paragraph">
 <p>Observe que eles são aplicados antes da organização do commit e das opções de formatação como <code>--reverse</code>.</p>
@@ -570,15 +628,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--author=&lt;padrão&gt;</dt>
 <dt class="hdlist1">--committer=&lt;padrão&gt;</dt>
 <dd>
-<p>Limit the commits output to ones with author/committer header lines that match the specified pattern (regular expression). With more than one <code>--author=&lt;pattern&gt;</code>, commits whose author matches any of the given patterns are chosen (similarly for multiple <code>--committer=&lt;pattern&gt;</code>).</p>
+<p>Limite a saída dos commits àqueles com linhas de cabeçalho do autor/aque que fez o commit que correspondam ao padrão especificado (expressão regular). Com mais de um <code>--author=&lt;padrão&gt;</code>, os commits cujo autor corresponda a qualquer um dos padrões fornecidos são escolhidos (da mesma maneira para vários <code>--committer=&lt;padrão&gt;</code>).</p>
 </dd>
 <dt class="hdlist1">--grep-reflog=&lt;padrão&gt;</dt>
 <dd>
-<p>Limit the commits output to ones with reflog entries that match the specified pattern (regular expression). With more than one <code>--grep-reflog</code>, commits whose reflog message matches any of the given patterns are chosen. It is an error to use this option unless <code>--walk-reflogs</code> is in use.</p>
+<p>Limite a saída dos commits àqueles com entradas de reflog que correspondam ao padrão especificado (expressão regular). Com mais de um <code>--grep-reflog</code>, são escolhidos os commits cuja mensagem de reflog corresponda a qualquer um dos padrões fornecidos. É um erro usar essa opção, a menos que a opção <code>--walk-reflogs</code> esteja em uso.</p>
 </dd>
 <dt class="hdlist1">--grep=&lt;padrão&gt;</dt>
 <dd>
-<p>Limit the commits output to ones with a log message that matches the specified pattern (regular expression). With more than one <code>--grep=&lt;pattern&gt;</code>, commits whose message matches any of the given patterns are chosen (but see <code>--all-match</code>).</p>
+<p>Limite a saída dos commits àqueles com uma mensagem de registro que corresponda ao padrão especificado (expressão regular). Com mais de um <code>--grep=&lt;padrão&gt;</code>, os commits cuja mensagem corresponda a qualquer um dos padrões fornecidos são escolhidos (porém, consulte a opção <code>--all-match</code>).</p>
 <div class="paragraph">
 <p>Quando <code>--notes</code> está em vigor, a mensagem das anotações é coincidida como se fizesse parte da mensagem do registro log.</p>
 </div>
@@ -635,25 +693,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--no-min-parents</dt>
 <dt class="hdlist1">--no-max-parents</dt>
 <dd>
-<p>Show only commits which have at least (or at most) that many parent commits. In particular, <code>--max-parents=1</code> is the same as <code>--no-merges</code>, <code>--min-parents=2</code> is the same as <code>--merges</code>. <code>--max-parents=0</code> gives all root commits and <code>--min-parents=3</code> all octopus merges.</p>
+<p>Mostra apenas os commits que tenham pelo menos (ou no máximo) esta quantidade principal de commits. Em particular, a opção <code>--max-parents=1</code> é o mesmo que <code>--no-merges</code>, já a opção <code>--min-parents=2</code> é o mesmo que <code>--merges</code>. <code>--max-parents=0</code> fornece todos os commits raiz e <code>--min-parents=3</code> todas as mesclagens Octopus.</p>
 <div class="paragraph">
-<p><code>--no-min-parents</code> and <code>--no-max-parents</code> reset these limits (to no limit) again. Equivalent forms are <code>--min-parents=0</code> (any commit has 0 or more parents) and <code>--max-parents=-1</code> (negative numbers denote no upper limit).</p>
+<p><code>--no-min-parents</code> e <code>--no-max-parents</code> redefinem estes limites (para nenhum limite) novamente. As formas equivalentes são <code>--min-parents=0</code> (qualquer commit tem 0 ou mais ramos principais) e <code>--max-parents=-1</code> (números negativos denotam que não há limite superior).</p>
 </div>
 </dd>
 <dt class="hdlist1">--first-parent</dt>
 <dd>
-<p>When finding commits to include, follow only the first parent commit upon seeing a merge commit. This option can give a better overview when viewing the evolution of a particular topic branch, because merges into a topic branch tend to be only about adjusting to updated upstream from time to time, and this option allows you to ignore the individual commits brought in to your history by such a merge.</p>
+<p>Ao encontrar os commits para serem inclusos, siga apenas o primeiro commit principal ao ver a mesclagem de um commit. Esta opção pode fornecer uma melhor visão geral ao visualizar a evolução de um ramo de tópico específico, porque as mesclagens no tópico de um ramo tendem a se ajustar apenas ao topo atualizado de tempos em tempos, e essa opção permite que você ignore os commits individuais trazidos ao seu histórico por essa mesclagem.</p>
 <div class="paragraph">
 <p>Esta opção também muda o formato diff padrão para a mesclagem dos commits para <code>first-parent</code>, consulte <code>--diff-merges=first-parent</code> para mais detalhes.</p>
 </div>
 </dd>
 <dt class="hdlist1">--exclude-first-parent-only</dt>
 <dd>
-<p>When finding commits to exclude (with a <em>^</em>), follow only the first parent commit upon seeing a merge commit. This can be used to find the set of changes in a topic branch from the point where it diverged from the remote branch, given that arbitrary merges can be valid topic branch changes.</p>
+<p>Ao encontrar os commits que serão excluídos (com um <em>^</em>), siga apenas o primeiro commit principal ao ver a mesclagem de um commit. Isso pode ser usado para localizar um conjunto de alterações no tópico de num ramo a partir do ponto onde ele divergiu do ramo remoto, uma vez que mesclas arbitrárias podem ser alterações válidas no tópico do ramo.</p>
 </dd>
 <dt class="hdlist1">--not</dt>
 <dd>
-<p>Reverses the meaning of the <em>^</em> prefix (or lack thereof) for all following revision specifiers, up to the next <code>--not</code>. When used on the command line before --stdin, the revisions passed through stdin will not be affected by it. Conversely, when passed via standard input, the revisions passed on the command line will not be affected by it.</p>
+<p>Inverte o significado do prefixo <em>^</em> (ou a falta dele) para todos os especificadores de revisão seguintes, até o próximo <code>--not</code>. Quando usado na linha de comando antes de <code>--stdin</code>, as revisões passadas por stdin não serão afetadas por ele. Por outro lado, quando encaminhadas pela entrada predefinida, as revisões passadas na linha de comando não serão afetadas por ela.</p>
 </dd>
 <dt class="hdlist1">--all</dt>
 <dd>
@@ -661,25 +719,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--branches[=&lt;padrão&gt;]</dt>
 <dd>
-<p>Pretend as if all the refs in <code>refs/heads</code> are listed on the command line as <em>&lt;commit&gt;</em>. If <em>&lt;pattern&gt;</em> is given, limit branches to ones matching given shell glob. If pattern lacks <em>?</em>, <em>*</em>, or <em>[</em>, <em>/*</em> at the end is implied.</p>
+<p>Finja como se todas as refs no <code>refs/heads</code> estejam listadas na linha de comando como <em>&lt;commit&gt;</em>. Caso <em>&lt;padrão&gt;</em> seja utilizado, limite os ramos para aqueles que coincidam com a "shell blob" informada. Caso o padrão não tenha <em>?</em>, <em>*, ou '[</em>, <em>/*</em> no final é implícito.</p>
 </dd>
 <dt class="hdlist1">--tags[=&lt;padrão&gt;]</dt>
 <dd>
-<p>Pretend as if all the refs in <code>refs/tags</code> are listed on the command line as <em>&lt;commit&gt;</em>. If <em>&lt;pattern&gt;</em> is given, limit tags to ones matching given shell glob. If pattern lacks <em>?</em>, <em>*</em>, or <em>[</em>, <em>/*</em> at the end is implied.</p>
+<p>Finja como se todas as refs no <code>refs/remotes</code> estejam listados na linha de comando como <em>&lt;commit&gt;</em>. Caso <em>&lt;padrão&gt;</em> seja utilizado, limite os ramos para aqueles que coincidam com a "shell blob" informada. Caso o padrão não tenha <em>?</em>, <em>*</em>, ou <em>[</em>, <em>/*</em> no final é implícito.</p>
 </dd>
 <dt class="hdlist1">--remotes[=&lt;padrão&gt;]</dt>
 <dd>
-<p>Pretend as if all the refs in <code>refs/remotes</code> are listed on the command line as <em>&lt;commit&gt;</em>. If <em>&lt;pattern&gt;</em> is given, limit remote-tracking branches to ones matching given shell glob. If pattern lacks <em>?</em>, <em>*</em>, or <em>[</em>, <em>/*</em> at the end is implied.</p>
+<p>Finja que todas as refs em <code>refs/remotes</code> estão listadas na linha de comando como <em>&lt;commit&gt;</em>. Se o <em>&lt;padrão&gt;</em> for fornecido, limita o rastreamento das ramificações remotas àquelas que correspondam ao glob do shell informado. Se o padrão não tiver <em>?</em>, <em>*</em> ou <em>[</em>, <em>/*</em> no final, então ficará implícito.</p>
 </dd>
 <dt class="hdlist1">--glob=&lt;glob-pattern&gt;</dt>
 <dd>
-<p>Pretend as if all the refs matching shell glob <em>&lt;glob-pattern&gt;</em> are listed on the command line as <em>&lt;commit&gt;</em>. Leading <em>refs/</em>, is automatically prepended if missing. If pattern lacks <em>?</em>, <em>*</em>, or <em>[</em>, <em>/*</em> at the end is implied.</p>
+<p>Finja como se todos as refs coincidentes com "shell glob" <em>&lt;glob-pattern&gt;</em> estejam listados na linha de comando como <em>&lt;commit&gt;</em>. A <em>refs/</em> principal é anexada automaticamente caso esteja ausente. Caso o padrão não tenha <em>?</em>, <em>*</em>, ou <em>[</em>, <em>/*</em> no final é implícito.</p>
 </dd>
 <dt class="hdlist1">--exclude=&lt;glob-pattern&gt;</dt>
 <dd>
 <p>Não inclua as refs que coincidam com <code>&lt;glob-pattern&gt;</code> em que as próximas opções <code>--all</code>, <code>--branches</code>, <code>--tags</code>, <code>--remotes</code> ou <code>--glob</code> considerariam de outra forma. As repetições destas opções acumulam padrões de exclusão até a próxima opção <code>--all</code>, <code>--branches</code>, <code>--tags</code>, <code>--remotes</code> ou <code>--glob</code> (outras opções ou argumentos não limpam os padrões acumulados).</p>
 <div class="paragraph">
-<p>The patterns given should not begin with <code>refs/heads</code>, <code>refs/tags</code>, or <code>refs/remotes</code> when applied to <code>--branches</code>, <code>--tags</code>, or <code>--remotes</code>, respectively, and they must begin with <code>refs/</code> when applied to <code>--glob</code> or <code>--all</code>. If a trailing <em>/*</em> is intended, it must be given explicitly.</p>
+<p>Os padrões informados não devem começar com <code>refs/heads</code>, <code>refs/tags</code>, ou <code>refs/remotes</code> quando aplicadas as opções <code>--branches</code>, <code>--tags</code>, ou <code>--remotes</code> respectivamente, e devem começar com <code>refs/</code> quando for aplicado ao <code>--glob</code> ou <code>--all</code>. Se a intenção for um delimitador <em>/*</em>, este deve ser utilizado de forma explicita.</p>
 </div>
 </dd>
 <dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
@@ -692,11 +750,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--alternate-refs</dt>
 <dd>
-<p>Pretend as if all objects mentioned as ref tips of alternate repositories were listed on the command line. An alternate repository is any repository whose object directory is specified in <code>objects/info/alternates</code>. The set of included objects may be modified by <code>core.alternateRefsCommand</code>, etc. See <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p>Faça de conta que todos os objetos mencionados como dicas de referência de repositórios alternativos foram listados na linha de comando. Um repositório alternativo é qualquer repositório cujo diretório de objetos esteja especificado em <code>objects/info/alternates</code>. O conjunto de objetos incluídos pode ser modificado por <code>core.alternateRefsCommand</code>, etc. Consulte <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--single-worktree</dt>
 <dd>
-<p>By default, all working trees will be examined by the following options when there are more than one (see <a href="git-worktree.html"><b>git-worktree</b>(1)</a>): <code>--all</code>, <code>--reflog</code> and <code>--indexed-objects</code>. This option forces them to examine the current working tree only.</p>
+<p>É predefinido que todas as árvores de trabalho serão examinadas através das seguintes opções quando houver mais de uma (consulte <a href="git-worktree.html"><b>git-worktree</b>(1)</a>): <code>--all</code>, <code>--reflog</code> e <code>--indexed-objects</code>. Esta opção impõem que o exame seja feito apenas na árvore de trabalho atual.</p>
 </dd>
 <dt class="hdlist1">--ignore-missing</dt>
 <dd>
@@ -726,7 +784,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Liste apenas os commits nos respectivos lados de um "diff" simétrico, ou seja, apenas aqueles que seriam marcados como <code>&lt;</code> resp. <code>&gt;</code> por <code>--left-right</code>.</p>
 <div class="paragraph">
-<p>For example, <code>--cherry-pick --right-only A...B</code> omits those commits from <code>B</code> which are in <code>A</code> or are patch-equivalent to a commit in <code>A</code>. In other words, this lists the <code>+</code> commits from <code>git cherry A B</code>. More precisely, <code>--cherry-pick --right-only --no-merges</code> gives the exact list.</p>
+<p>Por exemplo, a opção <code>--cherry-pick --right-only A...B</code> omite os commits de <code>B</code> que estão em <code>A</code> ou são equivalentes a um patch de um commit em <code>A</code>. Em outras palavras, isso lista os commits <code>+</code> do <code>git cherry A B</code>. Mais precisamente, as opções <code>--cherry-pick --right-only --no-merges</code> fornece a lista exata.</p>
 </div>
 </dd>
 <dt class="hdlist1">--cherry</dt>
@@ -736,9 +794,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-g</dt>
 <dt class="hdlist1">--walk-reflogs</dt>
 <dd>
-<p>Instead of walking the commit ancestry chain, walk reflog entries from the most recent one to older ones. When this option is used you cannot specify commits to exclude (that is, <em>^commit</em>, <em>commit1..commit2</em>, and <em>commit1...commit2</em> notations cannot be used).</p>
+<p>Em vez de percorrer a cadeia de ancestralidade do commit, percorra as entradas do reflog desde a mais recente até as mais antigas. Quando esta opção é usada, você não pode especificar commits que serão excluídos (ou seja, as notações <em>^commit</em>, <em>commit1..commit2</em> e <em>commit1...commit2</em> não podem ser usadas).</p>
 <div class="paragraph">
-<p>With <code>--pretty</code> format other than <code>oneline</code> and <code>reference</code> (for obvious reasons), this causes the output to have two extra lines of information taken from the reflog. The reflog designator in the output may be shown as <code>ref@{Nth}</code> (where <code>Nth</code> is the reverse-chronological index in the reflog) or as <code>ref@{timestamp}</code> (with the timestamp for that entry), depending on a few rules:</p>
+<p>Com o formato <code>--pretty</code> diferente de <code>oneline</code> e <code>reference</code> (por motivos óbvios), isso faz com que a saída tenha duas linhas extras de informações retiradas do reflog. O designador do reflog na saída pode ser mostrado como <code>ref@{Nth}</code> (em que <code>Nth</code> é o índice cronológico reverso no reflog) ou como <code>ref@{timestamp}</code> (com o registro de data e hora dessa entrada), dependendo de algumas regras:</p>
 </div>
 <div class="openblock">
 <div class="content">
@@ -761,7 +819,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Under <code>--pretty=oneline</code>, the commit message is prefixed with this information on the same line. This option cannot be combined with <code>--reverse</code>. See also <a href="git-reflog.html"><b>git-reflog</b>(1)</a>.</p>
+<p>Em <code>--pretty=oneline</code>, a mensagem do commit é prefixada com essas informações na mesma linha. Esta opção não pode ser combinada com a opção <code>--reverse</code>. Consulte também o comando <a href="git-reflog.html"><b>git-reflog</b>(1)</a>.</p>
 </div>
 <div class="paragraph">
 <p>Esta informação não será exibida de forma alguma sob <code>--pretty=reference</code>.</p>
@@ -832,7 +890,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--ancestry-path[=&lt;commit&gt;]</dt>
 <dd>
-<p>When given a range of commits to display (e.g. <em>commit1..commit2</em> or <em>commit2 ^commit1</em>), only display commits in that range that are ancestors of &lt;commit&gt;, descendants of &lt;commit&gt;, or &lt;commit&gt; itself. If no commit is specified, use <em>commit1</em> (the excluded part of the range) as &lt;commit&gt;. Can be passed multiple times; if so, a commit is included if it is any of the commits given or if it is an ancestor or descendant of one of them.</p>
+<p>Quando for dado um intervalo de commits a serem exibidos (por exemplo, <em>commit1..commit2</em> ou <em>commit2 ^commit1</em>), exiba apenas os commits neste intervalo que sejam ancestrais do <em>&lt;commit&gt;</em>, descendentes do <em>&lt;commit&gt;</em> ou o próprio <em>&lt;commit&gt;</em>. Se nenhum commit for especificado, use <em>commit1</em> (a parte excluída do intervalo) como &lt;commit&gt;. Pode ser passado várias vezes; nesse caso, um commit será incluído se for qualquer um dos commits fornecidos ou se for um ancestral ou descendente de um deles.</p>
 </dd>
 </dl>
 </div>
@@ -840,10 +898,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Segue explicações com mais detalhes.</p>
 </div>
 <div class="paragraph">
-<p>Suppose you specified <code>foo</code> as the &lt;paths&gt;. We shall call commits that modify <code>foo</code> !TREESAME, and the rest TREESAME. (In a diff filtered for <code>foo</code>, they look different and equal, respectively.)</p>
+<p>Suponha que você tenha especificado <code>foo</code> como <em>&lt;caminhos&gt;</em>. Chamaremos os commits que modificam o <code>foo</code> de !TREESAME, e o restante de TREESAME. (Num diff filtrado para <code>foo</code>, eles parecem diferentes e iguais, respectivamente.)</p>
 </div>
 <div class="paragraph">
-<p>In the following, we will always refer to the same example history to illustrate the differences between simplification settings. We assume that you are filtering for a file <code>foo</code> in this commit graph:</p>
+<p>A seguir, sempre nos referiremos ao mesmo exemplo do histórico para ilustrar as diferenças entre as configurações da simplificação. Presumimos que você esteja filtrando um arquivo <code>foo</code> neste gráfico de commits:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -855,7 +913,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>The horizontal line of history A---Q is taken to be the first parent of each merge. The commits are:</p>
+<p>A linha horizontal do histórico A---Q é considerada o primeiro ramo principal de cada mesclagem. Os commits são:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -866,7 +924,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Em <code>A</code>, <code>foo</code> contém apenas &#8220;foo&#8221;.</p>
 </li>
 <li>
-<p><code>B</code> contains the same change as <code>A</code>. Its merge <code>M</code> is trivial and hence TREESAME to all parents.</p>
+<p><code>B</code> contém a mesma alteração que <code>A</code>. A sua fusão <code>M</code> é trivial e, portanto, TREESAME para todos os principais.</p>
 </li>
 <li>
 <p>O <code>C</code> não muda <code>foo</code>, mas a sua mesclagem <code>N</code> o altera para &#8220;foobar&#8221;, portanto não é <em>TREESAME</em> para nenhum dos pais.</p>
@@ -889,7 +947,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">Modo predefinido</dt>
 <dd>
-<p>Commits are included if they are not TREESAME to any parent (though this can be changed, see <code>--sparse</code> below). If the commit was a merge, and it was TREESAME to one parent, follow only that parent. (Even if there are several TREESAME parents, follow only one of them.) Otherwise, follow all parents.</p>
+<p>Os commits são incluídos se não forem TREESAME para qualquer ramo principal (embora isso possa ser alterado, consulte a opção <code>--sparse</code> abaixo). Se o commit foi uma mesclagem e foi TREESAME para uma origem, siga apenas esta origem. (Mesmo que haja vários pais TREESAME, siga apenas um deles.) Caso contrário, siga todos os ramos principais.</p>
 <div class="paragraph">
 <p>Isso resulta em:</p>
 </div>
@@ -901,7 +959,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Note how the rule to only follow the TREESAME parent, if one is available, removed <code>B</code> from consideration entirely. <code>C</code> was considered via <code>N</code>, but is TREESAME. Root commits are compared to an empty tree, so <code>I</code> is !TREESAME.</p>
+<p>Observe como a regra de seguir apenas o principal TREESAME, se houver um disponível, removeu o <code>B</code> completamente da consideração. O <code>C</code> foi considerado via <code>N</code>, mas é TREESAME. Os commits principais são comparados a uma árvore vazia, portanto, <code>I</code> é !TREESAME.</p>
 </div>
 <div class="paragraph">
 <p>As relações entre pai/filho são visíveis apenas com <code>--parents</code>, porém isso não afeta os commits selecionados no modo predefinido, portanto, mostramos as linhas dos pais.</p>
@@ -909,14 +967,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1"><code>--full-history</code> sem reescrita anterior</dt>
 <dd>
-<p>This mode differs from the default in one point: always follow all parents of a merge, even if it is TREESAME to one of them. Even if more than one side of the merge has commits that are included, this does not imply that the merge itself is! In the example, we get</p>
+<p>Este modo difere do predefinido num ponto: sempre segue todos os pais de uma mesclagem, mesmo que seja TREESAME para um deles. Mesmo que mais de um lado da mesclagem tenha commits incluídos, isso não significa que a mesclagem em si esteja! No exemplo, nós temos</p>
 <div class="listingblock">
 <div class="content">
 <pre>        I  A  B  N  D  O  P  Q</pre>
 </div>
 </div>
 <div class="paragraph">
-<p><code>M</code> was excluded because it is TREESAME to both parents. <code>E</code>, <code>C</code> and <code>B</code> were all walked, but only <code>B</code> was !TREESAME, so the others do not appear.</p>
+<p>O <code>M</code> foi excluído porque é TREESAME para ambos os ramos principais. <code>E</code>, <code>C</code> e <code>B</code> foram todos percorridos, mas apenas <code>B</code> era !TREESAME, então os outros não aparecem.</p>
 </div>
 <div class="paragraph">
 <p>Observe que, sem reescrever os pais, não é realmente possível falar sobre os relacionamentos pai/filho entre os commits, portanto, mostramos-lhes desconectados.</p>
@@ -926,7 +984,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Os commits comuns são incluídos apenas se forem <em>!TREESAME</em> (embora é possível alterar isso, consulte <code>--sparse</code> abaixo).</p>
 <div class="paragraph">
-<p>Merges are always included. However, their parent list is rewritten: Along each parent, prune away commits that are not included themselves. This results in</p>
+<p>As mesclagens são sempre incluídas. No entanto, a sua lista principal é reescrita: Ao longo de cada ramo principal, elimine os commits que não estão incluídos. Isso resulta em</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -938,7 +996,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Compare to <code>--full-history</code> without rewriting above. Note that <code>E</code> was pruned away because it is TREESAME, but the parent list of P was rewritten to contain <code>E</code>'s parent <code>I</code>. The same happened for <code>C</code> and <code>N</code>, and <code>X</code>, <code>Y</code> and <code>Q</code>.</p>
+<p>Compare com a opção <code>--full-history</code> sem reescrever acima. Observe que <code>E</code> foi eliminado porque é TREESAME, mas a lista dos principais de P foi reescrito para conter o principal de <code>E</code>, <code>I</code>. O mesmo aconteceu com <code>C</code> e <code>N</code>, e <code>X</code>, <code>Y</code> e <code>Q</code>.</p>
 </div>
 </dd>
 </dl>
@@ -956,7 +1014,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Todos os commits que forem passados serão incluidos.</p>
 <div class="paragraph">
-<p>Note that without <code>--full-history</code>, this still simplifies merges: if one of the parents is TREESAME, we follow only that one, so the other sides of the merge are never walked.</p>
+<p>Observe que sem o <code>--full-history</code>, isso ainda simplifica as mesclagens: caso um dos pais seja <em>TREESAME</em>, seguiremos apenas este, para que os outros lados da mesclagem nunca sejam percorridos.</p>
 </div>
 </dd>
 <dt class="hdlist1">--simplify-merges</dt>
@@ -973,17 +1031,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Defina <code>C'</code> para <code>C</code>.</p>
 </li>
 <li>
-<p>Replace each parent <code>P</code> of <code>C'</code> with its simplification <code>P'</code>. In the process, drop parents that are ancestors of other parents or that are root commits TREESAME to an empty tree, and remove duplicates, but take care to never drop all parents that we are TREESAME to.</p>
+<p>Substitua cada principal <code>P</code> de <code>C'</code> pela sua simplificação <code>P'</code>. No processo, elimine os principais que são ancestrais de outros principais ou que são raiz, transfira TREESAME para uma árvore vazia e remova as duplicatas, mas tome cuidado para nunca eliminar todos os principais onde somos TREESAME.</p>
 </li>
 <li>
-<p>If after this parent rewriting, <code>C'</code> is a root or merge commit (has zero or &gt;1 parents), a boundary commit, or !TREESAME, it remains. Otherwise, it is replaced with its only parent.</p>
+<p>Se, após essa reescrita dos pais, <code>C'</code> for um commit raiz ou de mesclagem (tem zero ou &gt;1 principais), um commit de limite ou !TREESAME, ele permanecerá. Caso contrário, ele é substituído por seu único principal.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="paragraph">
-<p>The effect of this is best shown by way of comparing to <code>--full-history</code> with parent rewriting. The example turns into:</p>
+<p>O efeito disso é melhor mostrado por meio da comparação com o <code>--full-history</code> com reescrita principal. O exemplo se torna:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1002,10 +1060,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>N</code>'s parent list had <code>I</code> removed, because it is an ancestor of the other parent <code>M</code>. Still, <code>N</code> remained because it is !TREESAME.</p>
+<p>A lista do ramo principal <code>N</code> teve o <code>I</code> removido, porque ele é um ancestral do outro ramo principal <code>M</code>. Ainda assim, o <code>N</code> permaneceu porque é !TREESAME.</p>
 </li>
 <li>
-<p><code>P</code>'s parent list similarly had <code>I</code> removed. <code>P</code> was then removed completely, because it had one parent and is TREESAME.</p>
+<p>A lista principal de <code>P</code> também teve o <code>I</code> removido. O <code>P</code> foi então removido completamente, porque tinha um ramo principal e é TREESAME.</p>
 </li>
 <li>
 <p>A lista de pais de <code>Q</code> tinha` Y` simplificado para <code>X</code>. O <code>X</code> foi então removido, porque era uma raiz <em>TREESAME</em>. O <code>Q</code> foi removido completamente, porque tinha um pai e é <em>TREESAME</em>.</p>
@@ -1041,7 +1099,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Um <em>D..M</em> regular calcula o conjunto dos commits que são ancestrais do <code>M</code>, mas exclui os que são ancestrais do <code>D</code>. Isso é útil para ver o que aconteceu com a história que levou a <code>M</code> desde o <code>D</code>, no sentido que &#8220;o que <code>M</code> possui e que não existia em <code>D</code>&#8221;. O resultado neste exemplo seria todos os commits, exceto <code>A</code> e <code>B</code> (e <code>D</code>, obviamente).</p>
 </div>
 <div class="paragraph">
-<p>When we want to find out what commits in <code>M</code> are contaminated with the bug introduced by <code>D</code> and need fixing, however, we might want to view only the subset of <em>D..M</em> that are actually descendants of <code>D</code>, i.e. excluding <code>C</code> and <code>K</code>. This is exactly what the <code>--ancestry-path</code> option does. Applied to the <em>D..M</em> range, it results in:</p>
+<p>No entanto, quando quisermos descobrir quais commits em <code>M</code> estão contaminados com o bug introduzido por <code>D</code> e precisam ser corrigidos, talvez seja do nosso interesse visualizar apenas o subconjunto <em>D..M</em> que são realmente descendentes de <code>D</code>, ou seja, excluindo <code>C</code> e <code>K</code>. Isso é exatamente o que a opção <code>--ancestry-path</code> faz. Aplicado ao intervalo <em>D..M</em>, o resultado é:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1056,7 +1114,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Também podemos usar <code>--ancestry-path=D</code> em vez de <code>--ancestry-path</code> que significa a mesma coisa quando é aplicado ao intervalo <em>D..M</em>, porém, é apenas mais explícito.</p>
 </div>
 <div class="paragraph">
-<p>If we instead are interested in a given topic within this range, and all commits affected by that topic, we may only want to view the subset of <code>D..M</code> which contain that topic in their ancestry path. So, using <code>--ancestry-path=H D..M</code> for example would result in:</p>
+<p>Se, em vez disso, estivermos interessados num determinado tópico dentro deste intervalo e em todos os commits afetados por este tópico, talvez seja do nosso interesse visualizar apenas o subconjunto <code>D...M</code> que contém esse tópico em seu caminho de ancestralidade. Portanto, usar <code>--ancestry-path=H D...M</code>, por exemplo, resultaria em:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1095,7 +1153,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>For this example, suppose <code>I</code> created <code>file.txt</code> which was modified by <code>A</code>, <code>B</code>, and <code>X</code> in different ways. The single-parent commits <code>C</code>, <code>Z</code>, and <code>Y</code> do not change <code>file.txt</code>. The merge commit <code>M</code> was created by resolving the merge conflict to include both changes from <code>A</code> and <code>B</code> and hence is not TREESAME to either. The merge commit <code>R</code>, however, was created by ignoring the contents of <code>file.txt</code> at <code>M</code> and taking only the contents of <code>file.txt</code> at <code>X</code>. Hence, <code>R</code> is TREESAME to <code>X</code> but not <code>M</code>. Finally, the natural merge resolution to create <code>N</code> is to take the contents of <code>file.txt</code> at <code>R</code>, so <code>N</code> is TREESAME to <code>R</code> but not <code>C</code>. The merge commits <code>O</code> and <code>P</code> are TREESAME to their first parents, but not to their second parents, <code>Z</code> and <code>Y</code> respectively.</p>
+<p>Para este exemplo, suponha que <code>I</code> tenha criado o arquivo <code>file.txt</code> que foi alterado por <code>A</code>, <code>B</code> e <code>X</code> de maneiras diferentes. Os commits do único ramo principal <code>C</code>, <code>Z</code> e <code>Y</code> não alteram o arquivo <code>file.txt</code>. O commit de mesclagem <code>M</code> foi criado ao solucionar o conflito de mesclagem para incluir ambas as alterações de <code>A</code> e <code>B</code> e, portanto, não é TREESAME para nenhum deles. A mesclagem do commit <code>R</code>, no entanto, foi criado ignorando o conteúdo do arquivo <code>file.txt</code> em <code>M</code> e pegando apenas o conteúdo do arquivo <code>file.txt</code> em <code>X</code>. Portanto, <code>R</code> é TREESAME para <code>X</code>, mas não para <code>M</code>. Por fim, a resolução da mesclagem natural para criar <code>N</code> é pegar o conteúdo do arquivo <code>file.txt</code> em <code>R</code>, de modo que <code>N</code> é TREESAME para <code>R</code>, mas não para <code>C</code>. A mesclagem dos commits <code>O</code> e <code>P</code> são TREESAME para os seus primeiros ramos principais, mas não para os seus os ramos principais secundários, <code>Z</code> e <code>Y</code> respectivamente.</p>
 </div>
 <div class="paragraph">
 <p>Ao utilizar os modos predefinidos, ambos os <code>N</code> e <code>R</code> tem um pai TREESAME, então aquelas bordas são percorridas e outras são ignoradas. E o grafo resultante no histórico é:</p>
@@ -1179,7 +1237,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dl>
 </div>
 <div class="paragraph">
-<p>The <code>--simplify-by-decoration</code> option allows you to view only the big picture of the topology of the history, by omitting commits that are not referenced by tags. Commits are marked as !TREESAME (in other words, kept after history simplification rules described above) if (1) they are referenced by tags, or (2) they change the contents of the paths given on the command line. All other commits are marked as TREESAME (subject to be simplified away).</p>
+<p>A opção <code>--simplify-by-decoration</code> permite que você veja apenas o quadro geral da topologia do histórico, omitindo os commits que não são mencionados pelas etiquetas. Os commits são marcados como !TREESAME (em outras palavras, mantidos após as regras de simplificação do histórico descritas acima) se (1) forem mencionados pelas etiquetas ou (2) alterarem o conteúdo dos caminhos fornecidos na linha de comando. Todos os outros commits são marcados como TREESAME (que estão sujeitos a serem simplificados).</p>
 </div>
 </div>
 <div class="sect2">
@@ -1233,7 +1291,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">--no-walk[=(sorted|unsorted)]</dt>
 <dd>
-<p>Only show the given commits, but do not traverse their ancestors. This has no effect if a range is specified. If the argument <code>unsorted</code> is given, the commits are shown in the order they were given on the command line. Otherwise (if <code>sorted</code> or no argument was given), the commits are shown in reverse chronological order by commit time. Cannot be combined with <code>--graph</code>.</p>
+<p>Mostra apenas os commits mencionados, mas não percorre os seus ancestrais. Isso não terá efeito se um intervalo for especificado. Se a opção <code>unsorted</code> for usado, os commits serão mostrados na ordem em que foram fornecidos na linha de comando. Caso contrário (se <code>sorted</code> ou nenhuma opção for fornecido), os commits serão mostrados em ordem cronológica reversa de acordo com a hora do commit. Não pode ser combinado com a opção <code>--graph</code>.</p>
 </dd>
 <dt class="hdlist1">--do-walk</dt>
 <dd>
@@ -1244,11 +1302,77 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="sect2">
 <h3 id="_formatação_do_commit">Formatação do Commit</h3>
-<div class="paragraph">
-<p>Unresolved directive in rev-list-options.txt - include::pretty-options.txt[]</p>
-</div>
 <div class="dlist">
 <dl>
+<dt class="hdlist1">--pretty[=&lt;formato&gt;]</dt>
+<dt class="hdlist1">--format=&lt;formato&gt;</dt>
+<dd>
+<p>Imprima o conteúdo dos registros do commit num determinado formato, onde <em>&lt;format&gt;</em> pode ser <em>oneline</em>, <em>short</em>, <em>medium</em>, <em>full</em>, <em>fuller</em>, <em>reference</em>, <em>email</em>, <em>raw</em>, <em>format:&lt;string&gt;</em> e <em>tformat:&lt;string&gt;</em>. Quando <em>&lt;format&gt;</em> não for nenhuma das opções acima e tem <em>%placeholder</em>, ele age como se a opção <em>--pretty=tformat:&lt;formato&gt;</em> tivesse sido usado.</p>
+<div class="paragraph">
+<p>Consulte a seção "FORMATOS BONITOS" para obter alguns detalhes adicionais sobre cada formato. Quando a parte <em>=&lt;formato&gt;</em> é omitida, a predefinição é <em>medium</em>.</p>
+</div>
+<div class="paragraph">
+<p>Nota: você pode especificar o formato "pretty" padrão na configuração do repositório (consulte <a href="git-config.html"><b>git-config</b>(1)</a>).</p>
+</div>
+</dd>
+<dt class="hdlist1">--abbrev-commit</dt>
+<dd>
+<p>Em vez de mostrar o nome hexadecimal com 40 bytes completo do objeto commit, mostre um prefixo que nomeie o objeto de maneira exclusiva. A opção <em>--abbrev=&lt;n&gt;</em> (que também modifica a saída do diff, se for exibida) pode ser usada para especificar o comprimento mínimo do prefixo.</p>
+<div class="paragraph">
+<p>Isso deve tornar <code>--pretty=oneline</code> muito mais legível para pessoas que usam terminais com 80 colunas.</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-abbrev-commit</dt>
+<dd>
+<p>Exibe o nome do objeto commit completo com 40 bytes hexadecimais. Isso nega o a opção <code>--abbrev-commit</code>, de forma explícita ou implícita pelas outras opções como "--oneline". Ele também substitui a variável <code>log.abbrevCommit</code>.</p>
+</dd>
+<dt class="hdlist1">--oneline</dt>
+<dd>
+<p>Este é um atalho para "--pretty=oneline --abbrev-commit" ser utilizado junto.</p>
+</dd>
+<dt class="hdlist1">--encoding=&lt;codificação&gt;</dt>
+<dd>
+<p>Os objetos commit registram a codificação dos caracteres usado para a mensagem de registro log em seu cabeçalho de codificação; esta opção pode ser usada para informar ao comando para recodificar a mensagem de registro log do commit na codificação preferida pelo usuário. Para comandos que não sejam para redirecionamento, o padrão é UTF-8. Observe que, se um objeto alegar ser codificado em <code>X</code> e estivermos produzindo em <code>X</code>, produziremos o objeto literalmente; isso significa que as sequências inválidas no commit original podem ser copiadas para o objeto criado. Da mesma maneira, se o iconv(3) não conseguir converter o commit, faremos o envio literal do objeto original.</p>
+</dd>
+<dt class="hdlist1">--expand-tabs=&lt;n&gt;</dt>
+<dt class="hdlist1">--expand-tabs</dt>
+<dt class="hdlist1">--no-expand-tabs</dt>
+<dd>
+<p>Execute uma expansão de tabulação (substitua cada tabulação por espaços suficientes para preencher a próxima coluna de exibição que seja um múltiplo de <em>&lt;n&gt;</em>) na mensagem de registro antes de mostrá-la na saída. A opção <code>--expand-tabs</code> é uma abreviação de <code>--expand-tabs=8</code> e <code>--no-expand-tabs</code> é uma abreviação de <code>--expand-tabs=0</code>, que desativa a expansão das guias.</p>
+<div class="paragraph">
+<p>È predefinido que as guias sejam expandidas em formatos bonitos que recuam a mensagem de registro em 4 espaços (ou seja, a predefinição <em>medium</em>, <em>full</em> e <em>fuller</em>).</p>
+</div>
+</dd>
+<dt class="hdlist1">--notes[=&lt;ref&gt;]</dt>
+<dd>
+<p>Mostre as notas (consulte <a href="git-notes.html"><b>git-notes</b>(1)</a>) que anotam o commit, ao mostrar a mensagem de registro do commit. Esta é a predefinição para os comandos <code>git log</code>, <code>git show</code> e <code>git whatchanged</code> quando não há nenhuma opção <code>--pretty</code>, <code>--format</code> ou <code>--oneline</code> usada na linha de comando.</p>
+<div class="paragraph">
+<p>É predefinido que as anotações exibidas são das anotações refs listadas nas variáveis <code>core.notesRef</code> e <code>notes.displayRef</code> (ou substituições correspondentes do ambiente). Para mais detalhes consulte <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+</div>
+<div class="paragraph">
+<p>Com um argumento opcional <em>&lt;ref&gt;</em>, use a referência para localizar as notas a serem exibidas. Uma ref pode especificar o nome completo da ref quando começa com <code>refs/notes/</code>; quando começa com <code>notes/</code>, <code>refs/</code> e, caso contrário, <code>refs/notes/</code> é prefixado para formar o nome completo da ref.</p>
+</div>
+<div class="paragraph">
+<p>Várias opções <code>--notes</code> podem ser combinadas para controlar quais as notas estão sendo exibidas. Exemplos: <code>--notes=foo</code> mostrará apenas as notas vindas de "refs/notes/foo"; <code>--notes=foo --notes</code> mostrará as notas vindas de "refs/notes/foo" e das notas ref(s) predefinidas.</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-notes</dt>
+<dd>
+<p>Não mostrar as anotações. Isso anula a opção <code>--notes</code> acima, redefinindo a lista de refs das anotações a partir de onde as notas são exibidas. As opções são analisadas na ordem usada na linha de comando, portanto, por exemplo, <code>--notes --notes=foo --no-notes --notes=bar</code> mostrará apenas as notas de <code>refs/notes/bar</code>.</p>
+</dd>
+<dt class="hdlist1">--show-notes-by-default</dt>
+<dd>
+<p>Mostra as notas predefinidas, a menos que sejam fornecidas opções para a exibição de notas específicas.</p>
+</dd>
+<dt class="hdlist1">--show-notes[=&lt;ref&gt;]</dt>
+<dt class="hdlist1">--[no-]standard-notes</dt>
+<dd>
+<p>Essas opções estão obsoletas. Em vez disso, utilize as opções --notes/--no-notes acima.</p>
+</dd>
+<dt class="hdlist1">--show-signature</dt>
+<dd>
+<p>Verifique a validade de um objeto commit assinado, passando a assinatura para <code>gpg --verify</code> e exibe a sua saída.</p>
+</dd>
 <dt class="hdlist1">--relative-date</dt>
 <dd>
 <p>É um sinônimo para <code>--date=relative</code>.</p>
@@ -1265,7 +1389,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><code>--date=local</code> é um apelido para <code>--date=default-local</code>.</p>
 </div>
 <div class="paragraph">
-<p><code>--date=iso</code> (or <code>--date=iso8601</code>) shows timestamps in a ISO 8601-like format. The differences to the strict ISO 8601 format are:</p>
+<p><code>--date=iso</code> (ou <code>--date=iso8601</code>) mostra os registros de data e hora num formato semelhante ao ISO 8601. As diferenças em relação ao formato estrito da ISO 8601 são:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -1290,34 +1414,34 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><code>--date=short</code> exibe apenas a data em formato <code>AAAA-MM-DD</code> porém não a hora.</p>
 </div>
 <div class="paragraph">
-<p><code>--date=raw</code> shows the date as seconds since the epoch (1970-01-01 00:00:00 UTC), followed by a space, and then the timezone as an offset from UTC (a <code>+</code> or <code>-</code> with four digits; the first two are hours, and the second two are minutes). I.e., as if the timestamp were formatted with <code>strftime("%s %z")</code>). Note that the <code>-local</code> option does not affect the seconds-since-epoch value (which is always measured in UTC), but does switch the accompanying timezone value.</p>
+<p>A opção <code>--date=raw</code> mostra a data como segundos desde a partir da época (1970-01-01 00:00:00 UTC), seguida por um espaço e, em seguida, o fuso horário como um offset do UTC (apresentado com um <code>+</code> ou <code>-</code> com quatro dígitos; os dois primeiros são horas e os dois segundos são minutos). Ou seja, como se o registro de data e hora fosse formatado com <code>strftime("%s %z")</code>). Observe que a opção <code>-local</code> não afeta o valor de "seconds-since-epoch" (que é sempre medido em UTC), mas altera o valor do fuso horário que o acompanha.</p>
 </div>
 <div class="paragraph">
-<p><code>--date=human</code> shows the timezone if the timezone does not match the current time-zone, and doesn&#8217;t print the whole date if that matches (ie skip printing year for dates that are "this year", but also skip the whole date itself if it&#8217;s in the last few days and we can just say what weekday it was). For older dates the hour and minute is also omitted.</p>
+<p>A opção <code>--date=human</code> mostra o fuso horário se o fuso horário não corresponder ao fuso horário atual e não mostra a data inteira se houver correspondência (ou seja, não mostra o ano para datas que são "deste ano", mas também não mostra a data inteira se ela estiver nos últimos dias e pudermos apenas dizer que dia da semana foi). A hora e o minuto também são omitidos para datas mais antigas.</p>
 </div>
 <div class="paragraph">
-<p><code>--date=unix</code> shows the date as a Unix epoch timestamp (seconds since 1970). As with <code>--raw</code>, this is always in UTC and therefore <code>-local</code> has no effect.</p>
+<p>A opção <code>--date=unix</code> mostra a data como um registro de data e hora da época Unix (segundos desde 1970). Assim como no caso do <code>--raw</code>, ele está sempre em UTC e, portanto, a opção <code>-local</code> não tem efeito.</p>
 </div>
 <div class="paragraph">
-<p><code>--date=format:...</code> feeds the format <code>...</code> to your system <code>strftime</code>, except for %s, %z, and %Z, which are handled internally. Use <code>--date=format:%c</code> to show the date in your system locale&#8217;s preferred format. See the <code>strftime</code> manual for a complete list of format placeholders. When using <code>-local</code>, the correct syntax is <code>--date=format-local:...</code>.</p>
+<p>A opção <code>--date=format:...</code> alimenta o formato <code>...</code> em seu sistema <code>strftime</code>, com exceção de <em>%s</em>, <em>%z</em> e <em>%Z</em>, que são tratados internamente. Use <code>--date=format:%c</code> para mostrar a data no formato preferido da localidade do seu sistema. Consulte o manual do <code>strftime</code> para obter uma lista completa dos marcadores de formato. Ao usar <code>-local</code>, a sintaxe correta é <code>--date=format-local:...</code>.</p>
 </div>
 <div class="paragraph">
-<p><code>--date=default</code> is the default format, and is based on ctime(3) output. It shows a single line with three-letter day of the week, three-letter month, day-of-month, hour-minute-seconds in "HH:MM:SS" format, followed by 4-digit year, plus timezone information, unless the local time zone is used, e.g. <code>Thu Jan 1 00:00:00 1970 +0000</code>.</p>
+<p>A opção <code>--date=default</code> é o formato predefinido e tem como base na saída do ctime(3). Ele mostra uma única linha com três letras do dia da semana, três letras do mês, dia do mês, hora-minuto-segundos no formato "HH:MM:SS", seguido pelo ano de quatro dígitos, além de informações de fuso horário, a menos que o fuso horário local seja usado, por exemplo, <code>Thu Jan 1 00:00:00 1970 +0000</code>.</p>
 </div>
 </div>
 </div>
 </dd>
 <dt class="hdlist1">--parents</dt>
 <dd>
-<p>Print also the parents of the commit (in the form "commit parent&#8230;&#8203;"). Also enables parent rewriting, see <em>History Simplification</em> above.</p>
+<p>Mostre também as origens do commit (na opção "commit parent&#8230;&#8203;"). Também permite a reescrita do ramo principal, consulte <em>Simplificação do histórico</em> acima.</p>
 </dd>
 <dt class="hdlist1">--children</dt>
 <dd>
-<p>Print also the children of the commit (in the form "commit child&#8230;&#8203;"). Also enables parent rewriting, see <em>History Simplification</em> above.</p>
+<p>Mostre também os commit relacionados (na opção "commit child&#8230;&#8203;"). Também permite a reescrita do ramo principal, consulte <em>Simplificação do histórico</em> acima.</p>
 </dd>
 <dt class="hdlist1">--left-right</dt>
 <dd>
-<p>Mark which side of a symmetric difference a commit is reachable from. Commits from the left side are prefixed with <code>&lt;</code> and those from the right with <code>&gt;</code>. If combined with <code>--boundary</code>, those commits are prefixed with <code>-</code>.</p>
+<p>Marca de que lado de uma diferença simétrica um commit pode ser acessado. Os commits do lado esquerdo são marcados com <code>&lt;</code> e os do lado direito com <code>&gt;</code>. Se combinados com <code>--boundary</code>, estes commits são marcados com <code>-</code>.</p>
 <div class="paragraph">
 <p>Por exemplo, caso tenha essa topologia:</p>
 </div>
@@ -1348,7 +1472,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--graph</dt>
 <dd>
-<p>Draw a text-based graphical representation of the commit history on the left hand side of the output. This may cause extra lines to be printed in between commits, in order for the graph history to be drawn properly. Cannot be combined with <code>--no-walk</code>.</p>
+<p>Desenhe uma representação gráfica em texto do histórico do commit no lado esquerdo da saída. Isso pode fazer com que linhas extras sejam mostradas entre os commits, para que o histórico do gráfico seja desenhado corretamente. Não pode ser combinado com a opção <code>--no-walk</code>.</p>
 <div class="paragraph">
 <p>Permite a reescrita dos pais, consulte <em>Simplificação do Histórico</em> acima.</p>
 </div>
@@ -1369,7 +1493,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_formatos_bonitos">FORMATOS BONITOS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If the commit is a merge, and if the pretty-format is not <em>oneline</em>, <em>email</em> or <em>raw</em>, an additional line is inserted before the <em>Author:</em> line. This line begins with "Merge: " and the hashes of ancestral commits are printed, separated by spaces. Note that the listed commits may not necessarily be the list of the <strong>direct</strong> parent commits if you have limited your view of history: for example, if you are only interested in changes related to a certain directory or file.</p>
+<p>Se o commit for uma mesclagem e se o formato "pretty" não for <em>oneline</em>, <em>email</em> ou <em>raw</em>, uma linha adicional será inserida antes da linha <em>Author:</em>. Essa linha começa com "Merge: " e os hashes dos commits ancestrais são impressos e separados por espaços. Observe que os commits listados podem não ser necessariamente a lista dos commits principais <strong>diretos</strong> se você tiver limitado a sua visão do histórico: se estiver interessado apenas nas alterações relacionadas a um determinado diretório ou arquivo por exemplo.</p>
 </div>
 <div class="paragraph">
 <p>Existem vários formatos incorporados e você pode definir formatos adicionais ao definir uma opção da configuração <code>pretty.&lt;nome&gt;</code> para um outro nome de formato ou uma string <em>format:</em>, conforme descrito abaixo (consulte <a href="git-config.html"><b>git-config</b>(1)</a>). Aqui estão os detalhes dos formatos incorporados: Aqui estão os detalhes dos formatos incorporados:</p>
@@ -1471,7 +1595,7 @@ CommitDate: &lt;a-data-de-quem-fez-o-commit&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This format is used to refer to another commit in a commit message and is the same as <code>--pretty='format:%C(auto)%h (%s, %ad)'</code>. By default, the date is formatted with <code>--date=short</code> unless another <code>--date</code> option is explicitly specified. As with any <code>format:</code> with format placeholders, its output is not affected by other options like <code>--decorate</code> and <code>--walk-reflogs</code>.</p>
+<p>Este formato é usado para fazer referência a outro commit numa mensagem de commit e é o mesmo que <code>--pretty='format:%C(auto)%h (%s, %ad)'</code>. É predefinido que a data seja formatada com a opção <code>--date=short</code>, a menos que uma outra opção <code>--date</code> seja explicitamente especificada. Assim como qualquer <code>format:</code> com marcadores de formato, o que é gerado por ele não é afetado por outras opções como <code>--decorate</code> e <code>--walk-reflogs</code>.</p>
 </div>
 </li>
 <li>
@@ -1499,7 +1623,7 @@ Subject: [PATCH] &lt;linha-do-título&gt;</pre>
 <li>
 <p><em>raw</em></p>
 <div class="paragraph">
-<p>The <em>raw</em> format shows the entire commit exactly as stored in the commit object. Notably, the hashes are displayed in full, regardless of whether --abbrev or --no-abbrev are used, and <em>parents</em> information show the true parent commits, without taking grafts or history simplification into account. Note that this format affects the way commits are displayed, but not the way the diff is shown e.g. with <code>git log --raw</code>. To get full object names in a raw diff format, use <code>--no-abbrev</code>.</p>
+<p>O formato <em>raw</em> mostra o commit inteiro exatamente como armazenado no objeto de commit. Notavelmente, os hashes são exibidos na íntegra, independentemente do uso da opção --abbrev ou --no-abbrev, e as informações de <em>parents</em> mostram os verdadeiros commits principais, sem levar em conta os enxertos ou a simplificação do histórico. Observe que este formato afeta a forma como os commits são exibidos, mas não a forma como o diff é exibido, por exemplo, com o comando <code>git log --raw</code>. Para obter os nomes completos dos objetos num formato diff bruto, use <code>--no-abbrev</code>.</p>
 </div>
 </li>
 <li>
@@ -1562,7 +1686,7 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </dd>
 <dt class="hdlist1"><em>%C(&#8230;&#8203;)</em></dt>
 <dd>
-<p>color specification, as described under Values in the "CONFIGURATION FILE" section of <a href="git-config.html"><b>git-config</b>(1)</a>. By default, colors are shown only when enabled for log output (by <code>color.diff</code>, <code>color.ui</code>, or <code>--color</code>, and respecting the <code>auto</code> settings of the former if we are going to a terminal). <code>%C(auto,...)</code> is accepted as a historical synonym for the default (e.g., <code>%C(auto,red)</code>). Specifying <code>%C(always,...)</code> will show the colors even when color is not otherwise enabled (though consider just using <code>--color=always</code> to enable color for the whole output, including this format and anything else git might color). <code>auto</code> alone (i.e. <code>%C(auto)</code>) will turn on auto coloring on the next placeholders until the color is switched again.</p>
+<p>Conforme foi descrito em Valores na seção "ARQUIVO DE CONFIGURAÇÃO" do comando <a href="git-config.html"><b>git-config</b>(1)</a>. É predefinido que as cores são mostradas somente quando ativadas para a saída de registro (por <code>color.diff</code>, <code>color.ui</code> ou <code>--color</code>, respeitando as configurações <code>auto</code> do primeiro se estivermos indo para um terminal). O <code>%C(auto,...)</code> é aceito como sinônimo histórico do padrão (por exemplo, <code>%C(auto,red)</code>). Ao especificar <code>%C(always,...)</code> exibirá as cores mesmo quando a cor não estiver ativada (considere utilizar apenas a opção <code>--color=always</code> para ativar a cor para toda a saída, incluindo este formato e qualquer outra coisa que o git possa colorir). A opção <code>auto</code> sozinha (ou seja, <code>%C(auto)</code>) ativará a coloração automática nos próximos marcadores até que a cor seja trocada novamente.</p>
 </dd>
 <dt class="hdlist1"><em>%m</em></dt>
 <dd>
@@ -1574,11 +1698,11 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </dd>
 <dt class="hdlist1"><em>%&lt;( &lt;N&gt; [,trunc|ltrunc|mtrunc])</em></dt>
 <dd>
-<p>make the next placeholder take at least N column widths, padding spaces on the right if necessary. Optionally truncate (with ellipsis <em>..</em>) at the left (ltrunc) <code>..ft</code>, the middle (mtrunc) <code>mi..le</code>, or the end (trunc) <code>rig..</code>, if the output is longer than N columns. Note 1: that truncating only works correctly with N &gt;= 2. Note 2: spaces around the N and M (see below) values are optional. Note 3: Emojis and other wide characters will take two display columns, which may over-run column boundaries. Note 4: decomposed character combining marks may be misplaced at padding boundaries.</p>
+<p>Faz com que o próximo marcador ocupe pelo menos N larguras de coluna, preenchendo espaços à direita, se necessário. Opcionalmente, trunque (com reticências <em>&#8230;&#8203;</em>) à esquerda (ltrunc) <code>..ft</code>, no meio (mtrunc) <code>mi..le</code> ou no final (trunc) <code>rig..</code>, se a saída for maior que N colunas. Observação 1: esse truncamento só funciona corretamente com N &gt;= 2. Observação 2: os espaços ao redor dos valores N e M (veja abaixo) são opcionais. Observação 3: Os emojis e outros caracteres longos ocuparão duas colunas de exibição, o que pode ultrapassar os limites da coluna. Observação 4: as marcas de combinação de caracteres decompostos podem estar mal posicionadas nos limites do preenchimento.</p>
 </dd>
 <dt class="hdlist1"><em>%&lt;|( &lt;M&gt; )</em></dt>
 <dd>
-<p>make the next placeholder take at least until Mth display column, padding spaces on the right if necessary. Use negative M values for column positions measured from the right hand edge of the terminal window.</p>
+<p>Faz com que o próximo marcador ocupe pelo menos até a Mésima coluna de exibição, preenchendo espaços à direita, caso seja necessário. Use valores M negativos para posições de coluna medidas a partir da borda direita da janela do terminal.</p>
 </dd>
 <dt class="hdlist1"><em>%&gt;( &lt;N&gt; )</em>, <em>%&gt;|( &lt;M&gt; )</em></dt>
 <dd>
@@ -1749,13 +1873,13 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <div class="ulist">
 <ul>
 <li>
-<p><em>prefix=&lt;value&gt;</em>: Shown before the list of ref names. Defaults to "&#160;<code>(</code>".</p>
+<p>O <em>prefix=&lt;valor&gt;</em>: Exibido antes da lista de nomes ref. A predefinição é "&#160;<code>(</code>".</p>
 </li>
 <li>
-<p><em>suffix=&lt;value&gt;</em>: Shown after the list of ref names. Defaults to "<code>)</code>".</p>
+<p>O <em>prefix=&lt;valor&gt;</em>: Exibido antes da lista de nomes ref. A predefinição é "<code>)</code>".</p>
 </li>
 <li>
-<p><em>separator=&lt;value&gt;</em>: Shown between ref names. Defaults to "<code>,</code>&#160;".</p>
+<p>O <em>separator=&lt;valor&gt;</em>: Mostrado entre os nomes refs. A predefinição é "<code>,</code>&#160;".</p>
 </li>
 <li>
 <p><em>pointer=&lt;valor&gt;</em>: Mostrado entre HEAD e o ramo para o qual aponta, se houver.
@@ -1783,7 +1907,7 @@ A predefinição é "&#160;<code>-&gt;</code>&#160;".</p>
 <dl>
 <dt class="hdlist1"><em>%(describe[:&lt;opções&gt;])</em></dt>
 <dd>
-<p>human-readable name, like <a href="git-describe.html"><b>git-describe</b>(1)</a>; empty string for undescribable commits. The <code>describe</code> string may be followed by a colon and zero or more comma-separated options. Descriptions can be inconsistent when tags are added or removed at the same time.</p>
+<p>Um nome legível para humanos, como <a href="git-describe.html"><b>git-describe</b>(1)</a>; string vazia para commits sem descrição. A string <code>describe</code> pode ser seguida por dois-pontos, zero ou mais opções separadas por vírgulas. As descrições podem ser inconsistentes quando as etiquetas são adicionadas ou são removidas ao mesmo tempo.</p>
 <div class="ulist">
 <ul>
 <li>
@@ -1835,7 +1959,7 @@ A predefinição é "&#160;<code>-&gt;</code>&#160;".</p>
 </dd>
 <dt class="hdlist1"><em>%G?</em></dt>
 <dd>
-<p>show "G" for a good (valid) signature, "B" for a bad signature, "U" for a good signature with unknown validity, "X" for a good signature that has expired, "Y" for a good signature made by an expired key, "R" for a good signature made by a revoked key, "E" if the signature cannot be checked (e.g. missing key) and "N" for no signature</p>
+<p>Mostre "G" para uma assinatura boa (válida), "B" para uma assinatura ruim, "U" para uma assinatura boa com validade desconhecida, "X" para uma assinatura boa que expirou, "Y" para uma assinatura boa feita por uma chave expirada, "R" para uma assinatura boa feita por uma chave revogada, "E" se a assinatura não puder ser verificada (falta de chave por exemplo) e "N" para nenhuma assinatura</p>
 </dd>
 <dt class="hdlist1"><em>%GS</em></dt>
 <dd>
@@ -1891,7 +2015,7 @@ A predefinição é "&#160;<code>-&gt;</code>&#160;".</p>
 <div class="ulist">
 <ul>
 <li>
-<p><em>key=&lt;key&gt;</em>: only show trailers with specified &lt;key&gt;. Matching is done case-insensitively and trailing colon is optional. If option is given multiple times trailer lines matching any of the keys are shown. This option automatically enables the <code>only</code> option so that non-trailer lines in the trailer block are hidden. If that is not desired it can be disabled with <code>only=false</code>. E.g., <code>%(trailers:key=Reviewed-by)</code> shows trailer lines with key <code>Reviewed-by</code>.</p>
+<p>A <em>key=&lt;chave&gt;</em>: mostra apenas os caracteres de resposta com a &lt;chave&gt; especificada. A correspondência é feita sem distinção entre maiúsculas e minúsculas, os dois-pontos finais são opcionais. Se a opção for usada várias vezes, serão mostradas as linhas dos caracteres de resposta que correspondem a qualquer uma das chaves. Esta opção ativa automaticamente a opção <code>only</code> para que as linhas que não tenham caracteres de resposta no bloco oculto com caracteres de resposta. Se isso não for desejado, desative com <code>only=false</code>. Por exemplo, <code>%(trailers:key=Revisado-por)</code> mostra as linhas do trailer com a chave <code>Revisado-por</code>.</p>
 </li>
 <li>
 <p><em>only[=&lt;bool&gt;]</em>: selecione se as linhas não relacionadas à resposta a partir do bloco de resposta, devem ser incluídas ou não.</p>
@@ -1948,7 +2072,7 @@ Alguns espaços reservados podem depender das outras opções passadas para o mo
 <li>
 <p><em>tformat:</em></p>
 <div class="paragraph">
-<p>The <em>tformat:</em> format works exactly like <em>format:</em>, except that it provides "terminator" semantics instead of "separator" semantics. In other words, each commit has the message terminator character (usually a newline) appended, rather than a separator placed between entries. This means that the final entry of a single-line format will be properly terminated with a new line, just as the "oneline" format does. For example:</p>
+<p>O formato <em>tformat:</em> funciona exatamente como o <em>format:</em>, exceto pelo fato de que ele fornece a semântica de "terminador" em vez da semântica de "separador". Em outras palavras, cada commit tem o caractere de terminação da mensagem (geralmente uma nova linha) anexado, em vez de um separador colocado entre as entradas. Isso significa que a entrada final de um formato único da linha será encerrada corretamente com uma nova linha, exatamente como o formato "oneline" faz. Por exemplo:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1964,7 +2088,7 @@ $ git log -2 --pretty=tformat:%h 4da45bef \
 </div>
 </div>
 <div class="paragraph">
-<p>In addition, any unrecognized string that has a <code>%</code> in it is interpreted as if it has <code>tformat:</code> in front of it. For example, these two are equivalent:</p>
+<p>Além disso, qualquer string não reconhecida que tenha um <code>%</code> é interpretada como se tivesse <code>tformat:</code> na frente. Por exemplo, estes dois são equivalentes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -2218,7 +2342,7 @@ a opção <code>--format=raw</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Example: The following will count changed files, while ignoring directories with less than 10% of the total amount of changed files, and accumulating child directory counts in the parent directories: <code>--dirstat=files,10,cumulative</code>.</p>
+<p>Exemplo: O seguinte contará os arquivos alterados, ignorando os diretórios com menos de 10% da quantidade total de arquivos alterados e acumulando as contagens dos diretórios filhos nos diretórios pais: <code>--dirstat=files,10,cumulative</code>.</p>
 </div>
 </dd>
 <dt class="hdlist1">--cumulative</dt>
@@ -2882,7 +3006,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </dd>
 <dt class="hdlist1"><code>git log --since="2 weeks ago" -- gitk</code></dt>
 <dd>
-<p>Show the changes during the last two weeks to the file <em>gitk</em>. The <code>--</code> is necessary to avoid confusion with the <strong>branch</strong> named <em>gitk</em></p>
+<p>Mostrar as alterações feitas nas últimas duas semanas no arquivo "gitk". O <code>--</code> é necessário para evitar confusão com o <strong>ramo</strong> chamado <em>gitk</em></p>
 </dd>
 <dt class="hdlist1"><code>git log --name-status release..test</code></dt>
 <dd>
@@ -2902,7 +3026,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </dd>
 <dt class="hdlist1"><code>git log -p -m --first-parent</code></dt>
 <dd>
-<p>Shows the history including change diffs, but only from the &#8220;main branch&#8221; perspective, skipping commits that come from merged branches, and showing full diffs of changes introduced by the merges. This makes sense only when following a strict policy of merging all topic branches when staying on a single integration branch.</p>
+<p>Mostra o histórico, incluindo as diferenças das alterações, mas apenas da perspectiva do &#8220;ramo principal&#8221;, ignorando os commits provenientes de ramos mesclados e mostrando as diferenças completas das alterações introduzidas pelas mesclagens. Isso só faz sentido quando se segue uma política rígida para mesclar todos os tópicos das ramificações ao permanecer numa única ramificação de integração.</p>
 </dd>
 <dt class="hdlist1"><code>git log -L '/int main/',/^}/:main.c</code></dt>
 <dd>
@@ -2920,7 +3044,57 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 <h2 id="_discussão">DISCUSSÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-log.txt - include::i18n.txt[]</p>
+<p>O Git é, até certo ponto, um codificador de caracteres agnóstico.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>O conteúdo dos objetos bolha (blob) são sequências de bytes não interpretadas. Não há uma tradução de codificação no nível do núcleo.</p>
+</li>
+<li>
+<p>Os nomes do caminho são codificados na forma de normalização UTF-8 C. Isso se aplica a objetos nas árvore, arquivos do índice, referência de nomes e nomes do caminho em argumentos da linha de comando, variáveis do ambiente e os arquivos de configuração (<code>.git / config</code> (consulte <a href="git-config.html"><b>git-config</b>(1)</a>), <a href="gitignore.html"><b>gitignore</b>(5)</a>, <a href="gitattributes.html"><b>gitattributes</b>(5)</a> e <a href="gitmodules.html"><b>gitmodules</b>(5)</a>).</p>
+<div class="paragraph">
+<p>Observe que o Git, em seu cerne, trata os nomes do caminho simplesmente como sequências de bytes não NUL; não há conversões de codificação do nome do caminho (exceto no Mac e no Windows). Portanto, o uso de nomes com caminho não ASCII funcionará, em geral, mesmo em plataformas e sistemas de arquivos que usam codificações ASCII estendidas legadas. No entanto, os repositórios criados nesses sistemas não funcionarão corretamente em sistemas baseados em UTF-8 (Linux, Mac, Windows por exemplo) e vice-versa. Além disso, muitas ferramentas com base no Git simplesmente assumem que os nomes de caminho são UTF-8 e não exibem outras codificações corretamente.</p>
+</div>
+</li>
+<li>
+<p>As mensagens do registro log do commit geralmente são codificadas em UTF-8, porém há compatibilidade para outras codificações ASCII estendidas. Isso inclui ISO-8859-x, CP125x e muitos outros. Porém não há compatibilidade com codificações UTF-16/32, EBCDIC e CJK, codificações de vários bytes (GBK, Shift-JIS, Big5, EUC-x, CP9xx etc.).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Embora incentivemos que as mensagens do registro do commit sejam codificadas em UTF-8, tanto o núcleo quanto o Git porcelain foram projetados para não impor o UTF-8 nos projetos. Se todos os participantes de um determinado projeto acharem mais conveniente usar codificações herdadas, o Git não o proibirá. Entretanto, há alguns aspectos que devem ser levados em consideração.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>O comando <em>git commit</em> e o <em>git commit-tree</em> emitem um aviso se a mensagem de registro do commit fornecida a ele não se parecer com uma string UTF-8 válida, a menos que você diga explicitamente que o seu projeto usa uma codificação antiga. A maneira de definir isso é ter <code>i18n.commitEncoding</code> no arquivo <code>.git/config</code>, assim:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        commitEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Os objetos criados do commit com a configuração acima, registram o valor <code>i18n.commitEncoding</code> em seu cabeçalho <code>encoding</code>. Isso serve para ajudar as outras pessoas que forem examiná-las mais tarde. A ausência desse cabeçalho implica que a mensagem de registro do commit está codificada em UTF-8.</p>
+</div>
+</li>
+<li>
+<p>Os comandos <em>git log</em>, <em>git show</em>, <em>git blame</em> e outros, analisam o cabeçalho <code>encoding</code> de um objeto commit e tentam recodificar a mensagem de registro em UTF-8, a menos que outro seja especificado. Você pode especificar a codificação de saída desejada com <code>i18n.logOutputEncoding</code> no arquivo <code>.git/config</code>, da seguinte maneira:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        logOutputEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Caso não tenha essa variável de configuração, o valor de <code>i18n.commitEncoding</code> é utilizado em seu lugar.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Observe que decidimos deliberadamente não codificar novamente a mensagem do registro log do commit quando um commit for feito para forçar a codificação UTF-8 a nível do objeto commit, porque a re-codificação para UTF-8 não é necessariamente uma operação reversível.</p>
 </div>
 </div>
 </div>
@@ -2934,11 +3108,11 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 <dl>
 <dt class="hdlist1">format.pretty</dt>
 <dd>
-<p>Default for the <code>--format</code> option. (See <em>Pretty Formats</em> above.) Defaults to <code>medium</code>.</p>
+<p>É a predefinição para a opção <code>--format</code>. (Consulte <em>formatos bonitos</em> acima.) A predefinição é <code>medium</code>.</p>
 </dd>
 <dt class="hdlist1">i18n.logOutputEncoding</dt>
 <dd>
-<p>Encoding to use when displaying logs. (See <em>Discussion</em> above.) Defaults to the value of <code>i18n.commitEncoding</code> if set, and UTF-8 otherwise.</p>
+<p>A codificação que será usada na exibição dos registros log. (Consulte "Discussão" acima.) A predefinição é o valor em <code>i18n.commitEncoding</code>, quando for definido, caso contrário, é UTF-8.</p>
 </dd>
 </dl>
 </div>
@@ -2964,7 +3138,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-31 16:03:00 +0200
+Last updated 2024-07-12 22:27:24 +0200
 </div>
 </div>
 </body>

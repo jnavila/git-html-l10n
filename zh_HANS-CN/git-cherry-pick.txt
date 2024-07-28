@@ -68,13 +68,28 @@ git-cherry-pick - 应用某些现有提交引入的更改
 	如果当前的 HEAD 与拣选的提交的父本相同，那么将执行快速合并到这个提交。
 
 --allow-empty::
-	默认情况下，对空提交的偷取会失败，表明需要明确调用 `git commit --allow-empty`。这个选项覆盖了这一行为，允许在偷取时自动保留空的提交。注意，当 "--ff" 生效时，即使没有这个选项，符合 “快速合并” 要求的空提交也会被保留。 还要注意的是，使用这个选项只保留最初为空的提交（即提交与它的父级记录在同一目录苏上）。 由于之前的提交而导致的空的提交会被放弃。 如果要强制包含这些提交，请使用 `--keep-redundant-commits`。
+	By default, cherry-picking an empty commit will fail, indicating that an explicit invocation of `git commit --allow-empty` is required. This option overrides that behavior, allowing empty commits to be preserved automatically in a cherry-pick. Note that when "--ff" is in effect, empty commits that meet the "fast-forward" requirement will be kept even without this option. Note also, that use of this option only keeps commits that were initially empty (i.e. the commit recorded the same tree as its parent). Commits which are made empty due to a previous commit will cause the cherry-pick to fail. To force the inclusion of those commits, use `--empty=keep`.
 
 --allow-empty-message::
 	默认情况下，对空信息的提交进行拣选会失败。 这个选项覆盖了这一行为，允许对空信息的提交进行拣选。
 
+--empty=(drop|keep|stop)::
+	如何处理被挑拣的提交与当前历史中已有的更改重复的情况。
++
+--
+`drop`;;
+	这个提交会被丢弃。
+`keep`;;
+	这个提交会被保留。暗含 `--allow-empty` 选项。
+`stop`;;
+	当提交被应用时，挑拣操作将停止，允许您检查该提交。这是默认行为。
+--
++
+请注意，`--empty=drop` 和 `--empty=stop` 仅指定如何处理最初不是空的提交，而是由于之前的提交而变为空的情况。除非指定了 `--empty=keep` 或 `--allow-empty` 选项，否则最初就是空的提交仍然会导致挑拣操作失败。
++
+
 --keep-redundant-commits::
-	如果被摘取的提交与当前历史中已有的提交重复，它将变成空的。 默认情况下，这些多余的提交会导致 `cherry-pick` 停止，以便用户能够检查提交。这个选项覆盖了这一行为，并创建一个空的提交对象。暗含 `--allow-empty`。
+	Deprecated synonym for `--empty=keep`.
 
 --strategy=<策略>::
 	使用给定的合并策略。 应该只使用一次。 详见 linkgit:git-merge[1] 中的合并策略部分。

@@ -19,7 +19,7 @@ DESCRIÇÃO
 ---------
 Este comando fornece uma maneira de interagir com os repositórios p4 utilizando o Git.
 
-Crie um novo repositório Git a partir de um repositório p4 já existente utilizando o comando 'git p4 clone', informando a ele um ou mais caminhos para o depósito p4. Incorpore os novos commits das alterações do p4 com o comando 'git p4 sync'. O comando 'sync' também é utilizado para incluir as novas ramificações vindas dos outros caminhos do depósito p4. Envie as alterações do Git de volta para o p4 utilizando o comando 'git p4 submit'. O comando 'git p4 rebase' faz uma sincronização a mais e reconstrói o ramo atual no ramo remoto p4 já atualizado.
+Crie um novo repositório Git a partir de um repositório p4 já existente usando o comando 'git p4 clone', informando a ele um ou mais caminhos do depósito p4. Incorpora novas alterações nos commits p4 com o comando 'git p4 sync'. O comando 'sync' também é usado para incluir novas ramificações de outros caminhos do depósito do p4. Submeta as alterações do Git de volta ao p4 usando o comando 'git p4 submit'. O comando 'git p4 rebase' faz uma sincronização e faz o "rebase" do ramo atual para o ramo remoto p4 atualizado.
 
 
 EXEMPLOS
@@ -89,16 +89,16 @@ $ cd repo-git
 $ git init
 $ git p4 sync //path/in/your/perforce/depot
 ------------
-Faz a importação do depósito informado para 'refs/remotes/p4/master' num repositório Git já existente. A opção `--branch` pode ser utilizada para definir um ramo diferente que será utilizado no conteúdo do p4.
+Isso importa o depósito especificado para 'refs/remotes/p4/master' num repositório Git já existente. A opção `--branch` pode ser usada para especificar uma ramificação diferente a ser usada para o conteúdo do p4.
 
-Caso um repositório Git inclua as ramificações 'refs/remotes/origin/p4', elas serão buscadas e consultadas primeiro durante um comando 'git p4 sync'. Como a importação direta do p4 é consideravelmente mais lento do que extrair as alterações de um ramo Git remoto, pode ser útil num ambiente com vários desenvolvedores.
+Se um repositório Git incluir as ramificações 'refs/remotes/origin/p4', elas serão obtidas e consultadas primeiro durante a execução do comando 'git p4 sync'. Como a importação direta do p4 é consideravelmente mais lenta do que a extração de alterações de um Git remoto, isso pode ser útil num ambiente com vários desenvolvedores.
 
-Caso haja várias ramificações, ao executar o comando 'git p4 sync' utilizará de forma automática o algoritmo "DETECÇÃO DO RAMO" para tentar particionar as novas alterações na ramificação correta. Pode ser substituído pela opção `--branch` para definir apenas um único ramo que será atualizado.
+Se houver várias ramificações, o comando 'git p4 sync' usará automaticamente o algoritmo "BRANCH DETECTION" para tentar dividir as novas alterações na ramificação correta. Isso pode ser substituído pela opção `--branch` especificando apenas um único ramo para ser atualizado.
 
 
 Rebase
 ~~~~~~
-Um padrão de trabalho comum é buscar as alterações mais recentes do depósito p4 e mesclá-las com os commits que não foram alterados localmente. Frequentemente, o repositório p4 é o local definitivo para todo o código, portanto, um fluxo de trabalho de reconstrução da fundação faz todo o sentido. Este comando executa o comando 'git p4 sync' seguido do comando 'git rebase' para mover os commits locais no topo das alterações atualizadas do p4.
+Um padrão de trabalho comum é obter as alterações mais recentes do depósito p4 e mesclá-las com as alterações locais onde o commit ainda não foi feito. Muitas vezes, o repositório p4 é o local definitivo para todo o código, portanto, um fluxo de trabalho do "rebase" faz sentido. Esse comando executa o comando 'git p4 sync' seguido do 'git rebase' para mover os commits locais no topo das alterações atualizadas do p4.
 ------------
 $ git p4 rebase
 ------------
@@ -106,7 +106,7 @@ $ git p4 rebase
 
 Envio
 ~~~~~
-O envio das alterações de um repositório Git de volta para o repositório p4, requer um espaço de trabalho do cliente p4 separado. Isso deve ser definido utilizando a variável de ambiente `P4CLIENT` ou a variável de configuração Git 'git-p4.client'. O cliente p4 deve existir, porém a raiz do cliente será criada e preenchida caso ainda não exista.
+O envio das alterações de um repositório Git de volta ao repositório p4 requer um espaço de trabalho separado do cliente p4. Isso deve ser especificado usando a variável de ambiente `P4CLIENT` ou a variável de configuração do Git 'git-p4.client'. O cliente p4 deve existir, mas a raiz do cliente será criada e preenchida se ainda não existir.
 
 Para enviar todas as alterações que estão no ramo Git atual, mas não no ramo 'p4/master', utilize:
 ------------
@@ -126,7 +126,7 @@ $ git p4 submit --commit <sha1..sha1>
 
 A referência upstream geralmente é 'refs/remotes/p4/master', mas pode ser substituída utilizando a opção da linha de comando `--origin=`.
 
-As alterações no p4 serão criadas à medida que o usuário utilize o comando 'git p4 submit'. A opção `--preserve-user` fará com que a propriedade seja modificada de acordo com o autor do commit. Esta opção requer privilégios de administrador em p4, que podem ser concedidos utilizando 'p4 protect'.
+As alterações p4 serão criadas assim que o usuário invocar o comando 'git p4 submit'. A opção `--preserve-user` fará com que a propriedade seja modificada de acordo com o autor do commit. Essa opção requer privilégios de administrador no p4, que podem ser concedidos usando 'p4 protect'.
 
 Para arquivar as alterações em vez de enviá-las, utilize `--shelve` e `--update-shelve`:
 
@@ -140,7 +140,7 @@ Unshelve
 ~~~~~~~~
 O desarquivamento pega uma lista de alterações P4 arquivada e produz o commit equivalente com o git no ramo refs/remotes/p4-unshelved/<changelist>.
 
-O commit do git é criado com relação à revisão da origem atual (a predefinição retorna para HEAD). Um parente de um commit é criado com base na origem e em seguida, o commit desarquivado é criado com base nisso.
+O commit do git é criado em relação à revisão de origem atual (a predefinição é `HEAD`). Um commit principal é criado com base na origem e, em seguida, o commit armazenado é criado com base nele.
 
 A revisão da origem pode ser alterada com a opção "--origin".
 
@@ -164,7 +164,7 @@ Opções gerais
 Todos os comandos, exceto o clone, aceitam estas opções.
 
 --git-dir <dir>::
-	Define a variável de ambiente `GIT_DIR`. Consulte linkgit:git[1].
+	Defina a variável de ambiente `GIT_DIR`. Consulte linkgit:git[1].
 
 -v::
 --verbose::
@@ -175,9 +175,9 @@ Opções de sincronização
 Estas opções podem ser utilizadas no 'clone' inicial, bem como nas operações subsequentes de 'sincronização'.
 
 --branch <ref>::
-	Importe as alterações para o <ref> em vez do 'refs/remotes/p4/master'. Caso <ref> começar com 'refs/', será utilizado como está. Caso contrário, se não iniciar com 'p4/', esse prefixo será adicionado.
+	Importar as alterações para `<ref>` em vez de 'refs/remotes/p4/master'. Se `<ref>` começar com 'refs/', ele será usado como está. Caso contrário, se não começar com 'p4/', esse prefixo será adicionado.
 +
-É predefinido que um <ref> que não comece com 'refs/' seja tratado como o nome de um ramo monitorado remotamente (em 'refs/remotes/'). Esse comportamento pode ser alterado utilizando a opção `--import-local`.
+Por padrão, uma `<ref>` que não comece com 'refs/' é tratada como o nome de uma ramificação de rastreamento remoto (em 'refs/remotes/'). Esse comportamento pode ser alterado usando a opção `--import-local`.
 +
 A predefinição do <ref> é "master".
 +
@@ -189,10 +189,10 @@ Este exemplo importa um novo "p4/proj2" remoto para um repositório Git já exis
 ----
 
 --detect-branches::
-	Utilize o algoritmo de detecção do ramo para encontrar os novos caminhos no 'p4'. Está documentado abaixo em "DETECÇÃO DO RAMO".
+	Use o algoritmo de detecção de ramificação para encontrar novos caminhos em p4. Ele está documentado abaixo em "DETECÇÃO DO RAMO".
 
 --changesfile <arquivo>::
-	Importe exatamente os números da alteração p4 listados no 'arquivo', um por linha. Normalmente, o 'git p4' inspeciona a condição atual do repositório p4 e detecta quais as alterações que ele deve importar.
+	Importe exatamente os números de alteração do p4 listados em 'file', um por linha. Normalmente, o 'git p4' inspeciona o estado atual do repositório p4 e detecta as alterações que deve importar.
 
 --silent::
 	Não exiba nenhuma informação do progresso.
@@ -204,7 +204,7 @@ Este exemplo importa um novo "p4/proj2" remoto para um repositório Git já exis
 	Importe os rótulos do 'p4' para o Git.
 
 --import-local::
-	É predefinido que os ramos 'p4' sejam armazenadas em 'refs/remotes/p4/', onde serão tratadas como ramificações monitoradas remotamente pelo linkgit:git-branch[1] e outros comandos. Esta opção coloca as ramificações 'p4' no 'refs/heads/p4/'. Observe que as futuras operações de sincronização tam bém devem especificar a opção `--import-local` para que eles possam encontrar as ramificações 'p4' em 'refs/heads'.
+	É predefinido que as ramificações p4 sejam armazenadas em 'refs/remotes/p4/', onde serão tratadas como ramificações de rastreamento remoto pelo linkgit:git-branch[1] e outros comandos. Em vez disso, essa opção coloca as ramificações p4 em 'refs/heads/p4/'. Observe que as futuras operações de sincronização também devem especificar a opção `--import-local` para que possam encontrar as ramificações do p4 em 'refs/heads'.
 
 --max-changes <n>::
 	Importe no máximo 'n' alterações, em vez de todo o intervalo de alterações incluído no especificador da revisão informado. Um uso comum seria utilizar '@all' como especificador da revisão, porém depois utilizar a opção '--max-changes 1000' para importar apenas as últimas 1000 revisões, em vez de todo o histórico.
@@ -213,10 +213,10 @@ Este exemplo importa um novo "p4/proj2" remoto para um repositório Git já exis
 	O tamanho do bloco interno que será utilizado ao converter um especificador da revisão como '@all' numa lista com a quantidade específica de alteração. Em vez de utilizar uma única chamada para 'p4 changes' visando encontrar a lista completa das alterações para a conversão, há uma sequência de chamadas para 'p4 changes -m', cada uma das quais solicita um bloco de alterações com um tamanho definido. O tamanho padrão do bloco é 500, o que geralmente deve ser o suficiente.
 
 --keep-path::
-	É predefinido para o Git, que seja removido todo o caminho do depósito no mapeamento do caminho dos nomes dos arquivos do depósito p4. Com esta opção, o caminho completo do depósito p4 é mantido no Git. Por exemplo, o caminho '//depot/main/foo/bar.c', quando for importado de '//depot/main/', se torne 'foo/bar.c'. Com `--keep-path`, o caminho do Git fica 'depot/main/foo/bar.c'.
+	É predefinido que o mapeamento dos nomes dos arquivos do caminho do depósito p4 para o Git, envolve a remoção de todo o caminho do depósito. Com esta opção, o caminho completo do depósito p4 é mantido no Git. Por exemplo, o caminho '//depot/main/foo/bar.c', quando for importado de '//depot/main/', torna-se 'foo/bar.c'. Com a opção `--keep-path`, o caminho do Git se torna, 'depot/main/foo/bar.c'.
 
 --use-client-spec::
-	Use uma especificação do cliente para encontrar a lista dos arquivos interessantes no p4. Consulte a seção "CLIENT SPEC" abaixo.
+	Use uma especificação de cliente para encontrar a lista de arquivos interessantes no p4. Consulte a seção "ESPECIFICAÇÃO DO CLIENTE" abaixo.
 
 -/ <caminho>::
 	Exclua os caminhos selecionados do depósito durante a clonagem ou sincronização.
@@ -226,23 +226,23 @@ Opções de clonagem
 Estas opções podem ser utilizadas num 'clone' inicial, juntamente com as opções de 'sincronização' descritas acima.
 
 --destination <diretório>::
-	Onde criar o repositório Git. Caso não seja utilizado, o último componente no depósito p4 é utilizado para criar um novo diretório.
+	Onde criar o repositório Git. Se não for informado, o último componente no caminho do depósito do p4 será usado para criar um novo diretório.
 
 --bare::
-	Faça uma clonagem simples. Consulte linkgit:git-clone[1].
+	Fazendo uma clonagem simples. Consulte linkgit:git-clone[1].
 
 Opções de envio
 ~~~~~~~~~~~~~~~
 Estas opções podem ser utilizadas para modificar o comportamento do 'git p4 submit'.
 
 --origin <commit>::
-	Localização upstream a partir de onde os commits são identificados para envio ao 'p4'. É predefinido que este é o commit 'p4' mais recente acessível a partir do `HEAD`.
+	O local upstream a partir de onde os commits são identificados para envio ao p4. É predefinido que este é o commit p4 mais recente acessível a partir do `HEAD`.
 
 -M::
-	Detecte as renomeações. Consulte linkgit:git-diff[1]. As renomeações serão representadas em p4 utilizando operações 'move' de forma explicita. Não há opção correspondente para detectar cópias, no entanto há variáveis tanto para mover como copiar.
+	Detecte as renomeações. Consulte o comando linkgit:git-diff[1]. Os renomeamentos serão representados no p4 usando operações explícitas de "mover". Não há opção correspondente para detectar cópias, mas há variáveis para movimentos e para cópias.
 
 --preserve-user::
-	Re-escreva as alterações no 'p4' antes de enviá-lo ao 'p4' Esta opção requer privilégios de administração 'p4'.
+	Reautorize as alterações do p4 antes de enviá-las ao p4. Essa opção requer privilégios de administrador do p4.
 
 --export-labels::
 	Exporte as tags do Git como etiquetas 'p4'. As tags encontradas no Git são aplicadas ao diretório de trabalho do 'perforce'.
@@ -252,19 +252,19 @@ Estas opções podem ser utilizadas para modificar o comportamento do 'git p4 su
 	Mostre apenas quais os commits seriam enviados ao 'p4'; não mude de condição no Git ou no 'p4'.
 
 --prepare-p4-only::
-	Aplique um commit ao espaço de trabalho 'p4', abrindo, adicionando e excluindo os arquivos no 'p4' como para uma operação normal de envio. Não emita o "p4 submit" final, mas exiba uma mensagem sobre como enviar manualmente ou como reverter. Esta opção sempre é interrompida após o primeiro commit (mais antigo). As tags Git não são exportadas para o 'p4'.
+	Aplique um commit ao espaço de trabalho do p4, abrindo, adicionando e excluindo arquivos no p4 como numa operação normal de envio. Não emita o "p4 submit" final, mas imprima uma mensagem sobre como enviar manualmente ou de como reverter. Esta opção sempre é interrompida após o primeiro commit (mais antigo). As etiquetas Git não são exportadas para o p4.
 
 --shelve::
-	Em vez de enviar, crie uma série de listas de alterações que foram arquivadas. Depois de criar cada prateleira, os arquivos relevantes são revertidos/excluídos. Caso tenha vários commits pendentes, várias prateleiras serão criadas.
+	Em vez de enviar, crie o armazenamento de uma série de listas de alterações. Após criar cada espaço de armazenamento, os arquivos relevantes são revertidos/excluídos. Se você tiver vários commits pendentes, serão criados vários espaços de armazenamento.
 
 --update-shelve CHANGELIST::
 	Atualize uma lista de alterações existentes que foram arquivadas com este commit. Implica no uso da opção `--shelve`. Repita o procedimento para as várias listas de alterações que foram arquivadas.
 
 --conflict=(ask|skip|quit)::
-	Podem ocorrer conflitos durante a aplicação de um commit ao 'p4'. Quando isso acontece, o comportamento predefinido ("ask") é perguntar se você deve ignorar este commit e continuar ou encerrar. Esta opção pode ser utilizada para ignorar o prompt, fazendo com que os commits conflitantes sejam ignorados automaticamente ou pare de tentar aplicar os commits sem nenhum alerta.
+	Podem ocorrer conflitos ao aplicar um commit ao p4. Quando isso acontece, o comportamento predefinido ("ask") é lhe perguntar se você quer pular este commit e continuar ou encerrar. Essa opção pode ser usada para ignorar o aviso, fazendo com que os commits conflitantes sejam automaticamente ignorados, ou para parar de tentar aplicar os commits, sem aviso.
 
 --branch <ramo>::
-	Após o envio, sincronize esta ramificação informada em vez da predefinição 'p4/master'. Consulte a seção "Opções de sincronização" acima para obter mais informações.
+	Após o envio, sincronize este ramo nomeado em vez do 'p4/master' predefinido. Para mais informações consulte a seção "Opções de sincronização" acima.
 
 --commit (<sha1>|<sha1>..<sha1>)::
     Envie apenas o commit ou o intervalo dos commits informados, em vez da lista completa de alterações que estão no ramo Git atual.
@@ -281,14 +281,14 @@ Ganchos para envio
 p4-pre-submit
 ~~~~~~~~~~~~~
 
-O gancho `p4-pre-submit` é executado caso exista e seja executável. O gancho não aceita os parâmetros e nada da entrada padrão. Encerrando com uma condição diferente de zero deste script impede a execução do `git-p4 submit`. Pode ser contornada com a opção da linha de comando `--no-verify`.
+O gancho `p4-pre-submit` é executado se existir e for executável. O gancho não recebe parâmetros e nada da entrada predefinida. Ao encerrar com uma condição de encerramento diferente de zero desse script impede que o comando `git-p4 submit` seja iniciado. Ele pode ser ignorado com a opção de linha de comando `--no-verify`.
 
 Um cenário para a sua utilização é executar os testes da unidade no gancho.
 
 p4-prepare-changelist
 ~~~~~~~~~~~~~~~~~~~~~
 
-O gancho `p4-prepare-changelist` é executado bem depois de preparar a mensagem da lista de alterações predefinida e antes que o editor seja iniciado. É necessário um único parâmetro, o nome do arquivo que contenha o texto da lista das alterações. Encerrando com uma condição diferente de zero, faz com que o processo seja interrompido.
+O gancho `p4-prepare-changelist` é executado logo após a preparação da mensagem predefinida da lista de alterações e antes do editor ser iniciado. Ele recebe um parâmetro, o nome do arquivo que contém o texto da lista de alterações. Ao encerrar o script com um status diferente de zero fará com que o processo seja encerrado.
 
 O objetivo do gancho é editar o arquivo de mensagem no local, não sendo suprimido pela opção `--no-verify`. Este gancho é chamado mesmo se a opção `--prepare-p4-only` estivesse definida.
 
@@ -317,7 +317,7 @@ Desfazer as opções
 ~~~~~~~~~~~~~~~~~~
 
 --origin::
-    Define o 'git refspec' onde a lista de alterações 'P4' que foi arquivada é comparada. A predefinição retorna para 'p4/master'.
+    Define o 'git refspec' onde a lista de alterações P4 arquivada é comparada. A predefinição é 'p4/master'.
 
 SINTAXE DO CAMINHO DO DEPÓSITO
 ------------------------------
@@ -333,25 +333,25 @@ O argumento do caminho do depósito p4 para o comando 'git p4 sync' e o 'git p4 
     Importe apenas as alterações entre '1' a '6'.
 
 "//depot/proj1@all //depot/proj2@all"::
-    Importe todas as alterações dos dois caminhos do depósito informados para um único repositório. Somente os arquivos abaixo destes diretórios estão incluídos. Não há um subdiretório no Git para cada "proj1" e "proj2". Você deve utilizar a opção `--destination` ao informar mais de um caminho do depósito. O especificador de revisão deve ser definido de forma idêntica em cada caminho do depósito. Caso haja os arquivos com o mesmo nome nos caminhos do depósito, o caminho com a versão atualizada mais recente do arquivo é o que irá aparecer no Git.
+    Importe todas as alterações de ambos os caminhos de depósito nomeados num único repositório. Somente os arquivos abaixo desses diretórios são incluídos. Não há um subdiretório no Git para cada "proj1" e "proj2". Você deve usar a opção `--destination` ao especificar mais de um caminho para o depósito. A opção da revisão deve ser informado de forma idêntica em cada caminho para o depósito. Se houver arquivos nos caminhos do depósito com o mesmo nome, o caminho com a versão atualizada mais recente do arquivo é o que aparece no Git.
 
 Consulte 'revisões de ajuda p4' para obter a sintaxe completa dos especificadores da revisão p4.
 
 
 ESPECIFICAÇÃO DO CLIENTE
 ------------------------
-A definição do cliente p4 é mantida com o comando 'p4 client' e contém, entre os outros campos, uma visualização que define como o depósito é mapeado no repositório do cliente. Os comandos 'clone' e 'sync' podem consultar a especificação do cliente quando receber a opção `--use-client-spec` ou quando a variável `useClientSpec` for verdadeira. Após o 'git p4 clone', a variável `useClientSpec` é automaticamente definida no arquivo de configuração do repositório. Isso permite que futuros comandos `git p4 submit` funcionem corretamente; o comando 'submit' examina apenas a variável e não possui uma opção na linha de comando.
+A especificação do cliente p4 é mantida com o comando 'p4 client' e contém, entre outros campos, uma visualização que especifica como o depósito é mapeado no repositório do cliente. Os comandos 'clone' e 'sync' podem consultar a especificação do cliente quando a opção `--use-client-spec` é usada ou quando a variável 'useClientSpec' é verdadeira. Após o 'git p4 clone', a variável 'useClientSpec' é definida automaticamente no arquivo de configuração do repositório. Isso permite que os futuros comandos 'git p4 submit' funcionem corretamente; o comando 'submit' olha apenas para a variável e não tem uma opção de linha de comando.
 
-A sintaxe completa de uma visualização p4 está documentada em 'p4 help views'. O comando 'git p4' conhece apenas um subconjunto da sintaxe de visualização. Ele compreende os mapeamentos das várias linhas, sobreposições com '+', exclusões com '-' e as aspas duplas ao redor do espaço. Dos possíveis curingas, o 'git p4' manipula apenas '...' e somente quando está no final do caminho. O 'git p4' irá reclamará caso encontre um curinga sem tratamento.
+A sintaxe completa de uma visualização p4 está documentada em 'p4 help views'. O comando 'git p4' conhece apenas um subconjunto da sintaxe da visualização. Ele entende mapeamentos de várias linhas, sobreposições com '+', exclusões com '-' e aspas duplas ao redor de espaços em branco. Dos curingas possíveis, o comando 'git p4' só lida com '...', e somente quando ele está no final do caminho. O comando 'git p4' reclamará ao se deparar com um curinga não manipulado.
 
-Existem bugs na implementação dos mapeamentos da sobreposição. Caso vários caminhos do depósito mapearem as sobreposições para o mesmo local no repositório, 'git p4' poderá escolher o caminho errado. Isso é difícil de resolver sem dedicar um cliente específico apenas ao 'git p4'.
+Existem bugs na implementação dos mapeamentos da sobreposição. Se vários caminhos de depósito forem mapeados por meio de sobreposições para o mesmo local no repositório, o comando 'git p4' poderá escolher o caminho errado. Isso é difícil de resolver sem dedicar uma especificação de cliente apenas para o 'git p4'.
 
-O nome do cliente pode ser atribuído ao 'git p4' de várias maneiras. A variável 'git-p4.client' tem precedência, caso exista. Caso contrário, são utilizados os mecanismos p4 tradicionais para determinar o cliente utilizado: a variável de ambiente `P4CLIENT`, um arquivo referenciado por `P4CONFIG` ou o nome do host local.
+O nome do cliente pode ser fornecido ao 'git p4' de várias maneiras. A variável 'git-p4.client' tem precedência caso ele exista. Caso contrário, serão usados os mecanismos normais do p4 para determinar o cliente: a variável de ambiente `P4CLIENT`, um arquivo referenciado por `P4CONFIG` ou o nome do host local.
 
 
 DETECÇÃO DO RAMO
 ----------------
-O P4 não tem o mesmo conceito de ramificação que o Git. Em vez disso, o p4 organiza o seu conteúdo como uma árvore de diretórios, onde por convenção de diferentes ramificações lógicas que ficam nos diferentes locais da árvore. O comando 'p4 branch' é usado para manter os mapeamentos entre as diferentes áreas da árvore e indicar o conteúdo relacionado. O 'git p4' pode utilizar esses mapeamentos para determinar os relacionamentos dos ramos.
+O P4 não tem o mesmo conceito de ramificação que o Git. Em vez disso, o p4 organiza seu conteúdo como uma árvore de diretórios, onde, por convenção, diferentes ramificações lógicas estão em diferentes locais da árvore. O comando 'p4 branch' é usado para manter mapeamentos entre diferentes áreas da árvore e indicar o conteúdo relacionado. O comando 'git p4' pode usar esses mapeamentos para determinar as relações de ramificação.
 
 Caso você possua um repositório onde todas as ramificações de interesse existam como subdiretórios de um único caminho do depósito, é possível utilizar o comando `--detect-branches` durante a clonagem ou sincronização para que o comando 'git p4' encontre automaticamente os subdiretórios p4 e gere-os como os ramos no Git.
 
@@ -372,7 +372,7 @@ git p4 clone --detect-branches //depot@all
 ----
 produz uma ramificação separada em 'refs/remotes/p4/' para '//depot/main', chamado 'master', e uma para '//depot/branch1' chamada 'depot/branch1'.
 
-No entanto, não é necessário criar as ramificações p4 para poder utilizá-las como ramificações. Como é difícil inferir nos relacionamentos da ramificação de forma automática, uma configuração Git 'git-p4.branchList' pode ser usada para identificar de forma explicita os relacionamentos da ramificação. É uma lista de pares "source:destination", como uma especificação p4 simples do ramo onde "origem" e "destino" são os elementos do caminho no repositório p4. O exemplo acima se baseou na presença do ramo p4. Sem os ramos p4, o mesmo resultado ocorrerá com:
+No entanto, não é necessário criar ramificações no p4 para poder usá-las como ramificações. Como é difícil inferir nas relações da ramificação automaticamente, uma definição de configuração 'git-p4.branchList' do Git pode ser usada para identificar explicitamente as relações da ramificação. É uma lista de pares "source:destination", como uma especificação simples de ramificação p4, onde "source" e "destination" são os elementos de caminho no repositório p4. O exemplo acima se baseou na presença da ramificação p4. Sem as ramificações p4, o mesmo resultado ocorrerá com:
 ----
 git init depot
 cd depot
@@ -383,43 +383,43 @@ git p4 clone --detect-branches //depot@all .
 
 DESEMPENHO
 ----------
-O mecanismo de importação rápida usado pelo 'git p4' cria um arquivo de pacote para cada chamada do 'git p4 sync'. Normalmente, a compactação de lixo do Git (linkgit:git-gc[1]) as compacta de forma automática com menos arquivos no pacote, porém a chamada explícita do comando 'git repack -adf' pode ajudar a melhorar o desempenho.
+O mecanismo de importação rápida usado pelo 'git p4' cria um arquivo de pacote para cada invocação do "git p4 sync". Normalmente, a compactação de lixo do Git (linkgit:git-gc[1]) compacta automaticamente estes arquivos em menos arquivos do pacote, mas a invocação explícita de 'git repack -adf' pode melhorar o desempenho.
 
 
 VARIÁVEIS DE CONFIGURAÇÃO
 -------------------------
-As seguintes configurações podem ser usadas para alterar o comportamento do 'git p4'. Todos eles estão na seção 'git-p4'.
+As seguintes definições de configuração podem ser usadas para alterar o comportamento do comando 'git p4'. Todos eles estão na seção 'git-p4'.
 
 Variáveis gerais
 ~~~~~~~~~~~~~~~~
 git-p4.user::
-	Usuário especificado como uma opção para todos os comandos p4, com '-u <usuário>'. A variável de ambiente `P4USER` pode ser utilizada.
+	Usuário especificado como uma opção para todos os comandos p4, com '-u <usuário>'. Em vez disso, pode ser usada a variável de ambiente `P4USER`.
 
 git-p4.password::
-	Uma senha definida como uma opção para todos os comandos p4, com '-P <senha>'. A variável de ambiente `P4PASS` pode ser utilizada.
+	A senha especificada como uma opção para todos os comandos p4, com '-P <senha>'. Em vez disso, pode ser usada a variável de ambiente `P4PASS`.
 
 git-p4.port::
-	Uma porta definida como uma opção para todos os comandos p4, com '-p <porta>'. A variável de ambiente `P4PORT` pode ser utilizada.
+	Porta especificada como uma opção para todos os comandos p4, com '-p <porta>'. Em vez disso, pode ser usada a variável de ambiente `P4PORT`.
 
 git-p4.host::
-	O host definido como uma opção para todos os comandos p4, com '-h <host>'. A variável de ambiente `P4HOST` pode ser utilizada.
+	O host é especificado como uma opção para todos os comandos p4, com '-h <host>'. Em vez disso, pode ser usada a variável de ambiente `P4HOST`.
 
 git-p4.client::
 	Específico do cliente como uma opção para todos os comandos p4, com '-c <cliente>', incluindo a definição do cliente.
 
 git-p4.retries::
-	Define a quantidade de vezes para tentar novamente um comando p4 (principalmente, 'p4 sync') caso a rede atinja o tempo limite. O valor predefinido é 3. Define o valor como 0 para desativar as tentativas ou se a sua versão 'p4' não for compatível com tentativas (anteriores a versão 2012.2).
+	Especifica o número de vezes para tentar novamente um comando p4 (notadamente, 'p4 sync') se a rede atingir o tempo limite. O valor predefinido é 3. Defina o valor como 0 para desativar as tentativas ou se a sua versão do p4 não for compatível com tentativas (anterior a 2012.2).
 
 Variáveis de clonagem e sincronização
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 git-p4.syncFromOrigin::
-	Como a importação dos commits dos outros repositórios Git é muito mais rápido do que a importação através do 'p4', existe um mecanismo para encontrar as alterações 'p4' primeiro nos ramos remotos do Git. Caso existam ramos em 'refs/remote/origin/p4', elas serão buscadas e utilizada durante a sincronização a partir do 'p4'. Para desativar esse comportamento, esta variável pode ser definida como 'false'.
+	Como a importação dos commits de outros repositórios Git é muito mais rápido do que a importação do p4, existe um mecanismo para encontrar as alterações do p4 primeiro nos repositórios remotos do Git. Se houver ramificações em 'refs/remote/origin/p4', elas serão obtidas e usadas ao sincronizar a partir do p4. Essa variável pode ser definida como 'false' para desativar este comportamento.
 
 git-p4.branchUser::
-	Uma fase na detecção do ramo envolve olhar para os ramos 'p4' para encontrar os novos que serão importados. É predefinido que todas as ramificações sejam inspecionadas. Essa opção limita a pesquisa apenas àqueles pertencentes ao único usuário informado na variável.
+	Uma fase da detecção de ramificação envolve a análise das ramificações do p4 para encontrar as novas ramificações que serão importadas. É predefinido que todas as ramificações sejam inspecionadas. Esta opção limita a pesquisa apenas àqueles pertencentes ao único usuário nomeado na variável.
 
 git-p4.branchList::
-	A lista dos ramos que serão importados quando a detecção da ramificação estiver ativo. Cada entrada deve ser um par dos nomes das ramificações separados por dois pontos (:). Este exemplo declara que 'branchA' e 'branchB' foram criados a partir de 'main':
+	Lista das ramificações a serem importadas quando a detecção das ramificações estiver ativada. Cada entrada deve ser um par de nomes das ramificações separados por dois-pontos (:). Este exemplo declara que tanto o 'branchA' quanto o 'branchB' foram criados a partir de main:
 +
 -------------
 git config       git-p4.branchList main:branchA
@@ -436,19 +436,19 @@ git-p4.labelImportRegexp::
 	Apenas os rótulos 'p4' coincidentes com esta expressão regular serão importados. O valor predefinido é '[a-zA-Z0-9_\-.]+$'.
 
 git-p4.useClientSpec::
-	Define que a especificação do cliente p4 deve ser utilizada para identificar os caminhos de interesse do depósito 'p4'. Isto é o mesmo que utilizar a opção `--use-client-spec`. Consulte a seção "ESPECIFICAÇÃO DO CLIENTE" acima. Essa variável é um booleano e não o nome de um cliente 'p4'.
+	Especifique que a especificação do cliente p4 deve ser usada para identificar os caminhos do depósito p4 de interesse. Isso é equivalente a usar a opção `--use-client-spec`. Consulte a seção "ESPECIFICAÇÃO DO CLIENTE" acima. Esta variável é um booleano, não o nome de um cliente p4.
 
 git-p4.pathEncoding::
-	O 'Perforce' mantém a codificação de um caminho conforme seja informado pelo sistema operacional da origem. O Git espera que os caminhos sejam codificados como UTF-8. Utilize esta configuração para informar ao git-p4 qual a codificação que o Perforce utilizou para os caminhos. Essa codificação é utilizada para transcodificar os caminhos para UTF-8. Como exemplo, o "Perforce" no Windows geralmente utilizam "cp1252" para codificar os nomes dos caminhos. Se esta opção for passada para uma solicitação de clonagem p4, ela será mantida no novo repositório git resultante.
+	O "Perforce" mantém a codificação de um caminho conforme fornecido pelo sistema operacional de origem. O Git espera que os caminhos estejam codificados como UTF-8. Use esta configuração para informar ao git-p4 qual codificação o "Perforce" usou nos caminhos. Esta codificação é usada para transcodificar os caminhos para UTF-8. Por exemplo, o "Perforce" no Windows geralmente usa "cp1252" para codificar os nomes dos caminhos. Se esta opção for passada numa solicitação de clone p4, ela será mantida no novo repositório git resultante.
 
 git-p4.metadataDecodingStrategy::
-	O Perforce mantém a codificação das descrições de uma lista de alterações e os nomes completos dos usuários armazenados pelo cliente num determinado sistema operacional. O cliente p4v usa a codificação local do sistema operacional e, portanto, diferentes usuários podem acabar armazenando diferentes descrições da lista de alterações ou dos nomes completos dos usuários em diferentes codificações, no mesmo depósito. O Git tolera codificações inconsistentes/incorretas nas mensagens do commit e dos nomes dos autores, contudo que sejam definidos como utf-8. O git-p4 pode usar três estratégias de decodificação diferentes para lidar com a incerteza da codificação no Perforce: o 'passthrough' simplesmente passa os bytes originais do Perforce para o git, criando dados utilizáveis, mas codificados incorretamente, quando os dados do Perforce sejam codificados como algo diferente de utf- 8. O 'strict' espera que os dados do Perforce sejam codificados como utf-8 e falha na importação quando isso não for verdadeiro. O 'fallback' tenta interpretar os dados como utf-8 e, de outra forma, volta a usar uma codificação secundária - é predefinido que a codificação comum do Windows 'cp-1252' - com os maiores bytes de intervalo escapados caso a decodificação com a codificação substituta também falhe. Em python2 a estratégia predefinida é 'passthrough' por questões históricas, em python3 a predefinição é 'fallback'. Quando 'strict' for selecionado e a decodificação falhar, a mensagem de erro incentivará a alteração deste parâmetro de configuração como uma solução alternativa. Se esta opção for passada para uma solicitação de clonagem p4, ela será mantida no novo repositório git resultante.
+	O "Perforce" mantém a codificação das descrições de uma lista de alterações e dos nomes completos dos usuários, conforme vão sendo armazenados pelo cliente num determinado sistema operacional. O cliente p4v usa a codificação local do sistema operacional e, portanto, diferentes usuários podem acabar armazenando diferentes descrições de listas de alterações ou nomes completos de usuários em diferentes codificações, no mesmo depósito. O Git tolera codificações inconsistentes/incorretas nas mensagens de commit e nos nomes dos autores, mas espera que elas sejam especificadas como utf-8. O git-p4 pode usar três estratégias de decodificação diferentes para lidar com a incerteza de codificação no "Perforce": "passthrough" simplesmente passa os bytes originais do "Perforce" para o git, criando dados utilizáveis, mas incorretamente codificados, quando os dados do "Perforce" são codificados como algo diferente de utf-8. O 'strict' espera que os dados do "Perforce" sejam codificados como utf-8 e falha na importação quando isso não é verdade. O 'fallback' tenta interpretar os dados como utf-8 e, caso contrário, volta a usar uma codificação secundária - é predefinido que a codificação comum do Windows 'cp-1252' - com escape de bytes de faixa superior se a decodificação com a codificação de contingência também falhar. No python2, a estratégia padrão é 'passthrough' por motivos históricos, e no python3 a predefinição é 'fallback'. Quando 'strict' for selecionado e a decodificação falhar, a mensagem de erro indicará a alteração desse parâmetro de configuração como uma solução alternativa. Se esta opção for usada numa solicitação de clone p4, ela será mantida no novo repositório git resultante.
 
 git-p4.metadataFallbackEncoding::
 	Especifique a codificação substituta que será utilizada ao decodificar os nomes dos autores e das descrições de listas das alterações do Perforce usando a estratégia 'fallback' (consulte git-p4.metadataDecodingStrategy). A codificação substituta só será usada quando a decodificação como utf-8 falhar. Essa opção é padronizada para cp1252, uma codificação comum do Windows. Se esta opção for passada para uma solicitação de clonagem p4, ela será mantida no novo repositório git resultante.
 
 git-p4.largeFileSystem::
-	Especifique o sistema utilizado para os arquivos (binários) grandes. Observe que os sistemas dos arquivos grandes não são compatíveis o comando 'git p4 submit'. Apenas o 'Git LFS' está implementado no momento (consulte https://git-lfs.github.com/ para obter mais informações). Baixe e instale a extensão da linha de comando do 'Git LFS' para utilizar esta opção e configurá-la da seguinte maneira:
+	Especifique o sistema que é usado para arquivos grandes (binários). Observe que os sistemas de arquivos grandes não são compatíveis com o comando 'git p4 submit'. Apenas o Git LFS está implementado no momento (para mais informações consulte https://git-lfs.github.com/). Baixe e instale a extensão de linha de comando do Git LFS para usar essa opção e configure-a da seguinte maneira:
 +
 -------------
 git config       git-p4.largeFileSystem GitLFS
@@ -481,31 +481,31 @@ Um mapeamento substituirá quaisquer informações do usuário do 'P4'. Os mapea
 Envie as variáveis
 ~~~~~~~~~~~~~~~~~~
 git-p4.detectRenames::
-	Detecte as renomeações. Consulte linkgit:git-diff[1]. Pode ser 'true', 'false' ou uma pontuação conforme é o esperado pelo comando 'git diff -M'.
+	Detecte as renomeações. Consulte o comando linkgit:git-diff[1]. Isso pode ser 'true' (verdadeiro), 'false' (falso) ou uma pontuação conforme esperado pelo comando 'git diff -M'.
 
 git-p4.detectCopies::
-	Detecta cópias. Consulte linkgit:git-diff[1]. Pode ser 'true', 'false' ou uma pontuação conforme é o esperado pelo comando 'git diff -C'.
+	Detecte as cópias. Consulte o comando linkgit:git-diff[1]. Isso pode ser 'true' (verdadeiro), 'false' (falso) ou uma pontuação conforme esperado pelo comando 'git diff -C'.
 
 git-p4.detectCopiesHarder::
-	Detecte cópias com mais vigor. Consulte linkgit:git-diff[1]. A boolean.
+	Detecta cópias com mais intensidade. Consulte o comando linkgit:git-diff[1]. Um booleano.
 
 git-p4.preserveUser::
 	Ao enviar, recrie as alterações do usuário para refletir o autor do Git, independentemente de quem chame o comando 'git p4 submit'.
 
 git-p4.allowMissingP4Users::
-	Quando 'preserveUser' for verdadeiro, o comando 'git p4' normalmente é encerrado caso não consiga encontrar um autor no mapa do usuário p4. Esta configuração envia as alterações independentemente de qualquer coisa.
+	Quando 'preserveUser' for verdadeiro, o comando 'git p4' normalmente é encerrado se não conseguir encontrar um autor no mapa de usuários do p4. Esta configuração envia a alteração de qualquer maneira.
 
 git-p4.skipSubmitEdit::
-	O processo de envio chama o editor antes de cada alteração no 'p4' que será enviado. Caso esta configuração seja verdadeira, a etapa de edição será ignorada.
+	O processo de envio invoca o editor antes de cada alteração do p4 ser enviado. No entanto, se esta configuração for verdadeira, a etapa de edição será ignorada.
 
 git-p4.skipSubmitEditCheck::
-	Após editar a mensagem de alteração 'p4', o comando 'git p4' garante que a descrição realmente foi alterada observando a hora da modificação do arquivo. Esta opção desativa este teste.
+	Após editar a mensagem de alteração do p4, o 'git p4' se certifica de que a descrição foi realmente alterada, observando o tempo de modificação do arquivo. Essa opção desativa este teste.
 
 git-p4.allowSubmit::
-	É predefinido que qualquer ramo possa ser utilizado como uma fonte para uma operação 'git p4 submit'. Esta variável de configuração, se definida, permite que apenas os ramos informado sejam utilizados como as fontes para envio. Os nomes das ramificações devem ser os nomes abreviados (sem "refs/heads/") e devem ser separados por vírgulas (",") e sem espaços.
+	É predefinido que qualquer ramificação pode ser usado como uma fonte para uma operação 'git p4 submit'. Essa variável de configuração, se definida, permite que apenas as ramificações mencionadas sejam usadas como origens de envio. Os nomes das ramificações devem ser os nomes curtos (sem 'refs/heads/') e devem ser separados por vírgulas (","), sem espaços.
 
 git-p4.skipUserNameCheck::
-	Caso o usuário executando o comando 'git p4 submit' não existir no mapa do usuário p4, o 'git p4' será encerrado. Esta opção pode ser utilizada para impor o envio mesmo assim.
+	Se o usuário que estiver executando o comando 'git p4 submit' não existir no mapa de usuários do p4, o 'git p4' será encerrado. Esta opção pode ser usada para forçar o envio independentemente disso.
 
 git-p4.attemptRCSCleanup::
 	Caso seja ativado, o 'git p4 submit' tentará limpar as palavras-chave do RCS ($Header$, etc). Caso contrário, eles causariam conflitos na mesclagem e impediriam que o envio prossiga. no momento, esta opção deve ser considerada experimental.
@@ -517,7 +517,7 @@ git-p4.labelExportRegexp::
 	Somente rótulos p4 correspondentes a essa expressão regular serão exportados. O valor predefinido é '[a-zA-Z0-9_\-.]+$'.
 
 git-p4.conflict::
-	Determina o comportamento de envio quando um conflito com p4 for encontrado, conforme `--conflict`. O comportamento predefinido é 'ask'.
+	Especifica o comportamento de envio quando um conflito com o p4 é encontrado, conforme `--conflict`. O comportamento predefinido é 'ask'.
 
 git-p4.disableRebase::
     Não faça a reconstrução da árvore contra 'p4/master' após um envio.
@@ -529,8 +529,8 @@ DETALHES DA IMPLEMENTAÇÃO
 -------------------------
 * Os conjuntos de alterações 'p4' são importados utilizando a importação rápida do Git.
 * A clonagem ou a sincronização não requer um cliente 'p4'; o conteúdo do arquivo é coletado utilizando 'p4 print'.
-* O envio requer um cliente 'p4', que não esteja no mesmo local que o repositório Git. Os patches são aplicados, um de cada vez neste cliente 'p4' e enviados a partir daí.
-* Cada commit importado pelo 'git p4' possui uma linha no final da mensagem do registro log indicando a localização do depósito p4 e o número da alteração. Esta linha é utilizada pelas operações posteriores do 'git p4 sync' para saber quais foram alterações do p4 são novas.
+* O envio requer um cliente p4, que não está no mesmo local que o repositório Git. As correções são aplicados, um de cada vez, a este cliente p4 e enviados a partir dele.
+* Cada commit importado pelo comando 'git p4' tem uma linha no final da mensagem de registro indicando o local do depósito p4 e o número da alteração. Essa linha é usada por operações posteriores do comando 'git p4 sync' para saber quais as alterações do p4 são novas.
 
 GIT
 ---

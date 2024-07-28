@@ -9,9 +9,9 @@ git-send-email - 以电子邮件形式发送补丁集
 概述
 --
 [verse]
-'git send-email' [<选项>] <文件或是目录>...
-git send-email' [<选项>] <格式补丁选项>
-git send-email' --dump-aliases
+'git send-email' [<options>] (<file>|<directory>)...
+'git send-email' [<options>] <format-patch-options>
+'git send-email' --dump-aliases
 
 
 描述
@@ -94,7 +94,7 @@ git send-email' --dump-aliases
 请注意，我们不会尝试验证编码。
 
 --compose-encoding=<编码>::
-	指定撰写邮件的编码。默认值是 'sendemail.composeencoding' 的值；如果未指定，则假定为 UTF-8。
+	Specify encoding of compose message. Default is the value of the 'sendemail.composeEncoding'; if that is unspecified, UTF-8 is assumed.
 
 --transfer-encoding=(7bit|8bit|quoted-printable|base64|auto)::
 	指定通过 SMTP 发送邮件时使用的传输编码。 如仓本库中包含含有回车的文件，quoted-printable 会很有用，但会使原始补丁邮件文件（从 MUA 中保存）更难手动检查。
@@ -112,7 +112,7 @@ git send-email' --dump-aliases
 	指定用于发送电子邮件的信封发件人。 如果您的默认地址不是订阅列表的地址，这将非常有用。为了使用 'From'（发件人）地址，请将值设置为 "auto"。如果使用 sendmail 二进制文件，必须为 -f 参数设置适当的权限。 默认值是 `sendemail.envelopeSender` 配置变量的值；如果未指定，则由 MTA 选择信封发件人。
 
 --sendmail-cmd=<命令>::
-	指定发送电子邮件时要运行的命令。该命令应类似于 sendmail；具体来说，它必须支持 `-i` 选项。 如有必要，该命令将在 shell 中执行。 默认值为 `sendemail.sendmailcmd`。 如果未指定，并且 --smtp-server 也未指定，git-send-email 将在 `/usr/sbin`、`/usr/lib` 和 $PATH 中搜索 `sendmail`。
+	Specify a command to run to send the email. The command should be sendmail-like; specifically, it must support the `-i` option. The command will be executed in the shell if necessary. Default is the value of `sendemail.sendmailCmd`. If unspecified, and if --smtp-server is also unspecified, git-send-email will search for `sendmail` in `/usr/sbin`, `/usr/lib` and $PATH.
 
 --smtp-encryption=<加密>::
 	指定 SMTP 连接的加密方式。 有效值为 'ssl' 和 'tls'。任何其他值都将恢复为普通（未加密）SMTP，默认端口为 25。 尽管名称不同，但这两个值都将使用相同的 TLS 更新版本，只是由于历史原因才使用了这些名称。'ssl' 指 “隐式” 加密（有时称为 SMTPS），默认使用 465 端口。 'tls' 指 “显式” 加密（通常称为 STARTTLS），默认使用 25 端口。SMTP 服务器还可能使用其他端口，但这些端口并非默认端口。常见的 'tls' 和未加密的替代端口是 587。您需要查看供应商的文档或服务器配置，以确定自己的情况。默认值为 `sendemail.smtpEncryption`。
@@ -154,12 +154,12 @@ $ git send-email --smtp-auth="PLAIN LOGIN GSSAPI" ...
 	'--smtp-encryption ssl' 的遗留别名。
 
 --smtp-ssl-cert-path::
-	用于 SMTP SSL/TLS 证书验证的可信 CA 证书存储的路径（可以是已被 'c_rehash' 处理过的目录，也可以是包含一个或多个 PEM 格式证书的单个文件：请参阅 verify(1) -CAfile 和 -CApath，了解更多相关信息）。将其设置为空字符串可禁用证书验证。如果设置了，默认值为 `sendemail.smtpsslcertpath` 配置变量的值，否则默认值为备用 SSL 库编译后的默认值（这应该是大多数平台上的最佳选择）。
+	Path to a store of trusted CA certificates for SMTP SSL/TLS certificate validation (either a directory that has been processed by 'c_rehash', or a single file containing one or more PEM format certificates concatenated together: see verify(1) -CAfile and -CApath for more information on these). Set it to an empty string to disable certificate verification. Defaults to the value of the `sendemail.smtpSSLCertPath` configuration variable, if set, or the backing SSL library's compiled-in default otherwise (which should be the best choice on most platforms).
 
 --smtp-user=<用户>::
 	SMTP-AUTH 的用户名。默认值是 `sendemail.smtpUser` 的值；如果未指定用户名（使用 `--smtp-user` 或 `sendemail.smtpUser`），则不会尝试验证。
 
---smtp-debug=0|1::
+--smtp-debug=(0|1)::
 	启用 (1) 或禁用 (0) 调试输出。如果启用，将打印 SMTP 命令和回复。用于调试 TLS 连接和身份验证问题。
 
 --batch-size=<数值>::
@@ -171,14 +171,16 @@ $ git send-email --smtp-auth="PLAIN LOGIN GSSAPI" ...
 自动化
 ~~~
 
---no-[to|cc|bcc]::
+--no-to::
+--no-cc::
+--no-bcc::
 	清除之前通过配置设置的 "To:"（收件人）、"Cc:"（抄送人）、"Bcc:"（密送人）地址列表。
 
 --no-identity::
 	清除先前读取的通过配置设置的 `sendemail.identity` 值（如果有）。
 
 --to-cmd=<命令>::
-	指定每个补丁文件执行一次的命令，该命令应生成补丁文件特定的 "To:"（收件人）条目。 该命令的输出必须是每行一个电子邮件地址。 默认值为 'sendemail.tocmd' 配置值。
+	Specify a command to execute once per patch file which should generate patch file specific "To:" entries. Output of this command must be single email address per line. Default is the value of 'sendemail.toCmd' configuration value.
 
 --cc-cmd=<命令>::
 	指定每个补丁文件执行一次的命令，该命令应生成补丁文件特定的 "Cc:"（抄送人）条目。 该命令的输出必须是每行一个电子邮件地址。 默认值为 `sendemail.ccCmd` 配置值。
@@ -196,13 +198,13 @@ $ git send-email --smtp-auth="PLAIN LOGIN GSSAPI" ...
 	配置标识。给定后，'sendemail.<认证>' 分节中的值将优先于 'sendemail' 部分中的值。默认身份是 `sendemail.identity` 的值。
 
 --[no-]signed-off-by-cc::
-	如果设置了此选项，请将“ Signed-off-by”预告或抄送：行中的电子邮件添加到抄送列表中。默认为`sendemail.signedoffbycc`配置值的值；如果未指定，则默认为--signed-off-by-cc。
+	If this is set, add emails found in the `Signed-off-by` trailer or Cc: lines to the cc list. Default is the value of `sendemail.signedOffByCc` configuration value; if that is unspecified, default to --signed-off-by-cc.
 
 --[no-]cc-cover::
-	如果设置了此项，在系列邮件的第一个补丁（通常是封面信）的抄送标题中找到的电子邮件将被添加到每个邮件集的抄送列表中。默认值为 'sendemail.cccover' 配置值；如果未指定，默认值为 --no-cc-cover。
+	If this is set, emails found in Cc: headers in the first patch of the series (typically the cover letter) are added to the cc list for each email set. Default is the value of 'sendemail.ccCover' configuration value; if that is unspecified, default to --no-cc-cover.
 
 --[no-]to-cover::
-	如果设置了此项，在系列邮件的第一个补丁（通常是封面信函）的收件人标题中找到的邮件将被添加到每个邮件集的收件人列表中。默认值为 'sendemail.tocover' 配置值；如果未指定，默认值为--no-to-cover。
+	If this is set, emails found in To: headers in the first patch of the series (typically the cover letter) are added to the to list for each email set. Default is the value of 'sendemail.toCover' configuration value; if that is unspecified, default to --no-to-cover.
 
 --suppress-cc=<类别>::
 	指定一个额外的收件人类别，以禁止自动收件：
@@ -219,7 +221,7 @@ $ git send-email --smtp-auth="PLAIN LOGIN GSSAPI" ...
 - 'all' 会抑制所有自动抄送值。
 --
 +
-默认值是 `sendemail.suppresscc` 配置值的值，如果未指定，则在指定 --suppress-from 参数时默认为 'self'，在指定 --no-signed-off-cc 参数时默认为 'body'。
+Default is the value of `sendemail.suppressCc` configuration value; if that is unspecified, default to 'self' if --suppress-from is specified, as well as 'body' if --no-signed-off-cc is specified.
 
 --[no-]suppress-from::
 	如果设置了此项，则不会将发件人地址添加到抄送地址列表中。 默认值是 `sendemail.suppressFrom` 配置值的值，如果未指定，则默认为 --no-suppress-from 参数。
@@ -279,7 +281,7 @@ $ git send-email --smtp-auth="PLAIN LOGIN GSSAPI" ...
 ~~
 
 --dump-aliases::
-	不执行正常操作，而是从配置的别名文件中按字母顺序每行转存一个速记别名。注意，这只包括别名，不包括其扩展的电子邮件地址。 有关别名的更多信息，请参阅 'sendemail.aliasesfile'。
+	Instead of the normal operation, dump the shorthand alias names from the configured alias file(s), one per line in alphabetical order. Note that this only includes the alias name and not its expanded email addresses. See 'sendemail.aliasesFile' for more information about aliases.
 
 
 配置

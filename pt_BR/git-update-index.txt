@@ -12,7 +12,7 @@ RESUMO
 'git update-index'
 	     [--add] [--remove | --force-remove] [--replace]
 	     [--refresh] [-q] [--unmerged] [--ignore-missing]
-	     [(--cacheinfo <modo>,<objeto>,<arquivo>)...]
+	     [(--cacheinfo <mode>,<object>,<file>)...]
 	     [--chmod=(+|-)x]
 	     [--[no-]assume-unchanged]
 	     [--[no-]skip-worktree]
@@ -25,8 +25,9 @@ RESUMO
 	     [--really-refresh] [--unresolve] [--again | -g]
 	     [--info-only] [--index-info]
 	     [-z] [--stdin] [--index-version <n>]
+	     [--show-index-version]
 	     [--verbose]
-	     [--] [<arquivo>...]
+	     [--] [<file>...]
 
 DESCRIÇÃO
 ---------
@@ -39,29 +40,29 @@ A maneira como o 'git update-index' trata os arquivos mencionados pode ser alter
 OPÇÕES
 ------
 --add::
-	If a specified file isn't in the index already then it's added. Default behaviour is to ignore new files.
+	Caso um arquivo especificado ainda não esteja no índice, ele será adicionado. O comportamento predefinido é ignorar os novos arquivos.
 
 --remove::
-	If a specified file is in the index but is missing then it's removed. Default behavior is to ignore removed files.
+	Caso um arquivo especificado estiver no índice, mas estiver ausente, ele será removido. O comportamento predefinido é ignorar os arquivos removidos.
 
 --refresh::
 	Examina o índice atual e verifica se as mesclagens são necessárias ou atualizações, verificando as informações do stat().
 
 -q::
-Quiet. If --refresh finds that the index needs an update, the default behavior is to error out. This option makes 'git update-index' continue anyway.
+Silêncio. Se a opção `--refresh` descobrir que o índice precisa de uma atualização, o comportamento predefinido será gerar um erro. Esta opção faz com que o comando 'git update-index' sempre continue.
 
 --ignore-submodules::
-	Do not try to update submodules. This option is only respected when passed before --refresh.
+	Não tente atualizar os submódulos. Esta opção só é respeitada quando passada antes da opção `--refresh`.
 
 --unmerged::
-If --refresh finds unmerged changes in the index, the default behavior is to error out. This option makes 'git update-index' continue anyway.
+Se opção `--refresh` encontrar alterações não mescladas no índice, o comportamento predefinido será gerar um erro. Esta opção faz com que o comando 'git update-index' sempre continue.
 
 --ignore-missing::
 	Ignora os arquivos ausentes durante um `--refresh`
 
 --cacheinfo <modo>,<objeto>,<caminho>::
 --cacheinfo <modo> <objeto> <caminho>::
-	Directly insert the specified info into the index. For backward compatibility, you can also give these three arguments as three separate parameters, but new users are encouraged to use a single-parameter form.
+	Insere diretamente as informações especificadas no índice. Para compatibilidade com versões anteriores, também é possível usar estes três argumentos como três parâmetros separados, mas os novos usuários são incentivados a usar uma forma única de parâmetro.
 
 --index-info::
         Leia a informação do índice a partir do stdin.
@@ -70,7 +71,7 @@ If --refresh finds unmerged changes in the index, the default behavior is to err
         Defina as permissões de execução nos arquivos atualizados.
 
 --[no-]assume-unchanged::
-	When this flag is specified, the object names recorded for the paths are not updated. Instead, this option sets/unsets the "assume unchanged" bit for the paths. When the "assume unchanged" bit is on, the user promises not to change the file and allows Git to assume that the working tree file matches what is recorded in the index. If you want to change the working tree file, you need to unset the bit to tell Git. This is sometimes helpful when working with a big project on a filesystem that has a very slow lstat(2) system call (e.g. cifs).
+	Quando esta opção é especificada, os nomes registrados dos objetos para os caminhos não são atualizados. Em vez disso, esta opção define ou desativa o bit "assume unchanged" (assumir como inalterado) para os caminhos. Quando o bit "assume unchanged" (assumir como inalterado) está ativado, o usuário promete não alterar o arquivo e permite que o Git assuma que o arquivo da árvore de trabalho corresponda ao que está registrado no índice. Caso queira alterar o arquivo da árvore de trabalho, será precisa desativar o bit para informar ao Git. Isso às vezes é útil quando se trabalha com um grande projeto num sistema de arquivos que tem uma chamada de sistema lstat(2) muito lenta (cifs por exemplo).
 +
 O Git falhará (de forma elegante) caso precise modificar este arquivo no índice, quando for mesclar em um commit por exemplo; portanto, caso o arquivo assumido não monitorado seja alterado na upstream, você precisará lidar com a situação de forma manual.
 
@@ -101,21 +102,21 @@ O Git falhará (de forma elegante) caso precise modificar este arquivo no índic
 	Remova o arquivo do índice, mesmo quando o diretório ativo ainda tenha tal arquivo. (Implica no uso da opção `--remove`.)
 
 --replace::
-	By default, when a file `path` exists in the index, 'git update-index' refuses an attempt to add `path/file`. Similarly if a file `path/file` exists, a file `path` cannot be added. With --replace flag, existing entries that conflict with the entry being added are automatically removed with warning messages.
+	É predefinido que quando um arquivo `path` (caminho) existe no índice, o 'git update-index' recusa uma tentativa de adicionar `caminho/arquivo`. Da mesma maneira, se um arquivo `caminho/arquivo` existir, um arquivo `path` (caminho) não poderá ser adicionado. Com o sinalizador `--replace`, as entradas existentes que entram em conflito com a entrada que está sendo adicionada são removidas automaticamente com mensagens de aviso.
 
 --stdin::
-	Instead of taking a list of paths from the command line, read a list of paths from the standard input. Paths are separated by LF (i.e. one path per line) by default.
+	Em vez de obter uma lista dos caminhos da linha de comando, leia uma lista de caminhos da entrada predefinida. É predefinido que os caminhos sejam separados por 'LF' (ou seja, um caminho por linha).
 
 --verbose::
 	Relate o que está sendo adicionado e removido do índice.
 
 --index-version <n>::
-	Write the resulting index out in the named on-disk format version. Supported versions are 2, 3, and 4. The current default version is 2 or 3, depending on whether extra features are used, such as `git add -N`. With `--verbose`, also report the version the index file uses before and after this command.
+	Grava o índice resultante no formato da versão mencionada em disco. As versões compatíveis são '2', '3' e '4'. A versão atual é a '2' ou '3', dependendo do uso dos recursos extras, como o `git add -N`. Usando a opção `--verbose`, informe também a versão que o arquivo do índice usa antes e após este comando.
 +
-Version 4 performs a simple pathname compression that reduces index size by 30%-50% on large repositories, which results in faster load time. Git supports it since version 1.8.0, released in October 2012, and support for it was added to libgit2 in 2016 and to JGit in 2020. Older versions of this manual page called it "relatively young", but it should be considered mature technology these days.
+A versão '4' executa uma compactação simples de nome de caminho que reduz o tamanho do índice em 30% a 50% em repositórios grandes, o que resulta num tempo de carregamento mais rápido. O Git oferece suporte a ele desde a versão 1.8.0, lançada em outubro de 2012, e o suporte a ele foi adicionado ao libgit2 em 2016 e ao JGit em 2020. Versões mais antigas desta página do manual a chamavam de "relativamente nova", mas atualmente ela deve ser considerada uma tecnologia madura.
 
 --show-index-version::
-	Report the index format version used by the on-disk index file. See `--index-version` above.
+	Relata a versão do formato do índice usado pelo arquivo de índice em disco. Consulte a opção `--index-version` acima.
 
 -z::
 	Só faz algum sentido se for utilizado com `--stdin` or `--index-info`; os caminhos são separados com caracteres `NUL` em vez de `LF`.
@@ -146,7 +147,7 @@ Estas opções entram em vigor independente de quer configuração da variável 
 	Não interprete mais argumentos como opções.
 
 <arquivo>::
-	Files to act on. Note that files beginning with '.' are discarded. This includes `./file` and `dir/./file`. If you don't want this, then use cleaner names. The same applies to directories ending '/' and paths with '//'
+	Arquivos a serem processados. Observe que os arquivos que começam com "." são descartados. Isso inclui o `./file` e o `dir/./file`. Caso não queira isso, use nomes mais claros. O mesmo se aplica aos diretórios que terminam em '/' e os caminhos com '//'
 
 USANDO A OPÇÃO --REFRESH
 ------------------------
@@ -156,7 +157,7 @@ Como por exemplo, você gostaria de fazer isso após fazer um comando `git read-
 
 USANDO AS OPÇÕES --CACHEINFO OU --INFO-ONLY
 -------------------------------------------
-`--cacheinfo` is used to register a file that is not in the current working directory. This is useful for minimum-checkout merging.
+A opção `--cacheinfo` é usada para registrar um arquivo que não está no diretório atual de trabalho. Isso é útil para a verificação mínima da mesclagem.
 
 Para fingir que você tem um arquivo no caminho com modo e o sha1, use:
 
@@ -164,25 +165,25 @@ Para fingir que você tem um arquivo no caminho com modo e o sha1, use:
 $ git update-index --add --cacheinfo <modo>,<sha1>,<caminho>
 ----------------
 
-`--info-only` is used to register files without placing them in the object database. This is useful for status-only repositories.
+A opção `--info-only` é usada para registrar os arquivos sem colocá-los no banco de dados de objetos. Isso é útil para repositórios "status-only".
 
-Both `--cacheinfo` and `--info-only` behave similarly: the index is updated but the object database isn't. `--cacheinfo` is useful when the object is in the database but the file isn't available locally. `--info-only` is useful when the file is available, but you do not wish to update the object database.
+Tanto a opção `--cacheinfo` quanto a `--info-only` se comportam de maneira semelhante: o índice é atualizado, mas o banco de dados dos objetos não. A opção `--cacheinfo` é útil quando o objeto está no banco de dados, mas o arquivo não está localmente disponível. A opção `--info-only` é útil quando o arquivo está disponível, mas você não quer atualizar o banco de dados dos objetos.
 
 
 USANDO A OPÇÃO --INDEX-INFO
 ---------------------------
 
-`--index-info` is a more powerful mechanism that lets you feed multiple entry definitions from the standard input, and designed specifically for scripts. It can take inputs of three formats:
+A opção `--index-info` é um mecanismo mais avançado que permite alimentar várias definições da entrada a partir da entrada predefinida e foi projetado especificamente para scripts. Ele aceita três tipos de formatos:
 
-    . mode SP type SP sha1 TAB path
+    . O modo SP tipo SP sha1 TAB caminho
 +
 Este formato serve para colocar a saída `git ls-tree` no índice.
 
-    . mode SP sha1 SP stage TAB path
+    . O modo SP sha1 SP estágio TAB caminho
 +
 Este formato serve para colocar os estágios na ordem superior do arquivo no índice e coincide à saída do `git ls-files --stage`.
 
-    . mode SP sha1 TAB path
+    . O modo SP sha1 TAB caminho
 +
 Este formato não é mais gerado por nenhum comando Git, mas é e continuará sendo compatível através do comando `update-index --index-info`.
 
@@ -204,7 +205,7 @@ $ git update-index --index-info
 100755 8a1218a1024a212bb3db30becd860315f9f3ac52 2	frotz
 ------------
 
-The first line of the input feeds 0 as the mode to remove the path; the SHA-1 does not matter as long as it is well formatted. Then the second and third line feeds stage 1 and stage 2 entries for that path. After the above, we would end up with this:
+A primeira linha da entrada alimenta 0 como o modo para remover o caminho; o SHA-1 não importa, desde que esteja bem formatado. Em seguida, a segunda e a terceira linha alimentam as entradas do estágio 1 e do estágio 2 para este caminho. Após o procedimento acima, o resultado seria o seguinte:
 
 ------------
 $ git ls-files -s
@@ -216,13 +217,13 @@ $ git ls-files -s
 UTILIZANDO O BIT ``ASSUME UNCHANGED''
 -------------------------------------
 
-Many operations in Git depend on your filesystem to have an efficient `lstat(2)` implementation, so that `st_mtime` information for working tree files can be cheaply checked to see if the file contents have changed from the version recorded in the index file. Unfortunately, some filesystems have inefficient `lstat(2)`. If your filesystem is one of them, you can set "assume unchanged" bit to paths you have not changed to cause Git not to do this check. Note that setting this bit on a path does not mean Git will check the contents of the file to see if it has changed -- it makes Git to omit any checking and assume it has *not* changed. When you make changes to working tree files, you have to explicitly tell Git about it by dropping "assume unchanged" bit, either before or after you modify them.
+Muitas operações no Git dependem do seu sistema de arquivos para ter uma implementação eficiente do `lstat(2)`, de maneira que as informações do `st_mtime` para os arquivos da árvore de trabalho possam ser verificadas de maneira econômica para ver se o conteúdo do arquivo foi alterado em relação à versão registrada no arquivo de índice. Infelizmente, alguns sistemas de arquivos têm um `lstat(2)` ineficiente. Se o seu sistema de arquivos for um deles, você pode definir o bit "assume unchanged" para os caminhos que não foram alterados para que o Git não faça esta verificação. Observe que a configuração deste bit num caminho não significa que o Git verificará o conteúdo do arquivo para ver se ele foi alterado - ele faz com que o Git omita qualquer verificação e assuma que ele *não* foi alterado. Quando você faz alterações nos arquivos da árvore de trabalho, é necessário informar explicitamente ao Git sobre isso, eliminando o bit "assume unchanged", antes ou após a sua alteração.
 
-In order to set "assume unchanged" bit, use `--assume-unchanged` option. To unset, use `--no-assume-unchanged`. To see which files have the "assume unchanged" bit set, use `git ls-files -v` (see linkgit:git-ls-files[1]).
+Para definir o bit "assume unchanged", use a opção `--assume-unchanged`. Para remover, use `--no-assume-unchanged`. Para ver quais os arquivos têm o bit "assume unchanged" definido, use o comando `git ls-files -v` (consulte linkgit:git-ls-files[1]).
 
-The command looks at `core.ignorestat` configuration variable. When this is true, paths updated with `git update-index paths...` and paths updated with other Git commands that update both index and working tree (e.g. 'git apply --index', 'git checkout-index -u', and 'git read-tree -u') are automatically marked as "assume unchanged". Note that "assume unchanged" bit is *not* set if `git update-index --refresh` finds the working tree file matches the index (use `git update-index --really-refresh` if you want to mark them as "assume unchanged").
+O comando examina a variável de configuração `core.ignorestat`. Quando isso for verdadeiro, os caminhos atualizados com o comando `git update-index paths...` e os caminhos atualizados com outros comandos do Git que atualizam o índice e a árvore de trabalho ('git apply --index', 'git checkout-index -u' e 'git read-tree -u' por exemplo) são automaticamente marcados como "assume unchanged". Observe que o bit "assume unchanged" *não* é definido quando o comando `git update-index --refresh` encontrar o arquivo correspondente no índice da árvore de trabalho (use o comando `git update-index --really-refresh` se quiser marcá-los como "assume unchanged").
 
-Sometimes users confuse the assume-unchanged bit with the skip-worktree bit. See the final paragraph in the "Skip-worktree bit" section below for an explanation of the differences.
+Às vezes, os usuários confundem o bit "assume unchanged" com o bit "skip-worktree" (ignorar árvore de trabalho). Consulte o parágrafo final da seção "Skip-worktree bit" abaixo para obter uma explicação das diferenças.
 
 
 EXEMPLOS
@@ -269,11 +270,11 @@ O bit do Skip-worktree pode ser definido numa (longa) frase: Diga ao git para ev
 
 Note que nem todos os comandos do git prestarão atenção a este bit, e alguns, só são parcialmente compatíveis.
 
-The update-index flags and the read-tree capabilities relating to the skip-worktree bit predated the introduction of the linkgit:git-sparse-checkout[1] command, which provides a much easier way to configure and handle the skip-worktree bits. If you want to reduce your working tree to only deal with a subset of the files in the repository, we strongly encourage the use of linkgit:git-sparse-checkout[1] in preference to the low-level update-index and read-tree primitives.
+Os sinalizadores "update-index" e os recursos "read-tree" relacionados ao bit "skip-worktree" são anteriores à introdução do comando linkgit:git-sparse-checkout[1], que fornece uma maneira muito mais fácil de configurar e manipular os bits "skip-worktree". Caso queira reduzir a sua árvore de trabalho para lidar apenas com um subconjunto dos arquivos no repositório, recomendamos enfaticamente o uso do linkgit:git-sparse-checkout[1] em vez dos comandos de baixo nível 'update-index' e 'read-tree'.
 
-The primary purpose of the skip-worktree bit is to enable sparse checkouts, i.e. to have working directories with only a subset of paths present. When the skip-worktree bit is set, Git commands (such as `switch`, `pull`, `merge`) will avoid writing these files. However, these commands will sometimes write these files anyway in important cases such as conflicts during a merge or rebase. Git commands will also avoid treating the lack of such files as an intentional deletion; for example `git add -u` will not stage a deletion for these files and `git commit -a` will not make a commit deleting them either.
+O objetivo principal do bit 'skip-worktree' é permitir 'checkouts' esparsos, ou seja, ter diretórios de trabalho com apenas um subconjunto de caminhos presentes. Quando o bit 'skip-worktree' estiver definido, os comandos do Git (como o `switch`, o `pull` e o `merge`) evitarão a gravação destes arquivos. No entanto, estes comandos às vezes gravam estes arquivos de qualquer maneira em casos importantes, como conflitos durante uma mesclagem ou um rebase. Os comandos do Git também evitarão tratar a falta desses arquivos como uma exclusão intencional; por exemplo, o comando `git add -u` não fará uma exclusão desses arquivos e o comando `git commit -a` também não fará um commit para excluí-los.
 
-Although this bit looks similar to assume-unchanged bit, its goal is different. The assume-unchanged bit is for leaving the file in the working tree but having Git omit checking it for changes and presuming that the file has not been changed (though if it can determine without stat'ing the file that it has changed, it is free to record the changes). skip-worktree tells Git to ignore the absence of the file, avoid updating it when possible with commands that normally update much of the working directory (e.g. `checkout`, `switch`, `pull`, etc.), and not have its absence be recorded in commits. Note that in sparse checkouts (setup by `git sparse-checkout` or by configuring core.sparseCheckout to true), if a file is marked as skip-worktree in the index but is found in the working tree, Git will clear the skip-worktree bit for that file.
+Embora este bit seja parecido com o bit assumido e alterado, seu objetivo é diferente. O bit 'assume-unchanged' serve para deixar o arquivo na árvore de trabalho, mas fazer com que o Git omita a verificação de alterações e presuma que o arquivo não foi alterado (embora, se ele puder determinar, sem declarar o arquivo, que ele foi alterado, ele estará livre para fazer o registro das alterações). O 'skip-worktree' diz ao Git para ignorar a ausência do arquivo, evitar atualizá-lo quando possível com comandos que normalmente atualizam grande parte do diretório de trabalho (por exemplo, `checkout`, `switch`, `pull`, etc.) e não deixar que a sua ausência seja registrada nos commits. Observe que nas verificações esparsas (configuradas por `git sparse-checkout` ou configurando `core.sparseCheckout` como 'true'), se um arquivo estiver marcado como 'skip-worktree' no índice, mas for encontrado na árvore de trabalho, o Git limpará o bit 'skip-worktree' deste arquivo.
 
 ÍNDICE DIVIDIDO
 ---------------
@@ -329,22 +330,22 @@ Quando a variável de configuração `core.fsmonitor` é alterada, o monitor do 
 CONFIGURAÇÃO
 ------------
 
-The command honors `core.filemode` configuration variable. If your repository is on a filesystem whose executable bits are unreliable, this should be set to 'false' (see linkgit:git-config[1]). This causes the command to ignore differences in file modes recorded in the index and the file mode on the filesystem if they differ only on executable bit. On such an unfortunate filesystem, you may need to use 'git update-index --chmod='.
+O comando honra a variável de configuração `core.filemode`. Se o seu repositório estiver num sistema de arquivos cujos bits executáveis não são confiáveis, isso deve ser definido como 'false' (consulte linkgit:git-config[1]). Isso faz com que o comando ignore as diferenças nos modos de arquivo registrados no índice e o modo de arquivo no sistema de arquivos se eles diferirem apenas no bit executável. Num sistema de arquivos tão infeliz, talvez seja necessário usar 'git update-index --chmod='.
 
 De maneira semelhante, caso a variável de configuração `core.symlinks` esteja definida como 'false' (consulte linkgit:git-config[1]) os links simbólicos serão verificados como arquivos simples e esse comando não modificará o modo de gravação do arquivo vindo de link simbólico para um arquivo regular.
 
-The command looks at `core.ignorestat` configuration variable. See 'Using "assume unchanged" bit' section above.
+O comando examina a variável de configuração `core.ignorestat`. Consulte a seção 'Uso do bit "assuma como inalterado"' acima.
 
-The command also looks at `core.trustctime` configuration variable. It can be useful when the inode change time is regularly modified by something outside Git (file system crawlers and backup systems use ctime for marking files processed) (see linkgit:git-config[1]).
+O comando também examina a variável de configuração `core.trustctime`. Pode ser útil quando o tempo de alteração do inode é modificado regularmente por algo fora do Git (os rastreadores do sistema de arquivos e os sistemas de backup usam o ctime para marcar os arquivos processados) (consulte linkgit:git-config[1]).
 
 A extensão do cache não rastreado pode ser ativado através da configuração de variável `core.untrackedCache` (consulte linkgit:git-config[1]).
 
 OBSERVAÇÕES
 -----------
 
-Users often try to use the assume-unchanged and skip-worktree bits to tell Git to ignore changes to files that are tracked. This does not work as expected, since Git may still check working tree files against the index when performing certain operations. In general, Git does not provide a way to ignore changes to tracked files, so alternate solutions are recommended.
+Os usuários geralmente tentam usar os bits 'assume-unchanged' e 'skip-worktree' para dizer ao Git para ignorar as alterações nos arquivos que são rastreados. Isso não funciona como esperado, pois o Git ainda pode verificar os arquivos da árvore de trabalho em relação ao índice ao executar determinadas operações. Em geral, o Git não oferece uma maneira de ignorar as alterações nos arquivos rastreados, portanto, recomenda-se o uso de soluções alternativas.
 
-For example, if the file you want to change is some sort of config file, the repository can include a sample config file that can then be copied into the ignored name and modified. The repository can even include a script to treat the sample file as a template, modifying and copying it automatically.
+Por exemplo, se o arquivo que você deseja alterar for algum tipo de arquivo de configuração, o repositório poderá incluir um arquivo de configuração de amostra que poderá ser copiado para o nome ignorado e modificado. O repositório pode até incluir um script para tratar o arquivo de amostra como um modelo, modificando-o e copiando-o automaticamente.
 
 VEJA TAMBÉM
 -----------

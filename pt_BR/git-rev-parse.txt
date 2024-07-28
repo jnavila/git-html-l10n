@@ -9,12 +9,14 @@ git-rev-parse - Escolha e trabalhe os parâmetros
 RESUMO
 ------
 [verse]
-'git rev-parse' [<opções>] <args>...
+'git rev-parse' [<options>] <arg>...
 
 DESCRIÇÃO
 ---------
 
-Many Git porcelainish commands take a mixture of flags (i.e. parameters that begin with a dash '-') and parameters meant for the underlying 'git rev-list' command they use internally and flags and parameters for the other commands they use downstream of 'git rev-list'. This command is used to distinguish between them.
+Many Git porcelainish commands take a mixture of flags (i.e. parameters that begin with a dash '-') and parameters meant for the underlying 'git rev-list' command they use internally and flags and parameters for the other commands they use downstream of 'git rev-list'. The primary purpose of this command is to allow calling programs to distinguish between them. There are a few other operation modes that have nothing to do with the above "help parse command line options".
+
+Unless otherwise specified, most of the options and operation modes require you to run this command inside a git repository or a working tree that is under the control of a git repository, and will give you a fatal error otherwise.
 
 
 OPÇÕES
@@ -26,10 +28,10 @@ Modos de Operação
 Cada uma destas opções deve aparecer primeiro na linha de comando.
 
 --parseopt::
-	Utilize o comando 'git rev-parse' no modo de análise de opções (consulte a seção "PARSEOPT" abaixo).
+	Use 'git rev-parse' in option parsing mode (see PARSEOPT section below). The command in this mode can be used outside a repository or a working tree controlled by a repository.
 
 --sq-quote::
-	Utilize o comando 'git rev-parse' em modo de citação shell (consulte a seção "SQ-QUOTE" abaixo). Ao contrário da opção `--sq` abaixo, este modo apenas cita. Nada mais é feito para comandar a entrada.
+	Use 'git rev-parse' in shell quoting mode (see SQ-QUOTE section below). In contrast to the `--sq` option below, this mode only does quoting. Nothing else is done to command input. The command in this mode can be used outside a repository or a working tree controlled by a repository.
 
 As opções para `--parseopt`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -38,7 +40,7 @@ As opções para `--parseopt`
 	Apenas faz sentido no modo `--parseopt`. Informa ao analisador das opções para ecoar o primeiro `--` encontrado em vez de ignorá-lo.
 
 --stop-at-non-option::
-	Only meaningful in `--parseopt` mode. Lets the option parser stop at the first non-option argument. This can be used to parse sub-commands that take options themselves.
+	Apenas faz sentido no modo `--parseopt`. Permite que o analisador de opções pare no primeiro argumento que não seja uma opção. Isto pode ser utilizado para analisar os subcomandos que recebem as opções.
 
 --stuck-long::
 	Apenas faz sentido no modo `--parseopt`. Gere as opções em sua forma longa, caso estejam disponíveis, e com os seus argumentos bloqueados.
@@ -65,9 +67,9 @@ Opções para a Saída
 	Caso não haja nenhum parâmetro informado pelo usuário, em vez disso utilize `<arg>`.
 
 --prefix <arg>::
-	Behave as if 'git rev-parse' was invoked from the `<arg>` subdirectory of the working tree. Any relative filenames are resolved as if they are prefixed by `<arg>` and will be printed in that form.
+	Comporta-se como se o comando `git rev-parse` fosse invocado a partir do subdiretório `<arg>` da árvore de trabalho. Quaisquer nomes de arquivos relativos são resolvidos como se fossem prefixados pelo `<arg>` e serão impressos desta maneira.
 +
-This can be used to convert arguments to a command run in a subdirectory so that they can still be used after moving to the top-level of the repository. For example:
+Isso pode ser usado para converter argumentos num comando executado num subdiretório, de modo que eles ainda possam ser utilizados após a alteração para o nível mais alto do repositório. Por exemplo:
 +
 ----
 prefix=$(git rev-parse --show-prefix)
@@ -79,25 +81,25 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 --verify::
 	Verifique que exatamente um parâmetro seja informado e se pode ser transformado num SHA-1 com 20 bytes brutos, que possa ser utilizado para acessar o banco de dados do objeto. Em caso positivo, emita-o para a saída padrão; caso contrário, gere um erro.
 +
-If you want to make sure that the output actually names an object in your object database and/or can be used as a specific type of object you require, you can add the `^{type}` peeling operator to the parameter. For example, `git rev-parse "$VAR^{commit}"` will make sure `$VAR` names an existing object that is a commit-ish (i.e. a commit, or an annotated tag that points at a commit). To make sure that `$VAR` names an existing object of any type, `git rev-parse "$VAR^{object}"` can be used.
+Caso queira ter certeza que o resultado realmente nomeia um objeto em seu banco de dados de objetos e/ou pode ser usado como um tipo específico e necessário do objeto, você pode adicionar o operador `^{type}` ao parâmetro. Por exemplo, comando `git rev-parse "$VAR^{commit}"` garantirá que `$VAR` nomeie um objeto já existente que seja um "commit-ish" (ou seja, um commit ou uma etiqueta anotada que aponte para um commit). Para garantir que `$VAR` nomeie um objeto existente de qualquer tipo, é possível usar o comando `git rev-parse "$VAR^{object}"`.
 +
 Note que se você estiver verificando um nome de uma fonte não confiável, é prudente usar a opção `--end-of-options` para que o argumento relacionado ao nome não seja confundido com uma outra opção.
 
 -q::
 --quiet::
-	Only meaningful in `--verify` mode. Do not output an error message if the first argument is not a valid object name; instead exit with non-zero status silently. SHA-1s for valid object names are printed to stdout on success.
+	Apenas faz sentido no modo `--verify`. Não emita uma mensagem de erro se o primeiro argumento não for um nome de objeto válido; em vez disso, saia silenciosamente com status diferente de zero. O SHA-1 para nomes válidos dos objetos são impressos no stdout quando for bem-sucedido.
 
 --sq::
-	Usually the output is made one line per flag and parameter. This option makes output a single line, properly quoted for consumption by shell. Useful when you expect your parameter to contain whitespaces and newlines (e.g. when using pickaxe `-S` with 'git diff-{asterisk}'). In contrast to the `--sq-quote` option, the command input is still interpreted as usual.
+	Normalmente, a saída é feita numa linha por opção e por parâmetro. Esta opção torna a saída numa única linha, devidamente citada para uso do shell. Útil quando você espera que o seu parâmetro tenha espaços em branco e novas linhas (por exemplo, ao usar o pickaxe `-S` com o comando 'git diff-{asterisk}'). Em contraste com a opção `--sq-quote`, a entrada do comando ainda é interpretada como de costume.
 
---short[=length]::
+--short[=<length>]::
 	O mesmo que `--verify` porém encurta o nome do objeto para um prefixo único com pelo menos um`comprimento` determinado de caracteres. A quantidade mínima é de 4 caracteres, o valor é predefinido na variável de configuração `core.abbrev` (consulte linkgit:git-config[1]).
 
 --not::
 	Ao exibir os nomes dos objetos, prefixe-os com '{caret}' e retire o prefixo '{caret}' dos nomes dos objetos que já possuam um.
 
 --abbrev-ref[=(strict|loose)]::
-	A non-ambiguous short name of the objects name. The option core.warnAmbiguousRefs is used to select the strict abbreviation mode.
+	Um nome curto não ambíguo do nome do objeto. A opção `core.warnAmbiguousRefs` é usada para selecionar o modo de abreviação estrita.
 
 --symbolic::
 	Normalmente, os nomes dos objetos são emitidos em formato SHA-1 (com possível prefixo '{caret}'); essa opção faz com que eles sejam impressos o mais próximo possíveis da entrada original.
@@ -105,41 +107,51 @@ Note que se você estiver verificando um nome de uma fonte não confiável, é p
 --symbolic-full-name::
 	É semelhante ao `--symbolic`, porém omite a entrada que não seja uma refs (por exemplo, os nomes dos ramos ou tags; ou de uma forma explicitamente desambiguante "heads/master", quando você quer nomear a o ramo "master" quando houver uma tag com o nome "master") e mostre-os como "refnames" completos (por exemplo, "refs/heads/master").
 
+--output-object-format=(sha1|sha256|storage)::
+
+	Allow oids to be input from any object format that the current repository supports.
+
+	Specifying "sha1" translates if necessary and returns a sha1 oid.
+
+	Specifying "sha256" translates if necessary and returns a sha256 oid.
+
+	Specifying "storage" translates if necessary and returns an oid in encoded in the storage hash algorithm.
+
 Opções para os Objetos
 ~~~~~~~~~~~~~~~~~~~~~~
 
 --all::
 	Exibe todas as refs encontradas em `refs/`.
 
---branches[=pattern]::
---tags[=pattern]::
---remotes[=pattern]::
+--branches[=<padrão>]::
+--tags[=<padrão>]::
+--remotes[=<padrão>]::
 	Exibe todos as ramificações, tags ou ramificações monitoradas remotamente, respectivamente (ou seja, as refs encontradas respectivamente em `refs/heads`, `refs/tags` ou `refs/remotes`).
 +
-If a `pattern` is given, only refs matching the given shell glob are shown. If the pattern does not contain a globbing character (`?`, `*`, or `[`), it is turned into a prefix match by appending `/*`.
+Se um `pattern` for fornecido, somente as refs que correspondam a bolha do shell informado serão exibidos. Se o padrão não possuir um caractere de globbing (`?`, `*` ou `[`), ele será transformado numa correspondência do prefixo com a adição de `/*`.
 
---glob=pattern::
-	Show all refs matching the shell glob pattern `pattern`. If the pattern does not start with `refs/`, this is automatically prepended. If the pattern does not contain a globbing character (`?`, `*`, or `[`), it is turned into a prefix match by appending `/*`.
+--glob=<pattern>::
+	Mostra todas as refs que correspondem ao padrão da bolha do shell `pattern`. Se o padrão não começar com `refs/`, ele será automaticamente anexado. Se o padrão não possuir um caractere de globbing (`?`, `*` ou `[`), ele será transformado numa correspondência do prefixo com a adição de `/*`.
 
 --exclude=<glob-pattern>::
 	Não inclua as refs que coincidam com `<glob-pattern>` em que as próximas opções `--all`, `--branches`, `--tags`, `--remotes` ou `--glob` considerariam de outra forma. As repetições destas opções acumulam padrões de exclusão até a próxima opção `--all`, `--branches`, `--tags`, `--remotes` ou `--glob` (outras opções ou argumentos não limpam os padrões acumulados).
 +
-The patterns given should not begin with `refs/heads`, `refs/tags`, or `refs/remotes` when applied to `--branches`, `--tags`, or `--remotes`, respectively, and they must begin with `refs/` when applied to `--glob` or `--all`. If a trailing '/{asterisk}' is intended, it must be given explicitly.
+Os padrões informados não devem começar com `refs/heads`, `refs/tags`, ou `refs/remotes` quando aplicadas as opções `--branches`, `--tags`, ou `--remotes` respectivamente, e devem começar com `refs/` quando for aplicado ao `--glob` ou `--all`. Se a intenção for um delimitador '/{asterisk}', este deve ser utilizado de forma explicita.
 
---exclude-hidden=[fetch|receive|uploadpack]::
+--exclude-hidden=(fetch|receive|uploadpack)::
 	Não inclua refs que seriam ocultados por `git-fetch`, `git-receive-pack` ou `git-upload-pack` durante a consulta da configuração apropriada de `fetch.hideRefs`, `receive.hideRefs` ou `uploadpack.hideRefs` junto com `transfer.hideRefs` (consulte linkgit:git-config[1]). Esta opção afeta a próxima opção pseudo-ref `--all` ou `--glob` e é zerada após o processamento.
 
 --disambiguate=<prefixo>::
-	Show every object whose name begins with the given prefix. The <prefix> must be at least 4 hexadecimal digits long to avoid listing each and every object in the repository by mistake.
+	Mostra todos os objetos cujo nome começa com o prefixo informado. O <prefixo> deve ter pelo menos 4 dígitos hexadecimais para evitar a listagem de todos os objetos do repositório por engano.
 
 Opções para os Arquivos
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 --local-env-vars::
-	List the GIT_* environment variables that are local to the repository (e.g. GIT_DIR or GIT_WORK_TREE, but not GIT_EDITOR). Only the names of the variables are listed, not their value, even if they are set.
+	Liste as variáveis de ambiente GIT_* que são locais para o repositório (por exemplo, `GIT_DIR` ou `GIT_WORK_TREE`, mas não `GIT_EDITOR`). Somente os nomes das variáveis são listados, não seus valores, ainda que estejam definidos.
 
 --path-format=(absolute|relative)::
-	Controls the behavior of certain other options. If specified as absolute, the paths printed by those options will be absolute and canonical. If specified as relative, the paths will be relative to the current working directory if that is possible. The default is option specific.
+	Controla o comportamento de algumas outras opções. Se usado como absoluto, os caminhos impressos por estas opções serão absolutos e canônicos. Se usado como relativo, os caminhos serão relativos ao diretório de trabalho atual, quando isso for possível. A predefinição é específica da opção.
 +
 Esta opção pode ser usada várias vezes e afeta apenas os argumentos seguintes na linha de comando, seja no final da linha de comando ou na próxima instância desta opção.
 
@@ -154,7 +166,7 @@ Caso o `$GIT_DIR` não esteja definido e o diretório atual não for detectado c
 	Exibe o `$GIT_COMMON_DIR` caso seja definido, senão `$GIT_DIR`.
 
 --resolve-git-dir <caminho>::
-	Check if <path> is a valid repository or a gitfile that points at a valid repository, and print the location of the repository. If <path> is a gitfile then the resolved path to the real repository is printed.
+	Verifica se o <caminho> é um repositório válido ou um arquivo git que aponte para um repositório válido e imprima o local do repositório. Quando o <caminho> for um arquivo git, o caminho resolvido para o repositório real será impresso.
 
 --git-path <caminho>::
 	Resolva "$GIT_DIR/<caminho>" e leve em consideração as outras variáveis de realocação do caminho, como `$GIT_OBJECT_DIRECTORY`, `$GIT_INDEX_FILE`, etc. Caso `$GIT_OBJECT_DIRECTORY` seja definido para '/foo/bar' por exemplo, então o comando "git rev-parse --git-path objects/abc" returna '/foo/bar/abc'.
@@ -163,7 +175,7 @@ Caso o `$GIT_DIR` não esteja definido e o diretório atual não for detectado c
 	Mostra o caminho (absoluto) do cume do diretório da árvore de trabalho. Caso não haja uma árvore de trabalho, relate um erro.
 
 --show-superproject-working-tree::
-	Show the absolute path of the root of the superproject's working tree (if exists) that uses the current repository as its submodule. Outputs nothing if the current repository is not used as a submodule by any project.
+	Mostra o caminho absoluto da raiz da árvore de trabalho do superprojeto (quando houver) que use o repositório atual como seu submódulo. Não produz nada se o repositório atual não for usado como um submódulo por nenhum projeto.
 
 --shared-index-path::
 	Exibe o caminho para o arquivo do índice compartilhado no modo de índice dividido ou vazio caso não esteja no modo do índice dividido.
@@ -192,24 +204,24 @@ As seguintes opções não são afetadas pela opção `--path-format`:
 	Quando o comando é invocado a partir de um subdiretório, exiba o caminho do diretório atual em relação ao nível mais alto do diretório.
 
 --show-object-format[=(storage|input|output)]::
-	Show the object format (hash algorithm) used for the repository for storage inside the `.git` directory, input, or output. For input, multiple algorithms may be printed, space-separated. If not specified, the default is "storage".
+	Mostra o formato do objeto (algoritmo de hash) usado para o repositório para armazenamento dentro do diretório `.git`, entrada ou saída. Para a entrada, os vários algoritmos podem ser impressos, separados por espaço. Se não for especificado, a predefinição será `storage`.
 
 --show-ref-format::
-	Show the reference storage format used for the repository.
+	Mostra o formato da referência de armazenamento usado para o repositório.
 
 
 Outras Opções
 ~~~~~~~~~~~~~
 
---since=datestring::
---after=datestring::
+--since=<datestring>::
+--after=<datestring>::
 	Analise a cadeia de caracteres da data e exiba o parâmetro --max-age= correspondente para 'git rev-list'.
 
---until=datestring::
---before=datestring::
+--until=<datestring>::
+--before=<datestring>::
 	Analise a cadeia de caracteres da data e exiba o parâmetro --min-age= que corresponda para o 'git rev-list'.
 
-<args>...::
+<arg>...::
 	As opções e os parâmetros que serão analisados.
 
 
@@ -220,14 +232,14 @@ PARSEOPT
 
 No modo `--parseopt`, o comando 'git rev-parse' ajuda no processamento das opções trazendo aos scripts shell as mesmas facilidades integradas que o 'C' possuí. Funciona como um normalizador das opções (por exemplo, divide trocas únicas com valores agregados), quase como o que o `getopt(1)` faz.
 
-It takes on the standard input the specification of the options to parse and understand, and echoes on the standard output a string suitable for `sh(1)` `eval` to replace the arguments with normalized ones. In case of error, it outputs usage on the standard error stream, and exits with code 129.
+Ele recebe na entrada predefinida a especificação das opções que serão analisadas, compreendidas e mostra na saída predefinida uma string `sh(1)` `eval` adequada para substituir os argumentos por argumentos normalizados. Em caso de erro, ele mostra como usar na saída de erro predefinida e encerra com o código 129.
 
-Note: Make sure you quote the result when passing it to `eval`. See below for an example.
+Observação: Certifique-se de colocar o resultado entre aspas ao passá-lo para `eval`. Veja um exemplo abaixo.
 
 Formato de Entrada
 ~~~~~~~~~~~~~~~~~~
 
-'git rev-parse --parseopt' input format is fully text based. It has two parts, separated by a line that contains only `--`. The lines before the separator (should be one or more) are used for the usage. The lines after the separator describe the options.
+O formato de entrada `git rev-parse --parseopt` é totalmente baseado em texto. Possuí duas partes, são separadas por uma linha que contém apenas `--`. As linhas antes do separador (deve ser uma ou mais) são usadas. As linhas após o separador descrevem as opções.
 
 As opções de cada linha possui este formato:
 
@@ -236,7 +248,7 @@ As opções de cada linha possui este formato:
 ------------
 
 `<opt-spec>`::
-	its format is the short option character, then the long option name separated by a comma. Both parts are not required, though at least one is necessary. May not contain any of the `<flags>` characters. `h,help`, `dry-run` and `f` are examples of correct `<opt-spec>`.
+	O seu formato é o caractere curto da opção, em seguida, o nome longo da opção separado por vírgula. Ambas as partes não são obrigatórias, embora pelo menos uma seja necessária. Não pode conter nenhum dos caracteres `<flags>`. O `h,help`, `dry-run` e `f` são exemplos de `<opt-spec>` corretos.
 
 `<flags>`::
 	`<flags>` são do `*`, `=`, `?` ou `!`.
@@ -249,7 +261,7 @@ As opções de cada linha possui este formato:
 	* Utilize `!` para não fazer com que a opção longa que foi negada esteja disponível.
 
 `<arg-hint>`::
-	`<arg-hint>`, if specified, is used as a name of the argument in the help output, for options that take arguments. `<arg-hint>` is terminated by the first whitespace. It is customary to use a dash to separate words in a multi-word argument hint.
+	Quando o `<arg-hint>` é especificado, é utilizado como um nome do argumento na saída da ajuda para as opções que recebem argumentos. O `<arg-hint>` é encerrado pelo primeiro espaço em branco. É comum usar um travessão para separar palavras numa dica de argumento com várias palavras.
 
 O restante da linha, depois dos espaços removidos, é usado como ajuda associada à opção.
 
@@ -264,9 +276,9 @@ algum-comando [<opções>] <args>...
 
 algum-comando faz 'foo' e 'bar'!
 --
-h,help! show the help
+h,help! Mostra a ajuda
 
-foo some nifty option --foo bar= some cool option --bar with an argument baz=arg another cool option --baz with a named argument qux?path qux may take a path argument but has meaning by itself
+foo alguma opção bacana `--foo bar=` alguma opção bacana `--bar` com um argumento `baz=arg` outra opção bacana `--baz` com um argumento mencionado `qux?path qux` pode receber um argumento de caminho, mas tem significado por si só
 
   Um cabeçalho do grupo de opções
 C?        opção 'C' com um argumento opcional"

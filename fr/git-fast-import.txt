@@ -154,7 +154,7 @@ Contrairement au format `rfc2822`, ce format est très strict. Toute variation d
 	C'est la même chose que `raw`, sauf qu'aucun contrôle d'authenticité sur l'époque numérique et le décalage local n'est effectué. Cela peut être utile lorsque vous essayez de filtrer ou d'importer un historique existant avec, par exemple, des valeurs de fuseau horaire erronées.
 
 `rfc2822`::
-	C'est le standard de format des courriels tel que décrit par la RFC 2822.
+	C'est le standard de format de date tel que décrit par la RFC 2822.
 +
 Un exemple de valeur est ``Tue Feb 6 11:22:18 2007 -0500''. L'analyseur syntaxique de Git est précis, mais un peu trop indulgent. Il s'agit du même analyseur que celui utilisé par 'git am' lors de l'application de rustines reçues par courrier électronique.
 +
@@ -331,11 +331,13 @@ Dans les deux formats, `<mode>` est le type d'entrée du fichier, spécifié en 
 
 Dans les deux formats, `<chemin>` est le chemin complet du fichier à ajouter (s'il n'existe pas déjà) ou à modifier (s'il existe déjà).
 
-Une chaîne de caractères `<chemin>` doit utiliser des séparateurs de répertoire de style UNIX (barre oblique `/`), peut contenir n'importe quel octet autre que `LF`, et ne doit pas commencer par un double guillemet (`"`).
+A `<path>` can be written as unquoted bytes or a C-style quoted string.
 
-Un chemin peut utiliser un guillemet de style C ; ceci est accepté dans tous les cas et obligatoire si le nom du fichier commence par un guillemet double ou contient `LF`. Dans le cas d'une citation de style C, le nom complet doit être entouré de guillemets doubles, et tout caractère `LF`, barre anti-oblique ou guillemet double doit être échappé en le faisant précéder d'une barre anti-oblique (par exemple, `"path/with\n, \\\\\ et \" ; in it"`).
+When a `<path>` does not start with a double quote (`"`), it is an unquoted string and is parsed as literal bytes without any escape sequences. However, if the filename contains `LF` or starts with double quote, it cannot be represented as an unquoted string and must be quoted. Additionally, the source `<path>` in `filecopy` or `filerename` must be quoted if it contains SP.
 
-La valeur de `<chemin>` doit être sous forme canonique. C'est-à-dire qu'elle ne doit pas :
+When a `<path>` starts with a double quote (`"`), it is a C-style quoted string, where the complete filename is enclosed in a pair of double quotes and escape sequences are used. Certain characters must be escaped by preceding them with a backslash: `LF` is written as `\n`, backslash as `\\`, and double quote as `\"`. Some characters may optionally be written with escape sequences: `\a` for bell, `\b` for backspace, `\f` for form feed, `\n` for line feed, `\r` for carriage return, `\t` for horizontal tab, and `\v` for vertical tab. Any byte can be written with 3-digit octal codes (e.g., `\033`). All filenames can be represented as quoted strings.
+
+Un `<chemin>` doit utiliser des séparateurs de répertoire de style UNIX (barre oblique `/`) et sa valeur doit être de forme canonique, en ce qu'il ne doit pas :
 
 * contenir un composant de répertoire vide (par exemple, `foo//bar` n'est pas valide),
 * se terminer par un séparateur de répertoire (par exemple, `foo/` n'est pas valide),
@@ -344,7 +346,7 @@ La valeur de `<chemin>` doit être sous forme canonique. C'est-à-dire qu'elle n
 
 La racine de l'arbre peut être représentée par une chaîne vide comme `<chemin>`.
 
-Il est recommandé que `<chmein>` soit toujours codé en UTF-8.
+`<chemin>` ne peut pas contenir de caractère NUL, ni littéralement ni échappé comme dans `\000`.Il est recommandé que `<chemin>` soit toujours encodé en UTF-8.
 
 `filedelete`
 ^^^^^^^^^^^^

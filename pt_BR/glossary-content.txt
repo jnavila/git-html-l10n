@@ -55,13 +55,13 @@ Como um verbo: A ação de armazenar um novo instantâneo da condição do proje
 	Um objeto <<def_unreachable_object,objeto inacessível>> que não seja <<def_reachable,acessível>>, mesmo a partir dos outros objetos inacessíveis; um objeto pendente não tem referências a ele vinda de nenhuma referência ou <<def_object,objeto>> no <<def_repository,repositório>>.
 
 [[def_dereference]]dereference::
-	Referring to a <<def_symref,symbolic ref>>: the action of accessing the <<def_ref,reference>> pointed at by a symbolic ref. Recursive dereferencing involves repeating the aforementioned process on the resulting ref until a non-symbolic reference is found.
+	Referir-se a um <<def_symref,symbolic ref>>: a ação de acessar o <<def_ref,reference>> apontado por uma referência simbólica. A remoção da referência recursiva envolve a repetição do processo mencionado acima na referência resultante até que uma referência não simbólica seja encontrada.
 +
-Referring to a <<def_tag_object,tag object>>: the action of accessing the <<def_object,object>> a tag points at. Tags are recursively dereferenced by repeating the operation on the result object until the result has either a specified <<def_object_type,object type>> (where applicable) or any non-"tag" object type. A synonym for "recursive dereference" in the context of tags is "<<def_peel,peel>>".
+Referir-se a um <<def_tag_object,tag object>>: a ação de acessar o <<def_object,object>> para onde aponta uma etiqueta. As a remoção de referência das etiquetas são feitas recursivamente, repetindo a operação no objeto resultante até que o resultado tenha um <<def_object_type,object type>> especificado (quando aplicável) ou qualquer tipo de objeto que não seja uma "etiqueta". Um sinônimo para "remoção de referência recursiva" no contexto de etiquetas é "<<def_peel,peel>>".
 +
-Referring to a <<def_commit_object,commit object>>: the action of accessing the commit's tree object. Commits cannot be dereferenced recursively.
+Referindo-se a um <<def_commit_object,commit object>>: a ação de acessar o commit do objeto da árvore. Os commits não podem ter a remoção de referência de maneira recursiva.
 +
-Unless otherwise specified, "dereferencing" as it used in the context of Git commands or protocols is implicitly recursive.
+A menos que especificado de outra maneira, a "remoção da referência", conforme usada no contexto dos comandos ou protocolos do Git, é implicitamente recursiva.
 
 [[def_detached_HEAD]]HEAD DESANEXADO::
 	Normalmente, o <<def_HEAD,HEAD>> armazena o nome do <<def_branch,ramo>> e os comandos que operam no histórico que o `HEAD` representa, operam no histórico que leva ao cume do ramo onde o HEAD aponta. No entanto, o Git também permite que você <<def_checkout,averigue>> um <<def_commit,commit>> arbitrário que não seja necessariamente o cume de qualquer ramo em particular. O HEAD em tal condição é chamado de "desanexado" (detached).
@@ -145,7 +145,7 @@ Como substantivo: a menos que seja um <<def_fast_forward,avanço rápido>>, uma 
 	Para <<def_merge,mesclar>> mais de duas <<def_branch,ramificações>>.
 
 [[def_orphan]]órfão::
-	The act of getting on a <<def_branch,branch>> that does not exist yet (i.e., an <<def_unborn,unborn>> branch). After such an operation, the commit first created becomes a commit without a parent, starting a new history.
+	O ato de entrar num <<def_branch,branch>> que ainda não existe (ou seja, um <<def_unborn,unborn>> branch). Após essa operação, o commit criado inicialmente se torna um commit sem um ramo principal, iniciando um novo histórico.
 
 [[def_origin]]origin (origem)::
 	O <<def_repository,repositório>> upstream predefinido. A maioria dos projetos possui pelo menos um projeto "upstream" que eles monitoram. A predefinição 'origin' é usada para isso. As atualizações do novo "upstream" serão buscados no <<def_remote_tracking_branch,ramo monitorado remotamente>> chamado 'origin/name-of-upstream-branch', que você pode ver usando o comando `git branch -r`.
@@ -243,7 +243,13 @@ exclude (excluí);;
 	As refs que são por-<<def_worktree,worktree>> em vez de global. Atualmente isto é apresentado apenas como <<def_HEAD,HEAD>> e qualquer outra `refs` que inicie com `refs/bisect/`, mas podem posteriormente, incluir outras `refs` incomuns.
 
 [[def_pseudoref]]pseudoref (pseudo referência)::
-	`Pseudorefs` são uma classe de arquivos em `$GIT_DIR` que se comporta como `refs` para fins de análise de revisão, no entanto, são tratados especialmente pelo git. Os `pseudorefs` têm nomes com maiúsculas e sempre começam com uma linha que consiste em <<def_SHA1,SHA-1>>, seguido por um espaço. Portanto, `HEAD` não é um `pseudoref` pois às vezes é um `ref` simbólico. Opcionalmente eles podem conter alguns dados adicionais. São exemplos `MERGE_HEAD` e `CHERRY_PICK_HEAD`. Ao contrário do <<def_per_worktree_ref,per-worktree refs>>, estes arquivos não podem ser `refs` simbólicos e nunca possuem um `reflogs`. Eles também não podem ser atualizados através do mecanismo `ref` normal de atualização. Em vez disso, eles são atualizados gravando diretamente nos arquivos. No entanto, eles podem ser lidos como se fossem `refs`, portanto, `git rev-parse MERGE_HEAD` funcionará.
+	A ref that has different semantics than normal refs. These refs can be read via normal Git commands, but cannot be written to by commands like linkgit:git-update-ref[1].
++
+The following pseudorefs are known to Git:
+
+ - `FETCH_HEAD` is written by linkgit:git-fetch[1] or linkgit:git-pull[1]. It may refer to multiple object IDs. Each object ID is annotated with metadata indicating where it was fetched from and its fetch status.
+
+ - `MERGE_HEAD` is written by linkgit:git-merge[1] when resolving merge conflicts. It contains all commit IDs which are being merged.
 
 [[def_pull]]pull (captura, puxar, atrair, apertar)::
 	Captura um <<def_branch,ramo>> significa <<def_fetch,fetch (obter)>> e <<def_merge,merge (mesclar)>>. Consulte também linkgit:git-pull[1].
@@ -261,17 +267,33 @@ exclude (excluí);;
 	Para reaplicar uma série de alterações de uma <<def_branch,ramo>> para uma base diferente e redefinir o <<def_head,head>> dessa ramificação para o resultado.
 
 [[def_ref]]ref (referência)::
-	Um nome que comece com `refs/` (por exemplo, `refs/heads/master`) que aponte para um <<def_object_name,object name>> ou outro ref (o último é chamado de <<def_symref,ref simbólica>>). Por conveniência, uma `ref` as vezes pode ser abreviado quando utilizado como um argumento em um comando Git; Para mais detalhes consulte linkgit:gitrevisions[7]. As `refs` são armazenadas no <<def_repository,repositório>>.
+	A name that that points to an <<def_object_name,object name>> or another ref (the latter is called a <<def_symref,symbolic ref>>). For convenience, a ref can sometimes be abbreviated when used as an argument to a Git command; see linkgit:gitrevisions[7] for details. Refs are stored in the <<def_repository,repository>>.
 +
-O espaço de nomes da ref é hierárquico. Sub-hierarquias diferentes são utilizadas para diferentes propósitos (por exemplo, a hierarquia `refs/heads/` é utilizada para representar as ramificações locais).
+The ref namespace is hierarchical. Ref names must either start with `refs/` or be located in the root of the hierarchy. For the latter, their name must follow these rules:
 +
-Existem algumas referências especiais que não começam com `refs/`. O exemplo mais notável é `HEAD`.
+ - The name consists of only upper-case characters or underscores.
+
+ - The name ends with "`_HEAD`" or is equal to "`HEAD`".
++
+There are some irregular refs in the root of the hierarchy that do not match these rules. The following list is exhaustive and shall not be extended in the future:
++
+ - `AUTO_MERGE`
+
+ - `BISECT_EXPECTED_REV`
+
+ - `NOTES_MERGE_PARTIAL`
+
+ - `NOTES_MERGE_REF`
+
+ - `MERGE_AUTOSTASH`
++
+Different subhierarchies are used for different purposes. For example, the `refs/heads/` hierarchy is used to represent local branches whereas the `refs/tags/` hierarchy is used to represent local tags..
 
 [[def_reflog]]reflog::
 	Um `reflog` exibe o "histórico" local de uma `ref`. Em outras palavras, ele pode informar qual foi a 3ª última revisão _neste_ repositório e qual era a sua condição atual, ontem às 21:14. Para mais detalhes consulte o comando linkgit:git-reflog[1].
 
 [[def_refspec]]refspec::
-	Um `refspec` é utilizado por <<def_fetch,fetch>> e <<def_push,push>> para descrever o mapeamento entre <<def_ref,ref>> remoto e o `ref` local.
+	A "refspec" is used by <<def_fetch,fetch>> and <<def_push,push>> to describe the mapping between remote <<def_ref,ref>> and local ref. See linkgit:git-fetch[1] or linkgit:git-push[1] for details.
 
 [[def_remote]]remote repository (repositório remoto)::
 	Um <<def_repository,repositório>> que é utilizado para rastrear os mesmo projeto porém reside em um outro lugar. Para se comunicar com ramos remotos, consulte <<def_fetch,fetch>> ou <<def_push,push>>.
@@ -306,15 +328,6 @@ Existem algumas referências especiais que não começam com `refs/`. O exemplo 
 [[def_stash]]stash entry (lançamento para a armazenagem)::
 	Um <<def_object,objeto>> é utilizado para armazenar temporariamente o conteúdo de um diretório de trabalho <<def_dirty,sujo>> e o seu índice para utilização futura.
 
-[[def_special_ref]]ref especial::
-	A ref that has different semantics than normal refs. These refs can be accessed via normal Git commands but may not behave the same as a normal ref in some cases.
-+
-As seguintes refs especiais são conhecidas pelo Git:
-
- - "`FETCH_HEAD`" is written by linkgit:git-fetch[1] or linkgit:git-pull[1]. It may refer to multiple object IDs. Each object ID is annotated with metadata indicating where it was fetched from and its fetch status.
-
- - "`MERGE_HEAD`" is written by linkgit:git-merge[1] when resolving merge conflicts. It contains all commit IDs which are being merged.
-
 [[def_submodule]]submodule (submódulo)::
 	Um <<def_repository,repositório>> retém o histórico de um projeto separado dentro de um outro repositório (o último na qual é chamado de <<def_superproject, superproject>>).
 
@@ -343,7 +356,7 @@ As seguintes refs especiais são conhecidas pelo Git:
 	Um <<def_tree_object,objeto árvore>> ou um <<def_object,objeto>> que pode <<def_dereference,perder a referência>> recursivamente num objeto da árvore. Perder um <<def_commit_object,objeto commit>> retorna o objeto da árvore <<def_revision,revisão>> correspondente ao topo <<def_directory,diretório>>. São todos os tree-ishes: um <<def_commit-ish,commit-ish>>, um objeto da árvore, um <<def_tag_object,objeto tag>> que aponta para o objeto da árvore, um objeto tag que aponta para o objeto tag que aponta para o objeto árvore, etc.
 
 [[def_unborn]]por nascer::
-	The <<def_HEAD,HEAD>> can point at a <<def_branch,branch>> that does not yet exist and that does not have any commit on it yet, and such a branch is called an unborn branch. The most typical way users encounter an unborn branch is by creating a repository anew without cloning from elsewhere. The HEAD would point at the 'main' (or 'master', depending on your configuration) branch that is yet to be born. Also some operations can get you on an unborn branch with their <<def_orphan,orphan>> option.
+	O <<def_HEAD,HEAD>> pode apontar para um <<def_branch,branch>> que ainda não existe e que ainda não tem nenhum commit nele, e este ramo é chamado de ramo não nascido (unborn branch). A maneira mais comum de os usuários encontrarem um ramo não nascido é criando novamente um repositório sem clonar de outro lugar. O `HEAD` apontaria para o ramo principal ('main') (ou mestre ('master'), dependendo da sua configuração) que ainda não nasceu. Além disso, algumas operações podem colocá-lo num ramo não nascido com a opção <<def_orphan,orphan>>.
 
 
 [[def_unmerged_index]]unmerged index (índices não mesclados)::

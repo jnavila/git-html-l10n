@@ -34,7 +34,7 @@ OPÇÕES
 <pathspec>...::
 	Os arquivos que serão adicionados ao conteúdo. Os agrupamentos dos arquivos (`*.c` por exemplo) podem ser utilizados para adicionar todos os arquivos coincidentes. Também um nome do diretório principal (`dir` para adicionar `dir/arquivo1` e `dir/arquivo2` por exemplo) pode ser utilizados para atualizar o índice para coincidir a condição atual do diretório como um todo (definindo o `dir` gravará não apenas um arquivo `dir/arquivo1` modificado na árvore de trabalho, um arquivo `dir/arquivo2` adicionado à árvore de trabalho, mas também um arquivo `dir/arquivo3` que será removido da árvore de trabalho por exemplo). Observe que as versões mais antigas do Git costumavam ignorar os arquivos removidos; utilize a opção `--no-all` caso queira adicionar os arquivos novos ou alterados, porém ignore os que foram removidos.
 +
-Para mais detalhes sobre a sintaxe `<pathspec>`, consulte a entrada 'pathspec' em linkgit:gitglossary[7].
+For more details about the _<pathspec>_ syntax, see the 'pathspec' entry in linkgit:gitglossary[7].
 
 -n::
 --dry-run::
@@ -69,22 +69,22 @@ O objetivo desta opção é escolher as linhas do patch que serão aplicadas ou 
 
 -u::
 --update::
-	Atualize o índice exatamente onde ele já possua uma entrada que coincida com o `<pathspec>`. Remove e altera as entradas no índice para coincidir com a árvore de trabalho sem adicionar novos arquivos.
+	Update the index just where it already has an entry matching _<pathspec>_. This removes as well as modifies index entries to match the working tree, but adds no new files.
 +
-Caso nenhum `<pathspec>` seja informado durante o uso da opção `-u`, todos os arquivos monitorados na árvore de trabalho serão atualizados (as versões antigas do Git costumavam limitar a atualização ao diretório atual e seus subdiretórios).
+If no _<pathspec>_ is given when `-u` option is used, all tracked files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
 -A::
 --all::
 --no-ignore-removal::
-	Atualize o índice não apenas onde a árvore de trabalho possa um arquivo que coincida com o `<pathspec>` mas também onde o índice já possua uma entrada. Adiciona, modifica e remove as entradas do índice para que coincida com a árvore de trabalho.
+	Update the index not only where the working tree has a file matching _<pathspec>_ but also where the index already has an entry. This adds, modifies, and removes index entries to match the working tree.
 +
-Caso nenhum `<pathspec>` seja informado durante o uso da opção `-A`, todos os arquivos na árvore de trabalho serão atualizados (as versões antigas do Git costumavam limitar a atualização ao diretório atual e seus subdiretórios).
+If no _<pathspec>_ is given when `-A` option is used, all files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
 --no-all::
 --ignore-removal::
-	Atualize o índice adicionando os novos arquivos que sejam desconhecidos ao índice e os arquivos modificados na árvore de trabalho, no entanto ignore aqueles arquivos que foram removidos da árvore de trabalho. Esta opção não funciona quando `<pathspec>` não for utilizado.
+	Update the index by adding new files that are unknown to the index and files modified in the working tree, but ignore files that have been removed from the working tree. This option is a no-op when no _<pathspec>_ is used.
 +
-Esta opção serve principalmente para ajudar os usuários que estão acostumados com as versões mais antigas do Git, cujo `git add <pathspec>...` era um sinônimo para `git add --no-all <pathspec>...`, isto é, ignora a remoção dos arquivos.
+This option is primarily to help users who are used to older versions of Git, whose "git add _<pathspec>_..." was a synonym for "git add --no-all _<pathspec>_...", i.e. ignored removed files.
 
 -N::
 --intent-to-add::
@@ -109,7 +109,7 @@ Esta opção serve principalmente para ajudar os usuários que estão acostumado
 	Substitua o bit executável dos arquivos que foram adicionados. Apenas no índice que o bit executável é alterado, os arquivos no disco permanecem inalterados.
 
 --pathspec-from-file=<arquivo>::
-	O "pathspec" é passado com `<arquivo>` em vez dos argumentos da linha de comando. Caso o `<arquivo>` seja exatamente `-`, a entrada padrão será utilizada. Os elementos do "pathspec" são separados por caracteres de término de linha `LF` ou `CR/LF`. Os elementos do "pathspec" podem ser citados conforme explicado na variável de configuração `core.quotePath` (consulte linkgit:git-config[1]). Consulte também opção `--pathspec-file-nul` e o global `--literal-pathspecs`.
+	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by LF or CR/LF. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
 
 --pathspec-file-nul::
 	Só faz algum sentido caso seja utilizado junto com a opção `--pathspec-from-file`. Os elementos "pathspec" são separados com caracteres `NUL` e todos os outros caracteres são considerados de forma literal (incluindo as novas linhas e as citações).
@@ -198,20 +198,21 @@ patch::
 
   Permite a escolha de um caminho dentre uma seleção de 'status'. Depois de escolher o caminho, é apresentado a diferença entre o índice e o arquivo na árvore de trabalho, pergunta caso queira preparar a alteração de cada pedaço. Você pode selecionar uma das seguintes opções e pressional enter:
 
-       y - prepare este pedaço
-       n - não prepare este pedaço
-       q - saia; não prepare este pedaço ou qualquer um dos restantes
-       a - prepare este pedaço e todos os pedaços posteriores no arquivo
-       d - não prepare este pedaço ou qualquer um dos pedaços posteriores no arquivo
-       g - selecione um pedaço para ir de encontro com
-       / - procure um pedaço correspondente ao regex especificado
-       j - não decida sobre este pedaço, veja o próximo pedaço indeciso
-       J - não decida sobre este pedaço, veja o próximo pedaço
-       k - não decida sobre este pedaço, veja o pedaço indeciso anterior
-       K - não decida sobre este pedaço, veja o pedaço anterior
-       s - divide o pedaço atual em pedaços menores
-       e - edite manualmente o pedaço atual
-       ? - imprima a ajuda
+       y - stage this hunk
+       n - do not stage this hunk
+       q - quit; do not stage this hunk or any of the remaining ones
+       a - stage this hunk and all later hunks in the file
+       d - do not stage this hunk or any of the later hunks in the file
+       g - select a hunk to go to
+       / - search for a hunk matching the given regex
+       j - leave this hunk undecided, see next undecided hunk
+       J - leave this hunk undecided, see next hunk
+       k - leave this hunk undecided, see previous undecided hunk
+       K - leave this hunk undecided, see previous hunk
+       s - split the current hunk into smaller hunks
+       e - manually edit the current hunk
+       p - print the current hunk
+       ? - print help
 +
 Depois de decidir o destino de todos os pedaços, caso haja algum pedaço selecionado, o índice é atualizado com os pedaços que foram selecionados.
 +

@@ -34,7 +34,7 @@ git-add - ファイルの中身をインデックスに追加する
 <パススペック>...::
 	コンテンツを追加するファイルです。ファイルグローブ (例: `*.c`) を指定すると、マッチするすべてのファイルを追加することができます。また、先頭にディレクトリ名 (例: `dir` で `dir/file1` と `dir/file2` を追加します) を指定すると、ディレクトリ全体の現在の状態に合わせてインデックスを更新することができます (例: `dir` を指定すると、作業ツリーで変更されたファイル `dir/file1` や作業ツリーに追加されたファイル `dir/file2` だけでなく、作業ツリーから削除されたファイル `dir/file3` も記録されます)。古いバージョンの Git では、削除されたファイルは無視されていたことに注意しましょう。修正されたファイルや新しいファイルを追加したいが、削除されたファイルは無視したいという場合には、`--no-all` オプションを使用してください。
 +
-<パススペック>構文の詳細については、linkgit:gitglossary[7] の'パススペック'の項目を参照してください。
+For more details about the _<pathspec>_ syntax, see the 'pathspec' entry in linkgit:gitglossary[7].
 
 -n::
 --dry-run::
@@ -69,22 +69,22 @@ git-add - ファイルの中身をインデックスに追加する
 
 -u::
 --update::
-	<パススペック> に一致するエントリがすでにある場合にのみ、インデックスを更新します。これは、作業ツリーに合わせてインデックス・エントリを削除したり変更したりしますが、新しいファイルは追加しません。
+	Update the index just where it already has an entry matching _<pathspec>_. This removes as well as modifies index entries to match the working tree, but adds no new files.
 +
-`-u` オプションを使ったときに<パススペック>が与えられていない場合、作業ツリー全体にあるすべての追跡ファイルが更新されます（古いバージョンのGitでは、更新の対象をカレントディレクトリとそのサブディレクトリに限定していました）。
+If no _<pathspec>_ is given when `-u` option is used, all tracked files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
 -A::
 --all::
 --no-ignore-removal::
-	作業ツリーに<パススペック>に一致するファイルがある場合だけでなく、すでにインデックスにエントリがある場合にも、インデックスを更新します。これは、作業ツリーに合わせてインデックス・エントリを追加、修正、削除します。
+	Update the index not only where the working tree has a file matching _<pathspec>_ but also where the index already has an entry. This adds, modifies, and removes index entries to match the working tree.
 +
-`-A` オプション使用時に<パススペック>が指定されていない場合、作業ツリー全体の全てのファイルが更新されます（古いバージョンのGitでは、更新対象をカレントディレクトリとそのサブディレクトリに限定していました）。
+If no _<pathspec>_ is given when `-A` option is used, all files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
 --no-all::
 --ignore-removal::
-	インデックスに知られていない新しいファイルと作業ツリーで変更されたファイルを追加してインデックスを更新しますが、作業ツリーから削除されたファイルは無視します。このオプションは、<パススペック>が使用されていない場合は、このオプションは何もしません。
+	Update the index by adding new files that are unknown to the index and files modified in the working tree, but ignore files that have been removed from the working tree. This option is a no-op when no _<pathspec>_ is used.
 +
-このオプションは主に、古いバージョンのGitに慣れているユーザーのためのものです。"git add <パススペック>... "は "git add --no-all <パススペック>... "と同義語で、つまり削除されたファイルを無視します。
+This option is primarily to help users who are used to older versions of Git, whose "git add _<pathspec>_..." was a synonym for "git add --no-all _<pathspec>_...", i.e. ignored removed files.
 
 -N::
 --intent-to-add::
@@ -109,7 +109,7 @@ git-add - ファイルの中身をインデックスに追加する
 	追加されたファイルの実行可能ビットを上書きします。実行可能ビットはインデックスでのみ変更され、ディスク上のファイルは変更されません。
 
 --pathspec-from-file=<ファイル>::
-	Pathspecはコマンドラインの引数の代わりに `<ファイル>` で渡されます。 `<ファイル>` が正確に `-` であれば、標準入力が使用されます。Pathspecの要素はLFまたはCR/LFで区切られます。Pathspecの要素は、設定変数 `core.quotePath` (linkgit:git-config[1]参照) で説明されているように、引用することができます。また、`--pathspec-file-nul` やグローバルな `--literal-pathspecs` も参照してください。
+	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by LF or CR/LF. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
 
 --pathspec-file-nul::
 	`--pathspec-from-file` でのみ意味を持ちます。Pathspecの要素はNUL文字で区切られ、他のすべての文字は文字通りに解釈されます（改行や引用符を含む）。
@@ -198,20 +198,21 @@ patch::
 
   これにより、「ステータス」のような選択の中から一つのパスを選ぶことができます。パスを選択した後、インデックスと作業ツリーファイルの差分を表示し、各ハンクの変更をステージングするかどうかを尋ねます。以下のオプションを選択し、return と入力してください。
 
-       y - このハンクをステージングする
-       n - このハンクをステージングしない
-       q - quit; このハンクや残りのハンクをステージングしません。
-       a - このハンクとファイル内のすべての後続ハンクをステージングします。
-       d - このハンクをステージングせず、ファイル内の後続のハンクもステージングしません。
-       g - 移動するハンクを選択します。
-       / - 指定された正規表現に一致するハンクを検索します。
-       j - このハンクを未決定にして、次の未決定ハンクを参照します。
-       J - このハンクを未決定にして、次のハンクを参照します。
-       k - このハンクを未決定にして、前の未決定のハンクを見る
-       K - このハンクを未決定のままにして、前のハンクを参照します。
-       s - 現在のハンクを小さなハンクに分割します。
-       e - 現在のハンクを手動で編集します。
-       ?- ヘルプを表示
+       y - stage this hunk
+       n - do not stage this hunk
+       q - quit; do not stage this hunk or any of the remaining ones
+       a - stage this hunk and all later hunks in the file
+       d - do not stage this hunk or any of the later hunks in the file
+       g - select a hunk to go to
+       / - search for a hunk matching the given regex
+       j - leave this hunk undecided, see next undecided hunk
+       J - leave this hunk undecided, see next hunk
+       k - leave this hunk undecided, see previous undecided hunk
+       K - leave this hunk undecided, see previous hunk
+       s - split the current hunk into smaller hunks
+       e - manually edit the current hunk
+       p - print the current hunk
+       ? - print help
 +
 すべてのハンクの運命を決定した後、選択されたハンクがあれば、選択されたハンクでインデックスが更新されます。
 +
@@ -256,7 +257,7 @@ diff::
 
 新規コンテンツ::
 
-You may also add new content that does not exist in the patch; simply add new lines, each starting with "{plus}". The addition will appear reverted in the working tree.
+パッチに存在しない新しいコンテンツを追加することもできます。単に新しい行を追加すると、各コンテンツは "{plus}" で始まります。追加は作業ツリーで元に戻された状態で表示されます。
 --
 
 また、パッチの適用が不可能になるため、完全に避けるべき操作もいくつかあります。

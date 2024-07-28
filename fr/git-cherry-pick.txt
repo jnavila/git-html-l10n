@@ -68,13 +68,28 @@ Ceci est utile pour picorer l'effet de plusieurs commits sur votre index à la s
 	Si le HEAD actuel est le même que le parent du commit picoré, alors une avance rapide sur ce commit sera effectuée.
 
 --allow-empty::
-	Par défaut, le picorage d'un commit vide échouera, indiquant qu'une invocation explicite de `git commit --allow-empty` est nécessaire. Cette option surcharge ce comportement, permettant aux commits vides d'être préservés automatiquement dans un picorage. Notez que lorsque "--ff" est en vigueur, les commits vides qui répondent à l'exigence d'"avance rapide" seront conservés même sans cette option. Notez également que l'utilisation de cette option ne conserve que les commits qui étaient initialement vides (c'est-à-dire que le commit a enregistré le même arbre que son parent). Les commits qui sont rendus vides à cause d'un commit précédent sont abandonnés. Pour forcer l'inclusion de ces commits, utilisez `--keep-redundant-commits`.
+	Par défaut, le picorage d'un commit vide échouera, indiquant qu'une invocation explicite de `git commit --allow-empty` est nécessaire. Cette option surcharge ce comportement, permettant aux commits vides d'être préservés automatiquement dans un picorage. Notez que lorsque "--ff" est en vigueur, les commits vides qui répondent à l'exigence d'"avance rapide" seront conservés même sans cette option. Notez également que l'utilisation de cette option ne conserve que les commits qui étaient initialement vides (c'est-à-dire que le commit a enregistré le même arbre que son parent). Les commits qui sont rendus vides à cause d'un commit précédent feront échouer le picorage. Pour forcer l'inclusion de ces commits, utilisez `--empty=keep`.
 
 --allow-empty-message::
 	Par défaut, le picorage d'un commit avec un message vide échouera. Cette option annule ce comportement, permettant aux commits avec des messages vides d'être picorés.
 
+--empty=(drop|keep|stop)::
+	Comment manipuler les commits picorés qui sont redondants avec les modifications déjà dans l'historique actuel.
++
+--
+`drop`;;
+	Le commit sera abandonné.
+`keep`;;
+	Le commit sera gardé. Implique `--allow-empty`.
+`stop`;;
+	La picorage s'arrêtera lorsque le commit sera appliqué, vous permettant d'examiner le commit. C'est le comportement par défaut.
+--
++
+Notez que `--empty=drop` et `--empty=stop` spécifient seulement comment manipuler un commit qui n'était pas initialement vide, mais est devenu vide en raison d'un commit précédent. Les commits qui étaient initialement vides causeront encore l'échec du picorage à moins que `--empty=keep` ou `--allow-empty` ne soient spécifiés.
++
+
 --keep-redundant-commits::
-	Si un commit faisant l'objet d'un picorage duplique un commit déjà présent dans l'historique courant, celui-ci deviendra vide. Par défaut, ces commits redondants provoquent l'arrêt de `cherry-pick` pour que l'utilisateur puisse examiner le commit. Cette option surcharge ce comportement et crée un objet commit vide. Implique `--allow-empty`.
+	Synonyme obsolète pour `--empty=keep`.
 
 --strategy=<strategie>::
 	Utilise la stratégie de fusion donnée. Ne devrait être utilisée qu'une seule fois. Voir la section STRATÉGIES DE FUSION dans linkgit:git-merge[1] pour plus de détails.

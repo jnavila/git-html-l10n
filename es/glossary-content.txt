@@ -243,7 +243,13 @@ exclude;;
 	Referencia que es por-<<def_worktree,árbol de trabajo>>, en lugar de global. Esto es presentemente sólo <<def_HEAD,HEAD>> y cualquier referencia que comienza con `refs/bisect/`, pero posteriormente puede incluir otras referencias inusuales.
 
 [[def_pseudoref]]pseudoreferencia::
-	Las pseudoreferencias son una clase de ficheros bajo `$GIT_DIR` que se comportan como referencias para propósitos de rev-parse, pero los cuales son tratados especialmente por git. Pseudoreferencias tienen nombres totalmente en mayúsculas y siempre comienzan con una línea consistente en un <<def_SHA1,SHA-1>> seguido de un espacio en blanco. Entonces, HEAD no es una pseudoreferencia porque a veces es una referencia simbólica. Pueden contener opcionalmente datos adicionales. `MERGE_HEAD` y `CHERRY_PICK_HEAD` son ejemplos. Al contrario de <<def_per_worktree_ref,referencias por árbol de trabajo>> esos ficheros no pueden ser referencias simbólicas y nunca tendrán reflogs. Tampoco pueden ser actualizadas con la maquinaria de actualización de referencias normales; en cambio, son actualizadas escribiendo directamente en los ficheros. Sin embargo, pueden ser leídas como si fueran referencias, de tal manera que `git rev-parse MERGE_HEAD` funcionará.
+	Una referencia que tiene semánticas diferentes a la referencias normales. Esas referencias pueden leerse mediante comandos normales de Git, pero no pueden ser escritas por comandos como linkgit:git-update-ref[1].
++
+Las siguientes pseudo-referencias son reconocidas por Git:
+
+ - `FETCH_HEAD` es escrito por linkgit:git-fetch[1] o linkgit:git-pull[1]. Se puede referir a múltiples identificadores de objeto. Cada identificador de objeto es anotado con metadatos indicando de dónde se obtuvo y el estado del fetch.
+
+ - `MERGE_HEAD` es escrito por linkgit:git-merge[1] cuando se resuelven conflictos de fusión. Contiene todos los identificadores de las confirmaciones que se están fusionando.
 
 [[def_pull]]incorporar::
 	Incorporar una <<def_branch,rama>> significa <<def_fetch,traer>>la y <<def_merge,fusion>>arla. Ver también linkgit:git-pull[1].
@@ -261,17 +267,33 @@ exclude;;
 	Re-aplicar una serie de cambios de una <<def_branch,rama>> de una base diferente, y reasignar la <<def_head,head>> de esa rama al resultado.
 
 [[def_ref]]ref::
-	Un nombre que comienza con `refs/` (ej. `refs/heads/master`) que apunta a un <<def_object_name,nombre de objeto>> o a otra referencia (a éste último se le llama <<def_symref,referencia simbólica>>). Por conveniencia, una referencia puede a veces ser abreviada cuando se usa como argumento de un comando Git; ver linkgit:gitrevisions[7] para detalles. Las referencias se almacenan en el <<def_repository,repositorio>>.
+	Un nombre que apunta a un <<def_object_name,nombre de objeto>> o a otra referencia (a éste último se le llama <<def_symref,referencia simbólica>>). Por conveniencia, una referencia puede a veces ser abreviada cuando se usa como argumento de un comando Git; ver linkgit:gitrevisions[7] para detalles. Las referencias se almacenan en el <<def_repository,repositorio>>.
 +
-El espacio de nombres de referencias es jerárquico. Diferentes sub-jerarquías se usan para fines distintos (ej. la jerarquía `refs/heads/` se usa para representar ramas locales).
+The ref namespace is hierarchical. Ref names must either start with `refs/` or be located in the root of the hierarchy. For the latter, their name must follow these rules:
 +
-Hay unas cuantas referencias de propósito especial que no comienzan con `refs/`. El ejemplo más notable es `HEAD`.
+ - El nombre consiste sólo en caracteres en mayúsculas y guiones bajos.
+
+ - El nombre termina con "`_HEAD`" o es igual a "`HEAD`".
++
+Hay algunas referencias irregulares en la raíz de la jerarquía que no cumplen con esas reglas. La lista siguiente es exhaustiva y no deberá extenderse en el futuro:
++
+ - `AUTO_MERGE`
+
+ - `BISECT_EXPECTED_REV`
+
+ - `NOTES_MERGE_PARTIAL`
+
+ - `NOTES_MERGE_REF`
+
+ - `MERGE_AUTOSTASH`
++
+Diferentes sub-jerarquías se usan para fines distintos. Por ejemplo, la jerarquía `refs/heads/` se usa para representar ramas locales, y la jerarquía `refs/tags/` se usa para representar etiquetas locales.
 
 [[def_reflog]]bitácora de referencia::
 	Una bitácora de referencia muestra el historial local de una referencia. En otras palabras, te puede decir cuál fue la 3era última revisión en _este_ repositorio, y cuál era el estado actual en _este_ repositorio ayer a las 9:14pm. Ver linkgit:git-reflog[1] para detalles.
 
 [[def_refspec]]especificación de referencia::
-	Una "especificación de referencia" es usada por <<def_fetch,traer>> y por <<def_push,enviar>> para describir el mapeo entre <<def_ref,referencia>> remota y referencia local.
+	Una "especificación de referencia" es usada por <<def_fetch,traer>> y por <<def_push,enviar>> para describir el mapeo entre <<def_ref,referencia>> remota y referencia local. Ver linkgit:git-fetch[1] o linkgit:git-push[1] para detalles.
 
 [[def_remote]]repositorio remoto::
 	Un <<def_repository,repositorio>> el cual es usado para rastrear el mismo proyecto pero que reside en otro lugar. Para comunicarse con remotos, ver <<def_fetch,traer>> o <<def_push,enviar>>.
@@ -305,15 +327,6 @@ Hay unas cuantas referencias de propósito especial que no comienzan con `refs/`
 
 [[def_stash]]entrada de reserva::
 	Un <<def_object,objeto>> usado para almacenar temporalmente el contenido de un directorio de trabajo <<def_dirty,sucio>> así como el índice para reuso futuro.
-
-[[def_special_ref]]referencia especial::
-	Una referencia que tiene semánticas diferentes a la referencias normales. Esas referencias pueden accesarse mediante comandos normales de Git pero en algunos casos podrían comportarse diferente a una referencia normal.
-+
-Las siguientes referencias especiales son reconocidas por Git:
-
- - "`FETCH_HEAD`" es escrito por linkgit:git-fetch[1] o linkgit:git-pull[1]. Se puede referir a múltiples identificadores de objeto. Cada identificador de objeto es anotado con metadatos indicando de dónde se obtuvo y el estado del fetch.
-
- - "`MERGE_HEAD`" es escrito por linkgit:git-merge[1] cuando se resuelven conflictos de fusión. Contiene todos los identificadores de las confirmaciones que se están fusionando.
 
 [[def_submodule]]submódulo::
 	Un <<def_repository,repositorio>> que mantiene el historial de un proyecto separado dentro de otro repositorio; a este último se le llama <<def_superproject,superproyecto>>.

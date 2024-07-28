@@ -28,7 +28,7 @@ SYNOPSIS
 	   [-f <file>] [-e] <motif>
 	   [--and|--or|--not|(|)|-e <motif>...]
 	   [--recurse-submodules] [--parent-basename <nom-de-base>]
-	   [ [--[no-]exclude-standard] [--cached | --no-index | --untracked] | <arbre>...]
+	   [ [--[no-]exclude-standard] [--cached | --untracked |--no-index] | <arbre>...]
 	   [--] [<spéc-de-chemin>...]
 
 DESCRIPTION
@@ -41,11 +41,13 @@ OPTIONS
 --cached::
 	Au lieu de rechercher les fichiers suivis dans l'arbre de travail, rechercher les blobs enregistrés dans le fichier d'index.
 
---no-index::
-	Rechercher les fichiers dans le répertoire actuel qui n'est pas géré par Git.
-
 --untracked::
 	En plus de rechercher dans les fichiers suivis dans l'arbre de travail, rechercher aussi dans les fichiers non-suivis.
+
+--no-index::
+	Recherche les fichiers dans le répertoire actuel qui n'est pas géré par Git, ou en ignorant que le répertoire actuel est géré par Git. Cela ressemble plutôt à l'exécution de l'utilitaire régulier `grep(1)` avec son option `-r` spécifiée, mais avec quelques avantages supplémentaires, tels que l'utilisation de motifs de spécificateurs de chemins pour limiter les chemins ; voir l'entrée 'spécificateurs de chemin' dans linkgit:gitglossary[7] pour plus d'informations.
++
+Cette option ne peut être utilisée avec `--cached` ou `--untracked`. Voir aussi `grep.fallbackToNoIndex` dans 'CONFIGURATION' ci-dessous.
 
 --no-exclude-standard::
 	Rechercher également dans les fichiers ignorés en n'honorant pas le mécanisme `.gitignore`. Seulement utile avec `--untracked`.
@@ -54,7 +56,7 @@ OPTIONS
 	Ne pas prêter attention aux fichiers ignorés spécifiés via le mécanisme `.gitignore`. Seulement utile lors de la recherche de fichiers dans le répertoire actuel avec `--no-index`.
 
 --recurse-submodules::
-	Rechercher récursivement dans chaque sous-module qui est actif et extrait dans l'arbre de travail. Lorsqu'il est utilisé en combinaison avec l'option <arbre>, le préfixe de toutes les sorties de sous-modules sera le nom de l'objet <arbre> du projet parent. Cette option n'a aucun effet si `--no-index` est donné.
+	Rechercher récursivement dans chaque sous-module qui est actif et extrait dans l'arbre de travail. Lorsqu'il est utilisé en combinaison avec l'option _<arbre>_, le préfixe de toutes les sorties de sous-modules sera le nom de l'objet _<arbre>_ du projet parent. Cette option ne peut pas être utilisée avec `--untracked` et n'a aucun effet si `--no-index` est donné.
 
 -a::
 --text::
@@ -134,7 +136,7 @@ La prise en charge de ces types d'expressions régulières est une dépendance o
 
 -z::
 --null::
-	Utiliser \ 0 comme délimiteur pour les noms de chemin dans la sortie et les afficher verbatim. Sans cette option, les noms de chemin avec des caractères « inhabituels » sont cités comme expliqué pour la variable de configuration core.quotePath (voir linkgit:git-config[1]).
+	Utiliser \ 0 comme délimiteur pour les noms de chemin dans la sortie et les afficher verbatim. Sans cette option, les noms de chemin avec des caractères « inhabituels » sont cités comme expliqué pour la variable de configuration` core.quotePath` (voir linkgit:git-config[1]).
 
 -o::
 --only-matching::
@@ -182,7 +184,7 @@ La prise en charge de ces types d'expressions régulières est une dépendance o
 	Limiter le nombre de correspondances par fichier. En utilisant l'option `-v` ou `--invert-match`, la recherche s'arrête après le nombre spécifié de non-correspondances. Une valeur de -1 retournera des résultats illimités (par défaut). Une valeur de 0 quittera immédiatement avec un statut non nul.
 
 --threads <num>::
-	Nombre de fils de travail de grep à utiliser. Voir `grep.threads` dans 'CONFIGURATION' pour plus d'informations.
+	Nombre de fils de travail de `grep` à utiliser. Voir 'NOTES SUR LES FILS' et `grep.threads` dans 'CONFIGURATION' pour plus d'informations.
 
 -f <fichier>::
 	Lire les motifs depuis <fichier>, un par ligne.
@@ -240,7 +242,7 @@ EXEMPLES
 NOTES SUR LES FILS
 ------------------
 
-L'option `--threads` (et la configuration de grep.threads) sera ignorée quand `--open-files-in-pager` est utilisé, forçant une exécution à un seul thread.
+L'option `--threads` (et la configuration de `grep.threads`) sera ignorée quand `--open-files-in-pager` est utilisé, forçant une exécution à un seul thread.
 
 Lors de l'exploration du magasin d'objets (avec `--cached` ou en donnant des objets arbre), l'exécution avec plusieurs threads peut être plus lente qu'avec un seul thread si `--textconv` est donné et qu'il y a trop de conversions de texte. Donc, si vous avez de faibles performances dans ce cas, il peut être souhaitable d'utiliser `--threads=1`.
 

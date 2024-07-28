@@ -31,18 +31,18 @@ Para mais informações sobre submódulos, consulte linkgit:gitsubmodules[7].
 
 COMANDOS
 --------
-Sem argumentos, exiba a condição geral dos submódulos já existentes. Vários subcomandos estão disponíveis para execução das operações nos submódulos.
+Sem argumentos, mostra a condição geral dos submódulos existentes. Vários subcomandos estão disponíveis para realizar operações nos submódulos.
 
 add [-b <ramo>] [-f|--force] [--name <nome>] [--reference <repositório>] [--depth <profundidade>] [--] <repositório> [<caminho>]::
 	Adicione o repositório informado como um submódulo no caminho especificado ao conjunto de alterações para ser feito o commit ao lado do projeto atual: o projeto atual é chamado de "superproject".
 +
-O <repositório> é o URL do repositório de origem do novo submódulo. Este pode ser um URL absoluto, ou (se começar com ./ ou ../), a localização relativa ao repositório predefinido do superprojeto remoto (Por favor note que para especificar um repositório 'foo.git' que está localizado bem ao lado de um superproject 'bar.git', você terá que usar `../foo.git` em vez de `./foo.git` - como se pode esperar quando se seguem as regras para URLs relativas - porque a avaliação das URLs relativas no Git é idêntica à dos diretórios relativos).
+<repositório> é a URL do repositório de origem do novo submódulo. Pode ser uma URL absoluta ou (se começar com './' ou '../'), o local relativo ao repositório remoto padrão do superprojeto (observe que, para especificar um repositório 'foo.git' onde está localizado um superprojeto 'bar.git', você terá que usar `../foo.git` em vez de `./foo.git` - como seria de se esperar ao seguir as regras para URLs relativas - porque a avaliação de URLs relativas no Git é idêntica à de diretórios relativos).
 +
-A predefinição do ramo remoto é que ele seja monitorado pelo ramo atual. Se esse ramo monitorado remotamente não exista ou o `HEAD` esteja desconectado, a "origin" será assumida como o ramo remoto predefinido. Caso o superprojeto não tenha predefinido um ramo remoto configurado, o superprojeto será o seu próprio upstream autoritativo e será utilizado o diretório de trabalho atual.
+O ramo remoto padrão é o ramo remote do ramo rastreado remotamente no ramo atual. Se não houver uma ramificação de rastreamento remoto ou se o `HEAD` for desanexado, a 'origin' será considerada o ramo remoto predefinido. Se o superprojeto não tiver um ramo remoto predefinido configurado, o superprojeto será o seu próprio topo autoritativo e o diretório de trabalho atual será usado em seu lugar.
 +
 O argumento opcional `<caminho>` é o local relativo para que o submódulo clonado exista no superprojeto. Caso o `<caminho>` não seja informado, a parte canônica do repositório da origem será utilizada ("repo" para o "/path/to/repo.git" e "foo" para o "host.xz:foo/.git"). Caso o `<caminho>` exista e já for um repositório Git válido, ele será preparado para o commit sem clonagem. O `<caminho>` também é utilizado como o nome lógico do sub-módulo nas suas entradas de configuração, a menos que `--name` seja utilizado para definir um nome lógico.
 +
-A URL informada é registrada no `.gitmodules` para a utilização dos subsequentes usuários que clonam o superprojeto. Caso a URL seja informada com relação ao repositório do superprojeto, a presunção que os repositórios do superprojeto e dos submódulos serão mantidos juntos, peóximos do mesmo local, somente a URL do superprojeto precisará ser informada. O comando `git-submodule` localizará corretamente o submódulo utilizando uma URL relativa em `.gitmodules`.
+A URL informada é registrado em `.gitmodules` para ser usado por usuários subsequentes que clonarem o superprojeto. Se a URL for informada em relação ao repositório do superprojeto, presume-se que os repositórios do superprojeto e do submódulo serão mantidos juntos no mesmo local relativo, e somente o URL do superprojeto precisará ser fornecido. O git-submodule localizará corretamente o submódulo usando a URL relativa em `.gitmodules`.
 
 status [--cached] [--recursive] [--] [<caminho>...]::
 	Exiba a condição geral dos submódulos. Irá exibir o SHA-1 do commit registrado atualmente para cada submódulo, junto com o caminho do submódulo e a saída do comando 'git description' para o SHA-1. Cada SHA-1 provavelmente será prefixado com `-` caso o submódulo não seja inicializado,`+` caso o commit verificado do submódulo atual não coincida com o SHA-1 encontrado no índice do repositório que contenha o `U` caso o submódulo tenha conflitos de mesclagem.
@@ -56,7 +56,7 @@ Caso apenas tenha interesse nas alterações dos submódulos inicializados no mo
 init [--] [<caminho>...]::
 	Inicialize os submódulos registrados no índice (que foram adicionados e confirmados em outro lugar) definindo `submodule.$name.url` em `.git/config`, usando a mesma configuração de `.gitmodules` como modelo. Se o URL for relativo, ele será resolvido usando o ramo remoto padrão. Se não houver um ramo remoto padrão, o repositório atual será considerado upstream.
 +
-Os argumentos opcionais do `<caminho>` limitam quais foram os submódulos que serão inicializados. Caso nenhum caminho seja informado e o `submodule.active` tenha sido configurado, apenas os submódulos configurados para estarem ativos serão inicializados, caso contrário, todos os submódulos serão.
+Os argumentos opcionais `<caminho>` limitam onde os submódulos serão inicializados. Se nenhum caminho for especificado e o `submodule.active` tiver sido configurado, os submódulos configurados para estarem ativos serão inicializados; caso contrário, todos os submódulos serão inicializados.
 +
 Ele também copiará o valor de `submodule.$name.update`, se estiver presente no arquivo `.gitmodules`, para `.git/config`, mas (1) esse comando não altera as informações existentes em `.git/config` e (2) `submodule.$name.update` definido como um comando personalizado *não* é copiado por motivos de segurança.
 +
@@ -73,10 +73,10 @@ Caso `--force` seja utilizado, a árvore de trabalho do submódulo será removid
 +
 Caso realmente deseja remover um submódulo do repositório e fazer o commit em vez disso utilize linkgit:git-rm[1] Para opções de remoção consulte linkgit:gitsubmodules[7].
 
-update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <repositório>] [--depth <profundidade>] [--recursive] [--jobs <n>] [--[no-]single-branch] [--filter <filter spec>] [--] [<caminho>...]::
+update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <repositório>] [--depth <profundidade>] [--recursive] [--jobs <n>] [--[no-]single-branch] [--filter <spec-do-filtro>] [--] [<caminho>...]::
 +
 --
-Atualize os submódulos registrados para que correspondam ao que o superprojeto espera, clonando os submódulos ausentes, buscando os commits ausentes nos submódulos e atualizando a árvore de trabalho dos submódulos. A "atualização" pode ser feita de várias maneiras, dependendo das opções da linha de comando e do valor da variável de configuração `submodule.<nome>.update`. A opção da linha de comando tem precedência sobre a variável de configuração. Se nenhum dos dois for fornecido, será realizado um "checkout". (Observação: o que está no arquivo `.gitmodules` é irrelevante neste momento; consulte `git submodule init` acima para saber como o `.gitmodules` é usado). Os procedimentos de "atualização" compatíveis tanto com a linha de comando quanto com a configuração `submodule.<nome>.update` são:
+Atualize os submódulos registrados para que correspondam ao que o superprojeto espera, clonando os submódulos ausentes, obtendo os commits ausentes nos submódulos e atualizando a árvore de trabalho dos submódulos. A "atualização" pode ser feita de várias maneiras, dependendo das opções da linha de comando e do valor da variável de configuração `submodule.<nome>.update`. A opção de linha de comando tem precedência sobre a variável de configuração. Se nenhum dos dois for fornecido, será realizado um 'checkout'. (Observação: o que está no arquivo `.gitmodules` é irrelevante neste momento; consulte o comando `git submodule init` acima para saber como o `.gitmodules` é usado). Os procedimentos de atualização 'update' compatíveis tanto com a linha de comando quanto com a configuração `submodule.<nome>.update` são:
 
 	checkout;; o commit registrado no superprojeto será verificado no submódulo do HEAD desanexado.
 +
@@ -96,7 +96,7 @@ Se o submódulo ainda não foi inicializado e você apenas deseja utilizar a con
 
 Caso a opção `--recursive` seja utilizada, este comando recursará nos submódulos registrados e atualizará todos os submódulos aninhados.
 
-Caso a opção `--filter <filter spec>` seja especificada, o filtro de clonagem parcial fornecido será aplicado ao submódulo. Consulte linkgit:git-rev-list[1] para obter mais detalhes sobre as especificações do filtro.
+Se a opção `--filter <spec-do-filtro>` for especificado, o filtro de clone parcial fornecido será aplicado ao submódulo. Consulte o linkgit:git-rev-list[1] para obter detalhes sobre as especificações do filtro.
 --
 set-branch (-b|--branch) <ramo> [--] <caminho>::
 set-branch (-d|--default) [--] <caminho>::
@@ -111,7 +111,7 @@ summary [--cached|--files] [(-n|--summary-limit) <n>] [commit] [--] [<caminho>..
 O uso da opção `--submodule=log` com linkgit:git-diff[1] também fornecerá estas informações.
 
 foreach [--recursive] <comando>::
-	Avalia um comando arbitrário do shell em cada sub-módulo averiguado. O comando tem acesso às variáveis `$name`, `$sm_path`, `$displaypath`, `$sha1` e `$toplevel`: '$name' é o nome da seção do submódulo relevante no `.gitmodules`, '$sm_path' é o caminho do submódulo conforme foi diretamente registrado no superprojeto, '$displaypath' contém o caminho relativo do diretório de trabalho atual para o diretório raiz dos sub-módulos, '$sha1' é o commit conforme registrado diretamente no superprojeto e '$toplevel' é o caminho absoluto e direto para o nível mais alto do superprojeto. Observe que para evitar conflitos com '$PATH' no Windows, a variável '$path' agora é um sinônimo obsoleto da variável '$sm_path'. Todos os submódulos definidos no superprojeto, mas sem averiguação, são ignorados por este comando. A menos que seja utilizado a opção `--quiet`, o 'foreach' imprime o nome de cada submódulo antes de avaliar o comando. Caso a opção `--recursive` seja utilizada, os submódulos serão percorridos de forma recursiva (ou seja, o comando shell informado também será avaliado nos submódulos aninhados). Um retorno do comando diferente de zero em qualquer submódulo, faz com que o processamento seja finalizado. Isso pode ser alterado adicionando '|| :' até o final do comando.
+	Avalia um comando de shell arbitrário em cada submódulo verificado. O comando tem acesso às variáveis `$name`, `$sm_path`, `$displaypath`, `$sha1` e `$toplevel`: O `$name` é o nome da seção relevante do submódulo em `.gitmodules`, `$sm_path` é o caminho do submódulo conforme registrado no superprojeto imediato, `$displaypath` contém o caminho relativo do diretório de trabalho atual para o diretório raiz do submódulo, `$sha1` é o commit conforme registrado no superprojeto imediato e `$toplevel` é o caminho absoluto para o topo imediato do superprojeto. Observe que, para evitar conflitos com `$PATH` no Windows, a variável `$path` agora é um sinônimo obsoleto da variável `$sm_path`. Todos os submódulos definidos no superprojeto, mas que não tenham sido verificados, são ignorados por esse comando. A menos que seja informado a opção `--quiet`, o 'foreach' imprime o nome de cada submódulo antes de avaliar o comando. Se a opção `--recursive` for usada, os submódulos serão percorridos recursivamente (ou seja, o comando do shell fornecido também será avaliado nos submódulos aninhados). Um retorno diferente de zero do comando em qualquer submódulo faz com que o processamento seja encerrado. Isso pode ser substituído pela adição de '|| :' ao final do comando.
 +
 Como um exemplo, o comando abaixo exibirá o caminho e a averiguação atual do commit para cada submódulo:
 +
@@ -140,91 +140,89 @@ OPÇÕES
 	Exiba apenas as mensagens de erro.
 
 --progress::
-	Esta opção só é válida para os comandos `add` e `update`. É predefinido que a condição geral do progresso seja relatada no fluxo de erros quando estiver conectado em um terminal, a menos que `-q` seja utilizado. Esta opção impõem a condição geral do progresso, mesmo que o fluxo de erro predefinido não seja direcionado para um terminal.
+	Essa opção só é válida para o comando `add` e `update`. A condição geral do progresso é relatada no fluxo de erro padrão por padrão quando ele é anexado a um terminal, a menos que a opção `-q` seja especificada. Esta opção impõem a condição geral de progresso, ainda que o fluxo de erro predefinido não seja direcionado a um terminal.
 
 --all::
 	Esta opção só é válida para o comando `deinit`. Cancele o registro de todos os submódulos na árvore de trabalho.
 
 -b <ramo>::
 --branch <ramo>::
-	O ramo do repositório para ser adicionado como um submódulo. O nome do ramo é registrado como `submodule.<nome>.branch` no `.gitmodules` para `update --remote`. Um valor especial de `.` é utilizado para indicar que o nome do ramo no submódulo deve ser o mesmo nome como o da ramificação atual, no repositório atual. Caso a opção não seja utilizada, a predefinição retorna para o 'HEAD' remoto.
+	O ramo do repositório que será adicionado como um submódulo. O nome do ramo é gravado como `submodule.<nome>.branch` em `.gitmodules` para `update --remote`. Um valor especial `.` é usado para indicar que o nome do ramo no submódulo deve ser o mesmo nome do ramo atual no repositório atual. Se a opção não for especificada, a predefinição é o `HEAD` remoto.
 
 -f::
 --force::
-	Esta opção só é válida para os comandos `add`, `deinit` e `update`. Ao executar `add`, permita adicionar um caminho ignorado do submódulo. Ao executar o `deinit`, as árvores de trabalho do submódulo serão removidos mesmo que contenham alterações locais. Ao executar `update` (efetiva apenas com o procedimento de averiguação), descarte as alterações locais nos submódulos durante a alternância para um commit diferente; sempre execute uma operação de averiguação no submódulo, mesmo que o commit listado no índice do repositório coincida com o commit averiguado no submódulo.
+	Esta opção só é válida para os comandos `add`, `deinit` e `update`. Ao executar `add`, permite adicionar um caminho de submódulo que de outra forma seria ignorado. Ao executar o 'deinit', as árvores de trabalho do submódulo serão removidas mesmo que contenham alterações locais. Ao executar o `update` (apenas eficaz com o procedimento de 'checkout'), descarte as alterações locais nos submódulos ao mudar para um commit diferente; e execute sempre uma operação de 'checkout' no submódulo, mesmo que o commit listado no índice do repositório que o contém corresponda ao commit verificado no submódulo.
 
 --cached::
-	Esta opção só é válida para os comandos `status` e `summary`. Esses comandos normalmente utilizam o commit encontrado no submódulo `HEAD`, porém o commit armazenado no índice que é utilizado em seu lugar.
+	Esta opção só é válida para os comandos `status`e `summary`. Esses comandos normalmente usam o commit encontrado no submódulo `HEAD`, mas com essa opção, o commit armazenado no índice é usado.
 
 --files::
 	Esta opção só é válida para o comando `summary`. Quando esta opção é utilizada o comando compara o commit no índice em conjunto com o que está no submódulo `HEAD`.
 
 -n::
 --summary-limit::
-	Esta opção só é válida para o comando `summary`. Limite o tamanho do resumo (quantidade de commits exibidos no total). O número 0 desativa o resumo; um número negativo significa ilimitado (já predefinido). Este limite se aplica apenas aos submódulos modificados. O tamanho é sempre limitado a 1 para os submódulos adicionado/excluído/tipo alterado.
+	Esta opção só é válida para o comando `summary`. Limitar o tamanho do resumo 'summary' (quantidade de commits mostrados no total). Usar 0 desativará o resumo 'summary'; um número negativo significa ilimitado (o padrão). Este limite só se aplica aos submódulos alterados. O tamanho é sempre limitado a 1 para submódulos adicionados/excluídos/alterados por tipo.
 
 --remote::
-	Esta opção só é válida para o comando update. Em vez de utilizar o SHA-1 registrado no superprojeto para atualizar o submódulo, utilize a condição geral do submódulo do ramo monitorado remotamente. O ramo remoto utilizado é o ramo (`branch.<nome>.remote`) predefinido para `origin`. O ramo remoto costumava retornar para o `HEAD` remoto, porém o nome do ramo pode ser substituído ao definir a opção `submodule.<nome>.branch` ou entre `.gitmodules` ou `.git/config` (onde `.git/config` tem prioridade).
+	Esta opção só é válida para o comando `update`. Em vez de usar o SHA-1 registrado do superprojeto para atualizar o submódulo, use a condição do submódulo da ramificação rastreada remotamente. O "remoto" usado é o ramo da ramificação remota (`branch.<nome>.remote`), cujo padrão é `origin`. A ramificação remota usada tem como padrão o `HEAD` remoto, mas o nome da ramificação pode ser substituído pela configuração da opção `submodule.<nome>.branch` em `.gitmodules` ou `.git/config` (tendo precedência o `.git/config`).
 +
-Funciona para qualquer um dos procedimentos compatíveis de atualização (`--checkout`, `--rebase`, etc.). A única alteração é a origem do SHA-1 do destino. Por exemplo, `submodule update --remote --merge` mesclará as alterações iniciais do submódulo nos submódulos, enquanto `submodule update --merge` mesclará as alterações do 'gitlink' do superprojeto nos submódulos.
+Isso funciona para qualquer um dos procedimentos de atualização compatíveis (`--checkout`, `--rebase`, etc.). A única alteração é a origem do SHA-1 de destino. Por exemplo, a opção `submodule update --remote --merge` mesclará as alterações do submódulo 'upstream' nos submódulos, enquanto a opção `submodule update --merge` mesclará as alterações do 'gitlink' do superprojeto nos submódulos.
 +
-Para garantir uma condição de monitoramento da ramificação atual, `update --remote` captura o repositório remoto do submódulo antes de calcular o seu SHA-1. Caso não queira capturar, utilize `submodule update --remote --no-fetch`.
+Para garantir a condição atual da ramificação de rastreamento, a opção `update --remote` busca pelo repositório remoto do submódulo antes de calcular o SHA-1. Se não quiser buscar, você deve usar a opção `submodule update --remote --no-fetch`.
 +
-Use esta opção para integrar as alterações a partir do subprojeto upstream ao `HEAD` atual do seu submódulo. Como alternativa, você pode executar o comando `git pull` a partir do submódulo, que é equivalente, exceto pelo nome do ramo remoto: `update --remote` utiliza o repositório upstream predefinido e `submodule.<nome>.branch`, enquanto `git pull` utiliza o submódulo `branch.<nome>.merge`. Prefira o `submodule.<nome>.branch` caso queira distribuir a ramificação upstream predefinido com o superprojeto e `branch.<nome>.merge` caso queira uma sensação mais nativa ao trabalhar no próprio submódulo.
+Use esta opção para integrar as alterações do subprojeto 'upstream' com o `HEAD` atual do seu submódulo. Como alternativa, você pode executar o `git pull` a partir do submódulo, o que é equivalente, exceto pelo nome do ramo remoto: a opção `update --remote` usa o repositório 'upstream' predefinido e o `submodule.<nome>.branch`, enquanto o comando `git pull` usa o `branch.<nome>.merge` do submódulo. Prefira `submodule.<nome>.branch` se quiser distribuir o ramo 'upstream' predefinido com o superprojeto e `branch.<nome>.merge` se quiser uma sensação mais nativa ao trabalhar no próprio submódulo.
 
 -N::
 --no-fetch::
-	Esta opção só é válida para o comando `update`. Não capture os novos objetos do site remoto.
+	Esta opção só é válida para o comando `update`. Não busque novos objetos no site remoto.
 
 --checkout::
-	Esta opção só é válida para o comando `update`. Faça a averiguação do commit registrado no superprojeto em um `HEAD` desanexado no submódulo. Este é o comportamento predefinido, a utilização principal desta opção é substituir o `submodule.$name.update` quando definido como um valor diferente do `checkout`. Caso a chave do `submodule.$name.update` não esteja nem explicitamente configurada ou definida com `checkout` (para averiguação), então esta opção se torna implícita.
+	Esta opção só é válida para o comando `update`. Faça o 'checkout' do commit registrado no superprojeto num `HEAD` desanexado no submódulo. Esse é o comportamento predefinido; o principal uso dessa opção é substituir `submodule.$name.update` quando definido com um valor diferente do `checkout`. Se a chave `submodule.$name.update` não estiver explicitamente definida ou estiver definida como `checkout`, essa opção será implícita.
 
 --merge::
-	Esta opção só é válida para o comando `update`. Mescle o commit registrado no superprojeto do ramo atual do submódulo. Caso esta opção seja utilizada, o `HEAD` do submódulo não será desconectado. Caso uma mesclagem falhe e interrompa este processo, será necessário resolver os conflitos resultantes no submódulo com as ferramentas habituais da resolução de conflitos. Caso a chave `submodule.$name.update` esteja configurada para `mesclar`, então esta opção se torna implícita.
+	Esta opção só é válida para o comando `update`. Mesclar o commit registrado no superprojeto na ramificação atual do submódulo. Se essa opção for fornecida, o `HEAD` do submódulo não será desanexado. Se uma falha de mesclagem impedir este processo, você terá que resolver os conflitos resultantes dentro do submódulo com as ferramentas usuais de resolução de conflitos. Se a chave `submodule.$name.update` estiver definida como `merge`, esta opção estará implícita.
 
 --rebase::
-	Esta opção só é válida para o comando `update`. Reorganize a fundação do ramo atual no commit registrado no superprojeto. Caso esta opção seja utilizada, o `HEAD` do submódulo não será desconectado. Caso uma mesclagem falhe e interrompa este processo, será necessário resolver os conflitos resultantes com linkgit:git-rebase[1]. Caso a chave `submodule.$name.update` esteja definida como `rebase`, então esta opção se torna implícita.
+	Esta opção só é válida para o comando `update`. Faça o 'rebase' do ramo atual para o commit registrado no superprojeto. Se essa opção for fornecida, o `HEAD` do submódulo não será desanexado. Se uma falha de mesclagem impedir este processo, você terá que resolver estas falhas com o comando linkgit:git-rebase[1]. Se a chave `submodule.$name.update` estiver definida como `rebase`, esta opção estará implícita.
 
 --init::
-	Esta opção só é válida para o comando `update`. Inicialize todos os submódulos para os quais o comando "git submodule init" não foi chamado até o momento antes da atualização.
+	Esta opção só é válida para o comando `update`. Inicialize todos os submódulos para onde o `git submodule init` não foi chamado até o momento antes da atualização.
 
 --name::
 	Esta opção só é válida para o comando `add`. Define o nome do submódulo para a carreira de caracteres informada em vez de padronizar o seu caminho. O nome deve ser válido como um nome de diretório e não pode terminar com um '/'.
 
 --reference <repositório>::
-	Esta opção só é válida para os comandos `add` e `update`. Às vezes estes comandos precisam clonar um repositório remoto. Neste caso, esta opção será passada ao comando linkgit:git-clone[1].
+	Essa opção só é válida para o comando `add` e `update`. Esses comandos às vezes precisam clonar um repositório remoto. Nesse caso, essa opção será encaminhada para o comando linkgit:git-clone[1].
 +
-*OBSERVAÇÃO*: *Jamais* utilize esta opção, a menos que você tenha lido as observações para
-as opções linkgit:git-clone[1]'s `--reference`, `--shared`, e `--dissociate`
-com muita atenção.
+*OBSERVAÇÃO*: *Jamais* utilize esta opção, a menos que você tenha lido com muita atenção as observações para linkgit:git-clone[1], `--reference`, `--shared`, e `--dissociate`.
 
 --dissociate::
-	Esta opção só é válida para os comandos `add` e `update`. Às vezes estes comandos precisam clonar um repositório remoto. Neste caso, esta opção será passada ao comando linkgit:git-clone[1].
+	Essa opção só é válida para o comando `add` e `update`. Esses comandos às vezes precisam clonar um repositório remoto. Nesse caso, essa opção será encaminhada para o comando linkgit:git-clone[1].
 +
-*OBSERVAÇÃO*: Consulte a OBSERVAÇÃO para a opção `--reference`.
+*OBSERVAÇÃO*: consulte a OBSERVAÇÃO sobre a opção `--reference`.
 
 --recursive::
-	Esta opção só é válida para os comandos `foreach`, `update`, `status` e `sync`. Transponha os submódulos recursivamente. A operação é executada não apenas nos submódulos do repositório atual, mas também em qualquer outro submódulo aninhado dentro desses submódulos (e assim por diante).
+	Essa opção só é válida para os comandos `foreach`, `update`, `status` e `sync`. Percorrer os submódulos recursivamente. A operação é realizada não apenas nos submódulos do repositório atual, mas também em quaisquer submódulos aninhados dentro desses submódulos (e assim por diante).
 
 --depth::
-	Esta opção é válida para os comandos `add` e `update`. Crie uma clonagem 'superficial' com um histórico truncado para uma quantidade determinada de revisões. Consulte linkgit:git-clone[1]
+	Esta opção é válida para os comandos `add` e `update`. Cria um clone superficial ('shallow') com um histórico truncado para o número especificado de revisões. Consulte linkgit:git-clone[1]
 
 --[no-]recommend-shallow::
-	Esta opção só é válida para o comando `update`. O clone inicial de um submódulo por predefinição, utilizará o `submodule.<nome>.shallow` recomendado conforme é fornecido pelo arquivo `.gitmodules`. Para ignorar as sugestões, utilize `--no-recommend-shallow`.
+	Esta opção só é válida para o comando `update`. O clone inicial de um submódulo usará o `submodule.<nome>.shallow` recomendado, conforme fornecido pelo arquivo `.gitmodules` predefinido. Para ignorar as sugestões, use a opção `--no-recommend-shallow`.
 
 -j <n>::
 --jobs <n>::
-	Esta opção só é válida para o comando `update`. Clone novos submódulos em paralelo com a mesmo quantidade de trabalhos. A predefinição retorna para a configuração existente em `submodule.fetchJobs`.
+	Esta opção só é válida para o comando `update`. Clonar os novos submódulos em paralelo com a mesma quantidade de trabalhos. A predefinição é o que estiver em `submodule.fetchJobs`.
 
 --[no-]single-branch::
-	Esta opção só é válida para o comando `update`. Clone apenas uma ramificação durante a atualização: `HEAD` ou uma definida pela opção `--branch`.
+	Esta opção só é válida para o comando `update`. Clone apejas um ramo durante a atualização: `HEAD` ou um ramo especificado pela opção `--branch`.
 
 <caminho>...::
-	Caminhos para o submódulo(s). Quando for utilizado, restringe o comando a operar apenas nos submódulos encontrados nos caminhos informados. (É obrigatório a utilização desta opção com o `add`).
+	Os caminhos para os submódulos. Quando especificada, esta opção restringirá o comando a operar apenas nos submódulos encontrados nos caminhos especificados. (Esta é uma exigência do argumento `add`).
 
 ARQUIVOS
 --------
-Durante a atualização dos submódulos um arquivo `.gitmodules` fica no topo do diretório do repositório que o contenha, é utilizado para encontrar a URL de cada submódulo. Este arquivo deve ser formatado da mesma maneira que `$GIT_DIR/config`. A chave para cada URL do submódulo é `submodule.$name.url`. Para mais detalhes consulte linkgit:gitmodules[5].
+Ao inicializar os submódulos, um arquivo `.gitmodules` no diretório do topo do repositório que o contém é usado para encontrar a URL de cada submódulo. Esta deve ser formatada da mesma forma que `$GIT_DIR/config`. A chave para cada URL de submódulo é `submodule.$name.url`. Para mais detalhes consulte linkgit:gitmodules[5].
 
 VEJA TAMBÉM
 -----------

@@ -3,33 +3,33 @@ ARQUIVO DE CONFIGURAÇÃO
 
 O arquivo de configuração do Git contém várias variáveis que afetam o comportamento dos comandos do Git. Os arquivos `.git/config` e opcionalmente `config.worktree` (consulte a seção "ARQUIVO DE CONFIGURAÇÃO" do linkgit:git-worktree[1]) em cada repositório são utilizados para armazenar a configuração para aquele repositório e o `$HOME/.gitconfig` é utilizado para armazenar uma configuração por usuário como valores alternativos para o arquivo `.git/config`. O arquivo `/etc/gitconfig` pode ser utilizado para armazenar a predefinição de uma configuração em todo o sistema.
 
-As variáveis de configuração são utilizadas pelo encanamento Git e pelos comandos porcelana. As variáveis são divididas em seções em que o nome completo da variável da variável em si é o último segmento separado por ponto e o nome da seção é tudo que estiver antes do último ponto. Os nomes das variáveis não diferenciam maiúsculas de minúsculas, permitem apenas os caracteres alfanuméricos e `-` que devem começar com um caractere alfabético. Algumas variáveis podem aparecer várias vezes; dizemos então que a variável possui diversos valores.
+As variáveis de configuração são usadas pelos comandos Git 'plumbing' e 'porcelain'. As variáveis são divididas em seções, sendo que o nome na variável totalmente qualificada da própria variável é o último segmento separado por pontos e o nome da seção é tudo o que vem antes do último ponto. Os nomes das variáveis não diferenciam maiúsculas de minúsculas, permitem apenas caracteres alfanuméricos e `-`, devem começar com um caractere alfabético. Algumas variáveis podem aparecer diversas vezes; dizemos então que a variável é multivalorada.
 
 Sintaxe
 ~~~~~~~
 
-A sintaxe é bastante flexível e permissiva; os espaços são ignorados na maioria das vezes. Os caracteres '#' e ';' define o começo dos comentários até o final da linha, as linhas em branco são ignoradas.
+The syntax is fairly flexible and permissive. Whitespace characters, which in this context are the space character (SP) and the horizontal tabulation (HT), are mostly ignored. The '#' and ';' characters begin comments to the end of line. Blank lines are ignored.
 
-O arquivo consiste em seções e variáveis. Uma seção começa com o nome da seção entre colchetes e continua até a próxima seção. Os nomes de seção não diferenciam as maiúsculas das minúsculas. Apenas os caracteres alfanuméricos, `-` e `.` são permitidos nos nomes das seções. Cada variável deve pertencer a alguma seção, o que significa que deve haver um cabeçalho da seção antes da primeira configuração de uma variável.
+O arquivo consiste em seções e variáveis. Uma seção começa com o nome da seção entre colchetes e continua até o início da próxima seção. Os nomes das seções não diferenciam maiúsculas de minúsculas. Apenas caracteres alfanuméricos, `-` e `.` são permitidos nos nomes das seções. Cana variável deve pertencer a alguma seção, o que significa que deve haver um cabeçalho da seção antes da primeira configuração de uma variável.
 
-As seções podem ser divididas em subseções. Para iniciar uma subseção, coloque seu nome entre aspas duplas, separado por um espaço do nome da seção, no cabeçalho da seção, como no exemplo abaixo:
+As seções podem ser divididas em subseções. Para iniciar uma subseção, coloque seu nome entre aspas duplas, separado pelo espaço do nome da seção no cabeçalho da seção, como mostra o exemplo abaixo:
 
 --------
 	[seção "subseção"]
 
 --------
 
-Os nomes das subseções diferenciam as maiúsculas das minúsculas, podem conter qualquer caractere, exceto os que definem uma nova linha e um byte nulo. As aspas duplas `"` e a barra invertida podem ser incluídas escapando-as como` \"` e `\\` respectivamente. As barras invertidas anteriores aos outros caracteres são descartadas durante a leitura; por exemplo, `\t` é lido como` t` e `\0` é lido como `0`. Os cabeçalhos da seção não podem abranger várias linhas. As variáveis podem pertencer diretamente a uma seção ou a uma determinada subseção. Você pode ter `[section]` caso tenha `[section "subsection"]`, mas não é necessário.
+Os nomes da subseção diferem maiúsculas de minúsculas e podem conter qualquer caractere, exceto o caracter de nova linha e byte nulo. Aspas duplas `"` e a barra invertida podem ser incluídas escapando-as como `\\"` e `\\`, respectivamente. As barras invertidas que precedam outros caracteres, são eliminadas durante a leitura; por exemplo, `t` e `\0` são lidos como `0`. Os cabeçalhos da seção não podem abranger diversas linhas. As variáveis podem pertencer diretamente a uma seção ou a uma determinada subseção. Você pode ter `[seção]` se tiver `[seção "subseção"]`, mas não é necessário.
 
 Também existe uma sintaxe obsoleta `[section.subsection]`. Com esta sintaxe o nome da subseção é convertido em minúsculas e também é comparado com distinção entre maiúsculas e minúsculas. Estes nomes de subseções seguem as mesmas restrições que os nomes de seção.
 
-Todas as outras linhas (e o restante da linha após o cabeçalho da seção) são reconhecidas como variáveis de configuração, no formato 'name=value' (ou apenas 'name', que é uma abreviação para dizer que a variável é um valor booleano 'true'). Os nomes das variáveis não diferenciam maiúsculas de minúsculas, permitem apenas os caracteres alfanuméricos e `-` que devem começar com um caractere alfabético.
+Todas as outras linhas (e o restante da linha após o cabeçalho da seção) são reconhecidas como variáveis de definição, no formulário 'name = valor' (ou apenas 'name', que é um atalho para dizer que a variável é um booleano "true"). Os nomes das variáveis não diferenciam maiúsculas de minúsculas, permitem apenas caracteres alfanuméricos e `-`, devem começar com um caractere alfabético.
 
-Uma linha que define um valor pode ser continuada para a próxima linha, terminando com um `\`; a barra inclinada e o final da linha são removidos. São descartados os espaços à esquerda após 'name=', o restante da linha após o primeiro caractere de comentário '#' ou ';' e os espaços à direita da linha a menos que estejam entre aspas duplas. Internamente os espaços com valores são retidos de forma literal.
+Whitespace characters surrounding `name`, `=` and `value` are discarded. Internal whitespace characters within 'value' are retained verbatim. Comments starting with either `#` or `;` and extending to the end of line are discarded. A line that defines a value can be continued to the next line by ending it with a backslash (`\`); the backslash and the end-of-line characters are discarded.
 
-Dentro de uma aspa dupla `"` e barra invertida `\` os caracteres podem ser utilizados literalmente: utilize `\"` para `"` e `\\` para `\`.
+If `value` needs to contain leading or trailing whitespace characters, it must be enclosed in double quotation marks (`"`). Inside double quotation marks, double quote (`"`) and backslash (`\`) characters must be escaped: use `\"` for `"` and `\\` for `\`.
 
-As seguintes sequências de escape (ao lado de `\"` e `\\`) são reconhecidos: `\n` para caracteres de nova linha (NL), `\t` para tabulação horizontal (HT, TAB) e `\b` para o backspace (BS). São validas também as outras sequências de escape de caracteres (incluindo sequências de escape octais).
+As seguintes sequências com caracteres de escape (além de `\"` e `\\`) são reconhecidas: `\n` para caractere de nova linha (NL), `\t` para tabulação horizontal (HT, TAB) e `\b` para backspace (BS). Outras seqüências com caracteres de escape (incluindo sequências de fuga octal) são inválidas.
 
 
 Inclui
@@ -39,7 +39,7 @@ As seções `include` e `includeIf` permitem que você inclua diretivas da confi
 
 Você pode incluir um arquivo da configuração de outro configurando a variável especial `include.path` (ou `includeIf.*.path`) como o nome do arquivo a ser incluído. A variável assume um nome do caminho como seu valor e está sujeita à expansão do til. Estas variáveis podem ser utilizadas várias vezes.
 
-O conteúdo do arquivo incluído é inserido imediatamente, como se tivesse sido encontrado no local da diretiva de inclusão. Caso o valor da variável seja um caminho relativo, o caminho será considerado relativo ao arquivo da configuração no qual a diretiva de inclusão foi encontrada. Veja os exemplos abaixo.
+O conteúdo do arquivo incluído é inserido imediatamente como se tivessem sido encontrados no local da diretiva incluir. Se o valor na variável for um caminho relativo, o caminho será considerado relativo ao arquivo de configuração onde a diretiva include foi encontrada. Veja os exemplos abaixo.
 
 Inclusão condicional
 ~~~~~~~~~~~~~~~~~~~~
@@ -68,7 +68,7 @@ O padrão pode conter curingas de mascaramento padrão e dois adicionais, `**/` 
 	É o mesmo que `gitdir` exceto que a coincidência é feita sem distinguir as maiúsculas das minusculas (em sistemas onde seja indiferente o sistema de arquivos não se importa com maiúsculas de minusculas)
 
 `onbranch`::
-	Os dados que seguem a palavra-chave `onbranch:` são considerados um padrão com caracteres curinga de mascaramento predefinidos e dois adicionais, `**/` e `/**`, que podem coincidir com vários componentes do caminho. Caso estejamos em uma árvore de trabalho cujo nome do ramo atual com check-out coincida com o padrão, a inclusão condicional será atendida.
+	Os dados que seguem a palavra-chave `onbranch:` são considerados um padrão com curingas de agrupamento padrão e dois curingas adicionais, `**/` e `/**`, que podem corresponder a vários componentes de caminho. Se estivermos numa árvore de trabalho onde o nome do ramo que está sendo verificado no momento corresponda ao padrão, a condição de inclusão será atendida.
 +
 Caso o padrão termine com `/`, `**` será adicionado automaticamente. O padrão `foo/` se torna `foo/**` por exemplo. Em outras palavras, ele coincide com todos os ramos que começam com `foo/`. Isso é útil pois caso as suas ramificações estejam organizadas hierarquicamente e você queira aplicar uma configuração em todas as ramificações nesta hierarquia.
 
@@ -160,7 +160,7 @@ booleano::
 
        Quando uma variável pega um valor booleano, muitos sinônimos são aceitos para 'true' e 'false', estes são todos insensíveis as mudanças de maiúsculas e minusculas.
 
-	verdadeiro;; Os verdadeiros literais booleanos são `yes`, `on`, `true` e `1`. Além disso, é considerada como verdadeira uma variável definida sem `= <valor>`.
+	verdadeiro;; Os valores válidos para verdadeiro num literal booleano são `yes`, `on`, `true` e `1`. Além disso, uma variável definida sem um valor `= <valor>` é considerado como verdadeiro.
 
 	falso;; Os falsos literais booleanos são `no`, `off`, `false`, `0` e a string vazia.
 +
@@ -172,21 +172,21 @@ inteiro::
 color::
        O valor de uma variável que pega uma cor de uma lista de cores (ao menos duas, uma para o primeiro plano e outra para o plano de fundo) e os atributos (quantos queira), separados por espaços.
 +
-As cores básicas que são aceitas são `normal` (normal), `black` (preto) , `red` (vermelho) , `green` (verde), `yellow` (amarelo) , `blue` (azul), `magenta` (magenta), `cyan` (ciano), `white` (branco) e `default` (predefinido). A primeira cor é o primeiro plano; a segunda é o plano de fundo. Todas as cores básicas, exceto `normal` e `default`, possuem uma variante brilhante da cor que pode ser definida com `bright`, assim como `brightred`.
+São aceitas as seguintes cores básicas `normal`, `black`, `red`, `green`, `yellow`, `blue`, `magenta`, `cyan`, `white` e `default`. A primeira cor informada é o primeiro plano; a segunda é o plano de fundo. Todas as cores básicas, exceto `normal` e `default`, têm uma variação brilhante que pode ser especificada prefixando a cor com `bright`, como `brightred`.
 +
 A cor `normal` não faz qualquer alteração na cor. É o mesmo que uma string vazia mas pode ser usada como a cor do primeiro plano ao definir apenas uma cor de fundo ("normal red" por exemplo).
 +
 A cor `default` repõe explicitamente a cor predefinida do terminal, por exemplo, para definir um fundo sem cor. Embora varie entre os terminais, isso normalmente não é o mesmo que definir para "white black" (branco preto).
 +
-As cores também podem ser utilizadas como números entre 0 e 255; estes usam o modo ANSI com 256 cores (note que nem todos os terminais são compatíveis). Caso o seu terminal seja compatível, você também pode definir os valores RGB de 24 bits como hexadecimais, `#ff0ab3` por exemplo.
+Colors may also be given as numbers between 0 and 255; these use ANSI 256-color mode (but note that not all terminals may support this). If your terminal supports it, you may also specify 24-bit RGB values as hex, like `#ff0ab3`, or 12-bit RGB values like `#f1b`, which is equivalent to the 24-bit color `#ff11bb`.
 +
-Os atributos compatíveis são `bold`, `dim`, `ul`, `blink`, `reverse`, `italic`, e `strike` (para letras cruzadas ou "rasuradas"). A posição de qualquer atributo em relação às cores (antes, depois ou entre) não importa. Atributos específicos podem ser desativados prefixando-os com `no` ou `no-` (por exemplo `noreverse`, `no-ul`, etc).
+Os atributos aceitos são `bold`, `dim`, `ul`, `blink`, `reverse`, `italic` e `strike` (para letras tachadas ou "strikethrough"). É indiferente a posição de qualquer atributo com relação às cores (antes, depois ou no meio). Atributos específicos podem ser desativados prefixando-os com `no` ou `no-` (por exemplo, `noreverse`, `no-ul` etc.).
 +
 O pseudo-atributo `reset` redefine todas as cores e os atributos antes de aplicar a cor definida. Por exemplo, o `reset green` resultará em um primeiro plano verde e o fundo padrão sem qualquer atributo ativo.
 +
 Uma sequência de cores vazias não produz nenhum efeito de cor. Isso pode ser utilizado para evitar colorir elementos específicos sem desabilitar totalmente a cor.
 +
-Para os slots com as cores predefinidas do git, os atributos devem ser redefinidos no início de cada item na saída colorida. Portanto ao definir a variável `color.decorate.branch` como` black` pintará esse nome do ramo como `preto` simples, mesmo se a coisa anterior na mesma linha de saída (abrir parênteses antes da lista dos nomes das ramificações na saída de `log --decorate` por exemplo) é definido para ser pintado com `bold` (negrito) ou algum outro atributo. No entanto, os formatos dos registros log personalizados podem fazer uma coloração mais complicada e em camadas, as formas negadas podem ser úteis lá.
+Para os espaços de cor predefinidos do git, os atributos devem ser redefinidos no início de cada item da saída colorida. Portanto, a configuração de `color.decorate.branch` como `black` pintará o nome da ramificação como `black`, mesmo que o item anterior na mesma linha de saída (abrir parênteses antes da lista de nomes de ramificações na saída `log --decorate` por exemplo) esteja configurado para ser pintado com `bold` ou algum outro atributo. No entanto, os formatos de registro personalizados podem fazer uma coloração mais complicada e em camadas, nesse caso, as formas negadas podem ser úteis.
 
 caminho do diretório::
 	Uma variável que recebe um valor para o nome do caminho pode receber uma cadeia de caracteres que começa com "`~/`" ou "`~user/`", a expansão usual do til acontece com essa cadeia de caracteres: `~/` é expandida para o valor `$HOME`, e `~user/` para o diretório inicial do usuário que foi definido.
@@ -197,23 +197,23 @@ Caso um caminho comece com `%(prefixo)/`, o restante será interpretado como um 
 Variáveis
 ~~~~~~~~~
 
-Observe que esta lista não é abrangente e não está completa. Para variáveis específicas do comando, você encontrará uma descrição mais detalhada na página apropriada do manual.
+Observe que essa lista não é abrangente e não está necessariamente completa. Para variáveis específicas de comando, você encontrará uma descrição mais detalhada na página apropriada do manual.
 
-Outras ferramentas relacionadas ao `git-related` podem usar as suas próprias variáveis. Ao inventar novas variáveis para utilização em sua própria ferramenta, certifique-se que os seus respectivos nomes não entram em conflito com os que já são utilizados pelo próprio Git e outras ferramentas populares, e descreva-os em sua documentação.
-
-include::config/advice.txt[]
-
-include::config/attr.txt[]
-
-include::config/core.txt[]
+Outras ferramentas relacionadas ao git podem usar e usam as suas próprias variáveis. Ao inventar novas variáveis para uso em sua própria ferramenta, certifique-se que seus nomes não entrem em conflito com aqueles usados pelo próprio Git e por outras ferramentas populares, descreva-os em sua própria documentação.
 
 include::config/add.txt[]
+
+include::config/advice.txt[]
 
 include::config/alias.txt[]
 
 include::config/am.txt[]
 
 include::config/apply.txt[]
+
+include::config/attr.txt[]
+
+include::config/bitmap-pseudo-merge.txt[]
 
 include::config/blame.txt[]
 
@@ -237,9 +237,11 @@ include::config/commit.txt[]
 
 include::config/commitgraph.txt[]
 
-include::config/credential.txt[]
-
 include::config/completion.txt[]
+
+include::config/core.txt[]
+
+include::config/credential.txt[]
 
 include::config/diff.txt[]
 
@@ -253,9 +255,9 @@ include::config/feature.txt[]
 
 include::config/fetch.txt[]
 
-include::config/format.txt[]
-
 include::config/filter.txt[]
+
+include::config/format.txt[]
 
 include::config/fsck.txt[]
 
@@ -267,9 +269,9 @@ include::config/gitcvs.txt[]
 
 include::config/gitweb.txt[]
 
-include::config/grep.txt[]
-
 include::config/gpg.txt[]
+
+include::config/grep.txt[]
 
 include::config/gui.txt[]
 
@@ -317,6 +319,8 @@ include::config/pager.txt[]
 
 include::config/pretty.txt[]
 
+include::config/promisor.txt[]
+
 include::config/protocol.txt[]
 
 include::config/pull.txt[]
@@ -326,6 +330,8 @@ include::config/push.txt[]
 include::config/rebase.txt[]
 
 include::config/receive.txt[]
+
+include::config/reftable.txt[]
 
 include::config/remote.txt[]
 
@@ -351,9 +357,9 @@ include::config/splitindex.txt[]
 
 include::config/ssh.txt[]
 
-include::config/status.txt[]
-
 include::config/stash.txt[]
+
+include::config/status.txt[]
 
 include::config/submodule.txt[]
 

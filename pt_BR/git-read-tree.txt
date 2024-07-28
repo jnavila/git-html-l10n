@@ -18,23 +18,23 @@ DESCRIÇÃO
 ---------
 Lê as informações da árvore informada através da `<árvore>` no índice, mas na verdade não *atualize* nenhum dos arquivos que ele "armazena em cache". (consulte: linkgit:git-checkout-index[1])
 
-Opcionalmente, ele pode mesclar uma árvore no índice, executar uma mesclagem de avanço rápido (isto é, bidirecional) ou uma mesclagem de três vias, com a opção `-m`. Quando utilizado com a opção `-m`, a opção `-u` faz com que ele também atualize os arquivos na árvore de trabalho com o resultado do que foi mesclado.
+Opcionalmente, ele pode mesclar uma árvore no índice, executar uma mesclagem de avanço rápido (ou seja, de 2 vias) ou uma mesclagem de 3 vias, com a opção `-m`. Quando usado com a opção `-m`, a opção `-u` faz com que ele também atualize os arquivos na árvore de trabalho com o resultado da mesclagem.
 
-Apenas mesclagens triviais são feitas através do próprio comando 'git read-tree'. Somente os caminhos conflitantes estarão numa condição inalterada de mesclagem quando o comando 'git read-tree' retornar.
+Apenas as mesclagens triviais são feitas pelo próprio comando 'git read-tree'. Apenas os caminhos conflitantes estarão numa condição não mesclada durante o retorno do comando 'git read-tree'.
 
 OPÇÕES
 ------
 -m::
-	Faça uma mesclagem e não apenas uma leitura. O comando se recusará a executar caso o arquivo do índice tiver entradas que não foram mescladas, indicando que você não concluiu uma mesclagem anterior iniciada anteriormente.
+	Performa uma mesclagem e não apenas uma leitura. O comando se recusará a ser executado se o arquivo no índice tiver entradas não mescladas, indicando que você não concluiu uma mesclagem anterior que você iniciou.
 
 --reset::
-	O mesmo que `-m`, exceto que as entradas não imersas são descartadas em vez de falharem. Quando utilizadas com a opção `-u`, as atualizações que levam à perda das alterações na árvore de trabalho ou nos arquivos ou diretório sem rastreamento, não interrompem a operação.
+	Igual a opção `-m`, exceto que as entradas não mescladas são descartadas em vez de falharem. Quando usado com a opção `-u`, as atualizações que levam à perda das alterações na árvore de trabalho ou dos arquivos ou dos diretórios não rastreados não abortarão a operação.
 
 -u::
 	Após uma mesclagem bem-sucedida, atualize os arquivos na árvore de trabalho com o resultado da mesclagem.
 
 -i::
-	Geralmente, uma mesclagem exige que o arquivo do índice e os arquivos da árvore de trabalho estejam atualizados com o commit principal atualizado, para que não se perca as alterações locais. Esta opção desativa a verificação com a árvore de trabalho e deve ser utilizado ao criar uma mesclagem das árvores que não estão diretamente relacionadas a condição atual da árvore de trabalho num arquivo do índice temporário.
+	Normalmente, para não perder as alterações locais, uma mesclagem exige que o arquivo no índice e os arquivos na árvore de trabalho estejam atualizados com o commit do cabeçalho atual. Esta opção desativa a verificação com a árvore de trabalho e deve ser usada ao criar uma mesclagem de árvores que não estejam diretamente relacionadas a condição atual da árvore de trabalho num arquivo temporário do índice.
 
 -n::
 --dry-run::
@@ -47,20 +47,20 @@ OPÇÕES
 	Restrinja a mesclagem de três vias através do comando 'git read-tree' para que aconteça apenas caso não seja necessário a mesclagem no nível do arquivo, em vez de resolver a mesclagem para casos triviais e deixar os arquivos conflitantes não resolvidos no índice.
 
 --aggressive::
-	Normalmente, uma mesclagem de três vias deita através do comando 'git read-tree' resolve a mesclagem para os casos realmente triviais e deixa os outros casos que não foram resolvidos no índice, para que as porcelanas possam implementar diferentes políticas de mesclagem. Esta opção faz com que o comando resolva mais alguns casos internamente:
+	Normalmente, uma mesclagem de 3 vias pelo 'git read-tree' resolve a mesclagem nos casos realmente triviais e deixa outros casos não resolvidos no índice para que as porcelanas possam implementar diferentes políticas de mesclagem. Esta opção faz com que o comando resolva mais alguns casos internamente:
 +
-* quando um lado remove um caminho e o outro lado não o altera. A solução é remover este caminho.
-* quando ambos os lados removernum caminho. A solução é remover este caminho.
-* quando os dois lados adicionarem um caminho idêntico. A resolução é adicionar este caminho.
+* Quando um lado remove um caminho e o outro lado deixa o caminho inalterado. A resolução é remover aquele caminho.
+* Quando ambos os lados removem um caminho. A resolução é remover aquele caminho.
+* Quando ambos os lados adicionam um caminho igualmente. A resolução é adicionar aquele caminho.
 
 --prefix=<prefixo>::
-	Mantenha o conteúdo do índice atual e leia o conteúdo do 'tree-ish' informado no diretório `<prefixo>`. O comando se recusará a substituir as entradas que já existiam no arquivo do índice original.
+	Mantenha o conteúdo do índice atual e leia o conteúdo da árvore mencionada sob o diretório em `<prefixo>`. O comando se recusará a substituir as entradas que já existiam no arquivo do índice original.
 
 --index-output=<arquivo>::
-	Em vez de escrever os resultados em `$GIT_INDEX_FILE`, escreva o índice resultante no arquivo informado. Enquanto o comando está em operação, o arquivo do índice original é bloqueado com o mesmo mecanismo de sempre. O arquivo deve permitir que seja rename(2)ed (renomeado) de um arquivo temporário criado ao lado do arquivo do índice tradicional; normalmente, significa que ele precisa estar no mesmo sistema de arquivos que o próprio arquivo do índice e é necessário ter permissão de gravação nos diretórios onde o arquivo de índice e o arquivo gerado do índice estejam localizados.
+	Em vez de gravar os resultados no `$GIT_INDEX_FILE`, grave o índice resultante no arquivo mencionado. Enquanto o comando estiver funcionando, o arquivo do índice original será bloqueado com o mesmo mecanismo de sempre. O arquivo deve permitir ser renomeado(2) a partir de um arquivo temporário criado ao lado do arquivo do índice usual; normalmente, isso significa que ele precisa estar no mesmo sistema de arquivos que o próprio arquivo de índice, e você precisa de permissão de gravação nos diretórios onde o arquivo do índice e o arquivo de saída do índice estão localizados.
 
 --[no-]recurse-submodules::
-	A utilização do --recurse-submodules atualizará o conteúdo de todos os submódulos ativos de acordo com o commit registrado no superprojeto ao chamar de forma recursiva o "read-tree" e também ao definir os submódulos para ser desanexados naquele commit.
+	A utilização do --recurse-submodules atualizará o conteúdo de todos os submódulos ativos de acordo com o commit registrado no superprojeto ao chamar de forma recursiva o "read-tree" e também ao definir os submódulos HEAD para ser desanexados naquele commit.
 
 --no-sparse-checkout::
 	Desative a compatibilidade com a verificação esparsa, mesmo que o `core.sparseCheckout` seja verdadeiro.
@@ -102,7 +102,7 @@ Quando duas árvores são definidas, o usuário informa ao 'git read-tree' o seg
 
      2. O usuário deseja avançar rapidamente para '$M'.
 
-Nesse caso, o comando `git read-tree -m $H $M` garante que nenhuma mudança local seja perdida como resultado desta "mesclagem". Aqui estão as regras "carry forward", onde "I" denota o índice, "clean" significa que o índice e a árvore de trabalho coincidem e "existe"/"nothing" se refere à presença de um caminho no commit informado:
+Nesse caso, o comando `git read-tree -m $H $M` garante que nenhuma alteração local seja perdida como resultado dessa "mesclagem". Aqui estão as regras de "transporte", onde "I" indica o índice, "clean" significa que o índice e a árvore de trabalho coincidem e "exists"/"nothing" se referem à presença de um caminho no commit informado:
 
 ....
 	I                   H        M        Result
@@ -145,11 +145,11 @@ Nesse caso, o comando `git read-tree -m $H $M` garante que nenhuma mudança loca
      21 não   sim   não      existe   existe   falha
 ....
 
-Em todos os casos "manter índice", a a entrada do índice permanece como no arquivo do índice original. Caso a entrada não esteja atualizada, o comando 'git read-tree' mantém intacta a cópia na árvore de trabalho ao operar sob a opção `-u`.
+Em todos os casos de "manter o índice", a entrada do índice permanece como no arquivo original do índice. Se a entrada não estiver atualizada, o comando 'git read-tree' manterá intacta a cópia na árvore de trabalho quando estiver operando com a opção `-u`.
 
-Quando esta forma do comando 'git read-tree' retorna com sucesso, é possível ver quais das "alterações locais" feitas foram executadas com o comando `git diff-index --cached $M`. Observe que isso não corresponde necessariamente ao que o comando `git diff-index --cached $H` teria produzido antes de uma fusão de duas árvores. Isto ocorre devido aos casos 18 e 19 -- caso já tenha as alterações em '$M' (talvez você tenha recebido por e-mail num formulário para um patch por exemplo), o comando `git diff-index --cached $H` teria retornado uma mudança antes desta mesclagem, porém não teria sido exibida na saída do comando `git diff-index --cached $M` após a mesclagem das duas árvores.
+Quando essa forma de 'git read-tree' for bem-sucedida, você poderá ver quais das "alterações locais" que você fez foram levadas adiante executando o comando `git diff-index --cached $M`. Observe que isso não corresponde necessariamente ao que o comando `git diff-index --cached $H` teria produzido antes dessa mesclagem de duas árvores. Isso ocorre devido aos casos 18 e 19 - se você já tivesse as alterações em $M (talvez você as tenha recebido como um patch por e-mail por exemplo), o `git diff-index --cached $H` teria informado sobre a alteração antes dessa mesclagem, mas ela não seria exibida na saída do comando `git diff-index --cached $M` após a mesclagem de duas árvores.
 
-O caso 3 é um pouco complicado e precisa de explicação. O resultado desta regra, logicamente deve ser remover o caminho caso o usuário tenha realizado a remoção do caminho e depois mude para uma nova ramificação. Isso, no entanto, impedirá que a averiguação inicial aconteça, portanto, a regra é modificada para utilizar 'M' (nova árvore) somente quando o conteúdo do índice estiver vazio. Caso contrário, a remoção do caminho será mantida desde que '$H' e '$'M' sejam os mesmos.
+O caso 3 é um pouco complicado e precisa de explicação. O resultado dessa regra, logicamente, deve ser a remoção do caminho se o usuário tiver encenado a remoção do caminho e, em seguida, a alteração para um novo ramo. No entanto, isso impedirá a realização do verificação inicial, portanto, a regra é alterada para usar M (uma nova árvore) somente quando o conteúdo do índice estiver vazio. Caso contrário, a remoção do caminho é mantida, desde que `$H` e `$M` sejam os mesmos.
 
 Mesclagem de 3 vias
 ~~~~~~~~~~~~~~~~~~~
@@ -163,7 +163,7 @@ Isso significa que você pode fazer
 $ git read-tree -m <tree1> <tree2> <tree3>
 ----------------
 
-e você terminará com um índice com todas as entradas <tree1> em "stage1", todas as entradas <tree2> em "stage2" e todas as entradas <tree3> no "stage3". Ao fazer uma mesclagem de um outro ramo no ramo atual, utilizamos a árvore ancestral comum como <tree1>, o cabeçalho da ramificação atual como <tree2> e o outro cabeçalho do ramo como <tree3>.
+Você terá um índice com todas as entradas `<árvore1>` em 'stage1', todas as entradas `<árvore2>` em 'stage2' e todas as entradas `<árvore3>` em 'stage3'. Ao realizar uma mesclagem de outro ramo no ramo atual, usamos a árvore ancestral comum como `<árvore1>`, o cabeçalho do ramo atual como `<árvore2>` e o cabeçalho do outro ramo como `<árvore3>`.
 
 Além disso, o comando 'git read-tree' possui uma lógica para caso especial que diz: caso você veja um arquivo que coincida em todos os aspectos nos seguintes condições, ele irá "retornar" novamente para "stage0":
 
@@ -177,7 +177,7 @@ O comando 'git write-tree' se recusa a escrever numa árvore sem sentido e irá 
 
 OK, tudo isso soa como uma coleção de regras totalmente sem sentido, mas na verdade é exatamente o que você quer para fazer uma fusão rápida. Os diferentes estágios representam a "árvore de resultados" (estágio 0, também informado como "mesclado"), a árvore original (estágio 1, também informado como "orig") e as duas árvores que você está tentando mesclar (estágio 2 e 3, respectivamente).
 
-A ordem dos estágios 1, 2 e 3 (portanto a ordem dos três argumentos da linha de comando <árvore>) tem importância quando você inicia uma mesclagem de três vias com um arquivo do índice que já esteja preenchido. Aqui está um resumo de como o algoritmo funciona:
+A ordem dos estágios 1, 2 e 3 (portanto a ordem dos três argumentos da linha de comando `<tree-ish>`) tem importância quando você inicia uma mesclagem de três vias com um arquivo do índice que já esteja preenchido. Aqui está um resumo de como o algoritmo funciona:
 
 - se um arquivo existir no formato idêntico em todas as três árvores, ele retornará automaticamente para a condição de "mesclado" através do comando 'git read-tree'.
 
@@ -189,27 +189,27 @@ A ordem dos estágios 1, 2 e 3 (portanto a ordem dos três argumentos da linha d
 
   * caso encontre um "estágio1", que não coincida com o "estágio2" ou "estágio3", você sabe que ele foi removido das duas árvores (existia apenas na árvore original) e você remove essa entrada.
 
-  * caso encontre uma árvore que coincida com "stage2" e "stage3", remova um deles e transforme o outro num lançamento no "stage0". Remova qualquer entrada que coincida com o "stage1", caso ela também exista. .. todas as regras triviais normais ..
+  * Se você encontrar uma árvore 'stage2' e 'stage3' correspondentes, remova uma delas e transforme a outra numa entrada 'stage0'. Remova qualquer entrada 'stage1' correspondente, se ela também existir. .. Todas as regras triviais normais ..
 
-Normalmente seria utilizado o comando 'git merge-index' com o comando 'git merge-one-file' informado para executar esta última etapa. O script atualiza os arquivos na árvore de trabalho à medida que mescla cada caminho e no final de uma mesclagem bem-sucedida.
+Normalmente, você usaria o comando `git merge-index` com o comando `git merge-one-file` fornecido para realizar esta última etapa. O script atualiza os arquivos na árvore de trabalho à medida que mescla cada caminho e ao final de uma mesclagem bem-sucedida.
 
-Quando você inicia uma mesclagem de três vias com um índice do arquivo já preenchido, supõe-se que ele represente o a condição geral dos arquivos na sua árvore de trabalho e você pode até ter arquivos com alterações não registradas no índice do arquivo. Supõe-se ainda que esta condição geral seja "derivado" da árvore do estágio 2. A mesclagem de três vias se recusa a executar caso encontre uma entrada no arquivo do índice original que não coincida com o estágio 2.
+Quando você inicia uma mesclagem de três vias com um arquivo já preenchido no índice, presume-se que ele represente a condição dos arquivos na sua árvore de trabalho, e você pode até mesmo ter arquivos com alterações não registradas no arquivo do índice. Supõe-se ainda que esse estado seja "derivado" da árvore no estágio 2. A mesclagem de 3 vias se recusa a ser executada caso encontre uma entrada original no arquivo do índice que não corresponda ao estágio 2.
 
-Isso é feito para impedir que você perca as alterações do trabalho ainda em andamento e misture as alterações aleatórias numa consolidação de uma mesclagem não relacionada. Para ilustrar, suponha que você comece de um commit que foi feito por último no seu repositório:
+Isso é feito para evitar que você perca as suas alterações de trabalho que estão em andamento e misture as suas alterações aleatórias num commit mesclado não relacionado. Para ilustrar, imagine que você comece a partir do último commit em seu repositório:
 
 ----------------
 $ JC=`git rev-parse --verify "HEAD^0"`
 $ git checkout-index -f -u -a $JC
 ----------------
 
-Você faz edições aleatórias, sem executar o 'git update-index'. E então percebe que o cume da sua árvore "upstream" avançou desde que você fez o "pull" dele:
+Você faz edições aleatórias, sem executar o comando `git update-index`. E então você percebe que o cume da sua árvore no topo (upstream) avançou desde que você se afastou dele:
 
 ----------------
 $ git fetch git://.... linus
 $ LT=`git rev-parse FETCH_HEAD`
 ----------------
 
-A sua árvore de trabalho ainda tem como base no seu HEAD ($ JC), mas você tem algumas edições desde então. A mesclagem de três vias garante que você não tenha adicionado ou modificado as entradas no índice desde $JC e, se não tiver, faz a coisa certa. Então, com a seguinte sequência:
+A sua árvore de trabalho ainda se baseia em seu `HEAD` (`$JC`), mas você fez algumas edições desde então. A mesclagem de 3 vias garante que você não adicionou ou modificou as entradas no índice desde `$JC` e, se não tiver feito, fará a coisa certa. Portanto, com a sequência a seguir:
 
 ----------------
 $ git read-tree -m -u `git merge-base $JC $LT` $JC $LT
@@ -222,17 +222,17 @@ o commit que seria feito é uma mesclagem direta entre $JC e $LT sem as alteraç
 
 No entanto, caso tenha alterações locais na árvore de trabalho que seriam substituídas através desta mesclagem, o comando 'git read-tree' se recusará a executar evitando que as suas alterações sejam perdidas.
 
-Em outras palavras, não há a necessidade de se preocupar com o que apenas exista na árvore de trabalho. Quando houver alterações locais numa parte do projeto que não está envolvida com a mesclagem, as suas alterações não interferem na mesclagem e são mantidas intactas. Quando há *interferência*, a mesclagem nem é iniciada (o comando 'git read-tree' faz o alerta e encerra sem alterar nada). Nesse caso, é possível continuar simplesmente fazendo o que estava fazendo no meio e quando a sua árvore de trabalho estiver pronta (ou seja, você concluiu o seu trabalho em andamento), tente mesclar novamente.
+Em outras palavras, não há necessidade de se preocupar com o que existe apenas na árvore de trabalho. Quando você tem alterações locais numa parte do projeto que não está envolvida na mesclagem, as suas alterações não interferem na mesclagem e são mantidas intactas. Quando eles *interferem*, a mesclagem nem sequer começa (o comando `git read-tree` reclama em voz alta e falha sem alterar nada). Nesse caso, você pode simplesmente continuar a fazer o que estava fazendo e, quando a árvore de trabalho estiver pronta (ou seja, você tiver concluído o trabalho em andamento), tente fazer a mesclagem novamente.
 
 
 AVERIGUAÇÃO ESPARSA
 -------------------
 
-Observação: Os recursos `skip-worktree` em linkgit:git-update-index[1] e `read-tree` antecederam a introdução do linkgit:git-sparse-checkout[1]. Os usuários são encorajados a usar o comando `sparse-checkout` de preferência em vez destes comandos para necessidades relacionadas ao sparse-checkout/skip-worktree. No entanto, as informações abaixo podem ser úteis para os usuários que estejam tentando entender o estilo do padrão usado no modo não cônico do comando `sparse-checkout`.
+Observação: Os recursos do 'skip-worktree' do comando linkgit:git-update-index[1] e `read-tree` são anteriores à introdução do linkgit:git-sparse-checkout[1]. Os usuários são incentivados a usar o comando `sparse-checkout` em vez destes comandos que possam ser redirecionados para necessidades relacionadas a `sparse-checkout` / `skip-worktree`. No entanto, as informações abaixo podem ser úteis para os usuários que tentam entender o estilo de predefinição usado no modo `non-cone` do comando `sparse-checkout`.
 
-A averiguação esparsa permite preencher minimamente o diretório de trabalho. Utiliza o bit "skip-worktree" (consulte linkgit:git-update-index[1]) para informar ao Git se vale a pena examinar um arquivo no diretório de trabalho.
+O 'aparse checkout' permite preencher o diretório de trabalho de maneira esparsa. Ele usa o bit `skip-worktree` (consulte linkgit:git-update-index[1]) para informar ao Git se vale a pena examinar um arquivo no diretório de trabalho.
 
-O coamndo 'git read-tree' e outros comandos com base na mesclagem ('git merge', 'git checkout' ...) podem ajudar a manter o bitmap 'skip-worktree' e a atualização do diretório de trabalho. O `$GIT_DIR/info/sparse-checkout` é utilizado para definir o bitmap da referência 'skip-worktree'. Quando o 'git read-tree' precisa atualizar o diretório de trabalho, ele redefine o bit 'skip-worktree' no índice com a base neste arquivo, que utiliza a mesma sintaxe dos arquivos '.gitignore'. Caso uma entrada coincida a um padrão neste arquivo, ou a entrada que corresponda com um arquivo presente na árvore de trabalho, então o 'skip-worktree' não será definido para esta entrada. Caso contrário, o 'skip-worktree' será definido.
+O `git read-tree` e outros comandos com base em mesclagem (`git merge`, `git checkout`...) podem ajudar a manter o bitmap do `skip-worktree` e a atualização do diretório de trabalho. O `$GIT_DIR/info/sparse-checkout` é usado para definir o bitmap de referência do `skip-worktree`. Quando o `git read-tree` precisa atualizar o diretório de trabalho, ele redefine o bit `skip-worktree` no índice com base nesse arquivo, que usa a mesma sintaxe dos arquivos '.gitignore'. Se uma entrada corresponder a uma predefinição nesse arquivo, ou se a entrada corresponder a um arquivo presente na árvore de trabalho, o `skip-worktree` não será definido nessa entrada. Caso contrário, o `skip-worktree` será definido.
 
 Em seguida, ele compara o novo valor 'skip-worktree' com o anterior. Caso o 'skip-worktree' mude de definido para não definido, ele adicionará o arquivo correspondente novamente. Caso passe de não definido para definido, esse arquivo será removido.
 

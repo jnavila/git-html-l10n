@@ -9,8 +9,8 @@ RESUMO
 ------
 [verse]
 'git show-ref' [--head] [-d | --dereference]
-	     [-s | --hash[=<n>]] [--abbrev[=<n>]] [--tags]
-	     [--heads] [--] [<pattern>...]
+	     [-s | --hash[=<n>]] [--abbrev[=<n>]] [--branches] [--tags]
+	     [--] [<pattern>...]
 'git show-ref' --verify [-q | --quiet] [-d | --dereference]
 	     [-s | --hash[=<n>]] [--abbrev[=<n>]]
 	     [--] [<ref>...]
@@ -26,7 +26,7 @@ Exiba as referências disponíveis em um repositório local, juntamente com as I
 
 O formulário `--exclude-existing` é um filtro que faz o inverso. Ele lê as refs do stdin, uma ref por linha, e mostra aquelas que não existem no repositório local.
 
-The `--exists` form can be used to check for the existence of a single references. This form does not verify whether the reference resolves to an actual object.
+A opção `--exists` pode ser usada para verificar a existência de uma única referência. Esta opção não verifica se a referência se refere a um objeto real.
 
 O uso deste utilitário é incentivado em favor do acesso direto aos arquivos no diretório `.git`.
 
@@ -37,10 +37,10 @@ OPÇÕES
 
 	Exibe a referência `HEAD`, mesmo que ela normalmente fosse filtrada.
 
---heads::
+--branches::
 --tags::
 
-	Limit to "refs/heads" and "refs/tags", respectively. These options are not mutually exclusive; when given both, references stored in "refs/heads" and "refs/tags" are displayed.
+	Limit to local branches and local tags, respectively. These options are not mutually exclusive; when given both, references stored in "refs/heads" and "refs/tags" are displayed. Note that `--heads` is a deprecated synonym for `--branches` and may be removed in the future.
 
 -d::
 --dereference::
@@ -54,20 +54,20 @@ OPÇÕES
 
 --verify::
 
-	Enable stricter reference checking by requiring an exact ref path. Aside from returning an error code of 1, it will also print an error message if `--quiet` was not specified.
+	Ative a verificação de referência mais rigorosa, exigindo um caminho de referência exato. Além de retornar 1 como código de erro, ele também imprimirá uma mensagem de erro caso a opção `--quiet` não tiver sido usada.
 
 --exists::
 
-	Check whether the given reference exists. Returns an exit code of 0 if it does, 2 if it is missing, and 1 in case looking up the reference failed with an error other than the reference being missing.
+	Verifica se a referência fornecida existe. Retorna 0 como um código de encerramento, se for o caso, 2 se estiver ausente e 1 se a busca da referência falhar com um erro que não seja a ausência da referência.
 
 --abbrev[=<n>]::
 
-	Abbreviate the object name. When using `--hash`, you do not have to say `--hash --abbrev`; `--hash=n` would do.
+	Abreviar o nome do objeto. Ao usar a opção `--hash`, você não precisa usar `--hash --abbrev`; a penas a opção `--hash=n` será o suficiente.
 
 -q::
 --quiet::
 
-	Do not print any results to stdout. Can be used with `--verify` to silently check if a reference exists.
+	Não gere nenhum resultado no stdout. Pode ser usado com `--verify` para verificar silenciosamente se uma referência existe.
 
 --exclude-existing[=<padrão>]::
 
@@ -81,7 +81,7 @@ OPÇÕES
 
 <padrão>...::
 
-	Show references matching one or more patterns. Patterns are matched from the end of the full name, and only complete parts are matched, e.g. 'master' matches 'refs/heads/master', 'refs/remotes/origin/master', 'refs/tags/jedi/master' but not 'refs/heads/mymaster' or 'refs/remotes/master/jedi'.
+	Mostra as referências que correspondam a um ou mais padrões. Os padrões são correspondidos a partir do final do nome completo e apenas as partes completas são correspondidas, por exemplo, 'master' corresponde a 'refs/heads/master', 'refs/remotes/origin/master', 'refs/tags/jedi/master', mas não a 'refs/heads/meumaster' ou 'refs/remotes/master/jedi'.
 
 SAÍDA
 -----
@@ -115,7 +115,7 @@ Ao usar `--hash` (e não `--dereference`), a saída está no formato:
 Por exemplo,
 
 -----------------------------------------------------------------------------
-$ git show-ref --heads --hash
+$ git show-ref --branches --hash
 2e3ba0114a1f52b47df29743d6915d056be13278
 185008ae97960c8d551adcd9e23565194651b5d1
 03adf42c988195b50e1a1935ba5fcbc39b2b029b
@@ -152,7 +152,7 @@ Para a criação de scripts, você pode pedir que ele fique quieto com a opção
 
 para verificar se um ramo específico existe ou não (observe como na verdade não queremos exibir os resultados e queremos usar o nome completo da "ref" para ele, a fim de não desencadear o problema com coincidências parciais e ambíguas).
 
-Para mostrar apenas as tags ou apenas os cabeçalhos dos ramos adequados, use a opção `--tags` e/ou `--heads` respectivamente (o uso de ambos significa que ele mostra as tags e os cabeçalhos, mas não outras referências aleatórias no subdiretório refs/).
+To show only tags, or only proper branch heads, use `--tags` and/or `--branches` respectively (using both means that it shows tags and branches, but not other random references under the refs/ subdirectory).
 
 Para fazer a remoção da referência automática da tag do objeto, use a opção `-d` ou a opção `--dereference`, para que você possa fazer
 

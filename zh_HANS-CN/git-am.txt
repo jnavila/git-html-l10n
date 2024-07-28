@@ -12,13 +12,13 @@ git-am - 从邮箱应用一系列修补程序
 'git am' [--signoff] [--keep] [--[no-]keep-cr] [--[no-]utf8] [--no-verify]
 	 [--[no-]3way] [--interactive] [--committer-date-is-author-date]
 	 [--ignore-date] [--ignore-space-change | --ignore-whitespace]
-	 [--whitespace=<选项>] [-C<n>] [-p<n>] [--directory=<目录>]
-	 [--exclude=<路径>] [--include=<路径>] [--reject] [-q | --quiet]
-	 [--[no-]scissors] [-S[<键 ID>]] [--patch-format=<格式>]
-	 [--quoted-cr=<行为>]
+	 [--whitespace=<action>] [-C<n>] [-p<n>] [--directory=<dir>]
+	 [--exclude=<path>] [--include=<path>] [--reject] [-q | --quiet]
+	 [--[no-]scissors] [-S[<keyid>]] [--patch-format=<format>]
+	 [--quoted-cr=<action>]
 	 [--empty=(stop|drop|keep)]
 	 [(<mbox> | <Maildir>)...]
-'git am' (--continue | --skip | --abort | --quit | --show-current-patch[=(diff|raw)] | --allow-empty)
+'git am' (--continue | --skip | --abort | --quit | --retry | --show-current-patch[=(diff|raw)] | --allow-empty)
 
 描述
 --
@@ -53,8 +53,17 @@ git-am - 从邮箱应用一系列修补程序
 --quoted-cr=<行为>::
 	这个标志将被传递给 'git mailinfo'（见 linkgit:git-mailinfo[1]）。
 
---empty=(stop|drop|keep)::
-	默认情况下，或者当该选项被设置为 'stop' 时，该命令在输入缺乏补丁的电子邮件时出错，并停止到当前 am 会话的中间。当这个选项被设置为 'drop' 时，跳过这样的电子邮件信息。 当这个选项被设置为 'keep' 时，会创建一个空的提交，将电子邮件的内容记录为日志。
+--empty=(drop|keep|stop)::
+	如何处理缺少补丁的电子邮件消息：
++
+--
+`drop`;;
+	该电子邮件会被跳过。
+`keep`;;
+	An empty commit will be created, with the contents of the e-mail message as its log.
+`stop`;;
+	The command will fail, stopping in the middle of the current `am` session. This is the default behavior.
+--
 
 -m::
 --message-id::
@@ -93,6 +102,8 @@ include::rerere-options.txt[]
 --include=<路径>::
 --reject::
 	这些标志会传递给应用补丁的 "git apply"（见 linkgit:git-apply[1]）程序。
++
+`--whitespace` 选项的有效 <行为> 有：`nowarn`、`warn`、`fix`、`error` 以及 `error-all`。
 
 --patch-format::
 	默认情况下，该命令将尝试自动检测补丁格式。这个选项允许用户绕过自动检测，并指定补丁的格式，以便将其解释为补丁。有效的格式是 mbox、mboxrd、stgit、stgit-series 和 hg。
@@ -132,6 +143,9 @@ include::rerere-options.txt[]
 
 --quit::
 	中止打补丁的操作，但保留 HEAD 和索引不被接触。
+
+--retry::
+	尝试再次应用最后冲突的补丁。这通常只在为重试尝试传递额外选项时有用（例如，`--3way`），否则你将再次看到相同的失败。
 
 --show-current-patch[=(diff|raw)]::
 	显示`git am` 因冲突而停止的消息。 如果指定了 `raw`，显示电子邮件的原始内容；如果是 `diff`，只显示差异部分。 默认为 `raw`。

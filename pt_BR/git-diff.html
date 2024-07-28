@@ -676,7 +676,7 @@ Implica no uso da opção <code>--patch</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Example: The following will count changed files, while ignoring directories with less than 10% of the total amount of changed files, and accumulating child directory counts in the parent directories: <code>--dirstat=files,10,cumulative</code>.</p>
+<p>Exemplo: O seguinte contará os arquivos alterados, ignorando os diretórios com menos de 10% da quantidade total de arquivos alterados e acumulando as contagens dos diretórios filhos nos diretórios pais: <code>--dirstat=files,10,cumulative</code>.</p>
 </div>
 </dd>
 <dt class="hdlist1">--cumulative</dt>
@@ -1778,8 +1778,207 @@ $ git diff -R                          <b class="conum">(2)</b></pre>
 <div class="paragraph">
 <p>Tudo abaixo desta linha nesta seção, está seletivamente incluído na documentação <a href="git-config.html"><b>git-config</b>(1)</a>. O conteúdo é o mesmo que é encontrado ali:</p>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">diff.autoRefreshIndex</dt>
+<dd>
+<p>Ao usar o <em>git diff</em> para comparar com os arquivos da árvore de trabalho, não considere apenas as alterações das estatísticas como alteradas. Em vez disso, execute silenciosamente o comando <code>git update-index --refresh</code> para atualizar as informações dos caminhos das estatísticas armazenadas em cache cujo conteúdo na árvore de trabalho corresponda ao conteúdo do índice. A predefinição desta opção é <em>true</em>. Observe que isso afeta apenas o comando porcelana <em>git diff</em>, e não os comandos <em>diff</em> de nível inferior, como o <em>git diff-files</em>.</p>
+</dd>
+<dt class="hdlist1">diff.dirstat</dt>
+<dd>
+<p>Uma lista separada por vírgulas dos parâmetros <code>--dirstat</code> que especifica o comportamento predefinido da opção <code>--dirstat</code> para <a href="git-diff.html"><b>git-diff</b>(1)</a> e companheiros. Os padrões podem ser substituídos na linha de comando (usando <code>--dirstat=&lt;parâmetro1,parâmetro2,...&gt;</code>). Os padrões de contingência (quando não são alterados pelo <code>diff.dirstat</code>) são <code>changes,noncumulative,3</code>. Os seguintes parâmetros estão disponíveis:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>changes</code></dt>
+<dd>
+<p>Calcule os números "dirstat" contando as linhas que foram removidas da fonte ou adicionadas ao destino. Ignora a quantidade de movimentos de código puro num arquivo. Em outras palavras, reorganizar as linhas num arquivo não conta tanto quanto as outras alterações. Este é o comportamento predefinido quando nenhum parâmetro for utilizado.</p>
+</dd>
+<dt class="hdlist1"><code>lines</code></dt>
+<dd>
+<p>Calcule os números "dirstat" fazendo a análise diferencial com base nas linhas regulares e somando as contagens das linhas removidas / adicionadas. (Para os arquivos binários, conte em blocos de 64 bytes, pois os arquivos binários não têm um conceito natural de linhas). Este é um comportamento mais dispendioso do <code>--dirstat</code> do que o comportamento <code>changes</code> (alterações), conta as linhas reorganizadas num arquivo tanto quanto as outras alterações. A produção resultante é consistente com o que você obtém das outras opções <code>--*stat</code>.</p>
+</dd>
+<dt class="hdlist1"><code>files</code></dt>
+<dd>
+<p>Calcule os números "dirstat" contando a quantidade de arquivos alterados. Cada arquivo alterado conta igualmente na análise do "dirstat". Este é o comportamento computacional mais barato do <code>--dirstat</code>, pois não precisa olhar o conteúdo do arquivo.</p>
+</dd>
+<dt class="hdlist1"><code>cumulative</code></dt>
+<dd>
+<p>Conta as alterações num diretório herdeiro e também para o diretório de origem. Observe que, ao utilizar <code>cumulative</code> (cumulativo), a soma das porcentagens relatadas pode exceder os 100%. O comportamento predefinido (não cumulativo) pode ser especificado com o parâmetro <code>noncumulative</code> (não cumulativo).</p>
+</dd>
+<dt class="hdlist1">&lt;limite&gt;</dt>
+<dd>
+<p>Um parâmetro inteiro especifica uma porcentagem de corte (a predefinição retorna para 3%). Os diretórios que contribuem com menos que esta porcentagem nas alterações não são exibidos na saída.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
 <div class="paragraph">
-<p>Unresolved directive in git-diff.txt - include::config/diff.txt[]</p>
+<p>Exemplo: O seguinte contará os arquivos alterados, ignorando os diretórios com menos de 10% da quantidade total dos arquivos alterados e acumulando as contagens de um diretório-herdado nos diretórios-raiz: <code>files,10,cumulative</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1">diff.statNameWidth</dt>
+<dd>
+<p>Limita a largura da parte do nome do arquivo gerado com <code>--stat</code>. Se definido, aplica-se a todos os comandos que geram arquivos com <code>--stat</code>, exceto <code>format-patch</code>.</p>
+</dd>
+<dt class="hdlist1">diff.statGraphWidth</dt>
+<dd>
+<p>Limita a largura da parte do gráfico gerado com <code>--stat</code>. Se definido, aplica-se a todos os comandos que geram arquivos com <code>--stat</code>, exceto <code>format-patch</code>.</p>
+</dd>
+<dt class="hdlist1">diff.context</dt>
+<dd>
+<p>Gera diffs com &lt;n&gt; linhas de contexto em vez do padrão, 3. Esse valor é substituído pela opção <code>-U</code>.</p>
+</dd>
+<dt class="hdlist1">diff.interHunkContext</dt>
+<dd>
+<p>Mostra o contexto entre as diferenças dos blocos, até a quantidade determinada de linhas, fundindo assim os blocos que estão próximos uns dos outros. Esse valor serve como padrão para a opção de linha de comando <code>--inter-hunk-context</code>.</p>
+</dd>
+<dt class="hdlist1">diff.external</dt>
+<dd>
+<p>Se essa variável de configuração for definida, a geração de diferenças não será realizada usando o mecanismo interno, e sim, usando o comando informado. Pode ser substituída pela variável de ambiente &#8216;GIT_EXTERNAL_DIFF&#8217;. O comando é invocado com parâmetros conforme descrito em "git Diffs" no <a href="git.html"><b>git</b>(1)</a>. Observação: se quiser usar um programa diff externo apenas num subconjunto dos seus arquivos, talvez seja melhor usar <a href="gitattributes.html"><b>gitattributes</b>(5)</a>.</p>
+</dd>
+<dt class="hdlist1">diff.ignoreSubmodules</dt>
+<dd>
+<p>Define os valores predefinidos de <code>--ignore-submodules</code>. Observe que isso afeta apenas o comando porcelana <em>git diff</em>, e não os comandos <em>diff</em> de nível inferior, como o <em>git diff-files</em>. O comando <em>git checkout</em> e o comando <em>git switch</em> também respeitam essa configuração ao reportar as alterações que não foram feitas. Ao definir a configuração como <em>all</em> desativa o resumo do submódulo que é normalmente exibido pelo comando <em>git commit</em> e por <em>git status</em> quando <code>status.submoduleSummary</code> estiver definido, a menos que seja substituído pela opção de linha de comando <code>--ignore-submodules</code>. Esta configuração não é afetada pelos comandos <em>git submodule</em>. É predefinido que, isso seja definido como "untracked" (não rastreado) para que quaisquer submódulos não rastreados sejam ignorados.</p>
+</dd>
+<dt class="hdlist1">diff.mnemonicPrefix</dt>
+<dd>
+<p>Se definido, o comando <em>git diff</em> usa um par de prefixos que é diferente do padrão "a/" e "b/", dependendo do que está sendo comparado. Quando essa configuração está em vigor, a saída reversa do diff também troca a ordem dos prefixos:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>git diff</code></dt>
+<dd>
+<p>Compara o (i)ndex (índice) e o (w)ork tree (árvore de trabalho);</p>
+</dd>
+<dt class="hdlist1"><code>git diff HEAD</code></dt>
+<dd>
+<p>Compara um (c)ommit e o (w)ork tree (árvore de trabalho);</p>
+</dd>
+<dt class="hdlist1"><code>git diff --cached</code></dt>
+<dd>
+<p>faz a comparação de um (c)ommit e o (i)ndice;</p>
+</dd>
+<dt class="hdlist1"><code>git diff HEAD:arquivo1 arquivo2</code></dt>
+<dd>
+<p>Compara um (o)bject (objeto) e um (w)ork tree (árvore de trabalho);</p>
+</dd>
+<dt class="hdlist1"><code>git diff --no-index a b</code></dt>
+<dd>
+<p>Compara duas coisas não git (1) e (2).</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1">diff.noprefix</dt>
+<dd>
+<p>Se definido, o <em>git diff</em> não exibe nenhum prefixo da origem ou do destino.</p>
+</dd>
+<dt class="hdlist1">diff.relative</dt>
+<dd>
+<p>Se definido como <em>true</em>, o <em>git diff</em> não mostrará as alterações fora do diretório e mostrará os nomes de caminho relativos ao diretório atual.</p>
+</dd>
+<dt class="hdlist1">diff.orderFile</dt>
+<dd>
+<p>Arquivo que indica como ordenar os arquivos num diff. Para mais detalhes consulte a opção <em>-O</em> do comando <a href="git-diff.html"><b>git-diff</b>(1)</a>. Se <code>diff.orderFile</code> for um nome de caminho relativo, ele será tratado como relativo no cume da árvore de trabalho.</p>
+</dd>
+<dt class="hdlist1">diff.renameLimit</dt>
+<dd>
+<p>A quantidade de arquivos que serão considerados na parte exaustiva da detecção de cópia/renomeação; equivalente à opção <code>-l</code> do <em>git diff</em>. Se não for definido, o valor predefinido atualmente é 1000. Essa configuração não terá efeito se a detecção de renomeação estiver desativada.</p>
+</dd>
+<dt class="hdlist1">diff.renames</dt>
+<dd>
+<p>Quando e como o Git detecta renomeações. Se estiver definido como "false" a detecção de renomeação está desativado. Se estiver definido como "true" a detecção básica de renomeação está ativada. Se estiver definido como "copies" ou "copy", o git também detectará as cópias. A predefinição é <em>true</em>. Observe que isso afeta apenas o comando porcelana "git diff", como <a href="git-diff.html"><b>git-diff</b>(1)</a> e <a href="git-log.html"><b>git-log</b>(1)</a>, e não comandos de nível inferior, como <a href="git-diff-files.html"><b>git-diff-files</b>(1)</a>.</p>
+</dd>
+<dt class="hdlist1">diff.suppressBlankEmpty</dt>
+<dd>
+<p>Um booleano para inibir o comportamento predefinido de imprimir um espaço antes de cada linha de saída vazia. A predefinição é <em>false</em>.</p>
+</dd>
+<dt class="hdlist1">diff.submodule</dt>
+<dd>
+<p>Defina o formato onde as diferenças nos submódulos são mostradas. O formato "curto" mostra apenas os nomes dos commits no início e no final do intervalo. O formato "log" lista os commits no intervalo como o <a href="git-submodule.html"><b>git-submodule</b>(1)</a> <code>summary</code> faz. O formato "diff" mostra um diff em linha do conteúdo alterado no submódulo. A predefinição é "short".</p>
+</dd>
+<dt class="hdlist1">diff.wordRegex</dt>
+<dd>
+<p>Uma expressão regular estendida POSIX usada para determinar o que é uma "word" (palavra) ao realizar cálculos de diferença palavra por palavra. As sequências de caracteres que correspondem à expressão regular são "palavras", todos os outros caracteres são espaços vazios que são <strong>ignoráveis</strong>.</p>
+</dd>
+<dt class="hdlist1">diff.&lt;driver&gt;.command</dt>
+<dd>
+<p>O comando personalizado do driver diff. Para mais detalhes consulte <a href="gitattributes.html"><b>gitattributes</b>(5)</a>.</p>
+</dd>
+<dt class="hdlist1">diff.&lt;driver&gt;.xfuncname</dt>
+<dd>
+<p>A expressão regular que o controlador (driver) do diff deve usar para reconhecer o cabeçalho do bloco. Também pode ser usado um padrão incorporado. Para mais detalhes consulte <a href="gitattributes.html"><b>gitattributes</b>(5)</a>.</p>
+</dd>
+<dt class="hdlist1">diff.&lt;driver&gt;.binary</dt>
+<dd>
+<p>Defina essa opção como <em>true</em> para que o controlador do diff trate os arquivos como binários. Para mais detalhes consulte <a href="gitattributes.html"><b>gitattributes</b>(5)</a>.</p>
+</dd>
+<dt class="hdlist1">diff.&lt;driver&gt;.textconv</dt>
+<dd>
+<p>O comando que o controlador do diff deve chamar para gerar a versão convertida em texto de um arquivo. O resultado da conversão é usado para gerar um diff legível para humanos. Para mais detalhes consulte <a href="gitattributes.html"><b>gitattributes</b>(5)</a>.</p>
+</dd>
+<dt class="hdlist1">diff.&lt;driver&gt;.wordRegex</dt>
+<dd>
+<p>A expressão regular que o controlador do diff deve usar para dividir as palavras numa linha. Para mais detalhes consulte <a href="gitattributes.html"><b>gitattributes</b>(5)</a>.</p>
+</dd>
+<dt class="hdlist1">diff.&lt;driver&gt;.cachetextconv</dt>
+<dd>
+<p>Defina essa opção como <code>true</code> para que o controlador do diff armazene em cache os arquivo gerados da conversão de texto. Para mais detalhes consulte <a href="gitattributes.html"><b>gitattributes</b>(5)</a>.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Unresolved directive in config/diff.txt - include::../mergetools-diff.txt[]</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">diff.indentHeuristic</dt>
+<dd>
+<p>Defina essa opção como <code>false</code> para desativar a heurística padrão que desloca os limites do bloco do diff facilitando a leitura dos patches.</p>
+</dd>
+<dt class="hdlist1">diff.algorithm</dt>
+<dd>
+<p>Escolha um algoritmo diff. As variantes são as seguintes:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>default</code>, <code>myers</code></dt>
+<dd>
+<p>O algoritmo diff ganancioso básico. Atualmente, este é o valor predefinido.</p>
+</dd>
+<dt class="hdlist1"><code>minimal</code></dt>
+<dd>
+<p>Expenda um tempo extra para garantir que o menor diferencial possível seja produzido.</p>
+</dd>
+<dt class="hdlist1"><code>patience</code></dt>
+<dd>
+<p>Utilize o algoritmo "patience diff" (ou diff de paciência) ao gerar os patches.</p>
+</dd>
+<dt class="hdlist1"><code>histogram</code></dt>
+<dd>
+<p>Este algoritmo estende o algoritmo "patience" (paciência) para "se compatível com os elementos comuns com baixa ocorrência".</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1">diff.wsErrorHighlight</dt>
+<dd>
+<p>Destaca erros de espaço vazio nas linhas <code>context</code>, <code>old</code> ou <code>new</code> do diff. Vários valores são separados por vírgula, <code>none</code> redefine os valores anteriores, <code>default</code> redefine a lista para <code>new</code>, e por fim <code>all</code> é uma abreviação de <code>old,new,context</code>. Os erros de espaço vazio são coloridos com <code>color.diff.whitespace</code>. A opção de linha de comando <code>--ws-error-highlight=&lt;tipo&gt;</code> substitui esta configuração.</p>
+</dd>
+<dt class="hdlist1">diff.colorMoved</dt>
+<dd>
+<p>Se definido como um <code>&lt;modo&gt;</code> válido ou um valor verdadeiro, as linhas movidas num diff são coloridas de forma diferente. Para obter detalhes sobre os modos válidos, consulte <em>--color-moved</em> do comando <a href="git-diff.html"><b>git-diff</b>(1)</a>. Se for definido como <em>true</em>, será utilizado o modo de cor predefinido. Quando definido como <em>false</em>, as linhas que foram movidas não serão coloridas.</p>
+</dd>
+<dt class="hdlist1">diff.colorMovedWS</dt>
+<dd>
+<p>Quando as linhas movidas são coloridas utilizando, por exemplo, a configuração <code>diff.colorMoved</code>, essa opção controla o <code>&lt;modo&gt;</code> como os espaços são tratados; para obter detalhes sobre os modos válidos, consulte a opção <em>--color-moved-ws</em> do comando <a href="git-diff.html"><b>git-diff</b>(1)</a>.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
@@ -1802,7 +2001,7 @@ $ git diff -R                          <b class="conum">(2)</b></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-31 16:03:00 +0200
+Last updated 2024-07-12 22:27:23 +0200
 </div>
 </div>
 </body>

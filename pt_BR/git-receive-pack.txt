@@ -15,9 +15,9 @@ DESCRIÇÃO
 ---------
 Chamado através do comando 'git send-pack' e atualiza o repositório com as informações fornecidas pelo terminal remoto.
 
-Este comando geralmente não é invocado diretamente pelo usuário final. O protocolo da interface do usuário está no lado 'git send-pack', e o par de programas deve ser utilizado para enviar atualizações para um repositório remoto. Para as operações "pull", veja see linkgit:git-fetch-pack[1].
+Normalmente, este comando não é invocado diretamente pelo usuário final. A interface do usuário do protocolo está no lado do comando 'git send-pack', e o par de programas deve ser usado para enviar as atualizações para um repositório remoto. Para operações 'pull', consulte linkgit:git-fetch-pack[1].
 
-O comando permite a criação e o encaminhamento rápido de refs sha1 (cabeçalhos/tags) na extremidade remota (a rigor, é o 'git-receive-pack' da extremidade local que é executado, mas para o usuário que está sentado na extremidade do pacote de envio, ele está atualizando o remoto. Ficou confuso?)
+O comando permite a criação e o encaminhamento rápido de refs sha1 (cabeçalhos/etiquetas) no lado remoto (a rigor, é o comando `git-receive-pack` do lado local que é executado, mas para o usuário que está no lado local do envio do pacote, ele está atualizando o lado remoto. Confuso?)
 
 Existem outros exemplos no mundo real da utilização dos ganchos de atualização e pós-atualização encontrados no diretório 'Documentation/howto'.
 
@@ -35,13 +35,13 @@ OPÇÕES
 
 O GANCHO DE PRÉ-RECEBIMENTO
 ---------------------------
-Antes de qualquer "ref" ser atualizada, caso o arquivo '$GIT_DIR/hooks/pre-receive' existir e for executável, ele será chamado uma vez e sem parâmetros. A entrada predefinido do gancho será uma linha por referência que será atualizada:
+Antes que qualquer ref seja atualizada, se o arquivo `$GIT_DIR/hooks/pre-receive` existir e for executável, ele será invocado uma vez sem parâmetros. A entrada predefinida do gancho será uma linha por ref que será atualizada:
 
        sha1-old SP sha1-new SP refname LF
 
-O valor do 'refname' é relativo ao `$GIT_DIR`; por exemplo, para a cabeçalho principal, isto é "refs/heads/master". Os dois valores sha1 antes de cada 'refname' são os nomes dos objetos para o 'refname' antes e depois da atualização. As refs que serão criadas terão um sha1 antigo igual a '0\{40}', enquanto as refs que serão excluídas terão um sha1 novo igual a 0\{40}, caso contrário, tanto o sha1 novo quanto o sha1 antigo devem ser objetos válidos no repositório.
+O valor do refname é relativo a `$GIT_DIR`; por exemplo, para o cabeçalho principal, é `refs/heads/master`. Os dois valores sha1 antes de cada refname são os nomes de objeto para o refname antes e depois da atualização. As referências que serão criadas terão 'sha1-old' igual a `0\{40}`, enquanto as referências que serão excluídas terão o 'sha1-new' igual a `0\{40}`; caso contrário, 'sha1-old' e o 'sha1-new' devem ser objetos válidos no repositório.
 
-Ao aceitar um impulsionamento assinado (consulte linkgit:git-push[1]), o certificado deste impulsionamento assinado é armazenado numa bolha e numa variável `GIT_PUSH_CERT` do ambiente onde o seu nome do objeto pode ser consultado. Um exemplo pode ser visto consultando a descrição do gancho `post-receive`. Além disso, o certificado é verificado utilizando o GPG e seu resultado é exportado com as seguintes variáveis de ambiente:
+Ao aceitar um `push` assinado (consulte linkgit:git-push[1]), o certificado do `push` assinado é armazenado num bolha e uma variável de ambiente `GIT_PUSH_CERT` pode ser consultada para obter o nome do objeto. Consulte a descrição do gancho `post-receive` para ver um exemplo. Além disso, o certificado é verificado usando GPG e o resultado é exportado com as seguintes variáveis de ambiente:
 
 `GIT_PUSH_CERT_SIGNER`::
 	O nome e o endereço do e-mail do proprietário da chave que assinou o certificado push.
@@ -53,7 +53,7 @@ Ao aceitar um impulsionamento assinado (consulte linkgit:git-push[1]), o certifi
 	A condição da verificação do certificado GPG do impulsionamento utiliza o mesmo processo mnemônico de como é utilizado em `%G?`, formato da família de comandos `git log` (consulte linkgit:git-log[1]).
 
 `GIT_PUSH_CERT_NONCE`::
-	A sequência nonce que o processo solicitou ao assinante para incluir no certificado "push". Caso isso não corresponda ao valor registrado no cabeçalho "nonce" no certificado "push", isso pode indicar que o certificado é válido e está sendo reproduzido numa sessão separada do comando "git push".
+	A string "nonce" que o processo solicitou ao signatário para incluir no certificado do `push`. Se isso não corresponder ao valor registrado no cabeçalho "nonce" do certificado do `push`, isso pode indicar que o certificado é válido e está sendo reproduzido a partir de uma sessão separada do `git push`.
 
 `GIT_PUSH_CERT_NONCE_STATUS`::
 `UNSOLICITED`;;
@@ -65,14 +65,14 @@ Ao aceitar um impulsionamento assinado (consulte linkgit:git-push[1]), o certifi
 `OK`;;
 	O comando "git push --signed" enviou o nonce que pedimos para ser enviado.
 `SLOP`;;
-	O comando "git push --signed" enviou um nonce diferente do que foi pedido para enviar agora, porém numa sessão anterior. Consulte a variável de ambiente `GIT_PUSH_CERT_NONCE_SLOP`.
+	O comando `git push --signed` enviou um "nonce" diferente do que pedimos para enviar agora, porém, numa sessão anterior. Consulte a variável de ambiente `GIT_PUSH_CERT_NONCE_SLOP`.
 
 `GIT_PUSH_CERT_NONCE_SLOP`::
-	O comando "git push --signed" enviou um nonce diferente do que foi pedido agora, porém numa sessão diferente, cujo horário do início e é diferente em muitos segundos da sessão atual. So faz sentido quando `GIT_PUSH_CERT_NONCE_STATUS` diz `SLOP`. Leia também sobre a variável `receive.certNonceSlop` no linkgit:git-config[1].
+	O comando `git push --signed` enviou agora um "nonce" diferente do que pedimos para enviar, mas numa sessão diferente, cujo horário de início é diferente em tantos segundos da sessão atual. Só tem sentido quando `GIT_PUSH_CERT_NONCE_STATUS` diz `SLOP`. Leia também sobre a variável `receive.certNonceSlop` do comando linkgit:git-config[1].
 
 Este gancho é chamado antes que qualquer "refname" seja atualizado e antes que qualquer verificação de avanço rápido seja executada.
 
-Caso o gancho 'pre-receive' termine com uma condição diferente de zero, nenhuma atualização será executada, a atualização, os ganchos 'pre-receive' e 'post-update' também não serão invocados. Isso pode ser útil para o resgate rápido caso a atualização não seja compatível.
+Se o gancho de pré-recebimento for encerrado com uma condição diferente de zero, nenhuma atualização será executada e os ganchos de atualização, de pós-recebimento e de pós-atualização também não serão invocados. Isso pode ser útil para encerrar rapidamente se a atualização não for suportada.
 
 Veja as notas sobre o ambiente de quarentena abaixo.
 
@@ -82,23 +82,23 @@ Antes de cada "ref" que será atualizada, caso o arquivo '$GIT_DIR/hooks/update'
 
        $GIT_DIR/hooks/update refname sha1-old sha1-new
 
-O parâmetro "refname" é relativo ao `$GIT_DIR`; por exemplo, para a cabeçalho principal, isto é "refs/heads/master". Os dois argumentos sha1 são os nomes dos objetos para o "refname" antes e depois da atualização. Observe que o gancho é chamado antes que o "refname" seja atualizado; portanto, o sha1 antigo é 0\{40} (o que significa que essa "ref" ainda não existe) ou deve coincidir ao que está registrado no "refname".
+O parâmetro "refname" é relativo a variável `$GIT_DIR`; por exemplo, para o cabeçalho principal, é "refs/heads/master". Os dois argumentos sha1 são os nomes do objeto para o refname antes e depois da atualização. Observe que o gancho é invocado antes que o refname seja atualizado, portanto, ou 'sha1-old' é `0\{40}` (o que significa que ainda não existe tal ref) ou deve corresponder ao que está registrado em refname.
 
-O gancho deve encerrar com uma condição diferente de zero caso queira impedir a atualização da "ref" informada. Caso contrário, ele deve encerrar com zero.
+O gancho deve encerrar com uma condição diferente de zero se quiser impedir a atualização da referência informada. Caso contrário, ele deve encerrar com zero.
 
-Uma execução bem-sucedida (uma condição de encerramento com zero) deste gancho não garante que a "ref" seja realmente atualizada; é apenas um pré-requisito. Como tal, não é uma boa ideia enviar avisos (por email por exemplo) deste gancho. Em vez disso, considere utilizar o gancho pós-recebimento.
+A execução bem-sucedida (uma condição de encerramento igual a zero) deste gancho não garante que a referência será de fato atualizada, é apenas um pré-requisito. Portanto, não é uma boa ideia enviar avisos (e-mail por exemplo) a partir deste gancho. Em vez disso, considere usar o gancho de pós-recebimento.
 
 O GANCHO DO PÓS-RECEBIMENTO
 ---------------------------
-Depois da atualização de todas as refs (ou que tentaram ser atualizadas), caso alguma atualização seja bem-sucedida e se o arquivo '$GIT_DIR/hooks/post-receive' existir e for executável, ele será chamado uma vez sem parâmetros. A entrada padrão do gancho será uma linha para cada 'ref' atualizada com êxito:
+Depois que todas as refs forem atualizadas (ou tentarem ser atualizadas), se alguma atualização de ref for bem-sucedida, se o arquivo `$GIT_DIR/hooks/post-receive` existir e for executável, ele será invocado uma vez sem parâmetros. A entrada predefinida do gancho será uma linha para cada ref. atualizada com sucesso:
 
        sha1-old SP sha1-new SP refname LF
 
-O valor do 'refname' é relativo ao `$GIT_DIR`; por exemplo, para a cabeçalho principal, isto é "refs/heads/master". Os dois valores sha1 antes de cada 'refname' são os nomes dos objetos para o 'refname' antes e depois da atualização. As refs que serão criadas terão um sha1 antigo igual a '0\{40}', enquanto as refs que serão excluídas terão um sha1 novo igual a 0\{40}, caso contrário, tanto o sha1 novo quanto o sha1 antigo devem ser objetos válidos no repositório.
+O valor do refname é relativo a `$GIT_DIR`; por exemplo, para o cabeçalho principal, é `refs/heads/master`. Os dois valores sha1 antes de cada refname são os nomes de objeto para o refname antes e depois da atualização. As referências que foram criadas terão o 'sha1-old' igual a `0\{40}`, enquanto as referências que foram excluídas terão o 'sha1-new' igual a `0\{40}`; caso contrário, o 'sha1-old' e o 'sha1-new' devem ser objetos válidos no repositório.
 
 As variáveis de ambiente `GIT_PUSH_CERT*` podem ser inspecionadas, assim como no gancho de `pré-recebimento`, após aceitar um "push" assinado.
 
-Com a utilização deste gancho, é fácil gerar e-mails descrevendo as atualizações no repositório. Este script de demonstração envia uma mensagem de e-mail listando cada "ref" dos commits impulsionados ao repositório e faz o registro dos certificados dos impulsionamentos assinados com boas assinaturas num serviço para o registro dos eventos:
+Usando esse gancho, é fácil gerar e-mails descrevendo as atualizações do repositório. Este script de exemplo envia uma mensagem de e-mail por ref listando os commits enviados para o repositório e registra os certificados do `push` realizado dos envios assinados com as assinaturas para um serviço de registro log:
 
 ----
 #!/bin/sh
@@ -128,11 +128,11 @@ exit 0
 
 O código de encerramento vindo desta invocação do gancho é ignorado; no entanto, um código de encerramento diferente de zero gera uma mensagem de erro.
 
-Observe que é possível para o "refname" não ter um sha1 novo durante a execução deste gancho. Isso pode ocorrer facilmente caso outro usuário modifique a "ref" após a atualização do 'git-receive-pack', porém antes que o gancho possa avaliá-lo. Recomenda-se que os ganchos confiem no sha1 novo ao invés do valor atual do "refname".
+Observe que é possível que o refname não tenha 'sha1-new' quando esse gancho for executado. Isso pode ocorrer facilmente se outro usuário modificar a referência depois que ela foi atualizada pelo comando 'git-receive-pack', mas antes que o gancho possa avaliá-la. Recomenda-se que os ganchos dependerem do 'sha1-new' em vez do valor atual do refname.
 
 O GANCHO DE PÓS-ATUALIZAÇÃO
 ---------------------------
-Após todos os outros processamentos, se pelo menos uma 'ref' foi atualizada e caso o arquivo '$GIT_DIR/hooks/post-update' existe e é executável, então o "post-update" (pós-atualização) será chamada com a lista das 'refs' que foram atualizadas. Isso pode ser utilizado para implementar qualquer outra tarefa de limpeza em todo o repositório.
+Após todos os outros processamentos, se pelo menos uma ref tiver sido atualizada e se o arquivo `$GIT_DIR/hooks/post-update` existir e for executável, o "post-update" será invocado com a lista de referências que foram atualizadas. Isso pode ser utilizado para implementar qualquer outra tarefa de limpeza em todo o repositório.
 
 O código de saída deste gancho de chamada é ignorado; a única coisa que resta para o 'git-receive-pack' nesse ponto é encerrar de qualquer maneira.
 

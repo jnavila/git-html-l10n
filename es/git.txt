@@ -11,9 +11,10 @@ SINOPSIS
 [verse]
 'git' [-v | --version] [-h | --help] [-C <ruta>] [-c <nombre>=<valor>]
     [--exec-path[=<ruta>]] [--html-path] [--man-path] [--info-path]
-    [-p|--paginate|-P|--no-pager] [--no-replace-objects] [--bare]
-    [--git-dir=<ruta>] [--work-tree=<ruta>] [--namespace=<nombre>]
-    [--config-env=<nombre>=<var-ambiente>] <comando> [<args>]
+    [-p | --paginate| -P | --no-pager] [--no-replace-objects] [--no-lazy-fetch]
+    [--no-optional-locks] [--no-advice] [--bare] [--git-dir=<ruta>]
+    [--work-tree=<ruta>] [--namespace=<nombre>] [--config-env=<nombre>=<var-ambiente>]
+    <comando> [<argumentos>]
 
 DESCRIPCIÓN
 -----------
@@ -97,7 +98,16 @@ Si sólo quieres correr git como si fuera arrancado en `<ruta>` entonces usa `gi
 	Trata el repositorio como un repositorio básico. Si la variable de ambiente GIT_DIR no esta asignada, se asigna al directorio de trabajo actual.
 
 --no-replace-objects::
-	No usa remplazamiento de referencias para remplazar objetos Git. Ver linkgit:git-replace[1] para mas información.
+	No usa remplazamiento de referencias para remplazar objetos Git. Esto equivale a exportar la variable de ambiente `GIT_NO_REPLACE_OBJECTS` con cualquier valor. Ver linkgit:git-replace[1] para mas información.
+
+--no-lazy-fetch::
+	Do not fetch missing objects from the promisor remote on demand. Useful together with `git cat-file -e <object>` to see if the object is locally available. This is equivalent to setting the `GIT_NO_LAZY_FETCH` environment variable to `1`.
+
+--no-optional-locks::
+	No realiza operaciones opcionales que requieran bloqueos. Es equivalente a asignar `0` a `GIT_OPTIONAL_LOCKS`.
+
+--no-advice::
+	Disable all advice hints from being printed.
 
 --literal-pathspecs::
 	Trata las especificaciones de ruta literalmente (ej. sin interpretar glob, sin especificaciones de ruta mágicas). Es equivalente a asignar la variable de ambiente `GIT_LITERAL_PATHSPECS` con `1`.
@@ -110,9 +120,6 @@ Si sólo quieres correr git como si fuera arrancado en `<ruta>` entonces usa `gi
 
 --icase-pathspecs::
 	Agrega magia "icase" a todas las especificaciones de ruta. Es equivalente a asignar `1` a la variable de ambiente `GIT_ICASE_PATHSPECS`.
-
---no-optional-locks::
-	No realiza operaciones opcionales que requieran bloqueos. Es equivalente a asignar `0` a `GIT_OPTIONAL_LOCKS`.
 
 --list-cmds=<grupo>[,<grupo>...]::
 	Lista comandos por grupo. Es una opción interna/experimental y puede cambiar o ser removida en el futuro. Los grupos soportados son: builtins, parseopt (comandos interconstruidos que usan opciones de parseo), main (todos los comandos en el directorio libexec), others (todos los otros comandos en `$PATH` que tienen el prefijo git-), list-<categoría> (ver categorías en command-list.txt), nohelpers (excluye comandos auxiliares), alias y config (obtiene la lista de comandos de la variable de configuración completion.commands)
@@ -403,6 +410,10 @@ Para una ruta no-fusionada, se llama a `GIT_EXTERNAL_DIFF` con 1 parámetro, <ru
 +
 Para cada ruta se llama a `GIT_EXTERNAL_DIFF`, dos variables de ambiente se asignan, `GIT_DIFF_PATH_COUNTER` y `GIT_DIFF_PATH_TOTAL`.
 
+`GIT_EXTERNAL_DIFF_TRUST_EXIT_CODE`::
+	If this Boolean environment variable is set to true then the `GIT_EXTERNAL_DIFF` command is expected to return exit code 0 if it considers the input files to be equal or 1 if it considers them to be different, like `diff(1)`. If it is set to false, which is the default, then the command is expected to return exit code 0 regardless of equality. Any other exit code causes Git to report a fatal error.
+
+
 `GIT_DIFF_PATH_COUNTER`::
 	Un contador base 1 incrementado por uno por cada ruta.
 
@@ -527,6 +538,9 @@ Ver link:technical/api-trace2.html[documentación de Trace2] para detalles compl
 `GIT_TRACE_REDACT`::
 	Predeterminadamente, cuando se activa rastreo, Git redacta los valores de cookies, el encabezado "Authorization", el encabezado "Proxy-Authorization:" y fichero empaquetado de URIs. Asigne false a esta variable de ambiente booleana para prevenir esta redacción.
 
+`GIT_NO_REPLACE_OBJECTS`::
+	Asignando y exportando ésta variable de ambiente le dice a Git que ignore referencias de reemplazo y que no reemplace objetos Git.
+
 `GIT_LITERAL_PATHSPECS`::
 	Asignando verdadero a esta variable de ambiente booleana causará que Git trate a todas las especificaciones de ruta literalmente, mas que como patrones glob. Por ejemplo, corriendo `GIT_LITERAL_PATHSPECS=1 git log -- '*.c'` buscará confirmaciones que toquen la ruta `*.c`, no cualquier ruta que coincida con el glob `*.c`. Querrías esto si proporcionas rutas literales a Git (ej., rutas que te hayan resultado previamente de `git ls-tree`, `--raw` salida de diff, etc.).
 
@@ -538,6 +552,9 @@ Ver link:technical/api-trace2.html[documentación de Trace2] para detalles compl
 
 `GIT_ICASE_PATHSPECS`::
 	Asignando verdadero a esta variable de ambiente booleana causará que Git trate a todas las especificaciones de ruta como insensibles a mayúsculas.
+
+`GIT_NO_LAZY_FETCH`::
+	Asignando verdadero a esta variable de ambiente booleana le dice a Git que no traiga perezosamente objetos faltantes del remoto promitente bajo demanda.
 
 `GIT_REFLOG_ACTION`::
 	Cuando se actualiza una referencia, se crean entradas de reflog para dar seguimiento a la razón por la cual la referencia fue actualizada (la cual es típicamente el nombre de un comando de alto nivel que actualizó la referencia), además de los valores anterior y nuevo de la referencia. Un comando porcelana en un script puede usar la función auxiliar set_reflog_action en `git-sh-setup` para asignar su nombre a esta variable cuando es invocada por el usuario final como el comando de máximo nivel, para ser registrado en el cuerpo del reflog.
@@ -557,7 +574,7 @@ The default is "false", which disables the aforementioned behavior. Setting this
 	Asigne falso a esta variable de ambiente booleana para prevenir el uso de protocolos por fetch/push/clone los cuales están configurados en el estado `user`. Esto es útil para restringir inicialización recursiva de submodulos desde un repositorio no confiable o para programas que alimenten URLs potencialmente no confiables a comandos git. Ver linkgit:git-config[1] para mas detalles.
 
 `GIT_PROTOCOL`::
-	Sólo para uso interno. Usado en el protocolo de estrechamiento de manos de conexión. Contiene una lista de claves separadas por dos puntos ':' con valores opcionales 'clave[=valor]'. La presencia de claves y valores desconocidos debe ser ignorada.
+	Sólo para uso interno. Usado en el protocolo de estrechamiento de manos de conexión. Contiene una lista de claves separadas por dos puntos ':' con valores opcionales '<clave>[=<valor>]'. La presencia de claves y valores desconocidos debe ser ignorada.
 +
 Note que servidores pueden necesitar ser configurados para permitir que esta variable sobrepase algunos transportes. Será propagada automáticamente cuando se accesen repositorios locales (ej. `file://` o una ruta del sistema de ficheros), así como sobre el protocolo `git://`. Para git-over-http, debería funcionar automáticamente en la mayoría de las configuraciones, pero ver la discusión en linkgit:git-http-backend[1]. Para git-over-ssh, el servidor ssh puede necesitar ser configurado para permitir a los clientes pasar esta variable (ej. usando `AcceptEnv GIT_PROTOCOL` con OpenSSH).
 +
@@ -596,6 +613,17 @@ Apuntadores nombrados llamados referencias marcan puntos interesantes en el hist
 El fichero índice se inicializa con una lista de todas las rutas y, para cada ruta, un objeto blob y un conjunto de atributos. El objeto blob representa el contenido del fichero como en la cabeza de la rama actual. Los atributos (última hora de modificación, tamaño, etc.) se toman del fichero correspondiente en el árbol de trabajo. Cambios subsecuentes al árbol de trabajo se pueden encontrar al comparar esos atributos. El índice puede ser actualizado con contenido nuevo, y nuevas confirmaciones pueden ser creadas a partir del contenido almacenado en el índice.
 
 El índice también es capaz de almacenar entradas múltiples (llamadas "etapas") para cada nombre de ruta dado. Esas etapas se usan para mantener las varias versiones sin fusionar de un fichero cuando una fusión está en progreso.
+
+SECURITY
+--------
+
+Some configuration options and hook files may cause Git to run arbitrary shell commands. Because configuration and hooks are not copied using `git clone`, it is generally safe to clone remote repositories with untrusted content, inspect them with `git log`, and so on.
+
+However, it is not safe to run Git commands in a `.git` directory (or the working tree that surrounds it) when that `.git` directory itself comes from an untrusted source. The commands in its config and hooks are executed in the usual way.
+
+By default, Git will refuse to run when the repository is owned by someone other than the user running the command. See the entry for `safe.directory` in linkgit:git-config[1]. While this can help protect you in a multi-user environment, note that you can also acquire untrusted repositories that are owned by you (for example, if you extract a zip file or tarball from an untrusted source). In such cases, you'd need to "sanitize" the untrusted repository first.
+
+If you have an untrusted `.git` directory, you should first clone it with `git clone --no-local` to obtain a clean copy. Git does restrict the set of options and hooks that will be run by `upload-pack`, which handles the server side of a clone or fetch, but beware that the surface area for attack against `upload-pack` is large, so this does carry some risk. The safest thing is to serve the repository as an unprivileged user (either via linkgit:git-daemon[1], ssh, or using other tools to change user ids). See the discussion in the `SECURITY` section of linkgit:git-upload-pack[1].
 
 MAS DOCUMENTACIÓN
 -----------------

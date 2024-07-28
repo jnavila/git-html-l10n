@@ -15,17 +15,17 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Para cada nome do caminho informado através da linha de comando ou de um arquivo via `--stdin`, verifique se o arquivo foi excluído por .gitignorar (ou outros arquivos de entrada para o mecanismo de exclusão) e imprima o caminho se ele for excluído.
+Para cada nome do caminho informado através da linha de comando ou de um arquivo via `--stdin`, verifique se o arquivo foi excluído por .gitignore (ou outros arquivos de entrada para o mecanismo de exclusão) e mostre o caminho se ele for excluído.
 
 Por padrão, os arquivos rastreados não são exibidos, pois não estão sujeitos a regras de exclusão. mas veja `--no-index`.
 
 OPÇÕES
 ------
 -q, --quieto::
-	Don't output anything, just set exit status. This is only valid with a single pathname.
+	Não produz nada, apenas define o status de encerramento. Isso só é válido com um único nome de caminho.
 
 -v, --verbose::
-	Instead of printing the paths that are excluded, for each path that matches an exclude pattern, print the exclude pattern together with the path. (Matching an exclude pattern usually means the path is excluded, but if the pattern begins with "`!`" then it is a negated pattern and matching it means the path is NOT excluded.)
+	Em vez de imprimir os caminhos que foram excluídos, para cada caminho que corresponda a um padrão de exclusão, imprima o padrão de exclusão junto com o caminho. (Corresponder a um padrão de exclusão geralmente significa que o caminho está excluído, mas se o padrão começar com "`!`", ele será um padrão negado e corresponder a ele significa que o caminho NÃO está excluído).
 +
 Para as regras da precedência dentro e entre as fontes eliminadas, consulte linkgit:gitignore[5].
 
@@ -33,10 +33,10 @@ Para as regras da precedência dentro e entre as fontes eliminadas, consulte lin
 	Leia os nomes do caminho na entrada padrão, um por linha, em vez da linha de comando.
 
 -z::
-	The output format is modified to be machine-parsable (see below). If `--stdin` is also given, input paths are separated with a NUL character instead of a linefeed character.
+	O formato de saída é modificado para ser analisável por máquina (veja abaixo). Se a opção `--stdin` também for usada, os caminhos da entrada serão separados por um caractere NUL em vez de um caractere de alimentação de linha.
 
 -n, --non-matching::
-	Show given paths which don't match any pattern. This only makes sense when `--verbose` is enabled, otherwise it would not be possible to distinguish between paths which match a pattern and those which don't.
+	Mostra os caminhos fornecidos que não correspondem a nenhum padrão. Só faz sentido quando a opção `--verbose` estiver ativa, caso contrário não seria possível distinguir entre os caminhos que correspondem a um padrão e os que não correspondem.
 
 --no-index::
 	Não procure no índice ao realizar as verificações. Pode ser utilizado para depurar o motivo de um caminho ter sido rastreado por ex. `git add .` e não foi ignorado pelas regras conforme o esperado pelo usuário ou ao desenvolver padrões incluindo a negação da coincidência a um caminho adicionado anteriormente com o comando `git add -f`.
@@ -44,21 +44,21 @@ Para as regras da precedência dentro e entre as fontes eliminadas, consulte lin
 SAÍDA
 -----
 
-By default, any of the given pathnames which match an ignore pattern will be output, one per line. If no pattern matches a given path, nothing will be output for that path; this means that path will not be ignored.
+É predefinido que será gerado qualquer um dos nomes informados de caminho que corresponda a um padrão de ignorar, um por linha. Se nenhum padrão corresponder a um determinado caminho, nada será gerado para esse caminho; isso significa que esse caminho não será ignorado.
 
 Caso a opção `--verbose` seja utilizada, a saída será uma série de linhas desta forma:
 
 <fonte> <COLON> <linenum> <COLON> <padrão> <HT> <pathname>
 
-<pathname> is the path of a file being queried, <pattern> is the matching pattern, <source> is the pattern's source file, and <linenum> is the line number of the pattern within that source. If the pattern contained a "`!`" prefix or "`/`" suffix, it will be preserved in the output. <source> will be an absolute path when referring to the file configured by `core.excludesFile`, or relative to the repository root when referring to `.git/info/exclude` or a per-directory exclude file.
+<pathname> é o caminho de um arquivo que está sendo consultado, <padrão> é o padrão correspondente, <pattern> é o arquivo de origem do padrão e <linenum> é o número da linha do padrão dentro dessa origem. Se houver um prefixo "`!`" no padrão ou um sufixo "`/`", ele será preservado na saída. <origem> será um caminho absoluto quando se referir ao arquivo configurado por `core.excludesFile`, ou relativo à raiz do repositório quando se referir a `.git/info/exclude` ou a um arquivo de exclusão por diretório.
 
 Caso `-z` seja utilizado, os nomes do caminho gerado são delimitados pelo caractere nulo; caso `--verbose` também seja utilizado, então os caracteres nulos também serão utilizados em vez das vírgulas e das guias rígidas:
 
 <fonte> <NULL> <linenum> <NULL> <padrão> <NULL> <pathname> <NULL>
 
-If `-n` or `--non-matching` are specified, non-matching pathnames will also be output, in which case all fields in each output record except for <pathname> will be empty. This can be useful when running non-interactively, so that files can be incrementally streamed to STDIN of a long-running check-ignore process, and for each of these files, STDOUT will indicate whether that file matched a pattern or not. (Without this option, it would be impossible to tell whether the absence of output for a given file meant that it didn't match any pattern, or that the output hadn't been generated yet.)
+Se a opção `-n` ou `--non-matching` forem usados, os nomes de caminho não correspondentes também serão gerados, e nesse caso, todos os campos em cada registro de saída, exceto o <nome-do-caminho>, estarão vazios. Isso pode ser útil quando executado de forma não interativa, de modo que os arquivos possam ser transmitidos de maneira incremental para o STDIN de um processo de verificação de ignorar de longa duração, assim como, para cada um desses arquivos, o STDOUT indicará se o arquivo correspondeu a um padrão ou não. (Sem esta opção, seria impossível saber se a ausência da saída para um determinado arquivo significasse que ele não correspondia a nenhum padrão ou que a saída ainda não teria sido gerada).
 
-Buffering happens as documented under the `GIT_FLUSH` option in linkgit:git[1]. The caller is responsible for avoiding deadlocks caused by overfilling an input buffer or reading from an empty output buffer.
+O armazenamento em buffer ocorre conforme documentado na opção `GIT_FLUSH` do comando linkgit:git[1]. Aquele que invoca é o responsável por evitar impasses causados pelo preenchimento excessivo de um buffer de entrada ou pela leitura de um buffer vazio na saída.
 
 CONDIÇÃO DE ENCERRAMENTO
 ------------------------

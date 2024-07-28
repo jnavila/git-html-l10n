@@ -15,21 +15,21 @@ git-grep - 打印与模式匹配的行
 	   [-P | --perl-regexp]
 	   [-F | --fixed-strings] [-n | --line-number] [--column]
 	   [-l | --files-with-matches] [-L | --files-without-match]
-	   [(-O | --open-files-in-pager) [<分页器>]]
+	   [(-O | --open-files-in-pager) [<pager>]]
 	   [-z | --null]
 	   [ -o | --only-matching ] [-c | --count] [--all-match] [-q | --quiet]
 	   [--max-depth <depth>] [--[no-]recursive]
 	   [--color[=<when>] | --no-color]
 	   [--break] [--heading] [-p | --show-function]
-	   [-A <后上下文>] [-B <前上下文>] [-C <上下文>]
+	   [-A <post-context>] [-B <pre-context>] [-C <context>]
 	   [-W | --function-context]
-	   [(-m | --max-count) <数量>]
-	   [--threads <数量>]
-	   [-f <file>] [-e] <模式>
-	   [--and|--or|--not|(|)|-e <模式>...]
+	   [(-m | --max-count) <num>]
+	   [--threads <num>]
+	   [-f <file>] [-e] <pattern>
+	   [--and|--or|--not|(|)|-e <pattern>...]
 	   [--recurse-submodules] [--parent-basename <basename>]
-	   [ [--[no-]exclude-standard] [--cached | --no-index | --untracked] | <目录树>...]
-	   [--] [<路径规范>...]
+	   [ [--[no-]exclude-standard] [--cached | --untracked | --no-index] | <tree>...]
+	   [--] [<pathspec>...]
 
 描述
 --
@@ -41,11 +41,13 @@ git-grep - 打印与模式匹配的行
 --cached::
 	与其搜索工作区中的跟踪文件，不如搜索索引文件中注册的 blobs。
 
---no-index::
-	搜索当前目录中不被 Git 管理的文件。
-
 --untracked::
 	除了在工作区中的跟踪文件中搜索外，还可以在未跟踪的文件中搜索。
+
+--no-index::
+	在当前目录中搜索不由 Git 管理的文件，或者忽略当前目录由 Git 管理的事实。这类似于运行带有 `-r` 选项的常规 `grep(1)` 实用程序，但有一些额外的好处，比如使用路径模式来限制路径；更多信息请参见 linkgit:gitglossary[7] 中的 'pathspec' 条目。
++
+此选项不能与 `--cached` 或 `--untracked` 一起使用。另请参见下面 'CONFIGURATION' 部分中的 `grep.fallbackToNoIndex`。
 
 --no-exclude-standard::
 	也可以通过不遵守 `.gitignore` 机制在被忽略的文件中搜索。只对 `--untracked` 有用。
@@ -54,7 +56,7 @@ git-grep - 打印与模式匹配的行
 	不注意通过 `.gitignore` 机制指定的被忽略的文件。 只有在用 `--no-index` 搜索当前目录下的文件时才有用。
 
 --recurse-submodules::
-	递归搜索在仓库中激活和检出的每个子模块。 当与 <tree> 选项结合使用时，所有子模块输出的前缀将是父项目的 <tree> 对象的名称。如果给了 `--no-index`，这个选项就没有效果。
+	Recursively search in each submodule that is active and checked out in the repository. When used in combination with the _<tree>_ option the prefix of all submodule output will be the name of the parent project's _<tree>_ object. This option cannot be used together with `--untracked`, and it has no effect if `--no-index` is specified.
 
 -a::
 --text::
@@ -134,7 +136,7 @@ git-grep - 打印与模式匹配的行
 
 -z::
 --null::
-	使用\0作为输出中路径名的分隔符，并逐字打印它们。按照配置变量core.quotePath的说明，引用带有“ unusual”字符的路径名 (查阅linkgit:git-config[1])。
+	Use \0 as the delimiter for pathnames in the output, and print them verbatim. Without this option, pathnames with "unusual" characters are quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]).
 
 -o::
 --only-matching::
@@ -182,7 +184,7 @@ git-grep - 打印与模式匹配的行
 	限制每个文件的匹配数量。当使用 `-v` 或 `--invert-match` 选项时，搜索会在指定的非匹配数量后停止。值为 -1 将返回无限的结果（默认）。值为 0 将立即退出，状态为非零。
 
 --threads <数量>::
-	要使用的 grep 工作线程的数量。 更多信息见 “配置” 中的 `grep.threads`。
+	Number of `grep` worker threads to use. See 'NOTES ON THREADS' and `grep.threads` in 'CONFIGURATION' for more information.
 
 -f <文件>::
 	从 <文件> 中读取模式，每行一个。
@@ -240,9 +242,9 @@ git-grep - 打印与模式匹配的行
 线条的注释
 -----
 
-当使用 `--open-files-in-pager` 时，`--threads` 选项（和 grep.threads 配置）将被忽略，强制单线程执行。
+The `--threads` option (and the `grep.threads` configuration) will be ignored when `--open-files-in-pager` is used, forcing a single-threaded execution.
 
-当检索对象存储时（使用 `--cached` 或给出树状对象），如果给出 `--textconv` 并且有太多的文本转换，多线程运行可能比单线程运行要慢。因此，如果你在这种情况下遇到低性能，使用 `--threads=1` 可能是可取的。
+When grepping the object store (with `--cached` or giving tree objects), running with multiple threads might perform slower than single-threaded if `--textconv` is given and there are too many text conversions. Thus, if low performance is experienced in this case, it might be desirable to use `--threads=1`.
 
 配置
 --

@@ -8,18 +8,18 @@ git-pack-refs - Embale os cabeçalhos e a tags do pacote para acesso eficiente a
 RESUMO
 ------
 [verse]
-'git pack-refs' [--all] [--no-prune] [--include <padrão>] [--exclude <padrão>]
+'git pack-refs' [--all] [--no-prune] [--auto] [--include <pattern>] [--exclude <pattern>]
 
 DESCRIÇÃO
 ---------
 
-Traditionally, tips of branches and tags (collectively known as 'refs') were stored one file per ref in a (sub)directory under `$GIT_DIR/refs` directory. While many branch tips tend to be updated often, most tags and some branch tips are never updated. When a repository has hundreds or thousands of tags, this one-file-per-ref format both wastes storage and hurts performance.
+Tradicionalmente, as dicas das ramificações e as etiquetas (conhecidas coletivamente como "refs") eram armazenadas num arquivo por ref num (sub)diretório do diretório `$GIT_DIR/refs`. Embora muitas dicas dos ramos tendam a ser atualizadas com frequência, a maioria das etiquetas e algumas dicas dos ramos nunca são atualizadas. Quando um repositório tem centenas ou milhares de etiquetas, este formato de um arquivo por referência desperdiça armazenamento e prejudica o desempenho.
 
-This command is used to solve the storage and performance problem by storing the refs in a single file, `$GIT_DIR/packed-refs`. When a ref is missing from the traditional `$GIT_DIR/refs` directory hierarchy, it is looked up in this file and used if found.
+Este comando é usado para resolver o problema de armazenamento e desempenho, armazenando as referências num único arquivo, `$GIT_DIR/packed-refs`. Quando uma referência está faltando na hierarquia tradicional do diretório `$GIT_DIR/refs`, ela é procurada nesse arquivo sendo utilizada caso seja encontrada.
 
 Atualizações subsequentes nos ramos sempre criam novos arquivos na hierarquia de diretórios `$GIT_DIR/refs`.
 
-A recommended practice to deal with a repository with too many refs is to pack its refs with `--all` once, and occasionally run `git pack-refs`. Tags are by definition stationary and are not expected to change. Branch heads will be packed with the initial `pack-refs --all`, but only the currently active branch heads will become unpacked, and the next `pack-refs` (without `--all`) will leave them unpacked.
+Uma prática recomendada para lidar com um repositório com muitas referências é empacotar as suas referências com a opção `--all` uma vez e, ocasionalmente, executar o comando `git pack-refs`. É predefinido que as etiquetas sejam estacionárias e não se espera que elas sejam alteradas. Os cabeçalhos da ramificação serão empacotados com o `pack-refs --all` inicial, mas no momento, apenas os cabeçalhos ativos da ramificação serão desempacotados, e o próximo `pack-refs` (sem `--all`) os deixará desempacotados.
 
 
 OPÇÕES
@@ -27,11 +27,19 @@ OPÇÕES
 
 --all::
 
-The command by default packs all tags and refs that are already packed, and leaves other refs alone. This is because branches are expected to be actively developed and packing their tips does not help performance. This option causes all refs to be packed as well, with the exception of hidden refs, broken refs, and symbolic refs. Useful for a repository with many branches of historical interests.
+É predefinido que o comando, empacote todas as etiquetas e as referências que já estão empacotadas e deixa as outras referências sem empacotar. Isso se deve ao fato da espectativa que as ramificações sejam ativamente desenvolvidas, e o acúmulo dos seus cumes não ajude no desempenho. Esta opção faz com que todas as referências também sejam compactadas, com exceção das referências ocultas, quebradas e simbólicas. Útil para um repositório com muitos ramos onde haja interesses históricos.
 
 --no-prune::
 
-The command usually removes loose refs under `$GIT_DIR/refs` hierarchy after packing them. This option tells it not to.
+O comando geralmente remove as referências soltas na hierarquia `$GIT_DIR/refs` após empacotá-las. Essa opção diz para não fazê-lo.
+
+--auto::
+
+Pack refs as needed depending on the current state of the ref database. The behavior depends on the ref format used by the repository and may change in the future.
++
+	- "files": No special handling for `--auto` has been implemented.
++
+	- "reftable": Tables are compacted such that they form a geometric sequence. For two tables N and N+1, where N+1 is newer, this maintains the property that N is at least twice as big as N+1. Only tables that violate this property are compacted.
 
 --include <padrão>::
 

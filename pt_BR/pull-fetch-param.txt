@@ -1,13 +1,13 @@
 <repositório>::
-	The "remote" repository that is the source of a fetch or pull operation. Este parâmetro pode ser uma URL (consulte a seção <<URLS, GIT URLS>> abaixo) ou o nome de um ramo remoto (consulte a seção <<REMOTES, REMOTES>> abaixo).
+	O repositório "remote" é a fonte de uma operação 'fetch' ou 'pull'. Este parâmetro pode ser uma URL (consulte a seção <<URLS,GIT URLS>> abaixo) ou o nome de um controle remoto (consulte a seção <<REMOTES,RAMOS REMOTOS>> abaixo).
 
 ifndef::git-pull[]
 <grupo>::
-	Um nome referente para a lista de repositórios como o valor no arquivo da configuração `remotes.<grupo>`. (Consulte linkgit:git-config[1]).
+	Um nome referente a uma lista de repositórios remotos como o valor de `remotes.<grupo>` no arquivo de configuração. (consulte linkgit:git-config[1]).
 endif::git-pull[]
 
 <refspec>::
-	Determina quais as refs capturar e quais as refs locais atualizar. Quando nenhum `<refspec>` aparece na linha de comando, em vez disso, os refs que serão capturados são lidos a partir das variáveis `remote.<repositório>.fetch`
+	Especifica quais as refs que devem ser obtidas via 'fetch' e quais as refs locais devem ser atualizadas. Quando não houver um `<refspec>` na linha de comando, as refs que serão obtidas com 'fetch' serão lidas a partir das variáveis `remote.<repositório>.fetch`
 ifndef::git-pull[]
 	(consulte <<CRTB,CONFIGURAÇÕES DOS RAMOS MONITORADOS REMOTAMENTE>> below).
 endif::git-pull[]
@@ -16,11 +16,11 @@ ifdef::git-pull[]
 	in linkgit:git-fetch[1]).
 endif::git-pull[]
 +
-O formato de um parâmetro `<refspec>` é um opcional mais `+`, seguido pela fonte `<src>`, seguido por dois pontos `:`, seguido pelo destino "ref" `<dst>`. Os dois pontos podem ser omitidos quando o destino `<dst>` estiver vazio. A fonte `<src>` normalmente é uma referência, mas também pode ser um nome de objeto escrito totalmente em hexadecimal.
+O formato de um parâmetro `<refspec>` é um sinal de adição opcional `+`, seguido pela origem `<src>`, seguido por dois-pontos `:`, seguido pela referência de destino `<dst>`. Os dois-pontos podem ser omitidos quando o valor de `<dst>` estiver vazio. O valor de `<src>` normalmente é uma referência, mas também pode ser um nome de um objeto hexadecimal inteiramente escrito.
 +
 Uma <refspec> pode conter um `*` na sua origem <src> para indicar uma simples combinação de padrões. Tal "refspec" funciona como um "glob" que combina com qualquer ref de mesmo prefixo. Um padrão <refspec> deve conter um `*` tanto origem <src> quanto no destino <dst>. Ele irá mapear os reffs para o destino substituindo o `*` pelo conteúdo correspondente da fonte.
 +
-Caso uma refspec seja prefixada através do `^`, ela será interpretada como uma refspec negativa. Em vez de especificar quais as refs devem ser buscadas ou quais as refs locais devem ser atualizadas, tal refspec irá especificar as refs que serão excluídas. Uma ref será considerada compatível caso coincida com pelo menos uma ref positiva e não corresponda com nenhum ref negativo. Os refspecs negativos podem ser úteis para restringir o escopo padrão de um refspec para que ele não inclua determinados refspecs. Os refspecs negativos podem ser padrões refspecs de si mesmo. Entretanto, eles podem conter apenas uma fonte <src> e não especificam um destino <dst>. Os nomes dos objetos em hexadecimais também não são suportados.
+Se um 'refspec' for prefixado por `^`, ele será interpretado como um refspec negativo. Em vez de especificar quais as 'refs' devem ser obtidas com 'fetch' ou quais as refs locais devem ser atualizadas, esta refspec especificará as refs que serão excluídas. Uma ref será considerada compatível se corresponder a pelo menos uma refspec positiva e não corresponder a nenhuma refspec negativa. As refspecs negativas podem ser úteis para restringir o escopo de um padrão refspec para que não inclua refs específicas. As refspecs negativas podem ser refspecs de padrão. No entanto, eles podem conter apenas um `<src>` e não especificar um `<dst>`. Também não há suporte para nomes de objetos hexadecimais totalmente mencionados.
 +
 A `tag` significa o mesmo que `refs/tags/<tag>:refs/tags/<tag>`; ele solicita a buscaa de tudo até a tag informada.
 +
@@ -28,7 +28,7 @@ A "ref" remota que coincida com <src> é buscada e se <dst> não seja uma sequê
 +
 Caso a atualização seja permitida sem a opção `--force` depende do espaço de nomes da ref onde está sendo buscada, do tipo do objeto que está sendo buscado e se a atualização é considerada um avanço rápido. Geralmente, as mesmas regras se aplicam à busca e ao impulsionar, consulte a seção `<refspec>...` do linkgit:git-push[1] para saber o que são. As exceções para estas regras específicas para o comando 'git fetch' são anotadas abaixo.
 +
-Até a versão 2.20 do Git, e diferentemente do envio com linkgit:git-push[1], qualquer atualização para `refs/tags/*` seria aceita sem o sinal `+` no refspec (ou `--force`). Ao buscar, consideramos promiscuamente todas as atualizações das tags de um ramo remoto como buscas impostas. Desde a versão 2.20 Git, buscar a atualização `refs/tags/*` funciona da mesma maneira que quando fazer um impulsionamento. Ou seja, todas as atualizações serão rejeitadas sem o sinal `+` no refspec (ou `--force`).
+Até a versão 2.20 do Git, e ao contrário do que ocorre quando se faz um push com linkgit:git-push[1], quaisquer atualizações para `refs/tags/*` seriam aceitas sem `+` no refspec (ou a opção `--force`). Ao fazer a obtenção com 'fetch', consideramos promiscuamente todas as atualizações das etiquetas de um ramo remoto como sendo um 'fetch' forçado. Desde a versão 2.20 do Git, a busca para atualizar `refs/tags/*` funciona da mesma forma que o push. Ou seja, todas as atualizações serão rejeitadas sem `+` no refspec (ou `--force`).
 +
 Ao contrário quando impulsionamos com o linkgit:git-push[1], qualquer atualização fora do `refs/{tags,heads}/*` será aceito sem o sinal `+` no refspec (ou `--force`), seja trocando, por exemplo, um objeto de árvore para uma bolha ou um commit para outro commit que não tenha o commit anterior como ancestral, etc.
 +
@@ -37,9 +37,9 @@ Ao contrário quando impulsionamos com o linkgit:git-push[1], não existe uma co
 Assim como impulsionar com linkgit:git-push[1], todas as regras descritas acima sobre o que não é permitido como uma atualização pode ser sobrescrito ao adicionar um caractere opcional no "refspec" começando com `+` (ou ao utilizar a opção `--force` na linha de comando). A única exceção a isso é que nenhuma quantidade de imposição fará com que o espaço de nomes `refs/heads/*` aceite um objeto que não seja um commit.
 +
 [NOTE]
-Quando se sabe que o ramo remoto que você quer buscar é retrocedida e reconstruída regularmente, espera-se que o novo topo não seja descendente do topo anterior (conforme foi armazenada no ramo monitorado remotamente da última vez que você fez a busca). Você vai querer usar o sinal `+` para indicar que serão necessárias atualizações não rápidas para estas ramificações. Não há como determinar ou declarar que uma ramificação será disponibilizada em um repositório com este comportamento; o usuário que está capturando simplesmente deve saber que esse é o padrão de uso esperado para um ramo.
+Quando o ramo remoto que você deseja obter com 'fetch' for conhecido por ser rebobinado ter feito um 'rebase' regularmente, espera-se que o novo cume não seja descendente do cume anterior (conforme foi armazenado no último 'fetch' que você fez no ramo rastreado remotamente). Você deve usar o sinal `+` para indicar que serão necessárias atualizações que não sejam de avanço rápido para estas ramificações. Não há nenhuma maneira de determinar ou declarar que um ramo será disponibilizado num repositório com este comportamento; o usuário que o extrai simplesmente deve saber que esse é o padrão de uso esperado para um ramo.
 ifdef::git-pull[]
 +
 [NOTE]
-Há uma diferença entre listar múltiplos <refspec> diretamente na linha de comando com 'git pull' e ter várias entradas `remote.<repositório>.fetch` na sua configuração para um <repositório> e executar um comando com 'git pull' sem qualquer parâmetros explícitos <refspec>. Os <refspec>s listados explicitamente na linha de comando são sempre mesclado no ramo atual após a busca. Em outras palavras, caso você liste mais de uma "ref" remota, o comando 'git pull' criará uma mesclagem "Octopus" (Polvo). Por outro lado, caso você não liste nenhum parâmetro <refspec> de forma explícita na linha de comando, o comando 'git pull' buscará tudo o que encontrar na configuração `remote.<repositório>.fetch` e mesclará apenas o primeiro que for encontrado no ramo atual. Isso ocorre porque raramente é feito a criação de um "polvo" a partir das refs remotas, enquanto monitora os vários cabeçalhos remotos de uma só, isso geralmente é bastante útil.
+Há uma diferença entre listar os vários `<refspec>` diretamente na linha de comando com 'git pull' e ter várias entradas `remote.<repositório>.fetch` em sua configuração para um `<repositório>` e executar um comando 'git pull' sem nenhum parâmetro `<refspec>` explícito. Os `<refspec>` listados explicitamente na linha de comando são sempre mesclados no ramo atual após um 'fetch'. Em outras palavras, se você listar mais de uma referência remota, o comando "git pull" criará uma mesclagem Octopus. Por outro lado, se você não listar nenhum parâmetro `<refspec>` explícito na linha de comando, o 'git pull' buscará todos os `<refspec>` encontrados na configuração `remote.<repository>.fetch` e mesclará apenas o primeiro `<refspec>` encontrado no ramo atual. Isso ocorre porque a criação de um "Octopus" a partir de refs remotos raramente é feito, ao passo que manter o controle de vários cabeçalhos remotos de uma só vez, ao obter mais de um com o 'fetch', isso costuma ser útil.
 endif::git-pull[]

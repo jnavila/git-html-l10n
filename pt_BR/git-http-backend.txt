@@ -12,28 +12,28 @@ RESUMO
 
 DESCRIÇÃO
 ---------
-A simple CGI program to serve the contents of a Git repository to Git clients accessing the repository over http:// and https:// protocols. The program supports clients fetching using both the smart HTTP protocol and the backwards-compatible dumb HTTP protocol, as well as clients pushing using the smart HTTP protocol. It also supports Git's more-efficient "v2" protocol if properly configured; see the discussion of `GIT_PROTOCOL` in the ENVIRONMENT section below.
+Um programa CGI simples para servir o conteúdo de um repositório Git para clientes Git que acessam o repositório pelos protocolos http:// e https://. O programa oferece suporte a clientes que buscam usando o protocolo HTTP inteligente e o protocolo HTTP burro compatível com versões anteriores, bem como a clientes que enviam usando o protocolo HTTP inteligente. Ele também suporta o protocolo "v2" mais eficiente do Git, se configurado corretamente; consulte a discussão sobre `GIT_PROTOCOL` na seção AMBIENTE abaixo.
 
 Verifica se o diretório possui o arquivo mágico "git-daemon-export-ok" e se recusará a exportar qualquer diretório Git que não tenha sido explicitamente marcado para exportação (a menos que a variável de ambiente `GIT_HTTP_EXPORT_ALL` esteja definida) .
 
-By default, only the `upload-pack` service is enabled, which serves 'git fetch-pack' and 'git ls-remote' clients, which are invoked from 'git fetch', 'git pull', and 'git clone'. If the client is authenticated, the `receive-pack` service is enabled, which serves 'git send-pack' clients, which is invoked from 'git push'.
+Por padrão, apenas o serviço `upload-pack` está ativado, que atende aos clientes 'git fetch-pack' e 'git ls-remote', que são invocados a partir de 'git fetch', 'git pull' e 'git clone'. Se o cliente for autenticado, o serviço `receive-pack` será ativado e atenderá aos clientes do 'git send-pack', que é chamado a partir do 'git push'.
 
 SERVIÇOS
 --------
 Estes serviços podem ser ativados/desativados usando o arquivo de configuração por repositório:
 
 http.getanyfile::
-	This serves Git clients older than version 1.6.6 that are unable to use the upload pack service. When enabled, clients are able to read any file within the repository, including objects that are no longer reachable from a branch but are still present. It is enabled by default, but a repository can disable it by setting this configuration value to `false`.
+	Isso serve para clientes Git anteriores à versão 1.6.6 que não conseguem usar o serviço de pacote de upload. Quando ativado, os clientes podem ler qualquer arquivo no repositório, inclusive objetos que não podem mais ser acessados num ramo, mas que ainda estão presentes. É predefinido que ele seja ativado, porém, um repositório pode desativá-lo definindo esse valor de configuração como `false`.
 
 http.uploadpack::
-	This serves 'git fetch-pack' and 'git ls-remote' clients. It is enabled by default, but a repository can disable it by setting this configuration value to `false`.
+	Isso oferece aos clientes 'git fetch-pack' e 'git ls-remote'. É predefinido que ele seja ativado, porém, um repositório pode desativá-lo definindo esse valor de configuração como `false`.
 
 http.receivepack::
-	This serves 'git send-pack' clients, allowing push. It is disabled by default for anonymous users, and enabled by default for users authenticated by the web server. It can be disabled by setting this item to `false`, or enabled for all users, including anonymous users, by setting it to `true`.
+	Isso serve para clientes 'git send-pack', permitindo o envio. Ele é desativado por padrão para usuários anônimos e ativado por padrão para usuários autenticados pelo servidor da web. Ele pode ser desativado definindo esse item como `false` ou ativado para todos os usuários, inclusive usuários anônimos, definindo-o como `true`.
 
 TRADUÇÃO DA URL
 ---------------
-To determine the location of the repository on disk, 'git http-backend' concatenates the environment variables PATH_INFO, which is set automatically by the web server, and GIT_PROJECT_ROOT, which must be set manually in the web server configuration. If GIT_PROJECT_ROOT is not set, 'git http-backend' reads PATH_TRANSLATED, which is also set automatically by the web server.
+Para determinar o local do repositório no disco, o 'git http-backend' concatena as variáveis de ambiente PATH_INFO, que é definida automaticamente pelo servidor web, e GIT_PROJECT_ROOT, que deve ser definida manualmente na configuração do servidor Web. Se GIT_PROJECT_ROOT não estiver definido, 'git http-backend' lê o PATH_TRANSLATED, que também é definido automaticamente pelo servidor da web.
 
 EXEMPLOS
 --------
@@ -90,7 +90,7 @@ Caso não tenha o `mod_rewrite` disponível para coincidir com o texto sob consu
 </LocationMatch>
 ----------------------------------------------------------------
 +
-In this mode, the server will not request authentication until the client actually starts the object negotiation phase of the push, rather than during the initial contact. For this reason, you must also enable the `http.receivepack` config option in any repositories that should accept a push. The default behavior, if `http.receivepack` is not set, is to reject any pushes by unauthenticated users; the initial request will therefore report `403 Forbidden` to the client, without even giving an opportunity for authentication.
+Nesse modo, o servidor não solicitará autenticação até que o cliente realmente inicie a fase de negociação de envio (push) do objeto, em vez de durante o contato inicial. Por esse motivo, você também deve ativar a opção de configuração `http.receivepack` em todos os repositórios que devem aceitar um push. O comportamento predefinido, se `http.receivepack` não estiver definido, é rejeitar qualquer envio por usuários não autenticados; a solicitação inicial, portanto, informará `403 Forbidden` ao cliente, sem sequer dar uma oportunidade de autenticação.
 +
 Para exigir a autenticação para ambas as leituras e gravações, utilize uma diretiva local ao redor do repositório ou um dos seus diretórios upstream:
 +
@@ -126,7 +126,7 @@ ScriptAliasMatch ^/git/[^/]*(.*) /usr/libexec/git-core/git-http-backend/storage.
 ----------------------------------------------------------------
 
 Apache estático acelerado 2.x::
-	Similar to the above, but Apache can be used to return static files that are stored on disk. On many systems this may be more efficient as Apache can ask the kernel to copy the file contents from the file system directly to the network:
+	Semelhante ao anterior, mas o Apache pode ser usado para retornar arquivos estáticos armazenados no disco. Em muitos sistemas, isso pode ser mais eficiente, pois o Apache pode solicitar ao kernel que copie o conteúdo do arquivo do sistema de arquivos diretamente para a rede:
 +
 ----------------------------------------------------------------
 SetEnv GIT_PROJECT_ROOT /var/www/git
@@ -212,7 +212,7 @@ O 'git http-backend' conta com as variáveis do ambiente `CGI` definidas pelo se
 
 A variável de ambiente `GIT_HTTP_EXPORT_ALL` pode ser passada para o comando 'git-http-backend' para ignorar a verificação do arquivo "git-daemon-export-ok" em cada repositório antes de permitir a exportação desse repositório.
 
-The `GIT_HTTP_MAX_REQUEST_BUFFER` environment variable (or the `http.maxRequestBuffer` config option) may be set to change the largest ref negotiation request that git will handle during a fetch; any fetch requiring a larger buffer will not succeed. This value should not normally need to be changed, but may be helpful if you are fetching from a repository with an extremely large number of refs. The value can be specified with a unit (e.g., `100M` for 100 megabytes). The default is 10 megabytes.
+A variável de ambiente `GIT_HTTP_MAX_REQUEST_BUFFER` (ou a opção de configuração `http.maxRequestBuffer`) pode ser definida para alterar a maior solicitação de negociação de referência que o git tratará durante uma busca; qualquer busca que exija um buffer maior não será bem-sucedida. Normalmente, esse valor não precisa ser alterado, mas pode ser útil se você estiver fazendo a busca num repositório com um número extremamente grande de refs. O valor pode ser especificado com uma unidade (`100M` para 100 megabytes por exemplo). A predefinição é 10 megabytes.
 
 Os clientes podem sondar por capacidades opcionais do protocolo (como o protocolo v2) utilizando o cabeçalho HTTP `Git-Protocol`. Para ser compatível com eles, o conteúdo desse cabeçalho deve aparecer na variável de ambiente `GIT_PROTOCOL`. A maioria dos servidores web passará esse cabeçalho para o CGI através da variável `HTTP_GIT_PROTOCOL` e o `git-http-backend` copiará automaticamente para a variável `GIT_PROTOCOL`. Entretanto, alguns servidores web podem ser mais seletivos sobre quais os cabeçalhos eles passarão, nesse caso, eles precisam ser configurados de forma explícita (veja a menção do `Git-Protocol` na configuração do Apache, a partir da seção EXEMPLOS mais recentes).
 

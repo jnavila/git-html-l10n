@@ -483,12 +483,78 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">&lt;objeto&gt;&#8230;&#8203;</dt>
 <dd>
-<p>The names of objects to show (defaults to <em>HEAD</em>). For a more complete list of ways to spell object names, see "SPECIFYING REVISIONS" section in <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a>.</p>
+<p>Os nomes dos objetos que será mostrados (o padrão é <code>HEAD</code>). Para obter uma lista mais completa de maneiras de soletrar nomes de objetos, consulte a seção "ESPECIFICANDO AS REVISÕES" do comando <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a>.</p>
 </dd>
-</dl>
+<dt class="hdlist1">--pretty[=&lt;formato&gt;]</dt>
+<dt class="hdlist1">--format=&lt;formato&gt;</dt>
+<dd>
+<p>Imprima o conteúdo dos registros do commit num determinado formato, onde <em>&lt;format&gt;</em> pode ser <em>oneline</em>, <em>short</em>, <em>medium</em>, <em>full</em>, <em>fuller</em>, <em>reference</em>, <em>email</em>, <em>raw</em>, <em>format:&lt;string&gt;</em> e <em>tformat:&lt;string&gt;</em>. Quando <em>&lt;format&gt;</em> não for nenhuma das opções acima e tem <em>%placeholder</em>, ele age como se a opção <em>--pretty=tformat:&lt;formato&gt;</em> tivesse sido usado.</p>
+<div class="paragraph">
+<p>Consulte a seção "FORMATOS BONITOS" para obter alguns detalhes adicionais sobre cada formato. Quando a parte <em>=&lt;formato&gt;</em> é omitida, a predefinição é <em>medium</em>.</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-show.txt - include::pretty-options.txt[]</p>
+<p>Nota: você pode especificar o formato "pretty" padrão na configuração do repositório (consulte <a href="git-config.html"><b>git-config</b>(1)</a>).</p>
+</div>
+</dd>
+<dt class="hdlist1">--abbrev-commit</dt>
+<dd>
+<p>Em vez de mostrar o nome hexadecimal com 40 bytes completo do objeto commit, mostre um prefixo que nomeie o objeto de maneira exclusiva. A opção <em>--abbrev=&lt;n&gt;</em> (que também modifica a saída do diff, se for exibida) pode ser usada para especificar o comprimento mínimo do prefixo.</p>
+<div class="paragraph">
+<p>Isso deve tornar <code>--pretty=oneline</code> muito mais legível para pessoas que usam terminais com 80 colunas.</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-abbrev-commit</dt>
+<dd>
+<p>Exibe o nome do objeto commit completo com 40 bytes hexadecimais. Isso nega o a opção <code>--abbrev-commit</code>, de forma explícita ou implícita pelas outras opções como "--oneline". Ele também substitui a variável <code>log.abbrevCommit</code>.</p>
+</dd>
+<dt class="hdlist1">--oneline</dt>
+<dd>
+<p>Este é um atalho para "--pretty=oneline --abbrev-commit" ser utilizado junto.</p>
+</dd>
+<dt class="hdlist1">--encoding=&lt;codificação&gt;</dt>
+<dd>
+<p>Os objetos commit registram a codificação dos caracteres usado para a mensagem de registro log em seu cabeçalho de codificação; esta opção pode ser usada para informar ao comando para recodificar a mensagem de registro log do commit na codificação preferida pelo usuário. Para comandos que não sejam para redirecionamento, o padrão é UTF-8. Observe que, se um objeto alegar ser codificado em <code>X</code> e estivermos produzindo em <code>X</code>, produziremos o objeto literalmente; isso significa que as sequências inválidas no commit original podem ser copiadas para o objeto criado. Da mesma maneira, se o iconv(3) não conseguir converter o commit, faremos o envio literal do objeto original.</p>
+</dd>
+<dt class="hdlist1">--expand-tabs=&lt;n&gt;</dt>
+<dt class="hdlist1">--expand-tabs</dt>
+<dt class="hdlist1">--no-expand-tabs</dt>
+<dd>
+<p>Execute uma expansão de tabulação (substitua cada tabulação por espaços suficientes para preencher a próxima coluna de exibição que seja um múltiplo de <em>&lt;n&gt;</em>) na mensagem de registro antes de mostrá-la na saída. A opção <code>--expand-tabs</code> é uma abreviação de <code>--expand-tabs=8</code> e <code>--no-expand-tabs</code> é uma abreviação de <code>--expand-tabs=0</code>, que desativa a expansão das guias.</p>
+<div class="paragraph">
+<p>È predefinido que as guias sejam expandidas em formatos bonitos que recuam a mensagem de registro em 4 espaços (ou seja, a predefinição <em>medium</em>, <em>full</em> e <em>fuller</em>).</p>
+</div>
+</dd>
+<dt class="hdlist1">--notes[=&lt;ref&gt;]</dt>
+<dd>
+<p>Mostre as notas (consulte <a href="git-notes.html"><b>git-notes</b>(1)</a>) que anotam o commit, ao mostrar a mensagem de registro do commit. Esta é a predefinição para os comandos <code>git log</code>, <code>git show</code> e <code>git whatchanged</code> quando não há nenhuma opção <code>--pretty</code>, <code>--format</code> ou <code>--oneline</code> usada na linha de comando.</p>
+<div class="paragraph">
+<p>É predefinido que as anotações exibidas são das anotações refs listadas nas variáveis <code>core.notesRef</code> e <code>notes.displayRef</code> (ou substituições correspondentes do ambiente). Para mais detalhes consulte <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+</div>
+<div class="paragraph">
+<p>Com um argumento opcional <em>&lt;ref&gt;</em>, use a referência para localizar as notas a serem exibidas. Uma ref pode especificar o nome completo da ref quando começa com <code>refs/notes/</code>; quando começa com <code>notes/</code>, <code>refs/</code> e, caso contrário, <code>refs/notes/</code> é prefixado para formar o nome completo da ref.</p>
+</div>
+<div class="paragraph">
+<p>Várias opções <code>--notes</code> podem ser combinadas para controlar quais as notas estão sendo exibidas. Exemplos: <code>--notes=foo</code> mostrará apenas as notas vindas de "refs/notes/foo"; <code>--notes=foo --notes</code> mostrará as notas vindas de "refs/notes/foo" e das notas ref(s) predefinidas.</p>
+</div>
+</dd>
+<dt class="hdlist1">--no-notes</dt>
+<dd>
+<p>Não mostrar as anotações. Isso anula a opção <code>--notes</code> acima, redefinindo a lista de refs das anotações a partir de onde as notas são exibidas. As opções são analisadas na ordem usada na linha de comando, portanto, por exemplo, <code>--notes --notes=foo --no-notes --notes=bar</code> mostrará apenas as notas de <code>refs/notes/bar</code>.</p>
+</dd>
+<dt class="hdlist1">--show-notes-by-default</dt>
+<dd>
+<p>Mostra as notas predefinidas, a menos que sejam fornecidas opções para a exibição de notas específicas.</p>
+</dd>
+<dt class="hdlist1">--show-notes[=&lt;ref&gt;]</dt>
+<dt class="hdlist1">--[no-]standard-notes</dt>
+<dd>
+<p>Essas opções estão obsoletas. Em vez disso, utilize as opções --notes/--no-notes acima.</p>
+</dd>
+<dt class="hdlist1">--show-signature</dt>
+<dd>
+<p>Verifique a validade de um objeto commit assinado, passando a assinatura para <code>gpg --verify</code> e exibe a sua saída.</p>
+</dd>
+</dl>
 </div>
 </div>
 </div>
@@ -496,7 +562,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_formatos_bonitos">FORMATOS BONITOS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>If the commit is a merge, and if the pretty-format is not <em>oneline</em>, <em>email</em> or <em>raw</em>, an additional line is inserted before the <em>Author:</em> line. This line begins with "Merge: " and the hashes of ancestral commits are printed, separated by spaces. Note that the listed commits may not necessarily be the list of the <strong>direct</strong> parent commits if you have limited your view of history: for example, if you are only interested in changes related to a certain directory or file.</p>
+<p>Se o commit for uma mesclagem e se o formato "pretty" não for <em>oneline</em>, <em>email</em> ou <em>raw</em>, uma linha adicional será inserida antes da linha <em>Author:</em>. Essa linha começa com "Merge: " e os hashes dos commits ancestrais são impressos e separados por espaços. Observe que os commits listados podem não ser necessariamente a lista dos commits principais <strong>diretos</strong> se você tiver limitado a sua visão do histórico: se estiver interessado apenas nas alterações relacionadas a um determinado diretório ou arquivo por exemplo.</p>
 </div>
 <div class="paragraph">
 <p>Existem vários formatos incorporados e você pode definir formatos adicionais ao definir uma opção da configuração <code>pretty.&lt;nome&gt;</code> para um outro nome de formato ou uma string <em>format:</em>, conforme descrito abaixo (consulte <a href="git-config.html"><b>git-config</b>(1)</a>). Aqui estão os detalhes dos formatos incorporados: Aqui estão os detalhes dos formatos incorporados:</p>
@@ -598,7 +664,7 @@ CommitDate: &lt;a-data-de-quem-fez-o-commit&gt;</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>This format is used to refer to another commit in a commit message and is the same as <code>--pretty='format:%C(auto)%h (%s, %ad)'</code>. By default, the date is formatted with <code>--date=short</code> unless another <code>--date</code> option is explicitly specified. As with any <code>format:</code> with format placeholders, its output is not affected by other options like <code>--decorate</code> and <code>--walk-reflogs</code>.</p>
+<p>Este formato é usado para fazer referência a outro commit numa mensagem de commit e é o mesmo que <code>--pretty='format:%C(auto)%h (%s, %ad)'</code>. É predefinido que a data seja formatada com a opção <code>--date=short</code>, a menos que uma outra opção <code>--date</code> seja explicitamente especificada. Assim como qualquer <code>format:</code> com marcadores de formato, o que é gerado por ele não é afetado por outras opções como <code>--decorate</code> e <code>--walk-reflogs</code>.</p>
 </div>
 </li>
 <li>
@@ -626,7 +692,7 @@ Subject: [PATCH] &lt;linha-do-título&gt;</pre>
 <li>
 <p><em>raw</em></p>
 <div class="paragraph">
-<p>The <em>raw</em> format shows the entire commit exactly as stored in the commit object. Notably, the hashes are displayed in full, regardless of whether --abbrev or --no-abbrev are used, and <em>parents</em> information show the true parent commits, without taking grafts or history simplification into account. Note that this format affects the way commits are displayed, but not the way the diff is shown e.g. with <code>git log --raw</code>. To get full object names in a raw diff format, use <code>--no-abbrev</code>.</p>
+<p>O formato <em>raw</em> mostra o commit inteiro exatamente como armazenado no objeto de commit. Notavelmente, os hashes são exibidos na íntegra, independentemente do uso da opção --abbrev ou --no-abbrev, e as informações de <em>parents</em> mostram os verdadeiros commits principais, sem levar em conta os enxertos ou a simplificação do histórico. Observe que este formato afeta a forma como os commits são exibidos, mas não a forma como o diff é exibido, por exemplo, com o comando <code>git log --raw</code>. Para obter os nomes completos dos objetos num formato diff bruto, use <code>--no-abbrev</code>.</p>
 </div>
 </li>
 <li>
@@ -689,7 +755,7 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </dd>
 <dt class="hdlist1"><em>%C(&#8230;&#8203;)</em></dt>
 <dd>
-<p>color specification, as described under Values in the "CONFIGURATION FILE" section of <a href="git-config.html"><b>git-config</b>(1)</a>. By default, colors are shown only when enabled for log output (by <code>color.diff</code>, <code>color.ui</code>, or <code>--color</code>, and respecting the <code>auto</code> settings of the former if we are going to a terminal). <code>%C(auto,...)</code> is accepted as a historical synonym for the default (e.g., <code>%C(auto,red)</code>). Specifying <code>%C(always,...)</code> will show the colors even when color is not otherwise enabled (though consider just using <code>--color=always</code> to enable color for the whole output, including this format and anything else git might color). <code>auto</code> alone (i.e. <code>%C(auto)</code>) will turn on auto coloring on the next placeholders until the color is switched again.</p>
+<p>Conforme foi descrito em Valores na seção "ARQUIVO DE CONFIGURAÇÃO" do comando <a href="git-config.html"><b>git-config</b>(1)</a>. É predefinido que as cores são mostradas somente quando ativadas para a saída de registro (por <code>color.diff</code>, <code>color.ui</code> ou <code>--color</code>, respeitando as configurações <code>auto</code> do primeiro se estivermos indo para um terminal). O <code>%C(auto,...)</code> é aceito como sinônimo histórico do padrão (por exemplo, <code>%C(auto,red)</code>). Ao especificar <code>%C(always,...)</code> exibirá as cores mesmo quando a cor não estiver ativada (considere utilizar apenas a opção <code>--color=always</code> para ativar a cor para toda a saída, incluindo este formato e qualquer outra coisa que o git possa colorir). A opção <code>auto</code> sozinha (ou seja, <code>%C(auto)</code>) ativará a coloração automática nos próximos marcadores até que a cor seja trocada novamente.</p>
 </dd>
 <dt class="hdlist1"><em>%m</em></dt>
 <dd>
@@ -701,11 +767,11 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 </dd>
 <dt class="hdlist1"><em>%&lt;( &lt;N&gt; [,trunc|ltrunc|mtrunc])</em></dt>
 <dd>
-<p>make the next placeholder take at least N column widths, padding spaces on the right if necessary. Optionally truncate (with ellipsis <em>..</em>) at the left (ltrunc) <code>..ft</code>, the middle (mtrunc) <code>mi..le</code>, or the end (trunc) <code>rig..</code>, if the output is longer than N columns. Note 1: that truncating only works correctly with N &gt;= 2. Note 2: spaces around the N and M (see below) values are optional. Note 3: Emojis and other wide characters will take two display columns, which may over-run column boundaries. Note 4: decomposed character combining marks may be misplaced at padding boundaries.</p>
+<p>Faz com que o próximo marcador ocupe pelo menos N larguras de coluna, preenchendo espaços à direita, se necessário. Opcionalmente, trunque (com reticências <em>&#8230;&#8203;</em>) à esquerda (ltrunc) <code>..ft</code>, no meio (mtrunc) <code>mi..le</code> ou no final (trunc) <code>rig..</code>, se a saída for maior que N colunas. Observação 1: esse truncamento só funciona corretamente com N &gt;= 2. Observação 2: os espaços ao redor dos valores N e M (veja abaixo) são opcionais. Observação 3: Os emojis e outros caracteres longos ocuparão duas colunas de exibição, o que pode ultrapassar os limites da coluna. Observação 4: as marcas de combinação de caracteres decompostos podem estar mal posicionadas nos limites do preenchimento.</p>
 </dd>
 <dt class="hdlist1"><em>%&lt;|( &lt;M&gt; )</em></dt>
 <dd>
-<p>make the next placeholder take at least until Mth display column, padding spaces on the right if necessary. Use negative M values for column positions measured from the right hand edge of the terminal window.</p>
+<p>Faz com que o próximo marcador ocupe pelo menos até a Mésima coluna de exibição, preenchendo espaços à direita, caso seja necessário. Use valores M negativos para posições de coluna medidas a partir da borda direita da janela do terminal.</p>
 </dd>
 <dt class="hdlist1"><em>%&gt;( &lt;N&gt; )</em>, <em>%&gt;|( &lt;M&gt; )</em></dt>
 <dd>
@@ -876,13 +942,13 @@ O título era &gt;&gt;t4119: test autocomputing -p&lt;n&gt; for traditional diff
 <div class="ulist">
 <ul>
 <li>
-<p><em>prefix=&lt;value&gt;</em>: Shown before the list of ref names. Defaults to "&#160;<code>(</code>".</p>
+<p>O <em>prefix=&lt;valor&gt;</em>: Exibido antes da lista de nomes ref. A predefinição é "&#160;<code>(</code>".</p>
 </li>
 <li>
-<p><em>suffix=&lt;value&gt;</em>: Shown after the list of ref names. Defaults to "<code>)</code>".</p>
+<p>O <em>prefix=&lt;valor&gt;</em>: Exibido antes da lista de nomes ref. A predefinição é "<code>)</code>".</p>
 </li>
 <li>
-<p><em>separator=&lt;value&gt;</em>: Shown between ref names. Defaults to "<code>,</code>&#160;".</p>
+<p>O <em>separator=&lt;valor&gt;</em>: Mostrado entre os nomes refs. A predefinição é "<code>,</code>&#160;".</p>
 </li>
 <li>
 <p><em>pointer=&lt;valor&gt;</em>: Mostrado entre HEAD e o ramo para o qual aponta, se houver.
@@ -910,7 +976,7 @@ A predefinição é "&#160;<code>-&gt;</code>&#160;".</p>
 <dl>
 <dt class="hdlist1"><em>%(describe[:&lt;opções&gt;])</em></dt>
 <dd>
-<p>human-readable name, like <a href="git-describe.html"><b>git-describe</b>(1)</a>; empty string for undescribable commits. The <code>describe</code> string may be followed by a colon and zero or more comma-separated options. Descriptions can be inconsistent when tags are added or removed at the same time.</p>
+<p>Um nome legível para humanos, como <a href="git-describe.html"><b>git-describe</b>(1)</a>; string vazia para commits sem descrição. A string <code>describe</code> pode ser seguida por dois-pontos, zero ou mais opções separadas por vírgulas. As descrições podem ser inconsistentes quando as etiquetas são adicionadas ou são removidas ao mesmo tempo.</p>
 <div class="ulist">
 <ul>
 <li>
@@ -962,7 +1028,7 @@ A predefinição é "&#160;<code>-&gt;</code>&#160;".</p>
 </dd>
 <dt class="hdlist1"><em>%G?</em></dt>
 <dd>
-<p>show "G" for a good (valid) signature, "B" for a bad signature, "U" for a good signature with unknown validity, "X" for a good signature that has expired, "Y" for a good signature made by an expired key, "R" for a good signature made by a revoked key, "E" if the signature cannot be checked (e.g. missing key) and "N" for no signature</p>
+<p>Mostre "G" para uma assinatura boa (válida), "B" para uma assinatura ruim, "U" para uma assinatura boa com validade desconhecida, "X" para uma assinatura boa que expirou, "Y" para uma assinatura boa feita por uma chave expirada, "R" para uma assinatura boa feita por uma chave revogada, "E" se a assinatura não puder ser verificada (falta de chave por exemplo) e "N" para nenhuma assinatura</p>
 </dd>
 <dt class="hdlist1"><em>%GS</em></dt>
 <dd>
@@ -1018,7 +1084,7 @@ A predefinição é "&#160;<code>-&gt;</code>&#160;".</p>
 <div class="ulist">
 <ul>
 <li>
-<p><em>key=&lt;key&gt;</em>: only show trailers with specified &lt;key&gt;. Matching is done case-insensitively and trailing colon is optional. If option is given multiple times trailer lines matching any of the keys are shown. This option automatically enables the <code>only</code> option so that non-trailer lines in the trailer block are hidden. If that is not desired it can be disabled with <code>only=false</code>. E.g., <code>%(trailers:key=Reviewed-by)</code> shows trailer lines with key <code>Reviewed-by</code>.</p>
+<p>A <em>key=&lt;chave&gt;</em>: mostra apenas os caracteres de resposta com a &lt;chave&gt; especificada. A correspondência é feita sem distinção entre maiúsculas e minúsculas, os dois-pontos finais são opcionais. Se a opção for usada várias vezes, serão mostradas as linhas dos caracteres de resposta que correspondem a qualquer uma das chaves. Esta opção ativa automaticamente a opção <code>only</code> para que as linhas que não tenham caracteres de resposta no bloco oculto com caracteres de resposta. Se isso não for desejado, desative com <code>only=false</code>. Por exemplo, <code>%(trailers:key=Revisado-por)</code> mostra as linhas do trailer com a chave <code>Revisado-por</code>.</p>
 </li>
 <li>
 <p><em>only[=&lt;bool&gt;]</em>: selecione se as linhas não relacionadas à resposta a partir do bloco de resposta, devem ser incluídas ou não.</p>
@@ -1075,7 +1141,7 @@ Alguns espaços reservados podem depender das outras opções passadas para o mo
 <li>
 <p><em>tformat:</em></p>
 <div class="paragraph">
-<p>The <em>tformat:</em> format works exactly like <em>format:</em>, except that it provides "terminator" semantics instead of "separator" semantics. In other words, each commit has the message terminator character (usually a newline) appended, rather than a separator placed between entries. This means that the final entry of a single-line format will be properly terminated with a new line, just as the "oneline" format does. For example:</p>
+<p>O formato <em>tformat:</em> funciona exatamente como o <em>format:</em>, exceto pelo fato de que ele fornece a semântica de "terminador" em vez da semântica de "separador". Em outras palavras, cada commit tem o caractere de terminação da mensagem (geralmente uma nova linha) anexado, em vez de um separador colocado entre as entradas. Isso significa que a entrada final de um formato único da linha será encerrada corretamente com uma nova linha, exatamente como o formato "oneline" faz. Por exemplo:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1091,7 +1157,7 @@ $ git log -2 --pretty=tformat:%h 4da45bef \
 </div>
 </div>
 <div class="paragraph">
-<p>In addition, any unrecognized string that has a <code>%</code> in it is interpreted as if it has <code>tformat:</code> in front of it. For example, these two are equivalent:</p>
+<p>Além disso, qualquer string não reconhecida que tenha um <code>%</code> é interpretada como se tivesse <code>tformat:</code> na frente. Por exemplo, estes dois são equivalentes:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1342,7 +1408,7 @@ a opção <code>--format=raw</code>.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Example: The following will count changed files, while ignoring directories with less than 10% of the total amount of changed files, and accumulating child directory counts in the parent directories: <code>--dirstat=files,10,cumulative</code>.</p>
+<p>Exemplo: O seguinte contará os arquivos alterados, ignorando os diretórios com menos de 10% da quantidade total de arquivos alterados e acumulando as contagens dos diretórios filhos nos diretórios pais: <code>--dirstat=files,10,cumulative</code>.</p>
 </div>
 </dd>
 <dt class="hdlist1">--cumulative</dt>
@@ -2024,7 +2090,57 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 <h2 id="_discussão">DISCUSSÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-show.txt - include::i18n.txt[]</p>
+<p>O Git é, até certo ponto, um codificador de caracteres agnóstico.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>O conteúdo dos objetos bolha (blob) são sequências de bytes não interpretadas. Não há uma tradução de codificação no nível do núcleo.</p>
+</li>
+<li>
+<p>Os nomes do caminho são codificados na forma de normalização UTF-8 C. Isso se aplica a objetos nas árvore, arquivos do índice, referência de nomes e nomes do caminho em argumentos da linha de comando, variáveis do ambiente e os arquivos de configuração (<code>.git / config</code> (consulte <a href="git-config.html"><b>git-config</b>(1)</a>), <a href="gitignore.html"><b>gitignore</b>(5)</a>, <a href="gitattributes.html"><b>gitattributes</b>(5)</a> e <a href="gitmodules.html"><b>gitmodules</b>(5)</a>).</p>
+<div class="paragraph">
+<p>Observe que o Git, em seu cerne, trata os nomes do caminho simplesmente como sequências de bytes não NUL; não há conversões de codificação do nome do caminho (exceto no Mac e no Windows). Portanto, o uso de nomes com caminho não ASCII funcionará, em geral, mesmo em plataformas e sistemas de arquivos que usam codificações ASCII estendidas legadas. No entanto, os repositórios criados nesses sistemas não funcionarão corretamente em sistemas baseados em UTF-8 (Linux, Mac, Windows por exemplo) e vice-versa. Além disso, muitas ferramentas com base no Git simplesmente assumem que os nomes de caminho são UTF-8 e não exibem outras codificações corretamente.</p>
+</div>
+</li>
+<li>
+<p>As mensagens do registro log do commit geralmente são codificadas em UTF-8, porém há compatibilidade para outras codificações ASCII estendidas. Isso inclui ISO-8859-x, CP125x e muitos outros. Porém não há compatibilidade com codificações UTF-16/32, EBCDIC e CJK, codificações de vários bytes (GBK, Shift-JIS, Big5, EUC-x, CP9xx etc.).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Embora incentivemos que as mensagens do registro do commit sejam codificadas em UTF-8, tanto o núcleo quanto o Git porcelain foram projetados para não impor o UTF-8 nos projetos. Se todos os participantes de um determinado projeto acharem mais conveniente usar codificações herdadas, o Git não o proibirá. Entretanto, há alguns aspectos que devem ser levados em consideração.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>O comando <em>git commit</em> e o <em>git commit-tree</em> emitem um aviso se a mensagem de registro do commit fornecida a ele não se parecer com uma string UTF-8 válida, a menos que você diga explicitamente que o seu projeto usa uma codificação antiga. A maneira de definir isso é ter <code>i18n.commitEncoding</code> no arquivo <code>.git/config</code>, assim:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        commitEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Os objetos criados do commit com a configuração acima, registram o valor <code>i18n.commitEncoding</code> em seu cabeçalho <code>encoding</code>. Isso serve para ajudar as outras pessoas que forem examiná-las mais tarde. A ausência desse cabeçalho implica que a mensagem de registro do commit está codificada em UTF-8.</p>
+</div>
+</li>
+<li>
+<p>Os comandos <em>git log</em>, <em>git show</em>, <em>git blame</em> e outros, analisam o cabeçalho <code>encoding</code> de um objeto commit e tentam recodificar a mensagem de registro em UTF-8, a menos que outro seja especificado. Você pode especificar a codificação de saída desejada com <code>i18n.logOutputEncoding</code> no arquivo <code>.git/config</code>, da seguinte maneira:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        logOutputEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Caso não tenha essa variável de configuração, o valor de <code>i18n.commitEncoding</code> é utilizado em seu lugar.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Observe que decidimos deliberadamente não codificar novamente a mensagem do registro log do commit quando um commit for feito para forçar a codificação UTF-8 a nível do objeto commit, porque a re-codificação para UTF-8 não é necessariamente uma operação reversível.</p>
 </div>
 </div>
 </div>
@@ -2039,7 +2155,7 @@ modo arquivo excluído &lt;modo&gt;,&lt;modo&gt;</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-31 16:03:01 +0200
+Last updated 2024-07-12 22:27:26 +0200
 </div>
 </div>
 </body>

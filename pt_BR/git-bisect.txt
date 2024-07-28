@@ -15,11 +15,11 @@ DESCRIÇÃO
 ---------
 O comando assume vários subcomandos das diferentes opções dependendo do subcomando:
 
- git bisect start [--term-(new|bad)=<term-new> --term-(old|good)=<term-old>]
+ git bisect start [--term-(bad|new)=<term-new> --term-(good|old)=<term-old>]
 		  [--no-checkout] [--first-parent] [<bad> [<good>...]] [--] [<pathspec>...]
  git bisect (bad|new|<term-new>) [<rev>]
  git bisect (good|old|<term-old>) [<rev>...]
- git bisect terms [--term-good | --term-bad]
+ git bisect terms [--term-(good|old) | --term-(bad|new)]
  git bisect skip [(<rev>|<range>)...]
  git bisect reset [<commit>]
  git bisect (visualize|view)
@@ -81,7 +81,7 @@ Para limpar a condição geral bisseção e retornar ao `HEAD` original, execute
 $ git bisect reset
 ------------------------------------------------
 
-By default, this will return your tree to the commit that was checked out before `git bisect start`. (A new `git bisect start` will also do that, as it cleans up the old bisection state.)
+É predefinido que isso retornará a sua árvore para o commit que foi verificado antes do comando `git bisect start`. (Um novo `git bisect start` também fará isso, já que ele limpa o antigo estado de bisseção.)
 
 Com um argumento opcional, você pode retornar para um commit diferente:
 
@@ -121,7 +121,7 @@ Para receber um lembrete dos termos utilizados no momento, utilize
 git bisect terms
 ------------------------------------------------
 
-Você pode obter apenas o termo antigo (respectivamente novo) com `git bisect terms --term-old` ou `git bisect terms --term-good`.
+You can get just the old term with `git bisect terms --term-old` or `git bisect terms --term-good`; `git bisect terms --term-new` and `git bisect terms --term-bad` can be used to learn how to call the commits more recent than the sought change.
 
 Caso queira utilizar os seus próprios termos em vez de "bad"/"good" ou "new"/"old", escolha qualquer nome que quiser (exceto os subcomandos bisect já existentes como `reset`, `start`, ...) iniciando uma bisseção utilizando
 
@@ -152,9 +152,9 @@ Para ver os suspeitos restantes no 'gitk', utilize o seguinte comando durante o 
 $ git bisect visualize
 ------------
 
-Git detects a graphical environment through various environment variables: `DISPLAY`, which is set in X Window System environments on Unix systems. `SESSIONNAME`, which is set under Cygwin in interactive desktop sessions. `MSYSTEM`, which is set under Msys2 and Git for Windows. `SECURITYSESSIONID`, which may be set on macOS in interactive desktop sessions.
+O Git detecta um ambiente gráfico através de várias variáveis de ambiente: `DISPLAY`, que é definido em ambientes X Window System nos sistemas Unix. `SESSIONNAME`, que é definido no Cygwin nas sessões de desktop interativas. `MSYSTEM`, que é definido no Msys2 e o Git para Windows. `SECURITYSESSIONID`, que pode ser definido no macOS nas sessões de ambiente de trabalho interativas.
 
-If none of these environment variables is set, 'git log' is used instead. You can also give command-line options such as `-p` and `--stat`.
+O 'git log' será usado caso nenhuma destas variável de ambiente sejam definidas. Tamém é possível usar as opções de linha de comando como `-p` e `--stat`.
 
 ------------
 $ git bisect visualize --stat
@@ -224,7 +224,7 @@ Informa ao processo "bisect" que os commits entre as versões `v2.5` e `v2.6` (i
 Reduza a bisseção informando mais parâmetros para o início do bisect
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can further cut down the number of trials, if you know what part of the tree is involved in the problem you are tracking down, by specifying pathspec parameters when issuing the `bisect start` command:
+É possível reduzir ainda mais a quantidade de tentativas caso saiba qual parte da árvore está envolvida no problema que está sendo rastreado, especificando parâmetros de pathpec ao usar o comando `bisect start`:
 
 ------------
 $ git bisect start -- arch/i386 include/asm-i386
@@ -255,13 +255,13 @@ O código especial 125 da saída deve ser utilizado quando o código-fonte atual
 
 Muitas vezes você pode achar que durante uma sessão bisect você queira ter alterações temporárias (`s/#define DEBUG 0/#define DEBUG 1/` ao cabeçalho de um arquivo, ou "a revisão que não tem este commit e precisa que esta correção seja aplicada como um quebra galho que seja irrelevante para esta bisseção por exemplo") aplicada à revisão que está sendo testada.
 
-To cope with such a situation, after the inner 'git bisect' finds the next revision to test, the script can apply the patch before compiling, run the real test, and afterwards decide if the revision (possibly with the needed patch) passed the test and then rewind the tree to the pristine state. Finally the script should exit with the status of the real test to let the `git bisect run` command loop determine the eventual outcome of the bisect session.
+Para lidar com essa situação, depois que o comando interno 'git bisect' encontrar a próxima revisão que será testada, o script poderá aplicar a correção antes da compilação, executar o teste real, e depois, decidir se a revisão (possivelmente com a correção necessária) passou no teste, em seguida, retorna a árvore para o estado original. Finalmente, o script deve encerrar com a condição real do teste permitindo que o loop do comando `git bisect run` determine o resultado final da sessão bisect.
 
 OPÇÕES
 ------
 --no-checkout::
 +
-Do not checkout the new working tree at each iteration of the bisection process. Instead just update the reference named `BISECT_HEAD` to make it point to the commit that should be tested.
+Não faça o "checkout" da nova árvore de trabalho em cada iteração do processo de bissecção. Em vez disso, basta atualizar a referência chamada `BISECT_HEAD` para que ela aponte para o commit que deverá ser testado.
 +
 Essa opção pode ser útil quando o teste que você executaria em cada etapa não exigir uma árvore com check-out.
 +
@@ -306,7 +306,7 @@ $ git bisect run ~/test.sh
 $ git bisect reset                   # encerra a seção bisect
 ------------
 +
-Here we use a `test.sh` custom script. In this script, if `make` fails, we skip the current commit. `check_test_case.sh` should `exit 0` if the test case passes, and `exit 1` otherwise.
+Aqui utilizamos um script `test.sh`. Neste scriipt, caso o `make` falhe, nós ignoramos o commit atual. O arquivo `check_test_case.sh` deve encerrar com `exit 0` se o cenário de teste for aprovado, caso contrário, `exit 1`.
 +
 É mais seguro se os arquivos `test.sh` e `check_test_case.sh` estiverem fora do repositório para evitar interações entre os processos `bisect`, `make`, `test` e os scripts.
 

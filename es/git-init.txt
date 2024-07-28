@@ -9,11 +9,11 @@ git-init - Crear un repositorio de Git vacío o reinicializar uno ya existente
 SINOPSIS
 --------
 [verse]
-'git init' [-q | --quiet] [--bare] [--template=<directorio-de-plantilla>]
-	  [--separate-git-dir <directorio-git>] [--object-format=<formato>]
-	  [--ref-format=<formato>]
-	  [-b <nombre-de-rama> | --initial-branch=<nombre-de-rama>]
-	  [--shared[=<permisos>]] [directorio]
+`git init` [`-q` | `--quiet`] [`--bare`] [++--template=++__<directorio-de-plantilla>__]
+	  [`--separate-git-dir` _<directorio-git>_] [++--object-format=++__<formato>__]
+	  [++--ref-format=++__<formato>__]
+	  [`-b` _<nombre-de-rama>_ | ++--initial-branch=++__<nombre-de-rama>__]
+	  [++--shared++[++=++__<permisos>__]] [_<directorio>_]
 
 
 DESCRIPCIÓN
@@ -25,74 +25,78 @@ Si la variable de ambiente `$GIT_DIR` se configura, entonces especifica una ruta
 
 Si el directorio de almacenamiento de objetos se especifica con la variable de ambiente `$GIT_OBJECT_DIRECTORY`, entonces los directorios sha1 se crean bajo él, de lo contrario se usa el directorio predeterminado `$GIT_DIR/objects`.
 
-Ejecutar 'git init' en un repositorio existente es seguro. No sobre-escribirá cosas que ya existan ahí. La razón primaria para volver a ejecutar 'git init' es para recoger plantillas agregadas recientemente (o para mover el repositorio a otro lugar si se proporciona --separate-git-dir).
+Ejecutar `git init` en un repositorio existente es seguro. No sobre-escribirá cosas que ya existan ahí. La razón primaria para volver a ejecutar `git init` es para recoger plantillas agregadas recientemente (o para mover el repositorio a otro lugar si se proporciona `--separate-git-dir`).
 
 OPCIONES
 --------
 
--q::
---quiet::
+`-q`::
+`--quiet`::
 
 Mostrar sólo los mensajes de error y advertencia; el resto de mensajes se suprimirán.
 
---bare::
+`--bare`::
 
 Crea un repositorio básico. Si la variable de ambiente `GIT_DIR` no está configurada, se configura al directorio de trabajo actual.
 
---object-format=<formato>::
+++--object-format=++__<formato>__::
 
-Especifica el formato de objeto (algoritmo hash )dado para el repositorio. Los valores válidos son 'sha1' y -si esta habilitado- 'sha256'. 'sha1' es el predeterminado.
+Especifica el _<formato>_ de objeto (algoritmo hash )dado para el repositorio. Los valores válidos son `sha1` y -si esta habilitado- `sha256`. `sha1` es el predeterminado.
 +
 include::object-format-disclaimer.txt[]
 
---ref-format=<formato>::
+++--ref-format=++__<formato>__::
 
-Especifica el formato de almacenamiento de referencia dado para el repositorio. Los valores válidos son:
+Especifica el _<formato>_ de almacenamiento de referencia dado para el repositorio. Los valores válidos son:
 +
 include::ref-storage-format.txt[]
 
---template=<directorio-de-plantilla>::
+++--template=++__<directorio-de-plantilla>__::
 
 Especifica el directorio de dónde usar plantillas. (Ver la sección "DIRECTORIO DE PLANTILLAS" mas adelante.)
 
---separate-git-dir=<directorio-git>::
+++--separate-git-dir=++__<directorio-git>__::
 
 En lugar de inicializar el repositorio como un directorio ya sea de `$GIT_DIR` o `./.git`, crea un fichero de texto conteniendo la ruta al repositorio actual. Este fichero actúa como una liga simbólica de Git agnóstica de sistema de ficheros hacia el repositorio.
 +
 Si es una re-inicialización, el repositorio se moverá a la ruta especificada.
 
--b <nombre-rama::
---initial-branch=<nombre-rama>::
+`-b` _<nombre-rama>_::
+++--initial-branch=++__<nombre-rama>__::
 
-Usar el nombre especificado para la rama inicial en el repositorio recientemente creado. Si no se especifica, recae en el nombre predeterminado (actualmente `master`, pero está sujeto a cambio en el futuro; el nombre puede ser personalizado con la variable de configuración `init.defaultBranch`).
+Usar el _<nombre-de-rama>_ especificado para la rama inicial en el repositorio recientemente creado. Si no se especifica, recae en el nombre predeterminado (actualmente `master`, pero está sujeto a cambio en el futuro; el nombre puede ser personalizado con la variable de configuración `init.defaultBranch`).
 
---shared[=(false|true|umask|group|all|world|everybody|<permiso>)]::
+++--shared++[++=++(`false`|`true`|`umask`|`group`|`all`|`world`|`everybody`|_<permiso>_)]::
 
-Especifica que el repositorio Git será compartido entre varios usuarios. Esto permite a los usuarios pertenecientes al mismo grupo hacer push en ese repositorio. Cuando se especifica, la variable de configuración "core.sharedRepository" se asigna de tal manera que esos ficheros y directorios bajo `$GIT_DIR` son creados con los permisos solicitados. Cuando no se especifica, Git usará los permisos reportados por umask(2).
+Especifica que el repositorio Git será compartido entre varios usuarios. Esto permite a los usuarios pertenecientes al mismo grupo hacer push en ese repositorio. Cuando se especifica, la variable de configuración `core.sharedRepository` se asigna de tal manera que esos ficheros y directorios bajo `$GIT_DIR` son creados con los permisos solicitados. Cuando no se especifica, Git usará los permisos reportados por `umask`(2).
 +
-La opción puede tomar los siguientes valores, tomando por defecto el valor 'group' si no se proporciona ningún valor:
+La opción puede tomar los siguientes valores, predeterminando a `group` si no se da algún valor:
 +
 --
-'umask' (o 'false')::
+`umask`::
+`false`::
 
-Use los permisos obtenidos con umask(2). Será el valor por defecto cuando no se indica `--shared`.
+Use los permisos obtenidos con `umask`(2). El predeterminado, cuando no se indica `--shared`.
 
-'group' (o 'true')::
+`group`::
+`true`::
 
-Hace al repositorio escribible para el grupo, (y g+sx, ya que el grupo git podría no ser el grupo primario de todos los usuarios). Esto se usa para relajar los permisos de un valor -por el contrario- seguro de umask(2). Note que la umask aún aplica a los otros bits de permisos (ej. si umask es '0022', usando 'group' no quitará privilegios de lectura de otros usuarios (no del grupo) ). Ver '0xxx' para cómo especificar exactamente los permisos del repositorio.
+Hace al repositorio escribible para el grupo, (y `g+sx`, ya que el grupo git podría no ser el grupo primario de todos los usuarios). Esto se usa para relajar los permisos de un valor -por el contrario- seguro de `umask`(2). Note que umask aún aplica a los otros bits de permisos (ej. si umask es `0022`, usando `group` no quitará privilegios de lectura de otros usuarios (no del grupo) ). Ver `0xxx` para cómo especificar exactamente los permisos del repositorio.
 
-'all' (o 'world' o 'everybody')::
+`all`::
+`world`::
+`everybody`::
 
-Igual que 'group', pero permite que cualquier usuario lea el repositorio.
+Igual que `group`, pero permite que cualquier usuario lea el repositorio.
 
-'<permisos>'::
+_<permisos>_::
 
-'<permisos>' es un número octal de tres dígitos prefijado con `0` y cada fichero tendrá el modo '<permisos>'. '<permisos>' sobre-escribirá el valor umask(2) del usuario (y no solo permisos mas holgados como lo hacen 'group' y 'all'). '0640' creará un repositorio legible por el grupo, pero no escribible o accesible para otros. '0660' creará un repositorio que es legible y escribible por el usuario actual y grupo, pero inaccesible para otros (directorios y ejecutables obtienen su bit `x` del bit `r` para sus clases de usuarios correspondientes).
+`<permisos>` es un número octal de tres dígitos prefijado con `0` y cada fichero tendrá el modo `<permisos>`. `<permisos>` sobre-escribirá el valor `umask`(2) del usuario (y no solo permisos mas holgados como lo hacen `group` y `all`). `0640` creará un repositorio legible por el grupo, pero no escribible o accesible para otros. `0660` creará un repositorio que es legible y escribible por el usuario actual y grupo, pero inaccesible para otros (directorios y ficheros ejecutables obtienen su bit `x` del bit `r` para sus clases de usuarios correspondientes).
 --
 
 Predeterminadamente, la bandera de configuración `receive.denyNonFastForwards` está habilitada en repositorios compartidos, de tal manera que no se pueda forzar un push no-fast-forward en él.
 
-Si se proporciona un 'directorio', el comando se ejecuta dentro de éste. Si éste directorio no existe, se creará.
+Si se proporciona un _<directorio>_, el comando se ejecuta dentro de éste. Si éste directorio no existe, se creará.
 
 DIRECTORIO DE PLANTILLAS
 ------------------------
@@ -127,7 +131,7 @@ $ git add .     <2>
 $ git commit    <3>
 ----------------
 +
-<1> Crear un directorio /ruta/a/mi/código/.git .
+<1> Crear un directorio `/ruta/a/mi/código/.git` .
 <2> Añadir todos los ficheros existentes al índice.
 <3> Registra el estado prístino como el primer commit en el historial.
 
@@ -135,6 +139,8 @@ CONFIGURACIÓN
 -------------
 
 include::includes/cmd-config-section-all.txt[]
+
+:git-init:
 
 include::config/init.txt[]
 

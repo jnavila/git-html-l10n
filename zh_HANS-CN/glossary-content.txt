@@ -243,7 +243,13 @@
 	相比于全局引用，它是对每个<<def_worktree,工作区>>的引用。 目前只有 <<def_HEAD,HEAD>> 和任何以 `refs/bisect/` 开头的引用，但以后可能包括其他不寻常的引用。
 
 [[def_pseudoref]]伪引用 (pseudoref)::
-	伪引用是 `$GIT_DIR` 下的一类文件，其行为与修订-剖析 (rev-parse) 中的引用一样，但被 Git 区分对待。 伪引用的名字一般是由由一行 <<def_SHA1,SHA-1>> 开始，然后是空格。 所以，HEAD 并不是一个伪引用，因为它有时是一个符号性引用。 它可能选择性地包含一些额外的数据。 比如 `MERGE_HEAD` 和 `CHERRY_PICK_HEAD`。 与<<def_per_worktree_ref,工作区引用>>不同，这些文件不能是符号引用，也没有引用日志。 它们也不能通过正常的引用更新机制进行更新。 相反，它们是通过直接写入文件来更新的。 不过，它们可以被当作引用读取，所以 `git rev-parse MERGE_HEAD` 仍可以运行。
+	A ref that has different semantics than normal refs. These refs can be read via normal Git commands, but cannot be written to by commands like linkgit:git-update-ref[1].
++
+The following pseudorefs are known to Git:
+
+ - `FETCH_HEAD` is written by linkgit:git-fetch[1] or linkgit:git-pull[1]. It may refer to multiple object IDs. Each object ID is annotated with metadata indicating where it was fetched from and its fetch status.
+
+ - `MERGE_HEAD` is written by linkgit:git-merge[1] when resolving merge conflicts. It contains all commit IDs which are being merged.
 
 [[def_pull]]拉取 (pull)::
 	拉取一个<<def_branch,分支>>意味着<<def_fetch,获取>>一个分支并且<<def_merge,合并>>这个分支。 另见 linkgit:git-pull[1]。
@@ -261,17 +267,33 @@
 	将<<def_branch,分支>>的一系列修改重新应用于不同的分支上，并将<<def_head,头>>指针重置为该分支。
 
 [[def_ref]]引用 (ref)::
-	一个以 `refs/` 开头的名字（例如 `refs/heads/master`），它指向一个<<def_object_name,对象名称>>或另一个引用（后者被称为<<def_symref,符号引用>>）。 为方便起见，当作为 Git 命令的参数时，引用可以使用缩写；参见 linkgit:gitrevisions[7] 。 引用保存在<<def_repository,仓库>>中。
+	A name that that points to an <<def_object_name,object name>> or another ref (the latter is called a <<def_symref,symbolic ref>>). For convenience, a ref can sometimes be abbreviated when used as an argument to a Git command; see linkgit:gitrevisions[7] for details. Refs are stored in the <<def_repository,repository>>.
 +
-引用的命名空间是分层次的。 不同的子层次表示不同的情况（例如，`refs/heads/` 层次用于代表本地分支）。
+引用名称空间是分层的。引用名称必须以 `refs/` 开头，或者位于层次结构的根目录中。对于后者，它们的名称必须遵循以下规则：
 +
-有一些特殊意义的引用不以 `refs/` 开头。 最经典的例子就是 `HEAD`。
+ - 名称仅由大写字母或下划线组成。
+
+ - 名称以"`_HEAD`"结尾，或者等于"`HEAD`"。
++
+在层次结构根目录中存在一些不符合这些规则的非正规引用。以下列表详细得列出了所有情况并不会继续扩展：
++
+ - `AUTO_MERGE`
+
+ - `BISECT_EXPECTED_REV`
+
+ - `NOTES_MERGE_PARTIAL`
+
+ - `NOTES_MERGE_REF`
+
+ - `MERGE_AUTOSTASH`
++
+Different subhierarchies are used for different purposes. For example, the `refs/heads/` hierarchy is used to represent local branches whereas the `refs/tags/` hierarchy is used to represent local tags..
 
 [[def_reflog]]引用日志 (reflog)::
 	引用日志显示一个引用的本地 “历史”。 换句话说，它可以告诉你，在昨天下午 9:14，_这个_ 仓库的最后三次修订是什么，以及 _这个_ 仓库的当前状态是什么。 详情见 linkgit:git-reflog[1]。
 
 [[def_refspec]]引用规范 (refspec)::
-	“引用规范” 是<<def_fetch,获取>>和<<def_push,推送>>用以描述远程<<def_ref,引用>>和本地引用之间的映射关系。
+	A "refspec" is used by <<def_fetch,fetch>> and <<def_push,push>> to describe the mapping between remote <<def_ref,ref>> and local ref. See linkgit:git-fetch[1] or linkgit:git-push[1] for details.
 
 [[def_remote]]远程仓库 (remote repository)::
 	一个部署在其他地方但用于跟踪同一个项目的<<def_repository,仓库>>。要与远程通信，请参阅<<def_fetch,获取>>或<<def_push,推送>>。
@@ -305,15 +327,6 @@
 
 [[def_stash]]贮藏项 (stash entry)::
 	一个<<def_object,对象>>，用于临时存储<<def_dirty,脏>>工作目录的内容和索引，以便将来重新使用。
-
-[[def_special_ref]]特殊引用 (special ref )::
-	语义不同于普通引用的引用。这些引用可以通过正常的 Git 命令访问，但在某些情况下可能与正常引用的行为不同。
-+
-Git 已知的特殊引用如下：
-
- - "`FETCH_HEAD`" 由 linkgit:git-fetch[1] 或 linkgit:git-pull[1] 写入。它可以指向多个对象 ID。每个对象 ID 都有元数据注释，说明其取自何处以及取回状态。
-
- - linkgit:git-merge[1] 在解决合并冲突时会写入 "`MERGE_HEAD`"。它包含所有正在合并的提交 ID。
 
 [[def_submodule]]子模块 (submodule)::
 	一个<<def_repository,仓库>>保存着另一个库内的独立项目的历史（后者被称为<<def_superproject, 父工程>>）。

@@ -9,27 +9,20 @@ git-config - Lire et écrire les options du dépôt et les options globales
 SYNOPSIS
 --------
 [verse]
-'git config' [<option-de-fichier>] [--type=<type>] [--fixed-value] [--show-origin] [--show-scope] [-z|--null] <nom> [<valeur> [<motif-de-valeur>]]
-'git config' [<option-de-fichier>] [--type=<type>] --add <nom> <valeur>
-'git config' [<option-de-fichier>] [--type=<type>] [--fixed-value] --replace-all <nom> <valeur> [<motif-de-valeur>]
-'git config' [<option-de-fichier>] [--type=<type>] [--show-origin] [--show-scope] [-z|--null] [--fixed-value] --get <nom> [<motif-de-valeur>]
-'git config' [<option-de-fichier>] [--type=<type>] [--show-origin] [--show-scope] [-z|--null] [--fixed-value] --get-all <nom> [<motif-de-valeur>]
-'git config' [<option-de-fichier>] [--type=<type>] [--show-origin] [--show-scope] [-z|--null] [--fixed-value] [--name-only] --get-regexp <regex_de_nom> [<motif-de-valeur>]
-'git config' [<option-de-fichier>] [--type=<type>] [-z|--null] --get-urlmatch <nom> <URL>
-'git config' [<option-de-fichier>] [--fixed-value] --unset <nom> [<motif-de-valeur>]
-'git config' [<option-de-fichier>] [--fixed-value] --unset-all <nom> [<motif-de-valeur>]
-'git config' [<option-de-fichier>] --rename-section <ancien-nom> <nouveau-nom>
-'git config' [<option-de-fichier>] --remove-section <nom>
-'git config' [<option-de-fichier>] [--show-origin] [--show-scope] [-z|--null] [--name-only] -l | --list
-'git config' [<option-de-fichier>] --get-color <nom> [<défaut>]
-'git config' [<option-de-fichier>] --get-colorbool <nom> [stdout-is-tty]
-'git config' [<option-de-fichier>] -e | --edit
+'git config list' [<option-de-fichier>] [<option-d-affichage>] [--includes]
+'git config get' [<option-de-fichier>] [<option-d-affichage>] [--includes] [--all] [--regexp=<regexp>] [--value=<valeur>] [--fixed-value] [--default=<default>] <nom>
+'git config set' [<option-de-fichier>] [--type=<type>] [--all] [--value=<valeur>] [--fixed-value] <nom> <valeur>
+'git config unset' [<option-de-fichier>] [--all] [--value=<valeur>] [--fixed-value] <nom> <valeur>
+'git config rename-section' [<option-de-fichier>] <ancien-name> <nouveau-name>
+'git config remove-section' [<option-de-fichier>] <nom>
+'git config edit' [<option-de-fichier>]
+'git config' [<option-de-fichier>] --get-colorbool <nom> [<stdout-est-tty>]
 
 DESCRIPTION
 -----------
 Vous pouvez interroger/définir/remplacer/annuler les options avec cette commande. Le nom est en fait la section et la clé séparées par un point, et la valeur sera échappée.
 
-Plusieurs lignes peuvent être ajoutées à une option en utilisant l'option `--add`. Si vous voulez mettre à jour ou annuler une option qui peut se trouver sur plusieurs lignes, un "motif-de-valeur" (qui est une expression régulière étendue, à moins que l'option "--fixed-value" soit donnée) doit être donné. Seules les valeurs existantes qui correspondent au motif sont mises à jour ou annulées. Si vous voulez gérer les lignes qui ne correspondent *pas* au motif, ajoutez simplement un point d'exclamation devant (voir aussi <<EXAMPLES>>), mais notez que cela ne fonctionne que lorsque l'option `--fixed-value` n'est pas utilisée.
+Plusieurs lignes peuvent être ajoutées à une option en utilisant l'option `--append`. Si vous voulez mettre à jour ou annuler une option qui peut se trouver sur plusieurs lignes, un "motif-de-valeur" (qui est une expression régulière étendue, à moins que l'option "--fixed-value" soit donnée) doit être donné. Seules les valeurs existantes qui correspondent au motif sont mises à jour ou annulées. Si vous voulez gérer les lignes qui ne correspondent *pas* au motif, ajoutez simplement un point d'exclamation devant (voir aussi <<EXAMPLES>>), mais notez que cela ne fonctionne que lorsque l'option `--fixed-value` n'est pas utilisée.
 
 L'option `--type=<type>` indique à 'git config' de s'assurer que les valeurs entrantes et sortantes peuvent être canonisées sous le <type> donné. Si aucun `--type=<type>` n'est donné, aucune canonisation ne sera effectuée. Les appelants peuvent annuler un spécificateur `--type` existant avec `--no-type`.
 
@@ -51,6 +44,30 @@ En cas de succès, la commande renvoie le code de sortie 0.
 
 Une liste de toutes les variables de configuration disponibles peut être obtenue en utilisant la commande `git help --config`.
 
+COMMANDES
+---------
+
+list::
+	Lister toutes les variables définies dans le fichier de configuration, avec leurs valeurs.
+
+get::
+	Émet la valeur de la clé spécifiée. Si la clé est présente plusieurs fois dans la configuration, émet la dernière valeur. Si `--all` est spécifié, émet toutes les valeurs associées à la clé. Retourne le code d'erreur 1 si la clé n'est pas présente.
+
+set::
+	Définir la valeur pour une ou plusieurs options de configuration. Par défaut, cette commande refuse d'écrire des options de configuration multi-valeur. Passer `--all` remplacera toutes les options de configuration multi-valeur avec la nouvelle valeur, alors que `--value=` remplacera toutes les options de configuration dont les valeurs correspondent au modèle donné.
+
+unset::
+	Valeur désinitialisée pour une ou plusieurs options de configuration. Par défaut, cette commande refuse de désactiver les clés multi-valeurs. Passer `--all` dé-enregistrera toutes les options de configuration multi-valeur, alors que `--value` dé-enregistrera toutes les options de configuration dont les valeurs correspondent au modèle donné.
+
+rename-section::
+	Renommer la section donnée avec un nouveau nom.
+
+remove-section::
+	Supprimer la section indiquée du fichier de configuration.
+
+edit::
+	Ouvrir un éditeur pour modifier le fichier de configuration spécifié ; soit `--system`, `--global`, `--local` (par défaut), `--worktree`ou `--file <fichier-config>`.
+
 [[OPTIONS]]
 OPTIONS
 -------
@@ -58,19 +75,21 @@ OPTIONS
 --replace-all::
 	Le comportement par défaut est de remplacer au maximum une ligne. Ceci remplace toutes les lignes correspondant à la clé (et optionnellement au `motif-de-valeur`).
 
---add::
-	Ajoute une nouvelle ligne à l'option sans modifier les valeurs existantes. C'est la même chose que de fournir '^$' comme `modèle-de-valeur` dans `--replace-all`.
+--append::
+	Ajoute une nouvelle ligne à l'option sans modifier les valeurs existantes. C'est la même chose que de fournir `--value=^$` à `set`.
 
---get::
-	Obtenir la valeur d'une clé donnée (éventuellement filtrée par une regex correspondant à la valeur). Renvoie le code d'erreur 1 si la clé n'a pas été trouvée et la dernière valeur si plusieurs valeurs de clé ont été trouvées.
+--comment <message>::
+	Ajouter un commentaire à la fin des lignes nouvelles ou modifiées.
 
---get-all::
-	Comme get, mais renvoie toutes les valeurs pour une clé à valeurs multiples.
+	Si _<message>_ commence avec un ou plusieurs espaces blancs suivis par "#", il est utilisé tel quel. S'il commence par "#", un espace est préfixé avant qu'il ne soit utilisé. Sinon, une chaîne " # " (un espace suivi d'un dièse suivi d'un espace) est préfixée à elle. Et la chaîne résultante est placée immédiatement après la valeur définie pour la variable. Le _ <message>_ ne doit pas contenir de caractères retour-chariot (les commentaires multi-lignes ne sont pas permis).
 
---get-regexp::
-	Comme --get-all, mais interprèter le nom comme une expression régulière et écrire les noms des clés. La correspondance des expressions régulières est actuellement sensible à la casse et se fait par rapport à une version canonisée de la clé dans laquelle les noms de sections et de variables sont en minuscules, mais pas les noms de sous-sections.
+--all::
+	Avec `get`, renvoyer toutes les valeurs pour une clé à valeurs multiples.
 
---get-urlmatch <nom> <URL>::
+---regexp::
+	avec `get`, interpréter le nom comme une expression régulière. La correspondance des expressions régulières est actuellement sensible à la casse et se fait par rapport à une version canonisée de la clé dans laquelle les noms de sections et de variables sont en minuscules, mais pas les noms de sous-sections.
+
+--url=<URL>::
 	Lorsqu'un <nom> en deux parties <section>.<clé> est donné, la valeur de <section>.<URL>.<clé> dont la partie <URL> correspond le mieux à l'URL donnée est retournée (si une telle clé n'existe pas, la valeur de <section>.<clé> est utilisée comme solution de repli). Lorsqu'on donne juste la section comme nom, le faire pour toutes les clés de la <section> et les lister. Renvoie le code d'erreur 1 si aucune valeur n'est trouvée.
 
 --global::
@@ -108,22 +127,6 @@ Voir aussi <<FILES>>.
 --blob <blob>::
 	Similaire à `--file` mais utiliser le blob donné au lieu d'un fichier. Par exemple, vous pouvez utiliser 'master:.gitmodules' pour lire les valeurs du fichier '.gitmodules' dans la branche master. Voir la section "SPECIFICATION DE REVISIONS" dans linkgit:gitrevisions[7] pour une liste plus complète des façons d'épeler les noms de blob.
 
---remove-section::
-	Supprimer la section indiquée du fichier de configuration.
-
---rename-section::
-	Renommer la section donnée avec un nouveau nom.
-
---unset::
-	Supprimer la ligne correspondant à la clé du fichier de configuration.
-
---unset-all::
-	Supprimer toutes les lignes correspondant à la clé du fichier de configuration.
-
--l::
---list::
-	Lister toutes les variables définies dans le fichier de configuration, avec leurs valeurs.
-
 --fixed-value::
 	Lorsqu’utilisé avec l’argument 'value-pattern', traiter 'motif-de-valeur' comme une chaîne exacte au lieu d’une expression régulière. Cela limitera les paires nom/valeur qui sont trouvées à celles dont la valeur est exactement égale au `motif-de-valeur`.
 
@@ -155,7 +158,7 @@ Les « <type> » valides comprennent :
 	Pour toutes les options qui produisent des valeurs et/ou des clés, terminer toujours les valeurs par le caractère nul (au lieu d'une nouvelle ligne). Utiliser plutôt le saut de ligne comme délimiteur entre la clé et la valeur. Cela permet une analyse sûre de la sortie sans être confondu, par exemple, avec des valeurs qui contiennent des sauts de ligne.
 
 --name-only::
-	Afficher seulement les noms des variables de configuration pour `--list` ou `--get-regexp`.
+	Afficher seulement les noms des variables de configuration pour `list` ou `get`.
 
 --show-origin::
 	Augmenter la sortie de toutes les options de configuration interrogées avec le type d'origine (fichier, entrée standard, blob, ligne de commande) et l'origine réelle (chemin du fichier de configuration, ref, ou identifiant du blob si applicable).
@@ -167,25 +170,64 @@ Les « <type> » valides comprennent :
 
 	Trouver le paramètre de couleur pour `<nom>` (par exemple, `color.diff`) et affiche "true" ou "false". `<stdout-est-tty>` devrait être soit "true" soit "false", et est pris en compte lorsque la configuration est "auto". Si `<stdout-est-tty>` est absent, alors vérifier la sortie standard de la commande elle-même, et sortir avec le statut 0 si la couleur doit être utilisée, ou sortir avec le statut 1 sinon. Lorsque le paramètre de couleur pour `<nom>` est indéfini, la commande utilise `color.ui` comme solution de repli.
 
---get-color <nom> [<défaut>]::
-
-	Trouver la couleur configurée pour `nom` (par exemple `color.diff.new`) et l'afficher comme séquence d'échappement de couleur ANSI sur la sortie standard. Le paramètre optionnel `défaut` est utilisé à la place, s'il n'y a pas de couleur configurée pour `nom`.
-+
-`--type=color [--default=<défaut>]` est préféré à `--get-color` (mais notez que `--get-color` omettra le caractère de nouvelle ligne final affiché par `--type=color`).
-
--e::
---edit::
-	Ouvrir un éditeur pour modifier le fichier de configuration spécifié ; soit `--system`, `--global`, ou du dépôt (par défaut).
-
 --[no-]includes::
 	Respecter les directives `include.*` dans les fichiers de configuration lors de la recherche de valeurs. La valeur par défaut est `off` lorsqu'un fichier spécifique est donné (par exemple, en utilisant `--file`, `--global`, etc) et `on` lorsqu'on cherche dans tous les fichiers de configuration.
 
 --default <valeur>::
-  Lors de l'utilisation de `--get`, et que la variable demandée n'est pas trouvée, se comporter comme si <valeur> était la valeur assignée à cette variable.
+  Lors de l'utilisation de `get`, et que la variable demandée n'est pas trouvée, se comporter comme si _<valeur>_ était la valeur assignée à cette variable.
+
+MODES OBSOLÈTES
+---------------
+
+Les modes suivants ont été dépréciés en faveur des sous-commandes. Il est recommandé de migrer vers la nouvelle syntaxe.
+
+'git config <nom>'::
+	Remplacé par `git config get <nom>`.
+
+'git config <nom> [<motif-de-valeur>]'::
+	Remplacé par `git config set [--value=<motif>] <nom> <valeur>`.
+
+-l::
+--list::
+	Remplacé par`git config list`.
+
+--get <nom> [<motif-de-valeur>]::
+	Remplacé par `git config get [--value= <motif>] <nom>`.
+
+--get-all <nom> [<motif-de-valeur>]::
+	Remplacé par `git config get [--value=<motif>] --all --show-names <nom>`.
+
+--get-regexp <regexp-de-nom>::
+	Remplacé par `git config get --all --show-names --regexp <regexp-de-nom>`.
+
+--get-urlmatch <nom> <URL>::
+	Remplacé par `git config get --all --show-names --url= <URL> <nom>`.
+
+--get-color <nom> [<défaut>]::
+	Remplacé par `git config get --type=color [--default= <défaut>] <nom>`.
+
+--add <nom> <valeur>::
+	Remplacé par `git config set --append <nom> <valeur>`.
+
+--unset <nom> [<motif-de-valeur>]::
+	Remplacé par `git config unset [--value= <motif>] <nom>`.
+
+--unset-all <nom> [<motif-de-valeur>]::
+	Remplacé par `git config unset [--value=<motif>] --all <nom>`.
+
+--rename-section <ancien-nom> <nouveau-nom>::
+	Remplacé par `git config rename-section <ancien-nom> <nouveau-nom>`.
+
+--remove-section <nom>::
+	Remplacé par `git config remove-section <nom>`.
+
+-e::
+--edit::
+	Remplacé par `git config edit`.
 
 CONFIGURATION
 -------------
-`pager.config` n'est respecté que lors de l'énumération de la configuration, c'est-à-dire lors de l'utilisation de `--list` ou de l'un des `--get-*` qui peuvent retourner plusieurs résultats. Le défaut est d'utiliser un pager.
+`pager.config` n'est respecté que lors de l'énumération de la configuration, c'est-à-dire lors de l'utilisation de `list` ou de l'un des `get` qui peuvent retourner plusieurs résultats. Le défaut est d'utiliser un pager.
 
 [[FILES]]
 FICHIERS
@@ -214,7 +256,7 @@ Les options seront lues depuis tous ces fichiers lorsqu'ils sont disponibles. Si
 
 Les fichiers sont lus dans l'ordre indiqué ci-dessus, la dernière valeur trouvée étant prioritaire sur les valeurs lues précédemment. Lorsque plusieurs valeurs peuvent être concaténées, toutes les valeurs d'une clé dans tous les fichiers seront utilisées.
 
-Par défaut, les options sont seulement écrites dans le fichier de configuration spécifique au dépôt. Notez que cela affecte également les options comme `--replace-all` et `--unset`. *'git config' ne modifiera jamais qu'un seul fichier à la fois*.
+Par défaut, les options sont seulement écrites dans le fichier de configuration spécifique au dépôt. Notez que cela affecte également les options comme `set` et `unset`. *'git config' ne modifiera jamais qu'un seul fichier à la fois*.
 
 Vous pouvez limiter les sources de configuration qui sont lues ou écrites en spécifiant le chemin d'un fichier avec l'option `--file`, ou en spécifiant une portée de configuration avec `--system`, `--global`, `--local`, ou `--worktree`. Pour en savoir plus, voir <<OPTIONS>> ci-dessus.
 
@@ -304,7 +346,7 @@ Avec un .git/config comme ceci :
 
 ; paramètres du proxy
 [core]
-	gitproxy=proxy-command pour kernel.org
+	gitproxy=proxy-command for kernel.org
 	gitproxy=default-proxy ; pour tout le reste
 
 ; HTTP
@@ -318,13 +360,13 @@ Avec un .git/config comme ceci :
 vous pouvez mettre le filemode à true avec
 
 ------------
-% git config core.filemode true
+% git config set core.filemode true
 ------------
 
 Les entrées hypothétiques de la commande proxy ont en fait un postfix pour discerner l'URL à laquelle elles s'appliquent. Voici comment changer l'entrée pour kernel.org en "ssh".
 
 ------------
-% git config core.gitproxy '<"ssh" pour kernel.org>' 'for kernel.org$'
+% git config set --value='for kernel.org$' core.gitproxy '"ssh" for kernel.org'
 ------------
 
 Cela permet de s'assurer que seule la paire clé/valeur de kernel.org est remplacée.
@@ -332,7 +374,7 @@ Cela permet de s'assurer que seule la paire clé/valeur de kernel.org est rempla
 Pour supprimer l'entrée pour les renommages, faites
 
 ------------
-% git config --unset diff.renames
+% git config unset diff.renames
 ------------
 
 Si vous voulez supprimer une entrée pour un multivar (comme core.gitproxy ci-dessus), vous devez fournir une regex correspondant à la valeur d'exactement une ligne.
@@ -340,68 +382,62 @@ Si vous voulez supprimer une entrée pour un multivar (comme core.gitproxy ci-de
 Pour demander la valeur d'une clef donnée, faites
 
 ------------
-% git config --get core.filemode
-------------
-
-ou
-
-------------
-% git config core.filemode
+% git config get core.filemode
 ------------
 
 ou, pour interroger un multivar :
 
 ------------
-% git config --get core.gitproxy "for kernel.org$"
+% git config get --value="for kernel.org$" core.gitproxy
 ------------
 
 Si vous voulez connaître toutes les valeurs d’un multivar, faites :
 
 ------------
-% git config --get-all core.gitproxy
+% git config get --all --show-names core.gitproxy
 ------------
 
 Si vous aimez vivre dangereusement, vous pouvez remplacer *tout* core.gitproxy par une nouvelle valeur avec
 
 ------------
-% git config --replace-all core.gitproxy ssh
+% git config set --all core.gitproxy ssh
 ------------
 
 Cependant, si vous voulez seulement remplacer la ligne pour le proxy par défaut, c'est-à-dire celui sans postfixe "for ...", faites quelque chose comme ceci :
 
 ------------
-% git config core.gitproxy ssh '! for '
+% git config set --value='! for ' core.gitproxy ssh
 ------------
 
 Pour ne faire correspondre que les valeurs comportant un point d'exclamation, vous devez
 
 ------------
-% git config section.key value '[!]'
+% git config set --value='[!]' section.key value
 ------------
 
 Pour ajouter un nouveau proxy, sans modifier aucun des proxy existants, utilisez
 
 ------------
-% git config --add core.gitproxy '"proxy-command" for example.com'
+% git config set --append core.gitproxy '"proxy-command" for exemple.com'
 ------------
 
 Un exemple d'utilisation de la couleur personnalisée de la configuration dans votre script :
 
 ------------
 #!/bin/sh
-WS=$(git config --get-color color.diff.whitespace "blue reverse")
-RESET=$(git config --get-color "" "reset")
-echo "${WS}your whitespace color or blue reverse${RESET}"
+WS=$(git config get --type=color --default="blue reverse" color.diff.whitespace)
+RESET=$(git config get --type=color --default="reset" "")
+echo "${WS}votre color d'espace et bleu sont échangées${RESET}"
 ------------
 
 Pour les URLs dans `https://weak.example.com`, `http.sslVerify` est mis à false, alors qu'il est mis à `true` pour toutes les autres :
 
 ------------
-% git config --type=bool --get-urlmatch http.sslverify https://good.example.com
+% git config get --type=bool --url=https://bon.exemple.com http.sslverify
 true
-% git config --type=bool --get-urlmatch http.sslverify https://weak.example.com
+% git config get --type=bool --url=https://faible.exemple.com http.sslverify
 false
-% git config --get-urlmatch http https://weak.example.com
+% git config get --url=https://weak.example.com http
 http.cookieFile /tmp/cookie.txt
 http.sslverify false
 ------------

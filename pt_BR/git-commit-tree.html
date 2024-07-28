@@ -456,7 +456,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_descrição">DESCRIÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>This is usually not what an end user wants to run directly. See <a href="git-commit.html"><b>git-commit</b>(1)</a> instead.</p>
+<p>Normalmente, não é o que um usuário final gostaria de usar diretamente. Em vez disso, consulte <a href="git-commit.html"><b>git-commit</b>(1)</a>.</p>
 </div>
 <div class="paragraph">
 <p>Cria um novo objeto commit com base no objeto da árvore informada e emite a nova ID do objeto commit no stdout. A mensagem do registro log é lido na entrada padrão a não ser que as opções <code>-m</code> ou <code>-F</code> sejam utilizadas.</p>
@@ -465,13 +465,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>As opções <code>-m</code> e <code>-F</code> podem ser utilizadas várias vezes e em qualquer ordem. A mensagem do registro log do commit será composta na ordem em que as opções forem utilizadas.</p>
 </div>
 <div class="paragraph">
-<p>A commit object may have any number of parents. With exactly one parent, it is an ordinary commit. Having more than one parent makes the commit a merge between several lines of history. Initial (root) commits have no parents.</p>
+<p>Um objeto commit pode ter qualquer quantidade de origens. Com exatamente um commit principal, ele é um commit comum. Ter mais de uma origem faz com que o commit seja uma mescla entre várias linhas de histórico. Os commits iniciais (raiz) não possuem parentes.</p>
 </div>
 <div class="paragraph">
 <p>Enquanto uma árvore representa a condição de um diretório de trabalho em específico, um commit representa esta condição em "hora" e explica como chegar até lá.</p>
 </div>
 <div class="paragraph">
-<p>Normally a commit would identify a new "HEAD" state, and while Git doesn&#8217;t care where you save the note about that state, in practice we tend to just write the result to the file that is pointed at by <code>.git/HEAD</code>, so that we can always see what the last committed state was.</p>
+<p>Normalmente, um commit identifica uma nova condição "HEAD" e embora o Git não se importe onde você salva a nota sobre esse estado, na prática, tendemos apenas a escrever o resultado no arquivo apontado por <code>.git/HEAD</code> para que possamos sempre ver como estava a última condição do commit.</p>
 </div>
 </div>
 </div>
@@ -570,7 +570,57 @@ Além disso, a parte da data é aceita nos seguintes formatos: <code>YYYY.MM.DD<
 <h2 id="_discussão">Discussão</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Unresolved directive in git-commit-tree.txt - include::i18n.txt[]</p>
+<p>O Git é, até certo ponto, um codificador de caracteres agnóstico.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>O conteúdo dos objetos bolha (blob) são sequências de bytes não interpretadas. Não há uma tradução de codificação no nível do núcleo.</p>
+</li>
+<li>
+<p>Os nomes do caminho são codificados na forma de normalização UTF-8 C. Isso se aplica a objetos nas árvore, arquivos do índice, referência de nomes e nomes do caminho em argumentos da linha de comando, variáveis do ambiente e os arquivos de configuração (<code>.git / config</code> (consulte <a href="git-config.html"><b>git-config</b>(1)</a>), <a href="gitignore.html"><b>gitignore</b>(5)</a>, <a href="gitattributes.html"><b>gitattributes</b>(5)</a> e <a href="gitmodules.html"><b>gitmodules</b>(5)</a>).</p>
+<div class="paragraph">
+<p>Observe que o Git, em seu cerne, trata os nomes do caminho simplesmente como sequências de bytes não NUL; não há conversões de codificação do nome do caminho (exceto no Mac e no Windows). Portanto, o uso de nomes com caminho não ASCII funcionará, em geral, mesmo em plataformas e sistemas de arquivos que usam codificações ASCII estendidas legadas. No entanto, os repositórios criados nesses sistemas não funcionarão corretamente em sistemas baseados em UTF-8 (Linux, Mac, Windows por exemplo) e vice-versa. Além disso, muitas ferramentas com base no Git simplesmente assumem que os nomes de caminho são UTF-8 e não exibem outras codificações corretamente.</p>
+</div>
+</li>
+<li>
+<p>As mensagens do registro log do commit geralmente são codificadas em UTF-8, porém há compatibilidade para outras codificações ASCII estendidas. Isso inclui ISO-8859-x, CP125x e muitos outros. Porém não há compatibilidade com codificações UTF-16/32, EBCDIC e CJK, codificações de vários bytes (GBK, Shift-JIS, Big5, EUC-x, CP9xx etc.).</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Embora incentivemos que as mensagens do registro do commit sejam codificadas em UTF-8, tanto o núcleo quanto o Git porcelain foram projetados para não impor o UTF-8 nos projetos. Se todos os participantes de um determinado projeto acharem mais conveniente usar codificações herdadas, o Git não o proibirá. Entretanto, há alguns aspectos que devem ser levados em consideração.</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>O comando <em>git commit</em> e o <em>git commit-tree</em> emitem um aviso se a mensagem de registro do commit fornecida a ele não se parecer com uma string UTF-8 válida, a menos que você diga explicitamente que o seu projeto usa uma codificação antiga. A maneira de definir isso é ter <code>i18n.commitEncoding</code> no arquivo <code>.git/config</code>, assim:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        commitEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Os objetos criados do commit com a configuração acima, registram o valor <code>i18n.commitEncoding</code> em seu cabeçalho <code>encoding</code>. Isso serve para ajudar as outras pessoas que forem examiná-las mais tarde. A ausência desse cabeçalho implica que a mensagem de registro do commit está codificada em UTF-8.</p>
+</div>
+</li>
+<li>
+<p>Os comandos <em>git log</em>, <em>git show</em>, <em>git blame</em> e outros, analisam o cabeçalho <code>encoding</code> de um objeto commit e tentam recodificar a mensagem de registro em UTF-8, a menos que outro seja especificado. Você pode especificar a codificação de saída desejada com <code>i18n.logOutputEncoding</code> no arquivo <code>.git/config</code>, da seguinte maneira:</p>
+<div class="listingblock">
+<div class="content">
+<pre>[i18n]
+        logOutputEncoding = ISO-8859-1</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Caso não tenha essa variável de configuração, o valor de <code>i18n.commitEncoding</code> é utilizado em seu lugar.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Observe que decidimos deliberadamente não codificar novamente a mensagem do registro log do commit quando um commit for feito para forçar a codificação UTF-8 a nível do objeto commit, porque a re-codificação para UTF-8 não é necessariamente uma operação reversível.</p>
 </div>
 </div>
 </div>
@@ -601,7 +651,7 @@ Além disso, a parte da data é aceita nos seguintes formatos: <code>YYYY.MM.DD<
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-03-31 16:03:00 +0200
+Last updated 2024-07-12 22:27:23 +0200
 </div>
 </div>
 </body>

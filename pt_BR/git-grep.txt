@@ -18,22 +18,22 @@ RESUMO
 	   [(-O | --open-files-in-pager) [<pager>]]
 	   [-z | --null]
 	   [ -o | --only-matching ] [-c | --count] [--all-match] [-q | --quiet]
-	   [--max-depth <profundidade>] [--[no-]recursive]
-	   [--color[=<quando>] | --no-color]
+	   [--max-depth <depth>] [--[no-]recursive]
+	   [--color[=<when>] | --no-color]
 	   [--break] [--heading] [-p | --show-function]
 	   [-A <post-context>] [-B <pre-context>] [-C <context>]
 	   [-W | --function-context]
 	   [(-m | --max-count) <num>]
 	   [--threads <num>]
-	   [-f <arquivo>] [-e] <padrão>
-	   [--and|--or|--not|(|)|-e <padrão>...]
+	   [-f <file>] [-e] <pattern>
+	   [--and|--or|--not|(|)|-e <pattern>...]
 	   [--recurse-submodules] [--parent-basename <basename>]
-	   [ [--[no-]exclude-standard] [--cached | --no-index | --untracked] | <árvore>...]
+	   [ [--[no-]exclude-standard] [--cached | --untracked | --no-index] | <tree>...]
 	   [--] [<pathspec>...]
 
 DESCRIÇÃO
 ---------
-Look for specified patterns in the tracked files in the work tree, blobs registered in the index file, or blobs in given tree objects. Patterns are lists of one or more search expressions separated by newline characters. An empty string as search expression matches all lines.
+Procure padrões especificados nos arquivos rastreados na árvore de trabalho, bolhas registradas no arquivo do índice ou bolhas em determinados objetos da árvore. Os padrões são listas de uma ou mais expressões de pesquisa separadas por caracteres de nova linha. Uma string vazia como expressão de pesquisa corresponde a todas as linhas.
 
 
 OPÇÕES
@@ -41,20 +41,22 @@ OPÇÕES
 --cached::
 	Em vez de procurar por arquivos rastreados na árvore de trabalho, pesquisar por bolhas registradas no índice do arquivo.
 
---no-index::
-	Localize os arquivos no diretório atual que não sejam gerenciados pelo Git.
-
 --untracked::
 	Além de localizar nos arquivos rastreados da árvore de trabalho, localize também nos arquivos não rastreados.
+
+--no-index::
+	Search files in the current directory that is not managed by Git, or by ignoring that the current directory is managed by Git. This is rather similar to running the regular `grep(1)` utility with its `-r` option specified, but with some additional benefits, such as using pathspec patterns to limit paths; see the 'pathspec' entry in linkgit:gitglossary[7] for more information.
++
+This option cannot be used together with `--cached` or `--untracked`. See also `grep.fallbackToNoIndex` in 'CONFIGURATION' below.
 
 --no-exclude-standard::
 	Localize também nos arquivos ignorados, ignorando o mecanismo `.gitignore`. Útil apenas com a opção `--untracked`.
 
 --exclude-standard::
-	Do not pay attention to ignored files specified via the `.gitignore` mechanism. Only useful when searching files in the current directory with `--no-index`.
+	Não repare nos arquivos ignorados definidos em `.gitignore`. Útil apenas ao pesquisar pelos arquivos no diretório atual com a opção `--no-index`.
 
 --recurse-submodules::
-	Recursively search in each submodule that is active and checked out in the repository. When used in combination with the <tree> option the prefix of all submodule output will be the name of the parent project's <tree> object. This option has no effect if `--no-index` is given.
+	Recursively search in each submodule that is active and checked out in the repository. When used in combination with the _<tree>_ option the prefix of all submodule output will be the name of the parent project's _<tree>_ object. This option cannot be used together with `--untracked`, and it has no effect if `--no-index` is specified.
 
 -a::
 --text::
@@ -64,7 +66,7 @@ OPÇÕES
 	Honre com as configurações do filtro "textconv".
 
 --no-textconv::
-	Do not honor textconv filter settings. This is the default.
+	Não honre com as configurações do filtro "textconv". Esta é a predefinição.
 
 -i::
 --ignore-case::
@@ -74,7 +76,7 @@ OPÇÕES
 	Não coincida padrões em arquivos binários.
 
 --max-depth <profundidade>::
-	For each <pathspec> given on command line, descend at most <depth> levels of directories. A value of -1 means no limit. This option is ignored if <pathspec> contains active wildcards. In other words if "a*" matches a directory named "a*", "*" is matched literally so --max-depth is still effective.
+	Para cada `<pathspec>` fornecido na linha de comando, desça no máximo `<profundidade>` níveis de diretórios. O valor -1 significa nenhum limite. Esta opção será ignorada se <pathspec> contiver curingas. Em outras palavras, se "a*" corresponder a um diretório chamado "a*", "*" será correspondido literalmente, de modo que `--max-depth` ainda será eficaz.
 
 -r::
 --recursive::
@@ -93,16 +95,16 @@ OPÇÕES
 
 -h::
 -H::
-	By default, the command shows the filename for each match. `-h` option is used to suppress this output. `-H` is there for completeness and does not do anything except it overrides `-h` given earlier on the command line.
+	É predefinido que o comando mostre o nome do arquivo para cada correspondência. A opção `-h` é usada para suprimir essa saída. O `-H` está lá para ser completo e não faz nada, exceto substituir o `-h` fornecido anteriormente na linha de comando.
 
 --full-name::
-	When run from a subdirectory, the command usually outputs paths relative to the current directory. This option forces paths to be output relative to the project top directory.
+	Quando executado num subdiretório, o comando geralmente gera caminhos relativos ao diretório atual. Esta opção impõem os caminhos que serão gerados em relação ao diretório principal do projeto.
 
 -E::
 --extended-regexp::
 -G::
 --basic-regexp::
-	Use POSIX extended/basic regexp for patterns. Default is to use basic regexp.
+	Use o regexp estendido/básico POSIX para os padrões. A predefinição é usar o regexp básico.
 
 -P::
 --perl-regexp::
@@ -126,15 +128,15 @@ A compatibilidade para estes tipos de expressões regulares é uma dependência 
 --name-only::
 -L::
 --files-without-match::
-	Instead of showing every matched line, show only the names of files that contain (or do not contain) matches. For better compatibility with 'git diff', `--name-only` is a synonym for `--files-with-matches`.
+	Em vez de mostrar todas as linhas correspondentes, mostre apenas os nomes dos arquivos que contêm (ou não contêm) correspondências. Para melhor compatibilidade com o comando 'git diff', `--name-only` é um sinônimo de `--files-with-matches`.
 
 -O[<pager>]::
 --open-files-in-pager[=<pager>]::
-	Open the matching files in the pager (not the output of 'grep'). If the pager happens to be "less" or "vi", and the user specified only one pattern, the first file is positioned at the first match automatically. The `pager` argument is optional; if specified, it must be stuck to the option without a space. If `pager` is unspecified, the default pager will be used (see `core.pager` in linkgit:git-config[1]).
+	Abra os arquivos correspondentes no pager (não a saída do 'grep'). Se o paginador for "less" ou "vi" e o usuário tiver especificado apenas um padrão, o primeiro arquivo será posicionado automaticamente na primeira correspondência. O argumento `pager` é opcional; se for especificado, deverá ser anexado à opção sem espaço. Se `pager` não for especificado, será usado o pager padrão (consulte `core.pager` do comando linkgit:git-config[1]).
 
 -z::
 --null::
-	Use '\0' como um delimitador para os nomes do caminho na saída, e as imprima literalmente. Sem esta opção, os nomes do caminho com caracteres "incomuns" são citados como explicado na variável de configuração `core.quotePath` (consulte linkgit:git-config[1]).
+	Use \0 as the delimiter for pathnames in the output, and print them verbatim. Without this option, pathnames with "unusual" characters are quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]).
 
 -o::
 --only-matching::
@@ -145,10 +147,10 @@ A compatibilidade para estes tipos de expressões regulares é uma dependência 
 	Em vez de exibir todas as linhas coincidentes, exiba a quantidade de linhas coincidentes.
 
 --color[=<quando>]::
-	Show colored matches. The value must be always (the default), never, or auto.
+	Mostra as correspondências coloridas. O valor sempre deve ser `always` (a predefinição), `never` ou `auto`.
 
 --no-color::
-	Turn off match highlighting, even when the configuration file gives the default to color output. Same as `--color=never`.
+	Desativar o realce de correspondência, mesmo quando o arquivo de configuração dá como padrão a saída colorida. O mesmo que `--color=never`.
 
 --break::
 	Imprima uma linha vazia entre as coincidências dos diferentes arquivos.
@@ -158,7 +160,7 @@ A compatibilidade para estes tipos de expressões regulares é uma dependência 
 
 -p::
 --show-function::
-	Show the preceding line that contains the function name of the match, unless the matching line is a function name itself. The name is determined in the same way as `git diff` works out patch hunk headers (see 'Defining a custom hunk-header' in linkgit:gitattributes[5]).
+	Mostra a linha anterior que contém o nome da função correspondente, a menos que a linha correspondente seja um nome de função em si. O nome é determinado da mesma forma que o comando `git diff` trabalha com os cabeçalhos de hunk de correção (consulte 'Definindo um cabeçalho de hunk personalizado' do comando linkgit:gitattributes[5]).
 
 -<num>::
 -C <num>::
@@ -182,7 +184,7 @@ A compatibilidade para estes tipos de expressões regulares é uma dependência 
 	Limita a quantidade de correspondências por arquivo. Ao usar a opção `-v` ou `--invert-match`, a pesquisa para depois que uma quantidade determinada de não correspondências seja atingida. O valor -1 retornará resultados ilimitados (o padrão). Já o valor 0 encerrará imediatamente com um status diferente de zero.
 
 --threads <num>::
-	Number of grep worker threads to use. See `grep.threads` in 'CONFIGURATION' for more information.
+	Number of `grep` worker threads to use. See 'NOTES ON THREADS' and `grep.threads` in 'CONFIGURATION' for more information.
 
 -f <arquivo>::
 	Leia os padrões vindos de um `<arquivo>`, um por linha.
@@ -196,13 +198,13 @@ Nas versões do Git anteriores à 2.23.0, os padrões contendo '\0' seriam silen
 Em futuras versões, podemos aprender a oferecer suporte aos padrões contendo '\0' para mais estruturas de pesquisa, até então morreremos quando o tipo do padrão em questão não mais os suportar.
 
 -e::
-	The next parameter is the pattern. This option has to be used for patterns starting with `-` and should be used in scripts passing user input to grep. Multiple patterns are combined by 'or'.
+	O próximo parâmetro é o padrão. Esta opção deve ser usada para padrões que começam com `-` e deve ser usada em scripts que passam a entrada do usuário para o grep. Vários padrões são combinados por 'or'.
 
 --and::
 --or::
 --not::
 ( ... )::
-	Specify how multiple patterns are combined using Boolean expressions. `--or` is the default operator. `--and` has higher precedence than `--or`. `-e` has to be used for all patterns.
+	Especifique como vários padrões são combinados usando expressões booleanas. O `--or` é o operador padrão. O `--and` tem precedência maior que `--or`. O `-e` deve ser usado em todos os padrões.
 
 --all-match::
 	Ao utilizar múltiplas expressões de padrões combinadas com `--or`, este flag é utilizado para limitar a coincidência nos arquivos que possuam linhas que coincidam com todas elas.
@@ -218,7 +220,7 @@ Em futuras versões, podemos aprender a oferecer suporte aos padrões contendo '
 	Sinaliza o fim das opções; o restante dos parâmetros são os limitadores do `<pathspec>`.
 
 <pathspec>...::
-	If given, limit the search to paths matching at least one pattern. Both leading paths match and glob(7) patterns are supported.
+	Se usado, limitará a pesquisa a caminhos que correspondam a pelo menos um padrão. Ambos são compatíveis os padrões de correspondência de caminhos principais e glob(7).
 +
 Para mais detalhes sobre a sintaxe `<pathspec>`, consulte a entrada 'pathspec' em linkgit:gitglossary[7].
 
@@ -240,9 +242,9 @@ EXEMPLOS
 NOTAS SOBRE OS ENCADEAMENTOS
 ----------------------------
 
-A opção `--threads` (e a configuração 'grep.threads') serão ignoradas quando a opção `--open-files-in-pager` for utilizado, impondo uma execução com thread único.
+The `--threads` option (and the `grep.threads` configuration) will be ignored when `--open-files-in-pager` is used, forcing a single-threaded execution.
 
-Ao fazer um 'grep' em um objeto armazenado (com a opção `--cached` ou oferecendo três objetos), a execução com várias threads poderá ser mais lenta do que uma thread única caso `--textconv` seja informado e haja muitas conversões de texto. Portanto, caso esteja com baixo desempenho, pode ser desejável utilizar `--threads=1`.
+When grepping the object store (with `--cached` or giving tree objects), running with multiple threads might perform slower than single-threaded if `--textconv` is given and there are too many text conversions. Thus, if low performance is experienced in this case, it might be desirable to use `--threads=1`.
 
 CONFIGURAÇÃO
 ------------

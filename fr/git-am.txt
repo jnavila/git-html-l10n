@@ -18,11 +18,11 @@ SYNOPSIS
 	 [--quoted-cr=<action>]
 	 [--empty=(stop|drop|keep)]
 	 [(<mbox> | <Maildir>)...]
-'git am' (--continue | --skip | --abort | --quit | --show-current-patch[=(diff|raw)] | --allow-empty)
+'git am' (--continue | --skip | --abort | --quit | | --retry | --show-current-patch[=(diff|raw)] | --allow-empty)
 
 DESCRIPTION
 -----------
-Découpe des messages courriel dans un boîte aux lettre en message, auteur, information et rustine de commits, et les applique sur la branche en cours. Vous pouvez considérer cela comme une opération inverse de linkgit:git-format-patch[1] exécutée sur une branche avec un historique direct sans fusions.
+Découpe des messages courriel dans une boîte aux lettres en message, auteur, information et rustine de commits, et les applique sur la branche en cours. Vous pouvez considérer cela comme une opération inverse de linkgit:git-format-patch[1] exécutée sur une branche avec un historique direct sans fusions.
 
 OPTIONS
 -------
@@ -53,8 +53,17 @@ OPTIONS
 --quoted-cr=<action>::
 	Ce drapeau sera transmis à 'git mailinfo' (voir linkgit:git-mailinfo[1]).
 
---empty=(stop|drop|keep)::
-	Par défaut, ou lorsque l'option est définie sur 'stop', la commande sort en erreur sur un message électronique d'entrée ne contenant pas de rustine et s'arrête au milieu de la session am en cours. Lorsque cette option est définie sur 'drop', ignorer un tel message électronique à la place. Lorsque cette option est définie sur 'keep', créer un commit vide, en enregistrant le contenu du message électronique comme message de validation.
+--empty=(drop|keep|stop)::
+	Comment gérer un message courriel sans rustine :
++
+--
+`drop`;;
+	Le message courriel sera ignoré.
+`keep`;;
+	Un commit vide sera créé avec le contenu du message électronique comme message de validation.
+`stop`;;
+	La commande échouera, en s'arrêtant au milieu de la session `am` actuelle. C'est le comportement par défaut.
+--
 
 -m::
 --message-id::
@@ -93,6 +102,8 @@ include::rerere-options.txt[]
 --include=<chemin>::
 --reject::
 	Ces drapeaux sont transmis au programme 'git apply' (voir linkgit:git-apply[1]) qui applique le patch.
++
+Les <action> valides pour l'option `--whitespace` sont : `nowarn` , `warn` , `fix` , `error` et `error-all`.
 
 --patch-format::
 	Par défaut, la commande tentera de détecter automatiquement le format de la rustine. Cette option permet à l'utilisateur de contourner la détection automatique et de spécifier le format de rustine comme lequel la(les) rustine(s) doit/doivent être interprétée(s). Les formats valides sont mbox, mboxrd, stgit, stgit-series et hg.
@@ -132,6 +143,9 @@ include::rerere-options.txt[]
 
 --quit::
 	Abandonner l'opération de rustinage mais garder HEAD et l'index intacts.
+
+--retry::
+	Essaie d'appliquer à nouveau la dernière rustine en conflit. Ceci n'est généralement utile que pour passer des options supplémentaires lors de la tentative de ré-essai (p. ex. `--3way`), puisque sinon vous verrez la même erreur à nouveau.
 
 --show-current-patch[=(diff|raw)]::
 	Montrer le message auquel `git am` s'est arrêté en raison de conflits. Si `raw` est spécifié, afficher le contenu brut du message électronique ; si `diff`, afficher uniquement la partie diff. La valeur par défaut est `raw`.

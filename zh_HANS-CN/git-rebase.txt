@@ -8,11 +8,11 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 概述
 --
 [verse]
-'git rebase' [-i | --interactive] [<选项>] [--exec <命令>]
-	[--onto <新基础> | --keep-base] [<上游仓库> [<分支>]]
-'git rebase' [-i | --interactive] [<选项>] [--exec <命令>] [--onto <新基础>]
-	--root [<分支>]
-'git rebase' (--continue | --skip | --abort | --quit | --edit-todo | --show-current-patch)
+'git rebase' [-i | --interactive] [<options>] [--exec <cmd>]
+	[--onto <newbase> | --keep-base] [<upstream> [<branch>]]
+'git rebase' [-i | --interactive] [<options>] [--exec <cmd>] [--onto <newbase>]
+	--root [<branch>]
+'git rebase' (--continue|--skip|--abort|--quit|--edit-todo|--show-current-patch)
 
 描述
 --
@@ -209,8 +209,18 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 +
 另请参阅下面的不兼容选项。
 
---empty=(drop|keep|ask)::
-	如何处理开始时不是空的提交，也不是对上游提交的纯粹撷取，但在重排序后变为空的提交（因为它们包含了上游修改的子集）。 如果使用 drop（默认），则会丢弃变为空的提交。 如果使用 keep，则会保留此类提交。 如果使用 ask（隐含 `--interactive`），当应用空提交时，变基停止，允许你选择是丢弃它、编辑更多文件，还是只提交空改动。 其他选项，如 `--exec`，除非明确指定了 `-i`/`-interactive`，否则将使用默认的 drop。
+--empty=(drop|keep|stop)::
+	How to handle commits that are not empty to start and are not clean cherry-picks of any upstream commit, but which become empty after rebasing (because they contain a subset of already upstream changes):
++
+--
+`drop`;;
+	提交将被丢弃。这是默认行为。
+`keep`;;
+	提交将被保留。当指定了 `--exec` 时，此选项是隐含的，除非同时指定了 `-i`/`--interactive`。
+`stop`;;
+`ask`;;
+	当提交被应用时，变基将停止，允许您选择是丢弃它、进一步编辑文件，还是只提交空更改。当指定了 `-i`/`--interactive` 时，此选项是隐含的。`ask` 是 `stop` 的废弃同义词。
+--
 +
 需要注意的是，开始时为空的提交会被保留（除非指定了 `--no-keep-empty`），而干净的 cherry-picks 提交（由 `git log --cherry-mark ...`）会被检测到并作为第一步被丢弃（除非通过了 `--reapply-cherry-picks`或 `--keep-base`）。
 +
@@ -393,7 +403,7 @@ include::rerere-options.txt[]
 +
 建议使用 linkgit:git-commit[1] 的 `--squash`、`--fixup`、`--fixup=amend:` 或 `--fixup=reword:` 选项来创建带有压扁标记的提交。
 +
-将配置变量 `rebase.autoSquash` 设为 true，可启用交互式变基默认自动清空功能。可以使用 `--no-autosquash`选项来覆盖该设置。
+Setting configuration variable `rebase.autoSquash` to true enables auto-squashing by default for interactive rebase. The `--no-autosquash` option can be used to override that setting.
 +
 另请参阅下面的不兼容选项。
 
@@ -459,7 +469,7 @@ include::rerere-options.txt[]
 
 默认情况下，‘合并’ 后台会保留故意为空的提交（不过，如果使用 `-i` 选项，这些提交会在待办事项列表编辑器中标记为空，或者使用 `--no-keep-empty` 自动删除）。
 
-与应用后端类似，合并后端默认情况下也会丢弃变为空的提交，除非指定了 `-i` 或 `--interactive` 选项（在这种情况下，合并会停止并询问用户该怎么做）。 合并后端还有一个 `--empty=(drop|keep|ask)` 选项，用于改变处理变为空的提交的行为。
+Similar to the apply backend, by default the merge backend drops commits that become empty unless `-i`/`--interactive` is specified (in which case it stops and asks the user what to do). The merge backend also has an `--empty=(drop|keep|stop)` option for changing the behavior of handling commits that become empty.
 
 目录重命名检测
 ~~~~~~~
