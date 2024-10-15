@@ -33,7 +33,7 @@ git-submodule - 初始化、更新或检查子模块
 --
 没有参数，显示现有子模块的状态。 有几个子命令可用于对子模块进行操作。
 
-add [-b <分支>] [-f|--force] [--name <名称>] [--reference <仓库>] [--depth <深度>] [--] <仓库> [<路径>]::
+add [-b <branch>] [-f|--force] [--name <name>] [--reference <repository>] [--ref-format <format>] [--depth <depth>] [--] <repository> [<path>]::
 	将给定的版本库作为子模块在给定的路径上添加到当前项目旁边要提交的变更集：当前项目被称为 "父项目"。
 +
 <仓库> 是新子模块仓库的 URL。 这可以是一个绝对 URL，或者（如果它以 ./ 或 ../ 开头），相对于父项目的默认远程仓库的位置（请注意，要指定一个紧挨着父项目 'bar.git' 的仓库 'foo.git'，你必须使用 `../foo.git` 而不是 `./foo.git` 正如人们在遵循相对 URL 的规则时可能期望的那样，因为 Git 中相对 URLs 的解释与相对目录是一样的）。
@@ -43,6 +43,8 @@ add [-b <分支>] [-f|--force] [--name <名称>] [--reference <仓库>] [--depth
 可选参数 <路径> 是克隆的子模块在父项目中存在的相对位置。如果没有给出 <路径>，则使用源仓库的规范部分（"repo" 表示 "/path/to/repo.git"，"foo" 表示 "host.xz:foo/.git"）。如果 <路径> 存在并且已经是一个有效的 Git 仓库，那么它将被暂存提交，而无需克隆。<路径> 也被用作子模块在其配置项中的逻辑名称，除非用 `--name` 来指定一个逻辑名称。
 +
 给定的 URL 被记录到 `.gitmodules` 中，供后续用户克隆父项目时使用。如果 URL 是相对于父项目的仓库给出的，则假定父项目和子模块仓库将被保存在同一相对位置，只需要提供父项目的URL。git-submodule 将使用 `.gitmodules` 中的相对 URL 正确定位子模块。
++
+If `--ref-format <format>` is specified, the ref storage format of newly cloned submodules will be set accordingly.
 
 status [--cached] [--recursive] [--] [<路径>...]::
 	显示子模块的状态。这将打印每个子模块当前检出提交的 SHA-1，以及子模块的路径和 SHA-1 的 'git describe' 的输出。如果子模块没有被初始化，每个SHA-1 的前缀可能是 `-`；如果当前签出的子模块提交与包含仓库的索引中发现的 SHA-1 不匹配，则是 `+`；如果子模块有合并冲突，则是 `U`。
@@ -73,7 +75,7 @@ deinit [-f|--force] (--all|[--] <路径>...)::
 +
 如果你真的想从仓库中删除一个子模块并提交，请使用 linkgit:git-rm[1] 代替。参见 linkgit:gitsubmodules[7] 的删除选项。
 
-update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <仓库>] [--depth <深度>] [--recursive] [--jobs <数量>] [--[no-]single-branch] [--filter <过滤规范>] [--] [<路径>...]::
+update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <repository>] [--ref-format <format>] [--depth <depth>] [--recursive] [--jobs <n>] [--[no-]single-branch] [--filter <filter-spec>] [--] [<path>...]::
 +
 --
 通过克隆缺失的子模块、获取子模块中缺失的提交以及更新子模块的工作目录树，更新已注册的子模块，使其符合超级项目的预期。“更新” 有多种方式，取决于命令行选项和配置变量 `submodule.<名称>.update` 的值。命令行选项优先于配置变量。如果命令行选项和配置变量都没有给出，则会执行 "chackout"。 (注意：`.gitmodules` 文件中的内容与此无关；关于 `.gitmodules` 的使用方法，请参见上文的 `Git 子模块初始化`）。 通过命令行和 `submodule.<名称>.update` 配置支持的 “更新” 程序如下：
@@ -95,6 +97,8 @@ update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--forc
 如果子模块还没有被初始化，而你只是想使用存储在 `.gitmodules` 中的设置，你可以用 `--init` 选项自动初始化子模块。
 
 如果指定了`--recursive`，该命令将递归到已注册的子模块中，并更新其中的任何嵌套子模块。
+
+If `--ref-format <format>` is specified, the ref storage format of newly cloned submodules will be set accordingly.
 
 如果指定了 `--filter <过滤规范>`，给定的部分克隆过滤器将被应用于子模块。关于过滤器规格细节，见 linkgit:git-rev-list[1]。
 --

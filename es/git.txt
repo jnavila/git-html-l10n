@@ -101,13 +101,13 @@ Si sólo quieres correr git como si fuera arrancado en `<ruta>` entonces usa `gi
 	No usa remplazamiento de referencias para remplazar objetos Git. Esto equivale a exportar la variable de ambiente `GIT_NO_REPLACE_OBJECTS` con cualquier valor. Ver linkgit:git-replace[1] para mas información.
 
 --no-lazy-fetch::
-	Do not fetch missing objects from the promisor remote on demand. Useful together with `git cat-file -e <object>` to see if the object is locally available. This is equivalent to setting the `GIT_NO_LAZY_FETCH` environment variable to `1`.
+	No trae objetos faltantes desde el remoto prometente bajo demanda. Útil junto con `git cat-file -e <objeto>` para ver si el objeto esta localmente disponible. Esto es equivalente a asignar `1` a la variable de ambiente `GIT_NO_LAZY_FETCH`.
 
 --no-optional-locks::
 	No realiza operaciones opcionales que requieran bloqueos. Es equivalente a asignar `0` a `GIT_OPTIONAL_LOCKS`.
 
 --no-advice::
-	Disable all advice hints from being printed.
+	Deshabilita la impresión de todas las sugerencias.
 
 --literal-pathspecs::
 	Trata las especificaciones de ruta literalmente (ej. sin interpretar glob, sin especificaciones de ruta mágicas). Es equivalente a asignar la variable de ambiente `GIT_LITERAL_PATHSPECS` con `1`.
@@ -296,7 +296,7 @@ CABEZA::
 <etiqueta>::
 	un 'nombre' valido de etiqueta (ej. una referencia `refs/tags/<etiqueta>`).
 
-<head>::
+<cabeza>::
 	un 'nombre' valido de cabeza (ej. una referencia `refs/heads/<cabeza>`).
 
 Para una lista completa de las maneras de deletrear nombres de objetos ver la sección "ESPECIFICANDO REVISIONES" en linkgit:gitrevisions[7].
@@ -411,7 +411,7 @@ Para una ruta no-fusionada, se llama a `GIT_EXTERNAL_DIFF` con 1 parámetro, <ru
 Para cada ruta se llama a `GIT_EXTERNAL_DIFF`, dos variables de ambiente se asignan, `GIT_DIFF_PATH_COUNTER` y `GIT_DIFF_PATH_TOTAL`.
 
 `GIT_EXTERNAL_DIFF_TRUST_EXIT_CODE`::
-	If this Boolean environment variable is set to true then the `GIT_EXTERNAL_DIFF` command is expected to return exit code 0 if it considers the input files to be equal or 1 if it considers them to be different, like `diff(1)`. If it is set to false, which is the default, then the command is expected to return exit code 0 regardless of equality. Any other exit code causes Git to report a fatal error.
+	Si a esta variable de ambiente booleana se le asigna true entonces se espera que el comando `GIT_EXTERNAL_DIFF` regrese un código de salida 0 si considera que los ficheros de entrada son iguales, o 1 si considera que son diferentes, como `diff(1)`. Si se le asigna false, el cual es el predeterminado, entonces se espera que el comando regrese un código de salida 0 independientemente de la igualdad. Cualquier otro código de salida provoca a Git a reportar un error fatal.
 
 
 `GIT_DIFF_PATH_COUNTER`::
@@ -563,9 +563,9 @@ Ver link:technical/api-trace2.html[documentación de Trace2] para detalles compl
 	Si se asigna falso a esta variable de ambiente booleana, ignora referencias rotas o mal nombradas cuando se itera por la lista de referencias. Normalmente Git intentará incluir cualquiera de tales referencias, lo cual puede provocar que algunas operaciones fallen. Esto es usualmente preferible, ya que es mejor abortar operaciones potencialmente destructivas (ej. linkgit:git-prune[1]) en vez de ignorar referencias rotas (y por lo tanto considerar que no vale guardar el historial al que apuntan). El valor predeterminado es `1` (ej. ser paranoico en la detección y abortar todas las operaciones). Normalmente no deberías asignarle `0`, pero puede ser útil cuando se intenta salvar datos de un repositorio corrupto.
 
 `GIT_COMMIT_GRAPH_PARANOIA`::
-	When loading a commit object from the commit-graph, Git performs an existence check on the object in the object database. This is done to avoid issues with stale commit-graphs that contain references to already-deleted commits, but comes with a performance penalty.
+	Cuando se carga un objeto confirmación desde el grafo de confirmaciones, Git hace una revisión de existencia en el objeto en la base de datos de objetos. Esto se hace para evitar problemas con grafos de confirmación viciados que contengan referencias a confirmaciones ya eliminadas, pero viene con una penalización de desempeño.
 +
-The default is "false", which disables the aforementioned behavior. Setting this to "true" enables the existence check so that stale commits will never be returned from the commit-graph at the cost of performance.
+El predeterminado es "false", el cual deshabilita el comportamiento antes mencionado. Asignar "true" habilita la revisión de existencia de tal manera que nunca se regresaran confirmaciones viciadas del grafo de confirmaciones con el costo de desempeño.
 
 `GIT_ALLOW_PROTOCOL`::
 	Si se le asigna una lista de protocolos separada por dos puntos, se comporta como si a `protocolo.allow` se le asigna `never`, y cada uno de los protocolos listados `protocol.<nombre>.allow` tuviera asignado `always` (anulando cualquier configuración existente). Ver la descripción de `protocol.allow` en linkgit:git-config[1] para mas detalles.
@@ -593,6 +593,9 @@ Dos valores especiales son soportados: `off` simplemente cerrará el manejador e
 `GIT_PRINT_SHA1_ELLIPSIS` (obsoleto)::
 	Si se le asigna `yes`, imprime una elipsis después de una valor (abreviado) SHA-1. Esto afecta indicaciones de HEADs separadas (linkgit:git-checkout[1]) y la salida bruta de diff (linkgit:git-diff[1]). Ya no se considera adecuado imprimir una elipsis en los casos mencionados y es probable que su soporte sea removido en el futuro previsible (junto con la variable).
 
+`GIT_ADVICE`::
+	If set to `0`, then disable all advice messages. These messages are intended to provide hints to human users that may help them get out of problematic situations or take advantage of new features. Users can disable individual messages using the `advice.*` config keys. These messages may be disruptive to tools that execute Git processes, so this variable is available to disable the messages. (The `--no-advice` global option is also available, but old Git versions may fail when this option is not understood. The environment variable will be ignored by Git versions that do not understand it.)
+
 Discusión[[Discussion]]
 -----------------------
 
@@ -614,16 +617,16 @@ El fichero índice se inicializa con una lista de todas las rutas y, para cada r
 
 El índice también es capaz de almacenar entradas múltiples (llamadas "etapas") para cada nombre de ruta dado. Esas etapas se usan para mantener las varias versiones sin fusionar de un fichero cuando una fusión está en progreso.
 
-SECURITY
---------
+SEGURIDAD
+---------
 
-Some configuration options and hook files may cause Git to run arbitrary shell commands. Because configuration and hooks are not copied using `git clone`, it is generally safe to clone remote repositories with untrusted content, inspect them with `git log`, and so on.
+Algunas opciones de configuración y ficheros gancho pueden causar que Git corra arbitrariamente comandos de terminal. Ya que configuraciones y ganchos no se copian usando `git clone`, es generalmente seguro clonar repositorios remotos con contenido no-confiable, inspeccionarlos con `git log`, y así sucesivamente.
 
-However, it is not safe to run Git commands in a `.git` directory (or the working tree that surrounds it) when that `.git` directory itself comes from an untrusted source. The commands in its config and hooks are executed in the usual way.
+Sin embrago, no es seguro correr comandos Git en un directorio `.git` (o el árbol de trabajo que lo rodea) cuando ese directorio `.git` mismo viene de un origen no confiable. Los comandos en su configuración y ganchos se ejecutan como de costumbre.
 
-By default, Git will refuse to run when the repository is owned by someone other than the user running the command. See the entry for `safe.directory` in linkgit:git-config[1]. While this can help protect you in a multi-user environment, note that you can also acquire untrusted repositories that are owned by you (for example, if you extract a zip file or tarball from an untrusted source). In such cases, you'd need to "sanitize" the untrusted repository first.
+Predeterminadamente, Git se negará a correr cuando el repositorio pertenezca a otro usuario al que corra el comando. Ver la entrada para `safe.directory` en linkgit:git-config[1]. Mientras esto puede ayudar a protegerte en un ambiente multiusuario, nota que también puedes obtener repositorios no confiables que te pertenezcan (por ejemplo, si descomprimes un fichero zip o tarball de una fuente no confiable). En tales casos, necesitarás primero "sanitizar" el repositorio no confiable.
 
-If you have an untrusted `.git` directory, you should first clone it with `git clone --no-local` to obtain a clean copy. Git does restrict the set of options and hooks that will be run by `upload-pack`, which handles the server side of a clone or fetch, but beware that the surface area for attack against `upload-pack` is large, so this does carry some risk. The safest thing is to serve the repository as an unprivileged user (either via linkgit:git-daemon[1], ssh, or using other tools to change user ids). See the discussion in the `SECURITY` section of linkgit:git-upload-pack[1].
+Si tienes un directorio `.git` no confiable, deberías primero clonarlo con `git clone --no-local` para obtener una copia limpia. Git restringe el conjunto de opciones y ganchos que correrán por `upload-pack`, el cual maneja el lado del servidor de un clone o fetch, pero ten cuidado que la superficie de ataque contra `upload-pack` es muy grande, así que esto conlleva algún riesgo. Lo mas seguro es servir el repositorio como un usuario sin privilegios (ya sea por linkgit:git-daemon[1], ssh, o usando otras herramientas para cambiar identificadores de usuario). Ver la discusión en la sección `SEGURIDAD` de linkgit:git-upload-pack[1].
 
 MAS DOCUMENTACIÓN
 -----------------

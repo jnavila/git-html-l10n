@@ -33,7 +33,7 @@ COMANDOS
 --------
 Sem argumentos, mostra a condição geral dos submódulos existentes. Vários subcomandos estão disponíveis para realizar operações nos submódulos.
 
-add [-b <ramo>] [-f|--force] [--name <nome>] [--reference <repositório>] [--depth <profundidade>] [--] <repositório> [<caminho>]::
+add [-b <branch>] [-f|--force] [--name <name>] [--reference <repository>] [--ref-format <format>] [--depth <depth>] [--] <repository> [<path>]::
 	Adicione o repositório informado como um submódulo no caminho especificado ao conjunto de alterações para ser feito o commit ao lado do projeto atual: o projeto atual é chamado de "superproject".
 +
 <repositório> é a URL do repositório de origem do novo submódulo. Pode ser uma URL absoluta ou (se começar com './' ou '../'), o local relativo ao repositório remoto padrão do superprojeto (observe que, para especificar um repositório 'foo.git' onde está localizado um superprojeto 'bar.git', você terá que usar `../foo.git` em vez de `./foo.git` - como seria de se esperar ao seguir as regras para URLs relativas - porque a avaliação de URLs relativas no Git é idêntica à de diretórios relativos).
@@ -43,6 +43,8 @@ O ramo remoto padrão é o ramo remote do ramo rastreado remotamente no ramo atu
 O argumento opcional `<caminho>` é o local relativo para que o submódulo clonado exista no superprojeto. Caso o `<caminho>` não seja informado, a parte canônica do repositório da origem será utilizada ("repo" para o "/path/to/repo.git" e "foo" para o "host.xz:foo/.git"). Caso o `<caminho>` exista e já for um repositório Git válido, ele será preparado para o commit sem clonagem. O `<caminho>` também é utilizado como o nome lógico do sub-módulo nas suas entradas de configuração, a menos que `--name` seja utilizado para definir um nome lógico.
 +
 A URL informada é registrado em `.gitmodules` para ser usado por usuários subsequentes que clonarem o superprojeto. Se a URL for informada em relação ao repositório do superprojeto, presume-se que os repositórios do superprojeto e do submódulo serão mantidos juntos no mesmo local relativo, e somente o URL do superprojeto precisará ser fornecido. O git-submodule localizará corretamente o submódulo usando a URL relativa em `.gitmodules`.
++
+If `--ref-format <format>` is specified, the ref storage format of newly cloned submodules will be set accordingly.
 
 status [--cached] [--recursive] [--] [<caminho>...]::
 	Exiba a condição geral dos submódulos. Irá exibir o SHA-1 do commit registrado atualmente para cada submódulo, junto com o caminho do submódulo e a saída do comando 'git description' para o SHA-1. Cada SHA-1 provavelmente será prefixado com `-` caso o submódulo não seja inicializado,`+` caso o commit verificado do submódulo atual não coincida com o SHA-1 encontrado no índice do repositório que contenha o `U` caso o submódulo tenha conflitos de mesclagem.
@@ -73,7 +75,7 @@ Caso `--force` seja utilizado, a árvore de trabalho do submódulo será removid
 +
 Caso realmente deseja remover um submódulo do repositório e fazer o commit em vez disso utilize linkgit:git-rm[1] Para opções de remoção consulte linkgit:gitsubmodules[7].
 
-update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <repositório>] [--depth <profundidade>] [--recursive] [--jobs <n>] [--[no-]single-branch] [--filter <spec-do-filtro>] [--] [<caminho>...]::
+update [--init] [--remote] [-N|--no-fetch] [--[no-]recommend-shallow] [-f|--force] [--checkout|--rebase|--merge] [--reference <repository>] [--ref-format <format>] [--depth <depth>] [--recursive] [--jobs <n>] [--[no-]single-branch] [--filter <filter-spec>] [--] [<path>...]::
 +
 --
 Atualize os submódulos registrados para que correspondam ao que o superprojeto espera, clonando os submódulos ausentes, obtendo os commits ausentes nos submódulos e atualizando a árvore de trabalho dos submódulos. A "atualização" pode ser feita de várias maneiras, dependendo das opções da linha de comando e do valor da variável de configuração `submodule.<nome>.update`. A opção de linha de comando tem precedência sobre a variável de configuração. Se nenhum dos dois for fornecido, será realizado um 'checkout'. (Observação: o que está no arquivo `.gitmodules` é irrelevante neste momento; consulte o comando `git submodule init` acima para saber como o `.gitmodules` é usado). Os procedimentos de atualização 'update' compatíveis tanto com a linha de comando quanto com a configuração `submodule.<nome>.update` são:
@@ -95,6 +97,8 @@ Os procedimentos de atualização a seguir têm limitações adicionais:
 Se o submódulo ainda não foi inicializado e você apenas deseja utilizar a configuração armazenada no `.gitmodules`, você pode inicializar automaticamente o submódulo com a opção `--init`.
 
 Caso a opção `--recursive` seja utilizada, este comando recursará nos submódulos registrados e atualizará todos os submódulos aninhados.
+
+If `--ref-format <format>` is specified, the ref storage format of newly cloned submodules will be set accordingly.
 
 Se a opção `--filter <spec-do-filtro>` for especificado, o filtro de clone parcial fornecido será aplicado ao submódulo. Consulte o linkgit:git-rev-list[1] para obter detalhes sobre as especificações do filtro.
 --
