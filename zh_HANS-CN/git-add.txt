@@ -7,12 +7,12 @@ git-add - 添加文件内容到索引
 
 概述
 --
-[verse]
-'git add' [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
-	  [--edit | -e] [--[no-]all | -A | --[no-]ignore-removal | [--update | -u]] [--sparse]
-	  [--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
-	  [--chmod=(+|-)x] [--pathspec-from-file=<文件> [--pathspec-file-nul]]
-	  [--] [<路径规范>...]
+[synopsis]
+git add [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
+	[--edit | -e] [--[no-]all | -A | --[no-]ignore-removal | [--update | -u]] [--sparse]
+	[--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
+	[--chmod=(+|-)x] [--pathspec-from-file=<file> [--pathspec-file-nul]]
+	[--] [<pathspec>...]
 
 描述
 --
@@ -24,112 +24,112 @@ git-add - 添加文件内容到索引
 
 `git status` 命令可用于获取摘要，说明哪些变化的文件已暂存，准备下一次提交。
 
-`git add` 命令默认不会添加被忽略的文件。如果在命令行上明确指定了任何被忽略的文件，则 `git add` 会失败，并显示被忽略文件的列表。由目录递归或 Git 执行的文件名通配符（在 shell 之前引用的通配符）所涉及的忽略文件将被静默忽略。 'git add' 命令可用于通过 `-f` 选项（force）强制添加忽略的文件。
+The `git add` command will not add ignored files by default. If any ignored files were explicitly specified on the command line, `git add` will fail with a list of ignored files. Ignored files reached by directory recursion or filename globbing performed by Git (quote your globs before the shell) will be silently ignored. The `git add` command can be used to add ignored files with the `-f` (force) option.
 
 请参阅 linkgit:git-commit[1] 了解将内容添加到提交的其他替代方法。
 
 
 选项
 --
-<路径规范>...::
+`<pathspec>...`::
 	要从中添加内容的文件。可以使用文件通配符（例如 `*.c`）来添加所有匹配的文件。此外，还可以提供一个前导目录名（例如，指定 `dir` 以添加 `dir/file1` 和 `dir/file2`）来更新索引，使其与整个目录的当前状态相匹配（例如，指定 `dir` 不仅会记录在工作树中修改的文件 `dir/file1`，还会记录在工作树中添加的文件 `dir/file2`，还有从工作树中删除的文件 `dir/file3`）。请注意，旧版本的 Git 会忽略已删除的文件；如果要添加已修改的文件或新文件，但忽略已删除的文件，请使用 `--no-all` 选项。
 +
 For more details about the _<pathspec>_ syntax, see the 'pathspec' entry in linkgit:gitglossary[7].
 
--n::
---dry-run::
+`-n`::
+`--dry-run`::
 	实际上不添加文件，仅展示文件是否存在或是否忽略。
 
--v::
---verbose::
+`-v`::
+`--verbose`::
         详细日志。
 
--f::
---force::
+`-f`::
+`--force`::
 	允许添加已被忽略的文件。
 
---sparse::
+`--sparse`::
 	允许更新稀疏检出 cone 之外的索引条目。 通常，`git add` 拒绝更新其路径不适合稀疏检出 cone 的索引条目，因为这些文件可能会在没有警告的情况下从工作区中删除。有关更多详细信息，请参阅链接 linkgit:git-sparse-checkout[1]。
 
--i::
---interactive::
+`-i`::
+`--interactive`::
 	以交互方式将工作目录树中的修改内容添加到索引。可以提供可选的路径参数，以将操作限制为工作目录树的子集。有关详细信息，请参见 ''交互模式''。
 
--p::
---patch::
+`-p`::
+`--patch`::
 	交互地在索引和工作目录之间选择补丁块并将它们添加到索引中。这让用户有机会在将修改后的内容添加到索引之前查看差异。
 +
 参见这可以有效地运行 `add --interactive`，但是会绕过初始命令菜单，而直接跳转到 `patch` 子命令。有关详细信息，请参见 ''交互模式''。
 
--e::
---edit::
+`-e`::
+`--edit`::
 	在编辑器中打开与索引的差异，使用户进行编辑。关闭编辑器后，调整块补丁头并将其应用于索引。
 +
 此选项的目的是选择并选择要应用的补丁的行，甚至修改要暂存的行的内容。与使用交互式补丁块选择器相比，其更快，更灵活。但是，很容易混淆自己并创建不应用于索引的补丁。请参阅下面的编辑补丁。
 
--u::
---update::
+`-u`::
+`--update`::
 	Update the index just where it already has an entry matching _<pathspec>_. This removes as well as modifies index entries to match the working tree, but adds no new files.
 +
 If no _<pathspec>_ is given when `-u` option is used, all tracked files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
--A::
---all::
---no-ignore-removal::
+`-A`::
+`--all`::
+`--no-ignore-removal`::
 	Update the index not only where the working tree has a file matching _<pathspec>_ but also where the index already has an entry. This adds, modifies, and removes index entries to match the working tree.
 +
 If no _<pathspec>_ is given when `-A` option is used, all files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
---no-all::
---ignore-removal::
+`--no-all`::
+`--ignore-removal`::
 	Update the index by adding new files that are unknown to the index and files modified in the working tree, but ignore files that have been removed from the working tree. This option is a no-op when no _<pathspec>_ is used.
 +
-This option is primarily to help users who are used to older versions of Git, whose "git add _<pathspec>_..." was a synonym for "git add --no-all _<pathspec>_...", i.e. ignored removed files.
+This option is primarily to help users who are used to older versions of Git, whose `git add <pathspec>...` was a synonym for `git add --no-all <pathspec>...`, i.e. ignored removed files.
 
--N::
---intent-to-add::
+`-N`::
+`--intent-to-add`::
 	只记录稍后将添加路径的事实。路径的项会被放置在索引中，但不包括改动的内容。这对于使用 `git diff` 显示文件的未暂存内容以及使 `git commit -a` 提交这些文件非常有用。
 
---refresh::
+`--refresh`::
 	不添加文件，只刷新索引中的 stat() 信息。
 
---ignore-errors::
+`--ignore-errors`::
 	如果由于索引错误而无法添加某些文件，请不要中止操作，而是继续添加其他文件。命令仍应以非零状态退出。可以将配置变量 `add.ignoreErrors` 设置为 true，使其成为默认行为。
 
---ignore-missing::
-	此选项只能与 --dry-run 一起使用。通过使用此选项，用户可以检查是否会忽略任何给定的文件，无论它们是否已存在于工作树中。
+`--ignore-missing`::
+	This option can only be used together with `--dry-run`. By using this option the user can check if any of the given files would be ignored, no matter if they are already present in the work tree or not.
 
---no-warn-embedded-repo::
+`--no-warn-embedded-repo`::
 	默认情况下， `git add` 将在向索引添加嵌入式存储库时发出警告，而不使用 `git submodule add` 在 `.gitmodules` 中创建条目。此选项将抑制警告（例如，如果手动对子模块执行操作）。
 
---renormalize::
-	对所有跟踪文件重新应用 “清除” 程序，将它们强制添加到索引中。 这在更改 `core.autocrlf` 配置或 `text` 属性后非常有用，可以纠正添加文件时错误的 CRLF/LF 行尾。 该选项意味着 `-u` 。由于 CRLF 字符不会被清除，因此 CRLF 会被清除为 LF，而 CRCRLF 序列只会被部分清除为 CRLF。
+`--renormalize`::
+	Apply the "clean" process freshly to all tracked files to forcibly add them again to the index. This is useful after changing `core.autocrlf` configuration or the `text` attribute in order to correct files added with wrong _CRLF/LF_ line endings. This option implies `-u`. Lone CR characters are untouched, thus while a _CRLF_ cleans to _LF_, a _CRCRLF_ sequence is only partially cleaned to _CRLF_.
 
---chmod=(+|-)x::
+`--chmod=(+|-)x`::
 	重写添加文件的可执行位。可执行位仅在索引中更改，磁盘上的文件保持不变。
 
---pathspec-from-file=<file>::
-	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by LF or CR/LF. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
+`--pathspec-from-file=<file>`::
+	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by _LF_ or _CR/LF_. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
 
---pathspec-file-nul::
-	只有在使用 `--pathspec-from-file` 选项时才有意义。指定路径元素用 NUL 字符分隔，所有其他字符都按字面意思（包括换行符和引号）表示。
+`--pathspec-file-nul`::
+	Only meaningful with `--pathspec-from-file`. Pathspec elements are separated with _NUL_ character and all other characters are taken literally (including newlines and quotes).
 
-\--::
+`--`::
 	此选项可用于分离命令行选项和文件列表（当文件名可能被误认为命令行选项时非常有用）。
 
 
 实例
 --
 
-* 添加 `Documentation` 目录及其子目录下所有 `*.txt` 文件的内容：
+* Adds content from all ++*.txt++ files under `Documentation` directory and its subdirectories:
 +
 ------------
 $ git add Documentation/\*.txt
 ------------
 +
-注意，在本例中，星号 `*` 是从 shell 中引入的；这使得该命令可以包含 `Documentation/` 的子目录中的文件。
+Note that the asterisk ++*++ is quoted from the shell in this example; this lets the command include the files from subdirectories of `Documentation/` directory.
 
-* 从所有 git-*.sh 脚本中添加内容：
+* Considers adding content from all ++git-*.sh++ scripts:
 +
 ------------
 $ git add git-*.sh
@@ -156,7 +156,7 @@ $ git add git-*.sh
 
 状态::
 
-   这将显示每个路径下 HEAD 和索引之间的更改（即，如果输入 `git commit`，将提交什么），以及索引和工作目录树文件之间的更改（即，在输入 `git commit` 之前，执行 `git add` 可以进一步暂存什么）。示例输出如下：
+   This shows the change between `HEAD` and index (i.e. what will be committed if you say `git commit`), and between index and working tree files (i.e. what you could stage further before `git commit` using `git add`) for each path. A sample output looks like this:
 +
 ------------
               staged     unstaged path
@@ -164,7 +164,7 @@ $ git add git-*.sh
      2:     +403/-35        +1/-1 git-add--interactive.perl
 ------------
 +
-它表明 foo.png 与 HEAD 有区别（但其是二进制的，因此无法显示行数），索引副本和工作目录树版本之间没有区别（如果工作目录树版本也不同，`nothing` 的位置上会显示 `binary` ）。另一个文件 git add-{litdd}interactive.perl 添加了403 行，如果提交索引中的内容，则删除了 35 行，但工作目录树文件有额外修改（一次添加一次删除）。
+It shows that `foo.png` has differences from `HEAD` (but that is binary so line count cannot be shown) and there is no difference between indexed copy and the working tree version (if the working tree version were also different, 'binary' would have been shown in place of 'nothing'). The other file, `add-interactive.c`, has 403 lines added and 35 lines deleted if you commit what is in the index, but working tree file has further modifications (one addition and one deletion).
 
 update::
 
@@ -220,7 +220,7 @@ Update>> -2
 
 diff::
 
-  这使您可以查看要提交的内容（即，在 HEAD 和索引之间）。
+  This lets you review what will be committed (i.e. between `HEAD` and index).
 
 
 编辑补丁
@@ -242,7 +242,7 @@ diff::
 修改后的内容由 "-" 行（删除旧内容）和 "{plus}" 行（添加替换内容）表示。通过将 "-" 行转换为 " "，并删除 "{plus}" 行，可以防止临时进行修改。请注意，只修改其中一个可能会给索引带来混乱的更改。
 --
 
-还可以执行更复杂的操作。但是请注意，由于补丁仅应用于索引而不是工作目录树，因此工作树似乎会 "撤消" 索引中的更改。例如，在索引中添加一行，而该行不在 HEAD 或工作目录树。此时会暂存其以进行提交，但是该行似乎在会在工作目录树中进行还原。
+There are also more complex operations that can be performed. But beware that because the patch is applied only to the index and not the working tree, the working tree will appear to "undo" the change in the index. For example, introducing a new line into the index that is in neither the `HEAD` nor the working tree will stage the new line for commit, but the line will appear to be reverted in the working tree.
 
 避免使用这些构造，除非格外小心。
 
@@ -271,6 +271,7 @@ diff::
 
 include::includes/cmd-config-section-all.txt[]
 
+:git-add: 1
 include::config/add.txt[]
 
 参见

@@ -7,12 +7,12 @@ git-add - Adicione o conteúdo do arquivo ao índice
 
 RESUMO
 ------
-[verse]
-'git add' [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
-	  [--edit | -e] [--[no-]all | -A | --[no-]ignore-removal | [--update | -u]] [--sparse]
-	  [--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
-	  [--chmod=(+|-)x] [--pathspec-from-file=<arquivo> [--pathspec-file-nul]]
-	  [--] [<pathspec>...]
+[synopsis]
+git add [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
+	[--edit | -e] [--[no-]all | -A | --[no-]ignore-removal | [--update | -u]] [--sparse]
+	[--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
+	[--chmod=(+|-)x] [--pathspec-from-file=<file> [--pathspec-file-nul]]
+	[--] [<pathspec>...]
 
 DESCRIÇÃO
 ---------
@@ -24,112 +24,112 @@ Este comando pode ser executado várias vezes antes de um commit. Ele adiciona a
 
 O comando `git status` pode ser utilizado para obter um resumo de quais os arquivos que possuem as alterações que foram testadas para o próximo commit.
 
-É predefinido que o comando `git add` não adicione os arquivos que foram ignorados. Caso algum arquivo ignorado seja especificado explicitamente na linha de comando, o `git add` falhará com uma lista de arquivos ignorados. Arquivos ignorados alcançados de forma recursiva no diretório ou agrupamento do nome dos arquivos executados pelo Git (cite os seus agrupamentos antes do shell) serão ignorados silenciosamente. O comando 'git add' pode ser utilizado para adicionar os arquivos ignorados com a opção `-f` (impor).
+The `git add` command will not add ignored files by default. If any ignored files were explicitly specified on the command line, `git add` will fail with a list of ignored files. Ignored files reached by directory recursion or filename globbing performed by Git (quote your globs before the shell) will be silently ignored. The `git add` command can be used to add ignored files with the `-f` (force) option.
 
 Consulte linkgit:git-commit[1] para ver as formas alternativas de adicionar um conteúdo a um commit.
 
 
 OPÇÕES
 ------
-<pathspec>...::
+`<pathspec>...`::
 	Os arquivos que serão adicionados ao conteúdo. Os agrupamentos dos arquivos (`*.c` por exemplo) podem ser utilizados para adicionar todos os arquivos coincidentes. Também um nome do diretório principal (`dir` para adicionar `dir/arquivo1` e `dir/arquivo2` por exemplo) pode ser utilizados para atualizar o índice para coincidir a condição atual do diretório como um todo (definindo o `dir` gravará não apenas um arquivo `dir/arquivo1` modificado na árvore de trabalho, um arquivo `dir/arquivo2` adicionado à árvore de trabalho, mas também um arquivo `dir/arquivo3` que será removido da árvore de trabalho por exemplo). Observe que as versões mais antigas do Git costumavam ignorar os arquivos removidos; utilize a opção `--no-all` caso queira adicionar os arquivos novos ou alterados, porém ignore os que foram removidos.
 +
 For more details about the _<pathspec>_ syntax, see the 'pathspec' entry in linkgit:gitglossary[7].
 
--n::
---dry-run::
+`-n`::
+`--dry-run`::
 	Na verdade, não adicione o(s) arquivo(s), apenas demonstre se eles existem e/ou serão ignorados.
 
--v::
---verbose::
+`-v`::
+`--verbose`::
         Seja loquaz.
 
--f::
---force::
+`-f`::
+`--force`::
 	Permitir a inclusão dos arquivos que já foram ignorados por outros motivos.
 
---sparse::
+`--sparse`::
 	Permite a atualização das entradas do índice fora da cônica sparse-checkout. Normalmente, o comando `git add` se recusa a atualizar as entradas dos índices cujos caminhos não caibam dentro da cônica sparse-checkout, uma vez que estes arquivos podem ser removidos da árvore de trabalho sem aviso prévio. Consulte a opção linkgit:git-sparse-checkout[1] para obter mais detalhes.
 
--i::
---interactive::
+`-i`::
+`--interactive`::
 	Adicione o conteúdo modificado interativamente ao índice da árvore de trabalho. Os argumentos opcionais do caminho podem ser utilizados para limitar a operação num subconjunto da árvore de trabalho. Para mais detalhes consulte ``modo interativo''.
 
--p::
---patch::
+`-p`::
+`--patch`::
 	Escolha interativamente pedaços do patch entre o índice, a árvore de trabalho e adicione-os ao índice. Isso dá ao usuário a chance de revisar a diferença antes de adicionar conteúdo modificado ao índice.
 +
 Efetivamente executa o comando `add --interactive` porém ignora o menu do comando inicial e salta diretamente para o subcomando` patch`. Para mais detalhes consulte ``modo interativo''.
 
--e::
---edit::
+`-e`::
+`--edit`::
 	Abra o diff em conjunto com o índice num editor e deixe que o usuário o edite. Após o fechamento do editor, ajuste os cabeçalhos dos pedaços e aplique o patch no índice.
 +
 O objetivo desta opção é escolher as linhas do patch que serão aplicadas ou mesmo para modificar o conteúdo das linhas que serão preparadas. Isso pode ser mais rápido e flexível do que utilizar o seletor interativo de pedaços. No entanto, é fácil se confundir e criar um patch que não se aplica ao índice. Consulte a seção EDIÇÃO DE PATCHES abaixo.
 
--u::
---update::
+`-u`::
+`--update`::
 	Update the index just where it already has an entry matching _<pathspec>_. This removes as well as modifies index entries to match the working tree, but adds no new files.
 +
 If no _<pathspec>_ is given when `-u` option is used, all tracked files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
--A::
---all::
---no-ignore-removal::
+`-A`::
+`--all`::
+`--no-ignore-removal`::
 	Update the index not only where the working tree has a file matching _<pathspec>_ but also where the index already has an entry. This adds, modifies, and removes index entries to match the working tree.
 +
 If no _<pathspec>_ is given when `-A` option is used, all files in the entire working tree are updated (old versions of Git used to limit the update to the current directory and its subdirectories).
 
---no-all::
---ignore-removal::
+`--no-all`::
+`--ignore-removal`::
 	Update the index by adding new files that are unknown to the index and files modified in the working tree, but ignore files that have been removed from the working tree. This option is a no-op when no _<pathspec>_ is used.
 +
-This option is primarily to help users who are used to older versions of Git, whose "git add _<pathspec>_..." was a synonym for "git add --no-all _<pathspec>_...", i.e. ignored removed files.
+This option is primarily to help users who are used to older versions of Git, whose `git add <pathspec>...` was a synonym for `git add --no-all <pathspec>...`, i.e. ignored removed files.
 
--N::
---intent-to-add::
+`-N`::
+`--intent-to-add`::
 	Registre apenas o fato de onde caminho será adicionado posteriormente. Uma entrada para o caminho é colocada ao índice sem nenhum conteúdo. É útil para, entre outras coisas, para exibir os conteúdos dos tais arquivos que não foram preparados com o comando `git diff` e que o commit não foi feito com `git commit -a`.
 
---refresh::
+`--refresh`::
 	Não adicione o(s) arquivo(s), apenas renove as suas informações stat() no índice.
 
---ignore-errors::
+`--ignore-errors`::
 	Caso alguns arquivos não possam ser adicionados por motivos de erros durante a indexação, não interrompa a operação e continue a adicionar os outros que não tenham erros. O comando ainda deve sair com a condição diferente de zero. Para que este comportamento esteja sempre ativado, a variável de configuração `add.ignoreErrors` pode ser definida como 'true'.
 
---ignore-missing::
-	Esta opção só pode ser utilizada em conjunto com a opção `--dry-run`. Ao utilizar esta opção, o usuário pode verificar se algum dos arquivos informados seriam ignorados, independentemente caso já estejam presentes na árvore de trabalho ou não.
+`--ignore-missing`::
+	This option can only be used together with `--dry-run`. By using this option the user can check if any of the given files would be ignored, no matter if they are already present in the work tree or not.
 
---no-warn-embedded-repo::
+`--no-warn-embedded-repo`::
 	É predefinido que o comando `git add` avisará ao adicionar um repositório incorporado ao índice sem utilizar o comando `git submodule add` para criar uma entrada no `.gitmodules`. Esta opção suprimirá o alerta (caso esteja executando as operações manualmente nos submódulos por exemplo).
 
---renormalize::
-	Aplique o processo "limpo" em todos os arquivos monitorados para impor a sua adição novamente ao índice. É útil após alterar a configuração da variável `core.autocrlf` ou do atributo` text` para corrigir os arquivos que foram adicionados com caracteres de quebra de linha `CRLF` ou `LF` incorretas. Implica no uso da opção `-u`. Os caracteres CR solitários são intocados, logo, enquanto um CRLF é limpo para LF, uma sequência CRCRLF é parcialmente limpa apenas para CRLF.
+`--renormalize`::
+	Apply the "clean" process freshly to all tracked files to forcibly add them again to the index. This is useful after changing `core.autocrlf` configuration or the `text` attribute in order to correct files added with wrong _CRLF/LF_ line endings. This option implies `-u`. Lone CR characters are untouched, thus while a _CRLF_ cleans to _LF_, a _CRCRLF_ sequence is only partially cleaned to _CRLF_.
 
---chmod=(+|-)x::
+`--chmod=(+|-)x`::
 	Substitua o bit executável dos arquivos que foram adicionados. Apenas no índice que o bit executável é alterado, os arquivos no disco permanecem inalterados.
 
---pathspec-from-file=<arquivo>::
-	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by LF or CR/LF. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
+`--pathspec-from-file=<file>`::
+	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by _LF_ or _CR/LF_. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
 
---pathspec-file-nul::
-	Só faz algum sentido caso seja utilizado junto com a opção `--pathspec-from-file`. Os elementos "pathspec" são separados com caracteres `NUL` e todos os outros caracteres são considerados de forma literal (incluindo as novas linhas e as citações).
+`--pathspec-file-nul`::
+	Only meaningful with `--pathspec-from-file`. Pathspec elements are separated with _NUL_ character and all other characters are taken literally (including newlines and quotes).
 
-\--::
+`--`::
 	Esta opção pode ser utilizada para separar as opções da linha de comandos da lista dos arquivos (útil quando os nomes do arquivo puderem ser confundidos com as opções da linha de comando).
 
 
 EXEMPLOS
 --------
 
-* Adiciona conteúdo de todos os arquivos `*.txt` sob o diretório `Documentation` com os seus respectivos subdiretórios:
+* Adds content from all ++*.txt++ files under `Documentation` directory and its subdirectories:
 +
 ------------
 $ git add Documentation/\*.txt
 ------------
 +
-Observe que o asterisco `*` neste exemplo é citado do shell; isso permite que o comando inclua todos os arquivos dos subdiretórios do diretório `Documentation/`.
+Note that the asterisk ++*++ is quoted from the shell in this example; this lets the command include the files from subdirectories of `Documentation/` directory.
 
-* Considera a adição do conteúdo de todos os scripts `git-*.sh`:
+* Considers adding content from all ++git-*.sh++ scripts:
 +
 ------------
 $ git add git-*.sh
@@ -156,7 +156,7 @@ O loop do comando principal tem 6 subcomandos (incluindo a ajuda e encerrar).
 
 status::
 
-   Exibe a alteração entre o `HEAD` e o índice (ou seja, o commit que será caso utilize o comando `git commit`) e entre o índice e os arquivos da árvore de trabalho (ou seja, o que você poderia realizar antes do comando `git commit` utilizando o comando `git add`) para cada caminho. Uma amostra da saída fica assim:
+   This shows the change between `HEAD` and index (i.e. what will be committed if you say `git commit`), and between index and working tree files (i.e. what you could stage further before `git commit` using `git add`) for each path. A sample output looks like this:
 +
 ------------
               staged     unstaged path
@@ -164,7 +164,7 @@ status::
      2:     +403/-35        +1/-1 add-interactive.c
 ------------
 +
-Demonstra que foo.png tem diferenças em relação ao `HEAD` (mas por ser binário a contagem das linhas não pode ser exibida) e não há diferença entre a cópia indexada e a versão na árvore de trabalho (caso a versão na árvore de trabalho também fosse diferente, a informação 'binary' (binário) seria exibido no lugar de 'nothing' (nada)). O outro arquivo, `add-interactive.c`, possui 403 linhas que foram adicionadas e 35 linhas que foram excluídas caso faça o commit do que está no índice, porém o arquivo na árvore de trabalho possui outras modificações (uma adição e uma exclusão).
+It shows that `foo.png` has differences from `HEAD` (but that is binary so line count cannot be shown) and there is no difference between indexed copy and the working tree version (if the working tree version were also different, 'binary' would have been shown in place of 'nothing'). The other file, `add-interactive.c`, has 403 lines added and 35 lines deleted if you commit what is in the index, but working tree file has further modifications (one addition and one deletion).
 
 update::
 
@@ -220,7 +220,7 @@ Não é necessário pressionar o enter, ao configurar a variável de configuraç
 
 diff::
 
-  Permite a revisão do commit que será feito (entre o HEAD e o índice por exemplo).
+  This lets you review what will be committed (i.e. between `HEAD` and index).
 
 
 EDIÇÃO DE PATCHES
@@ -242,7 +242,7 @@ conteúdo que foi alterado::
 O conteúdo modificado é representado por linhas "-" (removendo o conteúdo antigo) seguido por linhas "{plus}" (adicionando o conteúdo de reposição). Você pode impedir a preparação da modificação convertendo as linhas "-" para " " e removendo as linhas "{plus}". Lembre-se que alterar apenas a metade do par provavelmente introduzirá mudanças confusas ao índice.
 --
 
-Também existem operações mais complexas que podem ser executadas. Mas cuidado, porque o patch é aplicado apenas ao índice e não à árvore de trabalho, a árvore de trabalho aparecerá para "desfazer" a mudança no índice. A introdução de uma nova linha no índice que não esteja em HEAD nem na árvore de trabalho por exemplo, organizará a nova linha para o commit, porém a linha parecerá ter sido revertida na árvore de trabalho.
+There are also more complex operations that can be performed. But beware that because the patch is applied only to the index and not the working tree, the working tree will appear to "undo" the change in the index. For example, introducing a new line into the index that is in neither the `HEAD` nor the working tree will stage the new line for commit, but the line will appear to be reverted in the working tree.
 
 Evite utilizar estas construções ou faça isso com extrema cautela.
 
@@ -271,6 +271,7 @@ CONFIGURAÇÃO
 
 include::includes/cmd-config-section-all.txt[]
 
+:git-add: 1
 include::config/add.txt[]
 
 VEJA TAMBÉM

@@ -20,11 +20,9 @@ DESCRIPTION
 
 Créer, décompresser et manipuler des fichiers "bundle". Les colis sont utilisés pour le transfert "hors ligne" d'objets Git sans qu'un "serveur" actif se trouve de l'autre côté de la connexion réseau.
 
-Ils peuvent être utilisés pour créer des sauvegardes incrémentielles et complètes d'un dépôt, et pour relayer l'état des références d'un dépôt à un autre.
+Ils peuvent être utilisés pour créer des sauvegardes incrémentielles et complètes d'un dépôt (voir l'exemple « sauvegarde complète » dans « EXEMPLE », et pour relayer l'état des références d'un dépôt à un autre (voir le second exemple).
 
 Les commandes Git qui récupèrent ou autrement "lisent" via des protocoles tels que `ssh://` et `https://` peuvent aussi opérer sur des fichiers cois. Il est possible de linkgit:git-clone[1] un nouveau dépôt à partir d'un colis, d'utiliser linkgit:git-fetch[1] pour en récupérer, et de lister les références qu'il contient avec linkgit:git-ls-remote[1]. Il n'y a pas de support d'"écriture" correspondant, c'est-à-dire qu'un 'git push' dans un colis n'est pas supporté.
-
-Voir la section "EXEMPLES" ci-dessous pour plus des exemples d'utilisation des colis.
 
 FORMATS DES COLIS
 -----------------
@@ -74,7 +72,7 @@ unbundle <fichier>::
 SPÉCIFICATION DES RÉFÉRENCES
 ----------------------------
 
-Les révisions doivent être accompagnées de noms de référence pour être regroupées dans un colis.
+Les révisions doivent être accompagnées de noms de référence pour être regroupées dans un colis. Alternativement, `--all` peut être utilisé pour empaqueter toutes les réfs.
 
 Plus d'une référence peut être empaquetée, et plus d'un ensemble d'objets prérequis peut être spécifié. Les objets empaquetés sont ceux qui ne sont pas contenus dans l'union des prérequis.
 
@@ -126,14 +124,33 @@ Un colis autonome sans pré-requis peut être extrait n'importe où, même dans 
 
 Il n'y a pas de problème à être prudent et faire en sorte que le fichier regroupement contienne des objets déjà présents dans la destination, car ceux-ci sont ignorés lors du déballage à la destination.
 
-Si vous voulez imiter `git clone --mirror`, qui inclurait vos refs comme `refs/remotes/*`, utilisez `--all`. Si vous voulez fournir le même ensemble de références qu'un clone directement depuis le dépôt source, utilisez `--branches --tags` pour les `<arguments-git-rev-list>`.
+Si vous voulez fournir le même ensemble de références qu'un clone directement depuis le dépôt source, utilisez `--branches --tags` pour les `<arguments-git-rev-list>`.
 
 La commande 'git bundle verify' peut être utilisée pour vérifier si votre dépôt destinataire possède les commits pré-requis nécessaires pour un colis.
 
 EXEMPLES
 --------
 
-Supposons que vous vouliez transférer l'historique d'un dépôt R1 sur la machine A vers un autre dépôt R2 sur la machine B. Pour une raison quelconque, la connexion directe entre A et B n'est pas autorisée, mais nous pouvons déplacer les données de A à B via un mécanisme quelconque (CD, email, etc.). Nous voulons mettre à jour R2 avec le développement fait sur la branche master dans R1.
+Nous discuterons de deux cas :
+
+1. Prendre une sauvegarde complète d'un dépôt
+2. Transférer l'historique d'un dépôt vers une autre machine lorsque les deux machines n'ont pas de connexion directe
+
+Prenons d'abord une sauvegarde complète du dépôt. La commande suivante prendra une sauvegarde complète du dépôt dans le sens que tous les réfs sont inclus dans le colis :
+
+----------------
+$ git bundle create backup.bundle --all
+----------------
+
+Mais notez encore que ce n'est que pour les réfs, c'est-à-dire que vous n'inclurez que les refs et les commits accessibles à partir de ces réfs. Vous n'inclurez pas d'autre état local, tel que le contenu de l'index, l'arbre de travail, la remise, la configuration par dépôt, les crochets, etc.
+
+Vous pouvez ensuite récupérer ce dépôt en utilisant par exemple linkgit:git-clone[1] :
+
+----------------
+$ git clone backup.bundle <nouveau-répertoire>
+----------------
+
+Pour l'exemple suivant, supposons que vous vouliez transférer l'historique d'un dépôt R1 sur la machine A vers un autre dépôt R2 sur la machine B. Pour une raison quelconque, la connexion directe entre A et B n'est pas autorisée, mais nous pouvons déplacer les données de A à B via un mécanisme quelconque (CD, email, etc.). Nous voulons mettre à jour R2 avec le développement fait sur la branche master dans R1.
 
 Pour amorcer le processus, vous pouvez d'abord créer un paquet qui n'a pas de prérequis. Vous pouvez utiliser une étiquette pour vous rappeler jusqu'à quel commit le dernier traitement a été fait, afin de faciliter la mise à jour ultérieure de l'autre dépôt avec un paquet incrémental :
 
@@ -213,6 +230,15 @@ Vous pouvez également voir quelles références il offre :
 ----------------
 $ git ls-remote monpaquet
 ----------------
+
+DISCUSSION
+----------
+
+Une manière naïve de faire une sauvegarde complète d'un dépôt est d'utiliser quelque chose qui fait comme `cp -r <dépôt> <destination>`. Cela est découragé puisque le dépôt pourrait être écrit pendant l'opération de copie. À son tour, certains fichiers dans `<destination>` pourraient être corrompus.
+
+C'est pourquoi il est recommandé d'utiliser l'outillage Git pour faire des sauvegardes de dépôt, soit avec cette commande soit par exemple avec linkgit:git-clone[1]. Mais gardez à l'esprit que ces outils ne vous aideront pas à sauvegarder l'état autre que les refs et les commits. En d'autres termes, ils ne vous aideront pas à sauvegarder le contenu de l'index, l'arbre de travail, la remise, la configuration par dépôt, les crochets, etc.
+
+Voir aussi linkgit:gitfaq[7], section "TRANSFERTS" pour une discussion des problèmes associés à la synchronisation de fichiers entre les systèmes.
 
 FORMATS DE FICHIER
 ------------------

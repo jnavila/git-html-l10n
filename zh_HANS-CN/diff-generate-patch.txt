@@ -4,7 +4,7 @@
 
 使用 `-p` 选项运行 linkgit:git-diff[1]、linkgit:git-log[1]、linkgit:git-show[1]、linkgit:git-diff-index[1]、linkgit:git-diff-tree[1] 或 linkgit:git-diff-files[1] 会生成补丁文本。 你可以通过 `GIT_EXTERNAL_DIFF` 和 `GIT_DIFF_OPTS` 环境变量（参见 linkgit:git[1]），以及 `diff` 属性（参见 linkgit:gitattributes[5]）自定义补丁文本的创建。
 
--p 选项产生的内容与传统的差异格式略有不同：
+What the `-p` option produces is slightly different from the traditional diff format:
 
 1.   它前面有一个 `git diff` 头，如下所示：
 
@@ -15,26 +15,27 @@
 当涉及重命名/复制时，`file1` 和 `file2` 分别显示重命名/复制的源文件名和重命名/复制产生的文件名。
 
 2.   它的后面是一个或多个扩展头信息行：
-
-       old mode <模式>
-       new mode <模式>
-       deleted file mode <模式>
-       new file mode <模式>
-       copy from <路径>
-       copy to <路径>
-       rename from <路径>
-       rename to <路径>
-       similarity index <数字>
-       dissimilarity index <数字>
-       index <哈希>..<哈希> <模式>
 +
-文件模式被打印为 6 位八进制数字，包括文件类型和文件权限位。
+[synopsis]
+old mode <mode>
+new mode <mode>
+deleted file mode <mode>
+new file mode <mode>
+copy from <path>
+copy to <path>
+rename from <path>
+rename to <path>
+similarity index <number>
+dissimilarity index <number>
+index <hash>..<hash> <mode>
++
+File modes _<mode>_ are printed as 6-digit octal numbers including the file type and file permission bits.
 +
 扩展头信息中的路径名称不包括 `a/` 和 `b/` 前缀。
 +
 相似性指数是未改变的行占比，而不相似性指数是改变的行占比。它是四舍五入的整数，后有百分号。因此，100%的相似度指数指为两个文件相等，而 100% 的不相似度意味着入新文件中没有旧文件中的行。
 +
-索引行包括改变前和改变后的 blob 对象名称。如果文件模式没有变化，则包含 <模式>；否则，分别显示新旧模式。
+The index line includes the blob object names before and after the change. The _<mode>_ is included if the file mode does not change; otherwise, separate lines indicate the old and the new mode.
 
 3.  含有 "不常见" 字符的路径名会被引用，这一点在配置变量` core.quotePath` 中有所解释（见 linkgit:git-config[1]）。
 
@@ -96,13 +97,14 @@ index fabadb8,cc95eb0..4866510
        diff --cc file
 
 2.   它的后面是一个或多个扩展头信息行（本例显示的是与两个父提交的合并）：
-
-       index <哈希>,<哈希>..<哈希>
-       mode <模式>,<模式>..<模式>
-       new file mode <模式>
-       deleted file mode <模式>,<模式>
 +
-`mode<模式>，<模式>..<模式>` 行仅在 <模式> 中至少有一个与其余的不同时才会出现。包含有关检测到的内容移动的信息 (重命名和复制检测) 的扩展标头设计为使用两个 <目录树对象> 的 diff，不能用于组合的 diff 格式。
+[synopsis]
+index <hash>,<hash>..<hash>
+mode <mode>,<mode>`..`<mode>
+new file mode <mode>
+deleted file mode <mode>,<mode>
++
+The `mode <mode>,<mode>..<mode>` line appears only if at least one of the <mode> is different from the rest. Extended headers with information about detected content movement (renames and copying detection) are designed to work with the diff of two _<tree-ish>_ and are not used by combined diff format.
 
 3.   它的后面是两行源文件/目标文件的头信息：
 

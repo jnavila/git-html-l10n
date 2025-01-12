@@ -7,12 +7,12 @@ git-add - Ajoute le contenu de fichiers à l'index
 
 SYNOPSIS
 --------
-[verse]
-'git add' [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
-	  [--edit | -e] [--[no-]all | -A | --[no-]ignore-removal | [--update | -u]] [--sparse]
-	  [--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
-	  [--chmod=(+|-)x] [--pathspec-from-file=<fichier> [--pathspec-file-nul]]
-	  [--] [<spécificateur de chemin>...]
+[synopsis]
+git add [--verbose | -v] [--dry-run | -n] [--force | -f] [--interactive | -i] [--patch | -p]
+	[--edit | -e] [--[no-]all | -A | --[no-]ignore-removal | [--update | -u]] [--sparse]
+	[--intent-to-add | -N] [--refresh] [--ignore-errors] [--ignore-missing] [--renormalize]
+	[--chmod=(+|-)x] [--pathspec-from-file=<fichier> [--pathspec-file-nul]]
+	[--] [<spécificateur-de-chemin>...]
 
 DESCRIPTION
 -----------
@@ -31,105 +31,105 @@ Référez-vous linkgit:git-commit[1] pour des méthodes alternatives d'ajout de 
 
 OPTIONS
 -------
-<spécificateur de chemin>...::
+`<spécificateur-de-chemin>...`::
 	Fichiers dont le contenu doit être ajouté. Les patrons (ex : `*.c`) permettent de restreindre à tous les fichiers correspondants. Un nom de répertoire (ex : `rep` pour ajouter `rep/fichier1` et `rep/fichier2`) permet d'ajouter récursivement tous les fichiers d'un répertoire (par exemple spécifier `rep` n'enregistrera pas seulement le fichier modifié dans l'arbre de travail `rep/fichier1` ou un fichier ajouté `rep/fichier2`, mais aussi un fichier `rep/fichier3` supprimé de l'arbre de travail). Veuillez noter que des version anciennes de Git ignoraient les fichiers supprimés ; utilisez l'option `--no-all` si vous souhaitez ajouter les fichiers nouveaux ou modifiés mais ignorer les fichiers supprimés.
 +
 Pour de plus amples détails sur la syntaxe _<spécificateur-de-chemin>_, référez-vous à la section 'pathspec' dans linkgit:gitglossary[7].
 
--n::
---dry-run::
+`-n`::
+`--dry-run`::
 	Ne pas ajouter réellement les fichiers. Montrer juste ceux qui existent ou seront ignorés.
 
--v::
---verbose::
+`-v`::
+`--verbose`::
         Mode bavard.
 
--f::
---force::
+`-f`::
+`--force`::
 	Permettre l'ajout de fichiers qui sont normalement ignorés.
 
---sparse::
+`--sparse`::
 	Autoriser la mise à jour des entrées d'index en dehors du cône d'extraction clairsemée. Normalement, `git add` refuse de mettre à jour les entrées d'index dont les chemins ne rentrent pas dans le cône d'extraction clairsemée, car ces fichiers pourraient être supprimés de l'arbre de travail sans avertissement. Voir linkgit:git-sparse-checkout[1] pour plus de détails.
 
--i::
---interactive::
+`-i`::
+`--interactive`::
 	Ajouter le contenu modifié dans l'arbre de travail à l'index. Les arguments optionnels de chemin permettent de limiter les opérations à un sous-ensemble de l'arbre de travail. Référez-vous à « Mode interactif » pour plus de détails.
 
--p::
---patch::
+`-p`::
+`--patch`::
 	Choisir de manière interactive les sections de patch entre l'index et la copie de travail et les ajouter à l'index. Cela permet à l'utilisateur de passer en revue les différences avant d'ajouter le contenu modifié à l'index.
 +
 Cela lance effectivement `add --interactive` mais court-circuite le menu initial et saute directement à la sous-commande `patch`. Référez-vous à « Mode interactif » pour plus de détails.
 
--e::
---edit::
+`-e`::
+`--edit`::
 	Ouvrir les différences avec l'index dans un éditeur et laisser l'utilisateur les éditer. Après la fermeture de l'éditeur, ajuster les entêtes de sections et appliquer le patch à l'index.
 +
 L'objectif de cette option est de permettre de choisir et retenir les lignes de la rustine à appliquer, ou même de modifier le contenu des lignes à indexer. Cela peut être plus rapide et plus flexible que l'utilisation du sélecteur interactif. Cependant, il est plus facile de se tromper et de créer un patch qui ne s'applique pas. Référez-vous à ÉDITER LES RUSTINES ci-dessous.
 
--u::
---update::
+`-u`::
+`--update`::
 	Mettre à jour l'index sur les seuls fichiers déjà présents et correspondant à _<spec-de-chemin>_. Cela retire ou modifie les entrées d'index pour correspondre à la copie de travail, mais n'ajoute pas de fichier.
 +
 Si aucun _<spec-de-chemin>_ n'est spécifié quand l'option `-u` est utilisée, tous les fichiers suivis dans la totalité de l'arbre de travail sont mis à jour (les versions anciennes de Git limitaient la mise à jour au répertoire courant et ses sous-répertoires).
 
--A::
---all::
---no-ignore-removal::
+`-A`::
+`--all`::
+`--no-ignore-removal`::
 	Mettre à jour l'index non seulement pour tous les fichiers de l'arbre de travail correspondant à _<spec-de-chemin>_ mais aussi pour toutes les entrées existant déjà dans l'index. Ceci ajoute, modifie et retire des entrées d'index pour correspondre à la copie de travail.
 +
 Si aucun _<spec-de-chemin>_ n'est spécifié quand l'option `-A` est utilisée, tous les fichiers de l'arbre de travail sont mis à jour (les versions anciennes de Git utilisaient le répertoire courant et ses sous-répertoires).
 
---no-all::
---ignore-removal::
+`--no-all`::
+`--ignore-removal`::
 	Mettre à jour l'index en y ajoutant les nouveaux fichiers qui sont inconnus et les fichiers modifiés dans la copie de travail, mais ignore les fichiers qui ont été effacés de la copie de travail. Cette option ne fait rien quand aucun _<spec-de-chemin>_ n'est utilisé.
 +
-Cette option sert principalement à aider les utilisateurs de versions anciennes de Git pour lesquels « git add _<spec-de-chemin>_... » était synonyme de « git add --no-all _<spec-de-chemin>_... », c'est-à-dire qui ignorait les fichiers effacés.
+Cette option sert principalement à aider les utilisateurs de versions anciennes de Git pour lesquels `git add <spec-de-chemin>...` était synonyme de `git add --no-all <spec-de-chemin>...`, c'est-à-dire qui ignorait les fichiers effacés.
 
--N::
---intent-to-add::
+`-N`::
+`--intent-to-add`::
 	N'enregistrer que le fait que le chemin sera ajouté plus tard. Une entrée pour le chemin est placée en index sans contenu. C'est particulièrement utile pour, entre autres choses, montrer le contenu non indexé de ces fichiers avec `git diff` et les valider avec `git commit -a`.
 
---refresh::
+`--refresh`::
 	Ne pas ajouter le ou les fichiers mais rafraîchir seulement leur information de stat() dans l'index.
 
---ignore-errors::
+`--ignore-errors`::
 	Si des fichiers n'ont pas pu être ajoutés à cause d'erreurs lors de leur indexation, ne pas annuler l'opération mais continuer l'ajout des autres fichiers. La commande se terminera tout de même avec un code d'erreur non nul. Le paramètre de configuration `add.ignoreErrors` peut être positionné à true pour que ce comportement soit celui par défaut.
 
---ignore-missing::
-	Cette option ne peut être utilisée que couplée avec --dry-run. L'utilisation de cette option permet à l'utilisateur de vérifier si un des fichiers indiqués serait ignoré, qu'il soit présent ou non dans la copie de travail.
+`--ignore-missing`::
+	Cette option ne peut être utilisée que couplée avec `--dry-run`. L'utilisation de cette option permet à l'utilisateur de vérifier si un des fichiers indiqués serait ignoré, qu'il soit présent ou non dans la copie de travail.
 
---no-warn-embedded-repo::
+`--no-warn-embedded-repo`::
 	Par défaut, `git add` avertit l'utilisateur lors de l'ajout d'un dépôt embarqué dans l'index sans utilisation de `git submodule add` pour créer une entrée dans `.gitmodules`. Cette option supprime cet avertissement (par exemple, si vous effectuez manuellement des opérations sur des sous-modules).
 
---renormalize::
-	Forcer l'application du filtre "clean" à tous les fichiers suivis pour les ajouter en force à l'index. C'est utile après avoir changé la variable de configuration `core.autocrlf` ou l'attribut `text` pour corriger des fichiers ajoutés avec des fins de lignes erronées CRLF/LF. Cette option implique `-u`. Les caractères CR solitaires ne sont pas traités, donc alors qu'un CRLF est nettoyé en LF, une séquence CRCRLF n'est que partiellement nettoyée en CRLF.
+`--renormalize`::
+	Forcer l'application du filtre "clean" à tous les fichiers suivis pour les ajouter en force à l'index. C'est utile après avoir changé la variable de configuration `core.autocrlf` ou l'attribut `text` pour corriger des fichiers ajoutés avec des fins de lignes erronées _CRLF/LF_. Cette option implique `-u`. Les caractères _CR_ solitaires ne sont pas traités, donc alors qu'un _CRLF_ est nettoyé en _LF_, une séquence _CRCRLF_ n'est que partiellement nettoyée en _CRLF_.
 
---chmod=(+|-)x::
+`--chmod=(+|-)x`::
 	Forcer le bit exécutable des fichiers ajoutés. Le bit exécutable n'est modifié que dans l'index, les fichiers de la copie de travail ne sont pas modifiés.
 
---pathspec-from-file=<fichier>::
-	Le spécificateur de chemin est passé dans _<fichier>_ au lieu des arguments de la ligne de commande. Si _<fichier>_ vaut `-` alors l'entrée standard est utilisée. Les éléments du spécificateur de chemin sont séparés par LF ou CR/LF. Les éléments du spécificateur de chemin peuvent être cités comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Voir aussi l'option `--pathspec-file-nul` et l'option globale `--literal-pathspecs`.
+`--pathspec-from-file=<fichier>`::
+	Le spécificateur de chemin est passé dans _<fichier>_ au lieu des arguments de la ligne de commande. Si _<fichier>_ vaut `-` alors l'entrée standard est utilisée. Les éléments du spécificateur de chemin sont séparés par _LF_ ou _CR/LF_. Les éléments du spécificateur de chemin peuvent être cités comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Voir aussi l'option `--pathspec-file-nul` et l'option globale `--literal-pathspecs`.
 
---pathspec-file-nul::
-	Uniquement significatif avec `--pathspec-from-file`. Les éléments du spécificateur de chemin sont séparés par le caractère NUL et tous les autres caractères sont utilisés littéralement (y compris les retours à la ligne et les guillemets).
+`--pathspec-file-nul`::
+	Uniquement significatif avec `--pathspec-from-file`. Les éléments du spécificateur de chemin sont séparés par le caractère _NUL_ et tous les autres caractères sont utilisés littéralement (y compris les retours à la ligne et les guillemets).
 
-\--::
+`--`::
 	Cette option permet de séparer les options de la ligne de commande de la liste des fichiers (utile si certains noms de fichiers peuvent être confondus avec des options).
 
 
 EXEMPLES
 --------
 
-* Ajouter le contenu de tous les fichiers `*.txt` sous le répertoire `Documentation` et ses sous-répertoires :
+* Ajouter le contenu de tous les fichiers ++*.txt++ sous le répertoire `Documentation` et ses sous-répertoires :
 +
 ------------
 $ git add Documentation/\*.txt
 ------------
 +
-Remarquez que l'astérisque `*` est échappé du shell dans cet exemple ; cela permet d'inclure les fichiers dans les sous-répertoires du répertoire `Documentation/`.
+Remarquez que l'astérisque ++*++ est échappé du shell dans cet exemple ; cela permet d'inclure les fichiers dans les sous-répertoires du répertoire `Documentation/`.
 
-* Ajouter le contenu de tous les scripts git-*.sh :
+* Ajouter le contenu de tous les scripts ++git-*.sh++ :
 +
 ------------
 $ git add git-*.sh
@@ -156,7 +156,7 @@ La boucle de commande principale propose 6 sous-commandes (plus help (aide) et q
 
 status::
 
-   Ceci affiche les modifications entre HEAD et l'index (c-à-d ce qui seraient validées si vous lanciez `git commit`), et entre l'index et les fichiers de la copie de travail (c-à-d ce que vous pourriez indexer au moyen de `git add` avant de lancer `git commit`) pour chaque chemin. Un exemple d'affichage ressemble à ceci :
+   Ceci affiche les modifications entre `HEAD` et l'index (c-à-d ce qui seraient validées si vous lanciez `git commit`), et entre l'index et les fichiers de la copie de travail (c-à-d ce que vous pourriez indexer au moyen de `git add` avant de lancer `git commit`) pour chaque chemin. Un exemple d'affichage ressemble à ceci :
 +
 ------------
               staged     unstaged path
@@ -164,7 +164,7 @@ status::
      2:     +403/-35        +1/-1 add-interactive.c
 ------------
 +
-Cela montre que foo.png contient des différences avec HEAD (mais c'est un format binaire donc le nombre de lignes ne peut pas être affiché) et qu'il n'y a pas de différence entre la copie indexée et la copie de travail (si la copie de travail aussi avait été différente, 'binary' aurait été affiché à la place de 'nothing'). L'autre fichier, add-interactive.c, a 430 lignes ajoutées et 35 effacées si vous validez ce qui est dans l'index, mais la copie de travail contient d'autres modifications (un ajout et un retrait).
+Cela montre que `foo.png` contient des différences avec `HEAD` (mais c'est un format binaire donc le nombre de lignes ne peut pas être affiché) et qu'il n'y a pas de différence entre la copie indexée et la copie de travail (si la copie de travail aussi avait été différente, 'binary' aurait été affiché à la place de 'nothing'). L'autre fichier, add-interactive.c, a 430 lignes ajoutées et 35 effacées si vous validez ce qui est dans l'index, mais la copie de travail contient d'autres modifications (un ajout et un retrait).
 
 update::
 
@@ -220,7 +220,7 @@ Vous pouvez vous éviter de taper Entrée ici, en mettant la variable de configu
 
 diff::
 
-  Ceci permet de faire une revue de ce qui sera validé (c'est une différence entre HEAD et index).
+  Ceci permet de faire une revue de ce qui sera validé (c'est une différence entre `HEAD` et index).
 
 
 ÉDITER LES CORRECTIFS
@@ -242,7 +242,7 @@ contenu modifié::
 Le contenu modifié est représenté par des lignes "-" (supprimant l'ancien contenu) suivies de lignes "{plus}" (ajoutant le nouveau contenu). Vous pouvez empêcher l'indexation de ces modifications en convertissant les lignes "-" en lignes " " et en supprimant les lignes "{plus}". Méfiez-vous : ne modifier que la moitié de la paire de lignes a de fortes chances de créer des modifications inattendues dans l'index.
 --
 
-Il existe aussi des opérations plus complexes qui peuvent être réalisées. Méfiez-vous : quand le correctif n'est appliqué que dans l'index et pas dans l'arbre de travail, l'arbre de travail semblera « défaire » les modifications de l'index. Par exemple, l'introduction dans l'index d'une nouvelle ligne qui n’apparaît ni dans HEAD ni dans l'arbre de travail indexera la nouvelle ligne pour validation, mais cette ligne semblera être supprimée dans l'arbre de travail.
+Il existe aussi des opérations plus complexes qui peuvent être réalisées. Méfiez-vous : quand le correctif n'est appliqué que dans l'index et pas dans l'arbre de travail, l'arbre de travail semblera « défaire » les modifications de l'index. Par exemple, l'introduction dans l'index d'une nouvelle ligne qui n’apparaît ni dans `HEAD` ni dans l'arbre de travail indexera la nouvelle ligne pour validation, mais cette ligne semblera être supprimée dans l'arbre de travail.
 
 Évitez d'utiliser ces constructions, ou faites-le avec une extrême précaution.
 
@@ -271,6 +271,7 @@ CONFIGURATION
 
 include::includes/cmd-config-section-all.txt[]
 
+:git-add: 1
 include::config/add.txt[]
 
 VOIR AUSSI

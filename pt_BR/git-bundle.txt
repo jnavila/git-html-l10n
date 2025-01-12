@@ -20,11 +20,9 @@ DESCRIÇÃO
 
 Crie, desempacote e manipule os arquivos "bundle" (pacote). Os pacotes são usados para a transferência "offline" dos objetos Git sem um "servidor" ativo esperando do outro lado da conexão de rede.
 
-Eles podem ser usados para criar backups incrementais e completos de um repositório e para retransmitir o estado das referências de um repositório para outro.
+They can be used to create both incremental and full backups of a repository (see the "full backup" example in "EXAMPLES"), and to relay the state of the references in one repository to another (see the second example).
 
-Os comandos do Git que buscam ou "leem" através de protocolos como `ssh://` e `https://` também podem operar nos arquivos de pacote (bundle). É possível linkgit:git-clone[1] (clonar) um novo repositório a partir de um pacote, usar o comando linkgit:git-fetch[1] para buscar a partir de um e para listar as referências contidas nele usando o comando linkgit:git-ls-remote[1]. Não há suporte correspondente de "gravação", ou seja, não há suporte para fazer um 'git push' num pacote.
-
-Consulte a seção de EXEMPLOS abaixo para mais exemplos de como usar.
+Git commands that fetch or otherwise "read" via protocols such as `ssh://` and `https://` can also operate on bundle files. It is possible linkgit:git-clone[1] a new repository from a bundle, to use linkgit:git-fetch[1] to fetch from one, and to list the references contained within it with linkgit:git-ls-remote[1]. There's no corresponding "write" support, i.e. a 'git push' into a bundle is not supported.
 
 FORMATO BUNDLE
 --------------
@@ -74,7 +72,7 @@ unbundle <arquivo>::
 ESPECIFICANDO AS REFERÊNCIAS
 ----------------------------
 
-As revisões devem ser acompanhadas pelos nomes de referência que serão empacotados num pacote (bundle).
+Revisions must be accompanied by reference names to be packaged in a bundle. Alternatively `--all` can be used to package all refs.
 
 Mais de uma referência pode ser empacotada e mais de um conjunto de objetos de pré-requisito podem ser especificados. Os objetos empacotados são aqueles que não estão presentes na união dos pré-requisitos.
 
@@ -126,14 +124,33 @@ Um pacote independente e sem qualquer pré-requisito, pode ser extraído em qual
 
 É bom errar pelo excesso de zelo, fazendo com que o arquivo bundle (pacote) contenha os objetos já no destino, pois eles são ignorados durante a descompactação no destino.
 
-Se quiser corresponder a `git clone --mirror`, que incluiria as suas referências, como `refs/remotes/*`, use o comando `--all`. Caso queira fornecer o mesmo conjunto de referências que um clone obteria diretamente do repositório da origem, use a opção `--branches --tags` no `<git-rev-list-args>`.
+If you want to provide the same set of refs that a clone directly from the source repository would get, use `--branches --tags` for the `<git-rev-list-args>`.
 
 O comando 'git bundle verify' pode ser usado para verificar se o repositório do destinatário tem os pré-requisitos necessários para fazer o commit de um pacote.
 
 EXEMPLOS
 --------
 
-Suponha que você queira transferir o histórico de um repositório R1 na máquina A para outro repositório R2 na máquina B. Por qualquer motivo, a conexão direta entre A e B não é permitida, mas podemos mover os dados de A para B através de algum mecanismo (CD, e-mail etc.). Queremos atualizar o R2 com o desenvolvimento feito no ramo master de R1.
+We'll discuss two cases:
+
+1. Taking a full backup of a repository
+2. Transferring the history of a repository to another machine when the two machines have no direct connection
+
+First let's consider a full backup of the repository. The following command will take a full backup of the repository in the sense that all refs are included in the bundle:
+
+----------------
+$ git bundle create backup.bundle --all
+----------------
+
+But note again that this is only for the refs, i.e. you will only include refs and commits reachable from those refs. You will not include other local state, such as the contents of the index, working tree, the stash, per-repository configuration, hooks, etc.
+
+You can later recover that repository by using for example linkgit:git-clone[1]:
+
+----------------
+$ git clone backup.bundle <new directory>
+----------------
+
+For the next example, assume you want to transfer the history from a repository R1 on machine A to another repository R2 on machine B. For whatever reason, direct connection between A and B is not allowed, but we can move data from A to B via some mechanism (CD, email, etc.). We want to update R2 with development made on the branch master in R1.
 
 Para inicializar o processo, você pode primeiro criar um pacote que não exista qualquer pré-requisitos. Você pode usar uma tag para ser lembrado até o último commit que for processado, serve para facilitar a atualização posterior do outro repositório com um pacote incremental:
 
@@ -213,6 +230,15 @@ Você também pode ver quais são as referências que ela oferece:
 ----------------
 $ git ls-remote mybundle
 ----------------
+
+DISCUSSÃO
+---------
+
+A naive way to make a full backup of a repository is to use something to the effect of `cp -r <repo> <destination>`. This is discouraged since the repository could be written to during the copy operation. In turn some files at `<destination>` could be corrupted.
+
+This is why it is recommended to use Git tooling for making repository backups, either with this command or with e.g. linkgit:git-clone[1]. But keep in mind that these tools will not help you backup state other than refs and commits. In other words they will not help you backup contents of the index, working tree, the stash, per-repository configuration, hooks, etc.
+
+See also linkgit:gitfaq[7], section "TRANSFERS" for a discussion of the problems associated with file syncing across systems.
 
 FORMATO DO ARQUIVO
 ------------------

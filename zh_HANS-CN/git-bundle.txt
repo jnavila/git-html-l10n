@@ -20,11 +20,9 @@ git-bundle - 通过存档移动对象和引用
 
 创建、解包和操作 “打包” 文件。捆绑文件用于 Git 对象的 “离线” 传输，而不需要在网络连接的另一端有一个活跃的 “服务器”。
 
-它们可以用来创建仓库的增量和完全备份，并将一个仓库中的引用状态传递给另一个版本库。
+They can be used to create both incremental and full backups of a repository (see the "full backup" example in "EXAMPLES"), and to relay the state of the references in one repository to another (see the second example).
 
-通过 `ssh://` 和 `https://` 等协议获取或以其他方式 “读取” 的 Git 命令也可以对打包文件进行操作。它可以通过 linkgit:git-clone[1] 从打包中建立新的仓库，用 linkgit:git-fetch[1] 从其中获取，并通过 linkgit:git-ls-remote[1] 列出其中的引用。没有相应的 "写" 支持，也就是说，不支持 'git push' 捆绑包。
-
-关于如何使用捆绑包的例子，见下面的 “实例” 部分。
+Git commands that fetch or otherwise "read" via protocols such as `ssh://` and `https://` can also operate on bundle files. It is possible linkgit:git-clone[1] a new repository from a bundle, to use linkgit:git-fetch[1] to fetch from one, and to list the references contained within it with linkgit:git-ls-remote[1]. There's no corresponding "write" support, i.e. a 'git push' into a bundle is not supported.
 
 捆绑包格式
 -----
@@ -74,7 +72,7 @@ unbundle <文件>::
 指定引用
 ----
 
-修订必须附有引用名称，才能打包成捆绑包。
+Revisions must be accompanied by reference names to be packaged in a bundle. Alternatively `--all` can be used to package all refs.
 
 可以打包一个以上的引用，也可以指定一组以上的先决条件对象。 被打包的对象是那些不包含在先决条件组合中的对象。
 
@@ -126,14 +124,33 @@ $ git bundle create mybundle v1.0.0..master
 
 谨慎行事是可以的，使捆绑文件包含已经在目的地的对象，因为在目的地解包时这些对象会被忽略。
 
-如果你想匹配 `git clone --mirror`，这将包括你的 refs 如 `refs/remotes/*`，使用 `--all`。 如果你想提供与直接从源码库克隆得到的相同的引用，使用 `--branches --tags` 作为 `<git-rev-list-args>`。
+If you want to provide the same set of refs that a clone directly from the source repository would get, use `--branches --tags` for the `<git-rev-list-args>`.
 
 'git bundle verify' 命令可以用来检查你的接收库是否有一个捆绑包所需的先决条件提交。
 
 实例
 --
 
-假设你想把 A 机器上的版本库 R1 的历史记录转移到 B 机器上的另一个版本库 R2。由于某种原因，A 和 B 之间不允许直接连接，但我们可以通过某种机制（CD、电子邮件等）把数据从 A 转移到 B。 我们想用 R1 中的分支 master 上的开发来更新 R2。
+We'll discuss two cases:
+
+1. Taking a full backup of a repository
+2. Transferring the history of a repository to another machine when the two machines have no direct connection
+
+First let's consider a full backup of the repository. The following command will take a full backup of the repository in the sense that all refs are included in the bundle:
+
+----------------
+$ git bundle create backup.bundle --all
+----------------
+
+But note again that this is only for the refs, i.e. you will only include refs and commits reachable from those refs. You will not include other local state, such as the contents of the index, working tree, the stash, per-repository configuration, hooks, etc.
+
+You can later recover that repository by using for example linkgit:git-clone[1]:
+
+----------------
+$ git clone backup.bundle <new directory>
+----------------
+
+For the next example, assume you want to transfer the history from a repository R1 on machine A to another repository R2 on machine B. For whatever reason, direct connection between A and B is not allowed, but we can move data from A to B via some mechanism (CD, email, etc.). We want to update R2 with development made on the branch master in R1.
 
 为了启动这个过程，你可以先创建一个没有任何先决条件的捆绑包。你可以使用一个标签来记住你最后处理的提交，以方便以后用增量的捆绑包来更新其他仓库：
 
@@ -213,6 +230,15 @@ $ git fetch mybundle master:localRef
 ----------------
 $ git ls-remote mybundle
 ----------------
+
+讨论
+--
+
+A naive way to make a full backup of a repository is to use something to the effect of `cp -r <repo> <destination>`. This is discouraged since the repository could be written to during the copy operation. In turn some files at `<destination>` could be corrupted.
+
+This is why it is recommended to use Git tooling for making repository backups, either with this command or with e.g. linkgit:git-clone[1]. But keep in mind that these tools will not help you backup state other than refs and commits. In other words they will not help you backup contents of the index, working tree, the stash, per-repository configuration, hooks, etc.
+
+See also linkgit:gitfaq[7], section "TRANSFERS" for a discussion of the problems associated with file syncing across systems.
 
 文件格式
 ----

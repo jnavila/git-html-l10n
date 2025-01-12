@@ -110,29 +110,29 @@ Cela ne laisserait qu’un seul commit de fusion lorsque votre branche thématiq
 
 Lancer la commande 'git rerere' immédiatement après une autofusion conflictuelle enregistre les fichiers d'arbres de travail en conflit, avec les marqueurs de conflit habituels `<<<<<<<`, `=======` and `>>>>>>>`. Plus tard, après que vous avez fini de résoudre les conflits, exécuter 'git rerere' à nouveau enregistrera l'état résolu de ces fichiers. Supposez que vous avez fait cela lorsque vous avez créé la fusion de test de master dans la branche thématique.
 
-Next time, after seeing the same conflicted automerge, running 'git rerere' will perform a three-way merge between the earlier conflicted automerge, the earlier manual resolution, and the current conflicted automerge. If this three-way merge resolves cleanly, the result is written out to your working tree file, so you do not have to manually resolve it. Note that 'git rerere' leaves the index file alone, so you still need to do the final sanity checks with `git diff` (or `git diff -c`) and 'git add' when you are satisfied.
+La prochaine fois, après avoir vu la même autofusion conflictuelle, lancer `git rerere` effectuera une fusion de trois points entre l'autofusion antérieure en conflit, la résolution manuelle antérieure et l'autofusion en conflit actuelle. Si cette fusion à trois points se résout proprement, le résultat est écrit à votre fichier d'arbre de travail, de sorte que vous n'avez pas à le résoudre manuellement. Notez que 'git rerere' laisse le fichier index seul, donc vous devez toujours faire les vérifications de sanity finales avec `git diff` (ou `git diff -c`) et `git add` lorsque vous êtes satisfait.
 
-As a convenience measure, 'git merge' automatically invokes 'git rerere' upon exiting with a failed automerge and 'git rerere' records the hand resolve when it is a new conflict, or reuses the earlier hand resolve when it is not. 'git commit' also invokes 'git rerere' when committing a merge result. What this means is that you do not have to do anything special yourself (besides enabling the rerere.enabled config variable).
+Comme mesure de commodité, 'git merge' invoque automatiquement 'git rerere' à la sortie d'une autofusion ratée et 'git rerere' enregistre la résolution manuelle lorsqu'il s'agit d'un nouveau conflit, ou réutilise la résolution manuelle antérieure sinon. 'git commit' invoque également 'git rerere' lors de la validation d'un résultat de fusion. Ce que cela signifie, c'est que vous n'avez rien de spécial à faire vous-même (à moins d'avoir désactivé la variable de configuration `rerere.enabled`).
 
-In our example, when you do the test merge, the manual resolution is recorded, and it will be reused when you do the actual merge later with the updated master and topic branch, as long as the recorded resolution is still applicable.
+Dans notre exemple, lorsque vous faites la fusion de test, la résolution manuelle est enregistrée, et elle sera réutilisée lorsque vous faites la fusion réelle plus tard avec les branches master et topic mises à jour, tant que la résolution enregistrée est toujours applicable.
 
-The information 'git rerere' records is also used when running 'git rebase'. After blowing away the test merge and continuing development on the topic branch:
+Les enregistrement d'information `git rerere` sont également utilisées lors de l'exécution de `git rebase`. Après avoir fait exploser la fusion de test et continué le développement sur la branche thématique :
 
 ------------
-              o---*---o-------o---o topic
+              o---*---o-------o---o sujet
              /
     o---o---o---*---o---o---o---o   master
 
-	$ git rebase master topic
+	$ git rebase master sujet
 
 				  o---*---o-------o---o sujet
 				 /
     o---o---o---*---o---o---o---o   master
 ------------
 
-you could run `git rebase master topic`, to bring yourself up to date before your topic is ready to be sent upstream. This would result in falling back to a three-way merge, and it would conflict the same way as the test merge you resolved earlier. 'git rerere' will be run by 'git rebase' to help you resolve this conflict.
+vous pouvez lancer `git rebase master topic`, pour vous mettre à jour avant que votre sujet soit prêt à être envoyé en amont. Cela entraînerait un retour à une fusion à trois points et cela serait incompatible avec la fusion que vous avez résolue plus tôt. 'git rerere' sera lancé par 'git rebase' pour vous aider à résoudre ce conflit.
 
-[NOTE] 'git rerere' relies on the conflict markers in the file to detect the conflict. If the file already contains lines that look the same as lines with conflict markers, 'git rerere' may fail to record a conflict resolution. To work around this, the `conflict-marker-size` setting in linkgit:gitattributes[5] can be used.
+[NOTE] 'git rerere' s'appuie sur les marqueurs de conflit dans le dossier pour détecter le conflit. Si le fichier contient déjà des lignes qui ressemblent aux lignes avec des marqueurs de conflit, « git rerere» peut ne pas enregistrer une résolution de conflit. Pour contourner cette limitation, on peut utiliser le réglage de la taille de la marqueur de conflit `conflict-marker-size` dans linkgit:gitattributes[5].
 
 GIT
 ---
