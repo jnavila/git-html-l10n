@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-am(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -449,13 +450,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="content"><em>git am</em> [--signoff] [--keep] [--[no-]keep-cr] [--[no-]utf8] [--no-verify]
          [--[no-]3way] [--interactive] [--committer-date-is-author-date]
          [--ignore-date] [--ignore-space-change | --ignore-whitespace]
-         [--whitespace=&lt;选项&gt;] [-C&lt;n&gt;] [-p&lt;n&gt;] [--directory=&lt;目录&gt;]
-         [--exclude=&lt;路径&gt;] [--include=&lt;路径&gt;] [--reject] [-q | --quiet]
-         [--[no-]scissors] [-S[&lt;键 ID&gt;]] [--patch-format=&lt;格式&gt;]
-         [--quoted-cr=&lt;行为&gt;]
+         [--whitespace=&lt;action&gt;] [-C&lt;n&gt;] [-p&lt;n&gt;] [--directory=&lt;dir&gt;]
+         [--exclude=&lt;path&gt;] [--include=&lt;path&gt;] [--reject] [-q | --quiet]
+         [--[no-]scissors] [-S[&lt;keyid&gt;]] [--patch-format=&lt;format&gt;]
+         [--quoted-cr=&lt;action&gt;]
          [--empty=(stop|drop|keep)]
          [(&lt;mbox&gt; | &lt;Maildir&gt;)&#8230;&#8203;]
-<em>git am</em> (--continue | --skip | --abort | --quit | --show-current-patch[=(diff|raw)] | --allow-empty)</pre>
+<em>git am</em> (--continue | --skip | --abort | --quit | --retry | --show-current-patch[=(diff|raw)] | --allow-empty)</pre>
 </div>
 </div>
 </div>
@@ -463,7 +464,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_描述">描述</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>将邮箱中的邮件信息拆分为提交日志信息、作者信息和补丁，并将其应用到当前分支。你可以把它看作是 <a href="git-format-patch.html"><b>git-format-patch</b>(1)</a> 的反向操作，在一个没有合并历史的分支上运行。</p>
+<p>将邮箱中的邮件信息拆分为提交日志信息、作者信息和补丁，并将其应用到当前分支。你可以把它看作是 <a href="git-format-patch.html">git-format-patch(1)</a> 的反向操作，在一个没有合并历史的分支上运行。</p>
 </div>
 </div>
 </div>
@@ -479,42 +480,62 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--signoff</dt>
 <dd>
-<p>在提交信息中加入 <code>Signed-off-by</code> 的尾注，使用自己的提交者身份。 更多信息见 <a href="git-commit.html"><b>git-commit</b>(1)</a> 中的 signoff 选项。</p>
+<p>在提交信息中加入 <code>Signed-off-by</code> 的尾注，使用自己的提交者身份。 更多信息见 <a href="git-commit.html">git-commit(1)</a> 中的 signoff 选项。</p>
 </dd>
 <dt class="hdlist1">-k</dt>
 <dt class="hdlist1">--keep</dt>
 <dd>
-<p>传递`-k` 标志给 <em>git mailinfo</em>（见<a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>）。</p>
+<p>传递`-k` 标志给 <em>git mailinfo</em>（见<a href="git-mailinfo.html">git-mailinfo(1)</a>）。</p>
 </dd>
 <dt class="hdlist1">--keep-non-patch</dt>
 <dd>
-<p>将 <code>-b</code> 标志传递给 <em>git mailinfo</em>（见<a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>）。</p>
+<p>将 <code>-b</code> 标志传递给 <em>git mailinfo</em>（见<a href="git-mailinfo.html">git-mailinfo(1)</a>）。</p>
 </dd>
 <dt class="hdlist1">--[no-]keep-cr</dt>
 <dd>
-<p>使用 <code>--keep-cr</code>，调用 <em>git mailsplit</em>（见<a href="git-mailsplit.html"><b>git-mailsplit</b>(1)</a>），并使用相同的选项，以防止它在行末剥离 CR。<code>am.keepcr</code> 配置变量可以用来指定默认行为。 <code>--no-keep-cr</code> 可以用来覆盖 <code>am.keepcr</code>。</p>
+<p>使用 <code>--keep-cr</code>，调用 <em>git mailsplit</em>（见<a href="git-mailsplit.html">git-mailsplit(1)</a>），并使用相同的选项，以防止它在行末剥离 CR。<code>am.keepcr</code> 配置变量可以用来指定默认行为。 <code>--no-keep-cr</code> 可以用来覆盖 <code>am.keepcr</code>。</p>
 </dd>
 <dt class="hdlist1">-c</dt>
 <dt class="hdlist1">--scissors</dt>
 <dd>
-<p>移除正文中剪切行之前的所有内容（见<a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>）。可以使用 <code>mailinfo.scissors</code> 配置变量来默认激活。</p>
+<p>移除正文中剪切行之前的所有内容（见<a href="git-mailinfo.html">git-mailinfo(1)</a>）。可以使用 <code>mailinfo.scissors</code> 配置变量来默认激活。</p>
 </dd>
 <dt class="hdlist1">--no-scissors</dt>
 <dd>
-<p>忽略剪切线（见<a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>）。</p>
+<p>忽略剪切线（见<a href="git-mailinfo.html">git-mailinfo(1)</a>）。</p>
 </dd>
 <dt class="hdlist1">--quoted-cr=&lt;行为&gt;</dt>
 <dd>
-<p>这个标志将被传递给 <em>git mailinfo</em>（见 <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>）。</p>
+<p>这个标志将被传递给 <em>git mailinfo</em>（见 <a href="git-mailinfo.html">git-mailinfo(1)</a>）。</p>
 </dd>
-<dt class="hdlist1">--empty=(stop|drop|keep)</dt>
+<dt class="hdlist1">--empty=(drop|keep|stop)</dt>
 <dd>
-<p>默认情况下，或者当该选项被设置为 <em>stop</em> 时，该命令在输入缺乏补丁的电子邮件时出错，并停止到当前 am 会话的中间。当这个选项被设置为 <em>drop</em> 时，跳过这样的电子邮件信息。 当这个选项被设置为 <em>keep</em> 时，会创建一个空的提交，将电子邮件的内容记录为日志。</p>
+<p>如何处理缺少补丁的电子邮件消息：</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>drop</code></dt>
+<dd>
+<p>该电子邮件会被跳过。</p>
+</dd>
+<dt class="hdlist1"><code>keep</code></dt>
+<dd>
+<p>An empty commit will be created, with the contents of the e-mail message as its log.</p>
+</dd>
+<dt class="hdlist1"><code>stop</code></dt>
+<dd>
+<p>The command will fail, stopping in the middle of the current <code>am</code> session. This is the default behavior.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
 </dd>
 <dt class="hdlist1">-m</dt>
 <dt class="hdlist1">--message-id</dt>
 <dd>
-<p>传递 <code>-m</code> 标志给 <em>git mailinfo</em>（见 <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>），这样 Message-ID 头会被添加到提交信息中。 <code>am.messageid</code> 配置变量可以用来指定默认行为。</p>
+<p>传递 <code>-m</code> 标志给 <em>git mailinfo</em>（见 <a href="git-mailinfo.html">git-mailinfo(1)</a>），这样 Message-ID 头会被添加到提交信息中。 <code>am.messageid</code> 配置变量可以用来指定默认行为。</p>
 </dd>
 <dt class="hdlist1">--no-message-id</dt>
 <dd>
@@ -528,25 +549,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-u</dt>
 <dt class="hdlist1">--utf8</dt>
 <dd>
-<p>传递 <code>-u</code> 标志给 <em>git mailinfo</em>（见<a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>）。 建议从邮件中提取的提交日志信息被重新编码为 UTF-8 编码（配置变量 <code>i18n.commitEncoding</code> 可以用来指定项目的首选编码，如果它不是 UTF-8）。</p>
+<p>传递 <code>-u</code> 标志给 <em>git mailinfo</em>（见<a href="git-mailinfo.html">git-mailinfo(1)</a>）。 建议从邮件中提取的提交日志信息被重新编码为 UTF-8 编码（配置变量 <code>i18n.commitEncoding</code> 可以用来指定项目的首选编码，如果它不是 UTF-8）。</p>
 <div class="paragraph">
 <p>这在以前的 git 版本中是可选的，但现在它是默认的。 你可以使用 <code>--no-utf8</code> 来覆盖它。</p>
 </div>
 </dd>
 <dt class="hdlist1">--no-utf8</dt>
 <dd>
-<p>传递 <code>-n</code> 标志给 <em>git mailinfo</em>（见<a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>）。</p>
+<p>传递 <code>-n</code> 标志给 <em>git mailinfo</em>（见<a href="git-mailinfo.html">git-mailinfo(1)</a>）。</p>
 </dd>
 <dt class="hdlist1">-3</dt>
 <dt class="hdlist1">--3way</dt>
 <dt class="hdlist1">--no-3way</dt>
 <dd>
-<p>当补丁不能干净地应用时，如果补丁记录了它应该应用到的二进制文件的身份，并且我们有这些二进制文件可以在本地使用，那么就退回到三路合并。<code>--no-3way</code> 可以用来覆盖 am.threeWay 配置变量。更多信息，见 <a href="git-config.html"><b>git-config</b>(1)</a> 中的 am.threeWay。</p>
+<p>当补丁不能干净地应用时，如果补丁记录了它应该应用到的二进制文件的身份，并且我们有这些二进制文件可以在本地使用，那么就退回到三路合并。<code>--no-3way</code> 可以用来覆盖 am.threeWay 配置变量。更多信息，见 <a href="git-config.html">git-config(1)</a> 中的 am.threeWay。</p>
 </dd>
 <dt class="hdlist1">--rerere-autoupdate</dt>
 <dt class="hdlist1">--no-rerere-autoupdate</dt>
 <dd>
-<p>在 rerere 机制重用当前冲突的记录解析来更新工作树中的文件后，允许它也用解析的结果来更新索引。 <code>--no-rerere-autoupdate`是一个很好的方法，在用单独的 `git add</code> 提交结果到索引之前，可以反复检查 <code>rerere</code> 所做的事情，并抓住潜在的错误合并。</p>
+<p>在 rerere 机制重用当前冲突的记录解析来更新工作树中的文件后，允许它也用解析的结果来更新索引。 <code>--no-rerere-autoupdate</code>`是一个很好的方法，在用单独的 `git <code>add</code> 提交结果到索引之前，可以反复检查 <code>rerere</code> 所做的事情，并抓住潜在的错误合并。</p>
 </dd>
 <dt class="hdlist1">--ignore-space-change</dt>
 <dt class="hdlist1">--ignore-whitespace</dt>
@@ -558,7 +579,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--include=&lt;路径&gt;</dt>
 <dt class="hdlist1">--reject</dt>
 <dd>
-<p>这些标志会传递给应用补丁的 "git apply"（见 <a href="git-apply.html"><b>git-apply</b>(1)</a>）程序。</p>
+<p>这些标志会传递给应用补丁的 "git apply"（见 <a href="git-apply.html">git-apply(1)</a>）程序。</p>
+<div class="paragraph">
+<p><code>--whitespace</code> 选项的有效 &lt;行为&gt; 有：<code>nowarn</code>、<code>warn</code>、<code>fix</code>、<code>error</code> 以及 <code>error-all</code>。</p>
+</div>
 </dd>
 <dt class="hdlist1">--patch-format</dt>
 <dd>
@@ -572,7 +596,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-n</dt>
 <dt class="hdlist1">--no-verify</dt>
 <dd>
-<p>默认情况下，会运行 pre-commit 和 commit-msg 钩子。当给出任何 <code>--no-verify</code> 或 <code>-n</code> 时，这些都会被绕过。参见链接 <a href="githooks.html"><b>githooks</b>(5)</a>。</p>
+<p>默认情况下，会运行 pre-commit 和 commit-msg 钩子。当给出任何 <code>--no-verify</code> 或 <code>-n</code> 时，这些都会被绕过。参见链接 <a href="githooks.html">githooks(5)</a>。</p>
 </dd>
 <dt class="hdlist1">--committer-date-is-author-date</dt>
 <dd>
@@ -609,6 +633,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--quit</dt>
 <dd>
 <p>中止打补丁的操作，但保留 HEAD 和索引不被接触。</p>
+</dd>
+<dt class="hdlist1">--retry</dt>
+<dd>
+<p>尝试再次应用最后冲突的补丁。这通常只在为重试尝试传递额外选项时有用（例如，<code>--3way</code>），否则你将再次看到相同的失败。</p>
 </dd>
 <dt class="hdlist1">--show-current-patch[=(diff|raw)]</dt>
 <dd>
@@ -654,7 +682,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>被认为是一个补丁的开始，提交日志信息在第一次出现这样的行之前就结束了。</p>
 </div>
 <div class="paragraph">
-<p>当最初调用 <code>git am</code> 时，你给了它要处理的邮箱的名字。 当看到第一个不适用的补丁时，它就会在中间中止。 你可以通过以下两种方式之一恢复：</p>
+<p>当最初调用 <code>git</code> <code>am</code> 时，你给了它要处理的邮箱的名字。 当看到第一个不适用的补丁时，它就会在中间中止。 你可以通过以下两种方式之一恢复：</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -667,7 +695,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ol>
 </div>
 <div class="paragraph">
-<p>在当前操作完成之前，该命令拒绝处理新的邮箱，所以如果你决定从头开始，在运行带有邮箱名称的命令之前，运行 <code>git am --abort</code>。</p>
+<p>在当前操作完成之前，该命令拒绝处理新的邮箱，所以如果你决定从头开始，在运行带有邮箱名称的命令之前，运行 <code>git</code> <code>am</code> <code>--abort</code>。</p>
 </div>
 <div class="paragraph">
 <p>在应用任何补丁之前，ORIG_HEAD 被设置为当前分支的顶端。 如果你在多个提交中遇到问题，比如在错误的分支上运行 <em>git am</em>，或者提交中的错误更容易通过改变邮箱来解决（比如 "From: " 行中的错误），这就很有用了。</p>
@@ -678,7 +706,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_钩子">钩子</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>这个命令可以运行 <code>applypatch-msg</code>, <code>pre-applypatch</code>, 和 <code>post-applypatch</code> 钩子。 更多信息见 <a href="githooks.html"><b>githooks</b>(5)</a>。</p>
+<p>这个命令可以运行 <code>applypatch-msg</code>, <code>pre-applypatch</code>, 和 <code>post-applypatch</code> 钩子。 更多信息见 <a href="githooks.html">githooks(5)</a>。</p>
 </div>
 </div>
 </div>
@@ -686,10 +714,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_配置">配置</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>本节中这一行以下的内容都是从 <a href="git-config.html"><b>git-config</b>(1)</a> 文档中摘录的。其内容与那里的内容相同：</p>
+<p>本节中这一行以下的内容都是从 <a href="git-config.html">git-config(1)</a> 文档中摘录的。其内容与那里的内容相同：</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-am.txt - include::config/am.txt[]</p>
+<p>Unresolved directive in git-am.adoc - include::config/am.adoc[]</p>
 </div>
 </div>
 </div>
@@ -697,7 +725,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-apply.html"><b>git-apply</b>(1)</a>, <a href="git-format-patch.html"><b>git-format-patch</b>(1)</a>.</p>
+<p><a href="git-apply.html">git-apply(1)</a>, <a href="git-format-patch.html">git-format-patch(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -705,14 +733,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:04 +0200
+Last updated 2025-03-23 12:03:50 +0100
 </div>
 </div>
 </body>

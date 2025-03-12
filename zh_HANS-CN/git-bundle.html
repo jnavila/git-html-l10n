@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-bundle(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -461,13 +462,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>创建、解包和操作 “打包” 文件。捆绑文件用于 Git 对象的 “离线” 传输，而不需要在网络连接的另一端有一个活跃的 “服务器”。</p>
 </div>
 <div class="paragraph">
-<p>它们可以用来创建仓库的增量和完全备份，并将一个仓库中的引用状态传递给另一个版本库。</p>
+<p>They can be used to create both incremental and full backups of a repository (see the "full backup" example in "EXAMPLES"), and to relay the state of the references in one repository to another (see the second example).</p>
 </div>
 <div class="paragraph">
-<p>通过 <code>ssh://</code> 和 <code>https://</code> 等协议获取或以其他方式 “读取” 的 Git 命令也可以对打包文件进行操作。它可以通过 <a href="git-clone.html"><b>git-clone</b>(1)</a> 从打包中建立新的仓库，用 <a href="git-fetch.html"><b>git-fetch</b>(1)</a> 从其中获取，并通过 <a href="git-ls-remote.html"><b>git-ls-remote</b>(1)</a> 列出其中的引用。没有相应的 "写" 支持，也就是说，不支持 <em>git push</em> 捆绑包。</p>
-</div>
-<div class="paragraph">
-<p>关于如何使用捆绑包的例子，见下面的 “实例” 部分。</p>
+<p>Git commands that fetch or otherwise "read" via protocols such as <code>ssh://</code> and <code>https://</code> can also operate on bundle files. It is possible <a href="git-clone.html">git-clone(1)</a> a new repository from a bundle, to use <a href="git-fetch.html">git-fetch(1)</a> to fetch from one, and to list the references contained within it with <a href="git-ls-remote.html">git-ls-remote(1)</a>. There&#8217;s no corresponding "write" support, i.e. a <em>git push</em> into a bundle is not supported.</p>
 </div>
 </div>
 </div>
@@ -475,19 +473,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_捆绑包格式">捆绑包格式</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>捆绑包是 <code>.pack</code> 文件（见 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a>），有一个标头说明捆绑包中包含哪些引用。</p>
+<p>捆绑包是 .<code>pack</code> 文件（见 <a href="git-pack-objects.html">git-pack-objects(1)</a>），有一个标头说明捆绑包中包含哪些引用。</p>
 </div>
 <div class="paragraph">
 <p>就像打包的归档格式本身一样，捆绑包既可以是独立的，也可以使用排除法创建。 参见下面的 "目标前提" 部分。</p>
 </div>
 <div class="paragraph">
-<p>使用修订版排除法创建的捆绑包是使用 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a> 的 <code>--thin</code> 选项创建的 “轻量包”，并使用 <a href="git-index-pack.html"><b>git-index-pack</b>(1)</a> 的 <code>--fix-thin</code> 选项解除捆绑。</p>
+<p>使用修订版排除法创建的捆绑包是使用 <a href="git-pack-objects.html">git-pack-objects(1)</a> 的 <code>--thin</code> 选项创建的 “轻量包”，并使用 <a href="git-index-pack.html">git-index-pack(1)</a> 的 <code>--fix-thin</code> 选项解除捆绑。</p>
 </div>
 <div class="paragraph">
 <p>在使用修订排除法时，没有创建 “复杂包” 的选项，用户不应该担心这种差异。通过使用 “轻量包”，使用排除法创建的捆绑文件尺寸较小。它们在引擎盖下是 “薄” 的，在此只是作为一种好奇，并作为其他文档的参考。</p>
 </div>
 <div class="paragraph">
-<p>更多细节见 <a href="gitformat-bundle.html"><b>gitformat-bundle</b>(5)</a> ，以及 <a href="gitformat-pack.html"><b>gitformat-pack</b>(5)</a> 中关于 “轻量包” 的讨论。</p>
+<p>更多细节见 <a href="gitformat-bundle.html">gitformat-bundle(5)</a> ，以及 <a href="gitformat-pack.html">gitformat-pack(5)</a> 中关于 “轻量包” 的讨论。</p>
 </div>
 </div>
 </div>
@@ -502,7 +500,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">verify &lt;文件&gt;</dt>
 <dd>
-<p>用于检查捆绑包文件是否有效，是否能干净地应用到当前仓库。 这包括对捆绑包格式本身的检查，以及检查前提提交是否存在，并在当前版本库中被完全链接。 然后，<em>git bundle</em> 会打印出一个缺失提交的列表，如果有的话。 最后，打印出关于额外能力的信息，比如 “对象过滤器”。更多信息见 <a href="gitformat-bundle.html"><b>gitformat-bundle</b>(5)</a> 中的 “能力”。成功时退出代码为零，但如果捆绑包文件无效，退出代码将为非零。如果 <em>file</em> 是 <code>-</code>，则从标准输入流读取捆绑包文件。</p>
+<p>用于检查捆绑包文件是否有效，是否能干净地应用到当前仓库。 这包括对捆绑包格式本身的检查，以及检查前提提交是否存在，并在当前版本库中被完全链接。 然后，<em>git bundle</em> 会打印出一个缺失提交的列表，如果有的话。 最后，打印出关于额外能力的信息，比如 “对象过滤器”。更多信息见 <a href="gitformat-bundle.html">gitformat-bundle(5)</a> 中的 “能力”。成功时退出代码为零，但如果捆绑包文件无效，退出代码将为非零。如果 <em>file</em> 是 <code>-</code>，则从标准输入流读取捆绑包文件。</p>
 </dd>
 <dt class="hdlist1">list-heads &lt;文件&gt;</dt>
 <dd>
@@ -514,7 +512,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">&lt;git-rev-list-args&gt;</dt>
 <dd>
-<p>一个参数列表，可以被 <em>git rev-parse</em> 和 <em>git rev-list</em> 接受（并包含一个命名的引用，见下面的 指定引用），它指定了要传送的特定对象和引用。 例如，<code>master~10...master</code> 会导致当前的主引用与自其第 10 次祖先提交后添加的所有对象一起被打包。 对于可以打包的引用和对象的数量没有明确的限制。</p>
+<p>一个参数列表，可以被 <em>git rev-parse</em> 和 <em>git rev-list</em> 接受（并包含一个命名的引用，见下面的 指定引用），它指定了要传送的特定对象和引用。 例如，<code>master~10</code><code>...</code><code>master</code> 会导致当前的主引用与自其第 10 次祖先提交后添加的所有对象一起被打包。 对于可以打包的引用和对象的数量没有明确的限制。</p>
 </dd>
 <dt class="hdlist1">[&lt;引用名&gt;&#8230;&#8203;]</dt>
 <dd>
@@ -541,13 +539,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_指定引用">指定引用</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>修订必须附有引用名称，才能打包成捆绑包。</p>
+<p>Revisions must be accompanied by reference names to be packaged in a bundle. Alternatively <code>--all</code> can be used to package all refs.</p>
 </div>
 <div class="paragraph">
 <p>可以打包一个以上的引用，也可以指定一组以上的先决条件对象。 被打包的对象是那些不包含在先决条件组合中的对象。</p>
 </div>
 <div class="paragraph">
-<p><em>git bundle create</em> 命令使用与 <code>git rev-parse --abbrev-ref=loose</code> 相同的规则为您解析引用名称。每个先决条件都可以明确指定（例如 <code>^master~10</code> ），或者隐含地指定（例如 <code>master~10...master</code>，<code>--since=10.days.ago master</code>）。</p>
+<p><em>git bundle create</em> 命令使用与 <code>git</code> <code>rev-parse</code> <code>--abbrev-ref=loose</code> 相同的规则为您解析引用名称。每个先决条件都可以明确指定（例如 <code>^master~10</code> ），或者隐含地指定（例如 <code>master~10</code><code>...</code><code>master</code>，<code>--since=10.days.ago</code> <code>master</code>）。</p>
 </div>
 <div class="paragraph">
 <p>所有这些简单的情况都没有问题（假设我们有一个 "master" 和 "next" 分支）：</p>
@@ -589,7 +587,7 @@ fatal: 拒绝产生空捆绑包。</pre>
 <p>在创建捆绑包时，可以创建一个独立的捆绑包，可以在没有共同历史的版本库中解绑，也可以提供负修订，以排除历史早期部分所需的对象。</p>
 </div>
 <div class="paragraph">
-<p>向 <code>git bundle create</code> 输入诸如`new&#8217;这样的修订版将创建一个捆绑包文件，其中包含所有从 <code>new</code> 修订版可以到达的对象。捆绑文件可以在任何版本库中解绑，以获得通往 <code>new</code> 版本的完整历史：</p>
+<p>向 <code>git</code> <code>bundle</code> <code>create</code> 输入诸如`new&#8217;这样的修订版将创建一个捆绑包文件，其中包含所有从 <code>new</code> 修订版可以到达的对象。捆绑文件可以在任何版本库中解绑，以获得通往 <code>new</code> 版本的完整历史：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -605,13 +603,13 @@ fatal: 拒绝产生空捆绑包。</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>一个没有任何先决条件的独立软件包可以被提取到任何地方，甚至可以提取到一个空的仓库中，或者被克隆出来（即 <code>new</code>，但不是 <code>old..new</code>）。</p>
+<p>一个没有任何先决条件的独立软件包可以被提取到任何地方，甚至可以提取到一个空的仓库中，或者被克隆出来（即 <code>new</code>，但不是 <code>old</code><code>..</code><code>new</code>）。</p>
 </div>
 <div class="paragraph">
 <p>谨慎行事是可以的，使捆绑文件包含已经在目的地的对象，因为在目的地解包时这些对象会被忽略。</p>
 </div>
 <div class="paragraph">
-<p>如果你想匹配 <code>git clone --mirror</code>，这将包括你的 refs 如 <code>refs/remotes/*</code>，使用 <code>--all</code>。 如果你想提供与直接从源码库克隆得到的相同的引用，使用 <code>--branches --tags</code> 作为 <code>&lt;git-rev-list-args&gt;</code>。</p>
+<p>If you want to provide the same set of refs that a clone directly from the source repository would get, use <code>--branches</code> <code>--tags</code> for the <em>&lt;git-rev-list-args&gt;</em>.</p>
 </div>
 <div class="paragraph">
 <p><em>git bundle verify</em> 命令可以用来检查你的接收库是否有一个捆绑包所需的先决条件提交。</p>
@@ -622,7 +620,39 @@ fatal: 拒绝产生空捆绑包。</pre>
 <h2 id="_实例">实例</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>假设你想把 A 机器上的版本库 R1 的历史记录转移到 B 机器上的另一个版本库 R2。由于某种原因，A 和 B 之间不允许直接连接，但我们可以通过某种机制（CD、电子邮件等）把数据从 A 转移到 B。 我们想用 R1 中的分支 master 上的开发来更新 R2。</p>
+<p>We&#8217;ll discuss two cases:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Taking a full backup of a repository</p>
+</li>
+<li>
+<p>Transferring the history of a repository to another machine when the two machines have no direct connection</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>First let&#8217;s consider a full backup of the repository. The following command will take a full backup of the repository in the sense that all refs are included in the bundle:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git bundle create backup.bundle --all</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But note again that this is only for the refs, i.e. you will only include refs and commits reachable from those refs. You will not include other local state, such as the contents of the index, working tree, the stash, per-repository configuration, hooks, etc.</p>
+</div>
+<div class="paragraph">
+<p>You can later recover that repository by using for example <a href="git-clone.html">git-clone(1)</a>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>$ git clone backup.bundle &lt;new directory&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For the next example, assume you want to transfer the history from a repository R1 on machine A to another repository R2 on machine B. For whatever reason, direct connection between A and B is not allowed, but we can move data from A to B via some mechanism (CD, email, etc.). We want to update R2 with development made on the branch master in R1.</p>
 </div>
 <div class="paragraph">
 <p>为了启动这个过程，你可以先创建一个没有任何先决条件的捆绑包。你可以使用一个标签来记住你最后处理的提交，以方便以后用增量的捆绑包来更新其他仓库：</p>
@@ -675,7 +705,7 @@ machineA$ git tag -f lastR2bundle master</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>如果你知道预期的接收库应该在哪次提交中拥有必要的对象，你可以用这些知识来指定先决条件，给出一个截止点来限制产生的捆绑包中的修订和对象。前面的例子为此使用了 lastR2bundle 标签，但你也可以使用任何其他选项，就像你给 <a href="git-log.html"><b>git-log</b>(1)</a> 命令的那样。这里有更多的例子：</p>
+<p>如果你知道预期的接收库应该在哪次提交中拥有必要的对象，你可以用这些知识来指定先决条件，给出一个截止点来限制产生的捆绑包中的修订和对象。前面的例子为此使用了 lastR2bundle 标签，但你也可以使用任何其他选项，就像你给 <a href="git-log.html">git-log(1)</a> 命令的那样。这里有更多的例子：</p>
 </div>
 <div class="paragraph">
 <p>你可以使用一个在两者中都存在的标签：</p>
@@ -702,7 +732,7 @@ machineA$ git tag -f lastR2bundle master</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>你可以运行 <code>git-bundle verify</code> 来看看你是否可以从一个用先决条件创建的包中提取：</p>
+<p>你可以运行 <code>git-bundle</code> <code>verify</code> 来看看你是否可以从一个用先决条件创建的包中提取：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -731,10 +761,24 @@ machineA$ git tag -f lastR2bundle master</pre>
 </div>
 </div>
 <div class="sect1">
+<h2 id="_讨论">讨论</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>A naive way to make a full backup of a repository is to use something to the effect of <code>cp</code> <code>-r</code> <em>&lt;repo&gt;</em> <em>&lt;destination&gt;</em>. This is discouraged since the repository could be written to during the copy operation. In turn some files at <em>&lt;destination&gt;</em> could be corrupted.</p>
+</div>
+<div class="paragraph">
+<p>This is why it is recommended to use Git tooling for making repository backups, either with this command or with e.g. <a href="git-clone.html">git-clone(1)</a>. But keep in mind that these tools will not help you backup state other than refs and commits. In other words they will not help you backup contents of the index, working tree, the stash, per-repository configuration, hooks, etc.</p>
+</div>
+<div class="paragraph">
+<p>See also <a href="gitfaq.html">gitfaq(7)</a>, section "TRANSFERS" for a discussion of the problems associated with file syncing across systems.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
 <h2 id="_文件格式">文件格式</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>参见 <a href="gitformat-bundle.html"><b>gitformat-bundle</b>(5)</a>。</p>
+<p>参见 <a href="gitformat-bundle.html">gitformat-bundle(5)</a>。</p>
 </div>
 </div>
 </div>
@@ -742,14 +786,14 @@ machineA$ git tag -f lastR2bundle master</pre>
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:05 +0200
+Last updated 2025-03-23 12:03:50 +0100
 </div>
 </div>
 </body>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-repack(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,7 +447,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git repack</em> [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m] [--window=&lt;n&gt;] [--depth=&lt;n&gt;] [--threads=&lt;n&gt;] [--keep-pack=&lt;包名&gt;] [--write-midx]</pre>
+<pre class="content"><em>git repack</em> [-a] [-A] [-d] [-f] [-F] [-l] [-n] [-q] [-b] [-m]
+        [--window=&lt;n&gt;] [--depth=&lt;n&gt;] [--threads=&lt;n&gt;] [--keep-pack=&lt;pack-name&gt;]
+        [--write-midx] [--name-hash-version=&lt;n&gt;]</pre>
 </div>
 </div>
 </div>
@@ -471,7 +474,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">-a</dt>
 <dd>
-<p>将所有引用对象打包成一个包，而不是逐步打包未打包的对象。 在打包用于私人开发的版本库时尤其有用。与 <code>-d</code> 一起使用。 这将清理 <code>git prune</code> 留下的对象，但 <code>git fsck --full --dangling</code> 显示为悬空。</p>
+<p>将所有引用对象打包成一个包，而不是逐步打包未打包的对象。 在打包用于私人开发的版本库时尤其有用。与 <code>-d</code> 一起使用。 这将清理 <code>git</code> <code>prune</code> 留下的对象，但 <code>git</code> <code>fsck</code> <code>--full</code> <code>--dangling</code> 显示为悬空。</p>
 <div class="paragraph">
 <p>请注意，通过哑协议获取的用户必须获取整个新数据包，才能获得其中包含的任何对象，无论他们本地已经拥有多少该数据包中的其他对象。</p>
 </div>
@@ -481,7 +484,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">-A</dt>
 <dd>
-<p>与 <code>-a</code> 相同，除非使用了 <code>-d</code>。 这样，以前的数据包中任何无法到达的对象都会变成松散的、未打包的对象，而不是留在旧数据包中。 即使在重新打包时，也不会有意将无法到达的对象添加到数据包中。 该选项可以防止无法到达的对象留在旧数据包中后被立即删除。 相反，松散的不可达对象将在下一次调用 <em>git gc</em> 时根据正常的过期规则进行修剪。参见 <a href="git-gc.html"><b>git-gc</b>(1)</a>。</p>
+<p>与 <code>-a</code> 相同，除非使用了 <code>-d</code>。 这样，以前的数据包中任何无法到达的对象都会变成松散的、未打包的对象，而不是留在旧数据包中。 即使在重新打包时，也不会有意将无法到达的对象添加到数据包中。 该选项可以防止无法到达的对象留在旧数据包中后被立即删除。 相反，松散的不可达对象将在下一次调用 <em>git gc</em> 时根据正常的过期规则进行修剪。参见 <a href="git-gc.html">git-gc(1)</a>。</p>
 </dd>
 <dt class="hdlist1">-d</dt>
 <dd>
@@ -489,56 +492,56 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--cruft</dt>
 <dd>
-<p>与 <code>-a</code> 相同，除非使用了 <code>-d</code>。然后，任何无法访问的对象都会被打包到一个单独的压缩包中。无法访问的对象可以在下一次调用 <code>git gc</code> 时使用正常的过期规则进行剪枝（参见 <a href="git-gc.html"><b>git-gc</b>(1)</a>）。与 <code>-k</code> 不兼容。</p>
+<p>与 <code>-a</code> 相同，除非使用了 <code>-d</code>。然后，任何无法访问的对象都会被打包到一个单独的压缩包中。无法访问的对象可以在下一次调用 <code>git</code> <code>gc</code> 时使用正常的过期规则进行剪枝（参见 <a href="git-gc.html">git-gc(1)</a>）。与 <code>-k</code> 不兼容。</p>
 </dd>
 <dt class="hdlist1">--cruft-expiration=&lt;近似值&gt;</dt>
 <dd>
-<p>立即过期超过 <code>&lt;approxidate&gt;</code> 的不可访问对象，而不是等待下一次调用 <code>git gc</code>。 仅在使用 <code>--cruft -d</code> 选项时有用。</p>
+<p>立即过期超过 <em>&lt;approxidate&gt;</em> 的不可访问对象，而不是等待下一次调用 <code>git</code> <code>gc</code>。 仅在使用 <code>--cruft</code> <code>-d</code> 选项时有用。</p>
 </dd>
 <dt class="hdlist1">--max-cruft-size=&lt;n&gt;</dt>
 <dd>
-<p>在创建新的数据包之前，会先将 Cruft 物件重新打包到大小为 <code>&lt;n&gt;</code> 字节的数据包中。只要有足够的小于 <code>&lt;n&gt;</code> 的 Cruft 包，重新打包将导致创建一个新的 Cruft 包，其中包含来自任何合并 Cruft 包的对象，以及任何新的无法访问的对象。大于 <code>&lt;n&gt;</code> 的压缩包不会被修改。当新的 Cruft 包大于 <code>&lt;n&gt;</code> 字节时，它将被拆分成多个包，所有包的大小保证最多为 <code>&lt;n&gt;</code> 字节。仅在使用 <code>--cruft -d</code> 时有用。</p>
+<p>在创建新的数据包之前，会先将 Cruft 物件重新打包到大小为 <em>&lt;n&gt;</em> 字节的数据包中。只要有足够的小于 <em>&lt;n&gt;</em> 的 Cruft 包，重新打包将导致创建一个新的 Cruft 包，其中包含来自任何合并 Cruft 包的对象，以及任何新的无法访问的对象。大于 <em>&lt;n&gt;</em> 的压缩包不会被修改。当新的 Cruft 包大于 <em>&lt;n&gt;</em> 字节时，它将被拆分成多个包，所有包的大小保证最多为 <em>&lt;n&gt;</em> 字节。仅在使用 <code>--cruft</code> <code>-d</code> 时有用。</p>
 </dd>
 <dt class="hdlist1">--expire-to=&lt;目录&gt;</dt>
 <dd>
-<p>将包含修剪对象（如果有）的压缩包写入目录 <code>&lt;路径&gt;</code>。该选项可用于在单独的目录中保留剪枝对象的副本作为备份。仅在使用 <code>--cruft -d</code> 时有用。</p>
+<p>将包含修剪对象（如果有）的压缩包写入目录 &lt;路径&gt;。该选项可用于在单独的目录中保留剪枝对象的副本作为备份。仅在使用 <code>--cruft</code> <code>-d</code> 时有用。</p>
 </dd>
 <dt class="hdlist1">-l</dt>
 <dd>
-<p>向 <em>git pack-objects</em> 传递 <code>--local</code> 选项。参见 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a>。</p>
+<p>向 <em>git pack-objects</em> 传递 <code>--local</code> 选项。参见 <a href="git-pack-objects.html">git-pack-objects(1)</a>。</p>
 </dd>
 <dt class="hdlist1">-f</dt>
 <dd>
-<p>向 <code>git-pack-objects</code> 传递 <code>--no-reuse-delta</code> 选项，参见 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a>。</p>
+<p>向 <code>git-pack-objects</code> 传递 <code>--no-reuse-delta</code> 选项，参见 <a href="git-pack-objects.html">git-pack-objects(1)</a>。</p>
 </dd>
 <dt class="hdlist1">-F</dt>
 <dd>
-<p>向 <code>git-pack-objects</code> 传递 <code>--no-reuse-object</code> 选项，参见 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a>。</p>
+<p>向 <code>git-pack-objects</code> 传递 <code>--no-reuse-object</code> 选项，参见 <a href="git-pack-objects.html">git-pack-objects(1)</a>。</p>
 </dd>
 <dt class="hdlist1">-q</dt>
 <dt class="hdlist1">--quiet</dt>
 <dd>
-<p>在标准错误流中不显示进度，并向 <em>git pack-objects</em> 传递 <code>-q</code> 选项。参见 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a>。</p>
+<p>在标准错误流中不显示进度，并向 <em>git pack-objects</em> 传递 <code>-q</code> 选项。参见 <a href="git-pack-objects.html">git-pack-objects(1)</a>。</p>
 </dd>
 <dt class="hdlist1">-n</dt>
 <dd>
-<p>不使用 <em>git update-server-info</em> 更新服务器信息。 该选项会跳过更新通过 HTTP 或 FTP 发布该仓库（或其直接副本）所需的本地目录文件。 参见 <a href="git-update-server-info.html"><b>git-update-server-info</b>(1)</a>。</p>
+<p>不使用 <em>git update-server-info</em> 更新服务器信息。 该选项会跳过更新通过 HTTP 或 FTP 发布该仓库（或其直接副本）所需的本地目录文件。 参见 <a href="git-update-server-info.html">git-update-server-info(1)</a>。</p>
 </dd>
 <dt class="hdlist1">--window=&lt;n&gt;</dt>
 <dt class="hdlist1">--depth=&lt;n&gt;</dt>
 <dd>
-<p>这两个选项会影响如何使用 delta 压缩来存储数据包中的对象。对象首先会按类型、大小和可选名称进行内部排序，然后与 <code>--window`中的其他对象进行比较，以确定使用 delta 压缩是否能节省空间。</code>--depth` 限制了 delta 深度的最大值；过深会影响解包器的性能，因为需要多次应用 delta 数据才能找到所需的对象。</p>
+<p>这两个选项会影响如何使用 delta 压缩来存储数据包中的对象。对象首先会按类型、大小和可选名称进行内部排序，然后与 <code>--window</code>`中的其他对象进行比较，以确定使用 <code>delta</code> 压缩是否能节省空间。--depth` 限制了 delta 深度的最大值；过深会影响解包器的性能，因为需要多次应用 delta 数据才能找到所需的对象。</p>
 <div class="paragraph">
 <p>--window 的默认值为 10，--depth 的默认值为 50。最大深度为 4095。</p>
 </div>
 </dd>
 <dt class="hdlist1">--threads=&lt;n&gt;</dt>
 <dd>
-<p>该选项将传递给 <code>git pack-objects</code>。</p>
+<p>该选项将传递给 <code>git</code> <code>pack-objects</code>。</p>
 </dd>
 <dt class="hdlist1">--window-memory=&lt;n&gt;</dt>
 <dd>
-<p>该选项在 <code>--window</code> 的基础上提供了额外的限制；窗口大小会动态缩减，以避免占用超过 <em>&lt;n&gt;</em> 字节的内存。 这对于大小对象混杂的版本库非常有用，既不会因为窗口过大而耗尽内存，又能利用大窗口处理小对象。 大小后缀可以是 "k"、"m" 或 "g"。<code>--window-memory=0</code> 表示内存使用不受限制。 默认值取自 <code>pack.windowMemory</code> 配置变量。 请注意，实际内存使用量将是 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a> 使用的线程数乘以限制值。</p>
+<p>该选项在 <code>--window</code> 的基础上提供了额外的限制；窗口大小会动态缩减，以避免占用超过 <em>&lt;n&gt;</em> 字节的内存。 这对于大小对象混杂的版本库非常有用，既不会因为窗口过大而耗尽内存，又能利用大窗口处理小对象。 大小后缀可以是 "k"、"m" 或 "g"。<code>--window-memory=0</code> 表示内存使用不受限制。 默认值取自 <code>pack.windowMemory</code> 配置变量。 请注意，实际内存使用量将是 <a href="git-pack-objects.html">git-pack-objects(1)</a> 使用的线程数乘以限制值。</p>
 </dd>
 <dt class="hdlist1">--max-pack-size=&lt;n&gt;</dt>
 <dd>
@@ -546,11 +549,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--filter=&lt;过滤器定义&gt;</dt>
 <dd>
-<p>从生成的包文件中移除符合过滤规范的对象，并将其放入一个单独的包文件中。请注意，工作目录中使用的对象不会被过滤掉。因此，要使拆分完全有效，最好在裸 仓库中执行拆分，并将 <code>-a</code> 和 <code>-d</code> 选项与此选项一起使用。 此外，还应使用 <code>--no-write-bitmap-index</code>（或将 <code>repack.writebitmaps</code> 配置选项设为 <code>false</code>），否则写入位图索引会失败，因为它假定只有一个包文件包含所有对象。有关有效的 <code>&lt;filter-spec&gt;</code> 形式，请参见 <a href="git-rev-list.html"><b>git-rev-list</b>(1)</a>。</p>
+<p>从生成的包文件中移除符合过滤规范的对象，并将其放入一个单独的包文件中。请注意，工作目录中使用的对象不会被过滤掉。因此，要使拆分完全有效，最好在裸 仓库中执行拆分，并将 <code>-a</code> 和 <code>-d</code> 选项与此选项一起使用。 此外，还应使用 <code>--no-write-bitmap-index</code>（或将 <code>repack.writebitmaps</code> 配置选项设为 <code>false</code>），否则写入位图索引会失败，因为它假定只有一个包文件包含所有对象。有关有效的 <em>&lt;filter-spec&gt;</em> 形式，请参见 <a href="git-rev-list.html">git-rev-list(1)</a>。</p>
 </dd>
 <dt class="hdlist1">--filter-to=&lt;目录&gt;</dt>
 <dd>
-<p>将包含筛选出的对象的数据包写入目录 <code>&lt;目录&gt;</code>。仅在使用 <code>--filter</code> 时有用。这可用于将数据包放在通过 Git 替代机制访问的单独对象目录中。<strong>警告：</strong> 如果包含过滤掉的对象的包文件无法访问，则 repo 可能会损坏，因为可能无法访问该包文件的对象。请参阅 <a href="gitrepository-layout.html"><b>gitrepository-layout</b>(5)</a> 的 <code>objects</code> 和 <code>objects/info/alternates</code> 部分。</p>
+<p>将包含筛选出的对象的数据包写入目录 &lt;目录&gt;。仅在使用 <code>--filter</code> 时有用。这可用于将数据包放在通过 Git 替代机制访问的单独对象目录中。<strong>警告：</strong> 如果包含过滤掉的对象的包文件无法访问，则 repo 可能会损坏，因为可能无法访问该包文件的对象。请参阅 <a href="gitrepository-layout.html">gitrepository-layout(5)</a> 的 <code>objects</code> 和 <code>objects/info/alternates</code> 部分。</p>
 </dd>
 <dt class="hdlist1">-b</dt>
 <dt class="hdlist1">--write-bitmap-index</dt>
@@ -559,15 +562,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--pack-kept-objects</dt>
 <dd>
-<p>重新打包时将对象包含在 <code>.keep</code> 文件中。 请注意，在 <code>pack-objects</code> 完成后，我们仍不会删除 <code>.keep</code> 包。 这意味着我们可能会重复对象，但这使得该选项在有并发推送或获取时可以安全使用。 通常只有在使用 <code>-b</code> 或 <code>repack.writeBitmaps</code> 编写位图时，该选项才会有用，因为它可以确保位图包文件中包含必要的对象。</p>
+<p>重新打包时将对象包含在 .<code>keep</code> 文件中。 请注意，在 <code>pack-objects</code> 完成后，我们仍不会删除 .<code>keep</code> 包。 这意味着我们可能会重复对象，但这使得该选项在有并发推送或获取时可以安全使用。 通常只有在使用 <code>-b</code> 或 <code>repack.writeBitmaps</code> 编写位图时，该选项才会有用，因为它可以确保位图包文件中包含必要的对象。</p>
 </dd>
 <dt class="hdlist1">--keep-pack=&lt;包名&gt;</dt>
 <dd>
-<p>将给定的软件包排除在重新打包之外。这相当于在软件包中加入 <code>.keep</code> 文件。<code>&lt;包名&gt;`是软件包文件名，不含前导目录（如 `pack-123.pack</code>）。 可多次指定该选项以保留多个软件包。</p>
+<p>将给定的软件包排除在重新打包之外。这相当于在软件包中加入 .<code>keep</code> 文件。&lt;包名&gt;`是软件包文件名，不含前导目录（如 `pack-123.<code>pack</code>）。 可多次指定该选项以保留多个软件包。</p>
 </dd>
 <dt class="hdlist1">--unpack-unreachable=&lt;何时&gt;</dt>
 <dd>
-<p>当松动无法访问的对象时，不要费心松动任何早于 <code>&lt;时候&gt;`的对象。这可以用来优化写入对象的过程，因为后续的 `git prune</code> 会立即剪枝这些对象。</p>
+<p>当松动无法访问的对象时，不要费心松动任何早于 &lt;时候&gt;`的对象。这可以用来优化写入对象的过程，因为后续的 `git <code>prune</code> 会立即剪枝这些对象。</p>
 </dd>
 <dt class="hdlist1">-k</dt>
 <dt class="hdlist1">--keep-unreachable</dt>
@@ -577,14 +580,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-i</dt>
 <dt class="hdlist1">--delta-islands</dt>
 <dd>
-<p>向 <code>git-pack-objects</code> 传递 <code>--delta-islands</code> 选项，参见 <a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a>。</p>
+<p>向 <code>git-pack-objects</code> 传递 <code>--delta-islands</code> 选项，参见 <a href="git-pack-objects.html">git-pack-objects(1)</a>。</p>
 </dd>
 <dt class="hdlist1">-g&lt;条件&gt;</dt>
 <dt class="hdlist1">--geometric=&lt;条件&gt;</dt>
 <dd>
-<p>排列生成的数据包结构，使每个连续的数据包包含的对象数量至少是下一个最大数据包的 <code>&lt;条件&gt;</code> 倍。</p>
+<p>排列生成的数据包结构，使每个连续的数据包包含的对象数量至少是下一个最大数据包的 &lt;条件&gt; 倍。</p>
 <div class="paragraph">
-<p><code>git repack</code> 通过 “切割” 需要重新打包成一个的文件包来确保几何级数的增长。它会挑选最小的文件包集合，以便尽可能多地保留较大的文件包（按该文件包所含对象的数量计算）。</p>
+<p><code>git</code> <code>repack</code> 通过 “切割” 需要重新打包成一个的文件包来确保几何级数的增长。它会挑选最小的文件包集合，以便尽可能多地保留较大的文件包（按该文件包所含对象的数量计算）。</p>
 </div>
 <div class="paragraph">
 <p>与其他重新包装模式不同的是，需要包装的对象集是由 “卷起” 的包装集唯一决定的；换句话说，为了恢复几何级数，确定需要组合的包装。</p>
@@ -593,13 +596,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>松散对象隐含在此 “滚动” 中，而不考虑它们的可达性。今后可能会有变化。</p>
 </div>
 <div class="paragraph">
-<p>在编写多包位图时，<code>git repack</code> 会选择生成的最大包作为 MIDX 选择对象的首选包（参见 <a href="git-multi-pack-index.html"><b>git-multi-pack-index</b>(1)</a>）。</p>
+<p>在编写多包位图时，<code>git</code> <code>repack</code> 会选择生成的最大包作为 MIDX 选择对象的首选包（参见 <a href="git-multi-pack-index.html">git-multi-pack-index(1)</a>）。</p>
 </div>
 </dd>
 <dt class="hdlist1">-m</dt>
 <dt class="hdlist1">--write-midx</dt>
 <dd>
-<p>编写包含非冗余软件包的多软件包索引（参见 <a href="git-multi-pack-index.html"><b>git-multi-pack-index</b>(1)</a>）。</p>
+<p>编写包含非冗余软件包的多软件包索引（参见 <a href="git-multi-pack-index.html">git-multi-pack-index(1)</a>）。</p>
+</dd>
+<dt class="hdlist1">--name-hash-version=&lt;n&gt;</dt>
+<dd>
+<p>Provide this argument to the underlying <code>git</code> <code>pack-objects</code> process. See <a href="git-pack-objects.html">git-pack-objects(1)</a> for full details.</p>
 </dd>
 </dl>
 </div>
@@ -609,7 +616,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_配置">配置</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>各种配置变量会影响打包，参见 <a href="git-config.html"><b>git-config</b>(1)</a> (搜索 "pack" 和 "delta")。</p>
+<p>各种配置变量会影响打包，参见 <a href="git-config.html">git-config(1)</a> (搜索 "pack" 和 "delta")。</p>
 </div>
 <div class="paragraph">
 <p>默认情况下，该命令会在 <em>git pack-objects</em> 中传递 <code>--delta-base-offset</code> 选项；这通常会导致生成的数据包略小，但生成的数据包与版本 1.4.4 以上的 Git 版本不兼容。如果你需要直接或通过笨重的 http 协议与这些古老的 Git 版本共享你的仓库，那么你需要将配置变量 <code>repack.UseDeltaBaseOffset</code> 设为 "false"，然后重新打包。通过本地协议访问旧版本的 Git 不受此选项影响，因为在这种情况下，转换是根据需要即时进行的。</p>
@@ -623,7 +630,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-pack-objects.html"><b>git-pack-objects</b>(1)</a> <a href="git-prune-packed.html"><b>git-prune-packed</b>(1)</a></p>
+<p><a href="git-pack-objects.html">git-pack-objects(1)</a> <a href="git-prune-packed.html">git-prune-packed(1)</a></p>
 </div>
 </div>
 </div>
@@ -631,14 +638,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:07 +0200
+Last updated 2025-03-23 12:03:54 +0100
 </div>
 </div>
 </body>

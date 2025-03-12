@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-am(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -449,13 +450,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="content"><em>git am</em> [--signoff] [--keep] [--[no-]keep-cr] [--[no-]utf8] [--no-verify]
          [--[no-]3way] [--interactive] [--committer-date-is-author-date]
          [--ignore-date] [--ignore-space-change | --ignore-whitespace]
-         [--whitespace=&lt;ação&gt;] [-C&lt;n&gt;] [-p&lt;n&gt;] [--directory=&lt;dir&gt;]
-         [--exclude=&lt;caminho&gt;] [--include=&lt;caminho&gt;] [--reject] [-q | --quiet]
-         [--[no-]scissors] [-S[&lt;keyid&gt;]] [--patch-format=&lt;formato&gt;]
-         [--quoted-cr=&lt;ação&gt;]
+         [--whitespace=&lt;action&gt;] [-C&lt;n&gt;] [-p&lt;n&gt;] [--directory=&lt;dir&gt;]
+         [--exclude=&lt;path&gt;] [--include=&lt;path&gt;] [--reject] [-q | --quiet]
+         [--[no-]scissors] [-S[&lt;keyid&gt;]] [--patch-format=&lt;format&gt;]
+         [--quoted-cr=&lt;action&gt;]
          [--empty=(stop|drop|keep)]
          [(&lt;mbox&gt; | &lt;Maildir&gt;)&#8230;&#8203;]
-<em>git am</em> (--continue | --skip | --abort | --quit | --show-current-patch[=(diff|raw)]) | --allow-empty)</pre>
+<em>git am</em> (--continue | --skip | --abort | --quit | --retry | --show-current-patch[=(diff|raw)] | --allow-empty)</pre>
 </div>
 </div>
 </div>
@@ -463,7 +464,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_descrição">DESCRIÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Divide as mensagens de correio num mailbox dentro das mensagens do registro log do commit, as informações de autoria, os patches e as aplica ao ramo atual. Você poderia pensar nisso como uma operação reversa do <a href="git-format-patch.html"><b>git-format-patch</b>(1)</a> executado num ramo com um histórico direto e sem mesclagens.</p>
+<p>Divide as mensagens de correio num mailbox dentro das mensagens do registro log do commit, as informações de autoria, os patches e as aplica ao ramo atual. Você poderia pensar nisso como uma operação reversa do <a href="git-format-patch.html">git-format-patch(1)</a> executado num ramo com um histórico direto e sem mesclagens.</p>
 </div>
 </div>
 </div>
@@ -479,42 +480,62 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--signoff</dt>
 <dd>
-<p>Adicione um trailer <code>Signed-off-by</code> à mensagem do commit, usando a sua identidade de committer. Consulte a opção signoff do comando <a href="git-commit.html"><b>git-commit</b>(1)</a> para obter mais informações.</p>
+<p>Adicione um trailer <code>Signed-off-by</code> à mensagem do commit, usando a sua identidade de committer. Consulte a opção signoff do comando <a href="git-commit.html">git-commit(1)</a> para obter mais informações.</p>
 </dd>
 <dt class="hdlist1">-k</dt>
 <dt class="hdlist1">--keep</dt>
 <dd>
-<p>Repasse o comando <code>-k</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>).</p>
+<p>Repasse o comando <code>-k</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
 </dd>
 <dt class="hdlist1">--keep-non-patch</dt>
 <dd>
-<p>Repasse o comando <code>-b</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>).</p>
+<p>Repasse o comando <code>-b</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
 </dd>
 <dt class="hdlist1">--[no-]keep-cr</dt>
 <dd>
-<p>Com <code>--keep-cr</code>, invoque o comando <em>git mailsplit</em> (consulte <a href="git-mailsplit.html"><b>git-mailsplit</b>(1)</a>) com a mesma opção, para evitar que ele remova o caractere "CR" no final das linhas. A variável de configuração <code>am.keepcr</code> pode ser usada para especificar o comportamento padrão. A opção <code>--no-keep-cr</code> é útil para sobrepor os valores em <code>am.keepcr</code>.</p>
+<p>Com <code>--keep-cr</code>, invoque o comando <em>git mailsplit</em> (consulte <a href="git-mailsplit.html">git-mailsplit(1)</a>) com a mesma opção, para evitar que ele remova o caractere "CR" no final das linhas. A variável de configuração <code>am.keepcr</code> pode ser usada para especificar o comportamento padrão. A opção <code>--no-keep-cr</code> é útil para sobrepor os valores em <code>am.keepcr</code>.</p>
 </dd>
 <dt class="hdlist1">-c</dt>
 <dt class="hdlist1">--scissors</dt>
 <dd>
-<p>Remova tudo no corpo antes de uma linha "scissors" (tesouras) (see <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>). Pode ser ativada de fora predefinida ao utilizar a variável de configuração <code>mailinfo.scissors</code>.</p>
+<p>Remova tudo no corpo antes de uma linha "scissors" (tesouras) (see <a href="git-mailinfo.html">git-mailinfo(1)</a>). Pode ser ativada de fora predefinida ao utilizar a variável de configuração <code>mailinfo.scissors</code>.</p>
 </dd>
 <dt class="hdlist1">--no-scissors</dt>
 <dd>
-<p>Ignore linhas "scissors" (tesouras) (veja <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>).</p>
+<p>Ignore linhas "scissors" (tesouras) (veja <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
 </dd>
 <dt class="hdlist1">--quoted-cr=&lt;ação&gt;</dt>
 <dd>
-<p>Esta opção será passada ao comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>).</p>
+<p>Esta opção será passada ao comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
 </dd>
-<dt class="hdlist1">--empty=(stop|drop|keep)</dt>
+<dt class="hdlist1">--empty=(drop|keep|stop)</dt>
 <dd>
-<p>É predefinido que ou quando a opção é definida como "stop", o comando gera um erro numa mensagem de e-mail de entrada que não tem um patch e para no meio da sessão atual do "am". Quando essa opção estiver definida como <em>drop</em>, ignore essa mensagem de e-mail. Quando essa opção estiver definida como <em>keep</em>, criará um commit vazio, registrando o conteúdo da mensagem de e-mail como o seu registro log.</p>
+<p>How to handle an e-mail message lacking a patch:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>drop</code></dt>
+<dd>
+<p>The e-mail message will be skipped.</p>
+</dd>
+<dt class="hdlist1"><code>keep</code></dt>
+<dd>
+<p>An empty commit will be created, with the contents of the e-mail message as its log.</p>
+</dd>
+<dt class="hdlist1"><code>stop</code></dt>
+<dd>
+<p>The command will fail, stopping in the middle of the current <code>am</code> session. This is the default behavior.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
 </dd>
 <dt class="hdlist1">-m</dt>
 <dt class="hdlist1">--message-id</dt>
 <dd>
-<p>Use a opção <code>-m</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>), para que o cabeçalho "Message-ID" seja adicionado à mensagem do commit. A variável de configuração <code>am.messageid</code> pode ser usada para especificar o comportamento padrão.</p>
+<p>Use a opção <code>-m</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html">git-mailinfo(1)</a>), para que o cabeçalho "Message-ID" seja adicionado à mensagem do commit. A variável de configuração <code>am.messageid</code> pode ser usada para especificar o comportamento padrão.</p>
 </dd>
 <dt class="hdlist1">--no-message-id</dt>
 <dd>
@@ -528,25 +549,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-u</dt>
 <dt class="hdlist1">--utf8</dt>
 <dd>
-<p>Use a sinalização <code>-u</code> para o <em>git mailinfo</em> (consulte <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>). A mensagem proposta do registro log do commit, extraída do e-mail, é recodificada para UTF-8 (a variável de configuração <code>i18n.commitEncoding</code> pode ser usada para definir a codificação preferida do projeto, caso ela não seja UTF-8).</p>
+<p>Use a sinalização <code>-u</code> para o <em>git mailinfo</em> (consulte <a href="git-mailinfo.html">git-mailinfo(1)</a>). A mensagem proposta do registro log do commit, extraída do e-mail, é recodificada para UTF-8 (a variável de configuração <code>i18n.commitEncoding</code> pode ser usada para definir a codificação preferida do projeto, caso ela não seja UTF-8).</p>
 <div class="paragraph">
 <p>Isso era opcional nas versões anteriores do git, agora é a predefinição inicial. É possível usar <code>--no-utf8</code> para sobrepor isso.</p>
 </div>
 </dd>
 <dt class="hdlist1">--no-utf8</dt>
 <dd>
-<p>Repasse o comando <code>-n</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html"><b>git-mailinfo</b>(1)</a>).</p>
+<p>Repasse o comando <code>-n</code> para o comando <em>git mailinfo</em> (consulte <a href="git-mailinfo.html">git-mailinfo(1)</a>).</p>
 </dd>
 <dt class="hdlist1">-3</dt>
 <dt class="hdlist1">--3way</dt>
 <dt class="hdlist1">--no-3way</dt>
 <dd>
-<p>Quando o patch não for aplicado corretamente, use a mesclagem de 3 vias caso o patch registre a identidade das bolhas aos quais devem ser aplicadas disponibilizando-as localmente. A opção <code>--no-3way</code> pode ser utilizada para substituir uma variável de configuração de três vias. Para mais informações, consulte <code>am.threeWay</code> em <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p>Quando o patch não for aplicado corretamente, use a mesclagem de 3 vias caso o patch registre a identidade das bolhas aos quais devem ser aplicadas disponibilizando-as localmente. A opção <code>--no-3way</code> pode ser utilizada para substituir uma variável de configuração de três vias. Para mais informações, consulte <code>am.threeWay</code> em <a href="git-config.html">git-config(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--rerere-autoupdate</dt>
 <dt class="hdlist1">--no-rerere-autoupdate</dt>
 <dd>
-<p>Depois que o mecanismo <em>rerere</em> reutilizar uma resolução registrada no conflito atual para atualizar os arquivos na árvore de trabalho, permita que ele também atualize o índice com o resultado da resolução. A opção <code>--no-rerere-autoupdate</code> é uma boa maneira de verificar novamente o que o <code>rerere</code> fez e detectar possíveis erros de mesclagem, antes de fazer o commit resultante no índice com um comando <code>git add</code> separado.</p>
+<p>Depois que o mecanismo <em>rerere</em> reutilizar uma resolução registrada no conflito atual para atualizar os arquivos na árvore de trabalho, permita que ele também atualize o índice com o resultado da resolução. A opção <code>--no-rerere-autoupdate</code> é uma boa maneira de verificar novamente o que o <code>rerere</code> fez e detectar possíveis erros de mesclagem, antes de fazer o commit resultante no índice com um comando <code>git</code> <code>add</code> separado.</p>
 </dd>
 <dt class="hdlist1">--ignore-space-change</dt>
 <dt class="hdlist1">--ignore-whitespace</dt>
@@ -558,7 +579,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--include=&lt;caminho&gt;</dt>
 <dt class="hdlist1">--reject</dt>
 <dd>
-<p>Estas opções são usadas pelo comando <em>git apply</em> (consulte <a href="git-apply.html"><b>git-apply</b>(1)</a>) que aplica a correção.</p>
+<p>Estas opções são usadas pelo comando <em>git apply</em> (consulte <a href="git-apply.html">git-apply(1)</a>) que aplica a correção.</p>
+<div class="paragraph">
+<p>Valid &lt;action&gt; for the <code>--whitespace</code> option are: <code>nowarn</code>, <code>warn</code>, <code>fix</code>, <code>error</code>, and <code>error-all</code>.</p>
+</div>
 </dd>
 <dt class="hdlist1">--patch-format</dt>
 <dd>
@@ -572,7 +596,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-n</dt>
 <dt class="hdlist1">--no-verify</dt>
 <dd>
-<p>É predefinido que os ganchos <em>pre-applypatch</em> e <em>applypatch-msg</em> sejam executados. Quando qualquer uma das opções <code>--no-verify</code> ou <code>-n</code> é usado, elas são ignoradas. Consulte também <a href="githooks.html"><b>githooks</b>(5)</a>.</p>
+<p>É predefinido que os ganchos <em>pre-applypatch</em> e <em>applypatch-msg</em> sejam executados. Quando qualquer uma das opções <code>--no-verify</code> ou <code>-n</code> é usado, elas são ignoradas. Consulte também <a href="githooks.html">githooks(5)</a>.</p>
 </dd>
 <dt class="hdlist1">--committer-date-is-author-date</dt>
 <dd>
@@ -604,15 +628,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--abort</dt>
 <dd>
-<p>Restaura o ramo original e aborta a operação de aplicação de correções (patches). Reverter o conteúdo dos arquivos envolvidos na operação <code>git am</code> para o estado anterior à <code>git am</code>.</p>
+<p>Restaura o ramo original e aborta a operação de aplicação de correções (patches). Reverter o conteúdo dos arquivos envolvidos na operação <code>git</code> <code>am</code> para o estado anterior à <code>git</code> <code>am</code>.</p>
 </dd>
 <dt class="hdlist1">--quit</dt>
 <dd>
 <p>Anule a operação de correção, porém mantenha o <code>HEAD</code> e o índice inalterados.</p>
 </dd>
+<dt class="hdlist1">--retry</dt>
+<dd>
+<p>Try to apply the last conflicting patch again. This is generally only useful for passing extra options to the retry attempt (e.g., <code>--3way</code>), since otherwise you&#8217;ll just see the same failure again.</p>
+</dd>
 <dt class="hdlist1">--show-current-patch[=(diff|raw)]</dt>
 <dd>
-<p>Mostra a mensagem onde o comando <code>git am</code> foi interrompido devido a conflitos. Se <code>raw</code> for usado, mostrará o conteúdo bruto da mensagem de e-mail; já <code>diff</code>, mostrará apenas a diferença. A predefinição é <code>raw</code>.</p>
+<p>Mostra a mensagem onde o comando <code>git</code> <code>am</code> foi interrompido devido a conflitos. Se <code>raw</code> for usado, mostrará o conteúdo bruto da mensagem de e-mail; já <code>diff</code>, mostrará apenas a diferença. A predefinição é <code>raw</code>.</p>
 </dd>
 <dt class="hdlist1">--allow-empty</dt>
 <dd>
@@ -654,7 +682,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>é tomado como o início de um patch, a mensagem do registro log do commit é finalizado antes da primeira ocorrência de tal linha.</p>
 </div>
 <div class="paragraph">
-<p>Ao invocar inicialmente o <code>git am</code>, você fornece a ele os nomes das caixas de correio QUE SERÃO processadas. Ao ver o primeiro patch que não É POSSÍVEL APLICAR, ele é interrompido no meio. Você pode se recuperar dessa situação de duas maneiras:</p>
+<p>Ao invocar inicialmente o <code>git</code> <code>am</code>, você fornece a ele os nomes das caixas de correio QUE SERÃO processadas. Ao ver o primeiro patch que não É POSSÍVEL APLICAR, ele é interrompido no meio. Você pode se recuperar dessa situação de duas maneiras:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -667,10 +695,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </ol>
 </div>
 <div class="paragraph">
-<p>O comando se recusa a processar as novas caixas de correio até que a operação atual seja concluída, portanto, caso decida recomeçar do zero, execute o comando <code>git am --abort</code> antes de executar o comando com os nomes das caixas de correio.</p>
+<p>O comando se recusa a processar as novas caixas de correio até que a operação atual seja concluída, portanto, caso decida recomeçar do zero, execute o comando <code>git</code> <code>am</code> <code>--abort</code> antes de executar o comando com os nomes das caixas de correio.</p>
 </div>
 <div class="paragraph">
-<p>Antes que qualquer correção seja aplicada, ORIG_HEAD é definido como a ponta do ramo atual. Isso é útil se você tiver problemas com vários commits, como a execução do <code>git am</code> no ramo errado ou um erro nos commits que seja mais facilmente corrigido com a alteração da caixa de correio (por exemplo, erros nas linhas "From:").</p>
+<p>Antes que qualquer correção seja aplicada, ORIG_HEAD é definido como a ponta do ramo atual. Isso é útil se você tiver problemas com vários commits, como a execução do <code>git</code> <code>am</code> no ramo errado ou um erro nos commits que seja mais facilmente corrigido com a alteração da caixa de correio (por exemplo, erros nas linhas "From:").</p>
 </div>
 </div>
 </div>
@@ -678,7 +706,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_ganchos">GANCHOS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Esse comando pode executar os ganchos <code>applypatch-msg</code>, <code>pre-applypatch</code> e <code>post-applypatch</code>. Para mais informações consulte <a href="githooks.html"><b>githooks</b>(5)</a>.</p>
+<p>Esse comando pode executar os ganchos <code>applypatch-msg</code>, <code>pre-applypatch</code> e <code>post-applypatch</code>. Para mais informações consulte <a href="githooks.html">githooks(5)</a>.</p>
 </div>
 </div>
 </div>
@@ -686,10 +714,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_configuração">CONFIGURAÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Tudo abaixo desta linha nesta seção, está seletivamente incluído na documentação <a href="git-config.html"><b>git-config</b>(1)</a>. O conteúdo é o mesmo que é encontrado ali:</p>
+<p>Tudo abaixo desta linha nesta seção, está seletivamente incluído na documentação <a href="git-config.html">git-config(1)</a>. O conteúdo é o mesmo que é encontrado ali:</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-am.txt - include::config/am.txt[]</p>
+<p>Unresolved directive in git-am.adoc - include::config/am.adoc[]</p>
 </div>
 </div>
 </div>
@@ -697,7 +725,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_veja_também">VEJA TAMBÉM</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-apply.html"><b>git-apply</b>(1)</a>, <a href="git-format-patch.html"><b>git-format-patch</b>(1)</a>.</p>
+<p><a href="git-apply.html">git-apply(1)</a>, <a href="git-format-patch.html">git-format-patch(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -705,14 +733,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Parte do conjunto <a href="git.html"><b>git</b>(1)</a></p>
+<p>Parte do conjunto <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:27:22 +0200
+Last updated 2025-03-23 12:03:39 +0100
 </div>
 </div>
 </body>

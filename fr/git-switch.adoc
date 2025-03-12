@@ -1,0 +1,204 @@
+git-switch(1)
+=============
+
+NOM
+---
+git-switch - bascule de branche
+
+SYNOPSIS
+--------
+[verse]
+'git switch' [<options>] [--no-guess] <branche>
+'git switch' [<options>] --detach [<point-de-départ>]
+'git switch' [<options>] (-c|-C) <nouvelle-branche> [<point-de-départ>]
+'git switch' [<options>] --orphan <nouvelle-branche>
+
+DESCRIPTION
+-----------
+Passe à une branche spécifiée. L'arbre de travail et l'index sont mis à jour pour correspondre à la branche. Tous les nouveaux commits seront ajoutés au sommet de cette branche.
+
+En option, une nouvelle branche peut être créée avec les options `-c`, `-C`, automatiquement à partir d'une branche distante du même nom (voir `--guess`), ou détacher l'arbre de travail de toute branche avec `--detach` en même temps que la commutation.
+
+La commutation de branche ne nécessite pas d'index et d'arbre de travail propres(c.-à-d. aucune différence par rapport à `HEAD`). L'opération est interrompue cependant si l'opération entraîne une perte de modifications locales, sauf indication contraire via `--discard-changes` ou `--merge`.
+
+CETTE COMMANDE EST EXPÉRIMENTALE. LE COMPORTEMENT PEUT CHANGER.
+
+OPTIONS
+-------
+<branche>::
+	Branche sur laquelle commuter.
+
+<nouvelle-branche>::
+	Nom pour une nouvelle branche.
+
+<point_de_départ>::
+	The starting point for the new branch. Specifying a `<start-point>` allows you to create a branch based on some other point in history than where HEAD currently points. (Or, in the case of `--detach`, allows you to inspect and detach from some other point.)
++
+Vous pouvez utiliser la syntaxe `@{-N}` pour faire référence à la N-ième dernière branche ou commit sur lesquels on a basculé en utilisant une opération « git switch » ou « git checkout ». Vous pouvez aussi spécifier `-` qui est synonyme de `@{-1}`. C'est souvent utilisé pour basculer rapidement entre deux branches ou pour annuler un basculement par erreur.
++
+Autre cas spécial supplémentaire, vous pouvez utiliser `A...B` comme raccourci pour la base de fusion de `A` et `B` s'il y a exactement une seule base de fusion. Vous pouvez ne pas spécifier `A` ou `B`, auquel cas ce sera `HEAD` par défaut.
+
+-c <nouvelle-branche>::
+--create <nouvelle-branche>::
+	Créer une nouvelle branche nommée `<nouvelle-branche>` commençant à `<point-de-départ>` avant de basculer sur cette branche. C'est l'équivalent transactionnel de
++
+------------
+$ git branch <nouvelle-branche>
+$ git switch <nouvelle-branche>
+------------
++
+that is to say, the branch is not reset/created unless "git switch" is successful (e.g., when the branch is in use in another worktree, not just the current branch stays the same, but the branch is not reset to the start-point, either).
+
+-C <nouvelle-branche>::
+--force-create <nouvelle-branche>::
+	Similar to `--create` except that if `<new-branch>` already exists, it will be reset to `<start-point>`. This is a convenient shortcut for:
++
+------------
+$ git branch -f <nouvelle-branche>
+$ git switch <nouvelle-branche>
+------------
+
+-d::
+--detach::
+	Switch to a commit for inspection and discardable experiments. See the "DETACHED HEAD" section in linkgit:git-checkout[1] for details.
+
+--guess::
+--no-guess::
+	Si la `<branche>` n'est pas trouvée mais qu'il existe une branche de suivi pour un dépôt distant unique (appelé `<distant>`) avec un nom correspondant, le traiter comme équivalent à
++
+------------
+$ git switch -c <branche> --track <distant>/<branche>
+------------
++
+Si la branche existe dans plus d'un distant et que l'un d'entre eux est la valeur de la variable de configuration `checkout.defaultRemote`, celui-ci sera utilisé pour désambiguïser, même si la <branche> n'est pas unique parmi tous les distants. Réglez la variable `checkout.defaultRemote=origin` par exemple pour extraire toujours les branches distantes depuis celle-ci si <branche> est ambigüe mais existe sur le distant 'origin'. Voir aussi `checkout.defaultRemote` dans linkgit:git-config[1].
++
+`--guess` est le comportement par défaut. Utilisez `--no-guess` pour le désactiver.
++
+Le comportement par défaut peut être défini via la variable de configuration `checkout.guess`.
+
+-f::
+--force::
+	An alias for `--discard-changes`.
+
+--discard-changes::
+	Proceed even if the index or the working tree differs from `HEAD`. Both the index and working tree are restored to match the switching target. If `--recurse-submodules` is specified, submodule content is also restored to match the switching target. This is used to throw away local changes.
+
+-m::
+--merge::
+	Si vous avez des modifications locales sur un fichier ou plus qui sont différentes entre la branche actuelle et celle sur laquelle vous basculez, la commande refuse le basculement pour préserver vos modifications dans leur contexte. Cependant, avec cette option, une fusion à trois points entre la branche actuelle, le contenu de votre arbre de travail et la nouvelle branche est opérée et vous serez sur la nouvelle branche.
++
+Quand un conflit de fusion apparaît, les entrées d'index pour les chemins en conflit sont laissées non-fusionnées et vous devez résoudre les conflits et les marquer résolus pour les chemins concernés avec `git add` (ou `git rm` si la fusion doit aboutir à la suppression du chemin).
+
+--conflict=<style>::
+	Identique à l'option `--merge` ci-dessus, mais la manière dont les sections en conflits sont présentées est modifiée, en surchargeant la variable de configuration `merge.conflictStyle`. Les valeurs possibles sont `merge` (fusion, par défaut), `diff3` et `zdiff3`.
+
+-q::
+--quiet::
+	Silencieux, supprimer les messages d'état.
+
+--progress::
+--no-progress::
+	L'état d'avancement est affiché sur la sortie standard d'erreur par défaut quand elle est attachée à un terminal, à moins que `--quiet` ne soit spécifié. Cette bascule active l'état d'avancement même sans être attaché à un terminal, indépendamment de `--quiet`.
+
+-t::
+--track [direct|inherit]::
+	À la création d'une nouvelle branche, établir la configuration 'upstream' (branche amont). `-c` est implicite. Voir `--track` dans linkgit:git-branch[1] pour plus de détails.
++
+Si aucune option `-c` n'est fournie, le nom de la nouvelle branche sera dérivé de la branche de suivi à distance, en regardant la partie locale de la spécification de référence configurée pour le distant correspondant et en enlevant la partie initiale jusqu'au "*". Cela indiquerait d'utiliser le nom `hack` comme branche locale créée à partir de `origin/hack` (ou `remotes/origin/hack`, ou même `refs/remotes/origin/hack`). Si le nom fourni ne contient pas de barre oblique, ou si le résultat de la dérivation est un nom vide, la dérivation échoue. Vous pouvez spécifier explicitement un nom avec `-c` dans ce cas.
+
+--no-track::
+	Ne pas renseigner la configuration « amont », même si la configuration `branch.autoSetupMerge` est true.
+
+--orphan <nouvelle-branche>::
+	Create a new unborn branch, named `<new-branch>`. All tracked files are removed.
+
+--ignore-other-worktrees::
+	`git switch` échoue quand la référence voulue est déjà extraite dans un autre arbre de travail. Cette option force l'extraction. En d'autres termes, la réf peut être tenue par plus d'un arbre de travail.
+
+--recurse-submodules::
+--no-recurse-submodules::
+	L'utilisation de `--recurse-submodules` permet de mettre à jour le contenu de tous les sous-modules actifs en fonction du commit enregistré dans le super-projet. Si l'option n'est pas spécifiée (ou si `--no-recurse-submodules` est spécifié), les arbres de travail des sous-modules ne sont pas mis à jour. Comme linkgit:git-submodule[1], les `HEAD` des sous-modules seront détachées.
+
+EXEMPLES
+--------
+
+The following command switches to the "master" branch:
+
+------------
+$ git switch master
+------------
+
+Après avoir travaillé dans la mauvaise branche, basculer sur la branche correcte serait réalisé par :
+
+------------
+$ git switch monsujet
+------------
+
+Cependant, votre « fausse » branche et votre branche correcte « monsujet » peuvent être différentes par les fichiers que vous avez modifiés localement, auquel cas le basculement ci-dessus échouerait comme ceci :
+
+------------
+$ git switch monsujet
+error : Vos modifications locales aux fichiers suivants seraient écrasées par l'extraction :
+------------
+
+Vous pouvez fournir l'option `-m` à la commande, ce qui essaierait une fusion à trois points :
+
+------------
+$ git switch -m monsujet
+Fusion automatique de frotz
+------------
+
+Après cette fusion à trois points, les modifications locales ne sont _pas_ enregistrées dans votre index, donc `git diff` vous montrerait ce qui a changé depuis le sommet de la nouvelle branche.
+
+To switch back to the previous branch before we switched to mytopic (i.e. "master" branch):
+
+------------
+$ git switch -
+------------
+
+You can grow a new branch from any commit. For example, switch to "HEAD~3" and create branch "fixup":
+
+------------
+$ git switch -c fixup HEAD~3
+Switched to a new branch 'fixup'
+------------
+
+Si vous souhaitez démarrer une branche nouvelle depuis une branche distante du même nom :
+
+------------
+$ git switch new-topic
+Branch 'new-topic' set up to track remote branch 'new-topic' from 'origin'
+Switched to a new branch 'new-topic'
+------------
+
+To check out commit `HEAD~3` for temporary inspection or experiment without creating a new branch:
+
+------------
+$ git switch --detach HEAD~3
+HEAD is now at 9fc9555312 Merge branch 'cc/shared-index-permbits'
+------------
+
+If it turns out whatever you have done is worth keeping, you can always create a new name for it (without switching away):
+
+------------
+$ git switch -c good-surprises
+------------
+
+CONFIGURATION
+-------------
+
+include::includes/cmd-config-section-all.adoc[]
+
+include::config/checkout.adoc[]
+
+VOIR AUSSI
+----------
+linkgit:git-checkout[1], linkgit:git-branch[1]
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

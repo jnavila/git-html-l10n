@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-reflog(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,13 +447,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git reflog</em> [show] [&lt;日志选项&gt;] [&lt;引用&gt;]
-<em>git reflog expire</em> [--expire=&lt;时间&gt;] [--expire-unreachable=&lt;时间&gt;]
+<pre class="content"><em>git reflog</em> [show] [&lt;log-options&gt;] [&lt;ref&gt;]
+<em>git reflog list</em>
+<em>git reflog expire</em> [--expire=&lt;time&gt;] [--expire-unreachable=&lt;time&gt;]
         [--rewrite] [--updateref] [--stale-fix]
-        [--dry-run | -n] [--verbose] [--all [--single-worktree] | &lt;引用&gt;&#8230;&#8203;]
+        [--dry-run | -n] [--verbose] [--all [--single-worktree] | &lt;refs&gt;&#8230;&#8203;]
 <em>git reflog delete</em> [--rewrite] [--updateref]
-        [--dry-run | -n] [--verbose] &lt;引用&gt;@{&lt;标注&gt;}&#8230;&#8203;
-<em>git reflog exists</em> &lt;引用&gt;</pre>
+        [--dry-run | -n] [--verbose] &lt;ref&gt;@{&lt;specifier&gt;}&#8230;&#8203;
+<em>git reflog exists</em> &lt;ref&gt;</pre>
 </div>
 </div>
 </div>
@@ -463,19 +465,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>该命令管理记录在引用日志中的信息。</p>
 </div>
 <div class="paragraph">
-<p>引用日志（或称 "reflogs"）记录了本地仓库中分支和其他引用的提示更新时间。参考日志在各种 Git 命令中都很有用，可以用来指定引用的旧值。例如，<code>HEAD@{2}</code> 表示 “两步前 HEAD 所在的位置”，<code>master@{one.week.ago}</code> 表示 “一周前本仓库中 master 所在的位置”，等等。详见 <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a>。</p>
+<p>引用日志（或称 "reflogs"）记录了本地仓库中分支和其他引用的提示更新时间。参考日志在各种 Git 命令中都很有用，可以用来指定引用的旧值。例如，<code>HEAD@</code>{2} 表示 “两步前 HEAD 所在的位置”，<code>master@</code>{one.<code>week.ago</code>} 表示 “一周前本仓库中 master 所在的位置”，等等。详见 <a href="gitrevisions.html">gitrevisions(7)</a>。</p>
 </div>
 <div class="paragraph">
 <p>该命令采取不同的子命令，并根据子命令有不同的选项：</p>
 </div>
 <div class="paragraph">
-<p>"show" 子命令（也是默认命令，在没有任何子命令的情况下）显示命令行中提供的引用日志（或默认的 <code>HEAD</code>）。引用日志包括所有最近的操作，此外，<code>HEAD</code> 引用日志还记录分支切换。 <code>git reflog show</code> 是 <code>git log -g --abbrev-commit --pretty=oneline</code> 的别名；详见 <a href="git-log.html"><b>git-log</b>(1)</a>。</p>
+<p>"show" 子命令（也是默认命令，在没有任何子命令的情况下）显示命令行中提供的引用日志（或默认的 <code>HEAD</code>）。引用日志包括所有最近的操作，此外，<code>HEAD</code> 引用日志还记录分支切换。 <code>git</code> <code>reflog</code> <code>show</code> 是 <code>git</code> <code>log</code> <code>-g</code> <code>--abbrev-commit</code> <code>--pretty=oneline</code> 的别名；详见 <a href="git-log.html">git-log(1)</a>。</p>
 </div>
 <div class="paragraph">
-<p>"expire" 子命令用于删除旧的引用日志条目。超过 <code>expire</code> 时间的条目，或超过 <code>expire-unreachable</code> 时间且当前 tip 无法访问的条目，都会从引用日志中删除。 终端用户通常不会直接使用该子项，请参见 <a href="git-gc.html"><b>git-gc</b>(1)</a>。</p>
+<p>"list" 子命令列出了所有具有相应引用日志的引用。</p>
 </div>
 <div class="paragraph">
-<p>"delete" 子命令用于删除应用日志中的单个条目。其参数必须是一个_exact_条目（例如"<code>git reflog delete master@{2}</code>"）。最终用户通常也不会直接使用该子命令。</p>
+<p>"expire" 子命令用于删除旧的引用日志条目。超过 <code>expire</code> 时间的条目，或超过 <code>expire-unreachable</code> 时间且当前 tip 无法访问的条目，都会从引用日志中删除。 终端用户通常不会直接使用该子项，请参见 <a href="git-gc.html">git-gc(1)</a>。</p>
+</div>
+<div class="paragraph">
+<p>"delete" 子命令用于删除应用日志中的单个条目。其参数必须是一个_exact_条目（例如"<code>git</code> <code>reflog</code> <code>delete</code> <code>master@</code>{2}"）。最终用户通常也不会直接使用该子命令。</p>
 </div>
 <div class="paragraph">
 <p>"exists" 子命令检查引用是否有引用日志。 如果引用日志存在，则以零状态退出；如果不存在，则以非零状态退出。</p>
@@ -488,7 +493,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="_show显示的选项"><code>show</code>（显示）的选项</h3>
 <div class="paragraph">
-<p><code>git reflog show</code> 接受 <code>git log</code> 接受的任何选项。</p>
+<p><code>git</code> <code>reflog</code> <code>show</code> 接受 <code>git</code> <code>log</code> 接受的任何选项。</p>
 </div>
 </div>
 <div class="sect2">
@@ -509,7 +514,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--expire-unreachable=&lt;时间&gt;</dt>
 <dd>
-<p>剪除从分支当前顶端无法到达的超过 <code>&lt;时间&gt;</code> 的条目。如果未指定此选项，则过期时间取自配置设置 <code>gc.reflogExpireUnreachable</code>，默认为 30 天。<code>--expire-unreachable=all</code> 会修剪无法访问的条目，无论其年龄大小；<code>--expire-unreachable=never</code> 会关闭对无法访问条目的早期修剪（但请参见 <code>--expire</code>）。</p>
+<p>剪除从分支当前顶端无法到达的超过 &lt;时间&gt; 的条目。如果未指定此选项，则过期时间取自配置设置 <code>gc.reflogExpireUnreachable</code>，默认为 30 天。<code>--expire-unreachable=all</code> 会修剪无法访问的条目，无论其年龄大小；<code>--expire-unreachable=never</code> 会关闭对无法访问条目的早期修剪（但请参见 <code>--expire</code>）。</p>
 </dd>
 <dt class="hdlist1">--updateref</dt>
 <dd>
@@ -541,7 +546,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="_delete删除的选项"><code>delete</code>（删除）的选项</h3>
 <div class="paragraph">
-<p><code>git reflog delete</code> 接受选项 <code>--updateref</code>、<code>--rewrite</code>、<code>-n</code>、<code>--dry-run</code> 和 <code>--verbose</code>，其含义与与 <code>expire</code> 一起使用时相同。</p>
+<p><code>git</code> <code>reflog</code> <code>delete</code> 接受选项 <code>--updateref</code>、<code>--rewrite</code>、<code>-n</code>、<code>--dry-run</code> 和 <code>--verbose</code>，其含义与与 <code>expire</code> 一起使用时相同。</p>
 </div>
 </div>
 </div>
@@ -550,14 +555,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:07 +0200
+Last updated 2025-03-23 12:03:54 +0100
 </div>
 </div>
 </body>

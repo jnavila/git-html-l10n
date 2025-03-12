@@ -1,0 +1,467 @@
+git-config(1)
+=============
+
+名称
+--
+git-config - 获取和设置仓库或全局选项
+
+
+概述
+--
+[verse]
+'git config list' [<file-option>] [<display-option>] [--includes]
+'git config get' [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<value>] [--fixed-value] [--default=<default>] <name>
+'git config set' [<file-option>] [--type=<type>] [--all] [--value=<value>] [--fixed-value] <name> <value>
+'git config unset' [<file-option>] [--all] [--value=<value>] [--fixed-value] <name>
+'git config rename-section' [<file-option>] <old-name> <new-name>
+'git config remove-section' [<file-option>] <name>
+'git config edit' [<file-option>]
+'git config' [<file-option>] --get-colorbool <name> [<stdout-is-tty>]
+
+描述
+--
+你可以用这个命令查询/设置/替换/取消选项。名称(name)实际上是用点隔开的节和键，值(value)会被转义。
+
+Multiple lines can be added to an option by using the `--append` option. If you want to update or unset an option which can occur on multiple lines, a `value-pattern` (which is an extended regular expression, unless the `--fixed-value` option is given) needs to be given. Only the existing values that match the pattern are updated or unset. If you want to handle the lines that do *not* match the pattern, just prepend a single exclamation mark in front (see also <<EXAMPLES>>), but note that this only works when the `--fixed-value` option is not in use.
+
+`--type=<类型>` 选项指示 'git config' 确保传入和传出的值在给定的 <类型> 下是可以被规范化的。 如果没有给定 `--type=<类型>`，将不执行规范化。调用者可以用 `--no-type` 选项取消现有 `--type` 选项的指定。
+
+读取配置时，默认从系统、全局和资源库的本地配置文件中读取数值，选项 `--system`、`--global`、`--local`、`--worktree` 和 `--file<文件名>` 可以用来告诉命令只从选定的位置读取（见<<FILES>>）。
+
+写入时，新值默认写入仓库的本地配置文件，选项 `--system`、`--global`、`--worktree`、`--file <文件名>` 可以用来告诉命令写到那个位置（你可以给出 `--local` 选项，但是默认选项就是本地(local)）。
+
+该命令出错时将以非零状态失败。 以下是一些退出代码：
+
+- 该节或键无效（退出代码为1），
+- 没有提供节或键（退出值为2），
+- 配置文件无效（退出代码为3），
+- 配置文件无法写入（退出代码为4），
+- 你试图取消一个不存在的选项（退出代码为5），
+- 你试图取消/设置一个多行匹配的选项（退出代码为5），或
+- 试图使用一个无效的正则表达式（退出代码为6）。
+
+执行成功时，该命令返回退出代码0。
+
+所有可用配置变量的列表可以通过 `git help --config` 命令获取。
+
+命令
+--
+
+list::
+	列出配置文件中设置的所有变量，以及它们的值。
+
+get::
+	发出指定键的值。如果配置中键出现多次，则发出最后一个值。如果指定了 `--all`，则发出与键关联的所有值。如果键不存在，则返回错误代码 1。
+
+set::
+	为一个或多个配置选项设置值。默认情况下，此命令拒绝写入多值配置选项。传递 `--all` 将用新值替换所有多值配置选项，而 `--value=` 将替换所有其值与给定模式匹配的配置选项。
+
+unset::
+	取消设置一个或多个配置选项的值。默认情况下，此命令拒绝取消设置多值键。传递 `--all` 将取消设置所有多值配置选项，而 `--value` 将取消设置所有其值与给定模式匹配的配置选项。
+
+rename-section::
+	将给定的节重命名为一个新的名称。
+
+remove-section::
+	从配置文件中删除了该节。
+
+edit::
+	Opens an editor to modify the specified config file; either `--system`, `--global`, `--local` (default), `--worktree`, or `--file <config-file>`.
+
+[[OPTIONS]]
+选项
+--
+
+--replace-all::
+	默认行为是最多替换一行。这将会替换所有与键（以及可选的 `value-pattern` ）匹配的行。
+
+--append::
+	Adds a new line to the option without altering any existing values. This is the same as providing '--value=^$' in `set`.
+
+--comment <message>::
+	在新的或修改过的行末尾添加注释。
+
+	如果 _<消息>_ 以一个或多个空白字符后跟 "#" 开头，它将按原样使用。如果它以 "#" 开头，则在使用前会添加一个空格。否则，会在其前面加上字符串 " # "（一个空格后跟一个井号，再后跟一个空格）。生成的字符串将紧随变量定义的值之后放置。_<消息>_ 不能包含换行符（不允许多行注释）。
+
+--all::
+	With `get`, return all values for a multi-valued key.
+
+--regexp::
+	With `get`, interpret the name as a regular expression. Regular expression matching is currently case-sensitive and done against a canonicalized version of the key in which section and variable names are lowercased, but subsection names are not.
+
+--url=<URL>::
+	当给定一个由两部分组成的名称 section.key 时，返回 section.<URL>.key 的值，其 <URL> 部分是给定的最相匹配的 URL（如果没有这样的键存在，section.key 的值将作为备用值）。 当只给出 section 的名称时，对 section 中的所有 key 进行处理，并将其列出。 如果没有找到值，返回错误代码 1（section: 节，key:键；在配置文件中是这样的 [section] key=value）。
+
+--global::
+	对于写入选项：写入全局的 `~/.gitconfig` 文件而不是仓库的 `.git/config` 文件，如果该文件存在而 `~/.gitconfig` 文件不存在，则写入 `$XDG_CONFIG_HOME/git/config` 文件。
++
+对于读取选项：只从全局的 `~/.gitconfig` 和 `$XDG_CONFIG_HOME/git/config` 中读取，而不是从所有可用文件中读取。
++
+另请参见<<FILES>>。
+
+--system::
+	对于写选项：写到系统范围内的 `$(prefix)/etc/gitconfig` 文件中，而不是仓库中的 `.git/config` 文件。
++
+对于读取选项：只从系统范围内的 `$(prefix)/etc/gitconfig` 读取，而不是从所有可用文件中读取。
++
+另请参见<<FILES>>。
+
+--local::
+	对于写选项：写到仓库的 `.git/config` 文件中。 这是默认行为。
++
+对于读取选项：只从仓库 `.git/config` 文件中读取，而不是从所有可用文件中读取。
++
+另请参见<<FILES>>。
+
+--worktree::
+	与 `--local` 选项类似，只是如果启用了 `extensions.worktreeConfig` ，则从 `$GIT_DIR/config.worktree` 读取或写入。如果没有，则与 `--local` 选项行为相同。注意，对于主工作区， `$GIT_DIR` 等于 `$GIT_COMMON_DIR`，但对于其他工作区，它的形式是 `$GIT_DIR/worktrees/<id>/`。了解如何启用 `extensions.worktreeConfig`，参见 linkgit:git-worktree[1] 。
+
+-f <配置文件>::
+--file <配置文件>::
+	对于写入选项：写到指定的文件，而不是仓库 `.git/config` 文件。
++
+对于读取选项：只从指定的文件而不是从所有可用的文件中读取。
++
+另请参见<<FILES>>。
+
+--blob <blob>::
+	类似于 `--file` 选项，但使用指定的二进制对象而不是文件。例如，你可以使用 'master:.gitmodules' 来读取主分支中 '.gitmodules' 文件中的值。参见 linkgit:gitrevisions[7] 中的 “指定的修正” 部分，以获得更完整的二进制对象名称拼写方式。
+
+--fixed-value::
+	当与 `value-pattern` 参数一起使用时，将 `value-pattern` 视为精确的字符串，而不是正则表达式。这将使得被匹配的名称/值对只有那些值与 `value-pattern` 完全相等的名称/值对。
+
+--type <类型>::
+  'git config' 将确保任何输入或输出在给定的类型约束下是有效的，并将以 `<类型>` 的规范形式将输出的值规范化。
++
+有效的 `<类型>` 包括：
++
+- 'bool': canonicalize values `true`, `yes`,`on`, and positive numbers as "true", and values `false`, `no`, `off` and `0` as "false".
+- 'int'：将数值规范化为简单的十进制数字。可选的后缀 'k'、'm' 或 'g'将导致输入的值被乘以 1024、1048576 或 1073741824。
+- 'bool-or-int'：如上所述，根据 'bool '或 'int' 进行规范化。
+- 'path'：通过在 `$HOME` 和 `~user` 的值中添加前导 `~` 来规范化指定用户的主目录。在设置值时，该说明符没有任何作用（但可以在命令行中使用 `git config section.variable ~/` 让 shell 进行扩展）。
+- 'expiry-date'：通过将固定或相对日期字符串转换为时间戳进行规范化。这个指定符在设置值时没有影响。
+- 'color'： 当获得一个值时，通过转换为 ANSI 颜色转义序列进行规范化。当设置一个值时，会进行理智检查，以确保给定的值可以被规范化为 ANSI 颜色，但它会按原样写入。
++
+
+--bool::
+--int::
+--bool-or-int::
+--path::
+--expiry-date::
+  选择类型指定器的历史选项。更倾向于选择 `--type`（见上文）。
+
+--no-type::
+  取消先前设置的类型指定器（如果先前有的话）。这个选项要求 'git config' 不对检索的变量进行规范化处理。 `--no-type` 在没有 `--type=<类型>` 或 `--<类型>` 选项的情况下没有作用。
+
+-z::
+--null::
+	对于所有输出值和/或键的选项，总是用空字符（而不是换行）结束值。使用换行符作为键和值之间的分隔符。这样可以安全地解析输出，而不会被包含换行的值所混淆。
+
+--name-only::
+	Output only the names of config variables for `list` or `get`.
+
+--show-origin::
+	用来源类型（文件、标准输入、blob、命令行）和实际来源（配置文件路径、引用或 blob id（如适用））对所有查询到的配置选项的输出进行扩充。
+
+--show-scope::
+	类似于 `--show-origin` 选项，它用该值的范围（工作区、本地、全局、系统、命令）来增加所有查询的配置选项的输出。
+
+--get-colorbool <名称> [<stdout-is-tty>]::
+
+	找到 `<名称>` 的颜色设置（例如 `color.diff`），并输出 "true" 或 "false"。 `<stdout-is-tty>` 应该是 "true" 或 "false"，同样考虑配置为 "auto" 的情况。 如果 `<stdout-is-tty>` 缺失，则检查命令本身的标准输出，如果要使用颜色则以状态 0 退出，否则以状态 1 退出。 当 `名称` 的颜色设置未被定义时，该命令使用 `color.ui` 作为回退（stdout 是 "standard output" 的缩写，而 tty 是 "teletypewriter" 的缩写，通常指的是终端或控制台。）。
+
+--[no-]includes::
+	在查找数值时尊重配置文件中的 `include.*` 指令。当给出一个特定的文件时，默认为 `off`（例如，使用 `--file`、`--global` 等），当搜索所有配置文件时，默认为 `on`。
+
+--default <值>::
+  When using `get`, and the requested variable is not found, behave as if <value> were the value assigned to that variable.
+
+DEPRECATED MODES
+----------------
+
+以下模式已不再推荐使用，建议改用子命令。推荐迁移到新的语法。
+
+'git config <配置名称>'::
+	已由 `git config get <配置名称>` 替代。
+
+'git config <配置名称> <值> [<值模式>]'::
+	已由 `git config set [--value=<模式>] <配置名称> <值>` 替代。
+
+-l::
+--list::
+	已由 `git config list` 替代。
+
+--get <name> [<value-pattern>]::
+	已由 `git config get [--value=<模式>] <配置名称>` 替代。
+
+--get-all <name> [<value-pattern>]::
+	Replaced by `git config get [--value=<pattern>] --all <name>`.
+
+--get-regexp <name-regexp>::
+	已由 `git config get --all --show-names --regexp <名称正则表达式>` 替代。
+
+--get-urlmatch <名称> <URL>::
+	已由 `git config get --all --show-names --url=<URL> <配置名称>` 替代。
+
+--get-color <名称> [<默认值>]::
+	已由 `git config get --type=color [--default=<默认值>] <配置名称>` 替代。
+
+--add <name> <value>::
+	已由 `git config set --append <配置名称> <值>` 替代。
+
+--unset <name> [<value-pattern>]::
+	已由 `git config unset [--value=<模式>] <名称>` 替代。
+
+--unset-all <name> [<value-pattern>]::
+	已由 `git config unset [--value=<模式>] --all <配置名称>` 替代。
+
+--rename-section <旧配置名称> <新配置名称>::
+	已由 `git config rename-section <旧配置名称> <新配置名称>` 替代。
+
+--remove-section <name>::
+	已由 `git config remove-section <配置名称>` 替代。
+
+-e::
+--edit::
+	已由 `git config edit` 替代。
+
+配置
+--
+`pager.config` is only respected when listing configuration, i.e., when using `list` or `get` which may return multiple results. The default is to use a pager.
+
+[[FILES]]
+文件
+--
+
+默认情况下，'git config' 会从多个文件中读取配置选项：
+
+$(prefix)/etc/gitconfig::
+	全系统的配置文件。
+
+$XDG_CONFIG_HOME/git/config::
+~/.gitconfig::
+	用户特定的配置文件。当 XDG_CONFIG_HOME 环境变量没有设置或为空时，$HOME/.config/ 被用作 $XDG_CONFIG_HOME。
++
+这些文件也被称为 “全局” 配置文件。如果这两个文件都存在，就按照上面的顺序读取这两个文件。
+
+$GIT_DIR/config::
+	仓库特定的配置文件。
+
+$GIT_DIR/config.worktree::
+	这是可选的，只有当 $GIT_DIR/config 中存在 `extensions.worktreeConfig` 时才会被搜索到。
+
+你也可以在运行任何 git 命令时通过使用 `-c` 选项提供额外的配置参数。详情见 linkgit:git[1]。
+
+选项将从所有这些可用的文件中读取。如果全局或全系统的配置文件丢失或不可读，它们将被忽略。如果版本库的配置文件丢失或不可读，'git config' 将以非零的错误代码退出。如果文件不可读，会产生一个错误信息，但如果文件丢失，则不会产生错误信息。
+
+文件是按照上述顺序读取的，最后发现的值优先于之前读取的值。 当有多个值时，将使用所有文件中某个键的所有值。
+
+By default, options are only written to the repository specific configuration file. Note that this also affects options like `set` and `unset`. *'git config' will only ever change one file at a time*.
+
+你可以通过使用 `--file` 选项指定文件路径，或者使用 `--system`、`--global`、`--local` 或 `--worktree` 指定配置范围，来限制从哪些配置源读取或写入。 更多内容请参见上面的 <<OPTIONS>>。
+
+[[SCOPES]]
+范围
+--
+
+每个配置源都属于一个配置范围。这些范围包括：
+
+system::
+	$(prefix)/etc/gitconfig
+
+global::
+	$XDG_CONFIG_HOME/git/config
++
+~/.gitconfig
+
+local::
+	$GIT_DIR/config
+
+工作区::
+	$GIT_DIR/config.worktree
+
+命令::
+	GIT_CONFIG_{COUNT,KEY,VALUE} 环境变量（见下文 <<ENVIRONMENT>>）
++
+`-c` 选项
+
+除了 'command' 之外，每个范围都对应于一个命令行选项：`--system`、`--global`、`--local`、`--worktree`。
+
+当读取选项时，指定一个范围将只从该范围内的文件读取选项。当写选项时，指定一个范围将写到该范围内的文件（而不是仓库的特定配置文件）。参见上面的<<OPTIONS>>以获得完整的描述。
+
+大多数配置选项无论在哪个作用域中定义都会被尊重，但有些选项只在某些作用域中被尊重。完整的细节请参见相应选项的文档。
+
+受保护的配置
+~~~~~~
+
+受保护的配置指的是 'system'、'global' 和 'command' 范围。 出于安全考虑，某些选项只有在受保护的配置中指定时才会被尊重，否则会被忽略。
+
+Git 将这些作用域视为由用户或可信的管理员控制。这是因为控制这些作用域的攻击者可以在不使用 Git 的情况下造成实质性的伤害，所以假定用户的环境会保护这些作用域免受攻击。
+
+[[ENVIRONMENT]]
+环境变量
+----
+
+GIT_CONFIG_GLOBAL::
+GIT_CONFIG_SYSTEM::
+	从给定的文件中获取配置，而不是从全局或系统级配置中获取。详情见 linkgit:git[1]。
+
+GIT_CONFIG_NOSYSTEM::
+	是否跳过从全系统 $(prefix)/etc/gitconfig 文件中读取设置。详见 linkgit:git[1]。
+
+另请参见<<FILES>>。
+
+GIT_CONFIG_COUNT::
+GIT_CONFIG_KEY_<n>::
+GIT_CONFIG_VALUE_<n>::
+	如果 GIT_CONFIG_COUNT 被设置为一个正数，所有环境对 GIT_CONFIG_KEY_<n> 和 GIT_CONFIG_VALUE_<n> 到这个数字都将被添加到进程的运行时配置中。配置对是零索引的。任何缺失的键或值都被视为一个错误。空的 GIT_CONFIG_COUNT 与 GIT_CONFIG_COUNT=0 的处理方式相同，即不处理配置对。这些环境变量将覆盖配置文件中的值，但会被通过 `git -c` 传递的任何明确选项所覆盖。
++
+这在你想用一个共同的配置催生多个 git 命令，但又不能依赖一个配置文件的情况下很有用，例如在编写脚本时。
+
+GIT_CONFIG::
+	如果 `git config` 没有提供 `--file` 选项，则命令会使用 `GIT_CONFIG` 提供的文件，就像通过 `--file` 选项提供的一样。这个变量对其他 Git 命令没有影响，主要是为了兼容历史版本；通常不会用它来代替 `--file` 选项。
+
+[[EXAMPLES]]
+实例
+--
+
+给出一个这样的 .git/config：
+
+------------
+#
+# 这就是配置文件，并且
+# 一个'#' 或 ';' 字符表示
+# 一个注释
+#
+
+; 核心变量
+[core]
+	; 不信任文件模式
+	filemode = false
+
+; 我们的差异算法
+[diff]
+	external = /usr/local/bin/diff-wrapper
+	rename = true
+
+; 代理设置
+[core]
+	gitproxy=proxy-command for kernel.org
+	gitproxy=default-proxy ; 适用于其他所有网站
+
+; HTTP
+[http]
+	sslVerify
+[http "https://weak.example.com"]
+	sslVerify = false
+	cookiFile= /tmp/cookie.txt
+------------
+
+你可以用以下方法将文件模式设置为真
+
+------------
+% git config set core.filemode true
+------------
+
+假设的代理命令条目实际上有一个后缀来辨别它们适用于什么URL。下面是如何将 kernel.org 的条目改为 "ssh"。
+
+------------
+% git config set --value='for kernel.org$' core.gitproxy '"ssh" for kernel.org'
+------------
+
+这确保了只有 kernel.org 的键/值对被替换。
+
+要删除重名的条目，请执行
+
+------------
+% git config unset diff.renames
+------------
+
+如果你想删除一个多变量的条目（如上面的 core.gitproxy），你必须提供一个与恰好一行的值相匹配的正则表达式。
+
+要查询一个给定键的值，可以这样做
+
+------------
+% git config get core.filemode
+------------
+
+或者，要查询一个多变量：
+
+------------
+% git config get --value="for kernel.org$" core.gitproxy
+------------
+
+如果你想知道一个多变量的所有值，可以这么做：
+
+------------
+% git config get --all --show-names core.gitproxy
+------------
+
+如果你喜欢危险操作，你可以用一个新的 core.gitproxy 来取代 *所有* core.gitproxy
+
+------------
+% git config set --all core.gitproxy ssh
+------------
+
+然而，如果你真的只想替换默认代理，即没有 "for ..." 后缀的那一行，可以这样做：
+
+------------
+% git config set --value='! for ' core.gitproxy ssh
+------------
+
+为了真正地只匹配带有感叹号的值，你必须
+
+------------
+% git config set --value='[!]' section.key value
+------------
+
+要添加一个新的代理，而不改变任何现有的代理，使用
+
+------------
+% git config set --append core.gitproxy '"proxy-command" for example.com'
+------------
+
+一个例子是在你的脚本中使用配置的自定义颜色：
+
+------------
+#!/bin/sh
+WS=$(git config get --type=color --default="blue reverse" color.diff.whitespace)
+RESET=$(git config get --type=color --default="reset" "")
+echo "${WS}your whitespace color or blue reverse${RESET}"
+------------
+
+对于 `https://weak.example.com` 中的 URL，`http.sslVerify` 被设置为 false，而对于所有其他的 URL，它被设置为 `true`：
+
+------------
+% git config get --type=bool --url=https://good.example.com http.sslverify
+true
+% git config get --type=bool --url=https://weak.example.com http.sslverify
+false
+% git config get --url=https://weak.example.com http
+http.cookieFile /tmp/cookie.txt
+http.sslverify false
+------------
+
+include::config.adoc[]
+
+漏洞
+--
+当使用废弃的 `[section.subsection]` 语法时，如果 subsection 至少有一个大写字母，改变一个值将导致添加一个多行键而不是改变。例如，有以下配置
+
+--------
+  [section.subsection]
+    key = value1
+--------
+
+并运行 `git config section.Subsection.key value2` 将导致如下的结果
+
+--------
+  [section.subsection]
+    key = value1
+    key = value2
+--------
+
+
+GIT
+---
+属于 linkgit:git[1] 文档

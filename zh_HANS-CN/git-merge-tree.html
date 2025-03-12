@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-merge-tree(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -461,7 +462,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>执行合并，但不做任何新的提交，也不从工作区或索引中读取或写入。</p>
 </div>
 <div class="paragraph">
-<p>执行的合并将使用与 “真正的” <a href="git-merge.html"><b>git-merge</b>(1)</a>相同的功能，包括：</p>
+<p>执行的合并将使用与 “真正的” <a href="git-merge.html">git-merge(1)</a>相同的功能，包括：</p>
 </div>
 <div class="ulist">
 <ul>
@@ -492,9 +493,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="dlist">
 <dl>
+<dt class="hdlist1">--stdin</dt>
+<dd>
+<p>Read the commits to merge from the standard input rather than the command-line. See <a href="#INPUT">INPUT FORMAT</a> below for more information. Implies <code>-z</code>.</p>
+</dd>
 <dt class="hdlist1">-z</dt>
 <dd>
-<p>在 &lt;冲突文件信息&gt; 部分不要引用文件名，每个文件名用 NUL 字符而不是换行来结束。 在信息部分也要用 NUL 字符而不是换行来开始。 更多信息见下面的 <a href="#OUTPUT">输出</a>。</p>
+<p>Do not quote filenames in the &lt;Conflicted file info&gt; section, and end each filename with a NUL character rather than newline. Also begin the messages section with a NUL character instead of a newline. See <a href="#OUTPUT">OUTPUT</a> below for more information.</p>
 </dd>
 <dt class="hdlist1">--name-only</dt>
 <dd>
@@ -508,9 +513,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>如果指定的两个分支没有共同的历史，merge-tree 默认会出错。 这个标志可以用来覆盖这个检查，并使合并继续进行。</p>
 </dd>
-<dt class="hdlist1">--merge-base=&lt;提交&gt;</dt>
+<dt class="hdlist1">--merge-base=&lt;tree-ish&gt;</dt>
 <dd>
 <p>不需要为 &lt;branch1&gt; 和 &lt;branch2&gt; 寻找合并基础，而是为合并指定一个合并基础，目前不支持指定多个合并基础。该选项与 <code>--stdin</code> 不兼容。</p>
+<div class="paragraph">
+<p>由于直接提供了合并基础，&lt;分支 1&gt; 和 &lt;分支 2&gt; 不需要指定提交；树对象就足够了。</p>
+</div>
+</dd>
+<dt class="hdlist1">-X&lt;选项&gt;</dt>
+<dt class="hdlist1">--strategy-option=&lt;选项&gt;</dt>
+<dd>
+<p>将合并策略特有的选项传递给合并策略。 详见 <a href="git-merge.html">git-merge(1)</a>。</p>
 </dd>
 </dl>
 </div>
@@ -562,10 +575,8 @@ NUL</pre>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>   0：合并后有冲突
-   1： 合并是干净的
-   &lt;0：有什么东西阻止了合并的运行（例如，文件系统拒绝对仓库对象的访问
-对象的访问被文件系统拒绝)</pre>
+<pre>0: merge had conflicts
+1: merge was clean</pre>
 </div>
 </div>
 </div>
@@ -586,7 +597,7 @@ NUL</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>文件名将按照配置变量 <code>core.quotePath</code> 的说明加引号（参见 <a href="git-config.html"><b>git-config</b>(1)</a>）。 不过，如果通过了 <code>--name-only`选项，则会省略模式、对象和阶段。 如果传递了 `-z</code> 选项，“行” 将以 NUL 字符而不是换行符结束。</p>
+<p>文件名将按照配置变量 <code>core.quotePath</code> 的说明加引号（参见 <a href="git-config.html">git-config(1)</a>）。 不过，如果通过了 <code>--name-only</code>`选项，则会省略模式、对象和阶段。 如果传递了 `-z 选项，“行” 将以 NUL 字符而不是换行符结束。</p>
 </div>
 </div>
 <div class="sect2">
@@ -672,13 +683,19 @@ NUL</pre>
 <h2 id="_使用说明">使用说明</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>这个命令旨在作为低级的底层命令，类似于 <a href="git-hash-object.html"><b>git-hash-object</b>(1)</a>，<a href="git-mktree.html"><b>git-mktree</b>(1)</a>， <a href="git-commit-tree.html"><b>git-commit-tree</b>(1)</a>， <a href="git-write-tree.html"><b>git-write-tree</b>(1)</a>，<a href="git-update-ref.html"><b>git-update-ref</b>(1)</a> 和 <a href="git-mktag.html"><b>git-mktag</b>(1)</a>。 因此，它可以作为一系列步骤的一部分来使用，比如：</p>
+<p>这个命令旨在作为低级的底层命令，类似于 <a href="git-hash-object.html">git-hash-object(1)</a>，<a href="git-mktree.html">git-mktree(1)</a>， <a href="git-commit-tree.html">git-commit-tree(1)</a>， <a href="git-write-tree.html">git-write-tree(1)</a>，<a href="git-update-ref.html">git-update-ref(1)</a> 和 <a href="git-mktag.html">git-mktag(1)</a>。 因此，它可以作为一系列步骤的一部分来使用，比如：</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>NEWTREE=$(git merge-tree --write-tree $BRANCH1 $BRANCH2)
-test $? -eq 0 || die "There were conflicts..."
-NEWCOMMIT=$(git commit-tree $NEWTREE -p $BRANCH1 -p $BRANCH2)
+<pre>vi message.txt
+BRANCH1=refs/heads/test
+BRANCH2=main
+NEWTREE=$(git merge-tree --write-tree $BRANCH1 $BRANCH2) || {
+    echo "There were conflicts..." 1&gt;&amp;2
+    exit 1
+}
+NEWCOMMIT=$(git commit-tree $NEWTREE -F message.txt \
+    -p $BRANCH1 -p $BRANCH2)
 git update-ref $BRANCH1 $NEWCOMMIT</pre>
 </div>
 </div>
@@ -686,7 +703,7 @@ git update-ref $BRANCH1 $NEWCOMMIT</pre>
 <p>注意，当退出状态为非零时，这个序列中的 <code>NEWTREE</code> 将包含很多输出，而不仅仅是一棵目录树。</p>
 </div>
 <div class="paragraph">
-<p>对于冲突，输出包括你用 <a href="git-merge.html"><b>git-merge</b>(1)</a> 得到的相同信息：</p>
+<p>对于冲突，输出包括你用 <a href="git-merge.html">git-merge(1)</a> 得到的相同信息：</p>
 </div>
 <div class="ulist">
 <ul>
@@ -704,7 +721,7 @@ git update-ref $BRANCH1 $NEWCOMMIT</pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_输入格式">输入格式</h2>
+<h2 id="INPUT">输入格式</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p><em>git merge-tree --stdin</em> 的输入格式是完全基于文本的。每一行都有这样的格式：</p>
@@ -763,14 +780,14 @@ git update-ref $BRANCH1 $NEWCOMMIT</pre>
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:06 +0200
+Last updated 2025-03-23 12:03:53 +0100
 </div>
 </div>
 </body>

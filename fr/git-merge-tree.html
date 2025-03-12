@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-merge-tree(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -461,7 +462,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Exécute une fusion, mais ne fait pas de nouveaux commits et ne lit ni n&#8217;écrit ni l&#8217;arbre de travail ni l&#8217;index.</p>
 </div>
 <div class="paragraph">
-<p>La fusion effectuée utilisera les mêmes caractéristiques que le <a href="git-merge.html"><b>git-merge</b>(1)</a> « réel », y compris :</p>
+<p>La fusion effectuée utilisera les mêmes caractéristiques que le <a href="git-merge.html">git-merge(1)</a> « réel », y compris :</p>
 </div>
 <div class="ulist">
 <ul>
@@ -492,6 +493,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="dlist">
 <dl>
+<dt class="hdlist1">--stdin</dt>
+<dd>
+<p>Lire les commits à fusionner à partir de l&#8217;entrée standard plutôt que sur la ligne de commande. Voir <a href="#INPUT">FORMAT D&#8217;ENTRÉE</a> ci-dessous pour plus d&#8217;informations. Implique <code>-z</code>.</p>
+</dd>
 <dt class="hdlist1">-z</dt>
 <dd>
 <p>Ne pas citer les noms de fichiers dans la section &lt;information de fichiers en conflit&gt;, et terminer chaque nom de fichier avec un caractère NUL plutôt qu&#8217;un retour à la ligne. Commencer également la section des messages avec un caractère NUL au lieu d&#8217;une nouvelle ligne. Voir <a href="#OUTPUT">SORTIE</a> ci-dessous pour plus d&#8217;informations.</p>
@@ -508,9 +513,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>merge-tree sera en erreur par défaut si les deux branches spécifiées ne partagent aucune histoire commune. Ce drapeau peut être donné pour annuler cette vérification et faire poursuivre tout de même la fusion.</p>
 </dd>
-<dt class="hdlist1">--merge-base=&lt;commit&gt;</dt>
+<dt class="hdlist1">--merge-base=&lt;arbre-esque&gt;</dt>
 <dd>
 <p>Au lieu de trouver les bases de fustion pour la &lt;branche1&gt; et &lt;branche2&gt;, il n&#8217;y a pas de prise en charge pour spécifier une base de fusion pour la fusion et préciser plusieurs bases. Cette option est incompatible avec <code>--stdin</code>.</p>
+<div class="paragraph">
+<p>Comme la base de fusion est fournie directement, &lt;branche1&gt; et &lt;branche2&gt; n&#8217;ont pas besoin de pointer des commits ; les arbres sont suffisants.</p>
+</div>
+</dd>
+<dt class="hdlist1">-X&lt;option&gt;</dt>
+<dt class="hdlist1">--strategy-option=&lt;option&gt;</dt>
+<dd>
+<p>Passer l&#8217;option spécifique de stratégie de fusion à la stratégie de fusion. Voir <a href="git-merge.html">git-merge(1)</a> pour plus de détails.</p>
 </dd>
 </dl>
 </div>
@@ -562,17 +575,15 @@ NUL</pre>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>    0 : la fusion avait des conflits
-    1 : la fusion était propre
-    &lt;0 : quelque chose a empêché la fusion de fonctionner (p. ex. accès au dépôt
-objets empêché par le système de fichiers)</pre>
+<pre>0 : la fusion avait des conflits
+1 : la fusion était propre</pre>
 </div>
 </div>
 </div>
 <div class="sect2">
 <h3 id="OIDTLT">OID de l&#8217;arbre supérieur</h3>
 <div class="paragraph">
-<p>C&#8217;est un objet d&#8217;arbre qui représente ce qui serait extrait dans l&#8217;arbre de travail à la fin de <code>git merge</code>. S&#8217;il y avait des conflits, alors les fichiers dans cet arbre peuvent avoir des marqueurs de conflit intégrés. Cette section est toujours suivie d&#8217;une nouvelle ligne (ou NUL si <code>-z</code> est passé).</p>
+<p>C&#8217;est un objet d&#8217;arbre qui représente ce qui serait extrait dans l&#8217;arbre de travail à la fin de <code>git</code> <code>merge</code>. S&#8217;il y avait des conflits, alors les fichiers dans cet arbre peuvent avoir des marqueurs de conflit intégrés. Cette section est toujours suivie d&#8217;une nouvelle ligne (ou NUL si <code>-z</code> est passé).</p>
 </div>
 </div>
 <div class="sect2">
@@ -586,7 +597,7 @@ objets empêché par le système de fichiers)</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Le nom du fichier sera cité comme expliqué pour la variable de configuration <code>core.quotePath</code> (voir <a href="git-config.html"><b>git-config</b>(1)</a>). Cependant, si l&#8217;option <code>--name-only</code> est passée, le mode, l&#8217;objet, et l&#8217;étape seront omis. Si l&#8217;option <code>-z</code> est passée, les "lignes" sont terminées par un caractère NUL au lieu d&#8217;un caractère de nouvelle ligne.</p>
+<p>Le nom du fichier sera cité comme expliqué pour la variable de configuration <code>core.quotePath</code> (voir <a href="git-config.html">git-config(1)</a>). Cependant, si l&#8217;option <code>--name-only</code> est passée, le mode, l&#8217;objet, et l&#8217;étape seront omis. Si l&#8217;option <code>-z</code> est passée, les "lignes" sont terminées par un caractère NUL au lieu d&#8217;un caractère de nouvelle ligne.</p>
 </div>
 </div>
 <div class="sect2">
@@ -672,13 +683,19 @@ objets empêché par le système de fichiers)</pre>
 <h2 id="_notes_dutilisation">NOTES D&#8217;UTILISATION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Cette commande est destinée à la plomberie de bas niveau, semblable à <a href="git-hash-object.html"><b>git-hash-object</b>(1)</a>, <a href="git-mktree.html"><b>git-mktree</b>(1)</a>, <a href="git-commit-tree.html"><b>git-commit-tree</b>(1)</a>, <a href="git-write-tree.html"><b>git-write-tree</b>(1)</a>, <a href="git-update-ref.html"><b>git-update-ref</b>(1)</a>, et <a href="git-mktag.html"><b>git-mktag</b>(1)</a>. Ainsi, elle peut être utilisée comme partie d&#8217;une série d&#8217;étapes telles que :</p>
+<p>Cette commande est destinée à la plomberie de bas niveau, semblable à <a href="git-hash-object.html">git-hash-object(1)</a>, <a href="git-mktree.html">git-mktree(1)</a>, <a href="git-commit-tree.html">git-commit-tree(1)</a>, <a href="git-write-tree.html">git-write-tree(1)</a>, <a href="git-update-ref.html">git-update-ref(1)</a>, et <a href="git-mktag.html">git-mktag(1)</a>. Ainsi, elle peut être utilisée comme partie d&#8217;une série d&#8217;étapes telles que :</p>
 </div>
 <div class="literalblock">
 <div class="content">
-<pre>NEWTREE=$(git merge-tree --write-tree $BRANCH1 $BRANCH2)
-test $? -eq 0 || die "Il y avait des conflits..."
-NEWCOMMIT=$(git commit-tree $NEWTREE -p $BRANCH1 -p $BRANCH2)
+<pre>vi message.txt
+BRANCH1=refs/heads/test
+BRANCH2=main
+NEWTREE=$(git merge-tree --write-tree $BRANCH1 $BRANCH2) || {
+    echo "There were conflicts..." 1&gt;&amp;2
+    exit 1
+}
+NEWCOMMIT=$(git commit-tree $NEWTREE -F message.txt \
+    -p $BRANCH1 -p $BRANCH2)
 git update-ref $BRANCH1 $NEWCOMMIT</pre>
 </div>
 </div>
@@ -686,7 +703,7 @@ git update-ref $BRANCH1 $NEWCOMMIT</pre>
 <p>Notez que lorsque le statut de sortie est non-zéro, <code>NEWTREE</code> dans cette séquence contiendra beaucoup plus qu&#8217;un arbre.</p>
 </div>
 <div class="paragraph">
-<p>Pour les conflits, la sortie comprend les mêmes informations que vous obtiendriez avec <a href="git-merge.html"><b>git-merge</b>(1)</a> :</p>
+<p>Pour les conflits, la sortie comprend les mêmes informations que vous obtiendriez avec <a href="git-merge.html">git-merge(1)</a> :</p>
 </div>
 <div class="ulist">
 <ul>
@@ -704,7 +721,7 @@ git update-ref $BRANCH1 $NEWCOMMIT</pre>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_format_dentrée">FORMAT D&#8217;ENTRÉE</h2>
+<h2 id="INPUT">FORMAT D&#8217;ENTRÉE</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Le format d&#8217;entrée de <em>git merge-tree --stdin</em> est entièrement textuel. Chaque ligne a ce format :</p>
@@ -763,7 +780,7 @@ git update-ref $BRANCH1 $NEWCOMMIT</pre>
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Fait partie de la suite <a href="git.html"><b>git</b>(1)</a></p>
+<p>Fait partie de la suite <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
@@ -778,7 +795,7 @@ git update-ref $BRANCH1 $NEWCOMMIT</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:26:31 +0200
+Last updated 2025-03-23 12:03:32 +0100
 </div>
 </div>
 </body>

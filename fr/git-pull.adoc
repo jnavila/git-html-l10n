@@ -1,0 +1,177 @@
+git-pull(1)
+===========
+
+NOM
+---
+git-pull - Rapatrier et intégrer un autre dépôt ou une branche locale
+
+
+SYNOPSIS
+--------
+[verse]
+'git pull' [<options>] [<dépôt> [<spécification-de-référence>...]]
+
+
+DESCRIPTION
+-----------
+
+Incorpore les modifications d'un dépôt distant dans la branche courante. Si la branche courante est en retard par rapport à la branche distante, alors par défaut, cela avancera rapidement la branche courante pour correspondre à la branche distante. Si la branche courante et le dépôt distant ont divergé, l'utilisateur doit spécifier comment réconcilier les branches divergentes avec `--rebase` ou `--no-rebase` (ou l'option de configuration correspondante dans `pull.rebase`).
+
+Plus précisément, `git pull` exécute `git fetch` avec les paramètres donnés et ensuite, selon les options de configuration ou les drapeaux de la ligne de commande, appellera soit `git rebase` soit `git merge` pour réconcilier les branches divergentes.
+
+<dépôt> doit être le nom d'un dépôt distant tel que passé à linkgit:git-fetch[1]. <spéc-de-réf> peut nommer une réf distante arbitraire (par exemple, le nom d'une étiquette) ou même une collection de réfs avec les branches de suivi à distance correspondantes (par exemple, refs/heads/{asterisk}:refs/remotes/origin/{asterisk}), mais c'est généralement le nom d'une branche du dépôt distant.
+
+Les valeurs par défaut pour <dépôt> et <branche> sont lues à partir de la configuration "remote" et "merge" pour la branche actuelle comme défini par linkgit:git-branch[1] `--track`.
+
+Supposons que l'historique suivant existe et que la branche actuelle est `master` :
+
+------------
+	  A---B---C master sur origin
+	 /
+    D---E---F---G master
+	^
+	origin/master dans votre dépôt
+------------
+
+Ensuite, "`git pull`" récupère et rejoue les modifications de la branche `master` distante, puisqu'elle a divergé du `master` local (c'est-à-dire `E`) jusqu'à son commit actuel (`C`) en plus de `master` et enregistre le résultat dans un nouveau commit avec les noms des deux commits parents et un message de journal de l'utilisateur décrivant les modifications.
+
+------------
+	  A---B---C origin/master
+	 /         \
+    D---E---F---G---H master
+------------
+
+Voir linkgit:git-merge[1] pour plus de détails, notamment sur la manière dont les conflits sont présentés et traités.
+
+Dans Git 1.7.0 ou une version ultérieure, pour annuler une fusion conflictuelle, utilisez `git reset --merge`. *Avertissement* : dans les anciennes versions de Git, il est déconseillé d'exécuter 'git pull' avec des modifications non validées : bien que cela soit possible, cela vous laisse dans un état dont il peut être difficile de se défaire en cas de conflit.
+
+Si l'une des modifications sur le distant chevauche des modifications locales non validées, la fusion sera automatiquement annulée et l'arbre de travail sera conservé. Il est généralement préférable de mettre les modifications locales en ordre de marche ou de les remiser avec linkgit:git-stash[1] avant de tirer.
+
+OPTIONS
+-------
+
+-q::
+--quiet::
+	Ceci est transmis à la fois au git-fetch sous-jacent pour éliminer les rapports lors du transfert et au git-merge sous-jacent pour éliminer les rapports lors de la fusion.
+
+-v::
+--verbose::
+	Passer --verbose à git-fetch et git-merge.
+
+--[no-]recurse-submodules[=(yes|on-demand|no)]::
+	Cette option contrôle si les nouveaux commits des sous-modules peuplés doivent être récupérés et si les arbres de travail des sous-modules actifs devraient être aussi mis à jour (voir linkgit:git-fetch[1], linkgit:git-config[1] et linkgit:gitmodules[5]).
++
+Si l'extraction est effectuée via un rebasage, les commits des sous-module locaux sont également rebasés.
++
+Si la mise à jour est effectuée par fusion, les conflits de sous-module sont résolus et extraits.
+
+Options relatives à la fusion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:git-pull: 1
+
+include::merge-options.adoc[]
+
+-r::
+--rebase[=(false|true|merges|interactive)]::
+	Lorsque c'est le cas, rebaser la branche actuelle sur la branche amont après l'avoir récupérée. S'il existe une branche de suivi à distance correspondant à la branche en amont et que la branche en amont a été rebasée depuis la dernière extraction, le rebasage utilise cette information pour éviter de rebaser des modifications non locales.
++
+Lorsqu'il est défini sur `merges`, rebaser en utilisant `git rebase --rebase-merges` de sorte que les commits de fusion locaux soient inclus dans le rebasage (voir linkgit:git-rebase[1] pour plus de détails).
++
+Lorsqu'elle est fausse, fusionner la branche amont dans la branche actuelle.
++
+Lorsque vous êtes en mode `interactive`, activer le mode interactif de rebase.
++
+Voir `pull.rebase`, `branch. <nom> .rebase` et `branch.autoSetupRebase` dans linkgit:git-config[1] si vous voulez que `git pull` utilise toujours `--rebase` au lieu de fusionner .
++
+[NOTE]
+C'est un mode de fonctionnement potentiellement _dangereux_. Il réécrit l'historique, ce qui n'est pas de bon augure lorsque vous avez déjà publié cette historique. N'utilisez *pas* cette option à moins d'avoir lu attentivement linkgit:git-rebase[1].
+
+--no-rebase::
+	C'est un raccourci pour --rebase=false.
+
+Options relatives au rapatriement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+include::fetch-options.adoc[]
+
+include::pull-fetch-param.adoc[]
+
+include::urls-remotes.adoc[]
+
+include::merge-strategies.adoc[]
+
+COMPORTEMENT PAR DÉFAUT
+-----------------------
+
+Souvent, les gens utilisent `git pull` sans donner aucun paramètre. Traditionnellement, cela équivaut à dire `git pull origin`. Cependant, lorsque la configuration `branch.<nom>.remote` est présente alors que sur la branche `<nom>`, cette valeur est utilisée à la place de `origin`.
+
+Afin de déterminer l'URL à utiliser pour récupérer, la valeur de la configuration `remote. <origine> .url` est consultée et s'il n'y a pas une telle variable, la valeur sur la ligne `URL:` dans `$GIT_DIR/remotes/<origine>` est utilisée.
+
+Afin de déterminer les branches distantes à récupérer (et éventuellement stocker dans les branches de suivi à distance) lorsque la commande est exécutée sans aucun paramètre spéc-de-réf sur la ligne de commande, les valeurs de la variable de configuration `remote. <origine> .fetch` sont consultées , et s'il n'y en a pas, `$GIT_DIR/remotes/<origine>` est consulté et ses lignes `Pull :` sont utilisées. En plus des formats spéc-de-réf décrits dans la section OPTIONS, vous pouvez avoir un motif de spécificateur de référence qui ressemble à ceci :
+
+------------
+refs/heads/*:refs/remotes/origin/*
+------------
+
+Un motif de spécificateur de référence doit avoir un partie droite non vide (c'est-à-dire qu'elle doit stocker ce qui a été récupéré dans des branches de suivi à distance), et ses parties gauches et parties droites doivent se terminer par `/*`. Ce qui précède précise que toutes les branches distantes sont suivies en utilisant les branches de suivi à distance dans la hiérarchie `refs/remotes/origin/` sous le même nom.
+
+La règle qui consiste à déterminer quelle branche distante doit être fusionnée après avoir été récupérée est un peu compliquée, afin de ne pas rompre la rétrocompatibilité.
+
+Si des spécificateurs de référence explicites ont été donnés sur la ligne de commande de `git pull`, elles sont toutes fusionnées.
+
+Lorsqu'aucun spécificateur de référence n'a été donné sur la ligne de commande, alors `git pull` utilise le spécificateur de référence de la configuration ou `$GIT_DIR/remotes/<origine>`. Dans de tels cas, les règles suivantes s'appliquent :
+
+. Si la configuration `branch.<nom>.merge` pour la branche actuelle `<nom>` existe, c'est le nom de la branche du site distant en cours de fusion.
+
+. Si le spécificateur de référence est un spécificateur motif, rien n'est fusionné.
+
+. Sinon, la branche distante du premier spécificateur de référence est fusionnée.
+
+
+EXEMPLES
+--------
+
+* Mettre à jour les branches de suivi à distance pour le dépôt d'où vous avez cloné, puis fusionner l'une d'entre elles dans votre branche actuelle :
++
+------------------------------------------------
+$ git pull
+$ git pull origin
+------------------------------------------------
++
+Normalement, la branche fusionnée est la HEAD du dépôt distant, mais le choix est déterminé par les options branch. <nom> .remote et branch. <nom> .merge ; voir linkgit:git-config[1] pour plus de détails.
+
+* Fusionner dans la branche actuelle la branche distante `next` :
++
+------------------------------------------------
+$ git pull origin next
+------------------------------------------------
++
+Cela laisse une copie de `next` temporairement dans FETCH_HEAD, et met pas à jour la branche de suivi à distance `origin/next`. La même chose peut être faite en invoquant fetch et merge :
++
+------------------------------------------------
+$ git fetch origin
+$ git merge origin/next
+------------------------------------------------
+
+
+Si vous avez tenté un tirage qui a entraîné des conflits complexes et que vous souhaitez recommencer à zéro, vous pouvez vous rembobiner grâce à 'git reset'.
+
+
+include::transfer-data-leaks.adoc[]
+
+BOGUES
+------
+L'utilisation de --recurse-submodules ne permet actuellement d'obtenir de nouveaux commits que dans les sous-modules déjà vérifiés . Lorsque, par exemple, un nouveau sous-module est ajouté dans les commit en amont qui viennent d'être récupérés du superprojet, le sous-module lui-même ne peut pas être récupéré, ce qui rend impossible de vérifier ce sous-module plus tard sans avoir à le récupérer à nouveau. Ce problème devrait être corrigé dans une prochaine version de Git.
+
+VOIR AUSSI
+----------
+linkgit:git-fetch[1], linkgit:git-merge[1], linkgit:git-config[1]
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

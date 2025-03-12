@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-range-diff(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,10 +447,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git range-diff</em> [--color=[&lt;何时&gt;]] [--no-color] [&lt;差异选项&gt;]
-        [--no-dual-color] [--creation-factor=&lt;系数&gt;]
-        [--left-only | --right-only]
-        ( &lt;范围 1&gt; &lt;范围 2&gt; | &lt;修订 1&gt;&#8230;&#8203;&lt;修订 2&gt; | &lt;基础&gt; &lt;修订 1&gt; &lt;修订 2&gt; )
+<pre class="content"><em>git range-diff</em> [--color=[&lt;when&gt;]] [--no-color] [&lt;diff-options&gt;]
+        [--no-dual-color] [--creation-factor=&lt;factor&gt;]
+        [--left-only | --right-only] [--diff-merges=&lt;format&gt;]
+        [--remerge-diff]
+        ( &lt;range1&gt; &lt;range2&gt; | &lt;rev1&gt;&#8230;&#8203;&lt;rev2&gt; | &lt;base&gt; &lt;rev1&gt; &lt;rev2&gt; )
         [[--] &lt;path&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
@@ -461,7 +463,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>该命令显示补丁系列的两个版本之间的差异，或者更笼统地说，两个提交范围之间的差异（忽略合并提交）。</p>
 </div>
 <div class="paragraph">
-<p>如果存在 <code>&lt;path&gt;</code> 参数，这些提交范围将受到相应的限制。</p>
+<p>如果存在 <em>&lt;path&gt;</em> 参数，这些提交范围将受到相应的限制。</p>
 </div>
 <div class="paragraph">
 <p>为此，它首先从两个提交范围中找到相互对应的提交对。当两个补丁之间的差值（即作者信息、提交信息和提交差值）相对于补丁的大小相当小时，这两个提交就被认为是对应的。详见下面的 ``算法``。</p>
@@ -475,13 +477,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>&lt;range1&gt; &lt;range2&gt;</code>： 提交范围可以是 <code>&lt;base&gt;...&lt;rev&gt;</code>、<code>&lt;rev&gt;^!</code> 或 <code>&lt;rev&gt;^-&lt;n&gt;</code>。详见 <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a> 中的 <code>指定范围</code>。</p>
+<p><em>&lt;range1&gt;</em> <em>&lt;range2&gt;</em>： 提交范围可以是 <em>&lt;base&gt;</em><code>...</code><em>&lt;rev&gt;</em>、<em>&lt;rev&gt;</em><code>^</code>! 或 <em>&lt;rev&gt;</em><code>^-</code><em>&lt;n&gt;</em>。详见 <a href="gitrevisions.html">gitrevisions(7)</a> 中的 指定范围。</p>
 </li>
 <li>
-<p><code>&lt;rev1&gt;...&lt;rev2&gt;</code>。这等同于 <code>&lt;rev2&gt;...&lt;rev1&gt; &lt;rev1&gt;...&lt;rev2&gt;</code>.</p>
+<p><em>&lt;rev1&gt;</em><code>...</code><em>&lt;rev2&gt;</em>。这等同于 <em>&lt;rev2&gt;</em><code>...</code><em>&lt;rev1&gt;</em> <em>&lt;rev1&gt;</em><code>...</code><em>&lt;rev2&gt;</em>.</p>
 </li>
 <li>
-<p><code>&lt;base&gt; &lt;rev1&gt; &lt;rev2&gt;</code>： 等同于 <code>&lt;base&gt;..&lt;rev1&gt; &lt;base&gt;..&lt;rev2&gt;</code>.</p>
+<p><em>&lt;base&gt;</em> <em>&lt;rev1&gt;</em> <em>&lt;rev2&gt;</em>： 等同于 <em>&lt;base&gt;</em><code>..</code><em>&lt;rev1&gt;</em> <em>&lt;base&gt;</em><code>..</code><em>&lt;rev2&gt;</em>.</p>
 </li>
 </ul>
 </div>
@@ -496,7 +498,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>当提交的差异不同时，`git range-diff`会重现原始差异的颜色，并添加外层的 -/+ 差异标记，<strong>背景</strong> 为红/绿色，以便于查看，例如，当具体添加了哪些行时。</p>
 <div class="paragraph">
-<p>此外，只出现在第一个提交范围内的提交差异行会显示为 "dimmed"（这可以使用 <code>color.diff. &lt;slot&gt;</code> 配置设置，其中 <code>&lt;slot&gt;</code> 是`contextDimmed`、<code>oldDimmed</code> 和 <code>newDimmed</code> 中的一个），而仅出现在第二个提交范围内的提交差异行以粗体显示（这可以通过配置设置 <code>color.diff.&lt;slot&gt;</code> 来覆盖，其中 <code>&lt;slot&gt;</code> 是 <code>contextBold</code>、<code>oldBold</code> 和 <code>newBold</code> 中的一个）。</p>
+<p>此外，只出现在第一个提交范围内的提交差异行会显示为 "dimmed"（这可以使用 <code>color.diff.</code> <em>&lt;slot&gt;</em> 配置设置，其中 <em>&lt;slot&gt;</em> 是`contextDimmed`、<code>oldDimmed</code> 和 <code>newDimmed</code> 中的一个），而仅出现在第二个提交范围内的提交差异行以粗体显示（这可以通过配置设置 <code>color.diff.</code><em>&lt;slot&gt;</em> 来覆盖，其中 <em>&lt;slot&gt;</em> 是 <code>contextBold</code>、<code>oldBold</code> 和 <code>newBold</code> 中的一个）。</p>
 </div>
 <div class="paragraph">
 <p>这在 <code>range-diff</code> 中被称为 "双重着色"。使用 <code>--no-dual-color</code> 可以还原为根据外部差异标记对所有线条着色（在着色时完全忽略内部差异）。</p>
@@ -504,36 +506,47 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--creation-factor=&lt;百分比&gt;</dt>
 <dd>
-<p>将创建/删除成本误差因子设置为 <code>&lt;百分比&gt;</code>。 默认为 60。如果 <code>git range-diff</code> 错误地认为一个大的改动是完全重写 (删除一个提交，增加另一个提交)，可以使用较大的值，反之则使用较小的值。 请参阅下面的 ``算法`` 部分以了解为什么需要这个值。</p>
+<p>将创建/删除成本误差因子设置为 &lt;百分比&gt;。 默认为 60。如果 <code>git</code> <code>range-diff</code> 错误地认为一个大的改动是完全重写 (删除一个提交，增加另一个提交)，可以使用较大的值，反之则使用较小的值。 请参阅下面的 ``算法`` 部分以了解为什么需要这个值。</p>
 </dd>
 <dt class="hdlist1">--left-only</dt>
 <dd>
-<p>忽略第一个指定范围（或使用 <code>&lt;rev1&gt;...&lt;rev2&gt;</code> 格式时的 "左侧范围"）中丢失的提交。</p>
+<p>忽略第一个指定范围（或使用 <em>&lt;rev1&gt;</em><code>...</code><em>&lt;rev2&gt;</em> 格式时的 "左侧范围"）中丢失的提交。</p>
 </dd>
 <dt class="hdlist1">--right-only</dt>
 <dd>
-<p>忽略第二个指定范围（或使用 <code>&lt;rev1&gt;...&lt;rev2&gt;</code> 格式时的 "右侧范围"）中丢失的提交。</p>
+<p>忽略第二个指定范围（或使用 <em>&lt;rev1&gt;</em><code>...</code><em>&lt;rev2&gt;</em> 格式时的 "右侧范围"）中丢失的提交。</p>
+</dd>
+<dt class="hdlist1">--diff-merges=&lt;格式&gt;</dt>
+<dd>
+<p>Instead of ignoring merge commits, generate diffs for them using the corresponding <code>--diff-merges=</code><em>&lt;format&gt;</em> option of <a href="git-log.html">git-log(1)</a>, and include them in the comparison.</p>
+<div class="paragraph">
+<p>Note: In the common case, the <code>remerge</code> mode will be the most natural one to use, as it shows only the diff on top of what Git&#8217;s merge machinery would have produced. In other words, if a merge commit is the result of a non-conflicting <code>git</code> <code>merge</code>, the <code>remerge</code> mode will represent it with an empty diff.</p>
+</div>
+</dd>
+<dt class="hdlist1">--remerge-diff</dt>
+<dd>
+<p>Convenience option, equivalent to <code>--diff-merges=remerge</code>.</p>
 </dd>
 <dt class="hdlist1">--[no-]notes[=&lt;引用&gt;]</dt>
 <dd>
-<p>这个标志将传递给生成补丁的 <code>git log</code> 程序（参见 <a href="git-log.html"><b>git-log</b>(1)</a>）。</p>
+<p>这个标志将传递给生成补丁的 <code>git</code> <code>log</code> 程序（参见 <a href="git-log.html">git-log(1)</a>）。</p>
 </dd>
 <dt class="hdlist1">&lt;范围1&gt; &lt;范围2&gt;</dt>
 <dd>
-<p>比较两个范围指定的提交，其中 <code>&lt;range1&gt;</code> 被认为是 <code>&lt;range2&gt;</code> 的旧版本。</p>
+<p>比较两个范围指定的提交，其中 <em>&lt;range1&gt;</em> 被认为是 <em>&lt;range2&gt;</em> 的旧版本。</p>
 </dd>
 <dt class="hdlist1"><em>&lt;修订 1&gt;..&lt;修订 2&gt;</em></dt>
 <dd>
-<p>相当于传递 <code>&lt;rev2&gt;...&lt;rev1&gt;</code> 和 <code>&lt;rev1&gt;...&lt;rev2&gt;</code>。</p>
+<p>相当于传递 <em>&lt;rev2&gt;</em><code>...</code><em>&lt;rev1&gt;</em> 和 <em>&lt;rev1&gt;</em><code>...</code><em>&lt;rev2&gt;</em>。</p>
 </dd>
 <dt class="hdlist1">&lt;基础&gt; &lt;修订 1&gt; &lt;修订 2&gt;</dt>
 <dd>
-<p>等同于传递 <code>&lt;base&gt;...&lt;rev1&gt;</code> 和 <code>&lt;base&gt;...&lt;rev2&gt;</code>。 注意 <code>&lt;base&gt;</code> 不需要是分支的确切分支点。例如： 在重定向分支 <code>my-topic</code> 之后， <code>git range-diff my-topic@{u} my-topic@{1} my-topic</code> 将显示重定向带来的差异。</p>
+<p>等同于传递 <em>&lt;base&gt;</em><code>...</code><em>&lt;rev1&gt;</em> 和 <em>&lt;base&gt;</em><code>...</code><em>&lt;rev2&gt;</em>。 注意 <em>&lt;base&gt;</em> 不需要是分支的确切分支点。例如： 在重定向分支 <code>my-topic</code> 之后， <code>git</code> <code>range-diff</code> <code>my-topic@</code>{u} <code>my-topic@</code>{1} <code>my-topic</code> 将显示重定向带来的差异。</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p><code>git range-diff</code> 也接受常规的 diff 选项 (参见 <a href="git-diff.html"><b>git-diff</b>(1)</a>)，特别是 <code>--color=[&lt;when&gt;]</code> 和 <code>--no-color</code> 选项。这些选项用于生成 “补丁间的差异”，即比较新旧提交的作者、提交信息和差异。目前还没有办法调整生成补丁时传递给 <code>git log</code> 的大部分 diff 选项。</p>
+<p><code>git</code> <code>range-diff</code> 也接受常规的 diff 选项 (参见 <a href="git-diff.html">git-diff(1)</a>)，特别是 <code>--color=</code>[<em>&lt;when&gt;</em>] 和 <code>--no-color</code> 选项。这些选项用于生成 “补丁间的差异”，即比较新旧提交的作者、提交信息和差异。目前还没有办法调整生成补丁时传递给 <code>git</code> <code>log</code> 的大部分 diff 选项。</p>
 </div>
 </div>
 </div>
@@ -541,7 +554,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_输出稳定性">输出稳定性</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>range-diff</code> 命令的输出可能会改变。它的目的是提供人类可读的上层命令输出，而不是可以在不同版本的 Git 中使用以获得文本稳定的 <code>range-diff</code> (与 <a href="git-patch-id.html"><b>git-patch-id</b>(1)</a> 的 <code>--stable</code> 选项不同)。对于 <code>range-diff</code> 来说，也没有与 <a href="git-apply.html"><b>git-apply</b>(1)</a> 等价的东西，其输出不是机器可读的。</p>
+<p><code>range-diff</code> 命令的输出可能会改变。它的目的是提供人类可读的上层命令输出，而不是可以在不同版本的 Git 中使用以获得文本稳定的 <code>range-diff</code> (与 <a href="git-patch-id.html">git-patch-id(1)</a> 的 <code>--stable</code> 选项不同)。对于 <code>range-diff</code> 来说，也没有与 <a href="git-apply.html">git-apply(1)</a> 等价的东西，其输出不是机器可读的。</p>
 </div>
 <div class="paragraph">
 <p>当传递 diff 选项时尤其如此。目前，一些选项，例如 <code>--stat</code>，会在 <code>range-diff</code> 的上下文中产生无用的输出。未来版本的 <code>range-diff</code> 可能会学习如何以 <code>range-diff</code> 特有的方式来解释这些选项 (例如， <code>--stat</code> 产生人类可读的输出，总结了 diffstat 的变化情况)。</p>
@@ -552,7 +565,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_配置">配置</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>该命令使用 <code>diff.color.*</code> 和 <code>pager.range-diff</code> 设置（后者默认开启）。 参见 <a href="git-config.html"><b>git-config</b>(1)</a>。</p>
+<p>该命令使用 <code>diff.color.</code>* 和 <code>pager.range-diff</code> 设置（后者默认开启）。 参见 <a href="git-config.html">git-config(1)</a>。</p>
 </div>
 </div>
 </div>
@@ -568,7 +581,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p><code>git range-diff</code> 的典型输出如下：</p>
+<p><code>git</code> <code>range-diff</code> 的典型输出如下：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -595,7 +608,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>在这个例子中，有 3 个旧提交和 3 个新提交，开发人员删除了第 3 个提交，在前两个提交之前添加了一个新提交，并修改了第 2 个提交的提交信息及其差异。</p>
 </div>
 <div class="paragraph">
-<p>当输出到终端时，默认是用颜色编码的，就像普通的 <code>git diff</code> 输出一样。此外，第一行（添加提交）是绿色的，最后一行（删除提交）是红色的，第二行（完全匹配）是黄色的，就像 <code>git show</code> 输出的提交头一样，第三行旧提交是红色的，新提交是绿色的，其余的就像 <code>git show</code> 的提交头一样。</p>
+<p>当输出到终端时，默认是用颜色编码的，就像普通的 <code>git</code> <code>diff</code> 输出一样。此外，第一行（添加提交）是绿色的，最后一行（删除提交）是红色的，第二行（完全匹配）是黄色的，就像 <code>git</code> <code>show</code> 输出的提交头一样，第三行旧提交是红色的，新提交是绿色的，其余的就像 <code>git</code> <code>show</code> 的提交头一样。</p>
 </div>
 <div class="paragraph">
 <p>不过，用颜色编码的原 diff 实际上有点难读，因为它会把整行都染成红色或绿色。例如，在旧提交中添加了 "What is unexpected" 的那行就完全是红色的，即使旧提交的意图是添加一些东西。</p>
@@ -618,7 +631,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>为了避免假阳性（例如，当一个补丁被删除，而在同一补丁系列的两次迭代之间又添加了一个不相关的补丁），成本矩阵通过为整体删除/添加添加固定成本条目进行扩展，以考虑到这一点。</p>
 </div>
 <div class="paragraph">
-<p>示例： 假设 <code>1--2</code> 是补丁系列的第一次迭代，<code>A--C`是第二次迭代。假设 `A`是从 `2</code> 中挑选出来的，而 <code>C</code> 是从 <code>1</code> 中挑选出来的，但做了一点修改（比如，一个固定的错别字）。将提交可视化为一个二元图：</p>
+<p>示例： 假设 <code>1--2</code> 是补丁系列的第一次迭代，<code>A--C</code>`是第二次迭代。假设 `A`是从 `2 中挑选出来的，而 <code>C</code> 是从 <code>1</code> 中挑选出来的，但做了一点修改（比如，一个固定的错别字）。将提交可视化为一个二元图：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -695,7 +708,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-log.html"><b>git-log</b>(1)</a></p>
+<p><a href="git-log.html">git-log(1)</a></p>
 </div>
 </div>
 </div>
@@ -703,14 +716,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:06 +0200
+Last updated 2025-03-23 12:03:54 +0100
 </div>
 </div>
 </body>

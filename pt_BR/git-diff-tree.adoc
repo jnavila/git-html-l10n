@@ -1,0 +1,88 @@
+git-diff-tree(1)
+================
+
+NOME
+----
+git-diff-tree - Compara o conteúdo e o modo das bolhas encontradas através de dois objetos árvore
+
+
+RESUMO
+------
+[verse]
+'git diff-tree' [--stdin] [-m] [-s] [-v] [--no-commit-id] [--pretty]
+	      [-t] [-r] [-c | --cc] [--combined-all-paths] [--root] [--merge-base]
+	      [<opções-comuns-ao-diff>] <árvore> [<árvore>] [<caminho>...]
+
+DESCRIÇÃO
+---------
+Compara o conteúdo e o modo das bolhas encontrados através de dois objetos da árvore.
+
+Caso haja apenas uma <árvore> informada, o commit será comparado com as suas raízes (consulte `--stdin` abaixo).
+
+Observe que 'git diff-tree' pode usar a árvore encapsulada num objeto commit.
+
+OPÇÕES
+------
+include::diff-options.adoc[]
+
+<tree-ish>::
+	A identificação de um objeto árvore.
+
+<caminho>...::
+	Caso seja utilizado, os resultados serão limitados a um subconjunto de arquivos que coincidam a um dos `pathspecs` utilizados.
+
+-r::
+	Recursar nas subárvores.
+
+-t::
+	Mostra a própria entrada da árvore, bem como as subárvores. Implica no uso da opção `-r`.
+
+--root::
+	Quando `--root` é utilizado o commit inicial será exibido como um grande evento de criação. Isso é o equivalente a um `diff` na árvore `NULL`.
+
+--merge-base::
+	Em vez de comparar os `<tree-ish>` diretamente, use a mesclagem base entre os dois `<tree-ish>` como o lado "antes". Deve haver dois `<tree-ish>` informados e ambos devem ser commits.
+
+--stdin::
+	Quando `--stdin` é usado, o comando não aceita argumentos `<tree-ish>` da linha de comando. Em vez disso, ele lê as linhas que contêm duas <árvores>, um <commit> ou uma lista de <commit> a partir da entrada predefinida. (Utilize um único espaço como um separador.)
++
+Quando duas árvores são informadas, ele compara a primeira árvore com a segunda. Quando um único commit é usado, ele compara o commit com os commits principais. Os commits restantes, quando informados, são usados como se fossem os commits principais do primeiro commit.
++
+Ao comparar duas árvores, o ID de ambas as árvores (separado por um espaço e terminado por uma nova linha) é impresso antes da diferença. Ao comparar os commits, o ID do primeiro (ou único) commité impresso, seguido de uma nova linha.
++
+As seguintes opções afetam ainda mais o comportamento durante a comparação dos commits (mas não as árvores).
+
+-m::
+	É predefinido que o comando 'git diff-tree --stdin' não mostre diferenças para a mesclagem dos commits. Com esta opção, ele mostra as diferenças desse commit em relação a todos os commits principais. Consulte também a opção `-c`.
+
+-s::
+	É predefinido que o comando 'git diff-tree --stdin' mostre as diferenças, seja na forma legível para máquina (sem a opção `-p`) ou na forma de correção patch (com `-p`). Esta saída pode ser suprimida. Ele só é útil com a opção `-v`.
+
+-v::
+	Essa sinalização faz com que o `git diff-tree --stdin` também exiba a mensagem do commit antes das diferenças.
+
+include::pretty-options.adoc[]
+
+--no-commit-id::
+	'git diff-tree' outputs a line with the commit ID when applicable. This flag suppresses the commit ID output.
+
+-c::
+	Esta opção altera a maneira como uma mesclagem de commit é exibido (o que significa que ele é útil apenas quando o comando é informado como <tree-ish> ou `--stdin`). Ele mostra as diferenças de cada um dos commits principais para o resultado simultâneo da mesclagem em vez de mostrar as diferenças em pares entre um commit principal e o resultado, uma de cada vez (que é o que a opção `-m` faz). Além disso, ele lista apenas os arquivos que foram alterados de todos os commits principais.
+
+--cc::
+	Esta opção altera a maneira como a correção da mesclagem de um commit é exibido, de maneira semelhante à opção `-c`. Isso implica as opções `-c` e `-p` e comprime ainda mais a correção criada, omitindo pedaços desinteressantes cujo conteúdo dos commits principais tem apenas duas variantes e o resultado da mesclagem escolhe uma delas sem alteração. Quando todas as variações não são interessantes, o próprio commit e o registro log da mensagem do commit não são exibidos, como em qualquer outro caso de um "diff vazio".
+
+--combined-all-paths::
+	Esta opção faz com que os diffs combinados (usados para mesclar os commits) listem o nome do arquivo de todos os commits principais. Portanto, ele só tem efeito quando a opção `-c` ou `--cc` são usados, provavelmente, só é útil se forem detectadas alterações no nome do arquivo (ou seja, quando a detecção de renomeação ou cópia tiver sido solicitada).
+
+--always::
+	Exibe o próprio commit com a mensagem do registro log do commit, mesmo que o `diff` esteja vazio.
+
+
+include::pretty-formats.adoc[]
+
+include::diff-format.adoc[]
+
+GIT
+---
+Parte do conjunto linkgit:git[1]

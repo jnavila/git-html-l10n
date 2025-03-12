@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-pack-objects(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -449,10 +450,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <pre class="content"><em>git pack-objects</em> [-q | --progress | --all-progress] [--all-progress-implied]
         [--no-reuse-delta] [--delta-base-offset] [--non-empty]
         [--local] [--incremental] [--window=&lt;n&gt;] [--depth=&lt;n&gt;]
-        [--revs [--unpacked | --all]] [--keep-pack=&lt;包名&gt;]
-        [--cruft] [--cruft-expiration=&lt;时间&gt;]
-        [--stdout [--filter=&lt;过滤选项&gt;] | &lt;基础名&gt;]
-        [--shallow] [--keep-true-parents] [--[no-]sparse] &lt; &lt;对象列表&gt;</pre>
+        [--revs [--unpacked | --all]] [--keep-pack=&lt;pack-name&gt;]
+        [--cruft] [--cruft-expiration=&lt;time&gt;]
+        [--stdout [--filter=&lt;filter-spec&gt;] | &lt;base-name&gt;]
+        [--shallow] [--keep-true-parents] [--[no-]sparse]
+        [--name-hash-version=&lt;n&gt;] &lt; &lt;object-list&gt;</pre>
 </div>
 </div>
 </div>
@@ -491,7 +493,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--revs</dt>
 <dd>
-<p>从标准输入读取修订参数，而不是单个对象名称。 修订版参数的处理方式与带有 <code>--objects</code> 标志的 <em>git rev-list</em> 使用其 <code>commit</code> 参数来建立其输出的对象列表相同。 结果列表上的对象被打包。 除了修订，还接受 <code>--not</code> 或 <code>--shallow &lt;SHA-1&gt;</code> 行。</p>
+<p>从标准输入读取修订参数，而不是单个对象名称。 修订版参数的处理方式与带有 <code>--objects</code> 标志的 <em>git rev-list</em> 使用其 <code>commit</code> 参数来建立其输出的对象列表相同。 结果列表上的对象被打包。 除了修订，还接受 <code>--not</code> 或 <code>--shallow</code> <em>&lt;SHA-1&gt;</em> 行。</p>
 </dd>
 <dt class="hdlist1">--unpacked</dt>
 <dd>
@@ -514,7 +516,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--cruft</dt>
 <dd>
-<p>将无法到达的对象打包到一个单独的 "cruft" 包中，以 <code>.mtimes</code> 文件的存在为标志。通常由`git repack --cruft`使用。调用者提供一个包的名称列表，并指出哪些包将保留在版本库中，以及哪些包将被删除（用 <code>-</code> 前缀表示）。cruft 包的内容是所有不包含在幸存的包中的对象，它们没有超过宽限期（见下面的 <code>--cruft-expiration</code>），或者它们已经超过了宽限期，但可以从其他没有超过宽限期的对象中到达。</p>
+<p>将无法到达的对象打包到一个单独的 "cruft" 包中，以 .<code>mtimes</code> 文件的存在为标志。通常由`git repack --cruft`使用。调用者提供一个包的名称列表，并指出哪些包将保留在版本库中，以及哪些包将被删除（用 <code>-</code> 前缀表示）。cruft 包的内容是所有不包含在幸存的包中的对象，它们没有超过宽限期（见下面的 <code>--cruft-expiration</code>），或者它们已经超过了宽限期，但可以从其他没有超过宽限期的对象中到达。</p>
 <div class="paragraph">
 <p>当输入列出一个包含所有可达对象的包（并将所有其他包列为待删除），相应的 cruft 包将包含所有不可达对象（其 mtime 比 <code>--cruft-expiration</code> 新），以及任何 mtime 比 <code>--cruft-expiration</code> 早，但可从 mtime 比 <code>--cruft-expiration</code> 新的不可达对象到达的不可达对象）。</p>
 </div>
@@ -524,7 +526,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--cruft-expiration=&lt;近似值&gt;</dt>
 <dd>
-<p>如果指定了，且对象的 mtime 超过 <code>&lt;approxidate&gt;</code>，就会从 cruft 包中剔除。如果没有指定（并给出 <code>--cruft</code>），那么没有对象被淘汰。</p>
+<p>如果指定了，且对象的 mtime 超过 <em>&lt;approxidate&gt;</em>，就会从 cruft 包中剔除。如果没有指定（并给出 <code>--cruft</code>），那么没有对象被淘汰。</p>
 </dd>
 <dt class="hdlist1">--window=&lt;n&gt;</dt>
 <dt class="hdlist1">--depth=&lt;n&gt;</dt>
@@ -548,7 +550,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--keep-pack=&lt;包名&gt;</dt>
 <dd>
-<p>这个标志使已经在给定包中的对象被忽略，即使它本来已经被打包。<code>&lt;pack-name&gt;</code> 是不带前导目录的包文件名（例如：<code>pack-123.pack</code>）。该选项可以被多次指定以保留多个包。</p>
+<p>这个标志使已经在给定包中的对象被忽略，即使它本来已经被打包。<em>&lt;pack-name&gt;</em> 是不带前导目录的包文件名（例如：<code>pack-123.pack</code>）。该选项可以被多次指定以保留多个包。</p>
 </dd>
 <dt class="hdlist1">--incremental</dt>
 <dd>
@@ -598,7 +600,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>通过省略发送方和接收方之间的共同对象来创建一个 "轻量" 包，以减少网络传输。这个选项只有在与 --stdout 一起使用时才有意义。</p>
 <div class="paragraph">
-<p>注意：轻量包由于省略了所需的对象而违反了打包的存档格式，因此如果不使其自成一体，Git 就无法使用。使用 <code>git index-pack --fix-thin</code> （ <a href="git-index-pack.html"><b>git-index-pack</b>(1)</a>）来恢复自包含的属性。</p>
+<p>注意：轻量包由于省略了所需的对象而违反了打包的存档格式，因此如果不使其自成一体，Git 就无法使用。使用 <code>git</code> <code>index-pack</code> <code>--fix-thin</code> （ <a href="git-index-pack.html">git-index-pack(1)</a>）来恢复自包含的属性。</p>
 </div>
 </dd>
 <dt class="hdlist1">--shallow</dt>
@@ -609,7 +611,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>打包后的归档文件可以用 20 字节的对象名称或流中的偏移量来表达 delta 的基础对象，但早期版本的 Git 不理解后者。 默认情况下，<em>git pack-objects</em> 只使用前一种格式，以提高兼容性。 这个选项允许该命令使用后者的格式以达到紧凑的目的。 根据 delta 链的平均长度，这个选项通常会将生成的 packfile 缩小 3-5%。</p>
 <div class="paragraph">
-<p>注意: 在现版本 Git 中，诸如 <code>git gc</code> (参见 <a href="git-gc.html"><b>git-gc</b>(1)</a>)、<code>git repack</code> (参见 <a href="git-repack.html"><b>git-repack</b>(1)</a>)之类的上层命令在将仓库中的对象放入打包文件时，默认会传递这个选项。 当 <code>git bundle</code> (参见 <a href="git-bundle.html"><b>git-bundle</b>(1)</a>)创建一个捆绑包时也会这样做。</p>
+<p>注意: 在现版本 Git 中，诸如 <code>git</code> <code>gc</code> (参见 <a href="git-gc.html">git-gc(1)</a>)、<code>git</code> <code>repack</code> (参见 <a href="git-repack.html">git-repack(1)</a>)之类的上层命令在将仓库中的对象放入打包文件时，默认会传递这个选项。 当 <code>git</code> <code>bundle</code> (参见 <a href="git-bundle.html">git-bundle(1)</a>)创建一个捆绑包时也会这样做。</p>
 </div>
 </dd>
 <dt class="hdlist1">--threads=&lt;n&gt;</dt>
@@ -626,7 +628,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--filter=&lt;过滤器定义&gt;</dt>
 <dd>
-<p>从生成的包文件中省略某些对象（通常是 blob）。 有关有效的 <code>&lt;过滤规则&gt;</code> 形式，请参见 <a href="git-rev-list.html"><b>git-rev-list</b>(1)</a>。</p>
+<p>从生成的包文件中省略某些对象（通常是 blob）。 有关有效的 &lt;过滤规则&gt; 形式，请参见 <a href="git-rev-list.html">git-rev-list(1)</a>。</p>
 </dd>
 <dt class="hdlist1">--no-filter</dt>
 <dd>
@@ -664,6 +666,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--delta-islands</dt>
 <dd>
 <p>根据 “岛屿” 限制增量匹配。请参阅下文的增量匹配。</p>
+</dd>
+<dt class="hdlist1">--name-hash-version=&lt;n&gt;</dt>
+<dd>
+<p>While performing delta compression, Git groups objects that may be similar based on heuristics using the path to that object. While grouping objects by an exact path match is good for paths with many versions, there are benefits for finding delta pairs across different full paths. Git collects objects by type and then by a "name hash" of the path and then by size, hoping to group objects that will compress well together.</p>
+<div class="paragraph">
+<p>The default name hash version is <code>1</code>, which prioritizes hash locality by considering the final bytes of the path as providing the maximum magnitude to the hash function. This version excels at distinguishing short paths and finding renames across directories. However, the hash function depends primarily on the final 16 bytes of the path. If there are many paths in the repo that have the same final 16 bytes and differ only by parent directory, then this name-hash may lead to too many collisions and cause poor results. At the moment, this version is required when writing reachability bitmap files with <code>--write-bitmap-index</code>.</p>
+</div>
+<div class="paragraph">
+<p>The name hash version <code>2</code> has similar locality features as version <code>1</code>, except it considers each path component separately and overlays the hashes with a shift. This still prioritizes the final bytes of the path, but also "salts" the lower bits of the hash using the parent directory names. This method allows for some of the locality benefits of version <code>1</code> while breaking most of the collisions from a similarly-named file appearing in many different directories. At the moment, this version is not allowed when writing reachability bitmap files with <code>--write-bitmap-index</code> and it will be automatically changed to version <code>1</code>.</p>
+</div>
 </dd>
 </dl>
 </div>
@@ -729,7 +741,7 @@ island = refs/virtual/([0-9]+)/(pull)/</pre>
 <h2 id="_配置">配置</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>各种配置变量会影响打包，参见 <a href="git-config.html"><b>git-config</b>(1)</a> (搜索 "pack" 和 "delta")。</p>
+<p>各种配置变量会影响打包，参见 <a href="git-config.html">git-config(1)</a> (搜索 "pack" 和 "delta")。</p>
 </div>
 <div class="paragraph">
 <p>值得注意的是，delta 压缩不用于大于 <code>core.bigFileThreshold</code> 配置变量的对象和属性 <code>delta</code> 设置为 false 的文件。</p>
@@ -740,7 +752,7 @@ island = refs/virtual/([0-9]+)/(pull)/</pre>
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-rev-list.html"><b>git-rev-list</b>(1)</a> <a href="git-repack.html"><b>git-repack</b>(1)</a> <a href="git-prune-packed.html"><b>git-prune-packed</b>(1)</a></p>
+<p><a href="git-rev-list.html">git-rev-list(1)</a> <a href="git-repack.html">git-repack(1)</a> <a href="git-prune-packed.html">git-prune-packed(1)</a></p>
 </div>
 </div>
 </div>
@@ -748,14 +760,14 @@ island = refs/virtual/([0-9]+)/(pull)/</pre>
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:06 +0200
+Last updated 2025-03-23 12:03:53 +0100
 </div>
 </div>
 </body>

@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-grep(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -465,7 +466,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
            [-f &lt;file&gt;] [-e] &lt;motif&gt;
            [--and|--or|--not|(|)|-e &lt;motif&gt;&#8230;&#8203;]
            [--recurse-submodules] [--parent-basename &lt;nom-de-base&gt;]
-           [ [--[no-]exclude-standard] [--cached | --no-index | --untracked] | &lt;arbre&gt;&#8230;&#8203;]
+           [ [--[no-]exclude-standard] [--cached | --untracked |--no-index] | &lt;arbre&gt;&#8230;&#8203;]
            [--] [&lt;spéc-de-chemin&gt;&#8230;&#8203;]</pre>
 </div>
 </div>
@@ -487,25 +488,28 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Au lieu de rechercher les fichiers suivis dans l&#8217;arbre de travail, rechercher les blobs enregistrés dans le fichier d&#8217;index.</p>
 </dd>
-<dt class="hdlist1">--no-index</dt>
-<dd>
-<p>Rechercher les fichiers dans le répertoire actuel qui n&#8217;est pas géré par Git.</p>
-</dd>
 <dt class="hdlist1">--untracked</dt>
 <dd>
 <p>En plus de rechercher dans les fichiers suivis dans l&#8217;arbre de travail, rechercher aussi dans les fichiers non-suivis.</p>
 </dd>
+<dt class="hdlist1">--no-index</dt>
+<dd>
+<p>Recherche les fichiers dans le répertoire actuel qui n&#8217;est pas géré par Git, ou en ignorant que le répertoire actuel est géré par Git. Cela ressemble plutôt à l&#8217;exécution de l&#8217;utilitaire régulier <code>grep</code>(<code>1</code>) avec son option <code>-r</code> spécifiée, mais avec quelques avantages supplémentaires, tels que l&#8217;utilisation de motifs de spécificateurs de chemins pour limiter les chemins ; voir l&#8217;entrée <em>spécificateurs de chemin</em> dans <a href="gitglossary.html">gitglossary(7)</a> pour plus d&#8217;informations.</p>
+<div class="paragraph">
+<p>Cette option ne peut être utilisée avec <code>--cached</code> ou <code>--untracked</code>. Voir aussi <code>grep.fallbackToNoIndex</code> dans <em>CONFIGURATION</em> ci-dessous.</p>
+</div>
+</dd>
 <dt class="hdlist1">--no-exclude-standard</dt>
 <dd>
-<p>Rechercher également dans les fichiers ignorés en n&#8217;honorant pas le mécanisme <code>.gitignore</code>. Seulement utile avec <code>--untracked</code>.</p>
+<p>Rechercher également dans les fichiers ignorés en n&#8217;honorant pas le mécanisme .<code>gitignore</code>. Seulement utile avec <code>--untracked</code>.</p>
 </dd>
 <dt class="hdlist1">--exclude-standard</dt>
 <dd>
-<p>Ne pas prêter attention aux fichiers ignorés spécifiés via le mécanisme <code>.gitignore</code>. Seulement utile lors de la recherche de fichiers dans le répertoire actuel avec <code>--no-index</code>.</p>
+<p>Ne pas prêter attention aux fichiers ignorés spécifiés via le mécanisme .<code>gitignore</code>. Seulement utile lors de la recherche de fichiers dans le répertoire actuel avec <code>--no-index</code>.</p>
 </dd>
 <dt class="hdlist1">--recurse-submodules</dt>
 <dd>
-<p>Rechercher récursivement dans chaque sous-module qui est actif et extrait dans l&#8217;arbre de travail. Lorsqu&#8217;il est utilisé en combinaison avec l&#8217;option &lt;arbre&gt;, le préfixe de toutes les sorties de sous-modules sera le nom de l&#8217;objet &lt;arbre&gt; du projet parent. Cette option n&#8217;a aucun effet si <code>--no-index</code> est donné.</p>
+<p>Rechercher récursivement dans chaque sous-module qui est actif et extrait dans l&#8217;arbre de travail. Lorsqu&#8217;il est utilisé en combinaison avec l&#8217;option <em>&lt;arbre&gt;</em>, le préfixe de toutes les sorties de sous-modules sera le nom de l&#8217;objet <em>&lt;arbre&gt;</em> du projet parent. Cette option ne peut pas être utilisée avec <code>--untracked</code> et n&#8217;a aucun effet si <code>--no-index</code> est donné.</p>
 </dd>
 <dt class="hdlist1">-a</dt>
 <dt class="hdlist1">--text</dt>
@@ -601,12 +605,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-O[&lt;pageur&gt;]</dt>
 <dt class="hdlist1">--open-files-in-pager[=&lt;pageur&gt;]</dt>
 <dd>
-<p>Ouvrir les fichiers correspondants dans le pageur (pas la sortie de <em>grep</em>). Si le pageur est "less" ou "vi", et que l&#8217;utilisateur n&#8217;a spécifié qu&#8217;un seul motif, le premier fichier est positionné automatiquement à la première correspondance. L&#8217;argument <code>&lt;pageur&gt;</code> est optionnel ; s&#8217;il est spécifié, il doit être collé à l&#8217;option sans espace. Si <code>&lt;pageur&gt;</code> n&#8217;est pas spécifié, le pageur par défaut sera utilisé (voir <code>core.pager</code> dans <a href="git-config.html"><b>git-config</b>(1)</a>).</p>
+<p>Ouvrir les fichiers correspondants dans le pageur (pas la sortie de <em>grep</em>). Si le pageur est "less" ou "vi", et que l&#8217;utilisateur n&#8217;a spécifié qu&#8217;un seul motif, le premier fichier est positionné automatiquement à la première correspondance. L&#8217;argument <em>&lt;pageur&gt;</em> est optionnel ; s&#8217;il est spécifié, il doit être collé à l&#8217;option sans espace. Si <em>&lt;pageur&gt;</em> n&#8217;est pas spécifié, le pageur par défaut sera utilisé (voir <code>core.pager</code> dans <a href="git-config.html">git-config(1)</a>).</p>
 </dd>
 <dt class="hdlist1">-z</dt>
 <dt class="hdlist1">--null</dt>
 <dd>
-<p>Utiliser \ 0 comme délimiteur pour les noms de chemin dans la sortie et les afficher verbatim. Sans cette option, les noms de chemin avec des caractères « inhabituels » sont cités comme expliqué pour la variable de configuration core.quotePath (voir <a href="git-config.html"><b>git-config</b>(1)</a>).</p>
+<p>Utiliser \ 0 comme délimiteur pour les noms de chemin dans la sortie et les afficher verbatim. Sans cette option, les noms de chemin avec des caractères « inhabituels » sont cités comme expliqué pour la variable de configuration` core.quotePath` (voir <a href="git-config.html">git-config(1)</a>).</p>
 </dd>
 <dt class="hdlist1">-o</dt>
 <dt class="hdlist1">--only-matching</dt>
@@ -637,7 +641,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-p</dt>
 <dt class="hdlist1">--show-function</dt>
 <dd>
-<p>Afficher la ligne précédente qui contient le nom de fonction de la correspondance, à moins que la ligne correspondante soit elle-même un nom de fonction. Le nom est déterminé de la même manière que <code>git diff</code> traite les en-têtes de rustine (voir <em>Définir un entête de section personnalisé</em> in <a href="gitattributes.html"><b>gitattributes</b>(5)</a>).</p>
+<p>Afficher la ligne précédente qui contient le nom de fonction de la correspondance, à moins que la ligne correspondante soit elle-même un nom de fonction. Le nom est déterminé de la même manière que <code>git</code> <code>diff</code> traite les en-têtes de rustine (voir <em>Définir un entête de section personnalisé</em> in <a href="gitattributes.html">gitattributes(5)</a>).</p>
 </dd>
 <dt class="hdlist1">-&lt;num&gt;</dt>
 <dt class="hdlist1">-C &lt;num&gt;</dt>
@@ -658,7 +662,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-W</dt>
 <dt class="hdlist1">--function-context</dt>
 <dd>
-<p>Afficher le texte environnant depuis la ligne précédente contenant un nom de fonction jusqu&#8217;à celle qui précède le nom de fonction suivant, affichant effectivement la fonction entière dans laquelle la correspondance a été trouvée. Les noms de fonctions sont déterminés de la même manière que <code>git diff</code> traite les en-têtes de rustines (voir <em>Définir un entête de section personnalisé</em> dans <a href="gitattributes.html"><b>gitattributes</b>(5)</a>).</p>
+<p>Afficher le texte environnant depuis la ligne précédente contenant un nom de fonction jusqu&#8217;à celle qui précède le nom de fonction suivant, affichant effectivement la fonction entière dans laquelle la correspondance a été trouvée. Les noms de fonctions sont déterminés de la même manière que <code>git</code> <code>diff</code> traite les en-têtes de rustines (voir <em>Définir un entête de section personnalisé</em> dans <a href="gitattributes.html">gitattributes(5)</a>).</p>
 </dd>
 <dt class="hdlist1">-m &lt;num&gt;</dt>
 <dt class="hdlist1">--max-count &lt;nombre&gt;</dt>
@@ -667,7 +671,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--threads &lt;num&gt;</dt>
 <dd>
-<p>Nombre de fils de travail de grep à utiliser. Voir <code>grep.threads</code> dans <em>CONFIGURATION</em> pour plus d&#8217;informations.</p>
+<p>Nombre de fils de travail de <code>grep</code> à utiliser. Voir <em>NOTES SUR LES FILS</em> et <code>grep.threads</code> dans <em>CONFIGURATION</em> pour plus d&#8217;informations.</p>
 </dd>
 <dt class="hdlist1">-f &lt;fichier&gt;</dt>
 <dd>
@@ -717,7 +721,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Si donné, limiter la recherche aux chemins correspondant à au moins un motif. Les motifs de correspondance des chemins principaux et les motifs glob(7) sont tous deux pris en charge.</p>
 <div class="paragraph">
-<p>Pour de plus amples détails sur la syntaxe &lt;spécificateur de chemin&gt;, référez-vous à la section <em>pathspec</em> dans <a href="gitglossary.html"><b>gitglossary</b>(7)</a>.</p>
+<p>Pour de plus amples détails sur la syntaxe &lt;spécificateur de chemin&gt;, référez-vous à la section <em>pathspec</em> dans <a href="gitglossary.html">gitglossary(7)</a>.</p>
 </div>
 </dd>
 </dl>
@@ -729,19 +733,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><code>git grep 'time_t' -- '*.[ch]'</code></dt>
+<dt class="hdlist1"><code>git</code> <code>grep</code> 'time_t' <code>--</code> '*.[<code>ch</code>]'</dt>
 <dd>
-<p>Recherche <code>time_t</code> dans tous les fichiers suivis <code>.c</code> et <code>.h</code> dans le répertoire de travail et ses sous-répertoires.</p>
+<p>Recherche <code>time_t</code> dans tous les fichiers suivis .<code>c</code> et .<code>h</code> dans le répertoire de travail et ses sous-répertoires.</p>
 </dd>
-<dt class="hdlist1"><code>git grep -e '#define' --and \( -e MAX_PATH -e PATH_MAX \)</code></dt>
+<dt class="hdlist1"><code>git</code> <code>grep</code> <code>-e</code> '#define' <code>--and</code> \( <code>-e</code> <code>MAX_PATH</code> <code>-e</code> <code>PATH_MAX</code> \)</dt>
 <dd>
-<p>Recherche une ligne contenant <code>#define</code> et <code>MAX_PATH</code> ou <code>PATH_MAX</code>.</p>
+<p>Recherche une ligne contenant #define et <code>MAX_PATH</code> ou <code>PATH_MAX</code>.</p>
 </dd>
-<dt class="hdlist1"><code>git grep --all-match -e NODE -e Unexpected</code></dt>
+<dt class="hdlist1"><code>git</code> <code>grep</code> <code>--all-match</code> <code>-e</code> <code>NODE</code> <code>-e</code> <code>Unexpected</code></dt>
 <dd>
 <p>Recherche une ligne qui contient <code>NODE</code> ou <code>Unexpected</code> dans les fichiers qui ont des lignes qui correspondent aux deux.</p>
 </dd>
-<dt class="hdlist1"><code>git grep solution -- :^Documentation</code></dt>
+<dt class="hdlist1"><code>git</code> <code>grep</code> <code>solution</code> <code>--</code> <code>:^Documentation</code></dt>
 <dd>
 <p>Recherche <code>solution</code>, en excluant les fichiers de la <code>Documentation</code>.</p>
 </dd>
@@ -753,7 +757,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_notes_sur_les_fils">NOTES SUR LES FILS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>L&#8217;option <code>--threads</code> (et la configuration de grep.threads) sera ignorée quand <code>--open-files-in-pager</code> est utilisé, forçant une exécution à un seul thread.</p>
+<p>L&#8217;option <code>--threads</code> (et la configuration de <code>grep.threads</code>) sera ignorée quand <code>--open-files-in-pager</code> est utilisé, forçant une exécution à un seul thread.</p>
 </div>
 <div class="paragraph">
 <p>Lors de l&#8217;exploration du magasin d&#8217;objets (avec <code>--cached</code> ou en donnant des objets arbre), l&#8217;exécution avec plusieurs threads peut être plus lente qu&#8217;avec un seul thread si <code>--textconv</code> est donné et qu&#8217;il y a trop de conversions de texte. Donc, si vous avez de faibles performances dans ce cas, il peut être souhaitable d&#8217;utiliser <code>--threads=1</code>.</p>
@@ -764,10 +768,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_configuration">CONFIGURATION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Tout ce qui se trouve en dessous de cette ligne dans cette section est inclus de manière sélective à partir de la documentation <a href="git-config.html"><b>git-config</b>(1)</a>. Le contenu est le même que celui qui s&#8217;y trouve :</p>
+<p>Tout ce qui se trouve en dessous de cette ligne dans cette section est inclus de manière sélective à partir de la documentation <a href="git-config.html">git-config(1)</a>. Le contenu est le même que celui qui s&#8217;y trouve :</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-grep.txt - include::config/grep.txt[]</p>
+<p>Unresolved directive in git-grep.adoc - include::config/grep.adoc[]</p>
 </div>
 </div>
 </div>
@@ -775,7 +779,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Fait partie de la suite <a href="git.html"><b>git</b>(1)</a></p>
+<p>Fait partie de la suite <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
@@ -790,7 +794,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:26:30 +0200
+Last updated 2025-03-23 12:03:31 +0100
 </div>
 </div>
 </body>

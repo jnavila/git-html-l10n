@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-archive(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -471,7 +472,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">--format=&lt;格式&gt;</dt>
 <dd>
-<p>归档文件的格式。可能的值是 <code>tar</code>, <code>zip</code>, <code>tar.gz</code>, <code>tgz</code>, 以及使用配置选项 <code>tar.&lt;格式&gt;.command</code> 定义的任何格式。如果没有给出 <code>--format</code>，并且指定了输出文件，如果可能的话，将从文件名中推断出格式（例如，写入`foo.zip` 会使输出为`zip`格式）。否则，输出格式为`tar`。</p>
+<p>归档文件的格式。可能的值是 <code>tar</code>, <code>zip</code>, <code>tar.gz</code>, <code>tgz</code>, 以及使用配置选项 <code>tar.</code>&lt;格式&gt;<code>.command</code> 定义的任何格式。如果没有给出 <code>--format</code>，并且指定了输出文件，如果可能的话，将从文件名中推断出格式（例如，写入`foo.zip` 会使输出为`zip`格式）。否则，输出格式为`tar`。</p>
 </dd>
 <dt class="hdlist1">-l</dt>
 <dt class="hdlist1">--list</dt>
@@ -485,7 +486,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--prefix=&lt;前缀&gt;/</dt>
 <dd>
-<p>将 &lt;前缀&gt;/ 预置到存档中的路径。 可以重复使用；其最右边的值用于所有跟踪的文件。 请看下面的 <code>--add-file</code> 和 <code>--add-virtual-file</code> 所使用的值。</p>
+<p>Prepend &lt;prefix&gt;/ to paths in the archive. Can be repeated; its rightmost value is used for all tracked files. See below which value gets used by <code>--add-file</code>.</p>
 </dd>
 <dt class="hdlist1">-o &lt;文件&gt;</dt>
 <dt class="hdlist1">--output=&lt;文件&gt;</dt>
@@ -498,12 +499,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--add-virtual-file=&lt;路径&gt;:&lt;内容&gt;</dt>
 <dd>
-<p>将指定的内容添加到档案中。 可以重复添加多个文件。 归档文件的路径是由这个 <code>--add-virtual-file</code> 之前的最后一个 <code>--prefix</code> 选项（如果有的话）和 <code>&lt;路径&gt;</code> 相连而成的。</p>
+<p>将指定的内容添加到存档中。可以重复此操作以添加多个文件。</p>
 <div class="paragraph">
-<p><code>&lt;路径&gt;</code> 参数可以以字面的双引号字符开始和结束；包含的文件名被解释为 C 风格的字符串，即反斜杠被解释为转义字符。如果路径包含一个冒号，则必须加引号，以避免冒号被误解为路径和内容之间的分隔符，或者如果路径以双引号字符开始或结束。</p>
+<p>&lt;路径&gt; 参数可以以字面的双引号字符开始和结束；包含的文件名被解释为 C 风格的字符串，即反斜杠被解释为转义字符。如果路径包含一个冒号，则必须加引号，以避免冒号被误解为路径和内容之间的分隔符，或者如果路径以双引号字符开始或结束。</p>
 </div>
 <div class="paragraph">
 <p>文件模式被限制为普通文件，该选项可能会受到依赖平台的命令行的限制。对于非复杂的情况，写一个非跟踪的文件并使用 <code>--add-file</code> 代替。</p>
+</div>
+<div class="paragraph">
+<p>请注意，与 <code>--add-file</code> 不同，在存档中创建的路径不受 <code>--prefix</code> 选项的影响，因为可以将完整的 &lt;路径&gt; 作为选项的值给出。</p>
 </div>
 </dd>
 <dt class="hdlist1">--worktree-attributes</dt>
@@ -512,7 +516,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--mtime=&lt;时间&gt;</dt>
 <dd>
-<p>设置存档条目的修改时间。 如果没有这个选项，如果 <code>&lt;树状对象&gt;</code> 是一个提交或标签，则使用提交者的时间，如果是一个树，则使用当前时间。</p>
+<p>设置存档条目的修改时间。 如果没有这个选项，如果 &lt;树状对象&gt; 是一个提交或标签，则使用提交者的时间，如果是一个树，则使用当前时间。</p>
 </dd>
 <dt class="hdlist1">&lt;extra&gt;</dt>
 <dd>
@@ -520,7 +524,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--remote=&lt;仓库&gt;</dt>
 <dd>
-<p>与其从本地版本库制作一个 tar 归档，不如从远程版本库检索一个 tar 归档。注意，远程仓库可能会对 <code>&lt;树状对象&gt;</code> 中允许的 sha1 表达式进行限制。详情见 <a href="git-upload-archive.html"><b>git-upload-archive</b>(1)</a>。</p>
+<p>与其从本地版本库制作一个 tar 归档，不如从远程版本库检索一个 tar 归档。注意，远程仓库可能会对 &lt;树状对象&gt; 中允许的 sha1 表达式进行限制。详情见 <a href="git-upload-archive.html">git-upload-archive(1)</a>。</p>
 </dd>
 <dt class="hdlist1">--exec=&lt;git-upload-archive&gt;</dt>
 <dd>
@@ -558,7 +562,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">-&lt;数&gt;</dt>
 <dd>
-<p>指定压缩级别。该值将被传递给 <code>tar.&lt;格式&gt;.command</code> 中配置的压缩命令。如果没有指定这个选项，请参阅配置的命令的手册页，了解支持的级别和默认级别。</p>
+<p>指定压缩级别。该值将被传递给 <code>tar.</code>&lt;格式&gt;<code>.command</code> 中配置的压缩命令。如果没有指定这个选项，请参阅配置的命令的手册页，了解支持的级别和默认级别。</p>
 </dd>
 </dl>
 </div>
@@ -576,14 +580,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">tar.&lt;格式&gt;.command</dt>
 <dd>
-<p>这个变量指定了一个 shel l命令，由 <code>git archive</code> 产生的 tar 输出应该通过管道。该命令使用 shell 执行，在其标准输入中生成 tar 文件，并应在其标准输出中产生最终输出。任何压缩级别的选项将被传递给该命令（例如，&#8216;-9&#8217;）。</p>
+<p>这个变量指定了一个 shel l命令，由 <code>git</code> <code>archive</code> 产生的 tar 输出应该通过管道。该命令使用 shell 执行，在其标准输入中生成 tar 文件，并应在其标准输出中产生最终输出。任何压缩级别的选项将被传递给该命令（例如，&#8216;-9&#8217;）。</p>
 <div class="paragraph">
-<p><code>tar.gz</code> 和 <code>tgz</code> 格式是自动定义的，默认使用神奇的命令 <code>git archive gzip</code>，它调用了 gzip 的内部实现。</p>
+<p><code>tar.gz</code> 和 <code>tgz</code> 格式是自动定义的，默认使用神奇的命令 <code>git</code> <code>archive</code> <code>gzip</code>，它调用了 gzip 的内部实现。</p>
 </div>
 </dd>
 <dt class="hdlist1">tar.&lt;格式&gt;.remote</dt>
 <dd>
-<p>如果为真，则通过 <a href="git-upload-archive.html"><b>git-upload-archive</b>(1)</a> 启用该格式供远程客户端使用。对于用户定义的格式，默认为 false，但对于 <code>tar.gz</code> 和 <code>tgz</code> 格式为 true。</p>
+<p>如果为真，则通过 <a href="git-upload-archive.html">git-upload-archive(1)</a> 启用该格式供远程客户端使用。对于用户定义的格式，默认为 false，但对于 <code>tar.gz</code> 和 <code>tgz</code> 格式为 true。</p>
 </dd>
 </dl>
 </div>
@@ -596,16 +600,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">export-ignore</dt>
 <dd>
-<p>带有 export-ignore 属性的文件和目录不会被添加到存档文件中。 详情见 <a href="gitattributes.html"><b>gitattributes</b>(5)</a>。</p>
+<p>带有 export-ignore 属性的文件和目录不会被添加到存档文件中。 详情见 <a href="gitattributes.html">gitattributes(5)</a>。</p>
 </dd>
 <dt class="hdlist1">export-subst</dt>
 <dd>
-<p>如果为一个文件设置了 export-subst 属性，那么当把这个文件添加到存档时，Git 会展开几个占位符。 详情见 <a href="gitattributes.html"><b>gitattributes</b>(5)</a>。</p>
+<p>如果为一个文件设置了 export-subst 属性，那么当把这个文件添加到存档时，Git 会展开几个占位符。 详情见 <a href="gitattributes.html">gitattributes(5)</a>。</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p>注意，默认情况下，属性来自被归档的树中的 <code>.gitattributes</code> 文件。 如果你想在事后调整输出的方式（例如，你提交时没有在其 <code>.gitattributes</code> 中添加适当的 export-ignore ），请根据需要调整检查出来的 <code>.gitattributes</code> 文件并使用 <code>--worktree-attributes</code> 选项。 另外，你也可以在你的 <code>$GIT_DIR/info/attributes</code> 文件中保留归档任何树时应该适用的必要属性。</p>
+<p>注意，默认情况下，属性来自被归档的树中的 .<code>gitattributes</code> 文件。 如果你想在事后调整输出的方式（例如，你提交时没有在其 .<code>gitattributes</code> 中添加适当的 export-ignore ），请根据需要调整检查出来的 .<code>gitattributes</code> 文件并使用 <code>--worktree-attributes</code> 选项。 另外，你也可以在你的 <code>$GIT_DIR/info/attributes</code> 文件中保留归档任何树时应该适用的必要属性。</p>
 </div>
 </div>
 </div>
@@ -614,41 +618,41 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><code>git archive --format=tar --prefix=junk/ HEAD | (cd /var/tmp/ &amp;&amp; tar xf -)</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>--format=tar</code> <code>--prefix=junk/</code> <code>HEAD</code> | (<code>cd</code> <code>/var/tmp/</code> &amp;&amp; <code>tar</code> <code>xf</code> <code>-</code>)</dt>
 <dd>
 <p>创建一个包含当前分支上最新提交内容的 tar 归档文件，并将其解压到 <code>/var/tmp/junk</code> 目录中。</p>
 </dd>
-<dt class="hdlist1"><code>git archive --format=tar --prefix=git-1.4.0/ v1.4.0 | gzip &gt;git-1.4.0.tar.gz</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>--format=tar</code> <code>--prefix=git-1.4.0/</code> <code>v1.4.0</code> | <code>gzip</code> &gt;<code>git-1.4.0.tar.gz</code></dt>
 <dd>
 <p>为 v1.4.0 版本创建一个压缩的压缩包。</p>
 </dd>
-<dt class="hdlist1"><code>git archive --format=tar.gz --prefix=git-1.4.0/ v1.4.0 &gt;git-1.4.0.tar.gz</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>--format=tar.gz</code> <code>--prefix=git-1.4.0/</code> <code>v1.4.0</code> &gt;<code>git-1.4.0.tar.gz</code></dt>
 <dd>
 <p>和上面一样，但使用内置的 tar.gz 处理。</p>
 </dd>
-<dt class="hdlist1"><code>git archive --prefix=git-1.4.0/ -o git-1.4.0.tar.gz v1.4.0</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>--prefix=git-1.4.0/</code> <code>-o</code> <code>git-1.4.0.tar.gz</code> <code>v1.4.0</code></dt>
 <dd>
 <p>与上述相同，但格式是从输出文件中推断出来的。</p>
 </dd>
-<dt class="hdlist1"><code>git archive --format=tar --prefix=git-1.4.0/ v1.4.0^{tree} | gzip &gt;git-1.4.0.tar.gz</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>--format=tar</code> <code>--prefix=git-1.4.0/</code> <code>v1.4.0^</code>{tree} | <code>gzip</code> &gt;<code>git-1.4.0.tar.gz</code></dt>
 <dd>
 <p>为 v1.4.0 版本创建一个压缩的 tarball，但没有全局扩展的 pax 头。</p>
 </dd>
-<dt class="hdlist1"><code>git archive --format=zip --prefix=git-docs/ HEAD:Documentation/ &gt; git-1.4.0-docs.zip</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>--format=zip</code> <code>--prefix=git-docs/</code> <code>HEAD:Documentation/</code> &gt; <code>git-1.4.0-docs.zip</code></dt>
 <dd>
 <p>将当前头文件或目录下的所有内容放入 <em>git-1.4.0-docs.zip</em>，前缀为 <em>git-docs/</em>。</p>
 </dd>
-<dt class="hdlist1"><code>git archive -o latest.zip HEAD</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>-o</code> <code>latest.zip</code> <code>HEAD</code></dt>
 <dd>
 <p>创建一个包含当前分支上最新提交内容的 Zip 档案。注意，输出格式是由输出文件的扩展名推断出来的。</p>
 </dd>
-<dt class="hdlist1"><code>git archive -o latest.tar --prefix=build/ --add-file=configure --prefix= HEAD</code></dt>
+<dt class="hdlist1"><code>git</code> <code>archive</code> <code>-o</code> <code>latest.tar</code> <code>--prefix=build/</code> <code>--add-file=configure</code> <code>--prefix=</code> <code>HEAD</code></dt>
 <dd>
 <p>创建一个 tar 归档文件，其中包含当前分支上的最新提交内容，无前缀，以及无跟踪的文件 <em>configure</em>，前缀为 <em>build/</em>。</p>
 </dd>
-<dt class="hdlist1"><code>git config tar.tar.xz.command "xz -c"</code></dt>
+<dt class="hdlist1"><code>git</code> <code>config</code> <code>tar.tar.xz.command</code> "xz <code>-c</code>"</dt>
 <dd>
-<p>配置一个 "tar.xz" 格式来制作 LZMA 压缩的 tarf 文件。 你可以指定 <code>--format=tar.xz</code> 来使用它，或者通过创建一个像 <code>-o foo.tar.xz</code> 这样的输出文件。</p>
+<p>配置一个 "tar.xz" 格式来制作 LZMA 压缩的 tarf 文件。 你可以指定 <code>--format=tar.xz</code> 来使用它，或者通过创建一个像 <code>-o</code> <code>foo.tar.xz</code> 这样的输出文件。</p>
 </dd>
 </dl>
 </div>
@@ -658,7 +662,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="gitattributes.html"><b>gitattributes</b>(5)</a></p>
+<p><a href="gitattributes.html">gitattributes(5)</a></p>
 </div>
 </div>
 </div>
@@ -666,14 +670,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:04 +0200
+Last updated 2025-03-23 12:03:50 +0100
 </div>
 </div>
 </body>

@@ -1,0 +1,151 @@
+git-log(1)
+==========
+
+名称
+--
+git-log - 显示提交日志
+
+
+概述
+--
+[verse]
+'git log' [<options>] [<revision-range>] [[--] <path>...]
+
+描述
+--
+显示提交日志。
+
+:git-log: 1
+include::rev-list-description.adoc[]
+
+该命令采用适用于 linkgit:git-rev-list[1] 命令的选项来控制显示的内容和方式，以及适用于 linkgit:git-diff[1] 命令的选项来控制每次提交引入的更改的显示方式。
+
+
+选项
+--
+
+--follow::
+	继续列出文件的历史记录，包括重命名之后的情况（仅适用于单个文件）。
+
+--no-decorate::
+--decorate[=short|full|auto|no]::
+	打印显示的任何提交的引用名称。如果指定了 "short"，则不会打印引用名称的前缀 "refs/heads/"、"refs/tags/" 和 "refs/remotes/"。如果指定了 "full"，将打印完整的引用名称（包括前缀）。如果指定了 "auto"，则如果输出是发送到终端，则显示引用名称，就如同指定了"short"一样，否则不显示引用名称。选项 `--decorate` 是 `--decorate=short` 的简写。如果配置了 `log.decorate` 的配置值，默认为配置值，否则为 "auto"。
+
+--decorate-refs=<pattern>::
+--decorate-refs-exclude=<pattern>::
+	对于每个候选引用，在以下情况下不要将其用于装饰（decorate）：若它与`--decorate-refs-exclude`指定的任何模式匹配，或者若它不与`--decorate-refs`指定的任何模式匹配。配置选项`log.excludeDecoration`允许从装饰中排除引用，但是在`log.excludeDecoration`中的匹配项将被`--decorate-refs`模式中的显式指定所覆盖。
++
+如果没有给出这些选项或配置设置中的任何一个，那么如果引用与 `HEAD` 、`refs/heads/`、`refs/remotes/` 、`refs/stash/` 或 `refs/tags/` 匹配，则使用引用作为装饰。
+
+--clear-decorations::
+	当指定了该选项时，它会清除所有先前的 `--decorate-refs` 或 `--decorate-refs-exclude` 选项，并放宽默认的装饰过滤器以包括所有引用。如果配置值 `log.initialDecorationSet` 设置为 `all`，则假定使用此选项。
+
+--source::
+	打印出通过命令行给定的引用名称，以便触及每个提交。
+
+--[no-]mailmap::
+--[no-]use-mailmap::
+	使用 mailmap 文件将作者和提交者的名称和电子邮件地址映射到规范的真实名称和电子邮件地址。请参阅 linkgit:git-shortlog[1]。
+
+--full-diff::
+	如果不使用此标志， `git log -p <path>...` 将显示与指定路径相关的提交，并显示关于相同指定路径的差异。使用此标志，将显示与指定路径相关的提交的完整差异；这意味着 "<path>..." 将仅限定提交，并不限定这些提交的差异。
++
+请注意，这会影响所有基于差异的输出类型。例如：由 `--stat` 等产生的输出。
+
+--log-size::
+	在每个提交的输出中包含一行 ``log size <number>"" ，其中 <number> 是该提交消息的字节长度。旨在通过允许工具预先分配空间，加快从 `git log` 输出中读取日志消息的工具的速度。
+
+include::line-range-options.adoc[]
+
+<revision-range>::
+	仅显示指定修订范围内的提交。当没有指定 <revision-range> 时，默认为 `HEAD`（即导致当前提交的整个历史记录）。`origin..HEAD` 指定从当前提交（即 `HEAD` ）可达的所有提交，但不包括从 `origin` 可达的提交。有关拼写 <revision-range> 的完整列表，请参阅 linkgit:gitrevisions[7] 的 "Specifying Ranges" 部分。
+
+[--] <path>...::
+	只显示那些足以解释符合指定路径的文件是如何形成的提交。 有关细节和其他简化模式，请参见下面的'历史简化'。
++
+当出现混淆时，路径可能需要以`--`为前缀，以便将其与选项或修订范围分开。
+
+include::rev-list-options.adoc[]
+
+include::pretty-formats.adoc[]
+
+差异格式化
+-----
+
+默认情况下，`git log`不会产生任何差异输出。下面的选项可以用来显示每次提交所做的修改。
+
+请注意，除非明确给出了 `--diff-merges` 变体（包括短 `-m`、`-c`、`--cc` 和 `--dd` 选项），否则合并提交不会显示差异，即使选择了 `--patch` 等差异格式，也不会匹配 `-S` 等搜索选项。使用 `--first-parent` 时例外，在这种情况下，`--first-parent` 是合并提交的默认格式。
+
+:git-log: 1
+:diff-merges-default: `off`
+include::diff-options.adoc[]
+
+include::diff-generate-patch.adoc[]
+
+实例
+--
+`git log --no-merges`::
+
+	显示整个提交历史，但跳过任何合并内容
+
+`git log v2.6.12.. include/scsi drivers/scsi`::
+
+	显示自版本 'v2.6.12' 以来改变 `include/scsi` 或 `drivers/scsi` 子目录中任何文件的所有提交
+
+`git log --since="2 weeks ago" -- gitk`::
+
+	显示过去两周内对文件 'gitk' 的修改。 `--` 是必要的，以避免与名为 'gitk' 的 *分支* 相混淆
+
+`git log --name-status release..test`::
+
+	显示在 "test "分支中但尚未在 "release "分支中的提交，以及每个提交修改的路径列表。
+
+`git log --follow builtin/rev-list.c`::
+
+	显示改变`builtin/rev-list.c`的提交，包括那些在文件被赋予现在名字之前发生的提交。
+
+`git log --branches --not --remotes=origin`::
+
+	显示所有在本地分支中但不在 "origin "的远程跟踪分支中的提交（你有而origin没有的东西）。
+
+`git log master --not --remotes=*/master`::
+
+	显示所有在本地主库但不在任何远程仓库主库分支中的提交。
+
+`git log -p -m --first-parent`::
+
+	显示包括变化差异的历史，但只从 "主分支 "的角度，跳过来自合并分支的提交，并显示合并带来的全部变化差异。 这只有在遵循严格的政策，在停留在一个集成分支时合并所有主题分支时才有意义。
+
+`git log -L '/int main/',/^}/:main.c`::
+
+	显示了文件`main.c`中的函数`main()`是如何随时间演变的。
+
+`git log -3`::
+
+	将显示的提交数量限制在3个。
+
+讨论
+--
+
+include::i18n.adoc[]
+
+配置
+--
+
+核心变量见 linkgit:git-config[1] ，与 diff 生成相关的设置见 linkgit:git-diff[1] 。
+
+format.pretty::
+	`--format`选项的默认值。 (见上面的 "漂亮的格式"。)默认为 "中等"。
+
+i18n.logOutputEncoding::
+	显示日志时要使用的编码。 (见上面的 "讨论"。)如果设置了，默认为`i18n.commitEncoding`的值，否则为UTF-8。
+
+include::includes/cmd-config-section-rest.adoc[]
+
+include::config/log.adoc[]
+
+include::config/notes.adoc[]
+
+GIT
+---
+属于 linkgit:git[1] 文档

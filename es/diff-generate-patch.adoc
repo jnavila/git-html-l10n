@@ -1,0 +1,137 @@
+[[generate_patch_text_with_p]]
+Generando texto de parche con -p
+--------------------------------
+
+Ejecutando linkgit:git-diff[1], linkgit:git-log[1], linkgit:git-show[1], linkgit:git-diff-index[1], linkgit:git-diff-tree[1], o linkgit:git-diff-files[1] la opción `-p` produce el texto del parche. Puedes personalizar la creación del texto del parche con las variables de ambiente `GIT_EXTERNAL_DIFF` y `GIT_DIFF_OPTS` (ver linkgit:git[1]), y el atributo `diff` (ver linkgit:gitattributes[5]).
+
+Lo que produce la opción `-p` es ligeramente diferente del formato tradicional de diff:
+
+1.   Es precedido por un encabezado "git diff" que se ve así:
+
+       diff --git a/fichero1 b/fichero2
++
+Los nombres de fichero `a/` y `b/` son iguales a menos que involucre renombrado/copia. Especialmente, incluso para creación o eliminado, `/dev/null`_no_ se usa en lugar de los nombres de fichero `a/` o `b/`.
++
+Cuando se involucra un renombre/copia, `fichero1` y `fichero2` muestra el nombre del fichero fuente del renombre/copia y el nombre del fichero que produce el renombre/copia, respectivamente.
+
+2.   Es seguido por una o mas líneas de encabezado extendido:
++
+[synopsis]
+old mode <modo>
+new mode <modo>
+deleted file mode <modo>
+new file mode <modo>
+copy from <ruta>
+copy to <ruta>
+rename from <ruta>
+rename to <ruta>
+similarity index <número>
+dissimilarity index <número>
+index <hash>..<hash> <modo>
++
+Modos de fichero _<modo>_ se imprimen como números octales de 6 dígitos incluyendo el tipo de fichero y los bits de permiso de fichero.
++
+Nombres de ruta en encabezados extendidos no incluyen los prefijos `a/` y `b/`.
++
+El índice de similaridad es el porcentaje de líneas sin cambios, y el índice de disimilaridad es el porcentaje de líneas modificadas. Es un entero redondeado hacia abajo, seguido por un signo de porcentaje. El índice de similaridad valor 100% es por lo tanto reservado para dos ficheros iguales, mientras que un 100% de disimilaridad significa que ninguna línea del fichero antiguo llegó al nuevo.
++
+La línea de índice incluye los nombres de objeto blob antes y después del cambio. El _<modo>_ se incluye si el modo del fichero no cambia; de lo contrario, líneas separadas indican los modos anterior y nuevo.
+
+3.  Nombres de ruta con caracteres "inusuales" se entrecomillan como se explica para la variable de configuración `core.quotePath` (ver linkgit:git-config[1]).
+
+4.  Todos los ficheros `fichero1` en la salida refieren a ficheros antes del commit, y todos los ficheros `fichero2`refieren a ficheros después del commit. Es incorrecto aplicar cada cambio a cada fichero secuencialmente. Por ejemplo, este parche intercambiará a y b:
+
+      diff --git a/a b/b
+      rename from a
+      rename to b
+      diff --git a/b b/a
+      rename from b
+      rename to a
+
+5.  Encabezados de fragmento mencionan el nombre de la función a la cual se aplica el fragmento. Ver "Definiendo un encabezado de fragmento personalizado" en linkgit:gitattributes[5] para detalles de cómo ajustar éste a lenguajes específicos.
+
+
+Formato de diff combinado
+-------------------------
+
+Cualquier comando que genere un diff puede tomar las opciones `-c` o `--cc` para producir una 'diff combinada' cuando se muestra la fusión. Este es el formato predeterminado cuando se muestran fusiones con linkgit:git-diff[1] o linkgit:git-show[1]. Note que también puede ser adecuado dar la opción `--diff-merges` a cualquiera de esos comandos para forzar la generación de diffs en un formato específico.
+
+Un formato "diff combinado" se ve así:
+
+------------
+diff --combined describe.c
+index fabadb8,cc95eb0..4866510
+--- a/describe.c
++++ b/describe.c
+@@@ -98,20 -98,12 +98,20 @@@
+	return (a_date > b_date) ? -1 : (a_date == b_date) ? 0 : 1;
+  }
+
+- static void describe(char *arg)
+ -static void describe(struct commit *cmit, int last_one)
+++static void describe(char *arg, int last_one)
+  {
+ +	unsigned char sha1[20];
+ +	struct commit *cmit;
+	struct commit_list *list;
+	static int initialized = 0;
+	struct commit_name *n;
+
+ +	if (get_sha1(arg, sha1) < 0)
+ +		usage(describe_usage);
+ +	cmit = lookup_commit_reference(sha1);
+ +	if (!cmit)
+ +		usage(describe_usage);
+ +
+	if (!initialized) {
+		initialized = 1;
+		for_each_ref(get_name);
+------------
+
+1.   Es precedido por un encabezado "git diff", que se ve así (cuando se usa la opción `-c`):
+
+       diff --combined fichero
++
+o así (cuando se usa la opción `--cc`):
+
+       diff --cc fichero
+
+2.   Es seguido por uno o mas líneas de encabezado extendido (este ejemplo muestra una fusión con dos padres):
++
+[synopsis]
+index <hash>,<hash>..<hash>
+mode <modo>,<modo>`..`<modo>
+new file mode <modo>
+deleted file mode <modo>,<modo>
++
+La línea `mode <modo>,<modo>..<modo>` sólo aparece si por lo menos uno de los <modo> es diferente del resto. Los encabezados extendidos con información sobre movimientos de contenido detectados (detección de renombrados y copia) están diseñados para trabajar con el diff de dos _<arbol-ismos>_ y no se usan en el formato diff combinado.
+
+3.   Es seguido por un encabezado de dos líneas del-fichero/al-fichero:
+
+       --- a/fichero
+       +++ b/fichero
++
+Similar al encabezado de dos líneas del formato diff tradicional 'unificado', se usa `/dev/null` para indicar ficheros creados o borrados.
++
+Sin embargo, si se da la opción --combined-all-paths, en lugar de dos líneas con de-fichero/a-fichero obtendrá un encabezado de-fichero/a-fichero de N+1 líneas, donde N es el número de padres en la confirmación de fusión:
+
+       --- a/fichero
+       --- a/fichero
+       --- a/fichero
+       +++ b/fichero
++
+Este formato extendido puede ser útil si la detección de renombre o copia esta activa, para permitirte ver el nombre original del fichero en padres diferentes.
+
+4.   El formato de encabezado de fragmento se modifica para prevenir a la gente de mandarlo accidentalmente a `patch -p1`. El formato diff combinado fue creado para revisión de cambios de commit de fusión, sin la intención de ser aplicado. El cambio es similar al cambio en el encabezado de 'índice' extendido:
+
+       @@@ <rango-desde-fichero> <rango-desde-fichero> <rango-hacia-fichero> @@@
++
+Hay (número de padres +1) caracteres `@` en el encabezado de fragmento para formato diff combinado.
+
+A diferencia del formato diff 'unificado' tradicional, el cual muestra dos ficheros A Y B con una sola columna con los prefijos `-`(menos -- aparece en A pero eliminado en B), `+`(mas -- faltante en A pero agregado a B), o `" "` (espacio -- sin cambio), este formato compara dos o mas ficheros fichero1, fichero2,... con un fichero X, y muestra como X difiere de cada ficheroN. Una columna para cada uno de los ficheroN es antepuesta a la línea de salida para notar como la línea de X es diferente de ella.
+
+Un caracter `-` en la columna N significa que la línea aparece en ficheroN pero no aparece en el resultado. Un caracter `+` en la columna N significa que la línea aparece en el resultado, y ficheroN no tiene esa línea (en otras palabras, la línea fue añadida, desde el punto de vista del antecesor).
+
+En el ejemplo de salida de arriba, la firma de la función cambió en ambos ficheros (por eso los dos `-` eliminaciones de ambos ficheros fichero1 y fichero2, además `++` que significa que una línea agregada no aparece en ningún fichero de fichero1 o fichero2). Además, otras ocho líneas iguales del fichero1 que no aparecen en fichero2 (por eso prefijadas con `+`).
+
+Cuando se muestra por `git diff-tree-c`, compara los padres de un commit de fusión con el resultado de la fusión (ej. fichero1..ficheroN son los padres). Cuando se muestra por `git diff-files-c`, compara los dos padres de fusión no-resueltos con el fichero del árbol de trabajo (ej. fichero1 en etapa 2 conocida como "nuestra versión", fichero2 en etapa 3 conocida como "la versión de ellos").

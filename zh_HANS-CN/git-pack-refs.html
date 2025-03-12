@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-pack-refs(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git pack-refs</em> [--all] [--no-prune] [--include &lt;模式&gt;] [--exclude &lt;模式&gt;]</pre>
+<pre class="content"><em>git pack-refs</em> [--all] [--no-prune] [--auto] [--include &lt;pattern&gt;] [--exclude &lt;pattern&gt;]</pre>
 </div>
 </div>
 </div>
@@ -463,7 +464,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>分支的后续更新总是在 <code>$GIT_DIR/refs</code> 目录层次下创建新文件。</p>
 </div>
 <div class="paragraph">
-<p>处理一个有太多引用的仓库的推荐做法是，用 <code>--all</code> 来打包它的引用一次，然后偶尔运行 <code>git pack-refs</code> 。 根据定义，标签是固定的，不应该改变。 分支头会被初始的 <code>pack-refs --all</code> 打包，但只有当前活动的分支头会被解压，下一次 <code>pack-refs</code>（没有 <code>--all</code>）会让它们被解压。</p>
+<p>处理一个有太多引用的仓库的推荐做法是，用 <code>--all</code> 来打包它的引用一次，然后偶尔运行 <code>git</code> <code>pack-refs</code> 。 根据定义，标签是固定的，不应该改变。 分支头会被初始的 <code>pack-refs</code> <code>--all</code> 打包，但只有当前活动的分支头会被解压，下一次 <code>pack-refs</code>（没有 <code>--all</code>）会让它们被解压。</p>
 </div>
 </div>
 </div>
@@ -480,13 +481,27 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>该命令通常在打包后删除 <code>$GIT_DIR/refs</code> 层次下的松散引用。 这个选项告诉它不要这样做。</p>
 </dd>
+<dt class="hdlist1">--auto</dt>
+<dd>
+<p>根据引用数据库的当前状态按需打包引用。行为取决于仓库使用的引用格式，并可能在将来发生变化。</p>
+<div class="ulist">
+<ul>
+<li>
+<p>"files"：尚未为 <code>--auto</code> 实现特殊处理。</p>
+</li>
+<li>
+<p>"reftable"：表被压缩，使得它们形成一个几何序列。对于两个表 N 和 N+1，其中 N+1 较新，这保持了 N 至少是 N+1 两倍大的属性。只有违反这个属性的表才会被压缩。</p>
+</li>
+</ul>
+</div>
+</dd>
 <dt class="hdlist1">--include &lt;模式&gt;</dt>
 <dd>
-<p>根据 <code>glob(7)</code> 模式打包引用。重复使用该选项会累积包含模式。如果一个引用同时包含在 <code>--include</code> 和 <code>--exclude</code> 中，则 <code>--exclude</code> 优先。使用 <code>--include</code> 会默认排除所有标记。符号引用和断开的引用将永远不会被打包。与 <code>--all</code> 一起使用时，它将是一个 空操作。使用 <code>--no-include</code> 清除并重置模式列表。</p>
+<p>根据 <code>glob</code>(<code>7</code>) 模式打包引用。重复使用该选项会累积包含模式。如果一个引用同时包含在 <code>--include</code> 和 <code>--exclude</code> 中，则 <code>--exclude</code> 优先。使用 <code>--include</code> 会默认排除所有标记。符号引用和断开的引用将永远不会被打包。与 <code>--all</code> 一起使用时，它将是一个 空操作。使用 <code>--no-include</code> 清除并重置模式列表。</p>
 </dd>
 <dt class="hdlist1">--exclude &lt;模式&gt;</dt>
 <dd>
-<p>不打包与给定的 <code>glob(7)</code> 模式匹配的引用。重复使用此选项会累积排除模式。使用 <code>--no-exclude</code> 可以清除并重置模式列表。如果一个引用已经打包，使用 `--exclude`不会将其解包。</p>
+<p>不打包与给定的 <code>glob</code>(<code>7</code>) 模式匹配的引用。重复使用此选项会累积排除模式。使用 <code>--no-exclude</code> 可以清除并重置模式列表。如果一个引用已经打包，使用 `--exclude`不会将其解包。</p>
 </dd>
 </dl>
 </div>
@@ -510,14 +525,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:06 +0200
+Last updated 2025-03-23 12:03:54 +0100
 </div>
 </div>
 </body>

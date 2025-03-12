@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-range-diff(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -448,7 +449,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="verseblock">
 <pre class="content"><em>git range-diff</em> [--color=[&lt;quand&gt;]] [--no-color] [&lt;options-de-diff&gt;]
         [--no-dual-color] [--creation-factor=&lt;facteur&gt;]
-        [--left-only | --right-only]
+        [--left-only | --right-only] [--diff-merges=&lt;format&gt;]
+        [--remerge-diff]
         ( &lt;plage1&gt; &lt;plage2&gt; | &lt;rev1&gt;&#8230;&#8203;&lt;rev2&gt; | &lt;base&gt; &lt;rev1&gt; &lt;rev2&gt; )
         [[--] &lt;chemin&gt;&#8230;&#8203;]</pre>
 </div>
@@ -461,7 +463,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Cette commande affiche les différences entre deux versions d&#8217;une série de rustines, ou plus généralement, entre deux plages de commits (en ignorant les commits de fusion).</p>
 </div>
 <div class="paragraph">
-<p>En présence d&#8217;arguments <code>&lt;chemin&gt;</code>, ces plages de commits sont restreintes en conséquence.</p>
+<p>En présence d&#8217;arguments <em>&lt;chemin&gt;</em>, ces plages de commits sont restreintes en conséquence.</p>
 </div>
 <div class="paragraph">
 <p>À cette fin, elle recherche les paires de commits depuis les deux plages de commits qui se correspondent. Deux commit sont dits correspondre quand les diffs entres leurs rustines (c-à-d. les information d&#8217;auteur, les messages de commit et les diffs des commits) sont raisonnablement petites par rapport à la taille des rustines. Voir ``Algorithme`` ci-dessous pour plus de détails.</p>
@@ -475,13 +477,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="ulist">
 <ul>
 <li>
-<p><code>&lt;plage1&gt;&lt;plage2&gt;</code> : la plage de commits peut être de la forme <code>&lt;base&gt;..&lt;rev&gt;</code>, <code>&lt;rev&gt;^!-&lt;n&gt;</code>. Voir <code>SPECIFIER LES PLAGES</code> dans <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a> pour de plus amples détails.</p>
+<p><em>&lt;plage1&gt;</em><em>&lt;plage2&gt;</em> : la plage de commits peut être de la forme <em>&lt;base&gt;</em><code>..</code><em>&lt;rev&gt;</em>, <em>&lt;rev&gt;</em><code>^</code>!-<em>&lt;n&gt;</em>. Voir <code>SPECIFIER</code> <code>LES</code> <code>PLAGES</code> dans <a href="gitrevisions.html">gitrevisions(7)</a> pour de plus amples détails.</p>
 </li>
 <li>
-<p><code>&lt;rév1&gt;...&lt;rév2&gt;</code>. C&#8217;est équivalent à <code>&lt;rév2&gt;..&lt;rév1&gt; &lt;rév1&gt;..&lt;rév2&gt;</code>.</p>
+<p>&lt;rév1&gt;<code>...</code>&lt;rév2&gt;. C&#8217;est équivalent à &lt;rév2&gt;<code>..</code>&lt;rév1&gt; &lt;rév1&gt;<code>..</code>&lt;rév2&gt;.</p>
 </li>
 <li>
-<p><code>&lt;base&gt; &lt;rev1&gt; &lt;rev2&gt;</code> : C&#8217;estquivalent à <code>&lt;base&gt;..&lt;rev1&gt; &lt;base&gt;..&lt;rev2&gt;</code>.</p>
+<p><em>&lt;base&gt;</em> <em>&lt;rev1&gt;</em> <em>&lt;rev2&gt;</em> : C&#8217;estquivalent à <em>&lt;base&gt;</em><code>..</code><em>&lt;rev1&gt;</em> <em>&lt;base&gt;</em><code>..</code><em>&lt;rev2&gt;</em>.</p>
 </li>
 </ul>
 </div>
@@ -494,9 +496,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">--no-dual-color</dt>
 <dd>
-<p>Quand les diffs de commit diffèrent, <code>git range-diff</code> recrée le coloriage original des diffs et ajoute les marqueurs de diff externes -/+ avec le <strong>fond</strong> en rouge/vert pour le rendre plus visible, par exemple lorsqu&#8217;il y a eu une modification et quelles lignes ont été ajoutées.</p>
+<p>Quand les diffs de commit diffèrent, <code>git</code> <code>range-diff</code> recrée le coloriage original des diffs et ajoute les marqueurs de diff externes -/+ avec le <strong>fond</strong> en rouge/vert pour le rendre plus visible, par exemple lorsqu&#8217;il y a eu une modification et quelles lignes ont été ajoutées.</p>
 <div class="paragraph">
-<p>En outre, les lignes diff de commit qui sont seulement présentes dans la plage du premier commit sont montrées "atténuées" (ceci peut être surchargé à l&#8217;aide du réglage de configuration`color.diff.&lt;créneau&gt;` où <code>&lt;créneau&gt;</code> peut être <code>contextDimmed</code>, <code>oldDimmed</code> ou`newDimmed`), et les lignes du diff de commit qui ne sont présentes que dans la plage du second commit sont montrées en gras (ce qui peut être surchargé à l&#8217;aide du réglage de configuration`color.diff.&lt;créneau&gt;` où <code>&lt;créneau&gt;</code> peut être <code>contextBold</code>, <code>oldBold</code> ou`newBold`).</p>
+<p>En outre, les lignes diff de commit qui sont seulement présentes dans la plage du premier commit sont montrées "atténuées" (ceci peut être surchargé à l&#8217;aide du réglage de configuration`color.diff.&lt;créneau&gt;` où &lt;créneau&gt; peut être <code>contextDimmed</code>, <code>oldDimmed</code> ou`newDimmed`), et les lignes du diff de commit qui ne sont présentes que dans la plage du second commit sont montrées en gras (ce qui peut être surchargé à l&#8217;aide du réglage de configuration`color.diff.&lt;créneau&gt;` où &lt;créneau&gt; peut être <code>contextBold</code>, <code>oldBold</code> ou`newBold`).</p>
 </div>
 <div class="paragraph">
 <p>Ceci est connu par <code>range-diff</code> sous le nom de « coloration double ». Utilisez <code>--no-dual-color</code> pour retourner à la coloration de toutes les lignes selon les marqueurs de diff externes (et ignorer complètement la colorisation du diff interne).</p>
@@ -504,36 +506,47 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--creation-factor=&lt;pourcentage&gt;</dt>
 <dd>
-<p>Définir le facteur de coût de création/de suppression à <code>&lt;pourcent&gt;</code>. Par défaut à 60. Essayez une plus grande valeur si <code>git range-diff</code> considère erronément une réécriture totale comme un grand changement (la suppression d&#8217;un commit et l&#8217;ajout d&#8217;un autre), et une plus petite dans le cas inverse. Voir la section ``Algorithme`` ci-dessous pour une explication de pourquoi cela est nécessaire.</p>
+<p>Définir le facteur de coût de création/de suppression à <em>&lt;pourcent&gt;</em>. Par défaut à 60. Essayez une plus grande valeur si <code>git</code> <code>range-diff</code> considère erronément une réécriture totale comme un grand changement (la suppression d&#8217;un commit et l&#8217;ajout d&#8217;un autre), et une plus petite dans le cas inverse. Voir la section ``Algorithme`` ci-dessous pour une explication de pourquoi cela est nécessaire.</p>
 </dd>
 <dt class="hdlist1">--left-only</dt>
 <dd>
-<p>Supprimer les commits qui manquent dans la première plage spécifiée (ou dans la « plage de gauche » lors de l&#8217;utilisation du format <code>&lt;rév1&gt;...&lt;rév2&gt;</code>).</p>
+<p>Supprimer les commits qui manquent dans la première plage spécifiée (ou dans la « plage de gauche » lors de l&#8217;utilisation du format &lt;rév1&gt;<code>...</code>&lt;rév2&gt;).</p>
 </dd>
 <dt class="hdlist1">--right-only</dt>
 <dd>
-<p>Supprimer les commits qui manquent dans la deuxième plage spécifiée (ou dans la « plage de droite » lors de l&#8217;utilisation du format <code>&lt;rév1&gt;...&lt;rév2&gt;</code>).</p>
+<p>Supprimer les commits qui manquent dans la deuxième plage spécifiée (ou dans la « plage de droite » lors de l&#8217;utilisation du format &lt;rév1&gt;<code>...</code>&lt;rév2&gt;).</p>
+</dd>
+<dt class="hdlist1">--diff-merges=&lt;format&gt;</dt>
+<dd>
+<p>Au lieu d&#8217;ignorer les commits de fusion, générer des diffs pour eux à l&#8217;aide de l&#8217;option correspondante <code>--diff-merges=</code><em>&lt;format&gt;</em> de <a href="git-log.html">git-log(1)</a> et les inclure dans la comparaison.</p>
+<div class="paragraph">
+<p>Note: In the common case, the <code>remerge</code> mode will be the most natural one to use, as it shows only the diff on top of what Git&#8217;s merge machinery would have produced. In other words, if a merge commit is the result of a non-conflicting <code>git</code> <code>merge</code>, the <code>remerge</code> mode will represent it with an empty diff.</p>
+</div>
+</dd>
+<dt class="hdlist1">--remerge-diff</dt>
+<dd>
+<p>Option de comfort, équivalente à <code>--diff-merges=remerge</code>.</p>
 </dd>
 <dt class="hdlist1">--[no-]notes[=&lt;ref&gt;]</dt>
 <dd>
-<p>Ce drapeau est passé au programme <code>git log</code> (voir <a href="git-log.html"><b>git-log</b>(1)</a>) qui génère les rustines.</p>
+<p>Ce drapeau est passé au programme <code>git</code> <code>log</code> (voir <a href="git-log.html">git-log(1)</a>) qui génère les rustines.</p>
 </dd>
-<dt class="hdlist1">&lt;plage1&gt;&lt;plage2&gt;</dt>
+<dt class="hdlist1">&lt;plage1&gt; &lt;plage2&gt;</dt>
 <dd>
-<p>Comparer les commits spécifiés par les deux plages, où <code>&lt;plage1 &gt;</code> est considéré comme une version ancienne de <code>&lt;plage2&gt;</code> .</p>
+<p>Comparer les commits spécifiés par les deux plages, où <em>&lt;plage1&gt;</em> est considéré comme une version ancienne de <em>&lt;plage2&gt;</em> .</p>
 </dd>
 <dt class="hdlist1">&lt;rév1&gt;&#8230;&#8203;&lt;rév2&gt;</dt>
 <dd>
-<p>Equivalent à passer <code>&lt;rév2&gt;..&lt;rév1&gt;</code> et <code>&lt;rév1&gt;..&lt;rév2&gt;</code>.</p>
+<p>Equivalent à passer &lt;rév2&gt;<code>..</code>&lt;rév1&gt; et &lt;rév1&gt;<code>..</code>&lt;rév2&gt;.</p>
 </dd>
 <dt class="hdlist1">&lt;base&gt; &lt;rév1&gt; &lt;rév2&gt;</dt>
 <dd>
-<p>Équivalent à passer <code>&lt;base&gt;..&lt;rév1&gt;</code> et <code>&lt;base&gt;..&lt;rév2&gt;</code>. Notez que <code>&lt;base&gt;</code> n&#8217;a pas besoin d&#8217;être le point exact d&#8217;embranchement des branches. Par exemple : après avoir rebasé une branche <code>mon-sujet</code>, <code>git range-diff my-topic@{u} mon-sujet@{1} mon-sujet</code> montrerait les différences introduites par le rebasage.</p>
+<p>Équivalent à passer <em>&lt;base&gt;</em><code>..</code>&lt;rév1&gt; et <em>&lt;base&gt;</em><code>..</code>&lt;rév2&gt;. Notez que <em>&lt;base&gt;</em> n&#8217;a pas besoin d&#8217;être le point exact d&#8217;embranchement des branches. Par exemple : après avoir rebasé une branche <code>mon-sujet</code>, <code>git</code> <code>range-diff</code> <code>my-topic@</code>{u} <code>mon-sujet@</code>{1} <code>mon-sujet</code> montrerait les différences introduites par le rebasage.</p>
 </dd>
 </dl>
 </div>
 <div class="paragraph">
-<p><code>git range-diff</code> accepte aussi les options normales de diff (voir <a href="git-diff.html"><b>git-diff</b>(1)</a>), notablement les options <code>--color=[&lt;quand&gt;]</code> et <code>--no-color</code>. Ces options sont utilisées lors de la génération du " diff entre rustines", c-à-d pour comparer l&#8217;auteur, le message de validation et la diff de commits anciens/nouveaux correspondants. Il n&#8217;y a actuellement aucun moyen de bricoler la plupart des options de diff passées à <code>git log</code> lors de la génération de ces rustines.</p>
+<p><code>git</code> <code>range-diff</code> accepte aussi les options normales de diff (voir <a href="git-diff.html">git-diff(1)</a>), notablement les options <code>--color=</code>[<em>&lt;quand&gt;</em>] et <code>--no-color</code>. Ces options sont utilisées lors de la génération du " diff entre rustines", c-à-d pour comparer l&#8217;auteur, le message de validation et la diff de commits anciens/nouveaux correspondants. Il n&#8217;y a actuellement aucun moyen de bricoler la plupart des options de diff passées à <code>git</code> <code>log</code> lors de la génération de ces rustines.</p>
 </div>
 </div>
 </div>
@@ -541,7 +554,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_stabilité_de_la_sortie">STABILITÉ DE LA SORTIE</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>La sortie de la commande <code>range-diff</code> est sujette à changement. Elle est destiné à être la production de porcelaine humainement lisible, pas quelque chose qui peut être utilisé à travers les versions de Git pour obtenir un <code>range-diff</code> textuellement stable (par opposition à quelque chose comme l&#8217;option <code>--stable</code> de <a href="git-patch-id.html"><b>git-patch-id</b>(1)</a>). Il n&#8217;y a pas d&#8217;équivalent de <a href="git-apply.html"><b>git-apply</b>(1)</a> pour <code>range-diff</code>, la sortie n&#8217;est pas destinée à être consommable par une machine.</p>
+<p>La sortie de la commande <code>range-diff</code> est sujette à changement. Elle est destiné à être la production de porcelaine humainement lisible, pas quelque chose qui peut être utilisé à travers les versions de Git pour obtenir un <code>range-diff</code> textuellement stable (par opposition à quelque chose comme l&#8217;option <code>--stable</code> de <a href="git-patch-id.html">git-patch-id(1)</a>). Il n&#8217;y a pas d&#8217;équivalent de <a href="git-apply.html">git-apply(1)</a> pour <code>range-diff</code>, la sortie n&#8217;est pas destinée à être consommable par une machine.</p>
 </div>
 <div class="paragraph">
 <p>C&#8217;est particulièrement vrai lors du passage d&#8217;options à diff. Actuellement, certaines options comme <code>--stat</code> peuvent, comme effet émergent, produire des sorties qui sont assez inutiles dans les contexte de <code>range-diff</code>. Des versions futures de <code>range-diff</code> peuvent apprendre à intercepter de telles options d&#8217;un manière spécifique à <code>range-diff</code> (c-à-d pour <code>--stat</code> produisant une sortie humaine qui résume comment les stats de diff ont changé).</p>
@@ -552,7 +565,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_configuration">CONFIGURATION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Cette commande utilise les réglages <code>diff.color.*</code> et <code>pager.range-diff</code> (ce dernier activé par défaut). Voir <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p>Cette commande utilise les réglages <code>diff.color.</code>* et <code>pager.range-diff</code> (ce dernier activé par défaut). Voir <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -568,7 +581,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>Une sortie typique de <code>git range-diff</code> ressemblerait à ceci  :</p>
+<p>Une sortie typique de <code>git</code> <code>range-diff</code> ressemblerait à ceci  :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -595,7 +608,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Dans cet exemple, il y a 3 commits anciens et 3 nouveaux, où le développeur a supprimé le 3<sup>ème</sup>, en ajouté un nouveau avant les deux premiers, et a modifié le message de validation du 2<sup>ème</sup> commit ainsi que son diff.</p>
 </div>
 <div class="paragraph">
-<p>Lorsque la sortie va à un terminal, elle est codée en couleur par défaut, tout comme la sortie <code>git diff' normale. En outre, la première ligne (ajout d'un commit) est verte, la dernière ligne (suppression d'un commit) est rouge, la deuxième ligne (avec une correspondance parfaite) est jaune comme l'en-tête de commit de la sortie de `git show</code>, et la troisième ligne colore l&#8217;ancien commit en rouge, le nouveau en vert et le reste comme l&#8217;en-tête de commit <code>git show</code>.</p>
+<p>Lorsque la sortie va à un terminal, elle est codée en couleur par défaut, tout comme la sortie <code>git</code> <code>diff</code> normale. En outre, la première ligne (ajout d&#8217;un commit) est verte, la dernière ligne (suppression d&#8217;un commit) est rouge, la deuxième ligne (avec une correspondance parfaite) est jaune comme l&#8217;en-tête de commit de la sortie de <code>git</code> <code>show</code>, et la troisième ligne colore l&#8217;ancien commit en rouge, le nouveau en vert et le reste comme l&#8217;en-tête de commit <code>git</code> <code>show</code>.</p>
 </div>
 <div class="paragraph">
 <p>Une diff naïve de diffs codée en couleur est en fait un peu difficile à lire, cependant, car elle colorie l&#8217;ensemble des lignes rouges ou vertes. La ligne qui a ajouté "Ce qui est inattendu" dans l&#8217;ancien commit, par exemple, est complètement rouge, même si l&#8217;intention de l&#8217;ancien commit était d&#8217;ajouter quelque chose.</p>
@@ -695,7 +708,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_voir_aussi">VOIR AUSSI</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-log.html"><b>git-log</b>(1)</a></p>
+<p><a href="git-log.html">git-log(1)</a></p>
 </div>
 </div>
 </div>
@@ -703,7 +716,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Fait partie de la suite <a href="git.html"><b>git</b>(1)</a></p>
+<p>Fait partie de la suite <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
@@ -718,7 +731,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:26:31 +0200
+Last updated 2025-03-23 12:03:33 +0100
 </div>
 </div>
 </body>

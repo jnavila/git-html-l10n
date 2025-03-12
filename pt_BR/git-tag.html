@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-tag(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,14 +447,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git tag</em> [-a | -s | -u &lt;key-id&gt;] [-f] [-m &lt;msg&gt; | -F &lt;arquivo&gt;] [-e]
-        &lt;nome da tag&gt; [&lt;commit&gt; | &lt;objeto&gt;]
-<em>git tag</em> -d &lt;nome da tag&gt;&#8230;&#8203;
+<pre class="content"><em>git tag</em> [-a | -s | -u &lt;key-id&gt;] [-f] [-m &lt;msg&gt; | -F &lt;file&gt;] [-e]
+        [(--trailer &lt;token&gt;[(=|:)&lt;value&gt;])&#8230;&#8203;]
+        &lt;tagname&gt; [&lt;commit&gt; | &lt;object&gt;]
+<em>git tag</em> -d &lt;tagname&gt;&#8230;&#8203;
 <em>git tag</em> [-n[&lt;num&gt;]] -l [--contains &lt;commit&gt;] [--no-contains &lt;commit&gt;]
-        [--points-at &lt;objeto&gt;] [--column[=&lt;opções&gt;] | --no-column]
-        [--create-reflog] [--sort=&lt;chave&gt;] [--format=&lt;formato&gt;]
-        [--merged &lt;commit&gt;] [--no-merged &lt;commit&gt;] [&lt;padrão&gt;&#8230;&#8203;]
-<em>git tag</em> -v [--format=&lt;formato&gt;] &lt;tagname&gt;&#8230;&#8203;</pre>
+        [--points-at &lt;object&gt;] [--column[=&lt;options&gt;] | --no-column]
+        [--create-reflog] [--sort=&lt;key&gt;] [--format=&lt;format&gt;]
+        [--merged &lt;commit&gt;] [--no-merged &lt;commit&gt;] [&lt;pattern&gt;&#8230;&#8203;]
+<em>git tag</em> -v [--format=&lt;format&gt;] &lt;tagname&gt;&#8230;&#8203;</pre>
 </div>
 </div>
 </div>
@@ -467,22 +469,22 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>A menos que <code>-f</code> seja utilizado, a tag informada não deve existir ainda.</p>
 </div>
 <div class="paragraph">
-<p>Se um dos itens <code>-a</code>, <code>-s</code> ou <code>-u &lt;id-da-chave&gt;</code> for usada, o comando criará um objeto <em>tags</em> e exigirá uma mensagem para a etiqueta. A menos que a opção <code>-m &lt;msg&gt;</code> ou <code>-F &lt;arquivo&gt;</code> seja usado, um editor é iniciado para que o usuário digite a mensagem das etiquetas.</p>
+<p>Se um dos itens <code>-a</code>, <code>-s</code> ou <code>-u</code> <em>&lt;id-da-chave&gt;</em> for usada, o comando criará um objeto <em>tags</em> e exigirá uma mensagem para a etiqueta. A menos que a opção <code>-m</code> <em>&lt;msg&gt;</em> ou <code>-F</code> <em>&lt;arquivo&gt;</em> seja usado, um editor é iniciado para que o usuário digite a mensagem das etiquetas.</p>
 </div>
 <div class="paragraph">
-<p>Caso a opção <code>-m &lt;msg&gt;</code> ou <code>-F &lt;arquivo&gt;</code> seja usada e a opção <code>-a</code>, <code>-s</code> e <code>-u &lt;key-id&gt;</code> estiverem ausentes, a opção <code>-a</code> é obrigatória.</p>
+<p>If <code>-m</code> <em>&lt;msg&gt;</em> or <code>-F</code> <em>&lt;file&gt;</em> or <code>--trailer</code> <em>&lt;token&gt;</em>[<code>=</code><em>&lt;value&gt;</em>] is given and <code>-a</code>, <code>-s</code>, and <code>-u</code> <em>&lt;key-id&gt;</em> are absent, <code>-a</code> is implied.</p>
 </div>
 <div class="paragraph">
 <p>Caso contrário, é criada uma tag de referência que aponte diretamente para o objeto informado (ou seja, uma tag leve).</p>
 </div>
 <div class="paragraph">
-<p>Um objeto de etiquetas assinado pelo GnuPG será criado quando <code>-s</code> ou <code>-u &lt;id-da-chave&gt;</code> for usado. Quando a opção <code>-u &lt;id-da-chave&gt;</code> não é usado, a identidade de quem fez o commit para o usuário atual é usada para localizar a chave de assinatura GnuPG. 	A variável de configuração <code>gpg.program</code> é usada para especificar o binário personalizado do GnuPG.</p>
+<p>Um objeto de etiquetas assinado pelo GnuPG será criado quando <code>-s</code> ou <code>-u</code> <em>&lt;id-da-chave&gt;</em> for usado. Quando a opção <code>-u</code> <em>&lt;id-da-chave&gt;</em> não é usado, a identidade de quem fez o commit para o usuário atual é usada para localizar a chave de assinatura GnuPG. 	A variável de configuração <code>gpg.program</code> é usada para especificar o binário personalizado do GnuPG.</p>
 </div>
 <div class="paragraph">
 <p>Os objetos tag (criados com <code>-a</code>, <code>-s</code> ou <code>-u</code>) são chamados de tags "anotadas"; eles contêm uma data de criação, o nome e o e-mail do marcador, uma mensagem de marcação e uma assinatura opcional do GnuPG. Enquanto uma tag "leve" é simplesmente um nome para um objeto (geralmente um objeto commit).</p>
 </div>
 <div class="paragraph">
-<p>As tags anotadas destinam-se ao lançamento, enquanto as tags leves (light) destinam-se aos rótulos dos objetos particulares ou temporários. Por este motivo que é predefinido que alguns comandos git para nomear os objetos (como <code>git description</code>) ignorem essas tags leves.</p>
+<p>As tags anotadas destinam-se ao lançamento, enquanto as tags leves (light) destinam-se aos rótulos dos objetos particulares ou temporários. Por este motivo que é predefinido que alguns comandos git para nomear os objetos (como <code>git</code> <code>description</code>) ignorem essas tags leves.</p>
 </div>
 </div>
 </div>
@@ -499,7 +501,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--sign</dt>
 <dd>
-<p>Crie uma etiqueta assinada por GPG, usando a chave do endereço de e-mail predefinido. O comportamento predefinido da assinatura GPG das etiquetas é controlado pela variável de configuração <code>tag.gpgSign</code>, se existir ou caso contrário, é desativado. Consulte <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p>Crie uma etiqueta assinada por GPG, usando a chave do endereço de e-mail predefinido. O comportamento predefinido da assinatura GPG das etiquetas é controlado pela variável de configuração <code>tag.gpgSign</code>, se existir ou caso contrário, é desativado. Consulte <a href="git-config.html">git-config(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--no-sign</dt>
 <dd>
@@ -535,7 +537,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-l</dt>
 <dt class="hdlist1">--list</dt>
 <dd>
-<p>Listar as tags. Com <code>&lt;padrão&gt;...</code>, exemplo, <code>git tag --list 'v-*'</code> liste apenas as tags que coincidam ao(s) padrões.</p>
+<p>Listar as tags. Com &lt;padrão&gt;..., exemplo, <code>git</code> <code>tag</code> <code>--list</code> 'v-*' liste apenas as tags que coincidam ao(s) padrões.</p>
 <div class="paragraph">
 <p>Executar "tag git" sem argumentos também lista todas as tags. O padrão é um curinga do shell (exemplo, quando coincidir ao usar fnmatch(3)). Padrões múltiplos podem ser informados; caso haja coincidência entre alguns deles, a tag será exibida.</p>
 </div>
@@ -545,11 +547,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--sort=&lt;chave&gt;</dt>
 <dd>
-<p>Classifica com base na chave fornecida. Prefixo <code>-</code> para classificar em ordem decrescente do valor. É possível usar a opção <code>--sort=&lt;chave&gt;</code> diversas vezes e, neste caso, a última chave se torna a chave primária. Também suporta "version:refname" ou "v:refname" (os nomes das etiquetas são tratadas como versões). A ordem de classificação "version:refname" também pode ser afetada pela variável de configuração "versionsort.suffix". As chaves compatíveis são as mesmas que as do <code>git for-each-ref</code>. A predefinição da ordem de classificação é o valor configurado para a variável <code>tag.sort</code>, se ela existir, caso contrário, a ordem lexicográfica. Consulte <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p>Classifica com base na chave fornecida. Prefixo <code>-</code> para classificar em ordem decrescente do valor. É possível usar a opção <code>--sort=</code><em>&lt;chave&gt;</em> diversas vezes e, neste caso, a última chave se torna a chave primária. Também suporta "version:refname" ou "v:refname" (os nomes das etiquetas são tratadas como versões). A ordem de classificação "version:refname" também pode ser afetada pela variável de configuração "versionsort.suffix". As chaves compatíveis são as mesmas que as do <code>git</code> <code>for-each-ref</code>. A predefinição da ordem de classificação é o valor configurado para a variável <code>tag.sort</code>, se ela existir, caso contrário, a ordem lexicográfica. Consulte <a href="git-config.html">git-config(1)</a>.</p>
 </dd>
 <dt class="hdlist1">--color[=&lt;quando&gt;]</dt>
 <dd>
-<p>Respeite todas as cores usadas com a opção <code>--format</code>. O campo <code>&lt;quando&gt;</code> deve ser <code>always</code>, <code>never</code> ou <code>auto</code> (comporte-se como <code>always</code> caso <code>&lt;quando&gt;</code> esteja ausente).</p>
+<p>Respeite todas as cores usadas com a opção <code>--format</code>. O campo <em>&lt;quando&gt;</em> deve ser <code>always</code>, <code>never</code> ou <code>auto</code> (comporte-se como <code>always</code> caso <em>&lt;quando&gt;</em> esteja ausente).</p>
 </dd>
 <dt class="hdlist1">-i</dt>
 <dt class="hdlist1">--ignore-case</dt>
@@ -570,11 +572,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--contains [&lt;commit&gt;]</dt>
 <dd>
-<p>Liste apenas as tags que contenham um commit em específico (<code>HEAD`caso não esteja definido). Implica no uso da opção `--list</code>.</p>
+<p>Liste apenas as tags que contenham um commit em específico (<code>HEAD</code>`caso <code>n</code>ão <code>esteja</code> <code>definido</code>). <code>Implica</code> <code>no</code> <code>uso</code> <code>da</code> <code>op</code>ção `--list.</p>
 </dd>
 <dt class="hdlist1">--no-contains [&lt;commit&gt;]</dt>
 <dd>
-<p>Liste apenas as tags que não contenham nenhum commit em específico (<code>HEAD`caso não esteja definido). Implica no uso da opção `--list</code>.</p>
+<p>Liste apenas as tags que não contenham nenhum commit em específico (<code>HEAD</code>`caso <code>n</code>ão <code>esteja</code> <code>definido</code>). <code>Implica</code> <code>no</code> <code>uso</code> <code>da</code> <code>op</code>ção `--list.</p>
 </dd>
 <dt class="hdlist1">--merged [&lt;commit&gt;]</dt>
 <dd>
@@ -586,17 +588,21 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--points-at &lt;objeto&gt;</dt>
 <dd>
-<p>Liste apenas as tags dos objetos informados (<code>HEAD`caso não esteja definido). Implica no uso da opção `--list</code>.</p>
+<p>Liste apenas as tags dos objetos informados (<code>HEAD</code>`caso <code>n</code>ão <code>esteja</code> <code>definido</code>). <code>Implica</code> <code>no</code> <code>uso</code> <code>da</code> <code>op</code>ção `--list.</p>
 </dd>
 <dt class="hdlist1">-m &lt;msg&gt;</dt>
 <dt class="hdlist1">--message=&lt;msg&gt;</dt>
 <dd>
-<p>Use a mensagem fornecida nas etiquetas (em vez de solicitar). Se forem fornecidas várias opções <code>-m</code>, os seus valores serão concatenados como parágrafos separados. Implica no uso da opção <code>-a</code> se nenhuma das opções <code>-a</code>, <code>-s</code> ou <code>-u &lt;id-da-chave&gt;</code> for usada.</p>
+<p>Use a mensagem fornecida nas etiquetas (em vez de solicitar). Se forem fornecidas várias opções <code>-m</code>, os seus valores serão concatenados como parágrafos separados. Implica no uso da opção <code>-a</code> se nenhuma das opções <code>-a</code>, <code>-s</code> ou <code>-u</code> <em>&lt;id-da-chave&gt;</em> for usada.</p>
 </dd>
 <dt class="hdlist1">-F &lt;arquivo&gt;</dt>
 <dt class="hdlist1">--file=&lt;arquivo&gt;</dt>
 <dd>
-<p>Obtém a mensagem da etiqueta do arquivo informado. Use <em>-</em> para ler a mensagem da entrada predefinida. Implica no uso da opção <code>-a</code> se nenhuma das opções <code>-a</code>, <code>-s</code> ou <code>-u &lt;id-da-chave&gt;</code> for usada.</p>
+<p>Obtém a mensagem da etiqueta do arquivo informado. Use <em>-</em> para ler a mensagem da entrada predefinida. Implica no uso da opção <code>-a</code> se nenhuma das opções <code>-a</code>, <code>-s</code> ou <code>-u</code> <em>&lt;id-da-chave&gt;</em> for usada.</p>
+</dd>
+<dt class="hdlist1">--trailer &lt;token&gt;[(=|:)&lt;valor&gt;]</dt>
+<dd>
+<p>Specify a (&lt;token&gt;, &lt;value&gt;) pair that should be applied as a trailer. (e.g. <code>git</code> <code>tag</code> <code>--trailer</code> "Custom-Key: <code>value</code>" will add a "Custom-Key" trailer to the tag message.) The <code>trailer.</code>* configuration variables (<a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>) can be used to define if a duplicated trailer is omitted, where in the run of trailers each trailer would appear, and other details. The trailers can be extracted in <code>git</code> <code>tag</code> <code>--list</code>, using <code>--format=</code>"%(<code>trailers</code>)" placeholder.</p>
 </dd>
 <dt class="hdlist1">-e</dt>
 <dt class="hdlist1">--edit</dt>
@@ -609,15 +615,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--create-reflog</dt>
 <dd>
-<p>Cria um reflog para as etiquetas. Para ativar globalmente os reflogs para as etiquetas, consulte <code>core.logAllRefUpdates</code> do comando <a href="git-config.html"><b>git-config</b>(1)</a>. A forma negada da opção <code>--no-create-reflog</code> apenas substitui a forma anterior da opção <code>--create-reflog</code>, mas atualmente não nega a configuração em <code>core.logAllRefUpdates</code>.</p>
+<p>Cria um reflog para as etiquetas. Para ativar globalmente os reflogs para as etiquetas, consulte <code>core.logAllRefUpdates</code> do comando <a href="git-config.html">git-config(1)</a>. A forma negada da opção <code>--no-create-reflog</code> apenas substitui a forma anterior da opção <code>--create-reflog</code>, mas atualmente não nega a configuração em <code>core.logAllRefUpdates</code>.</p>
 </dd>
 <dt class="hdlist1">--format=&lt;formato&gt;</dt>
 <dd>
-<p>Uma string que interpola <code>%(fieldname)</code> de uma referência na etiqueta que está sendo mostrada e o objeto para onde ela aponta. O formato é o mesmo do <a href="git-for-each-ref.html"><b>git-for-each-ref</b>(1)</a>. Quando não especificado, o padrão é <code>%(refname:strip=2)</code>.</p>
+<p>Uma string que interpola %(<code>fieldname</code>) de uma referência na etiqueta que está sendo mostrada e o objeto para onde ela aponta. O formato é o mesmo do <a href="git-for-each-ref.html">git-for-each-ref(1)</a>. Quando não especificado, o padrão é %(<code>refname:strip=2</code>).</p>
 </dd>
 <dt class="hdlist1">&lt;nome-da-tag&gt;</dt>
 <dd>
-<p>O nome da etiqueta que será criada, excluída ou descrita. O novo nome da etiqueta deve passar em todas as verificações definidas por <a href="git-check-ref-format.html"><b>git-check-ref-format</b>(1)</a>. Algumas destas verificações podem restringir os caracteres permitidos num nome da etiqueta.</p>
+<p>O nome da etiqueta que será criada, excluída ou descrita. O novo nome da etiqueta deve passar em todas as verificações definidas por <a href="git-check-ref-format.html">git-check-ref-format(1)</a>. Algumas destas verificações podem restringir os caracteres permitidos num nome da etiqueta.</p>
 </dd>
 <dt class="hdlist1">&lt;commit&gt;</dt>
 <dt class="hdlist1">&lt;objeto&gt;</dt>
@@ -632,7 +638,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_configuração">CONFIGURAÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>É predefinido que o comando <em>git tag</em> no modo <em>sign-with-default</em> (-s) usará a sua identidade para fazer o commit (no formato <code>Seu nome &lt;seu@endereço.e-mail&gt;</code>) para localizar uma chave. Se quiser usar uma chave diferente, você pode especificá-la na configuração do repositório da seguinte maneira:</p>
+<p>É predefinido que o comando <em>git tag</em> no modo <em>sign-with-default</em> (-s) usará a sua identidade para fazer o commit (no formato <code>Seu</code> <code>nome</code> &lt;seu@endereço.<code>e-mail</code>&gt;) para localizar uma chave. Se quiser usar uma chave diferente, você pode especificá-la na configuração do repositório da seguinte maneira:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -641,7 +647,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p>O <code>pager.tag</code> só é respeitado ao listar etiquetas, ou seja, quando a opção <code>-l</code> é usada ou está implícita. A predefinição é usar um pager. Consulte <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p>O <code>pager.tag</code> só é respeitado ao listar etiquetas, ou seja, quando a opção <code>-l</code> é usada ou está implícita. A predefinição é usar um pager. Consulte <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -771,11 +777,11 @@ para obter as seguintes atualizações...</pre>
 <dl>
 <dt class="hdlist1">Formato interno do Git</dt>
 <dd>
-<p>É <code>&lt;unix-timestamp&gt; &lt;time-zone-offset&gt;</code>, onde desde a época do UNIX <code>&lt;unix-timestamp&gt;</code> é o valor em segundos. O <code>&lt;time-zone-offset&gt;</code> é o desvio positivo ou negativo a partir do UTC. O CET por exemplo (onde é 1 hora à frente do UTC ) é <code>+0100</code>.</p>
+<p>É <em>&lt;unix-timestamp&gt;</em> <em>&lt;time-zone-offset&gt;</em>, onde desde a época do UNIX <em>&lt;unix-timestamp&gt;</em> é o valor em segundos. O <em>&lt;time-zone-offset&gt;</em> é o desvio positivo ou negativo a partir do UTC. O CET por exemplo (onde é 1 hora à frente do UTC ) é <code>+0100</code>.</p>
 </dd>
 <dt class="hdlist1">RFC 2822</dt>
 <dd>
-<p>O formato de e-mail padrão, conforme descrito pela RFC 2822, por exemplo, <code>Thu, 07 Apr 2005 22:13:13 +0200</code>.</p>
+<p>The standard date format as described by RFC 2822, for example <code>Thu,</code> <code>07</code> <code>Apr</code> <code>2005</code> <code>22:13:13</code> <code>+0200</code>.</p>
 </dd>
 <dt class="hdlist1">ISO 8601</dt>
 <dd>
@@ -804,7 +810,7 @@ Além disso, a parte da data é aceita nos seguintes formatos: <code>YYYY.MM.DD<
 <dl>
 <dt class="hdlist1"><code>$GIT_DIR/TAG_EDITMSG</code></dt>
 <dd>
-<p>Esse arquivo contém a mensagem de uma tag anotada em andamento. Se o <code>git tag</code> for encerrado devido a um erro antes de criar uma tag anotada, a mensagem da tag que foi fornecida pelo usuário numa sessão do editor estará disponível nesse arquivo, mas poderá ser substituída pela próxima chamada do comando <code>git tag</code>.</p>
+<p>Esse arquivo contém a mensagem de uma tag anotada em andamento. Se o <code>git</code> <code>tag</code> for encerrado devido a um erro antes de criar uma tag anotada, a mensagem da tag que foi fornecida pelo usuário numa sessão do editor estará disponível nesse arquivo, mas poderá ser substituída pela próxima chamada do comando <code>git</code> <code>tag</code>.</p>
 </dd>
 </dl>
 </div>
@@ -825,7 +831,7 @@ Além disso, a parte da data é aceita nos seguintes formatos: <code>YYYY.MM.DD<
 <h2 id="_veja_também">VEJA TAMBÉM</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-check-ref-format.html"><b>git-check-ref-format</b>(1)</a>. <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p><a href="git-check-ref-format.html">git-check-ref-format(1)</a>. <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -833,14 +839,14 @@ Além disso, a parte da data é aceita nos seguintes formatos: <code>YYYY.MM.DD<
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Parte do conjunto <a href="git.html"><b>git</b>(1)</a></p>
+<p>Parte do conjunto <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:27:26 +0200
+Last updated 2025-03-23 12:03:46 +0100
 </div>
 </div>
 </body>

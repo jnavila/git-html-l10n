@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-apply(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,7 +447,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_synopsis">SYNOPSIS</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git apply</em> [--stat] [--numstat] [--summary] [--check] [--index | --intent-to-add] [--3way]
+<pre class="content"><em>git apply</em> [--stat] [--numstat] [--summary] [--check]
+          [--index | --intent-to-add] [--3way] [--ours | --theirs | --union]
           [--apply] [--no-add] [--build-fake-ancestor=&lt;fichier&gt;] [-R | --reverse]
           [--allow-binary-replacement | --binary] [--reject] [-z]
           [-p&lt;n&gt;] [-C&lt;n&gt;] [--inaccurate-eof] [--recount] [--cached]
@@ -464,7 +466,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Lit la sortie diff fournie (c&#8217;est-à-dire "une rustine") et l&#8217;applique aux fichiers. Lors de l&#8217;exécution à partir d&#8217;un sous-répertoire dans un dépôt, les chemins patchés en dehors du répertoire sont ignorés. Avec l&#8217;option <code>--index</code>, la rustine est également appliquée à l&#8217;index, et avec l&#8217;option <code>--cached</code>, la rustine est seulement appliquée à l&#8217;index. Sans ces options, la commande applique la rustine uniquement aux fichiers, et n&#8217;exige pas qu&#8217;ils soient dans un dépôt Git.</p>
 </div>
 <div class="paragraph">
-<p>Cette commande applique la rustine mais ne crée pas de commit. Utilisez <a href="git-am.html"><b>git-am</b>(1)</a> pour créer des commits à partir des rustines générées par <a href="git-format-patch.html"><b>git-format-patch</b>(1)</a> et/ou reçus par courrier électronique.</p>
+<p>Cette commande applique la rustine mais ne crée pas de commit. Utilisez <a href="git-am.html">git-am(1)</a> pour créer des commits à partir des rustines générées par <a href="git-format-patch.html">git-format-patch(1)</a> et/ou reçus par courrier électronique.</p>
 </div>
 </div>
 </div>
@@ -483,7 +485,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--numstat</dt>
 <dd>
-<p>Similaire à <code>--stat</code>, mais afficher le nombre de lignes ajoutées ou supprimées en notation décimale et le nom de chemin sans abréviation, pour le rendre plus facile à traiter automatiquement. Pour les fichiers binaires, affiche deux <code>-</code> au lieu de <code>0 0</code>. Désactive "apply".</p>
+<p>Similaire à <code>--stat</code>, mais afficher le nombre de lignes ajoutées ou supprimées en notation décimale et le nom de chemin sans abréviation, pour le rendre plus facile à traiter automatiquement. Pour les fichiers binaires, affiche deux <code>-</code> au lieu de <code>0</code> <code>0</code>. Désactive "apply".</p>
 </dd>
 <dt class="hdlist1">--summary</dt>
 <dd>
@@ -503,12 +505,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--intent-to-add</dt>
 <dd>
-<p>Lorsque de l&#8217;application de la rustine uniquement à l&#8217;arbre de travail, marquer les nouveaux fichiers à ajouter à l&#8217;index plus tard (voir l&#8217;option <code>--intent-to-add</code> dans <a href="git-add.html"><b>git-add</b>(1)</a>). Cette option est ignorée sauf si elle est exécutée dans un dépôt Git et que <code>--index</code> n&#8217;est pas spécifié. Notez que <code>--index</code> peut être implicite par d&#8217;autres options telles que <code>--cached</code> ou <code>--3way</code>.</p>
+<p>Lorsque de l&#8217;application de la rustine uniquement à l&#8217;arbre de travail, marquer les nouveaux fichiers à ajouter à l&#8217;index plus tard (voir l&#8217;option <code>--intent-to-add</code> dans <a href="git-add.html">git-add(1)</a>). Cette option est ignorée sauf si elle est exécutée dans un dépôt Git et que <code>--index</code> n&#8217;est pas spécifié. Notez que <code>--index</code> peut être implicite par d&#8217;autres options telles que <code>--cached</code> ou <code>--3way</code>.</p>
 </dd>
 <dt class="hdlist1">-3</dt>
 <dt class="hdlist1">--3way</dt>
 <dd>
 <p>Tenter une fusion à 3 voies si la rustine enregistre l&#8217;identité des blobs auxquels elle est censée s&#8217;appliquer et que nous avons ces blobs disponibles localement, laissant éventuellement les marqueurs de conflit dans les fichiers de l&#8217;arbre de travail pour que l&#8217;utilisateur les résolve. Cette option implique l&#8217;option <code>--index</code> sauf si l&#8217;option <code>--cached</code> est utilisée, et est incompatible avec l&#8217;option <code>--reject</code>. Lorsqu&#8217;elle est utilisée avec l&#8217;option <code>--cached</code>, tous les conflits sont laissés à des étapes supérieures dans le cache.</p>
+</dd>
+<dt class="hdlist1">--ours</dt>
+<dt class="hdlist1">--theirs</dt>
+<dt class="hdlist1">--union</dt>
+<dd>
+<p>Au lieu de laisser les conflits dans le dossier, résoudre les conflits en faveur des lignes de notre côté (ou du leur ou des deux). Nécessite --3way.</p>
 </dd>
 <dt class="hdlist1">--build-fake-ancestor=&lt;fichier&gt;</dt>
 <dd>
@@ -530,7 +538,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Lorsque le <code>--numstat</code> a été donné, ne pas changer les noms de chemin, mais utiliser un format lisible par machine et terminé par NUL.</p>
 <div class="paragraph">
-<p>Sans cette option, les noms de chemin avec des caractères « inhabituels » sont cités comme expliqué pour la variable de configuration <code>core.quotePath</code> (voir <a href="git-config.html"><b>git-config</b>(1)</a>).</p>
+<p>Sans cette option, les noms de chemin avec des caractères « inhabituels » sont cités comme expliqué pour la variable de configuration <code>core.quotePath</code> (voir <a href="git-config.html">git-config(1)</a>).</p>
 </div>
 </dd>
 <dt class="hdlist1">-p&lt;n&gt;</dt>
@@ -584,7 +592,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>Par défaut, la commande émet des messages d&#8217;avertissement mais applique la rustine. Lorsque <code>git-apply</code> est utilisé pour des statistiques et non pour appliquer une rustine, la valeur par défaut est <code>nowarn</code>.</p>
 </div>
 <div class="paragraph">
-<p>Vous pouvez utiliser différentes valeurs de <code>&lt;action&gt;</code> pour contrôler ce comportement :</p>
+<p>Vous pouvez utiliser différentes valeurs de <em>&lt;action&gt;</em> pour contrôler ce comportement :</p>
 </div>
 <div class="ulist">
 <ul>
@@ -628,14 +636,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>Préfixer &lt;racine&gt; à tous les noms de fichiers. Si un argument "-p" a également été passé, il est appliqué avant de préfixer la nouvelle racine.</p>
 <div class="paragraph">
-<p>Par exemple, une rustine qui parle de mettre à jour <code>a/git-gui.sh</code> en <code>b/git-gui.sh</code> peut être appliquée au fichier dans l&#8217;arbre de travail <code>modules/git-gui/git-gui.sh</code> en lançant <code>git apply --directory=modules/git-gui</code>.</p>
+<p>Par exemple, une rustine qui parle de mettre à jour <code>a/git-gui.sh</code> en <code>b/git-gui.sh</code> peut être appliquée au fichier dans l&#8217;arbre de travail <code>modules/git-gui/git-gui.sh</code> en lançant <code>git</code> <code>apply</code> <code>--directory=modules/git-gui</code>.</p>
 </div>
 </dd>
 <dt class="hdlist1">--unsafe-paths</dt>
 <dd>
 <p>Par défaut, une rustine qui affecte l&#8217;extérieur de la zone de travail (soit une arborescence de travail contrôlée par Git, soit le répertoire de travail actuel lorsque "git apply" est utilisé en remplacement de patch de GNU) est rejeté comme une erreur (ou un méfait).</p>
 <div class="paragraph">
-<p>Lorsque <code>git apply</code> est utilisé comme « meilleur patch GNU », l&#8217;utilisateur peut passer l&#8217;option <code>--unsafe-paths</code> pour passer outre cette vérification de sécurité. Cette option n&#8217;a aucun effet lorsque <code>--index</code> ou <code>--cached</code> est utilisé.</p>
+<p>Lorsque <code>git</code> <code>apply</code> est utilisé comme « meilleur patch GNU », l&#8217;utilisateur peut passer l&#8217;option <code>--unsafe-paths</code> pour passer outre cette vérification de sécurité. Cette option n&#8217;a aucun effet lorsque <code>--index</code> ou <code>--cached</code> est utilisé.</p>
 </div>
 </dd>
 <dt class="hdlist1">--allow-empty</dt>
@@ -650,10 +658,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_configuration">CONFIGURATION</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Tout ce qui se trouve en dessous de cette ligne dans cette section est inclus de manière sélective à partir de la documentation <a href="git-config.html"><b>git-config</b>(1)</a>. Le contenu est le même que celui qui s&#8217;y trouve :</p>
+<p>Tout ce qui se trouve en dessous de cette ligne dans cette section est inclus de manière sélective à partir de la documentation <a href="git-config.html">git-config(1)</a>. Le contenu est le même que celui qui s&#8217;y trouve :</p>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in git-apply.txt - include::config/apply.txt[]</p>
+<p>Unresolved directive in git-apply.adoc - include::config/apply.adoc[]</p>
 </div>
 </div>
 </div>
@@ -675,7 +683,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_voir_aussi">VOIR AUSSI</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-am.html"><b>git-am</b>(1)</a>.</p>
+<p><a href="git-am.html">git-am(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -683,7 +691,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Fait partie de la suite <a href="git.html"><b>git</b>(1)</a></p>
+<p>Fait partie de la suite <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
@@ -698,7 +706,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:26:29 +0200
+Last updated 2025-03-23 12:03:28 +0100
 </div>
 </div>
 </body>

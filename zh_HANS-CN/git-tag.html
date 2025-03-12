@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-tag(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,14 +447,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git tag</em> [-a | -s | -u &lt;键-id&gt;] [-f] [-m &lt;信息&gt; | -F &lt;文件&gt;] [-e]
-        &lt;标签名&gt; [&lt;提交&gt; | &lt;对象&gt;]
-<em>git tag</em> -d &lt;标签名&gt;&#8230;&#8203;
-<em>git tag</em> [-n[&lt;数字&gt;]] -l [--contains &lt;提交&gt;] [--no-contains &lt;提交&gt;]
-        [--points-at &lt;对象&gt;] [--column[=&lt;选项&gt;] | --no-column]
-        [--create-reflog] [--sort=&lt;键&gt;] [--format=&lt;格式&gt;]
-        [--merged &lt;提交&gt;] [--no-merged &lt;提交&gt;] [&lt;模式&gt;&#8230;&#8203;]
-<em>git tag</em> -v [--format=&lt;format&gt;] &lt;标签名&gt;&#8230;&#8203;</pre>
+<pre class="content"><em>git tag</em> [-a | -s | -u &lt;key-id&gt;] [-f] [-m &lt;msg&gt; | -F &lt;file&gt;] [-e]
+        [(--trailer &lt;token&gt;[(=|:)&lt;value&gt;])&#8230;&#8203;]
+        &lt;tagname&gt; [&lt;commit&gt; | &lt;object&gt;]
+<em>git tag</em> -d &lt;tagname&gt;&#8230;&#8203;
+<em>git tag</em> [-n[&lt;num&gt;]] -l [--contains &lt;commit&gt;] [--no-contains &lt;commit&gt;]
+        [--points-at &lt;object&gt;] [--column[=&lt;options&gt;] | --no-column]
+        [--create-reflog] [--sort=&lt;key&gt;] [--format=&lt;format&gt;]
+        [--merged &lt;commit&gt;] [--no-merged &lt;commit&gt;] [&lt;pattern&gt;&#8230;&#8203;]
+<em>git tag</em> -v [--format=&lt;format&gt;] &lt;tagname&gt;&#8230;&#8203;</pre>
 </div>
 </div>
 </div>
@@ -461,25 +463,25 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_描述">描述</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>在`refs/tags/<code>中添加一个标签引用，除非给出</code>-d/-l/-v`来删除、列出或验证标签。</p>
+<p>在`refs/tags/中添加一个标签引用，除非给出-d/-l/-v`来删除、列出或验证标签。</p>
 </div>
 <div class="paragraph">
 <p>除非给出`-f`，否则命名的标签必须还不存在。</p>
 </div>
 <div class="paragraph">
-<p>如果传递了 <code>-a</code>、 <code>-s</code> 或 <code>-u &lt;key-id&gt;`中的一个，该命令会创建一个 '标签' 对象，并要求提供一个标签信息。 除非给出</code>-m &lt;信息&gt;<code>或</code>-F &lt;文件&gt;`，否则会启动一个编辑器，让用户输入标签信息。</p>
+<p>如果传递了 <code>-a</code>、 <code>-s</code> 或 <code>-u</code> <em>&lt;key-id&gt;</em>`中的一个，该命令会创建一个 '标签' 对象，并要求提供一个标签信息。 除非给出-m &lt;信息&gt;或-F &lt;文件&gt;`，否则会启动一个编辑器，让用户输入标签信息。</p>
 </div>
 <div class="paragraph">
-<p>如果给定了`-m &lt;消息&gt;<code>或</code>-F &lt;文件&gt;<code>，并且没有</code>-a`、<code>-s`和</code>-u &lt;键-id&gt;<code>，则默认为</code>-a`。</p>
+<p>If <code>-m</code> <em>&lt;msg&gt;</em> or <code>-F</code> <em>&lt;file&gt;</em> or <code>--trailer</code> <em>&lt;token&gt;</em>[<code>=</code><em>&lt;value&gt;</em>] is given and <code>-a</code>, <code>-s</code>, and <code>-u</code> <em>&lt;key-id&gt;</em> are absent, <code>-a</code> is implied.</p>
 </div>
 <div class="paragraph">
 <p>否则，就会创建一个直接指向给定对象的标签引用（即一个轻量级标签）。</p>
 </div>
 <div class="paragraph">
-<p>当使用`-s`或`-u &lt;键-id&gt;<code>时，将创建一个GnuPG签名标签对象。 当没有使用</code>-u &lt;键-id&gt;<code>时，当前用户的提交者身份会被用来寻找GnuPG密钥进行签名。 	配置变量 `gpg.program</code> 用于指定自定义 GnuPG 二进制文件。</p>
+<p>当使用`-s`或`-u &lt;键-id&gt;时，将创建一个GnuPG签名标签对象。 当没有使用-u &lt;键-id&gt;时，当前用户的提交者身份会被用来寻找GnuPG密钥进行签名。 	配置变量 `gpg.<code>program</code> 用于指定自定义 GnuPG 二进制文件。</p>
 </div>
 <div class="paragraph">
-<p>标签对象（用`-a`、<code>-s`或</code>-u`创建）被称为 "注释 "标签；它们包含创建日期、标记者姓名和电子邮件、标记信息和可选的GnuPG签名。而 "轻量级 "标签只是一个对象（通常是一个提交对象）的名称。</p>
+<p>标签对象（用`-a`、<code>-s</code>`或-u`创建）被称为 "注释 "标签；它们包含创建日期、标记者姓名和电子邮件、标记信息和可选的GnuPG签名。而 "轻量级 "标签只是一个对象（通常是一个提交对象）的名称。</p>
 </div>
 <div class="paragraph">
 <p>注释性标签是用来发布的，而轻量级标签则是用于私人或临时对象的标签。由于这个原因，一些命名对象的git命令（如`git describe`）默认会忽略轻量级标签。</p>
@@ -499,7 +501,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--sign</dt>
 <dd>
-<p>制作一个GPG签名的标签，使用默认电子邮件地址的密钥。 标签GPG签名的默认行为由`tag.gpgSign`配置变量控制（如果存在），否则禁用。 参见 <a href="git-config.html"><b>git-config</b>(1)</a>。</p>
+<p>制作一个GPG签名的标签，使用默认电子邮件地址的密钥。 标签GPG签名的默认行为由`tag.gpgSign`配置变量控制（如果存在），否则禁用。 参见 <a href="git-config.html">git-config(1)</a>。</p>
 </dd>
 <dt class="hdlist1">--no-sign</dt>
 <dd>
@@ -535,7 +537,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-l</dt>
 <dt class="hdlist1">--list</dt>
 <dd>
-<p>列出标签。使用可选的`&lt;模式&gt;&#8230;&#8203;<code>，例如`git tag --list 'v-*'</code>，只列出符合模式的标签。</p>
+<p>列出标签。使用可选的`&lt;模式&gt;&#8230;&#8203;，例如`git <code>tag</code> <code>--list</code> 'v-*'，只列出符合模式的标签。</p>
 <div class="paragraph">
 <p>运行 "git tag "时不加参数也会列出所有标签。模式是一个shell通配符（即用fnmatch(3)匹配）。可以给出多个模式；如果其中任何一个匹配，就会显示该标签。</p>
 </div>
@@ -545,11 +547,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--sort=&lt;键&gt;</dt>
 <dd>
-<p>根据给定的键进行排序。 前缀 <code>-</code> 表示按照数值的降序排序。你可以多次使用 --sort=&lt;键&gt; 选项，在这种情况下，最后一个键成为主键。也支持 "version:refname" 或 "v:refname"（标签名被视为版本）。"version:refname" 的排序顺序也可以由 "versionsort.suffix" 配置变量影响。 支持的键与 <code>git for-each-ref</code> 中的相同。 排序顺序默认为 <code>tag.sort</code> 变量的配置值（如果存在的话），否则为词法顺序。见 <a href="git-config.html"><b>git-config</b>(1)</a>。</p>
+<p>根据给定的键进行排序。 前缀 <code>-</code> 表示按照数值的降序排序。你可以多次使用 --sort=&lt;键&gt; 选项，在这种情况下，最后一个键成为主键。也支持 "version:refname" 或 "v:refname"（标签名被视为版本）。"version:refname" 的排序顺序也可以由 "versionsort.suffix" 配置变量影响。 支持的键与 <code>git</code> <code>for-each-ref</code> 中的相同。 排序顺序默认为 <code>tag.sort</code> 变量的配置值（如果存在的话），否则为词法顺序。见 <a href="git-config.html">git-config(1)</a>。</p>
 </dd>
 <dt class="hdlist1">--color[=&lt;when&gt;]</dt>
 <dd>
-<p>尊重`--format`选项中指定的任何颜色。<code>&lt;什么时候&gt;`字段必须是`always</code>、<code>never`或`auto`之一（如果没有</code>&lt;什么时候&gt;<code>，则表现为`always</code>）。</p>
+<p>尊重`--format`选项中指定的任何颜色。&lt;什么时候&gt;`字段必须是`always、<code>never</code>`或`auto`之一（如果没有&lt;什么时候&gt;，则表现为`always）。</p>
 </dd>
 <dt class="hdlist1">-i</dt>
 <dt class="hdlist1">--ignore-case</dt>
@@ -563,7 +565,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--column[=&lt;选项&gt;]</dt>
 <dt class="hdlist1">--no-column</dt>
 <dd>
-<p>在列中显示标签列表。选项语法见配置变量`column.tag`。<code>--column`和</code>--no-column`没有选项，分别等同于&#8217;永远&#8217;和&#8217;从不'。</p>
+<p>在列中显示标签列表。选项语法见配置变量`column.tag`。<code>--column</code> 和 <code>--no-column</code> 没有选项，分别等同于&#8217;永远&#8217;和&#8217;从不'。</p>
 <div class="paragraph">
 <p>这个选项只适用于列出没有注释线的标签。</p>
 </div>
@@ -591,12 +593,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">-m &lt;消息&gt;</dt>
 <dt class="hdlist1">--message=&lt;msg&gt;</dt>
 <dd>
-<p>使用给定的标签信息（而不是提示）。 如果给出多个 <code>-m</code> 选项，它们的值将作为单独的段落连接起来。 如果未给出 <code>-a</code>、<code>-s</code> 或 <code>-u &lt;键 ID&gt;</code> 选项，则默认为 <code>-a</code>。</p>
+<p>使用给定的标签信息（而不是提示）。 如果给出多个 <code>-m</code> 选项，它们的值将作为单独的段落连接起来。 如果未给出 <code>-a</code>、<code>-s</code> 或 <code>-u</code> &lt;键 <code>ID</code>&gt; 选项，则默认为 <code>-a</code>。</p>
 </dd>
 <dt class="hdlist1">-F &lt;文件&gt;</dt>
 <dt class="hdlist1">--file=&lt;文件&gt;</dt>
 <dd>
-<p>从给定文件中获取标记信息。 使用 <em>-</em> 从标准输入读取信息。 如果未给出 <code>-a</code> 、<code>-s</code> 或 <code>-u &lt;键 ID&gt;</code> 则默认为 <code>-a</code>。</p>
+<p>从给定文件中获取标记信息。 使用 <em>-</em> 从标准输入读取信息。 如果未给出 <code>-a</code> 、<code>-s</code> 或 <code>-u</code> &lt;键 <code>ID</code>&gt; 则默认为 <code>-a</code>。</p>
+</dd>
+<dt class="hdlist1">--trailer &lt;令牌&gt;[(=|:)&lt;值&gt;]</dt>
+<dd>
+<p>Specify a (&lt;token&gt;, &lt;value&gt;) pair that should be applied as a trailer. (e.g. <code>git</code> <code>tag</code> <code>--trailer</code> "Custom-Key: <code>value</code>" will add a "Custom-Key" trailer to the tag message.) The <code>trailer.</code>* configuration variables (<a href="git-interpret-trailers.html">git-interpret-trailers(1)</a>) can be used to define if a duplicated trailer is omitted, where in the run of trailers each trailer would appear, and other details. The trailers can be extracted in <code>git</code> <code>tag</code> <code>--list</code>, using <code>--format=</code>"%(<code>trailers</code>)" placeholder.</p>
 </dd>
 <dt class="hdlist1">-e</dt>
 <dt class="hdlist1">--edit</dt>
@@ -609,15 +615,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--create-reflog</dt>
 <dd>
-<p>为标签创建一个引用日志。要全局性地启用标签的引用日志，请参见 <a href="git-config.html"><b>git-config</b>(1)</a> 中的 <code>core.logAllRefUpdates</code>。 否定形式的 <code>--no-create-reflog</code> 会覆盖先前的 <code>--create-reflog</code> ，但目前不会否定 <code>core.logAllRefUpdates</code> 的设置。</p>
+<p>为标签创建一个引用日志。要全局性地启用标签的引用日志，请参见 <a href="git-config.html">git-config(1)</a> 中的 <code>core.logAllRefUpdates</code>。 否定形式的 <code>--no-create-reflog</code> 会覆盖先前的 <code>--create-reflog</code> ，但目前不会否定 <code>core.logAllRefUpdates</code> 的设置。</p>
 </dd>
 <dt class="hdlist1">--format=&lt;格式&gt;</dt>
 <dd>
-<p>一个字符串，从正在显示的标签引用和它所指向的对象中插值`%(fieldname)'。 其格式与<a href="git-for-each-ref.html"><b>git-for-each-ref</b>(1)</a>相同。 当未指定时，默认为`%(refname:strip=2)`。</p>
+<p>一个字符串，从正在显示的标签引用和它所指向的对象中插值`%(fieldname)'。 其格式与<a href="git-for-each-ref.html">git-for-each-ref(1)</a>相同。 当未指定时，默认为`%(refname:strip=2)`。</p>
 </dd>
 <dt class="hdlist1">&lt;标签名&gt;</dt>
 <dd>
-<p>要创建、删除或描述的标签的名称。 新标签名必须通过 <a href="git-check-ref-format.html"><b>git-check-ref-format</b>(1)</a> 定义的所有检查。 其中一些检查可能限制了标签名称中允许的字符。</p>
+<p>要创建、删除或描述的标签的名称。 新标签名必须通过 <a href="git-check-ref-format.html">git-check-ref-format(1)</a> 定义的所有检查。 其中一些检查可能限制了标签名称中允许的字符。</p>
 </dd>
 <dt class="hdlist1">&lt;提交&gt;</dt>
 <dt class="hdlist1">&lt;对象&gt;</dt>
@@ -641,7 +647,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="paragraph">
-<p><code>pager.tag`只在列出标签时被尊重，即使用或暗示使用</code>-l`时。默认是使用分页器。 参见 <a href="git-config.html"><b>git-config</b>(1)</a>。</p>
+<p><code>pager.tag</code>`只在列出标签时被尊重，即使用或暗示使用-l`时。默认是使用分页器。 参见 <a href="git-config.html">git-config(1)</a>。</p>
 </div>
 </div>
 </div>
@@ -771,11 +777,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">Git 内部格式</dt>
 <dd>
-<p><code>&lt;unix 时间戳&gt; &lt;时区偏移量&gt;</code>，其中 <code>&lt;unix 时间戳&gt;</code> 是自 UNIX epoch 以来的秒数。 <code>&lt;时区偏移量&gt;</code> 是相对于 UTC 的正或负偏移量。例如，CET（比 UTC 提前1小时）为 <code>+0100</code>。</p>
+<p>&lt;unix 时间戳&gt; &lt;时区偏移量&gt;，其中 &lt;unix 时间戳&gt; 是自 UNIX epoch 以来的秒数。 &lt;时区偏移量&gt; 是相对于 UTC 的正或负偏移量。例如，CET（比 UTC 提前1小时）为 <code>+0100</code>。</p>
 </dd>
 <dt class="hdlist1">RFC 2822</dt>
 <dd>
-<p>由 RFC 2822 描述的标准电子邮件格式，例如 <code>Thu, 07 Apr 2005 22:13:13 +0200</code>。</p>
+<p>The standard date format as described by RFC 2822, for example <code>Thu,</code> <code>07</code> <code>Apr</code> <code>2005</code> <code>22:13:13</code> <code>+0200</code>.</p>
 </dd>
 <dt class="hdlist1">ISO 8601</dt>
 <dd>
@@ -804,7 +810,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1"><code>$GIT_DIR/TAG_EDITMSG</code></dt>
 <dd>
-<p>该文件包含一个进行中的注释标记的信息。如果 <code>git tag</code> 在创建注释标记前出错退出，则用户在编辑器会话中提供的标记信息将在此文件中提供，但可能会被下一次调用 <code>git tag</code> 时覆盖。</p>
+<p>该文件包含一个进行中的注释标记的信息。如果 <code>git</code> <code>tag</code> 在创建注释标记前出错退出，则用户在编辑器会话中提供的标记信息将在此文件中提供，但可能会被下一次调用 <code>git</code> <code>tag</code> 时覆盖。</p>
 </dd>
 </dl>
 </div>
@@ -825,7 +831,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-check-ref-format.html"><b>git-check-ref-format</b>(1)</a>. <a href="git-config.html"><b>git-config</b>(1)</a>.</p>
+<p><a href="git-check-ref-format.html">git-check-ref-format(1)</a>. <a href="git-config.html">git-config(1)</a>.</p>
 </div>
 </div>
 </div>
@@ -833,14 +839,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:07 +0200
+Last updated 2025-03-23 12:03:56 +0100
 </div>
 </div>
 </body>

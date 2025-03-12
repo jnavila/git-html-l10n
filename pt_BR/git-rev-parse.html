@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-rev-parse(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,7 +447,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git rev-parse</em> [&lt;opções&gt;] &lt;args&gt;&#8230;&#8203;</pre>
+<pre class="content"><em>git rev-parse</em> [&lt;options&gt;] &lt;arg&gt;&#8230;&#8203;</pre>
 </div>
 </div>
 </div>
@@ -454,7 +455,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_descrição">DESCRIÇÃO</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Muitos comandos porcelana do Git usam uma mistura de opções (ou seja, parâmetros que começam com um traço <em>-</em>) e parâmetros destinados ao comando <code>git rev-list</code> subjacente que eles usam internamente, as opções e os parâmetros para os outros comandos que eles utilizam na produção final do <code>git rev-list</code>. Este comando é usado para distinguir entre eles.</p>
+<p>Many Git porcelainish commands take a mixture of flags (i.e. parameters that begin with a dash <em>-</em>) and parameters meant for the underlying <em>git rev-list</em> command they use internally and flags and parameters for the other commands they use downstream of <em>git rev-list</em>. The primary purpose of this command is to allow calling programs to distinguish between them. There are a few other operation modes that have nothing to do with the above "help parse command line options".</p>
+</div>
+<div class="paragraph">
+<p>Unless otherwise specified, most of the options and operation modes require you to run this command inside a git repository or a working tree that is under the control of a git repository, and will give you a fatal error otherwise.</p>
 </div>
 </div>
 </div>
@@ -470,11 +474,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">--parseopt</dt>
 <dd>
-<p>Utilize o comando <em>git rev-parse</em> no modo de análise de opções (consulte a seção "PARSEOPT" abaixo).</p>
+<p>Use <em>git rev-parse</em> in option parsing mode (see PARSEOPT section below). The command in this mode can be used outside a repository or a working tree controlled by a repository.</p>
 </dd>
 <dt class="hdlist1">--sq-quote</dt>
 <dd>
-<p>Utilize o comando <em>git rev-parse</em> em modo de citação shell (consulte a seção "SQ-QUOTE" abaixo). Ao contrário da opção <code>--sq</code> abaixo, este modo apenas cita. Nada mais é feito para comandar a entrada.</p>
+<p>Use <em>git rev-parse</em> in shell quoting mode (see SQ-QUOTE section below). In contrast to the <code>--sq</code> option below, this mode only does quoting. Nothing else is done to command input. The command in this mode can be used outside a repository or a working tree controlled by a repository.</p>
 </dd>
 </dl>
 </div>
@@ -527,11 +531,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dl>
 <dt class="hdlist1">--default &lt;arg&gt;</dt>
 <dd>
-<p>Caso não haja nenhum parâmetro informado pelo usuário, em vez disso utilize <code>&lt;arg&gt;</code>.</p>
+<p>Caso não haja nenhum parâmetro informado pelo usuário, em vez disso utilize <em>&lt;arg&gt;</em>.</p>
 </dd>
 <dt class="hdlist1">--prefix &lt;arg&gt;</dt>
 <dd>
-<p>Comporta-se como se o comando <code>git rev-parse</code> fosse invocado a partir do subdiretório <code>&lt;arg&gt;</code> da árvore de trabalho. Quaisquer nomes de arquivos relativos são resolvidos como se fossem prefixados pelo <code>&lt;arg&gt;</code> e serão impressos desta maneira.</p>
+<p>Comporta-se como se o comando <code>git</code> <code>rev-parse</code> fosse invocado a partir do subdiretório <em>&lt;arg&gt;</em> da árvore de trabalho. Quaisquer nomes de arquivos relativos são resolvidos como se fossem prefixados pelo <em>&lt;arg&gt;</em> e serão impressos desta maneira.</p>
 <div class="paragraph">
 <p>Isso pode ser usado para converter argumentos num comando executado num subdiretório, de modo que eles ainda possam ser utilizados após a alteração para o nível mais alto do repositório. Por exemplo:</p>
 </div>
@@ -548,7 +552,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 <dd>
 <p>Verifique que exatamente um parâmetro seja informado e se pode ser transformado num SHA-1 com 20 bytes brutos, que possa ser utilizado para acessar o banco de dados do objeto. Em caso positivo, emita-o para a saída padrão; caso contrário, gere um erro.</p>
 <div class="paragraph">
-<p>Caso queira ter certeza que o resultado realmente nomeia um objeto em seu banco de dados de objetos e/ou pode ser usado como um tipo específico e necessário do objeto, você pode adicionar o operador <code>^{type}</code> ao parâmetro. Por exemplo, comando <code>git rev-parse "$VAR^{commit}"</code> garantirá que <code>$VAR</code> nomeie um objeto já existente que seja um "commit-ish" (ou seja, um commit ou uma etiqueta anotada que aponte para um commit). Para garantir que <code>$VAR</code> nomeie um objeto existente de qualquer tipo, é possível usar o comando <code>git rev-parse "$VAR^{object}"</code>.</p>
+<p>Caso queira ter certeza que o resultado realmente nomeia um objeto em seu banco de dados de objetos e/ou pode ser usado como um tipo específico e necessário do objeto, você pode adicionar o operador <code>^</code>{type} ao parâmetro. Por exemplo, comando <code>git</code> <code>rev-parse</code> "$VAR^{commit}" garantirá que <code>$VAR</code> nomeie um objeto já existente que seja um "commit-ish" (ou seja, um commit ou uma etiqueta anotada que aponte para um commit). Para garantir que <code>$VAR</code> nomeie um objeto existente de qualquer tipo, é possível usar o comando <code>git</code> <code>rev-parse</code> "$VAR^{object}".</p>
 </div>
 <div class="paragraph">
 <p>Note que se você estiver verificando um nome de uma fonte não confiável, é prudente usar a opção <code>--end-of-options</code> para que o argumento relacionado ao nome não seja confundido com uma outra opção.</p>
@@ -563,9 +567,9 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 <dd>
 <p>Normalmente, a saída é feita numa linha por opção e por parâmetro. Esta opção torna a saída numa única linha, devidamente citada para uso do shell. Útil quando você espera que o seu parâmetro tenha espaços em branco e novas linhas (por exemplo, ao usar o pickaxe <code>-S</code> com o comando <em>git diff-*</em>). Em contraste com a opção <code>--sq-quote</code>, a entrada do comando ainda é interpretada como de costume.</p>
 </dd>
-<dt class="hdlist1">--short[=length]</dt>
+<dt class="hdlist1">--short[=&lt;length&gt;]</dt>
 <dd>
-<p>O mesmo que <code>--verify</code> porém encurta o nome do objeto para um prefixo único com pelo menos um`comprimento` determinado de caracteres. A quantidade mínima é de 4 caracteres, o valor é predefinido na variável de configuração <code>core.abbrev</code> (consulte <a href="git-config.html"><b>git-config</b>(1)</a>).</p>
+<p>O mesmo que <code>--verify</code> porém encurta o nome do objeto para um prefixo único com pelo menos um`comprimento` determinado de caracteres. A quantidade mínima é de 4 caracteres, o valor é predefinido na variável de configuração <code>core.abbrev</code> (consulte <a href="git-config.html">git-config(1)</a>).</p>
 </dd>
 <dt class="hdlist1">--not</dt>
 <dd>
@@ -583,6 +587,25 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 <dd>
 <p>É semelhante ao <code>--symbolic</code>, porém omite a entrada que não seja uma refs (por exemplo, os nomes dos ramos ou tags; ou de uma forma explicitamente desambiguante "heads/master", quando você quer nomear a o ramo "master" quando houver uma tag com o nome "master") e mostre-os como "refnames" completos (por exemplo, "refs/heads/master").</p>
 </dd>
+<dt class="hdlist1">--output-object-format=(sha1|sha256|storage)</dt>
+<dd>
+<p>Allow oids to be input from any object format that the current repository supports.</p>
+<div class="literalblock">
+<div class="content">
+<pre>Specifying "sha1" translates if necessary and returns a sha1 oid.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Specifying "sha256" translates if necessary and returns a sha256 oid.</pre>
+</div>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>Specifying "storage" translates if necessary and returns an oid in encoded in the storage hash algorithm.</pre>
+</div>
+</div>
+</dd>
 </dl>
 </div>
 </div>
@@ -594,29 +617,29 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 <dd>
 <p>Exibe todas as refs encontradas em <code>refs/</code>.</p>
 </dd>
-<dt class="hdlist1">--branches[=pattern]</dt>
-<dt class="hdlist1">--tags[=pattern]</dt>
-<dt class="hdlist1">--remotes[=pattern]</dt>
+<dt class="hdlist1">--branches[=&lt;padrão&gt;]</dt>
+<dt class="hdlist1">--tags[=&lt;padrão&gt;]</dt>
+<dt class="hdlist1">--remotes[=&lt;padrão&gt;]</dt>
 <dd>
 <p>Exibe todos as ramificações, tags ou ramificações monitoradas remotamente, respectivamente (ou seja, as refs encontradas respectivamente em <code>refs/heads</code>, <code>refs/tags</code> ou <code>refs/remotes</code>).</p>
 <div class="paragraph">
-<p>Se um <code>pattern</code> for fornecido, somente as refs que correspondam a bolha do shell informado serão exibidos. Se o padrão não possuir um caractere de globbing (<code>?</code>, <code>*</code> ou <code>[</code>), ele será transformado numa correspondência do prefixo com a adição de <code>/*</code>.</p>
+<p>Se um <code>pattern</code> for fornecido, somente as refs que correspondam a bolha do shell informado serão exibidos. Se o padrão não possuir um caractere de globbing (?, * ou [), ele será transformado numa correspondência do prefixo com a adição de <code>/</code>*.</p>
 </div>
 </dd>
-<dt class="hdlist1">--glob=pattern</dt>
+<dt class="hdlist1">--glob=&lt;pattern&gt;</dt>
 <dd>
-<p>Mostra todas as refs que correspondem ao padrão da bolha do shell <code>pattern</code>. Se o padrão não começar com <code>refs/</code>, ele será automaticamente anexado. Se o padrão não possuir um caractere de globbing (<code>?</code>, <code>*</code> ou <code>[</code>), ele será transformado numa correspondência do prefixo com a adição de <code>/*</code>.</p>
+<p>Mostra todas as refs que correspondem ao padrão da bolha do shell <code>pattern</code>. Se o padrão não começar com <code>refs/</code>, ele será automaticamente anexado. Se o padrão não possuir um caractere de globbing (?, * ou [), ele será transformado numa correspondência do prefixo com a adição de <code>/</code>*.</p>
 </dd>
 <dt class="hdlist1">--exclude=&lt;glob-pattern&gt;</dt>
 <dd>
-<p>Não inclua as refs que coincidam com <code>&lt;glob-pattern&gt;</code> em que as próximas opções <code>--all</code>, <code>--branches</code>, <code>--tags</code>, <code>--remotes</code> ou <code>--glob</code> considerariam de outra forma. As repetições destas opções acumulam padrões de exclusão até a próxima opção <code>--all</code>, <code>--branches</code>, <code>--tags</code>, <code>--remotes</code> ou <code>--glob</code> (outras opções ou argumentos não limpam os padrões acumulados).</p>
+<p>Não inclua as refs que coincidam com <em>&lt;glob-pattern&gt;</em> em que as próximas opções <code>--all</code>, <code>--branches</code>, <code>--tags</code>, <code>--remotes</code> ou <code>--glob</code> considerariam de outra forma. As repetições destas opções acumulam padrões de exclusão até a próxima opção <code>--all</code>, <code>--branches</code>, <code>--tags</code>, <code>--remotes</code> ou <code>--glob</code> (outras opções ou argumentos não limpam os padrões acumulados).</p>
 <div class="paragraph">
 <p>Os padrões informados não devem começar com <code>refs/heads</code>, <code>refs/tags</code>, ou <code>refs/remotes</code> quando aplicadas as opções <code>--branches</code>, <code>--tags</code>, ou <code>--remotes</code> respectivamente, e devem começar com <code>refs/</code> quando for aplicado ao <code>--glob</code> ou <code>--all</code>. Se a intenção for um delimitador <em>/*</em>, este deve ser utilizado de forma explicita.</p>
 </div>
 </dd>
-<dt class="hdlist1">--exclude-hidden=[fetch|receive|uploadpack]</dt>
+<dt class="hdlist1">--exclude-hidden=(fetch|receive|uploadpack)</dt>
 <dd>
-<p>Não inclua refs que seriam ocultados por <code>git-fetch</code>, <code>git-receive-pack</code> ou <code>git-upload-pack</code> durante a consulta da configuração apropriada de <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> ou <code>uploadpack.hideRefs</code> junto com <code>transfer.hideRefs</code> (consulte <a href="git-config.html"><b>git-config</b>(1)</a>). Esta opção afeta a próxima opção pseudo-ref <code>--all</code> ou <code>--glob</code> e é zerada após o processamento.</p>
+<p>Não inclua refs que seriam ocultados por <code>git-fetch</code>, <code>git-receive-pack</code> ou <code>git-upload-pack</code> durante a consulta da configuração apropriada de <code>fetch.hideRefs</code>, <code>receive.hideRefs</code> ou <code>uploadpack.hideRefs</code> junto com <code>transfer.hideRefs</code> (consulte <a href="git-config.html">git-config(1)</a>). Esta opção afeta a próxima opção pseudo-ref <code>--all</code> ou <code>--glob</code> e é zerada após o processamento.</p>
 </dd>
 <dt class="hdlist1">--disambiguate=&lt;prefixo&gt;</dt>
 <dd>
@@ -715,7 +738,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 </dd>
 <dt class="hdlist1">--show-object-format[=(storage|input|output)]</dt>
 <dd>
-<p>Mostra o formato do objeto (algoritmo de hash) usado para o repositório para armazenamento dentro do diretório <code>.git</code>, entrada ou saída. Para a entrada, os vários algoritmos podem ser impressos, separados por espaço. Se não for especificado, a predefinição será <code>storage</code>.</p>
+<p>Mostra o formato do objeto (algoritmo de hash) usado para o repositório para armazenamento dentro do diretório .<code>git</code>, entrada ou saída. Para a entrada, os vários algoritmos podem ser impressos, separados por espaço. Se não for especificado, a predefinição será <code>storage</code>.</p>
 </dd>
 <dt class="hdlist1">--show-ref-format</dt>
 <dd>
@@ -728,17 +751,17 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"</pre>
 <h3 id="_outras_opções">Outras Opções</h3>
 <div class="dlist">
 <dl>
-<dt class="hdlist1">--since=datestring</dt>
-<dt class="hdlist1">--after=datestring</dt>
+<dt class="hdlist1">--since=&lt;datestring&gt;</dt>
+<dt class="hdlist1">--after=&lt;datestring&gt;</dt>
 <dd>
 <p>Analise a cadeia de caracteres da data e exiba o parâmetro --max-age= correspondente para <em>git rev-list</em>.</p>
 </dd>
-<dt class="hdlist1">--until=datestring</dt>
-<dt class="hdlist1">--before=datestring</dt>
+<dt class="hdlist1">--until=&lt;datestring&gt;</dt>
+<dt class="hdlist1">--before=&lt;datestring&gt;</dt>
 <dd>
 <p>Analise a cadeia de caracteres da data e exiba o parâmetro --min-age= que corresponda para o <em>git rev-list</em>.</p>
 </dd>
-<dt class="hdlist1">&lt;args&gt;&#8230;&#8203;</dt>
+<dt class="hdlist1">&lt;arg&gt;&#8230;&#8203;</dt>
 <dd>
 <p>As opções e os parâmetros que serão analisados.</p>
 </dd>
@@ -773,7 +796,7 @@ Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e outras
 </dd>
 <dt class="hdlist1"><em>&lt;describeOutput&gt;</em>, exemplo. <em>v1.7.4.2-679-g3bee7fb</em></dt>
 <dd>
-<p>A saída do <code>git describe</code>; ou seja, um tag mais próximo opcionalmente seguido por um traço e um número do commit seguido por um traço, um <em>g</em> e um nome abreviado do objeto.</p>
+<p>A saída do <code>git</code> <code>describe</code>; ou seja, um tag mais próximo opcionalmente seguido por um traço e um número do commit seguido por um traço, um <em>g</em> e um nome abreviado do objeto.</p>
 </dd>
 <dt class="hdlist1"><em>&lt;refname&gt;</em>, exemplo. <em>master</em>, <em>heads/master</em>, <em>refs/heads/master</em></dt>
 <dd>
@@ -806,19 +829,19 @@ Este documento demonstra a sintaxe "bruta" como vista pelo git. O shell e outras
 <dt class="hdlist1"><code>FETCH_HEAD</code></dt>
 <dd>
 <p>registra o ramo que você obteve de um repositório remoto com
-a sua última invocação <code>git fetch</code>.</p>
+a sua última invocação <code>git</code> <code>fetch</code>.</p>
 </dd>
 <dt class="hdlist1"><code>ORIG_HEAD</code></dt>
 <dd>
-<p>é criado por comandos que movem seu <code>HEAD</code> de forma drástica (<code>git
-am</code>, <code>git merge</code>, <code>git rebase</code>, <code>git reset</code>), para registrar a posição
+<p>é criado por comandos que movem seu <code>HEAD</code> de forma drástica (<code>git</code>
+<code>am</code>, <code>git</code> <code>merge</code>, <code>git</code> <code>rebase</code>, <code>git</code> <code>reset</code>), para registrar a posição
 do <code>HEAD</code> antes de sua operação, para que você possa alterar
 facilmente o cume da ramificação de volta ao estado anterior à sua execução.</p>
 </dd>
 <dt class="hdlist1"><code>MERGE_HEAD</code></dt>
 <dd>
 <p>registra o(s) commit(s) que está(ão) sendo mesclado(s) no seu ramo quando você
-executar o <code>git merge</code>.</p>
+executar o <code>git</code> <code>merge</code>.</p>
 </dd>
 <dt class="hdlist1"><code>REBASE_HEAD</code></dt>
 <dd>
@@ -828,17 +851,17 @@ num rebase interativo.</p>
 </dd>
 <dt class="hdlist1"><code>REVERT_HEAD</code></dt>
 <dd>
-<p>registra o commit que está sendo revertido quando você executa o <code>git revert</code>.</p>
+<p>registra o commit que está sendo revertido quando você executa o <code>git</code> <code>revert</code>.</p>
 </dd>
 <dt class="hdlist1"><code>CHERRY_PICK_HEAD</code></dt>
 <dd>
-<p>registra o commit que você está selecionando quando executa o <code>git
-cherry-pick</code>.</p>
+<p>registra o commit que você está selecionando quando executa o <code>git</code>
+<code>cherry-pick</code>.</p>
 </dd>
 <dt class="hdlist1"><code>BISECT_HEAD</code></dt>
 <dd>
-<p>registra o commit atual a ser testado quando você executa <code>git bisect
---no-checkout</code>.</p>
+<p>registra o commit atual a ser testado quando você executa <code>git</code> <code>bisect</code>
+<code>--no-checkout</code>.</p>
 </dd>
 <dt class="hdlist1"><code>AUTO_MERGE</code></dt>
 <dd>
@@ -877,11 +900,11 @@ resultar em conflitos.</p>
 </dd>
 <dt class="hdlist1"><em>[&lt;nome-do-ramo&gt;]@{upstream}</em>, exemplo, <em>master@{upstream}</em>, <em>@{u}</em></dt>
 <dd>
-<p>Um ramo B pode ser configurado para construir em cima de um ramo X (configurado com <code>branch.&lt;nome&gt;.merge</code>) em um R remoto (configurado com <code>branch.&lt;nome&gt;.remote</code>). B@{u} refere-se ao ramo rastreado remotamente para o ramo X obtido a partir do R remoto, normalmente encontrado em <code>refs/remotes/R/X</code>.</p>
+<p>Um ramo B pode ser configurado para construir em cima de um ramo X (configurado com <code>branch.</code><em>&lt;nome&gt;</em><code>.merge</code>) em um R remoto (configurado com <code>branch.</code><em>&lt;nome&gt;</em><code>.remote</code>). B@{u} refere-se ao ramo rastreado remotamente para o ramo X obtido a partir do R remoto, normalmente encontrado em <code>refs/remotes/R/X</code>.</p>
 </dd>
 <dt class="hdlist1"><em>[&lt;nome-do-ramo&gt;]@{push}</em>, exemplo, <em>master@{push}</em>, <em>@{push}</em></dt>
 <dd>
-<p>O sufixo <em>@{push}</em> relata ao ramo "para onde estaremos fazendo impulsionamento" caso <code>git push</code> seja executado enquanto <code>branchname</code> seja verificado (ou o <code>HEAD</code> atual, caso nenhum nome do ramo tenha sido especificado). Como é para <em>@{upstream}</em>, reportamos o ramo rastreado remotamente que corresponda aquela ramificação remotamente.</p>
+<p>O sufixo <em>@{push}</em> relata ao ramo "para onde estaremos fazendo impulsionamento" caso <code>git</code> <code>push</code> seja executado enquanto <code>branchname</code> seja verificado (ou o <code>HEAD</code> atual, caso nenhum nome do ramo tenha sido especificado). Como é para <em>@{upstream}</em>, reportamos o ramo rastreado remotamente que corresponda aquela ramificação remotamente.</p>
 <div class="paragraph">
 <p>Aqui um exemplo para deixar mais claro:</p>
 </div>
@@ -982,10 +1005,10 @@ J = F^2  = B^3^2   = A^^3^2</pre>
 <h2 id="_definindo_os_intervalos">DEFININDO OS INTERVALOS</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>O histórico que atravessa os comandos como o <code>git log</code> opera em um determinado conjunto de commits e não apenas em único commit.</p>
+<p>O histórico que atravessa os comandos como o <code>git</code> <code>log</code> opera em um determinado conjunto de commits e não apenas em único commit.</p>
 </div>
 <div class="paragraph">
-<p>Para estes comandos, defina uma única revisão utilizando a notação descrita na seção anterior, significa que o conjunto dos commits <code>acessíveis</code> a partir do commit informado.</p>
+<p>Para estes comandos, defina uma única revisão utilizando a notação descrita na seção anterior, significa que o conjunto dos commits <code>acess</code>íveis a partir do commit informado.</p>
 </div>
 <div class="paragraph">
 <p>Ao especificar várias revisões significa que o conjunto dos commits acessíveis a partir de qualquer um dos commits informados.</p>
@@ -1075,7 +1098,7 @@ J = F^2  = B^3^2   = A^^3^2</pre>
 </dd>
 <dt class="hdlist1"><em>^&lt;rev&gt;</em></dt>
 <dd>
-<p>Exclua os commits que estejam acessíveis a partir de <code>&lt;rev&gt;</code> (&lt;rev&gt; e os seus ancestrais por exemplo).</p>
+<p>Exclua os commits que estejam acessíveis a partir de <em>&lt;rev&gt;</em> (&lt;rev&gt; e os seus ancestrais por exemplo).</p>
 </dd>
 <dt class="hdlist1"><em>&lt;rev1&gt;..&lt;rev2&gt;</em></dt>
 <dd>
@@ -1134,10 +1157,10 @@ J = F^2  = B^3^2   = A^^3^2</pre>
 <h2 id="_parseopt">PARSEOPT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>No modo <code>--parseopt</code>, o comando <em>git rev-parse</em> ajuda no processamento das opções trazendo aos scripts shell as mesmas facilidades integradas que o <em>C</em> possuí. Funciona como um normalizador das opções (por exemplo, divide trocas únicas com valores agregados), quase como o que o <code>getopt(1)</code> faz.</p>
+<p>No modo <code>--parseopt</code>, o comando <em>git rev-parse</em> ajuda no processamento das opções trazendo aos scripts shell as mesmas facilidades integradas que o <em>C</em> possuí. Funciona como um normalizador das opções (por exemplo, divide trocas únicas com valores agregados), quase como o que o <code>getopt</code>(<code>1</code>) faz.</p>
 </div>
 <div class="paragraph">
-<p>Ele recebe na entrada predefinida a especificação das opções que serão analisadas, compreendidas e mostra na saída predefinida uma string <code>sh(1)</code> <code>eval</code> adequada para substituir os argumentos por argumentos normalizados. Em caso de erro, ele mostra como usar na saída de erro predefinida e encerra com o código 129.</p>
+<p>Ele recebe na entrada predefinida a especificação das opções que serão analisadas, compreendidas e mostra na saída predefinida uma string <code>sh</code>(<code>1</code>) <code>eval</code> adequada para substituir os argumentos por argumentos normalizados. Em caso de erro, ele mostra como usar na saída de erro predefinida e encerra com o código 129.</p>
 </div>
 <div class="paragraph">
 <p>Observação: Certifique-se de colocar o resultado entre aspas ao passá-lo para <code>eval</code>. Veja um exemplo abaixo.</p>
@@ -1145,7 +1168,7 @@ J = F^2  = B^3^2   = A^^3^2</pre>
 <div class="sect2">
 <h3 id="_formato_de_entrada">Formato de Entrada</h3>
 <div class="paragraph">
-<p>O formato de entrada <code>git rev-parse --parseopt</code> é totalmente baseado em texto. Possuí duas partes, são separadas por uma linha que contém apenas <code>--</code>. As linhas antes do separador (deve ser uma ou mais) são usadas. As linhas após o separador descrevem as opções.</p>
+<p>O formato de entrada <code>git</code> <code>rev-parse</code> <code>--parseopt</code> é totalmente baseado em texto. Possuí duas partes, são separadas por uma linha que contém apenas <code>--</code>. As linhas antes do separador (deve ser uma ou mais) são usadas. As linhas após o separador descrevem as opções.</p>
 </div>
 <div class="paragraph">
 <p>As opções de cada linha possui este formato:</p>
@@ -1157,33 +1180,33 @@ J = F^2  = B^3^2   = A^^3^2</pre>
 </div>
 <div class="dlist">
 <dl>
-<dt class="hdlist1"><code>&lt;opt-spec&gt;</code></dt>
+<dt class="hdlist1"><em>&lt;opt-spec&gt;</em></dt>
 <dd>
-<p>O seu formato é o caractere curto da opção, em seguida, o nome longo da opção separado por vírgula. Ambas as partes não são obrigatórias, embora pelo menos uma seja necessária. Não pode conter nenhum dos caracteres <code>&lt;flags&gt;</code>. O <code>h,help</code>, <code>dry-run</code> e <code>f</code> são exemplos de <code>&lt;opt-spec&gt;</code> corretos.</p>
+<p>O seu formato é o caractere curto da opção, em seguida, o nome longo da opção separado por vírgula. Ambas as partes não são obrigatórias, embora pelo menos uma seja necessária. Não pode conter nenhum dos caracteres <em>&lt;flags&gt;</em>. O <code>h,help</code>, <code>dry-run</code> e <code>f</code> são exemplos de <em>&lt;opt-spec&gt;</em> corretos.</p>
 </dd>
-<dt class="hdlist1"><code>&lt;flags&gt;</code></dt>
+<dt class="hdlist1"><em>&lt;flags&gt;</em></dt>
 <dd>
-<p><code>&lt;flags&gt;</code> são do <code>*</code>, <code>=</code>, <code>?</code> ou <code>!</code>.</p>
+<p><em>&lt;flags&gt;</em> são do *, <code>=</code>, ? ou !.</p>
 <div class="ulist">
 <ul>
 <li>
 <p>Utilize <code>=</code> caso a opção receba um argumento.</p>
 </li>
 <li>
-<p>Utilize <code>?</code> para dar sentido que a opção aceita um argumento opcional. Você provavelmente quer utilzar o modo <code>--stuck-long</code> para poder analisar de forma inequívoca o argumento opcional.</p>
+<p>Utilize ? para dar sentido que a opção aceita um argumento opcional. Você provavelmente quer utilzar o modo <code>--stuck-long</code> para poder analisar de forma inequívoca o argumento opcional.</p>
 </li>
 <li>
-<p>Utilize <code>*</code> para indicar que esta opção não deve ser listada no uso gerado para a opção <code>-h</code>. É exibido para <code>--help-all</code> conforme documentado em <a href="gitcli.html"><b>gitcli</b>(7)</a>.</p>
+<p>Utilize * para indicar que esta opção não deve ser listada no uso gerado para a opção <code>-h</code>. É exibido para <code>--help-all</code> conforme documentado em <a href="gitcli.html">gitcli(7)</a>.</p>
 </li>
 <li>
-<p>Utilize <code>!</code> para não fazer com que a opção longa que foi negada esteja disponível.</p>
+<p>Utilize ! para não fazer com que a opção longa que foi negada esteja disponível.</p>
 </li>
 </ul>
 </div>
 </dd>
-<dt class="hdlist1"><code>&lt;arg-hint&gt;</code></dt>
+<dt class="hdlist1"><em>&lt;arg-hint&gt;</em></dt>
 <dd>
-<p>Quando o <code>&lt;arg-hint&gt;</code> é especificado, é utilizado como um nome do argumento na saída da ajuda para as opções que recebem argumentos. O <code>&lt;arg-hint&gt;</code> é encerrado pelo primeiro espaço em branco. É comum usar um travessão para separar palavras numa dica de argumento com várias palavras.</p>
+<p>Quando o <em>&lt;arg-hint&gt;</em> é especificado, é utilizado como um nome do argumento na saída da ajuda para as opções que recebem argumentos. O <em>&lt;arg-hint&gt;</em> é encerrado pelo primeiro espaço em branco. É comum usar um travessão para separar palavras numa dica de argumento com várias palavras.</p>
 </dd>
 </dl>
 </div>
@@ -1217,7 +1240,7 @@ eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"</
 <div class="sect2">
 <h3 id="_texto_de_uso">Texto de uso</h3>
 <div class="paragraph">
-<p>Quando <code>"$@"</code> is <code>-h</code> ou <code>--help</code> no exemplo acima, o seguinte texto de utilização será exibido:</p>
+<p>Quando "$@" is <code>-h</code> ou <code>--help</code> no exemplo acima, o seguinte texto de utilização será exibido:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1242,10 +1265,10 @@ Um cabeçalho do grupo de opções
 <h2 id="_sq_quote">SQ-QUOTE</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>No modo <code>--sq-quote</code>, o comando <em>git rev-parse</em> ecoa na saída padrão uma única linha adequada para <code>sh (1)</code> <code>eval</code>. Esta linha é feita normalizando os argumentos após a opção <code>--sq-quote</code>. Nada mais é feito além de citar os argumentos.</p>
+<p>No modo <code>--sq-quote</code>, o comando <em>git rev-parse</em> ecoa na saída padrão uma única linha adequada para <code>sh</code> (<code>1</code>) <code>eval</code>. Esta linha é feita normalizando os argumentos após a opção <code>--sq-quote</code>. Nada mais é feito além de citar os argumentos.</p>
 </div>
 <div class="paragraph">
-<p>Caso queira que o comando de entrada ainda seja interpretada como de costume pelo comando <code>git rev-parse</code> antes da saída ser citada pela shell, consulte a opção <code>--sq</code>.</p>
+<p>Caso queira que o comando de entrada ainda seja interpretada como de costume pelo comando <code>git</code> <code>rev-parse</code> antes da saída ser citada pela shell, consulte a opção <code>--sq</code>.</p>
 </div>
 <div class="sect2">
 <h3 id="_exemplo_2">Exemplo</h3>
@@ -1308,14 +1331,14 @@ $ sh your-git-script.sh "a b'c"</pre>
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Parte do conjunto <a href="git.html"><b>git</b>(1)</a></p>
+<p>Parte do conjunto <a href="git.html">git(1)</a></p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:27:26 +0200
+Last updated 2025-03-23 12:03:45 +0100
 </div>
 </div>
 </body>

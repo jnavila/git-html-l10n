@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-rebase(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -446,11 +447,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git rebase</em> [-i | --interactive] [&lt;选项&gt;] [--exec &lt;命令&gt;]
-        [--onto &lt;新基础&gt; | --keep-base] [&lt;上游仓库&gt; [&lt;分支&gt;]]
-<em>git rebase</em> [-i | --interactive] [&lt;选项&gt;] [--exec &lt;命令&gt;] [--onto &lt;新基础&gt;]
-        --root [&lt;分支&gt;]
-<em>git rebase</em> (--continue | --skip | --abort | --quit | --edit-todo | --show-current-patch)</pre>
+<pre class="content"><em>git rebase</em> [-i | --interactive] [&lt;options&gt;] [--exec &lt;cmd&gt;]
+        [--onto &lt;newbase&gt; | --keep-base] [&lt;upstream&gt; [&lt;branch&gt;]]
+<em>git rebase</em> [-i | --interactive] [&lt;options&gt;] [--exec &lt;cmd&gt;] [--onto &lt;newbase&gt;]
+        --root [&lt;branch&gt;]
+<em>git rebase</em> (--continue|--skip|--abort|--quit|--edit-todo|--show-current-patch)</pre>
 </div>
 </div>
 </div>
@@ -458,16 +459,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_描述">描述</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>如果指定了 <code>&lt;branch&gt;</code>，<code>git rebase</code> 会自动执行 <code>git switch &lt;branch&gt;</code>，然后再做其他事情。 否则，它会保留在当前分支上。</p>
+<p>如果指定了 <em>&lt;branch&gt;</em>，<code>git</code> <code>rebase</code> 会自动执行 <code>git</code> <code>switch</code> <em>&lt;branch&gt;</em>，然后再做其他事情。 否则，它会保留在当前分支上。</p>
 </div>
 <div class="paragraph">
-<p>如果未指定 <code>&lt;upstream&gt;</code>，将使用 <code>branch.&lt;name&gt;.remote</code> 和 <code>branch.&lt;name&gt;.merge</code> 选项中配置的上游（详见 <a href="git-config.html"><b>git-config</b>(1)</a>），并假定使用 `--fork-point`选项。 如果您当前不在任何分支上，或者当前分支没有配置上游，变基操作会中止。</p>
+<p>如果未指定 <em>&lt;upstream&gt;</em>，将使用 <code>branch.</code><em>&lt;name&gt;</em><code>.remote</code> 和 <code>branch.</code><em>&lt;name&gt;</em><code>.merge</code> 选项中配置的上游（详见 <a href="git-config.html">git-config(1)</a>），并假定使用 `--fork-point`选项。 如果您当前不在任何分支上，或者当前分支没有配置上游，变基操作会中止。</p>
 </div>
 <div class="paragraph">
-<p>当前分支中的所有提交所做的改动，但不在 <code>&lt;upstream&gt;</code> 中的，都会被保存到一个临时区域。 这与 <code>git log &lt;upstream&gt;..HEAD</code> 或 <code>git log 'fork_point'..HEAD</code> 所显示的提交相同（如果启用了 <code>--fork-point</code>，请参阅下文关于 <code>--fork-point`的描述）；或者，如果指定了 `--root</code> 选项，则与 <code>git log HEAD</code> 所显示的提交相同。</p>
+<p>当前分支中的所有提交所做的改动，但不在 <em>&lt;upstream&gt;</em> 中的，都会被保存到一个临时区域。 这与 <code>git</code> <code>log</code> <em>&lt;upstream&gt;</em><code>..</code><code>HEAD</code> 或 <code>git</code> <code>log</code> 'fork_point'<code>..</code><code>HEAD</code> 所显示的提交相同（如果启用了 <code>--fork-point</code>，请参阅下文关于 <code>--fork-point</code>`的描述）；或者，如果指定了 `--root 选项，则与 <code>git</code> <code>log</code> <code>HEAD</code> 所显示的提交相同。</p>
 </div>
 <div class="paragraph">
-<p>如果提供了 <code>--onto</code> 选项，当前分支会重置为 <code>&lt;upstream&gt;</code> 或 <code>&lt;newbase&gt;</code>。 这与 <code>git reset --hard &lt;upstream&gt;</code>（或 <code>&lt;newbase&gt;</code>）的效果完全相同。<code>ORIG_HEAD</code> 设置为指向重置前分支的顶端。</p>
+<p>如果提供了 <code>--onto</code> 选项，当前分支会重置为 <em>&lt;upstream&gt;</em> 或 <em>&lt;newbase&gt;</em>。 这与 <code>git</code> <code>reset</code> <code>--hard</code> <em>&lt;upstream&gt;</em>（或 <em>&lt;newbase&gt;</em>）的效果完全相同。<code>ORIG_HEAD</code> 设置为指向重置前分支的顶端。</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -476,16 +477,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="title">Note</div>
 </td>
 <td class="content">
-如果在重置过程中使用了其他写入伪引用的命令（例如 <code>git reset</code>），就不能保证 <code>ORIG_HEAD</code> 在重置结束时仍然指向前一个分支的分支提示。不过，使用当前分支的 引用日志（即 <code>@{1}</code>，参见 <a href="gitrevisions.html"><b>gitrevisions</b>(7)</a>）可以访问前一个分支的分支提示。
+如果在重置过程中使用了其他写入伪引用的命令（例如 <code>git</code> <code>reset</code>），就不能保证 <code>ORIG_HEAD</code> 在重置结束时仍然指向前一个分支的分支提示。不过，使用当前分支的 引用日志（即 <code>@</code>{1}，参见 <a href="gitrevisions.html">gitrevisions(7)</a>）可以访问前一个分支的分支提示。
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>然后，先前保存在临时区域的提交将按顺序逐一重新应用到当前分支。请注意，<code>HEAD</code> 中任何与 <code>HEAD...&lt;upstream&gt;</code> 中的提交有相同文字改动的提交都会被省略（也就是说，上游已经接受的补丁，如果提交信息或时间戳不同，就会被跳过）。</p>
+<p>然后，先前保存在临时区域的提交将按顺序逐一重新应用到当前分支。请注意，<code>HEAD</code> 中任何与 <code>HEAD</code><code>...</code><em>&lt;upstream&gt;</em> 中的提交有相同文字改动的提交都会被省略（也就是说，上游已经接受的补丁，如果提交信息或时间戳不同，就会被跳过）。</p>
 </div>
 <div class="paragraph">
-<p>合并失败有可能导致该过程无法完全自动进行。 您必须解决合并失败问题，然后运行 <code>git rebase --continue</code>。 另一种方法是使用 <code>git rebase --skip</code> 绕过导致合并失败的提交。 要检查原始的 <code>&lt;branch&gt;</code> 并移除 <code>.git/rebase-apply</code> 工作文件，请使用 <code>git rebase --abort</code> 命令。</p>
+<p>合并失败有可能导致该过程无法完全自动进行。 您必须解决合并失败问题，然后运行 <code>git</code> <code>rebase</code> <code>--continue</code>。 另一种方法是使用 <code>git</code> <code>rebase</code> <code>--skip</code> 绕过导致合并失败的提交。 要检查原始的 <em>&lt;branch&gt;</em> 并移除 .<code>git/rebase-apply</code> 工作文件，请使用 <code>git</code> <code>rebase</code> <code>--abort</code> 命令。</p>
 </div>
 <div class="paragraph">
 <p>假设存在以下历史记录，当前分支为 "topic"：</p>
@@ -517,10 +518,10 @@ git rebase master topic</pre>
 </div>
 </div>
 <div class="paragraph">
-<p><strong>注：</strong> 后一种形式只是 <code>git checkout topic</code> 的简写。后接 <code>git rebase master</code>。当 rebase 退出时，<code>topic</code> 将仍是已签出的分支。</p>
+<p><strong>注：</strong> 后一种形式只是 <code>git</code> <code>checkout</code> <code>topic</code> 的简写。后接 <code>git</code> <code>rebase</code> <code>master</code>。当 rebase 退出时，<code>topic</code> 将仍是已签出的分支。</p>
 </div>
 <div class="paragraph">
-<p>如果上游分支已经包含了您所做的修改（例如，因为您邮寄的补丁被应用到了上游），那么该提交将被跳过，并发出警告（如果使用了 “合并” 后台）。 例如，在以下历史记录上运行 <code>git rebase master</code>（其中 <code>A'</code> 和 <code>A</code> 引入了相同的变更集，但提交者信息不同）：</p>
+<p>如果上游分支已经包含了您所做的修改（例如，因为您邮寄的补丁被应用到了上游），那么该提交将被跳过，并发出警告（如果使用了 “合并” 后台）。 例如，在以下历史记录上运行 <code>git</code> <code>rebase</code> <code>master</code>（其中 <code>A</code>' 和 <code>A</code> 引入了相同的变更集，但提交者信息不同）：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -540,7 +541,7 @@ git rebase master topic</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>下面是如何使用 <code>rebase --onto</code> 将基于一个分支的特性分支移植到另一个分支，以假装特性分支是从后一个分支分叉而来。</p>
+<p>下面是如何使用 <code>rebase</code> <code>--onto</code> 将基于一个分支的特性分支移植到另一个分支，以假装特性分支是从后一个分支分叉而来。</p>
 </div>
 <div class="paragraph">
 <p>首先，我们假设 <em>topic</em> 基于 <em>next</em> 分支。 例如，<em>topic</em> 中开发的功能依赖于 <em>next</em> 中的某些功能。</p>
@@ -634,10 +635,10 @@ git rebase master topic</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>如果 F 和 G 在某些方面有缺陷，或者不应该是 topicA 的一部分，这一点就很有用。 请注意，<code>--onto</code> 参数和 <code>&lt;upstream&gt;</code> 参数可以是任何有效的提交。</p>
+<p>如果 F 和 G 在某些方面有缺陷，或者不应该是 topicA 的一部分，这一点就很有用。 请注意，<code>--onto</code> 参数和 <em>&lt;upstream&gt;</em> 参数可以是任何有效的提交。</p>
 </div>
 <div class="paragraph">
-<p>如果出现冲突，<code>git rebase</code> 会在第一个有问题的提交处停止，并在树中留下冲突标记。 你可以用 <code>git diff</code> 找到这些标记 (&lt;&lt;&lt;&lt;&lt;&lt;)，并进行编辑以解决冲突。 每编辑一个文件，都需要告诉 Git 冲突已被解决，通常可以用</p>
+<p>如果出现冲突，<code>git</code> <code>rebase</code> 会在第一个有问题的提交处停止，并在树中留下冲突标记。 你可以用 <code>git</code> <code>diff</code> 找到这些标记 (&lt;&lt;&lt;&lt;&lt;&lt;)，并进行编辑以解决冲突。 每编辑一个文件，都需要告诉 Git 冲突已被解决，通常可以用</p>
 </div>
 <div class="literalblock">
 <div class="content">
@@ -680,7 +681,7 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">--abort</dt>
 <dd>
-<p>终止变基操作并将 HEAD 重置为原始分支。如果在启动变基操作时提供了 <code>&lt;分支&gt;</code>，那么 <code>HEAD</code> 将被重置为 <code>&lt;分支&gt;</code>。否则，<code>HEAD</code> 将被重置为启动变基操作时的位置。</p>
+<p>终止变基操作并将 HEAD 重置为原始分支。如果在启动变基操作时提供了 &lt;分支&gt;，那么 <code>HEAD</code> 将被重置为 &lt;分支&gt;。否则，<code>HEAD</code> 将被重置为启动变基操作时的位置。</p>
 </dd>
 <dt class="hdlist1">--quit</dt>
 <dd>
@@ -692,7 +693,7 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">--show-current-patch</dt>
 <dd>
-<p>在交互式变基或因冲突而停止变基时显示当前补丁。相当于 <code>git show REBASE_HEAD</code>。</p>
+<p>在交互式变基或因冲突而停止变基时显示当前补丁。相当于 <code>git</code> <code>show</code> <code>REBASE_HEAD</code>。</p>
 </dd>
 </dl>
 </div>
@@ -705,19 +706,19 @@ git rebase master topic</pre>
 <dl>
 <dt class="hdlist1">--onto &lt;新基础&gt;</dt>
 <dd>
-<p>创建新提交的起点。如果未指定 <code>--onto</code> 选项，则起点为 <code>&lt;upstream&gt;</code>。 可以是任何有效的提交，而不仅仅是现有的分支名称。</p>
+<p>创建新提交的起点。如果未指定 <code>--onto</code> 选项，则起点为 <em>&lt;upstream&gt;</em>。 可以是任何有效的提交，而不仅仅是现有的分支名称。</p>
 <div class="paragraph">
 <p>作为一种特殊情况，如果 A 和 B 的合并库只有一个，则可以使用 "A...B "作为合并库的快捷方式。您最多可以省略 A 和 B 中的一个，在这种情况下，它默认为 HEAD。</p>
 </div>
 </dd>
 <dt class="hdlist1">--keep-base</dt>
 <dd>
-<p>将创建新提交的起点设为 <code>&lt;upstream&gt;</code> 和 <code>&lt;branch&gt;</code> 的合并库。运行 <code>git rebase --keep-base &lt;upstream&gt; &lt;branch&gt;</code> 相当于运行 <code>git rebase --reapply-cherry-picks --no-fork-point --onto &lt;upstream&gt;...&lt;branch&gt; &lt;upstream&gt; &lt;branch&gt;</code> 。</p>
+<p>将创建新提交的起点设为 <em>&lt;upstream&gt;</em> 和 <em>&lt;branch&gt;</em> 的合并库。运行 <code>git</code> <code>rebase</code> <code>--keep-base</code> <em>&lt;upstream&gt;</em> <em>&lt;branch&gt;</em> 相当于运行 <code>git</code> <code>rebase</code> <code>--reapply-cherry-picks</code> <code>--no-fork-point</code> <code>--onto</code> <em>&lt;upstream&gt;</em><code>...</code><em>&lt;branch&gt;</em> <em>&lt;upstream&gt;</em> <em>&lt;branch&gt;</em> 。</p>
 <div class="paragraph">
 <p>该选项适用于在上游分支上开发功能的情况。在开发功能的过程中，上游分支可能会前进，这时最好的办法可能不是继续在上游分支上重新加载，而是保持基本提交不变。由于基本提交保持不变，该选项意味着 <code>--reapply-cherry-picks</code>，以避免丢失提交。</p>
 </div>
 <div class="paragraph">
-<p>虽然该选项和 <code>--fork-point</code> 都能找到 <code>&lt;upstream&gt;</code> 和 <code>&lt;branch&gt;</code> 之间的合并基数，但该选项使用合并基数作为创建新提交的_起点_，而 `--fork-point`则使用合并基数来确定将被重定向的_提交集_。</p>
+<p>虽然该选项和 <code>--fork-point</code> 都能找到 <em>&lt;upstream&gt;</em> 和 <em>&lt;branch&gt;</em> 之间的合并基数，但该选项使用合并基数作为创建新提交的_起点_，而 `--fork-point`则使用合并基数来确定将被重定向的_提交集_。</p>
 </div>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
@@ -738,11 +739,32 @@ git rebase master topic</pre>
 <p>另请参阅下面的不兼容选项。</p>
 </div>
 </dd>
-<dt class="hdlist1">--empty=(drop|keep|ask)</dt>
+<dt class="hdlist1">--empty=(drop|keep|stop)</dt>
 <dd>
-<p>如何处理开始时不是空的提交，也不是对上游提交的纯粹撷取，但在重排序后变为空的提交（因为它们包含了上游修改的子集）。 如果使用 drop（默认），则会丢弃变为空的提交。 如果使用 keep，则会保留此类提交。 如果使用 ask（隐含 <code>--interactive</code>），当应用空提交时，变基停止，允许你选择是丢弃它、编辑更多文件，还是只提交空改动。 其他选项，如 <code>--exec</code>，除非明确指定了 <code>-i</code>/<code>-interactive</code>，否则将使用默认的 drop。</p>
+<p>How to handle commits that are not empty to start and are not clean cherry-picks of any upstream commit, but which become empty after rebasing (because they contain a subset of already upstream changes):</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>drop</code></dt>
+<dd>
+<p>提交将被丢弃。这是默认行为。</p>
+</dd>
+<dt class="hdlist1"><code>keep</code></dt>
+<dd>
+<p>提交将被保留。当指定了 <code>--exec</code> 时，此选项是隐含的，除非同时指定了 <code>-i</code>/<code>--interactive</code>。</p>
+</dd>
+<dt class="hdlist1"><code>stop</code></dt>
+<dt class="hdlist1"><code>ask</code></dt>
+<dd>
+<p>当提交被应用时，变基将停止，允许您选择是丢弃它、进一步编辑文件，还是只提交空更改。当指定了 <code>-i</code>/<code>--interactive</code> 时，此选项是隐含的。<code>ask</code> 是 <code>stop</code> 的废弃同义词。</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
 <div class="paragraph">
-<p>需要注意的是，开始时为空的提交会被保留（除非指定了 <code>--no-keep-empty</code>），而干净的 cherry-picks 提交（由 <code>git log --cherry-mark ...</code>）会被检测到并作为第一步被丢弃（除非通过了 <code>--reapply-cherry-picks`或 `--keep-base</code>）。</p>
+<p>需要注意的是，开始时为空的提交会被保留（除非指定了 <code>--no-keep-empty</code>），而干净的 cherry-picks 提交（由 <code>git</code> <code>log</code> <code>--cherry-mark</code> ...）会被检测到并作为第一步被丢弃（除非通过了 <code>--reapply-cherry-picks</code>`或 `--keep-base）。</p>
 </div>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
@@ -751,7 +773,7 @@ git rebase master topic</pre>
 <dt class="hdlist1">--no-keep-empty</dt>
 <dt class="hdlist1">--keep-empty</dt>
 <dd>
-<p>不在结果中保留重置前开始为空的提交（即不改变父提交的任何内容）。 默认情况下保留开始时为空的提交，因为创建此类提交需要向 <code>git commit</code> 传递 <code>--allow-empty</code> 覆盖标志，表明用户非常有意地创建此类提交，因此希望保留它。</p>
+<p>不在结果中保留重置前开始为空的提交（即不改变父提交的任何内容）。 默认情况下保留开始时为空的提交，因为创建此类提交需要向 <code>git</code> <code>commit</code> 传递 <code>--allow-empty</code> 覆盖标志，表明用户非常有意地创建此类提交，因此希望保留它。</p>
 <div class="paragraph">
 <p>使用这个标记的情况可能很少，因为你只需启动交互式变基，并删除与你不想要的提交对应的行，就能删除开始时为空的提交。 该标记是一种方便的快捷方式，比如当外部工具生成许多空提交，而你希望将它们全部删除时。</p>
 </div>
@@ -767,7 +789,7 @@ git rebase master topic</pre>
 <dd>
 <p>重新应用任何上游提交中所有干净的拣选，而不是先发制人地丢弃它们。(如果这些提交在重排后成为空提交，因为它们包含了上游修改的子集，则对它们的行为由 <code>--empty</code> 标志控制。）</p>
 <div class="paragraph">
-<p>如果没有 <code>--keep-base</code>（或给出了 <code>--no-reapply-cherry-picks</code>），这些提交将被自动放弃。 由于这需要读取所有上游提交，对于需要读取大量上游提交的仓库来说，代价可能会很高。使用 <em>merge</em> 后端时，每次丢弃提交都会发出警告（除非给出 <code>--quiet</code>）。除非将 <code>advice.skippedCherryPicks</code> 设为 false，否则也会发出警告（参见 <a href="git-config.html"><b>git-config</b>(1)</a>）。</p>
+<p>如果没有 <code>--keep-base</code>（或给出了 <code>--no-reapply-cherry-picks</code>），这些提交将被自动放弃。 由于这需要读取所有上游提交，对于需要读取大量上游提交的仓库来说，代价可能会很高。使用 <em>merge</em> 后端时，每次丢弃提交都会发出警告（除非给出 <code>--quiet</code>）。除非将 <code>advice.skippedCherryPicks</code> 设为 false，否则也会发出警告（参见 <a href="git-config.html">git-config(1)</a>）。</p>
 </div>
 <div class="paragraph">
 <p><code>--reapply-cherry-picks</code> 允许变基操作放弃读取所有上游提交，从而可能提高性能。</p>
@@ -788,7 +810,7 @@ git rebase master topic</pre>
 <dd>
 <p>使用合并策略重定向（默认）。</p>
 <div class="paragraph">
-<p>请注意，变基合并是通过在 <code>&lt;上游&gt;</code> 分支上重放工作分支的每次提交来实现的。 因此，当发生合并冲突时，被报告为 <em>ours</em> 的一方是迄今为止以 <code>&lt;上游&gt;</code> 为起点的重定向系列，而 <em>theirs</em> 则是工作分支。 换句话说，双方是对调的。</p>
+<p>请注意，变基合并是通过在 &lt;上游&gt; 分支上重放工作分支的每次提交来实现的。 因此，当发生合并冲突时，被报告为 <em>ours</em> 的一方是迄今为止以 &lt;上游&gt; 为起点的重定向系列，而 <em>theirs</em> 则是工作分支。 换句话说，双方是对调的。</p>
 </div>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
@@ -799,7 +821,7 @@ git rebase master topic</pre>
 <dd>
 <p>使用给定的合并策略，而不是默认的 <code>ort</code>。暗指 <code>--merge</code>。</p>
 <div class="paragraph">
-<p>由于 <code>git rebase</code> 会使用给定的策略在 <code>&lt;上游&gt;</code> 分支之上重复工作分支的每次提交，因此使用 <code>ours</code> 策略只会清空 <code>&lt;分支&gt;</code> 中的所有补丁，这没有什么意义。</p>
+<p>由于 <code>git</code> <code>rebase</code> 会使用给定的策略在 &lt;上游&gt; 分支之上重复工作分支的每次提交，因此使用 <code>ours</code> 策略只会清空 &lt;分支&gt; 中的所有补丁，这没有什么意义。</p>
 </div>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
@@ -808,7 +830,7 @@ git rebase master topic</pre>
 <dt class="hdlist1">-X &lt;策略选项&gt;</dt>
 <dt class="hdlist1">--strategy-option=&lt;策略选项&gt;</dt>
 <dd>
-<p>将 &lt;策略选项&gt; 传递给合并策略。 这意味着 <code>--merge</code>，如果没有指定策略，则是 <code>--s ort</code>。 请注意 <em>ours</em> 和 <em>theirs</em> 的颠倒，就像上面的 `-m`选项一样。</p>
+<p>将 &lt;策略选项&gt; 传递给合并策略。 这意味着 <code>--merge</code>，如果没有指定策略，则是 <code>--s</code> <code>ort</code>。 请注意 <em>ours</em> 和 <em>theirs</em> 的颠倒，就像上面的 `-m`选项一样。</p>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
 </div>
@@ -816,7 +838,7 @@ git rebase master topic</pre>
 <dt class="hdlist1">--rerere-autoupdate</dt>
 <dt class="hdlist1">--no-rerere-autoupdate</dt>
 <dd>
-<p>在 rerere 机制重用当前冲突的记录解析来更新工作树中的文件后，允许它也用解析的结果来更新索引。 <code>--no-rerere-autoupdate`是一个很好的方法，在用单独的 `git add</code> 提交结果到索引之前，可以反复检查 <code>rerere</code> 所做的事情，并抓住潜在的错误合并。</p>
+<p>在 rerere 机制重用当前冲突的记录解析来更新工作树中的文件后，允许它也用解析的结果来更新索引。 <code>--no-rerere-autoupdate</code>`是一个很好的方法，在用单独的 `git <code>add</code> 提交结果到索引之前，可以反复检查 <code>rerere</code> 所做的事情，并抓住潜在的错误合并。</p>
 </dd>
 <dt class="hdlist1">-S[&lt;keyid&gt;]</dt>
 <dt class="hdlist1">--gpg-sign[=&lt;键 ID&gt;]</dt>
@@ -845,15 +867,15 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">--no-verify</dt>
 <dd>
-<p>该选项会绕过 pre-rebase 钩子。 另请参阅 <a href="githooks.html"><b>githooks</b>(5)</a>。</p>
+<p>该选项会绕过 pre-rebase 钩子。 另请参阅 <a href="githooks.html">githooks(5)</a>。</p>
 </dd>
 <dt class="hdlist1">--verify</dt>
 <dd>
-<p>允许运行 pre-rebase 钩子，这是默认选项。 该选项可用于覆盖 <code>--no-verify</code>。 另请参见 <a href="githooks.html"><b>githooks</b>(5)</a>。</p>
+<p>允许运行 pre-rebase 钩子，这是默认选项。 该选项可用于覆盖 <code>--no-verify</code>。 另请参见 <a href="githooks.html">githooks(5)</a>。</p>
 </dd>
 <dt class="hdlist1">-C&lt;n&gt;</dt>
 <dd>
-<p>确保每次更改前后至少有 <code>&lt;n&gt;</code> 行周围上下文匹配。 如果周围的上下文行数较少，则必须全部匹配。 默认情况下，不会忽略任何上下文。 暗指 <code>--apply</code>。</p>
+<p>确保每次更改前后至少有 <em>&lt;n&gt;</em> 行周围上下文匹配。 如果周围的上下文行数较少，则必须全部匹配。 默认情况下，不会忽略任何上下文。 暗指 <code>--apply</code>。</p>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
 </div>
@@ -870,15 +892,15 @@ git rebase master topic</pre>
 <dt class="hdlist1">--fork-point</dt>
 <dt class="hdlist1">--no-fork-point</dt>
 <dd>
-<p>在计算哪些提交由 <code>&lt;分支&gt;</code> 引入时，使用引用日志在 <code>&lt;上游仓库&gt;</code> 和 <code>&lt;分支&gt;</code> 之间找到更好的共同祖先。</p>
+<p>在计算哪些提交由 &lt;分支&gt; 引入时，使用引用日志在 &lt;上游仓库&gt; 和 &lt;分支&gt; 之间找到更好的共同祖先。</p>
 <div class="paragraph">
-<p>当启用 <code>--fork-point</code> 时，将使用 <em>fork_point</em> 而不是 <code>&lt;上游仓库&gt;</code> 来计算要重置的提交集，其中 <em>fork_point</em> 是 <code>git merge-base --fork-point &lt;上游仓库&gt; &lt;分支&gt;</code> 命令的结果（参见 <a href="git-merge-base.html"><b>git-merge-base</b>(1)</a>）。 如果 <em>fork_point</em> 最终为空，<code>&lt;上游仓库&gt;</code> 将作为备用。</p>
+<p>当启用 <code>--fork-point</code> 时，将使用 <em>fork_point</em> 而不是 &lt;上游仓库&gt; 来计算要重置的提交集，其中 <em>fork_point</em> 是 <code>git</code> <code>merge-base</code> <code>--fork-point</code> &lt;上游仓库&gt; &lt;分支&gt; 命令的结果（参见 <a href="git-merge-base.html">git-merge-base(1)</a>）。 如果 <em>fork_point</em> 最终为空，&lt;上游仓库&gt; 将作为备用。</p>
 </div>
 <div class="paragraph">
-<p>如果在命令行中提供了 <code>&lt;上游仓库&gt; ` 或 `--keep-base</code> 参数，则默认为 <code>--no-fork-point</code>，否则默认为 <code>--fork-point</code>。另请参阅 <a href="git-config.html"><b>git-config</b>(1)</a> 中的 <code>rebase.forkpoint</code>。</p>
+<p>如果在命令行中提供了 &lt;上游仓库&gt; ` 或 `--keep-base 参数，则默认为 <code>--no-fork-point</code>，否则默认为 <code>--fork-point</code>。另请参阅 <a href="git-config.html">git-config(1)</a> 中的 <code>rebase.forkpoint</code>。</p>
 </div>
 <div class="paragraph">
-<p>如果你的分支基于 <code>&lt;上游仓库&gt;</code>，但 <code>&lt;上游仓库&gt;</code> 被回退了，而你的分支包含了被删除的提交，那么可以使用 <code>--keep-base</code> 选项来从你的分支中删除那些提交。</p>
+<p>如果你的分支基于 &lt;上游仓库&gt;，但 &lt;上游仓库&gt; 被回退了，而你的分支包含了被删除的提交，那么可以使用 <code>--keep-base</code> 选项来从你的分支中删除那些提交。</p>
 </div>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
@@ -902,7 +924,7 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">--whitespace=&lt;选项&gt;</dt>
 <dd>
-<p>这个标志被传递给应用补丁的 <code>git apply</code> 程序（参阅 <a href="git-apply.html"><b>git-apply</b>(1)</a>）。它隐含了 <code>--apply</code>。</p>
+<p>这个标志被传递给应用补丁的 <code>git</code> <code>apply</code> 程序（参阅 <a href="git-apply.html">git-apply(1)</a>）。它隐含了 <code>--apply</code>。</p>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
 </div>
@@ -943,10 +965,10 @@ git rebase master topic</pre>
 <dd>
 <p>默认情况下，变基操作会简单地从待办事项列表中删除合并提交，并将被重置的提交放入一个单一的线性分支中。 使用 <code>--rebase-merges</code> 后，变基操作会通过重新创建合并提交，尝试保留要被重置的提交中的分支结构。在这些合并提交中，任何已解决的合并冲突或手动修正都必须手动解决/重新应用。<code>--no-rebase-merges</code> 可以用来抵消 <code>rebase.rebaseMerges</code> 配置选项和之前的 `--rebase-merges 选项。</p>
 <div class="paragraph">
-<p>重定向合并时，有两种模式： <code>rebase-cousins</code> 和 <code>no-rebase-cousins</code>。如果未指定模式，则默认为 <code>no-rebase-cousins</code>。在 <code>no-rebase-cousins</code> 模式下，没有 <code>&lt;上游仓库&gt;</code> 作为直接祖先的提交将保留其原始分支点，也就是说，被 <a href="git-log.html"><b>git-log</b>(1)</a> 的 <code>--ancestry-path</code> 选项排除在外的提交将默认保留其原始祖先。在 <code>rebase-cousins</code> 模式下，此类提交会被重定向到 <code>&lt;上游仓库&gt;</code>（或是`&lt;onto&gt;`，如果指定了）。</p>
+<p>重定向合并时，有两种模式： <code>rebase-cousins</code> 和 <code>no-rebase-cousins</code>。如果未指定模式，则默认为 <code>no-rebase-cousins</code>。在 <code>no-rebase-cousins</code> 模式下，没有 &lt;上游仓库&gt; 作为直接祖先的提交将保留其原始分支点，也就是说，被 <a href="git-log.html">git-log(1)</a> 的 <code>--ancestry-path</code> 选项排除在外的提交将默认保留其原始祖先。在 <code>rebase-cousins</code> 模式下，此类提交会被重定向到 &lt;上游仓库&gt;（或是`&lt;onto&gt;`，如果指定了）。</p>
 </div>
 <div class="paragraph">
-<p>目前只能使用 <code>ort</code> 合并策略重新创建合并提交；只有通过明确的 <code>exec git merge -s &lt;strategy&gt; [...]</code> 命令才能使用不同的合并策略。</p>
+<p>目前只能使用 <code>ort</code> 合并策略重新创建合并提交；只有通过明确的 <code>exec</code> <code>git</code> <code>merge</code> <code>-s</code> <em>&lt;strategy&gt;</em> [...] 命令才能使用不同的合并策略。</p>
 </div>
 <div class="paragraph">
 <p>另请参阅下面的重置合并和不兼容选项。</p>
@@ -955,7 +977,7 @@ git rebase master topic</pre>
 <dt class="hdlist1">-x &lt;命令&gt;</dt>
 <dt class="hdlist1">--exec &lt;命令&gt;</dt>
 <dd>
-<p>在最终历史记录中创建提交的每一行后添加 "exec &lt;命令&gt;"。<code>&lt;命令&gt;</code> 将被解释为一个或多个 shell 命令。任何失败的命令都会中断重置，退出代码为 1。</p>
+<p>在最终历史记录中创建提交的每一行后添加 "exec &lt;命令&gt;"。&lt;命令&gt; 将被解释为一个或多个 shell 命令。任何失败的命令都会中断重置，退出代码为 1。</p>
 <div class="paragraph">
 <p>您可以通过使用一个包含多个命令的 <code>--exec</code> 实例来执行多个命令：</p>
 </div>
@@ -984,7 +1006,7 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">--root</dt>
 <dd>
-<p>重置从 <code>&lt;分支&gt;</code> 到的所有提交，而不是用 <code>&lt;上游分支&gt;</code> 来限制它们。 这样就可以重定向分支上的根提交。</p>
+<p>重置从 &lt;分支&gt; 到的所有提交，而不是用 &lt;上游分支&gt; 来限制它们。 这样就可以重定向分支上的根提交。</p>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
 </div>
@@ -992,15 +1014,15 @@ git rebase master topic</pre>
 <dt class="hdlist1">--autosquash</dt>
 <dt class="hdlist1">--no-autosquash</dt>
 <dd>
-<p>自动将带有特殊格式信息的提交压制到正在重建的前提交中。如果提交信息以 "squash!"、"fixup!" 或 "amend!" 开头，则主题行的其余部分将作为提交说明符，如果与主题行或该提交的哈希值相匹配，则与之前的提交相匹配。如果没有完全匹配的提交，则会考虑与提交主题开头的指定符匹配。</p>
+<p>Automatically squash commits with specially formatted messages into previous commits being rebased. If a commit message starts with "squash! ", "fixup! " or "amend! ", the remainder of the title is taken as a commit specifier, which matches a previous commit if it matches the title or the hash of that commit. If no commit matches fully, matches of the specifier with the start of commit titles are considered.</p>
 <div class="paragraph">
-<p>在 rebase todo 列表中，squash、fixup 和 amend 提交的操作将分别从 <code>pick</code> 改为 <code>squash</code>、<code>fixup</code> 或 <code>fixup -C</code>，而且它们会被移到所修改的提交之后。在继续之前，可以使用 <code>--interactive</code> 选项查看和编辑待办事项列表。</p>
+<p>在 rebase todo 列表中，squash、fixup 和 amend 提交的操作将分别从 <code>pick</code> 改为 <code>squash</code>、<code>fixup</code> 或 <code>fixup</code> <code>-C</code>，而且它们会被移到所修改的提交之后。在继续之前，可以使用 <code>--interactive</code> 选项查看和编辑待办事项列表。</p>
 </div>
 <div class="paragraph">
-<p>建议使用 <a href="git-commit.html"><b>git-commit</b>(1)</a> 的 <code>--squash</code>、<code>--fixup</code>、<code>--fixup=amend:</code> 或 <code>--fixup=reword:</code> 选项来创建带有压扁标记的提交。</p>
+<p>The recommended way to create commits with squash markers is by using the <code>--squash</code>, <code>--fixup</code>, <code>--fixup=amend:</code> or <code>--fixup=reword:</code> options of <a href="git-commit.html">git-commit(1)</a>, which take the target commit as an argument and automatically fill in the title of the new commit from that.</p>
 </div>
 <div class="paragraph">
-<p>将配置变量 <code>rebase.autoSquash</code> 设为 true，可启用交互式变基默认自动清空功能。可以使用 `--no-autosquash`选项来覆盖该设置。</p>
+<p>Setting configuration variable <code>rebase.autoSquash</code> to true enables auto-squashing by default for interactive rebase. The <code>--no-autosquash</code> option can be used to override that setting.</p>
 </div>
 <div class="paragraph">
 <p>另请参阅下面的不兼容选项。</p>
@@ -1016,10 +1038,10 @@ git rebase master topic</pre>
 <dd>
 <p>自动重新安排执行失败的 <code>exec</code> 命令。这只有在交互模式下（或提供了 <code>--exec</code> 选项时）才有意义。</p>
 <div class="paragraph">
-<p>一旦启动变基程序，该选项就会生效。它会在整个变基过程和中保留，依次基于初始 <code>git rebase</code> 所提供的命令行选项、<code>rebase.rescheduleFailedExec</code> 配置（参见 <a href="git-config.html"><b>git-config</b>(1)</a> 或下文的“配置”），或者默认为 false。</p>
+<p>一旦启动变基程序，该选项就会生效。它会在整个变基过程和中保留，依次基于初始 <code>git</code> <code>rebase</code> 所提供的命令行选项、<code>rebase.rescheduleFailedExec</code> 配置（参见 <a href="git-config.html">git-config(1)</a> 或下文的“配置”），或者默认为 false。</p>
 </div>
 <div class="paragraph">
-<p>为整个 rebase 记录该选项是为了方便起见。否则，当调用 <code>git rebase --continue</code> 时，在开始时显式的 <code>--no-reschedule-failed-exec</code> 会被 <code>rebase.rescheduleFailedExec=true</code> 配置覆盖。目前，不能向 <code>git rebase --continue</code> 传递 <code>--[no-]reschedule-failed-exec</code>。</p>
+<p>为整个 rebase 记录该选项是为了方便起见。否则，当调用 <code>git</code> <code>rebase</code> <code>--continue</code> 时，在开始时显式的 <code>--no-reschedule-failed-exec</code> 会被 <code>rebase.rescheduleFailedExec=true</code> 配置覆盖。目前，不能向 <code>git</code> <code>rebase</code> <code>--continue</code> 传递 <code>--</code>[<code>no-</code>]<code>reschedule-failed-exec</code>。</p>
 </div>
 </dd>
 <dt class="hdlist1">--update-refs</dt>
@@ -1121,7 +1143,7 @@ git rebase master topic</pre>
 <h2 id="_行为差异">行为差异</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>git rebase</code> 有两个主要的后台：‘应用’ 和 ‘合并’（‘应用’ 后台曾被称为 <em>am</em> 后台，但这个名字看起来像动词而非名词，因此引起了混淆）。 此外，‘合并’ 后台曾被称为交互式后台，但现在也用于非交互式情况。 两者都是根据各自的底层功能重新命名的）。这两个后台在行为方式上有一些微妙的区别：</p>
+<p><code>git</code> <code>rebase</code> 有两个主要的后台：‘应用’ 和 ‘合并’（‘应用’ 后台曾被称为 <em>am</em> 后台，但这个名字看起来像动词而非名词，因此引起了混淆）。 此外，‘合并’ 后台曾被称为交互式后台，但现在也用于非交互式情况。 两者都是根据各自的底层功能重新命名的）。这两个后台在行为方式上有一些微妙的区别：</p>
 </div>
 <div class="sect2">
 <h3 id="_空提交">空提交</h3>
@@ -1132,7 +1154,7 @@ git rebase master topic</pre>
 <p>默认情况下，‘合并’ 后台会保留故意为空的提交（不过，如果使用 <code>-i</code> 选项，这些提交会在待办事项列表编辑器中标记为空，或者使用 <code>--no-keep-empty</code> 自动删除）。</p>
 </div>
 <div class="paragraph">
-<p>与应用后端类似，合并后端默认情况下也会丢弃变为空的提交，除非指定了 <code>-i</code> 或 <code>--interactive</code> 选项（在这种情况下，合并会停止并询问用户该怎么做）。 合并后端还有一个 <code>--empty=(drop|keep|ask)</code> 选项，用于改变处理变为空的提交的行为。</p>
+<p>Similar to the apply backend, by default the merge backend drops commits that become empty unless <code>-i</code>/<code>--interactive</code> is specified (in which case it stops and asks the user what to do). The merge backend also has an <code>--empty=</code>(<code>drop</code>|<code>keep</code>|<code>stop</code>) option for changing the behavior of handling commits that become empty.</p>
 </div>
 </div>
 <div class="sect2">
@@ -1147,7 +1169,7 @@ git rebase master topic</pre>
 <div class="sect2">
 <h3 id="_上下文">上下文</h3>
 <div class="paragraph">
-<p>‘应用’ 后台的工作方式是创建一系列补丁（在内部调用 <code>format-patch</code>），然后依次应用这些补丁（在内部调用 <code>am</code>）。 补丁由多个块组成，每个块包含行号、上下文区域和实际更改。 行号的获取必须谨慎，因为另一方很可能在文件中插入或删除了更早的行。 上下文区域的目的是帮助找到如何调整行号，以便将更改应用到正确的行上。 但是，如果代码的多个区域有相同的上下文行，就可能选错。 在现实世界中，这种情况曾导致提交被错误地重新应用，而没有报告任何冲突。 将 <code>diff.context</code> 设置为更大的值可能会避免此类问题，但会增加发生虚假冲突的几率（因为需要更多行匹配的上下文才能应用）。</p>
+<p>The <em>apply</em> backend works by creating a sequence of patches (by calling <code>format-patch</code> internally), and then applying the patches in sequence (calling <code>am</code> internally). Patches are composed of multiple hunks, each with line numbers, a context region, and the actual changes. The line numbers have to be taken with some offset, since the other side will likely have inserted or deleted lines earlier in the file. The context region is meant to help find how to adjust the line numbers in order to apply the changes to the right lines. However, if multiple areas of the code have the same surrounding lines of context, the wrong one can be picked. There are real-world cases where this has caused commits to be reapplied incorrectly with no conflicts reported. Setting <code>diff.context</code> to a larger value may prevent such types of problems, but increases the chance of spurious conflicts (since it will require more lines of matching context to apply).</p>
 </div>
 <div class="paragraph">
 <p>‘合并’ 后台使用每个相关文件的完整副本，从而避免了此类问题。</p>
@@ -1165,19 +1187,19 @@ git rebase master topic</pre>
 <div class="sect2">
 <h3 id="_钩子">钩子</h3>
 <div class="paragraph">
-<p>传统上，‘应用’ 后台并不调用提交后（post-commit）钩子，而 ‘合并’ 后台却调用了。 虽然 ‘合并’ 后台已取消了其输出，但两者都调用了检出后（post-checkout）钩子。 此外，这两个后端都只调用了变基操作的起点提交，而不是中间提交或最终提交的检出后（post-checkout）钩子。 在每种情况下，调用这些钩子都是偶然的，而不是设计出来的（两个后台最初都是以 shell 脚本的形式实现的，碰巧调用了其他会调用钩子的命令，如 <code>git checkout</code> 或 <code>git commit</code>）。 这两个后台应该具有相同的行为，但目前还不完全清楚哪一个才是正确的。 我们将来可能会让变基操作停止调用这些钩子。</p>
+<p>传统上，‘应用’ 后台并不调用提交后（post-commit）钩子，而 ‘合并’ 后台却调用了。 虽然 ‘合并’ 后台已取消了其输出，但两者都调用了检出后（post-checkout）钩子。 此外，这两个后端都只调用了变基操作的起点提交，而不是中间提交或最终提交的检出后（post-checkout）钩子。 在每种情况下，调用这些钩子都是偶然的，而不是设计出来的（两个后台最初都是以 shell 脚本的形式实现的，碰巧调用了其他会调用钩子的命令，如 <code>git</code> <code>checkout</code> 或 <code>git</code> <code>commit</code>）。 这两个后台应该具有相同的行为，但目前还不完全清楚哪一个才是正确的。 我们将来可能会让变基操作停止调用这些钩子。</p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_可中断性">可中断性</h3>
 <div class="paragraph">
-<p>如果用户在错误的时间按下 Ctrl-C 试图终止重置，重置就会进入无法通过后续的 <code>git rebase --abort</code> 终止的状态。 ‘合并’ 后台似乎不存在同样的缺陷。 (详见 <a href="https://lore.kernel.org/git/20200207132152.GC2868@szeder.dev/）" class="bare">https://lore.kernel.org/git/20200207132152.GC2868@szeder.dev/）</a></p>
+<p>如果用户在错误的时间按下 Ctrl-C 试图终止重置，重置就会进入无法通过后续的 <code>git</code> <code>rebase</code> <code>--abort</code> 终止的状态。 ‘合并’ 后台似乎不存在同样的缺陷。 (详见 <a href="https://lore.kernel.org/git/20200207132152.GC2868@szeder.dev/）" class="bare">https://lore.kernel.org/git/20200207132152.GC2868@szeder.dev/）</a></p>
 </div>
 </div>
 <div class="sect2">
 <h3 id="_重写提交">重写提交</h3>
 <div class="paragraph">
-<p>当重建过程中发生冲突时，变基操作停止并要求用户解决。 由于用户可能需要在解决冲突的同时做一些显著的改动，因此在冲突解决且用户运行了 <code>git rebase --continue</code> 之后，变基时应打开一个编辑器并要求用户更新提交信息。 ‘合并’ 后台会这样做，而 ‘应用’ 后台则会盲目应用原始的提交信息。</p>
+<p>当重建过程中发生冲突时，变基操作停止并要求用户解决。 由于用户可能需要在解决冲突的同时做一些显著的改动，因此在冲突解决且用户运行了 <code>git</code> <code>rebase</code> <code>--continue</code> 之后，变基时应打开一个编辑器并要求用户更新提交信息。 ‘合并’ 后台会这样做，而 ‘应用’ 后台则会盲目应用原始的提交信息。</p>
 </div>
 </div>
 <div class="sect2">
@@ -1205,7 +1227,7 @@ git rebase master topic</pre>
 <h2 id="_合并战略">合并战略</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>合并机制（ <code>git merge</code> 和 <code>git pull</code> 命令）允许用 <code>-s</code> 选项来选择后端&#8217;合并策略'。 一些策略也可以采取自己的选项，可以通过给 <code>git merge</code> 和/或 <code>git pull</code> 的 <code>-X&lt;选项&gt;</code> 参数来传递。</p>
+<p>合并机制（ <code>git</code> <code>merge</code> 和 <code>git</code> <code>pull</code> 命令）允许用 <code>-s</code> 选项来选择后端&#8217;合并策略'。 一些策略也可以采取自己的选项，可以通过给 <code>git</code> <code>merge</code> 和/或 <code>git</code> <code>pull</code> 的 <code>-X</code>&lt;选项&gt; 参数来传递。</p>
 </div>
 <div class="dlist">
 <dl>
@@ -1233,7 +1255,7 @@ git rebase master topic</pre>
 <dt class="hdlist1">ignore-space-at-eol</dt>
 <dt class="hdlist1">ignore-cr-at-eol</dt>
 <dd>
-<p>为了进行三方合并，将具有指定类型的空白变化的行视为没有变化。 但混合了其他改动的行的空白改动不会被忽略。 参见<a href="git-diff.html"><b>git-diff</b>(1)</a> <code>-b</code>, <code>-w</code>, <code>--ignore-space-at-eol</code>, 和 <code>--ignore-cr-at-eol</code>。</p>
+<p>为了进行三方合并，将具有指定类型的空白变化的行视为没有变化。 但混合了其他改动的行的空白改动不会被忽略。 参见<a href="git-diff.html">git-diff(1)</a> <code>-b</code>, <code>-w</code>, <code>--ignore-space-at-eol</code>, 和 <code>--ignore-cr-at-eol</code>。</p>
 <div class="ulist">
 <ul>
 <li>
@@ -1250,7 +1272,7 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">renormalize</dt>
 <dd>
-<p>在解决三方合并时，这将对一个文件的所有三个阶段运行虚拟检出和检入。 这个选项是为了在合并具有不同清洁过滤器或行末规范化规则的分支时使用。 详情见 <a href="gitattributes.html"><b>gitattributes</b>(5)</a> 中的 "合并具有不同检入/检出属性的分支"。</p>
+<p>This runs a virtual check-out and check-in of all three stages of any file which needs a three-way merge. This option is meant to be used when merging branches with different clean filters or end-of-line normalization rules. See "Merging branches with differing checkin/checkout attributes" in <a href="gitattributes.html">gitattributes(5)</a> for details.</p>
 </dd>
 <dt class="hdlist1">no-renormalize</dt>
 <dd>
@@ -1258,11 +1280,11 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">find-renames[=&lt;n&gt;]</dt>
 <dd>
-<p>开启重名检测，可选择设置相似度阈值。 这是默认的。这覆盖了 <em>merge.renames</em> 配置变量。 参见<a href="git-diff.html"><b>git-diff</b>(1)</a> <code>--find-renames</code>。</p>
+<p>开启重名检测，可选择设置相似度阈值。 这是默认的。这覆盖了 <em>merge.renames</em> 配置变量。 参见<a href="git-diff.html">git-diff(1)</a> <code>--find-renames</code>。</p>
 </dd>
 <dt class="hdlist1">rename-threshold=&lt;n&gt;</dt>
 <dd>
-<p>废弃的，<code>find-renames=&lt;n&gt;</code> 的同义词。</p>
+<p>废弃的，<code>find-renames=</code><em>&lt;n&gt;</em> 的同义词。</p>
 </dd>
 <dt class="hdlist1">subtree[=&lt;路径&gt;]</dt>
 <dd>
@@ -1285,11 +1307,11 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">diff-algorithm=[patience|minimal|histogram|myers]</dt>
 <dd>
-<p>在合并时使用不同的差异算法，这可以帮助避免由于不重要的匹配行（比如不同函数的大括号）而发生的错误合并。 参见<a href="git-diff.html"><b>git-diff</b>(1)</a> <code>--diff-algorithm</code>。 注意，<code>ort</code> 特定 <code>diff-algorithm=histogram</code>，而`recursive`默认为`diff.algorithm`配置设置。</p>
+<p>在合并时使用不同的差异算法，这可以帮助避免由于不重要的匹配行（比如不同函数的大括号）而发生的错误合并。 参见<a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>。 注意，<code>ort</code> 特定 <code>diff-algorithm=histogram</code>，而`recursive`默认为`diff.algorithm`配置设置。</p>
 </dd>
 <dt class="hdlist1">no-renames</dt>
 <dd>
-<p>关闭重名检测。这覆盖了 <code>merge.renames</code> 的配置变量。 参见<a href="git-diff.html"><b>git-diff</b>(1)</a> <code>--no-renames</code>。</p>
+<p>关闭重名检测。这覆盖了 <code>merge.renames</code> 的配置变量。 参见<a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>。</p>
 </dd>
 </dl>
 </div>
@@ -1321,13 +1343,13 @@ git rebase master topic</pre>
 <h2 id="_注释">注释</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>您应该了解在共享的版本库中使用 <code>git rebase</code> 的影响。 另请参阅下面的从上游重建中恢复。</p>
+<p>您应该了解在共享的版本库中使用 <code>git</code> <code>rebase</code> 的影响。 另请参阅下面的从上游重建中恢复。</p>
 </div>
 <div class="paragraph">
 <p>在运行变基命令时，如果存在 <code>pre-rebase</code> （变基前）钩子，它会首先执行该钩子。 您可以使用此钩子进行正确性检查，并在不合适时拒绝重置。 有关示例，请参阅模板 <code>pre-rebase</code>（变基前） 钩子脚本。</p>
 </div>
 <div class="paragraph">
-<p>完成后，<code>&lt;分支&gt;</code> 将成为当前分支。</p>
+<p>完成后，&lt;分支&gt; 将成为当前分支。</p>
 </div>
 </div>
 </div>
@@ -1413,7 +1435,7 @@ git rebase master topic</pre>
 <p>上线描述纯粹是为了方便您查看；<em>git rebase</em> 不会查看这些描述，只会查看提交名称（本例中为 "deadbee" 和 "fa1afe1"），因此请勿删除或编辑这些名称。</p>
 </div>
 <div class="paragraph">
-<p>用 "edit" 命令替换 "pick" 命令后，你可以告诉 <code>git rebase</code> 在应用该提交后停止，这样你就可以编辑文件和/或提交信息，修改提交，然后继续重置。</p>
+<p>用 "edit" 命令替换 "pick" 命令后，你可以告诉 <code>git</code> <code>rebase</code> 在应用该提交后停止，这样你就可以编辑文件和/或提交信息，修改提交，然后继续重置。</p>
 </div>
 <div class="paragraph">
 <p>要中断重置（就像 "edit" 命令一样，但不会先选择任何提交），请使用 "break "命令。</p>
@@ -1428,10 +1450,10 @@ git rebase master topic</pre>
 <p>如果要将两个或更多提交折叠为一个提交，请用 "squash" 或 "fixup" 代替命令 "pick" 来处理第二个及后续提交。 如果提交的作者不同，折叠后的提交将归属于第一个提交的作者。 除非使用了 "fixup -c" 命令，否则折叠提交的建议提交信息是第一个提交信息与 "squash" 命令确定的提交信息的合并，省略了 "fixup" 命令确定的提交信息。 在这种情况下，建议的提交信息只是 "fixup -c" 提交的信息，而且会打开一个编辑器允许你编辑信息。 "fixup -c" 提交的内容（补丁）仍然包含在折叠提交中。如果有多个 "fixup -c" 提交，则使用最后一个提交的信息。 您也可以使用 "fixup -C" 获得与 "fixup -c" 相同的效果，但不需要打开编辑器。</p>
 </div>
 <div class="paragraph">
-<p>当 "pick" 命令被替换为 "编辑" 命令或命令因合并错误而失败时，<code>git rebase</code> 将停止。完成编辑和/或解决冲突后，可以使用 <code>git rebase --continue</code> 继续。</p>
+<p>当 "pick" 命令被替换为 "编辑" 命令或命令因合并错误而失败时，<code>git</code> <code>rebase</code> 将停止。完成编辑和/或解决冲突后，可以使用 <code>git</code> <code>rebase</code> <code>--continue</code> 继续。</p>
 </div>
 <div class="paragraph">
-<p>例如，如果您想重新排列最近 5 次提交的顺序，让原来的 <code>HEAD~4</code> 变成新的 <code>HEAD</code>。要做到这一点，可以这样调用 <code>git rebase</code>：</p>
+<p>例如，如果您想重新排列最近 5 次提交的顺序，让原来的 <code>HEAD~4</code> 变成新的 <code>HEAD</code>。要做到这一点，可以这样调用 <code>git</code> <code>rebase</code>：</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1476,7 +1498,7 @@ exec cd subdir; make test
 </div>
 </div>
 <div class="paragraph">
-<p>当命令失败（即以非 0 状态退出）时，交互式变基操作就会停止，以便您有机会解决问题。您可以使用 <code>git rebase --continue</code> 继续。</p>
+<p>当命令失败（即以非 0 状态退出）时，交互式变基操作就会停止，以便您有机会解决问题。您可以使用 <code>git</code> <code>rebase</code> <code>--continue</code> 继续。</p>
 </div>
 <div class="paragraph">
 <p>"exec" 命令在 shell（默认的 shell，通常是/bin/sh）中执行命令，因此可以使用 shell 功能（如 "cd"、"&gt;"、";"&#8230;&#8203;&#8230;&#8203;）。命令从工作目录树的根目录运行。</p>
@@ -1507,21 +1529,21 @@ exec make test</pre>
 <h2 id="_拆分提交">拆分提交</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>在交互模式下，可以用 "edit"（编辑）来标记提交。 不过，这并不一定意味着 <code>git rebase</code> 希望编辑的结果是一个提交。 事实上，你可以撤销提交，也可以添加其他提交。 这可以用来将一个提交一分为二：</p>
+<p>在交互模式下，可以用 "edit"（编辑）来标记提交。 不过，这并不一定意味着 <code>git</code> <code>rebase</code> 希望编辑的结果是一个提交。 事实上，你可以撤销提交，也可以添加其他提交。 这可以用来将一个提交一分为二：</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>使用 <code>git rebase -i &lt;提交&gt;^</code> 开始交互式变基，其中 `&lt;提交&gt;`是要分割的提交。 事实上，只要包含该提交，任何提交范围都可以。</p>
+<p>使用 <code>git</code> <code>rebase</code> <code>-i</code> &lt;提交&gt;<code>^</code> 开始交互式变基，其中 `&lt;提交&gt;`是要分割的提交。 事实上，只要包含该提交，任何提交范围都可以。</p>
 </li>
 <li>
 <p>用 "edit" 操作标记要分割的提交。</p>
 </li>
 <li>
-<p>在编辑该提交时，执行 <code>git reset HEAD^</code>。 其效果是将 <code>HEAD</code> 重绕一圈，索引也跟着重绕一圈。 但工作区保持不变。</p>
+<p>在编辑该提交时，执行 <code>git</code> <code>reset</code> <code>HEAD^</code>。 其效果是将 <code>HEAD</code> 重绕一圈，索引也跟着重绕一圈。 但工作区保持不变。</p>
 </li>
 <li>
-<p>现在，将您希望在第一次提交中的改动添加到索引中。 你可以使用 <code>git add</code> （可能是交互式的）或 <code>git gui</code> （或两者）来完成。</p>
+<p>现在，将您希望在第一次提交中的改动添加到索引中。 你可以使用 <code>git</code> <code>add</code> （可能是交互式的）或 <code>git</code> <code>gui</code> （或两者）来完成。</p>
 </li>
 <li>
 <p>以任何合适的提交信息提交当前索引。</p>
@@ -1530,12 +1552,12 @@ exec make test</pre>
 <p>重复最后两个步骤，直到工作区干净为止。</p>
 </li>
 <li>
-<p>使用 <code>git rebase --continue</code> 继续变基。</p>
+<p>使用 <code>git</code> <code>rebase</code> <code>--continue</code> 继续变基。</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>如果不能绝对确定中间修订是一致的（编译、通过 testsuite 等），则应使用 <code>git stash</code> 在每次提交、测试之后，将尚未提交的改动保存起来，并在必要时修改提交。</p>
+<p>如果不能绝对确定中间修订是一致的（编译、通过 testsuite 等），则应使用 <code>git</code> <code>stash</code> 在每次提交、测试之后，将尚未提交的改动保存起来，并在必要时修改提交。</p>
 </div>
 </div>
 </div>
@@ -1595,7 +1617,7 @@ exec make test</pre>
 </dd>
 <dt class="hdlist1">较难的例子： 变化不一样。</dt>
 <dd>
-<p>如果 ‘子系统’ 变基有冲突，或者使用了 <code>--interactive</code> 来省略、编辑、压制或修复提交，或者上游使用了 <code>commit --amend</code>, <code>reset</code> 或完整历史重写命令（如 <a href="https://github.com/newren/git-filter-repo"><code>filter-repo</code></a>），就会发生这种情况。</p>
+<p>如果 ‘子系统’ 变基有冲突，或者使用了 <code>--interactive</code> 来省略、编辑、压制或修复提交，或者上游使用了 <code>commit</code> <code>--amend</code>, <code>reset</code> 或完整历史重写命令（如 <a href="https://github.com/newren/git-filter-repo"><code>filter-repo</code></a>），就会发生这种情况。</p>
 </dd>
 </dl>
 </div>
@@ -1771,8 +1793,8 @@ merge cmake</p>
 
 本节中这一行以下的内容都是从 linkgit:git-config[1] 文档中摘录的。其内容与那里的内容相同：
 
-Unresolved directive in git-rebase.txt - include::config/rebase.txt[]
-Unresolved directive in git-rebase.txt - include::config/sequencer.txt[]
+Unresolved directive in git-rebase.adoc - include::config/rebase.adoc[]
+Unresolved directive in git-rebase.adoc - include::config/sequencer.adoc[]
 
 GIT
 ---
@@ -1782,7 +1804,7 @@ GIT
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:07 +0200
+Last updated 2025-03-23 12:03:54 +0100
 </div>
 </div>
 </body>

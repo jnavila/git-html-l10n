@@ -1,0 +1,94 @@
+git-shortlog(1)
+===============
+
+NOM
+---
+git-shortlog - Résume 'git log' sortie
+
+SYNOPSIS
+--------
+[verse]
+'git shortlog' [<options>] [<intervalle-de-révision>] [[--] <chemin>...]
+git log --pretty=short | 'git shortlog' [<options>]
+
+DESCRIPTION
+-----------
+Récapitule la sortie du « git log » dans un format adapté à l'inclusion dans les annonces de version. Chaque commit sera regroupé par auteur et titre.
+
+En outre, "[PATCH]" sera supprimé de la description de validation.
+
+Si aucune révision n'est passée sur la ligne de commande et que soit l'entrée standard n'est pas un terminal, soit il n'y a pas de branche courante,'git shortlog' affichera un résumé du journal lu depuis l'entrée standard, sans référence au dépôt actuel.
+
+OPTIONS
+-------
+
+-n::
+--numbered::
+	Trier la sortie en fonction du nombre de livraisons par auteur au lieu de l'ordre alphabétique des auteurs.
+
+-s::
+--summary::
+	Supprimer la description des commits et fournir un résumé du décompte des validations seulement.
+
+-e::
+--email::
+	Afficher l'adresse courriel de chaque auteur.
+
+--format[=<format>]::
+	Au lieu du sujet du commit, utiliser d'autres informations pour décrire chaque commit. <format>' peut être n'importe quelle chaîne acceptée par l'option `--format` de'git log', telle que'*[%h] %s'. (Voir la section "MISES EN FORME" de linkgit:git-log[1].)
+
+	Chaque commit mis en forme sera reformaté avant d'être affiché.
+
+--date=<format>::
+	Affiche les dates formatées en fonction de la chaîne de date donnée. (Voir l'option `--date` dans la section "Formatage de commit" de linkgit:git-log[1]). Utile avec `--group=format:<format>`.
+
+--group=<type>::
+	Grouper les commits basés sur `<type>`. Si aucune option `--group` n'est spécifiée, la valeur par défaut est `author`. `<type>` peut être :
++
+--
+ - `author`, les commits sont groupés par auteur
+ - `committer`, les commits sont groupés par validateur (équivalent à `-c`)
+ - `trailer:<field>`, Le champ `<field>` est interprété comme un message de fin de commit sans prise en compte de la casse (voir linkgit:git-interpret-trailers[1]). Par exemple, si votre projet utilise des fins de messages `Reviewed-by`, vous voulez sans doute voir qui a fait des revisions avec `git shortlog -ns --group=trailer:reviewed-by`.
+ - `format:<format>`, toute chaîne acceptée par l'option `--format` de 'git log' (voir la section "MISES EN FORME DIFF" de linkgit:git-log[1]).
++
+Notez que les commits qui n'incluent pas de fin de message ne seront pas comptés. De la même façon, les commits avec plusieurs fins de message (par ex., plusieurs approbations) peuvent être comptés plus d'une fois (mais seulement une fois par valeur unique de fin de message sur ce commit).
++
+Shortlog tentera d'analyser chaque valeur de fin de texte comme une identité "nom <email>". En cas de succès, la carte de courrier est appliquée et le courriel est omis à moins que l'option `--email` ne soit spécifiée. Si la valeur ne peut pas être analysée comme une identité, elle sera prise littéralement et complètement.
+--
++
+Si `--group` est spécifié plusieurs fois, les commit sont comptés sous chaque valeur (mais encore une fois, une seule fois par valeur unique dans ce commit). Par exemple, `git shortlog --group=author --group=trailer:co-authored-by` compte à la fois les auteurs et les co-auteurs.
+
+-c::
+--committer::
+	Il s'agit d'un alias pour `--group=committer`.
+
+-w[<largeur>[,<indent1>[,<indent2>]]]::
+	Formater la sortie en coupant chaque ligne à la longueur `largeur`. La première ligne de chaque entrée est indentée à `indent1` espaces, et la deuxième ligne et les suivantes sont indentées à `indent2` espaces. `largeur`, `indent1` et `indent2` valent par défaut à 76, 6 et 9 respectivement.
++
+Si la largeur est `0` (zéro) alors indenter les lignes de la sortie sans les recouper.
+
+<plage-de-révisions>::
+	Afficher uniquement les commits dans la plage de révision spécifiée. Lorsqu'aucune <plage-de-révision> n'est spécifiée, elle vaut par défaut à `HEAD` (c'est-à-dire tout l'historique menant au commit actuel). `origin.. HEAD` spécifie tous les commits accessibles à partir du commit actuel (c'est-à-dire `HEAD`), mais pas de `origin`. Pour une liste complète des moyens d'épeler une <plage-de-révision>, consultez la section « Spécification de plage » de linkgit:gitrevisions[7].
+
+[--] <chemin>...::
+	Ne considérer que les commits qui sont suffisants pour expliquer comment les fichiers qui correspondent aux chemins spécifiés ont été créés.
++
+Les chemins peuvent avoir besoin d'être préfixés avec `--` pour les séparer des options ou de la plage de révision, en cas de confusion.
+
+:git-shortlog: 1
+include::rev-list-options.adoc[]
+
+TRANSFORMER LES AUTEURS
+-----------------------
+
+Voir linkgit:gitmailmap[5].
+
+Notez que si `git shortlog` est exécuté en dehors d'un dépôt (pour traiter le contenu du journal sur une entrée standard), il cherchera un fichier `.mailmap` dans le répertoire actuel.
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

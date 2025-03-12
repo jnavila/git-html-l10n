@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<meta name="generator" content="Asciidoctor 2.0.20"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
 <title>git-show-ref(1)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
 <style>
@@ -140,7 +140,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -162,6 +162,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -327,7 +328,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -447,13 +448,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="verseblock">
 <pre class="content"><em>git show-ref</em> [--head] [-d | --dereference]
-             [-s | --hash[=&lt;n&gt;]] [--abbrev[=&lt;n&gt;]] [--tags]
-             [--heads] [--] [&lt;模式&gt;&#8230;&#8203;]
+             [-s | --hash[=&lt;n&gt;]] [--abbrev[=&lt;n&gt;]] [--branches] [--tags]
+             [--] [&lt;pattern&gt;&#8230;&#8203;]
 <em>git show-ref</em> --verify [-q | --quiet] [-d | --dereference]
              [-s | --hash[=&lt;n&gt;]] [--abbrev[=&lt;n&gt;]]
              [--] [&lt;ref&gt;&#8230;&#8203;]
-<em>git show-ref</em> --exclude-existing[=&lt;模式&gt;]
-<em>git show-ref</em> --exists &lt;引用&gt;</pre>
+<em>git show-ref</em> --exclude-existing[=&lt;pattern&gt;]
+<em>git show-ref</em> --exists &lt;ref&gt;</pre>
 </div>
 </div>
 </div>
@@ -473,7 +474,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><code>--exists</code> 表单可用于检查单个引用是否存在。此表单不会验证引用是否解析到实际对象。</p>
 </div>
 <div class="paragraph">
-<p>我们鼓励使用该工具，而不是直接访问 <code>.git</code> 目录下的文件。</p>
+<p>我们鼓励使用该工具，而不是直接访问 .<code>git</code> 目录下的文件。</p>
 </div>
 </div>
 </div>
@@ -486,15 +487,15 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dd>
 <p>显示 HEAD 参考，即使它通常会被过滤掉。</p>
 </dd>
-<dt class="hdlist1">--heads</dt>
+<dt class="hdlist1">--branches</dt>
 <dt class="hdlist1">--tags</dt>
 <dd>
-<p>分别限制为 "refs/heads" 和 "refs/tags"。 这些选项并不相互排斥；如果同时给定这两个选项，则会显示存储在 "refs/heads" 和 "refs/tags" 中的引用。</p>
+<p>Limit to local branches and local tags, respectively. These options are not mutually exclusive; when given both, references stored in "refs/heads" and "refs/tags" are displayed. Note that <code>--heads</code> is a deprecated synonym for <code>--branches</code> and may be removed in the future.</p>
 </dd>
 <dt class="hdlist1">-d</dt>
 <dt class="hdlist1">--dereference</dt>
 <dd>
-<p>也可将引用标记转换为对象 ID。它们将以 <code>^{}</code> 的形式显示。</p>
+<p>也可将引用标记转换为对象 ID。它们将以 <code>^</code>{} 的形式显示。</p>
 </dd>
 <dt class="hdlist1">-s</dt>
 <dt class="hdlist1">--hash[=&lt;n&gt;]</dt>
@@ -511,7 +512,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--abbrev[=&lt;n&gt;]</dt>
 <dd>
-<p>缩写对象名称。 使用 <code>--hash</code> 时，不必说 <code>--hash --abbrev</code> ; <code>--hash=n</code> 也可以。</p>
+<p>缩写对象名称。 使用 <code>--hash</code> 时，不必说 <code>--hash</code> <code>--abbrev</code> ; <code>--hash=n</code> 也可以。</p>
 </dd>
 <dt class="hdlist1">-q</dt>
 <dt class="hdlist1">--quiet</dt>
@@ -520,8 +521,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </dd>
 <dt class="hdlist1">--exclude-existing[=&lt;模式&gt;]</dt>
 <dd>
-<p>让 <code>git show-ref</code> 成为一个过滤器，从标准输入流中读取格式为 <code>^(?:&lt;任何东西&gt;\s)?&lt;引用名称&gt;(?:\^{})?$</code> 的多个引用，并对每个引用执行以下操作：
-(1) 如果行末有 <code>^{}</code> ，则在行末去掉 <code>^{}</code>；
+<p>让 <code>git</code> <code>show-ref</code> 成为一个过滤器，从标准输入流中读取格式为 <code>^</code>(?:&lt;任何东西&gt;\s)?&lt;引用名称&gt;(?:\^{})?$ 的多个引用，并对每个引用执行以下操作：
+(1) 如果行末有 <code>^</code>{} ，则在行末去掉 <code>^</code>{}；
 (2) 如果提供的模式与引用名称不匹配，则忽略；
 (3) 如果引用名不是格式正确的引用名，则警告并跳过；
 (4) 如果引用名称是本地仓库中存在的引用，则忽略；
@@ -575,7 +576,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>$ git show-ref --heads --hash
+<pre>$ git show-ref --branches --hash
 2e3ba0114a1f52b47df29743d6915d056be13278
 185008ae97960c8d551adcd9e23565194651b5d1
 03adf42c988195b50e1a1935ba5fcbc39b2b029b
@@ -610,7 +611,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>只会匹配名为 "master" 的确切分支。</p>
 </div>
 <div class="paragraph">
-<p>如果没有匹配的内容，<code>git show-ref</code> 将返回错误代码 1，在验证的情况下，它将显示一条错误信息。</p>
+<p>如果没有匹配的内容，<code>git</code> <code>show-ref</code> 将返回错误代码 1，在验证的情况下，它将显示一条错误信息。</p>
 </div>
 <div class="paragraph">
 <p>在编写脚本时，可以使用 <code>--quiet</code> 标记要求它保持安静，这样就可以执行以下操作</p>
@@ -625,7 +626,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>来检查某个分支是否存在（请注意，我们实际上并不想显示任何结果，而且我们希望使用完整的引用名称，以避免引发部分匹配不明确的问题）。</p>
 </div>
 <div class="paragraph">
-<p>要只显示标签，或只显示适当的分支标题，请分别使用 <code>--tags</code> 和/或 <code>--heads</code> （同时使用这两种方法意味着会显示标签和标题，但不会显示 refs/ 子目录下的其他随机引用）。</p>
+<p>To show only tags, or only proper branch heads, use <code>--tags</code> and/or <code>--branches</code> respectively (using both means that it shows tags and branches, but not other random references under the refs/ subdirectory).</p>
 </div>
 <div class="paragraph">
 <p>要自动取消引用标记对象，请使用 <code>-d</code> 或 <code>--dereference</code> 标志，这样就可以执行</p>
@@ -644,7 +645,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_文件">文件</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><code>.git/refs/*</code>, <code>.git/packed-refs</code></p>
+<p>.<code>git/refs/</code>*, .<code>git/packed-refs</code></p>
 </div>
 </div>
 </div>
@@ -652,7 +653,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_参见">参见</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p><a href="git-for-each-ref.html"><b>git-for-each-ref</b>(1)</a>, <a href="git-ls-remote.html"><b>git-ls-remote</b>(1)</a>, <a href="git-update-ref.html"><b>git-update-ref</b>(1)</a>, <a href="gitrepository-layout.html"><b>gitrepository-layout</b>(5)</a></p>
+<p><a href="git-for-each-ref.html">git-for-each-ref(1)</a>, <a href="git-ls-remote.html">git-ls-remote(1)</a>, <a href="git-update-ref.html">git-update-ref(1)</a>, <a href="gitrepository-layout.html">gitrepository-layout(5)</a></p>
 </div>
 </div>
 </div>
@@ -660,14 +661,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_git">GIT</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>属于 <a href="git.html"><b>git</b>(1)</a> 文档</p>
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2024-07-12 22:28:07 +0200
+Last updated 2025-03-23 12:03:55 +0100
 </div>
 </div>
 </body>
