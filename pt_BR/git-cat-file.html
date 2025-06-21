@@ -447,9 +447,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_resumo">RESUMO</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git cat-file</em> &lt;tipo&gt; &lt;objeto&gt;
-<em>git cat-file</em> (-e | -p) &lt;objeto&gt;
-<em>git cat-file</em> (-t | -s) [--allow-unknown-type] &lt;objeto&gt;
+<pre class="content"><em>git cat-file</em> &lt;type&gt; &lt;object&gt;
+<em>git cat-file</em> (-e | -p | -t | -s) &lt;object&gt;
 <em>git cat-file</em> (--textconv | --filters)
              [&lt;rev&gt;:&lt;path|tree-ish&gt; | --path=&lt;path|tree-ish&gt; &lt;rev&gt;]
 <em>git cat-file</em> (--batch | --batch-check | --batch-command) [--batch-all-objects]
@@ -516,6 +515,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--filters</dt>
 <dd>
 <p>Exiba o conteúdo conforme foi convertido pelos filtros configurados na árvore de trabalho atual para o <em>&lt;caminho&gt;</em> informado (por exemplo, filtros de manchas, conversão da quebra de linha, etc.). Nesse caso, o <em>&lt;objeto&gt;</em> deve estar no formato &lt;árvore&gt;<code>:</code><em>&lt;caminho&gt;</em> ou <code>:</code><em>&lt;caminho&gt;</em>.</p>
+</dd>
+<dt class="hdlist1">--filter=&lt;filter-spec&gt;</dt>
+<dt class="hdlist1">--no-filter</dt>
+<dd>
+<p>Omit objects from the list of printed objects. This can only be used in combination with one of the batched modes. Excluded objects that have been explicitly requested via any of the batch modes that read objects via standard input (<code>--batch</code>, <code>--batch-check</code>) will be reported as "filtered". Excluded objects in <code>--batch-all-objects</code> mode will not be printed at all. The <em>&lt;filter-spec&gt;</em> may be one of the following:</p>
+<div class="paragraph">
+<p>O formulário <em>--filter=blob:none</em> omite todos as "bolhas".</p>
+</div>
+<div class="paragraph">
+<p>A opção <em>--filter=blob:limit=&lt;n&gt;[kmg]</em> omite as bolhas com tamanho de pelo menos n bytes ou com n unidades. O n pode ser zero. Os sufixos k, m e g podem ser usados para nomear as unidades em KiB, MiB ou GiB. Por exemplo, <em>blob:limit=1k</em> é o mesmo que <em>blob:limit=1024</em>.</p>
+</div>
+<div class="paragraph">
+<p>A forma <em>--filter=object:type=(tag|commit|tree|blob)</em> omite todo os objetos que não sejam do mesmo tipo que foi requisitado.</p>
+</div>
 </dd>
 <dt class="hdlist1">--path=&lt;caminho&gt;</dt>
 <dd>
@@ -614,10 +627,6 @@ especificar o caminho, separado por espaço. Consulte a seção
 <dt class="hdlist1">--unordered</dt>
 <dd>
 <p>Quando a opção <code>--batch-all-objects</code> estiver em uso, visite os objetos numa ordem que possa ser mais eficiente para acessar o conteúdo do objeto do que a ordem do hash. Os detalhes exatos da ordem não são especificados, porém caso não precise de uma ordem específica, isso geralmente resultará numa saída mais rápida, especialmente com a opção <code>--batch</code>. Observe que o comando <code>cat-file</code> ainda mostrará cada objeto apenas uma vez, ainda que ele esteja armazenado diversas vezes no repositório.</p>
-</dd>
-<dt class="hdlist1">--allow-unknown-type</dt>
-<dd>
-<p>Permita que <code>-s</code> ou <code>-t</code> consultem os objetos quebrados/corrompidos de um tipo desconhecido.</p>
 </dd>
 <dt class="hdlist1">--follow-symlinks</dt>
 <dd>
@@ -795,6 +804,14 @@ alink: um link simbólico para /etc/passwd</pre>
 </div>
 </div>
 <div class="paragraph">
+<p>If a name is specified on stdin that is filtered out via <code>--filter=</code>, then <code>cat-file</code> will ignore any custom format and print:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;object&gt; SP excluded LF</pre>
+</div>
+</div>
+<div class="paragraph">
 <p>Caso seja utilizado um nome que possa se referir a mais de um objeto (um SHA-1 curto e ambíguo), então o <code>cat-file</code> ignorará qualquer formato personalizado e exibirá:</p>
 </div>
 <div class="listingblock">
@@ -879,7 +896,7 @@ alink: um link simbólico para /etc/passwd</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-23 12:03:40 +0100
+Last updated 2025-05-29 13:36:56 +0200
 </div>
 </div>
 </body>

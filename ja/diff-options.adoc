@@ -1,0 +1,555 @@
+// Please don't remove this comment as asciidoc behaves badly when
+// the first non-empty line is ifdef/ifndef. The symptom is that
+// without this comment the <git-diff-core> attribute conditionally
+// defined below ends up being defined unconditionally.
+// Last checked with asciidoc 7.0.2.
+
+ifndef::git-format-patch[]
+ifndef::git-diff[]
+ifndef::git-log[]
+:git-diff-core: 1
+endif::git-log[]
+endif::git-diff[]
+endif::git-format-patch[]
+
+ifdef::git-format-patch[]
+-p::
+--no-stat::
+	diffstatsを使用しないプレーンなパッチを生成します。
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+`-p`::
+`-u`::
+`--patch`::
+	パッチの生成 (<<generate_patch_text_with_p>> を参照)。
+ifdef::git-diff[]
+	これはデフォルトです。
+endif::git-diff[]
+
+`-s`::
+`--no-patch`::
+	diff機構からのすべての出力を抑制します。デフォルトでパッチを表示する`git show`のようなコマンドの出力を抑えたり、またはエイリアスでコマンドラインの前の部分にある`--patch`や`--stat`などのオプションの効果をキャンセルしたりするのに便利です。
+
+endif::git-format-patch[]
+
+ifdef::git-log[]
+-m::
+	マージコミットの差分をデフォルトフォーマットで表示します。これは`--diff-merges=on`に似ていますが、`-m`は`-p`も同時に指定されない限り出力を生成しません。
+
+-c::
+	マージコミットに対して結合された差分出力を生成します。`--diff-merges=combined -p`のショートカットです。
+
+--cc::
+	マージコミットに対して密集した結合差分出力を生成します。`--diff-merges=dense-combined -p`のショートカットです。
+
+--dd::
+	マージコミットおよび通常のコミットの両方について、最初の親に関する差分を生成します。`--diff-merges=first-parent -p`のショートカットです。
+
+--remerge-diff::
+	マージコミットに対して再マージ差分出力を生成します。`--diff-merges=remerge -p`のショートカットです。
+
+--no-diff-merges::
+	`--diff-merges=off` の同義語です。
+
+--diff-merges=<フォーマット>::
+	マージコミットに使用する diff フォーマットを指定します。デフォルトは {diff-merges-default} です。ただし、`--first-parent` が使用されている場合は、`first-parent` がデフォルトになります。
++
+以下のフォーマットがサポートされています:
++
+--
+off, none::
+	マージコミットでの diff の出力を無効にします。暗黙的な値を上書きするのに便利です。
+
+on, m::
+	マージコミットの diff 出力をデフォルトのフォーマットで表示します。デフォルトのフォーマットは、コンフィギュレーション変数の `log.diffMerges` で変更することができ、そのデフォルト値は `separate` です。
+
+first-parent, 1::
+	最初の親に関して完全な差分を表示します。これは、非マージコミットに対して`--patch`が生成するのと同じフォーマットです。
+
+separate::
+	各親に関して完全な差分を表示します。各親について別々のログエントリーと差分が生成されます。
+
+combined, c::
+	親と結果のペアごとの差分を一度に1つずつ表示するのではなく、各親からの差分をマージ結果に同時に表示します。さらに、すべての親から変更されたファイルのみが一覧表示されます。
+
+dense-combined, cc::
+	`--diff-merges=combined` による出力をさらに圧縮し、親の内容が2つのバリエーションしかなく、マージ結果がそのうちの1つをそのまま選ぶような、退屈なハンクを省略します。
+
+remerge, r::
+	2つの親を持つマージコミットを再マージし、一時的なツリーオブジェクト（コンフリクトマーカーなどのファイルを含む可能性があります）が作成します。そして、その一時的なツリーと実際のマージコミットの間の差分が表示されます。
++
+このオプションを使用したときに出力される内容は変更される可能性があり、他のオプションとの相互作用も（明示的に文書化されていない限り）変更される可能性があります。
+--
+
+--combined-all-paths::
+	結合された差分（マージコミットで使用）ですべての親からのファイル名をリスト表示します。これは `--diff-merges=[dense-]combined` が使用されている場合にのみ効果があり、ファイル名の変更が検出された場合（つまり、リネームやコピー検出が要求された場合）にのみ有用です。
+endif::git-log[]
+
+`-U<n>`::
+`--unified=<n>`::
+	通常の3行ではなく、_<n>_行のコンテキストで差分を生成します。
+ifndef::git-format-patch[]
+	`--patch` を意味します。
+endif::git-format-patch[]
+
+`--output=<ファイル>`::
+	標準出力の代わりに特定のファイルへ出力します。
+
+`--output-indicator-new=<文字>`::
+`--output-indicator-old=<文字>`::
+`--output-indicator-context=<文字>`::
+	生成されたパッチの新しい行、古い行、またはコンテキスト行を示すために使用される文字を指定します。通常、それらはそれぞれ `+`、`-`、および ' ' です。
+
+ifndef::git-format-patch[]
+`--raw`::
+ifndef::git-log[]
+	差分をraw形式で生成します。
+ifdef::git-diff-core[]
+	これはデフォルトです。
+endif::git-diff-core[]
+endif::git-log[]
+ifdef::git-log[]
+	各コミットについて、raw形式の diff を使って変更のサマリーを表示します。
+	linkgit:git-diff[1]の "RAW OUTPUT FORMAT" セクションを
+	参照してください。これは、ログ自体をraw形式で
+	表示するのとは異なります。そのようなことを実現するには
+	`--format=raw` とします。
+endif::git-log[]
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+`--patch-with-raw`::
+	`-p --raw` と同義です。
+endif::git-format-patch[]
+
+ifdef::git-log[]
+`-t`::
+	diff出力にツリーオブジェクトを表示します。
+endif::git-log[]
+
+`--indent-heuristic`::
+	差分ハンクの境界をずらす発見的解決法を有効にして、パッチを読みやすくします。これはデフォルトです。
+
+`--no-indent-heuristic`::
+	インデントの発見的解決法を無効にします。
+
+`--minimal`::
+	可能な限り小さな差分を出すために、更に時間を費やします。
+
+`--patience`::
+	"patience diff"アルゴリズムを用いてdiffを生成します。
+
+`--histogram`::
+	"histogram diff" アルゴリズムを用いてdiffを生成します。
+
+`--anchored=<text>`::
+	"anchored diff"アルゴリズムでdiffを生成します。
++
+このオプションは複数回指定できます。
++
+ある行がソースと宛先の両方に存在し、一度だけ存在し、_<テキスト>_で始まる場合、このアルゴリズムは、出力で削除または追加として表示されるのを防ごうとします。内部では「patience diff」アルゴリズムを使用します。
+
+`--diff-algorithm=(patience|minimal|histogram|myers)`::
+	diffのアルゴリズムを選択します。バリアントは以下の通りです：
++
+--
+   `default`;;
+   `myers`;;
+	基本的な greedy diff アルゴリズム。現在のところ、これがデフォルトです。
+   `minimal`;;
+	可能な限り小さな差分を出すために、更に時間を費やします。
+   `patience`;;
+	パッチを生成する際に、"patience diff" アルゴリズムを使用します。
+   `histogram`;;
+	このアルゴリズムは、patience アルゴリズムを拡張し、「発生頻度の低い共通要素をサポート」します。
+--
++
+例えば、 `diff.algorithm` 変数をデフォルト以外の値に設定している上で、デフォルトの値を使用したい場合は、 `--diff-algorithm=default` オプションを使用する必要があります。
+
+`--stat[=<幅>[,<名前幅>[,<カウント>]]]`::
+	diffstatを生成します。デフォルトでは、必要なだけのスペースがファイル名部分に使われ、残りはグラフ部分に使われます。最大幅はデフォルトで端末の幅、端末に接続されていない場合は80カラムであり、_<幅>_で上書きすることができます。ファイル名部分の幅は、カンマの後に_<名前幅>_という別の幅を与えるか、`diff.statNameWidth=<名前幅>`を設定することで制限できます。グラフ部分の幅は`--stat-graph-width=<グラフ幅>`を使用するか`diff.statGraphWidth=<グラフ幅>`を設定することで制限できます。`--stat`か`--stat-graph-width`を使うことでstatグラフを生成する全てのコマンドに影響しますが、`diff.statNameWidth`や`diff.statGraphWidth`を設定しても`git format-patch`には影響しません。第3のパラメータとして_<カウント>_を与えることで、出力を最初の_<カウント>_行に制限でき、それ以上ある場合は`...`が続きます。
++
+これらのパラメータは、個別に `--stat-width=<幅>`、`--stat-name-width=<名前幅>` および `--stat-count=<数える数>` を用いて設定することもできます。
+
+`--compact-summary`::
+	ファイルの作成または削除("new"または"gone"、シンボリックリンクの場合はオプションで`+l`)やモードの変更（それぞれ実行可能ビットの追加または削除に`+x`または`-x`）などの拡張ヘッダー情報をdiffstatで凝縮して出力します。この情報は、ファイル名部分とグラフ部分の間に配置されます。`--stat`を意味します。
+
+`--numstat`::
+	`--stat` と似ていますが、追加された行数と削除された行数を10進数で表示し、マシンフレンドリーとなるようにパス名は省略せずに表示します。バイナリファイルの場合、`0 0` の代わりに `-` を2つ出力します。
+
+`--shortstat`::
+	変更されたファイルの総数、追加された行数、削除された行数を含む `--stat` フォーマットの最終行のみを出力する。
+
+`-X [<param>,...]`::
+`--dirstat[=<param>,...]`::
+	各サブディレクトリの相対的な変更量の分布を出力します。`--dirstat` の振る舞いはカンマで区切られたパラメータを渡すことでカスタマイズできます。デフォルトでは、設定変数 `diff.dirstat` によって制御されます (linkgit:git-config[1] を参照)。以下のパラメータが利用可能です。
++
+--
+`changes`;;
+	ソースから削除された行、または宛先に追加された行をカウントして、dirstat番号を計算します。これは、ファイル内の純粋なコード移動の量を無視します。つまり、ファイル内の行を並べ替えることは、他の変更点ほどにはカウントされません。これは、パラメータが与えられていない場合のデフォルトの動作です。
+`lines`;;
+	通常の行ベースの差分解析を行い、削除された行数と追加された行数を合計することで、dirstat数を計算します。(バイナリファイルには行という自然な概念がないため、バイナリファイルの場合は代わりに64バイトのチャンクを数えます)。これは `changes` 動作よりも高価な `--dirstat` 動作ですが、ファイル内で並べ替えられた行を他の変更と同じようにカウントします。出力結果は、他の `--*stat` オプションで得られるものと同じです。
+`files`;;
+	変更されたファイルの数を数えて、dirstatの数値を計算します。変更された各ファイルは、dirstatの分析において等しくカウントされます。これは、ファイルの内容を全く見る必要がないため、計算上最も安価な `--dirstat` の動作です。
+`cumulative`;;
+	子ディレクトリの変更も親ディレクトリにカウントします。`cumulative` を使用する場合、報告されるパーセントの合計は100%を超える可能性があることに注意してください。デフォルトの (累積しない) 動作は `noncumulative` パラメータで指定できます。
+_<制限>_;;
+	整数のパラメータでカットオフ率を指定します（デフォルトでは3％）。このパーセンテージ以下の変更しか貢献していないディレクトリは出力に表示されません。
+--
++
+例: 以下は、変更されたファイル総数の10％未満のディレクトリを無視し、親ディレクトリに子ディレクトリの数を累積しながら、変更されたファイルをカウントします: `--dirstat=files,10,cumulative`。
+
+`--cumulative`::
+	`--dirstat=cumulative` の別名です。
+
+`--dirstat-by-file[=<param>,...]`::
+	`--dirstat=files,<param>,...` の別名です。
+
+`--summary`::
+	作成、名前変更、モード変更などの拡張ヘッダー情報を要約して出力します。
+
+ifndef::git-format-patch[]
+`--patch-with-stat`::
+	`-p --stat` と同義です。
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+
+`-z`::
+ifdef::git-log[]
+	コミットの区切りには、改行ではなく __NUL__s を使用します。
++
+また、`--raw` や `--numstat` が指定されている場合は、パス名の変換を行わず、各出力フィールドの区切りとして __NUL__s を使用します。
+endif::git-log[]
+ifndef::git-log[]
+	`--raw`、`--numstat`、`--name-only`、または`--name-status`が
+	指定された場合、パス名を加工せず、出力フィールドの終端子にNUL文字を使用します。
+endif::git-log[]
++
+このオプションがない場合、パス名に "通常ではない" 文字が含まれていても、設定変数 `core.quotePath` の解釈に従って引用されます (linkgit:git-config[1] を参照)。
+
+`--name-only`::
+	Show only the name of each changed file in the post-image tree. The file names are often encoded in UTF-8. For more information see the discussion about encoding in the linkgit:git-log[1] manual page.
+
+`--name-status`::
+	Show only the name(s) and status of each changed file. See the description of the `--diff-filter` option on what the status letters mean. Just like `--name-only` the file names are often encoded in UTF-8.
+
+`--submodule[=<format>]`::
+	Specify how differences in submodules are shown. When specifying `--submodule=short` the `short` format is used. This format just shows the names of the commits at the beginning and end of the range. When `--submodule` or `--submodule=log` is specified, the `log` format is used. This format lists the commits in the range like linkgit:git-submodule[1] `summary` does. When `--submodule=diff` is specified, the `diff` format is used. This format shows an inline diff of the changes in the submodule contents between the commit range. Defaults to `diff.submodule` or the `short` format if the config option is unset.
+
+`--color[=<when>]`::
+	Show colored diff. `--color` (i.e. without `=<when>`) is the same as `--color=always`. _<when>_ can be one of `always`, `never`, or `auto`.
+ifdef::git-diff[]
+	これは、 `color.ui` と `color.diff` の設定によって
+	変更できます。
+endif::git-diff[]
+
+`--no-color`::
+	色付きの差分をオフにする。
+ifdef::git-diff[]
+	これは、構成設定を上書きできます。
+endif::git-diff[]
+	これは、 `--color=never` と同じです。
+
+`--color-moved[=<mode>]`::
+	移動したコード行は別の色で表示されます。
+ifdef::git-diff[]
+	これは `diff.colorMoved` という構成設定によって変更できます。
+endif::git-diff[]
+	The _<mode>_ defaults to `no` if the option is not given
+	and to `zebra` if the option with no mode is given.
+	The mode must be one of:
++
+--
+`no`::
+	移動した行はハイライトされません。
+`default`::
+	`zebra` と同義です。これは将来、より賢明なモードに変更されるかもしれません。
+`plain`::
+	Any line that is added in one location and was removed in another location will be colored with `color.diff.newMoved`. Similarly `color.diff.oldMoved` will be used for removed lines that are added somewhere else in the diff. This mode picks up any moved line, but it is not very useful in a review to determine if a block of code was moved without permutation.
+`blocks`::
+	Blocks of moved text of at least 20 alphanumeric characters are detected greedily. The detected blocks are painted using either the `color.diff.(old|new)Moved` color. Adjacent blocks cannot be told apart.
+`zebra`::
+	Blocks of moved text are detected as in `blocks` mode. The blocks are painted using either the `color.diff.(old|new)Moved` color or `color.diff.(old|new)MovedAlternative`. The change between the two colors indicates that a new block was detected.
+`dimmed-zebra`::
+	Similar to `zebra`, but additional dimming of uninteresting parts of moved code is performed. The bordering lines of two adjacent blocks are considered interesting, the rest is uninteresting. `dimmed_zebra` is a deprecated synonym.
+--
+
+`--no-color-moved`::
+	移動検出をオフにします。これは、構成設定を上書きするために使用できます。これは `--color-moved=no` と同じです。
+
+`--color-moved-ws=<mode>,...`::
+	`--color-moved` の移動検出を行う際に、どのように空白を無視するかを設定します。
+ifdef::git-diff[]
+	`diff.colorMovedWS`の構成設定によって指定できます。
+endif::git-diff[]
+	これらのモードはカンマで区切られたリストとして指定できます。
++
+--
+`no`::
+	移動検出を行う際に、空白を無視しません。
+`ignore-space-at-eol`::
+	EOLの空白の変化を無視します。
+`ignore-space-change`::
+	空白の量の変化を無視します。これは，行末の空白を無視し，それ以外の1文字以上の空白文字の並びをすべて等価と見なします。
+`ignore-all-space`::
+	行の比較時に空白を無視します。これは、一方の行に空白があり、他方の行に空白がない場合でも、その差を無視します。
+`allow-indentation-change`::
+	最初は移動の検出に空白があっても無視し、空白の変化が行ごとに同じである場合にのみ移動したコードブロックをひとかたまりにまとめます。これは他のモードと互換性がありません。
+--
+
+`--no-color-moved-ws`::
+	移動検出を行う際に空白を無視しません。これは構成設定を上書きするために使用できます。これは `--color-moved-ws=no` と同じです。
+
+`--word-diff[=<mode>]`::
+	By default, words are delimited by whitespace; see `--word-diff-regex` below. The _<mode>_ defaults to `plain`, and must be one of:
++
+--
+`color`::
+	変更された単語を色だけで強調表示します。`--color`を意味します。
+`plain`::
+	Show words as ++[-removed-]++ and ++{+added+}++. Makes no attempts to escape the delimiters if they appear in the input, so the output may be ambiguous.
+`porcelain`::
+	スクリプトに食わせるのに向いた特別な行ベースのフォーマットを使用します。追加/削除/変更されていない文字の連続 に対し通常の統一された差分フォーマットで表示され、行の先頭に `+`/`-`/` ` の文字があり、行の最後まで続きます。入力された改行は、チルダ `~` それだけの改行で表されます。
+`none`::
+	再度単語の差分を無効にします。
+--
++
+最初のモードの名前にもかかわらず、有効になっている場合はすべてのモードで変更された部分を強調表示するため色付けされます。
+
+`--word-diff-regex=<regex>`::
+	Use _<regex>_ to decide what a word is, instead of considering runs of non-whitespace to be a word. Also implies `--word-diff` unless it was already enabled.
++
+Every non-overlapping match of the _<regex>_ is considered a word. Anything between these matches is considered whitespace and ignored(!) for the purposes of finding differences. You may want to append `|[^[:space:]]` to your regular expression to make sure that it matches all non-whitespace characters. A match that contains a newline is silently truncated(!) at the newline.
++
+例えば、`--word-diff-regex=.` は、各文字を単語として扱い、それに応じて、文字ごとに差異を表示します。
++
+正規表現は、差分ドライバーや設定オプションを通しても設定できます。詳しくは linkgit:gitattributes[5] または linkgit:git-config[1] を参照してください。これを明示的に与えることで、どんな差分ドライバーや構成設定も上書きされます。差分ドライバーは構成設定を上書きします。
+
+`--color-words[=<regex>]`::
+	`--word-diff=color` と（もし正規表現が指定されていれば）`--word-diff-regex=<正規表現>` に相当します。
+endif::git-format-patch[]
+
+`--no-renames`::
+	設定ファイルでデフォルトとして指定されている場合でも、名前変更の検出をオフにします。
+
+`--[no-]rename-empty`::
+	空のブロブを名前変更のソースとして使用するかどうか。
+
+ifndef::git-format-patch[]
+`--check`::
+	変更内容にコンフリクトマーカーやホワイトスペースエラーが含まれている場合に警告を表示します。ホワイトスペースエラーとして扱う内容は `core.whitespace` の設定で制御されます。デフォルトでは、行末の空白（空白のみの行を含む）や、行頭インデント部分でスペースの直後にタブが続く場合がホワイトスペースエラーと見なされます。問題が検出されると、終了ステータスが非ゼロになります。`--exit-code` とは併用できません。
+
+`--ws-error-highlight=<kind>`::
+	diffの`context`、`old`、または`new`行における空白のエラーを強調表示します。複数の値はカンマで区切られ、`none`は以前の値をリセットし、`default`はリストを`new`にリセットし、`all`は`old,new,context`の省略形です。このオプションが指定されておらず、かつ設定変数`diff.wsErrorHighlight`が設定されていない場合、`new`行の空白エラーのみが強調表示されます。空白のエラーは`color.diff.whitespace`で色付けされます。
+
+endif::git-format-patch[]
+
+`--full-index`::
+	パッチ形式の出力を生成する際に、「インデックス」行において、最初のいくつかの文字の代わりに、完全な事前および事後のイメージblobオブジェクト名を表示します。
+
+`--binary`::
+	`--full-index` に加えて、`git-apply` で適用可能なバイナリ差分を出力します。
+ifndef::git-format-patch[]
+	`--patch` を意味します。
+endif::git-format-patch[]
+
+`--abbrev[=<n>]`::
+	Instead of showing the full 40-byte hexadecimal object name in diff-raw format output and diff-tree header lines, show the shortest prefix that is at least _<n>_ hexdigits long that uniquely refers the object. In diff-patch output format, `--full-index` takes higher precedence, i.e. if `--full-index` is specified, full blob names will be shown regardless of `--abbrev`. Non default number of digits can be specified with `--abbrev=<n>`.
+
+`-B[<n>][/<m>]`::
+`--break-rewrites[=[<n>][/<m>]]`::
+	完全に書き換えられた変更を削除と作成のペアに分割します。これには2つの目的があります：
++
+これは、ファイルの全面的な書き換えを、文脈として偶然一致するごく少数の行と削除・挿入が混ざった一連の変更としてではなく、古いものをすべて削除して新しいものをすべて挿入するという単一の変更として扱う方法に影響します。この数値 _<m>_ は `-B` オプションのこの側面を制御します（デフォルトは60％）。`-B/70%`は、Gitが全面書き換えと見なすためには、結果に元のファイルの30%未満しか残っていないべきであることを指定します（そうでなければ、結果のパッチは文脈行と混ざった一連の削除と挿入になります）。
++
+`-M`と一緒に使用すると、完全に書き換えられたファイルもリネームのソースとして考慮されます（通常、`-M`は消えたファイルのみをリネームのソースと見なします）。この数値 _<n>_ は `-B` オプションのこの側面を制御します（デフォルトは50%）。`-B20%`は、ファイルサイズの20%以上に相当する追加と削除を伴う変更が、別のファイルへのリネームの可能なソースとして検出される資格があることを指定します。
+
+`-M[<n>]`::
+`--find-renames[=<n>]`::
+ifndef::git-log[]
+	名前変更の検出。
+endif::git-log[]
+ifdef::git-log[]
+	差分を生成する場合、各コミットに対して名前変更を検出し報告します。
+	履歴をたどりながら名前変更されたファイルを追跡するには、
+	`--follow` を参照してください。
+endif::git-log[]
+	If _<n>_ is specified, it is a threshold on the similarity
+	index (i.e. amount of addition/deletions compared to the
+	file's size). For example, `-M90%` means Git should consider a
+	delete/add pair to be a rename if more than 90% of the file
+	hasn't changed.  Without a `%` sign, the number is to be read as
+	a fraction, with a decimal point before it.  I.e., `-M5` becomes
+	0.5, and is thus the same as `-M50%`.  Similarly, `-M05` is
+	the same as `-M5%`.  To limit detection to exact renames, use
+	`-M100%`.  The default similarity index is 50%.
+
+`-C[<n>]`::
+`--find-copies[=<n>]`::
+	リネームだけでなくコピーも検出します。`--find-copies-harder`も参照してください。_<n>_が指定されている場合、`-M<n>`と同じ意味を持ちます。
+
+`--find-copies-harder`::
+	パフォーマンス上の理由から、デフォルトでは、`-C`オプションはコピー元のファイルが同じ変更セット内で修正された場合にのみコピーを検出します。このフラグを使用すると、変更されていないファイルもコピー元の候補として検査します。これは大規模プロジェクトでは非常に負荷の高い操作となるため、注意して使用してください。複数の`-C`オプションを指定しても同じ効果があります。
+
+`-D`::
+`--irreversible-delete`::
+	削除の際に元イメージを省略します。つまり、ヘッダーのみを表示し、元イメージと`/dev/null`の間の差分は表示しません。結果として生成されるパッチは`patch`や`git apply`で適用することを意図していません。これは変更後のテキストのレビューに集中したい人のためだけのものです。さらに、出力にはそのようなパッチを逆方向に適用するための十分な情報が明らかに欠けているため、このオプションの名前が付けられています。
++
+`-B`と一緒に使用すると、削除/作成ペアの削除部分の元イメージも省略されます。
+
+`-l<数値>`::
+	`-M`と`-C`オプションには、リネーム/コピーのサブセットを安価に検出できる予備的な手順と、残りのすべてのペアになっていない宛先と関連するすべてのソースを比較する徹底的なフォールバック部分があります（リネームの場合、残りのペアになっていないソースのみが関連します；コピーの場合、すべての元のソースが関連します）。N個のソースと宛先に対して、この徹底的なチェックはO(N^2)です。このオプションは、関係するソース/宛先ファイルの数が指定された数を超える場合、リネーム/コピー検出の徹底的な部分の実行を防ぎます。デフォルトは`diff.renameLimit`です。0の値は無制限として扱われることに注意してください。
+
+ifndef::git-format-patch[]
+`--diff-filter=[(A|C|D|M|R|T|U|X|B)...[*]]`::
+	追加された(`A`)、コピーされた(`C`)、削除された(`D`)、修正された(`M`)、リネームされた(`R`)、タイプが変更された（例：通常ファイル、シンボリックリンク、サブモジュールなど）(`T`)、マージされていない(`U`)、不明な(`X`)、またはペアリングが壊れた(`B`)ファイルのみを選択します。フィルター文字の任意の組み合わせ（なしを含む）を使用できます。組み合わせに`*`（すべてかなし）を追加すると、比較において他の基準に一致するファイルがある場合はすべてのパスが選択され、他の基準に一致するファイルがない場合は何も選択されません。
++
+また、これらの大文字は小文字にして除外することができます。例えば、`--diff-filter=ad`は追加されたパスと削除されたパスを除外します。
++
+すべての差分がすべてのタイプを特徴として持つわけではないことに注意してください。例えば、コピーやリネームされたエントリーは、それらのタイプの検出が無効になっている場合は表示されません。
+
+`-S<文字列>`::
+	ファイル内の指定された_<文字列>_の出現回数を変更する差分を検索します（つまり、追加/削除）。スクリプト作成者の使用を意図しています。
++
+特定のコードブロック（構造体など）を探していて、そのブロックが最初に作成されてからの履歴を知りたい場合に役立ちます：この機能を繰り返し使用して、元イメージ内の興味深いブロックを`-S`に戻し、ブロックの最初のバージョンが得られるまで続けます。
++
+バイナリファイルも検索対象です。
+
+`-G<正規表現>`::
+	パッチテキストに_<正規表現>_に一致する追加/削除された行を含む差分を検索します。
++
+`-S<正規表現>` `--pickaxe-regex`と`-G<正規表現>`の違いを説明するために、同じファイル内の次の差分を持つコミットを考えてみましょう：
++
+----
++    return frotz(nitfol, two->ptr, 1, 0);
+...
+-    hit = frotz(nitfol, mf2.ptr, 1, 0);
+----
++
+`git log -G"frotz\(nitfol"`はこのコミットを表示しますが、`git log -S"frotz\(nitfol" --pickaxe-regex`は表示しません（その文字列の出現回数が変更されていないため）。
++
+`--text`が指定されない限り、textconvフィルターのないバイナリファイルのパッチは無視されます。
++
+詳細については、linkgit:gitdiffcore[7]の「pickaxe」の項目を参照してください。
+
+`--find-object=<オブジェクトID>`::
+	指定されたオブジェクトの出現回数を変更する差分を検索します。`-S`と似ていますが、特定の文字列ではなく特定のオブジェクトIDを検索する点で引数が異なります。
++
+オブジェクトはblobまたはサブモジュールコミットが可能です。これは`git-log`の`-t`オプションを暗示し、ツリーも検索します。
+
+`--pickaxe-all`::
+	`-S`または`-G`が変更を見つけた場合、_<文字列>_の変更を含むファイルだけでなく、その変更セットのすべての変更を表示します。
+
+`--pickaxe-regex`::
+	`-S`に与えられた_<文字列>_を拡張POSIXの正規表現として一致させます。
+
+endif::git-format-patch[]
+
+`-O<orderfile>`::
+	出力内のファイルの表示順序を制御します。これは`diff.orderFile`設定変数を上書きします（linkgit:git-config[1]参照）。`diff.orderFile`をキャンセルするには、`-O/dev/null`を使用します。
++
+出力順序は_<orderfile>_内のグロブパターンの順序によって決まります。最初のパターンに一致するパス名を持つすべてのファイルが最初に出力され、次に2番目のパターン（ただし最初のパターンではない）に一致するパス名を持つすべてのファイルが出力されます。どのパターンにも一致しないパス名を持つすべてのファイルは、ファイルの最後に暗黙的なマッチオールパターンがあるかのように、最後に出力されます。複数のパス名が同じランクを持つ場合（同じパターンに一致するが、それ以前のパターンには一致しない）、相互に対する出力順序は通常の順序です。
++
+_<orderfile>_は次のように解析されます：
++
+--
+ - 空白行は無視されるため、読みやすさのための区切りとして使用できます。
+
+ - ハッシュ（"`#`"）で始まる行は無視されるため、コメントとして使用できます。パターンがハッシュで始まる場合は、バックスラッシュ（"`\`"）をパターンの先頭に追加します。
+
+ - その他の各行には単一のパターンが含まれます。
+--
++
+パターンは`FNM_PATHNAME`フラグなしで`fnmatch`(3)に使用されるパターンと同じ構文と意味を持ちますが、最終的なパス名コンポーネントのいくつかを削除してパターンに一致する場合も、パス名はパターンに一致します。例えば、"`foo*bar`"というパターンは"`fooasdfbar`"や"`foo/bar/baz/asdf`"に一致しますが、"`foobarx`"には一致しません。
+
+`--skip-to=<ファイル>`::
+`--rotate-to=<ファイル>`::
+	出力から名前付き_<ファイル>_より前のファイルを破棄する（つまり「スキップ」）、または出力の最後に移動する（つまり「ローテート」）。これらのオプションは主に`git difftool`コマンドで使用するために考案されたもので、それ以外ではあまり役に立たない場合があります。
+
+ifndef::git-format-patch[]
+`-R`::
+	2つの入力を入れ替えます。つまり、インデックスまたはディスク上のファイルからツリーコンテンツへの差分を表示します。
+endif::git-format-patch[]
+
+`--relative[=<パス>]`::
+`--no-relative`::
+	プロジェクトのサブディレクトリから実行する場合、このオプションを使用してディレクトリ外の変更を除外し、パス名をそのディレクトリからの相対パスで表示するよう指示できます。サブディレクトリにいない場合（例：ベアリポジトリ内）、引数として_<パス>_を与えることで、出力を相対的にするサブディレクトリを指定できます。`--no-relative`は`diff.relative`設定オプションと以前の`--relative`の両方を打ち消すために使用できます。
+
+`-a`::
+`--text`::
+	すべてのファイルをテキストとして扱います。
+
+`--ignore-cr-at-eol`::
+	比較を行う際に行末のキャリッジリターンを無視します。
+
+`--ignore-space-at-eol`::
+	EOLの空白の変化を無視します。
+
+`-b`::
+`--ignore-space-change`::
+	空白の量の変化を無視します。これは，行末の空白を無視し，それ以外の1文字以上の空白文字の並びをすべて等価と見なします。
+
+`-w`::
+`--ignore-all-space`::
+	行の比較時に空白を無視します。これは、一方の行に空白があり、他方の行に空白がない場合でも、その差を無視します。
+
+`--ignore-blank-lines`::
+	すべての行が空白である変更を無視します。
+
+
+`-I<正規表現>`::
+`--ignore-matching-lines=<正規表現>`::
+	Ignore changes whose all lines match _<regex>_. This option may be specified more than once.
+
+`--inter-hunk-context=<行数>`::
+	Show the context between diff hunks, up to the specified _<number>_ of lines, thereby fusing hunks that are close to each other. Defaults to `diff.interHunkContext` or 0 if the config option is unset.
+
+`-W`::
+`--function-context`::
+	Show whole function as context lines for each change. The function names are determined in the same way as `git diff` works out patch hunk headers (see "Defining a custom hunk-header" in linkgit:gitattributes[5]).
+
+ifndef::git-format-patch[]
+ifndef::git-log[]
+`--exit-code`::
+	`diff`(1)と同様の終了コードでプログラムを終了させます。つまり、違いがあれば1で終了し、0は違いがないことを意味します。
+
+`--quiet`::
+	プログラムのすべての出力を無効にします。`--exit-code`を意味します。終了コードが信頼されていない外部diffヘルパーの実行を無効にします。つまり、それぞれの設定オプション`diff.trustExitCode`または++diff.++__<driver>__++.trustExitCode++、または環境変数`GIT_EXTERNAL_DIFF_TRUST_EXIT_CODE`がfalseの場合です。
+endif::git-log[]
+endif::git-format-patch[]
+
+`--ext-diff`::
+	外部diffヘルパーの実行を許可します。linkgit:gitattributes[5]で外部diffドライバーを設定した場合、このオプションをlinkgit:git-log[1]などと一緒に使用する必要があります。
+
+`--no-ext-diff`::
+	外部diffドライバーを許可しません。
+
+`--textconv`::
+`--no-textconv`::
+	バイナリファイルを比較するときに外部テキスト変換フィルターの実行を許可（または不許可）します。詳細はlinkgit:gitattributes[5]を参照してください。textconvフィルターは通常一方向の変換であるため、結果の差分は人間が読むのには適していますが、適用することはできません。このため、textconvフィルターはデフォルトでlinkgit:git-diff[1]およびlinkgit:git-log[1]に対してのみ有効になっており、linkgit:git-format-patch[1]やdiff配管コマンドには有効になっていません。
+
+
+`--ignore-submodules[=(none|untracked|dirty|all)]`::
+	diff生成時にサブモジュールへの変更を無視します。デフォルトは`all`です。`none`を使用すると、サブモジュールに追跡されていないファイルや変更されたファイルが含まれている場合、または`HEAD`がスーパープロジェクトに記録されているコミットと異なる場合、サブモジュールが修正されたと見なされます。これはlinkgit:git-config[1]またはlinkgit:gitmodules[5]の`ignore`オプションの設定を上書きするために使用できます。`untracked`が使用されると、サブモジュールは追跡されていないコンテンツのみを含む場合は汚れていると見なされません（ただし、変更されたコンテンツはスキャンされます）。`dirty`を使用すると、サブモジュールのワークツリーへのすべての変更が無視され、スーパープロジェクトに保存されたコミットへの変更のみが表示されます（これは1.7.0までの動作でした）。`all`を使用すると、サブモジュールへのすべての変更が非表示になります。
+
+`--src-prefix=<接頭辞>`::
+	"a/"の代わりに指定されたソース_<接頭辞>_を表示します。
+
+`--dst-prefix=<接頭辞>`::
+	"b/"の代わりに指定された宛先_<接頭辞>_を表示します。
+
+`--no-prefix`::
+	ソースまたは宛先の接頭辞を表示しません。
+
+`--default-prefix`::
+	デフォルトのソースと宛先の接頭辞（"a/"と"b/"）を使用します。これは`diff.noprefix`、`diff.srcPrefix`、`diff.dstPrefix`、`diff.mnemonicPrefix`などの設定変数を上書きします（linkgit:git-config[1]を参照）。
+
+`--line-prefix=<接頭辞>`::
+	出力の各行に追加の_<接頭辞>_を前置します。
+
+`--ita-invisible-in-index`::
+	デフォルトでは、`git add -N`で追加されたエントリは、`git diff`では既存の空ファイルとして、`git diff --cached`では新しいファイルとして表示されます。このオプションを使用すると、エントリは`git diff`では新しいファイルとして表示され、`git diff --cached`では存在しないものとして表示されます。このオプションは`--ita-visible-in-index`で元に戻すことができます。両方のオプションは実験的なもので、将来削除される可能性があります。
+
+これらの共通オプションの詳細な説明については、linkgit:gitdiffcore[7]も参照してください。

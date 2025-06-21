@@ -7,54 +7,54 @@ git-reset - Redefine o `HEAD` atual para a condição usada
 
 RESUMO
 ------
-[verse]
-'git reset' [-q] [<árvore>] [--] <pathspec>...
-'git reset' [-q] [--pathspec-from-file=<arquivo> [--pathspec-file-nul]] [<árvore>]
-'git reset' (--patch | -p) [<árvore>] [--] [<pathspec>...]
-'git reset' [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
+[synopsis]
+git reset [-q] [<tree-ish>] [--] <pathspec>...
+git reset [-q] [--pathspec-from-file=<file> [--pathspec-file-nul]] [<tree-ish>]
+git reset (--patch | -p) [<tree-ish>] [--] [<pathspec>...]
+git reset [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
 
 DESCRIÇÃO
 ---------
-Nos três primeiros formulários, copie as entradas da `<árvore>` para o índice. No último formulário, defina o cabeçalho do ramo atual (`HEAD`) como `<commit>`, opcionalmente modificando o índice e a árvore de trabalho para que coincidam. A predefinição da `<árvore>`/`<commit>` retorna para `HEAD` em todas as formas.
+In the first three forms, copy entries from _<tree-ish>_ to the index. In the last form, set the current branch head (`HEAD`) to _<commit>_, optionally modifying index and working tree to match. The _<tree-ish>_/_<commit>_ defaults to `HEAD` in all forms.
 
-'git reset' [-q] [<árvore>] [--] <pathspec>...::
-'git reset' [-q] [--pathspec-from-file=<arquivo> [--pathspec-file-nul]] [<árvore>]::
-	Esses formulários redefinem as entradas do índice para todos os caminhos correspondentes ao `<pathspec>` à sua condição na `<tree-ish>`. (Isso não afeta a árvore de trabalho ou a ramificação atual.)
+`git reset [-q] [<tree-ish>] [--] <pathspec>...`::
+`git reset [-q] [--pathspec-from-file=<file> [--pathspec-file-nul]] [<tree-ish>]`::
+	These forms reset the index entries for all paths that match the _<pathspec>_ to their state at _<tree-ish>_. (It does not affect the working tree or the current branch.)
 +
 Isto significa que `git reset <pathspec>` é o oposto de `git add <pathspec>`. Este comando é equivalente a `git restore [--source=<árvore>] --staged <pathspec>...`.
 +
 Depois de executar o `git reset <pathspec>` para atualizar a entrada do índice, você pode usar o linkgit:git-restore[1] para verificar o conteúdo do índice para a árvore de trabalho. Como alternativa, utilizando linkgit:git-restore[1] e especificando um commit com `--source`, você pode copiar o conteúdo de um caminho de um commit para o índice e a árvore de trabalho de uma vez só.
 
-'git reset' (--patch | -p) [<árvore>] [--] [<pathspec>...]::
-	Interativamente, selecione os pedaços na diferença entre o índice e a `<árvore>` (a predefinição retorna para `HEAD`). Os pedaços selecionados são aplicados no sentido inverso ao índice.
+`git reset (--patch | -p) [<tree-ish>] [--] [<pathspec>...]`::
+	Interactively select hunks in the difference between the index and _<tree-ish>_ (defaults to `HEAD`). The chosen hunks are applied in reverse to the index.
 +
-Isso significa que `git reset -p` é o oposto de `git add -p`, ou seja, você pode usá-lo para redefinir seletivamente os blocos. Consulte a seção ``Modo Interativo'' do linkgit:git-add[1] para aprender como operar o modo `--patch`.
+This means that `git reset -p` is the opposite of `git add -p`, i.e. you can use it to selectively reset hunks. See the "Interactive Mode" section of linkgit:git-add[1] to learn how to operate the `--patch` mode.
 
-'git reset' [<modo>] [<commit>]::
-	Esse formulário redefine o cabeçalho de ramificação atual para `<commit>` e possivelmente atualiza o índice (redefinindo-o para a árvore de `<commit>`) e a árvore de trabalho, dependendo do `<modo>`. Antes da operação, `ORIG_HEAD` é definido como o cume do ramo atual. Caso o `<modo>` seja omitido, a predefinição retorna para a opção `--mixed`. O `<modo>` deve ser um dos seguintes:
+`git reset [<mode>] [<commit>]`::
+	This form resets the current branch head to _<commit>_ and possibly updates the index (resetting it to the tree of _<commit>_) and the working tree depending on _<mode>_. Before the operation, `ORIG_HEAD` is set to the tip of the current branch. If _<mode>_ is omitted, defaults to `--mixed`. The _<mode>_ must be one of the following:
 +
 --
---soft::
-	Não toca no arquivo de índice ou na árvore de trabalho (mas redefine o cabeçalho para `<commit>`, assim como todos os modos fazem). Isso deixa todos os seus arquivos alterados como "Changes to be committed" (Alterações que serão adicionadas ao commit), como o `git status` colocaria.
+`--soft`::
+	Does not touch the index file or the working tree at all (but resets the head to _<commit>_, just like all modes do). This leaves all your changed files "Changes to be committed", as `git status` would put it.
 
---mixed::
+`--mixed`::
 	Redefine o índice, mas não a árvore de trabalho (ou seja, os arquivos alterados são preservados, mas não marcados para um commit) e relata o que não foi atualizado. Esta é a ação predefinida.
 +
 Caso `-N` seja especificado, os caminhos removidos serão marcados como uma intenção de adicionar (consulte linkgit:git-add[1]).
 
---hard::
-	Redefine o índice e a árvore de trabalho. Quaisquer alterações nos arquivos rastreados na árvore de trabalho desde `<commit>` serão descartados. Os arquivo são simplesmente excluídos quando quaisquer arquivos ou diretórios não estejam rastreados no modo de escrita.
+`--hard`::
+	Resets the index and working tree. Any changes to tracked files in the working tree since _<commit>_ are discarded. Any untracked files or directories in the way of writing any tracked files are simply deleted.
 
---merge::
-	Redefine o índice e atualiza os arquivos na árvore de trabalho que sejam diferentes entre o `<commit>` e o `HEAD`, mas mantém aqueles que são diferentes entre o índice e a árvore de trabalho (ou seja, que têm alterações que não foram adicionadas). Caso haja um arquivo diferente entre `<commit>` e o índice tiver alterações sem etapas, a redefinição será abortada.
+`--merge`::
+	Resets the index and updates the files in the working tree that are different between _<commit>_ and `HEAD`, but keeps those which are different between the index and working tree (i.e. which have changes which have not been added). If a file that is different between _<commit>_ and the index has unstaged changes, reset is aborted.
 +
 Em outras palavras, `--merge` faz algo como um `git read-tree -u -m <commit>`, mas carrega as entradas do índice não mescladas adiante.
 
---keep::
-	Redefine as entradas do índice e atualiza os arquivos na árvore de trabalho que sejam diferentes entre `<commit>` e `HEAD`. Caso haja uma diferença entre `<commit>` e `HEAD`, assim como houver alterações locais, a redefinição será abortada.
+`--keep`::
+	Resets index entries and updates files in the working tree that are different between _<commit>_ and `HEAD`. If a file that is different between _<commit>_ and `HEAD` has local changes, reset is aborted.
 
---[no-]recurse-submodules::
-	Quando a árvore de trabalho é atualizada, utilizando a opção `--recurse-submodules` também redefinirá recursivamente a árvore de trabalho de todos os submódulos ativos de acordo com o commit registrado no superprojeto, também configurando o `HEAD` do submódulo a ser desanexado neste commit.
+`--[no-]recurse-submodules`::
+	When the working tree is updated, using `--recurse-submodules` will also recursively reset the working tree of all active submodules according to the commit recorded in the superproject, also setting the submodules' `HEAD` to be detached at that commit.
 --
 
 Para as diferenças entre os três comandos consulte "Redefinir, restaurar e reverter" em linkgit:git[1].
@@ -63,24 +63,24 @@ Para as diferenças entre os três comandos consulte "Redefinir, restaurar e rev
 OPÇÕES
 ------
 
--q::
---quiet::
+`-q`::
+`--quiet`::
 	Fique em silêncio, reporte apenas as mensagens de erro.
 
---refresh::
---no-refresh::
+`--refresh`::
+`--no-refresh`::
 	Atualize o índice após uma redefinição mista. Ativado por padrão.
 
---pathspec-from-file=<arquivo>::
-	O "pathspec" é passado com `<arquivo>` em vez dos argumentos da linha de comando. Caso o `<arquivo>` seja exatamente `-`, a entrada padrão será utilizada. Os elementos do "pathspec" são separados por caracteres de término de linha `LF` ou `CR/LF`. Os elementos do "pathspec" podem ser citados conforme explicado na variável de configuração `core.quotePath` (consulte linkgit:git-config[1]). Consulte também opção `--pathspec-file-nul` e o global `--literal-pathspecs`.
+`--pathspec-from-file=<file>`::
+	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by _LF_ or _CR_/_LF_. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
 
---pathspec-file-nul::
-	Só faz algum sentido caso seja utilizado junto com a opção `--pathspec-from-file`. Os elementos "pathspec" são separados com caracteres `NUL` e todos os outros caracteres são considerados de forma literal (incluindo as novas linhas e as citações).
+`--pathspec-file-nul`::
+	Only meaningful with `--pathspec-from-file`. Pathspec elements are separated with _NUL_ character and all other characters are taken literally (including newlines and quotes).
 
-\--::
+`--`::
 	Não interprete mais argumentos como opções.
 
-<pathspec>...::
+`<pathspec>...`::
 	Limita os caminhos afetados pela operação.
 +
 Para mais detalhes sobre a sintaxe, consulte a entrada 'pathspec' em linkgit:gitglossary[7].
@@ -242,7 +242,7 @@ $ git diff --cached                         <7>
 $ git commit ...                            <8>
 ------------
 +
-<1> Primeiro, faz o reset do histórico um commit para trás para que possamos remover o commit original, porém, deixe a árvore de trabalho com todas as alterações. O `-N` garante que quaisquer novos arquivos adicionados com `HEAD`, ainda sejam marcados para que o `git add -p` os encontre.
+<1> First, reset the history back one commit so that we remove the original commit, but leave the working tree with all the changes. The `-N` ensures that any new files added with `HEAD` are still marked so that `git add -p` will find them.
 <2> Em seguida, selecionamos interativamente os blocos das diferenças para serem adicionas utilizando o recurso `git add -p`. Isso lhe perguntará sobre cada pedaço diff em sequência, assim você poderá usar de comandos simples como "yes, include this" (sim, inclua isso), "no don't include this" (não, não inclua isso) ou mesmo o poderoso recurso "edit" (editar).
 <3> Uma vez satisfeito com os blocos que deseja incluir, você deve verificar o que foi preparado para o primeiro commit utilizando a opção `git diff --cached`. Isso exibe todas as alterações que foram movidas para o índice e que estão prontas para o commit.
 <4> Em seguida, faça o commit das alterações armazenadas no índice. A opção `-c` especifica para ser feito o preenchimento prévio da mensagem original do commit iniciado com o primeiro commit. É útil para evitar ter que digitá-la novamente. O `HEAD@{1}` é uma notação especial para o commit onde o `HEAD` estava antes da redefinição (reset) do commit original (1 alteração atrás). Para mais detalhes consulte linkgit:git-reflog[1]. Você também pode utilizar qualquer outro commit válido como referência.
@@ -325,9 +325,9 @@ working index HEAD target         working index HEAD
 			  --keep   B       C     C
 ....
 
-A opção `reset --merge` deve ser utilizada durante a redefinição de uma mesclagem em conflito. Qualquer operação de mesclagem garante que o arquivo da árvore de trabalho envolvido na mesclagem não tenha uma alteração local em relação ao índice antes do inicio e que grave o resultado na árvore de trabalho. Portanto, se observarmos alguma diferença entre o índice e o destino, assim como entre o índice e a árvore de trabalho, significa que não estamos redefinindo a partir de um estado que uma operação de mesclagem deixou após falhar com um conflito. É por isso que não permitimos a opção `--merge` nesse caso.
+`git reset --merge` is meant to be used when resetting out of a conflicted merge. Any mergy operation guarantees that the working tree file that is involved in the merge does not have a local change with respect to the index before it starts, and that it writes the result out to the working tree. So if we see some difference between the index and the target and also between the index and the working tree, then it means that we are not resetting out from a state that a mergy operation left after failing with a conflict. That is why we disallow `--merge` option in this case.
 
-O comando `reset --keep` deve ser utilizado para remover alguns dos últimos commits no ramo atual mantendo as alterações na árvore de trabalho. Caso haja conflitos entre as alterações no commit que queremos remover e as mudanças na árvore de trabalho que desejamos manter, a redefinição será desativada. É por isso que não é permitido caso haja duas mudanças entre a árvore de trabalho, o `HEAD` e entre o` HEAD` e o destino. Por segurança, também não é permitido quando há entradas não imersas.
+`git reset --keep` is meant to be used when removing some of the last commits in the current branch while keeping changes in the working tree. If there could be conflicts between the changes in the commit we want to remove and the changes in the working tree we want to keep, the reset is disallowed. That's why it is disallowed if there are both changes between the working tree and `HEAD`, and between `HEAD` and the target. To be safe, it is also disallowed when there are unmerged entries.
 
 As tabelas a seguir demonstram o que acontece quando há entradas que não foram mescladas:
 

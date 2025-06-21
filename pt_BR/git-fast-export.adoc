@@ -22,10 +22,15 @@ OPÇÕES
 --progress=<n>::
 	Insira instruções de 'progresso' em todos os objetos `<n>` a serem exibidos por 'git fast-import' durante a importação.
 
---signed-tags=(verbatim|warn|warn-strip|strip|abort)::
-	Especifique como lidar com as etiquetas assinadas. Como qualquer transformação após a exportação pode alterar os nomes das etiquetas (o que também pode acontecer ao excluir revisões), as assinaturas não corresponderão.
+--signed-tags=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed tags. Since any transformation after the export (or during the export, such as excluding revisions) can change the hashes being signed, the signatures may become invalid.
 +
-Ao pedir para "abortar" 'abort' (que é a predefinição), esse programa será encerrado ao encontrar uma etiqueta assinada. Com 'strip', as etiqueta não serão assinadas silenciosamente; com 'warn-strip', elas não serão assinadas, mas um aviso será exibido; com 'verbatim', elas serão exportadas silenciosamente; e com 'warn', elas serão exportadas, mas você verá um aviso.
+When asking to 'abort' (which is the default), this program will die when encountering a signed tag. With 'strip', the tags will silently be made unsigned, with 'warn-strip' they will be made unsigned but a warning will be displayed, with 'verbatim', they will be silently exported and with 'warn-verbatim' (or 'warn', a deprecated synonym), they will be exported, but you will see a warning. 'verbatim' and 'warn-verbatim' should only be used if you know that no transformation affecting tags or any commit in their history will be performed by you or by fast-export or fast-import, or if you do not care that the resulting tag will have an invalid signature.
+
+--signed-commits=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed commits. Behaves exactly as '--signed-tags', but for commits. Default is 'abort'.
++
+Earlier versions this command that did not have '--signed-commits' behaved as if '--signed-commits=strip'. As an escape hatch for users of tools that call 'git fast-export' but do not yet support '--signed-commits', you may set the environment variable 'FAST_EXPORT_SIGNED_COMMITS_NOABORT=1' in order to change the default from 'abort' to 'warn-strip'.
 
 --tag-of-filtered-object=(abort|drop|rewrite)::
 	Especifique como lidar com as etiquetas cujo objeto marcado é filtrado. Como as revisões e os arquivos que serão exportados, eles podem ser limitados por caminho, os objetos marcados podem ser completamente filtrados.

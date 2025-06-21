@@ -6,6 +6,8 @@ Le mécanisme de fusion (commandes `git merge` et `git pull`) permet de choisir 
 ort::
 	C'est la stratégie de fusion par défaut lors du tirage ou de la fusion d'une branche. Cette stratégie ne peut résoudre que deux têtes en utilisant un algorithme de fusion à trois voies. Lorsqu'il y a plus d'un ancêtre commun qui peut être utilisé pour la fusion à trois, il crée un arbre fusionné des ancêtres communs et l'utilise comme arbre de référence pour la fusion à trois. Il a été rapporté que cela permettait de réduire les conflits de fusion sans provoquer de fausses fusions, grâce à des tests effectués sur de vraies fusions tirées de l'historique de développement du noyau Linux 2.6. En outre, cette stratégie permet de détecter et de gérer les fusions impliquant des renommages. Elle ne peut actuellement pas utiliser les copies détectées. Le nom de cet algorithme est un acronyme ("Ostensibly Recursive's Twin" : Jumeau ostensible de recurse) et vient du fait qu'il a été écrit pour remplacer l'algorithme par défaut précédent, `recursive`.
 +
+In the case where the path is a submodule, if the submodule commit used on one side of the merge is a descendant of the submodule commit used on the other side of the merge, Git attempts to fast-forward to the descendant. Otherwise, Git will treat this case as a conflict, suggesting as a resolution a submodule commit that is descendant of the conflicting ones, if one exists.
++
 La stratégie 'ort' peut prendre les options suivantes :
 
 ours;;
@@ -38,22 +40,23 @@ find-renames[=<n>];;
 rename-threshold=<n>;;
 	Synonyme obsolète pour `find-renames=<n>`.
 
-subtree[=<chemin>];;
-	Cette option est une forme plus avancée de stratégie 'subtree', où la stratégie fait une estimation de la façon dont deux arbres doivent être déplacés pour correspondre l'un à l'autre lors de la fusion. Au lieu de cela, le chemin spécifié est préfixé (ou tronqué au debut) pour faire correspondre la forme de deux arbres.
+no-renames;;
+	Désactiver la détection de renommage. Ceci annule la variable de configuration `merge.renames`. Voir aussi linkgit:git-diff[1] `--no-renames`.
 
-recursive::
-	Cela ne peut résoudre que deux têtes en utilisant un algorithme de fusion à trois voies. Lorsqu'il y a plus d'un ancêtre commun qui peut être utilisé pour la fusion à trois, il crée un arbre fusionné des ancêtres communs et l'utilise comme arbre de référence pour la fusion à trois. Il a été rapporté que cela permettait de réduire les conflits de fusion sans provoquer de fausses fusions, grâce à des tests effectués sur de vraies fusions tirées de l'historique de développement du noyau Linux 2.6. En outre, cela permet de détecter et de gérer les fusions impliquant des renommages. Cela n'utilise les copies détectées. C'était la stratégie par défaut lors de la résolution de deux sommets pour Git depuis la version v0.99.9k jusqu'à v2.33.0.
-+
-La stratégie 'recursive' utilise les mêmes options que 'ort'. Cependant, il y a trois options supplémentaires que 'ort' ignore (non documentées ci-dessus) et qui sont potentiellement utiles avec la stratégie 'recursive' :
+`histogram`;;
+	Synonyme obsolète pour `diff-algorithm=histogram`.
 
 patience;;
 	Synonyme obsolète pour `diff-algorithm=patience`.
 
-diff-algorithm=[patience|minimal|histogram|myers];;
-	Utiliser un algorithme de diff différent lors des fusions, ce qui peut aider à éviter les erreurs de fusion dues à des lignes de correspondance sans importance (comme des accolades de fonctions distinctes). Voir aussi linkgit:git-diff[1] `--diff-algorithm`. Notez que `ort` utilise spécifiquement `diff-algorithm=histogram`, alors que `recursive` utilise par défaut le paramètre de configuration `diff.algorithm`.
+diff-algorithm=[histogram|minimal|myers|patience];;
+	Utiliser un algorithme de diff différent lors des fusions, ce qui peut aider à éviter les erreurs de fusion dues à des lignes de correspondance sans importance (comme des accolades de fonctions distinctes). Voir aussi linkgit:git-diff[1] `--diff-algorithm`. Notez que `ort` utilise par défaut `diff-algorithm=histogram`, alors que les diffs normaux utilisent par défaut la valeur du paramètre de configuration `diff.algorithm`.
 
-no-renames;;
-	Désactiver la détection de renommage. Ceci annule la variable de configuration `merge.renames`. Voir aussi linkgit:git-diff[1] `--no-renames`.
+subtree[=<chemin>];;
+	Cette option est une forme plus avancée de stratégie 'subtree', où la stratégie fait une estimation de la façon dont deux arbres doivent être déplacés pour correspondre l'un à l'autre lors de la fusion. Au lieu de cela, le chemin spécifié est préfixé (ou tronqué au debut) pour faire correspondre la forme de deux arbres.
+
+recursive::
+	This is now a synonym for `ort`. It was an alternative implementation until v2.49.0, but was redirected to mean `ort` in v2.50.0. The previous recursive strategy was the default strategy for resolving two heads from Git v0.99.9k until v2.33.0.
 
 resolve::
 	Cela ne peut résoudre que deux têtes (c'est-à-dire la branche actuelle et une autre branche dont vous avez tiré) en utilisant un algorithme de fusion à trois points. Cela essaie de détecter avec soin les ambiguïtés de la fusion croisée. Les renommages ne sont pas gérés.
@@ -62,7 +65,7 @@ octopus::
 	Cela permet de résoudre les cas à plus de deux têtes, mais refuse de faire une fusion complexe qui nécessite une résolution manuelle. C'est principalement destiné à être utilisé pour regrouper les têtes de branches thématiques. C'est la stratégie de fusion par défaut lorsque l'on tire ou fusionne plusieurs branches.
 
 ours::
-	Cela résout un nombre quelconque de têtes, mais l'arbre résultant de la fusion est toujours celui de la tête de la branche actuelle, ignorant effectivement toutes les modifications provenant de toutes les autres branches. C'est censé être utilisé pour remplacer l'ancienne historique du développement des branches latérales. Notez que cette stratégie est différente de l'option -Xours de la stratégie de fusion 'recursive'.
+	Cela résout un nombre quelconque de têtes, mais l'arbre résultant de la fusion est toujours celui de la tête de la branche actuelle, ignorant effectivement toutes les modifications provenant de toutes les autres branches. C'est censé être utilisé pour remplacer l'ancienne historique du développement des branches latérales. Notez que cette stratégie est différente de l'option -Xours de la stratégie de fusion 'ort'.
 
 subtree::
 	Il s'agit d'une stratégie `ort` modifiée. Lors de la fusion des arbres A et B, si B correspond à un sous-arbre de A, B est d'abord ajusté pour correspondre à la structure arborescente de A, au lieu de lire les arbres au même niveau. Cet ajustement est également effectué sur l'arbre de l'ancêtre commun.

@@ -206,6 +206,24 @@ ifdef::git-rev-list[]
 
 --progress=<header>::
 	Exibe os relatórios de progresso no stderr à medida que os objetos são considerados. O texto `<header>` será impresso a cada atualização do progresso.
+
+-z::
+	Instead of being newline-delimited, each outputted object and its accompanying metadata is delimited using NUL bytes. Output is printed in the following form:
++
+-----------------------------------------------------------------------
+<OID> NUL [<token>=<value> NUL]...
+-----------------------------------------------------------------------
++
+Additional object metadata, such as object paths or boundary objects, is printed using the `<token>=<value>` form. Token values are printed as-is without any encoding/truncation. An OID entry never contains a '=' character and thus is used to signal the start of a new object record. Examples:
++
+-----------------------------------------------------------------------
+<OID> NUL
+<OID> NUL path=<path> NUL
+<OID> NUL boundary=yes NUL
+<OID> NUL missing=yes NUL [<token>=<value> NUL]...
+-----------------------------------------------------------------------
++
+This mode is only compatible with the `--objects`, `--boundary`, and `--missing` output options.
 endif::git-rev-list[]
 
 Simplificação do histórico
@@ -251,6 +269,7 @@ Segue explicações com mais detalhes.
 Suponha que você tenha especificado `foo` como '<caminhos>'. Chamaremos os commits que modificam o `foo` de !TREESAME, e o restante de TREESAME. (Num diff filtrado para `foo`, eles parecem diferentes e iguais, respectivamente.)
 
 A seguir, sempre nos referiremos ao mesmo exemplo do histórico para ilustrar as diferenças entre as configurações da simplificação. Presumimos que você esteja filtrando um arquivo `foo` neste gráfico de commits:
+
 -----------------------------------------------------------------------
 	  .-A---M---N---O---P---Q
 	 /     /   /   /   /   /
@@ -258,6 +277,7 @@ A seguir, sempre nos referiremos ao mesmo exemplo do histórico para ilustrar as
 	 \   /   /   /   /   /
 	  `-------------'   X
 -----------------------------------------------------------------------
+
 A linha horizontal do histórico A---Q é considerada o primeiro ramo principal de cada mesclagem. Os commits são:
 
 * O `I` é o commit inicial onde `foo` existe com o conteúdo ``asdf'' e existe um arquivo `quux` com o conteúdo` `quux ''. Os commits iniciais são comparados com uma árvore vazia, então o `I` é !TREESAME.
@@ -394,7 +414,7 @@ Se, em vez disso, estivermos interessados num determinado tópico dentro deste i
 -----------------------------------------------------------------------
 		E
 		 \
-		  G---H---I---J
+	      C---G---H---I---J
 			       \
 				L--M
 -----------------------------------------------------------------------

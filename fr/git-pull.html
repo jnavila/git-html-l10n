@@ -1153,6 +1153,9 @@ Il y a une différence entre le fait de lister plusieurs &lt;spéc-de-réf&gt; d
 <dd>
 <p>C&#8217;est la stratégie de fusion par défaut lors du tirage ou de la fusion d&#8217;une branche. Cette stratégie ne peut résoudre que deux têtes en utilisant un algorithme de fusion à trois voies. Lorsqu&#8217;il y a plus d&#8217;un ancêtre commun qui peut être utilisé pour la fusion à trois, il crée un arbre fusionné des ancêtres communs et l&#8217;utilise comme arbre de référence pour la fusion à trois. Il a été rapporté que cela permettait de réduire les conflits de fusion sans provoquer de fausses fusions, grâce à des tests effectués sur de vraies fusions tirées de l&#8217;historique de développement du noyau Linux 2.6. En outre, cette stratégie permet de détecter et de gérer les fusions impliquant des renommages. Elle ne peut actuellement pas utiliser les copies détectées. Le nom de cet algorithme est un acronyme ("Ostensibly Recursive&#8217;s Twin" : Jumeau ostensible de recurse) et vient du fait qu&#8217;il a été écrit pour remplacer l&#8217;algorithme par défaut précédent, <code>recursive</code>.</p>
 <div class="paragraph">
+<p>In the case where the path is a submodule, if the submodule commit used on one side of the merge is a descendant of the submodule commit used on the other side of the merge, Git attempts to fast-forward to the descendant. Otherwise, Git will treat this case as a conflict, suggesting as a resolution a submodule commit that is descendant of the conflicting ones, if one exists.</p>
+</div>
+<div class="paragraph">
 <p>La stratégie <em>ort</em> peut prendre les options suivantes :</p>
 </div>
 <div class="dlist">
@@ -1204,6 +1207,22 @@ Il y a une différence entre le fait de lister plusieurs &lt;spéc-de-réf&gt; d
 <dd>
 <p>Synonyme obsolète pour <code>find-renames=</code><em>&lt;n&gt;</em>.</p>
 </dd>
+<dt class="hdlist1">no-renames</dt>
+<dd>
+<p>Désactiver la détection de renommage. Ceci annule la variable de configuration <code>merge.renames</code>. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>.</p>
+</dd>
+<dt class="hdlist1"><code>histogram</code></dt>
+<dd>
+<p>Synonyme obsolète pour <code>diff-algorithm=histogram</code>.</p>
+</dd>
+<dt class="hdlist1">patience</dt>
+<dd>
+<p>Synonyme obsolète pour <code>diff-algorithm=patience</code>.</p>
+</dd>
+<dt class="hdlist1">diff-algorithm=[histogram|minimal|myers|patience]</dt>
+<dd>
+<p>Utiliser un algorithme de diff différent lors des fusions, ce qui peut aider à éviter les erreurs de fusion dues à des lignes de correspondance sans importance (comme des accolades de fonctions distinctes). Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>. Notez que <code>ort</code> utilise par défaut <code>diff-algorithm=histogram</code>, alors que les diffs normaux utilisent par défaut la valeur du paramètre de configuration <code>diff.algorithm</code>.</p>
+</dd>
 <dt class="hdlist1">subtree[=&lt;chemin&gt;]</dt>
 <dd>
 <p>Cette option est une forme plus avancée de stratégie <em>subtree</em>, où la stratégie fait une estimation de la façon dont deux arbres doivent être déplacés pour correspondre l&#8217;un à l&#8217;autre lors de la fusion. Au lieu de cela, le chemin spécifié est préfixé (ou tronqué au debut) pour faire correspondre la forme de deux arbres.</p>
@@ -1213,26 +1232,7 @@ Il y a une différence entre le fait de lister plusieurs &lt;spéc-de-réf&gt; d
 </dd>
 <dt class="hdlist1">recursive</dt>
 <dd>
-<p>Cela ne peut résoudre que deux têtes en utilisant un algorithme de fusion à trois voies. Lorsqu&#8217;il y a plus d&#8217;un ancêtre commun qui peut être utilisé pour la fusion à trois, il crée un arbre fusionné des ancêtres communs et l&#8217;utilise comme arbre de référence pour la fusion à trois. Il a été rapporté que cela permettait de réduire les conflits de fusion sans provoquer de fausses fusions, grâce à des tests effectués sur de vraies fusions tirées de l&#8217;historique de développement du noyau Linux 2.6. En outre, cela permet de détecter et de gérer les fusions impliquant des renommages. Cela n&#8217;utilise les copies détectées. C&#8217;était la stratégie par défaut lors de la résolution de deux sommets pour Git depuis la version v0.99.9k jusqu&#8217;à v2.33.0.</p>
-<div class="paragraph">
-<p>La stratégie <em>recursive</em> utilise les mêmes options que <em>ort</em>. Cependant, il y a trois options supplémentaires que <em>ort</em> ignore (non documentées ci-dessus) et qui sont potentiellement utiles avec la stratégie <em>recursive</em> :</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">patience</dt>
-<dd>
-<p>Synonyme obsolète pour <code>diff-algorithm=patience</code>.</p>
-</dd>
-<dt class="hdlist1">diff-algorithm=[patience|minimal|histogram|myers]</dt>
-<dd>
-<p>Utiliser un algorithme de diff différent lors des fusions, ce qui peut aider à éviter les erreurs de fusion dues à des lignes de correspondance sans importance (comme des accolades de fonctions distinctes). Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>. Notez que <code>ort</code> utilise spécifiquement <code>diff-algorithm=histogram</code>, alors que <code>recursive</code> utilise par défaut le paramètre de configuration <code>diff.algorithm</code>.</p>
-</dd>
-<dt class="hdlist1">no-renames</dt>
-<dd>
-<p>Désactiver la détection de renommage. Ceci annule la variable de configuration <code>merge.renames</code>. Voir aussi <a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>.</p>
-</dd>
-</dl>
-</div>
+<p>This is now a synonym for <code>ort</code>. It was an alternative implementation until v2.49.0, but was redirected to mean <code>ort</code> in v2.50.0. The previous recursive strategy was the default strategy for resolving two heads from Git v0.99.9k until v2.33.0.</p>
 </dd>
 <dt class="hdlist1">resolve</dt>
 <dd>
@@ -1244,7 +1244,7 @@ Il y a une différence entre le fait de lister plusieurs &lt;spéc-de-réf&gt; d
 </dd>
 <dt class="hdlist1">ours</dt>
 <dd>
-<p>Cela résout un nombre quelconque de têtes, mais l&#8217;arbre résultant de la fusion est toujours celui de la tête de la branche actuelle, ignorant effectivement toutes les modifications provenant de toutes les autres branches. C&#8217;est censé être utilisé pour remplacer l&#8217;ancienne historique du développement des branches latérales. Notez que cette stratégie est différente de l&#8217;option -Xours de la stratégie de fusion <em>recursive</em>.</p>
+<p>Cela résout un nombre quelconque de têtes, mais l&#8217;arbre résultant de la fusion est toujours celui de la tête de la branche actuelle, ignorant effectivement toutes les modifications provenant de toutes les autres branches. C&#8217;est censé être utilisé pour remplacer l&#8217;ancienne historique du développement des branches latérales. Notez que cette stratégie est différente de l&#8217;option -Xours de la stratégie de fusion <em>ort</em>.</p>
 </dd>
 <dt class="hdlist1">subtree</dt>
 <dd>
@@ -1398,7 +1398,7 @@ $ git merge origin/next</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-23 12:03:33 +0100
+Last updated 2025-05-29 13:36:48 +0200
 </div>
 </div>
 </body>

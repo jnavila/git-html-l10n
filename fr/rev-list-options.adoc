@@ -206,6 +206,24 @@ ifdef::git-rev-list[]
 
 --progress=<entête>::
 	Afficher les rapports d'avancement sur stderr au fur et à mesure que les objets sont pris en compte. Le texte "<en-tête>" sera affiché à chaque mise à jour de l'état d'avancement.
+
+-z::
+	Au lieu d'être délimité par la nouvelle ligne, chaque objet sorti et ses métadonnées complémentaires est délimité en utilisant des octets NUL. La sortie est affichée sous la forme suivante :
++
+-----------------------------------------------------------------------
+<OID> NUL [<jeton>=<valeur> NUL]...
+-----------------------------------------------------------------------
++
+Des métadonnées d'objets supplémentaires, comme des chemins d'objets ou des objets de limite, sont affichées à l'aide de la forme `<jeton>=<valeur>`. Les valeurs de jeton sont affichées tel quelles sans encodage/truncation. Une entrée OID ne contient jamais un caractère '=' et est donc utilisé pour signaler le début d'un enregistrement de nouvel objet. Exemples :
++
+-----------------------------------------------------------------------
+<OID> NUL
+<OID> NUL path=<chemin> NUL
+<OID> NUL boundary=yes NUL
+<OID> NUL missing=yes NUL [<jeton>=<valeur> NUL]...
+-----------------------------------------------------------------------
++
+Ce mode est uniquement compatible avec les options de sortie `--objects`, `--boundary` et `--missing`.
 endif::git-rev-list[]
 
 Simplification de l'historique
@@ -251,6 +269,7 @@ Une explication plus détaillée suit.
 Supposons que vous ayez spécifié `foo` pour <chemins>. Nous appellerons les commits qui modifient `foo` !MEMEARBRE, et le reste MEMEARBRE. (Dans un diff filtré pour `foo`, ils sont différents et égaux, respectivement.)
 
 Dans ce qui suit, nous nous référerons toujours au même exemple d'historique pour illustrer les différences entre les paramètres de simplification. Nous supposons que vous filtrez pour un fichier `foo` dans ce graphe de commits :
+
 -----------------------------------------------------------------------
 	  .-A---M---N---O---P---Q
 	 /     /   /   /   /   /
@@ -258,6 +277,7 @@ Dans ce qui suit, nous nous référerons toujours au même exemple d'historique 
 	 \   /   /   /   /   /
 	  `-------------'   X
 -----------------------------------------------------------------------
+
 La ligne horizontale de l'historique A---Q est prise pour être le premier parent de chaque fusion. Les commits sont :
 
 * `I` est le commit initial, dans lequel 'foo` existe avec le contenu ''asdf'', et un fichier `quux` existe avec le contenu ''quux''. Les commits initiaux sont comparés à un arbre vide, donc `I` est !MEMEARBRE.
@@ -394,7 +414,7 @@ Si nous sommes plutôt intéressés par un sujet donné dans cette plage, et tou
 -----------------------------------------------------------------------
 		E
 		 \
-		  G---H---I---J
+	      C---G---H---I---J
 			       \
 				L--M
 -----------------------------------------------------------------------

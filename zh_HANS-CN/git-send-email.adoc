@@ -81,6 +81,13 @@ git-send-email - 以电子邮件形式发送补丁集
 +
 只有同时设置了 --compose 时才有必要。 如果未设置 --compose，则会提示。
 
+--[no-]outlook-id-fix::
+	Microsoft Outlook SMTP servers discard the Message-ID sent via email and assign a new random Message-ID, thus breaking threads.
++
+With `--outlook-id-fix`, 'git send-email' uses a mechanism specific to Outlook servers to learn the Message-ID the server assigned to fix the threading. Use it only when you know that the server reports the rewritten Message-ID the same way as Outlook servers do.
++
+Without this option specified, the fix is done by default when talking to 'smtp.office365.com' or 'smtp-mail.outlook.com'. Use `--no-outlook-id-fix` to disable even when talking to these two servers.
+
 --subject=<字符串>::
 	指定电子邮件线程的初始主题。 只有同时设置了 --compose 时才需要。 如果未设置 --compose，系统将提示输入。
 
@@ -296,11 +303,11 @@ include::includes/cmd-config-section-all.adoc[]
 
 include::config/sendemail.adoc[]
 
-实例
---
-使用 gmail 作为 smtp 服务器
-~~~~~~~~~~~~~~~~~~~~
-要使用 'git send-email' 通过 GMail SMTP 服务器发送补丁，请编辑 ~/.gitconfig 指定账户设置：
+EXAMPLES OF SMTP SERVERS
+------------------------
+Use Gmail as the SMTP Server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To use `git send-email` to send your patches through the Gmail SMTP server, edit `~/.gitconfig` to specify your account settings:
 
 ----
 [sendemail]
@@ -312,13 +319,51 @@ include::config/sendemail.adoc[]
 
 如果您的 Gmail 账户设置了多因素身份验证，您可以生成一个应用程序专用密码，供 'git send-email' 使用。请访问 https://security.google.com/settings/security/apppasswords 创建密码。
 
+You can also use OAuth2.0 authentication with Gmail. `OAUTHBEARER` and `XOAUTH2` are common methods used for this type of authentication. Gmail supports both of them. As an example, if you want to use `OAUTHBEARER`, edit your `~/.gitconfig` file and add `smtpAuth = OAUTHBEARER` to your account settings:
+
+----
+[sendemail]
+	smtpEncryption = tls
+	smtpServer = smtp.gmail.com
+	smtpUser = yourname@gmail.com
+	smtpServerPort = 587
+	smtpAuth = OAUTHBEARER
+----
+
+Use Microsoft Outlook as the SMTP Server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unlike Gmail, Microsoft Outlook no longer supports app-specific passwords. Therefore, OAuth2.0 authentication must be used for Outlook. Also, it only supports `XOAUTH2` authentication method.
+
+Edit `~/.gitconfig` to specify your account settings for Outlook and use its SMTP server with `git send-email`:
+
+----
+[sendemail]
+	smtpEncryption = tls
+	smtpServer = smtp.office365.com
+	smtpUser = yourname@outlook.com
+	smtpServerPort = 587
+	smtpAuth = XOAUTH2
+----
+
+SENDING PATCHES
+---------------
 一旦您的提交已准备好发送至邮件列表，请运行以下命令：
 
 	$ git format-patch --cover-letter -M origin/master -o outgoing/
 	$ edit outgoing/0000-*
 	$ git send-email outgoing/*
 
-首次运行时，系统会提示您输入凭据。 请根据情况输入特定于应用程序的密码或常规密码。 如果配置了凭据助手（参见 linkgit:git-credential[1]），密码会保存在凭据存储区，下次就不用再输入了。
+The first time you run it, you will be prompted for your credentials. Enter the app-specific or your regular password as appropriate.
+
+If you have a credential helper configured (see linkgit:git-credential[1]), the password will be saved in the credential store so you won't have to type it the next time.
+
+If you are using OAuth2.0 authentication, you need to use an access token in place of a password when prompted. Various OAuth2.0 token generators are available online. Community maintained credential helpers for Gmail and Outlook are also available:
+
+	- https://github.com/AdityaGarg8/git-credential-email[git-credential-gmail] (cross platform, dedicated helper for authenticating Gmail accounts)
+
+	- https://github.com/AdityaGarg8/git-credential-email[git-credential-outlook] (cross platform, dedicated helper for authenticating Microsoft Outlook accounts)
+
+You can also see linkgit:gitcredentials[7] for more OAuth based authentication helpers.
 
 注意：需要安装以下 Perl 核心模块，这些模块可能已随 Perl 发行版一起安装： MIME::Base64、MIME::QuotedPrint、Net::Domain 和 Net::SMTP。 还需要安装这些额外的 Perl 模块： Authen::SASL 和 Mail::Address。
 

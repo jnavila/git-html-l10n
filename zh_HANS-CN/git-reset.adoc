@@ -7,54 +7,54 @@ git-reset - 重置当前HEAD到指定的状态
 
 概述
 --
-[verse]
-'git reset' [-q] [<目录树对象>] [--] <路径规范>...
-'git reset' [-q] [--pathspec-from-file=<文件> [--pathspec-file-nul]] [<目录树对象>]
-'git reset' (--patch | -p) [<目录树对象>] [--] [<路径规范>...]
-'git reset' [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<提交>]
+[synopsis]
+git reset [-q] [<tree-ish>] [--] <pathspec>...
+git reset [-q] [--pathspec-from-file=<file> [--pathspec-file-nul]] [<tree-ish>]
+git reset (--patch | -p) [<tree-ish>] [--] [<pathspec>...]
+git reset [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
 
 描述
 --
-在前三种形式中，从 `<treeish>` 复制条目到索引。 在最后一种形式中，将当前的分支头( `HEAD` )设置为 `<commit>` ，可选地修改索引和工作树以匹配。在所有形式中， `<tree-ish>` / `<commit>` 默认为 `HEAD` 。
+In the first three forms, copy entries from _<tree-ish>_ to the index. In the last form, set the current branch head (`HEAD`) to _<commit>_, optionally modifying index and working tree to match. The _<tree-ish>_/_<commit>_ defaults to `HEAD` in all forms.
 
-'git reset' [-q] [<目录树对象>] [--] <路径规范>...::
-'git reset' [-q] [--pathspec-from-file=<文件> [--pathspec-file-nul]] [<目录树对象>]::
-	这些形式将所有匹配 `<路径规范>` 的路径的索引条目重置为 `<目录树对象>` 时的状态。 (它不会影响工作目录树或当前分支。)
+`git reset [-q] [<tree-ish>] [--] <pathspec>...`::
+`git reset [-q] [--pathspec-from-file=<file> [--pathspec-file-nul]] [<tree-ish>]`::
+	These forms reset the index entries for all paths that match the _<pathspec>_ to their state at _<tree-ish>_. (It does not affect the working tree or the current branch.)
 +
 这意味着， `git reset <pathspec>` 与 `git add <pathspec>` 相反。该命令等同于 `git restore [--source=<treeish>] --staged <pathspec>...` 。
 +
 运行 `git reset <pathspec>` 更新索引条目后，您可以使用 linkgit:git-restore[1] 将索引中的内容检出到工作树中。或者，使用 linkgit:git-restore[1] 并使用 `--source` 指定一个提交，您可以一次性将提交中某个路径的内容复制到索引和工作树中。
 
-'git reset' (--patch | -p) [<目录树对象>] [--] [<路径规范>...]::
-	交互式选择索引和 `<目录树对象>` （默认为 `HEAD` ）之间差异的代码块。选择的代码块将逆序应用于索引。
+`git reset (--patch | -p) [<tree-ish>] [--] [<pathspec>...]`::
+	Interactively select hunks in the difference between the index and _<tree-ish>_ (defaults to `HEAD`). The chosen hunks are applied in reverse to the index.
 +
-这意味着 `git reset -p` 与 `git add -p` 相反，即您可以用它来有选择地重置代码块。参见 linkgit:git-add[1] 的 "交互模式"部分，了解如何操作 `--patch` 模式。
+This means that `git reset -p` is the opposite of `git add -p`, i.e. you can use it to selectively reset hunks. See the "Interactive Mode" section of linkgit:git-add[1] to learn how to operate the `--patch` mode.
 
-'git reset' [<模式>] [<提交>]::
-	这种形式将当前分支头重置为 `<提交>` ，并可能根据 `<模式>` 更新索引（将其重置为 `<提交>` 的树）和工作目录树。在操作之前， `ORIG_HEAD` 会被设置为当前分支的顶端。如果省略 `<模式>` ，则默认为 `--mixed` 。 `<模式>` 必须是以下之一：
+`git reset [<mode>] [<commit>]`::
+	This form resets the current branch head to _<commit>_ and possibly updates the index (resetting it to the tree of _<commit>_) and the working tree depending on _<mode>_. Before the operation, `ORIG_HEAD` is set to the tip of the current branch. If _<mode>_ is omitted, defaults to `--mixed`. The _<mode>_ must be one of the following:
 +
 --
---soft::
-	完全不触及索引文件或工作树(但将头重置为 `<提交>` ，就像所有模式都做的那样)。这使所有已更改的文件保持 "Changes to be committed" 状态,就像 `git status` 会显示的那样。
+`--soft`::
+	Does not touch the index file or the working tree at all (but resets the head to _<commit>_, just like all modes do). This leaves all your changed files "Changes to be committed", as `git status` would put it.
 
---mixed::
+`--mixed`::
 	重置索引，但不重置工作树（即保留已修改的文件，但不标记为提交）并报告哪些内容未更新。这是默认动作。
 +
 如果指定了 `-N` ，则删除的路径将被标记为要添加（请参阅 linkgit:git-add[1]）。
 
---hard::
-	重置索引和工作树。工作树中自 `<提交>` 以来对跟踪文件的任何更改都会被丢弃。 任何妨碍写入跟踪文件的未跟踪文件或目录都会被删除。
+`--hard`::
+	Resets the index and working tree. Any changes to tracked files in the working tree since _<commit>_ are discarded. Any untracked files or directories in the way of writing any tracked files are simply deleted.
 
---merge::
-	重置索引并更新工作树中与 `<提交>` 和 `HEAD` 之间不同的文件，但保留那些在索引和工作树之间不同的文件（即尚未被添加的修改）。如果 `<提交>` 和索引之间不同的文件有未暂存的更改，重置操作将被中止。
+`--merge`::
+	Resets the index and updates the files in the working tree that are different between _<commit>_ and `HEAD`, but keeps those which are different between the index and working tree (i.e. which have changes which have not been added). If a file that is different between _<commit>_ and the index has unstaged changes, reset is aborted.
 +
 换句话说, `--merge` 做的事情类似于 `git read-tree -u -m <提交>` ，但会保留尚未合并的索引条目。
 
---keep::
-	重置索引条目并更新工作树中与 `<提交>` 和 `HEAD` 之间不同的文件。 如果 `<提交>` 和 `HEAD` 之间不同的文件有本地修改，重置操作将被中止。
+`--keep`::
+	Resets index entries and updates files in the working tree that are different between _<commit>_ and `HEAD`. If a file that is different between _<commit>_ and `HEAD` has local changes, reset is aborted.
 
---[no-]recurse-submodules::
-	当更新工作树时,使用 --recurse-submodules 还将递归性地根据超级项目中记录的提交来重置所有活动子模块的工作树,同时将子模块的 HEAD 设置为分离在该提交处。
+`--[no-]recurse-submodules`::
+	When the working tree is updated, using `--recurse-submodules` will also recursively reset the working tree of all active submodules according to the commit recorded in the superproject, also setting the submodules' `HEAD` to be detached at that commit.
 --
 
 关于这三个命令的区别，见linkgit:git[1]中的 "重置、恢复和还原"。
@@ -63,24 +63,24 @@ git-reset - 重置当前HEAD到指定的状态
 选项
 --
 
--q::
---quiet::
+`-q`::
+`--quiet`::
 	静默模式，只报告错误。
 
---refresh::
---no-refresh::
+`--refresh`::
+`--no-refresh`::
 	在混合重置后刷新索引，默认启用。
 
---pathspec-from-file=<file>::
-	Pathspec 在 `<文件>` 中传递，而不是在命令行参数中传递。如果 `<文件>` 正好是 `-`，则使用标准输入。路径规范元素由 LF 或 CR/LF 分隔。可以引用配置变量 `core.quotePath` 的路径规范元素（请参见 linkgit:git-config[1]）。另请参见 `--pathspec-file-nul` 和全局 `--literal-pathspecs`。
+`--pathspec-from-file=<file>`::
+	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by _LF_ or _CR_/_LF_. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
 
---pathspec-file-nul::
-	只有在使用 `--pathspec-from-file` 选项时才有意义。指定路径元素用 NUL 字符分隔，所有其他字符都按字面意思（包括换行符和引号）表示。
+`--pathspec-file-nul`::
+	只有在使用 `--pathspec-from-file` 选项时才有意义。指定路径元素用 _NUL_ 字符分隔，所有其他字符都按字面意思（包括换行符和引号）表示。
 
-\--::
+`--`::
 	不将之后的参数解释为选项。
 
-<路径规范>...::
+`<路径规范>...`::
 	限制受操作影响的路径。
 +
 更多细节请参见 linkgit:gitglossary[7] 中的 '路径规范' 条目。
@@ -242,7 +242,7 @@ $ git diff --cached                         <7>
 $ git commit ...                            <8>
 ------------
 +
-<1> 首先，将历史记录重置回前一个提交以删除原始提交，但保留了工作树上的所有修改。使用 -N 确保任何使用 `HEAD` 添加的新文件仍然被标记，以便 `git add -p` 能够找到它们。
+<1> First, reset the history back one commit so that we remove the original commit, but leave the working tree with all the changes. The `-N` ensures that any new files added with `HEAD` are still marked so that `git add -p` will find them.
 <2> 接下来，我们使用 `git add -p` 工具，交互式地选择要添加的差异块。这将逐个询问每个差异块，你可以使用简单的命令，如 "是，包括这个" ， "不，不包括这个" ，甚至是非常强大的 "编辑 " 工具。
 <3> 一旦对你想要包括的块感到满意，你应该使用 `git diff --cached` 来验证为第一次提交准备的内容。这将显示所有已经移入索引并即将提交的更改。
 <4> 接下来，提交存储在索引中的修改。`-c` 选项指定从你第一次提交时的原始信息中预先填入提交信息。这对避免重复输入很有帮助。 `HEAD@{1}` 是一个特殊的符号，表示 `HEAD` 在最初的重置提交（1次变更前）之前处于的提交。 更多细节见 linkgit:git-reflog[1]。你也可以使用任何其他有效的提交引用。
@@ -325,9 +325,9 @@ working index HEAD target         working index HEAD
 			  --keep          B       C      C
 ....
 
-`reset --merge` 旨在在从已冲突的合并中重置时使用。任何合并操作都保证在开始之前,参与合并的工作树文件相对于索引没有本地更改,并且会将结果写入工作树。所以如果我们看到索引和目标之间以及索引和工作树之间有一些差异,那就意味着我们不是在从一个合并操作因冲突失败后留下的状态中重置。这就是为什么我们在这种情况下不允许使用 `--merge` 选项。
+`git reset --merge` is meant to be used when resetting out of a conflicted merge. Any mergy operation guarantees that the working tree file that is involved in the merge does not have a local change with respect to the index before it starts, and that it writes the result out to the working tree. So if we see some difference between the index and the target and also between the index and the working tree, then it means that we are not resetting out from a state that a mergy operation left after failing with a conflict. That is why we disallow `--merge` option in this case.
 
-`reset --keep` 旨在移除当前分支中的一些最后的提交时保留工作树中的修改。如果想要移除的提交中的更改与想要保留的工作树中的更改之间存在冲突,则不允许重置。这就是为什么如果工作树和 `HEAD` 之间，以及 `HEAD` 和目标之间都有更改时不允许重置。为了安全起见，当有未合并的条目时，也不允许这样做。
+`git reset --keep` is meant to be used when removing some of the last commits in the current branch while keeping changes in the working tree. If there could be conflicts between the changes in the commit we want to remove and the changes in the working tree we want to keep, the reset is disallowed. That's why it is disallowed if there are both changes between the working tree and `HEAD`, and between `HEAD` and the target. To be safe, it is also disallowed when there are unmerged entries.
 
 下表显示了有未合并的条目时发生的情况：
 

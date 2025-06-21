@@ -22,10 +22,15 @@ git-fast-export - Git 数据导出器
 --progress=<n>::
 	每隔 <n> 个对象插入 'progress' （进度）语句，在导入时由 'git fast-import' 显示。
 
---signed-tags=(verbatim|warn|warn-strip|strip|abort)::
-	指定如何处理已签名的标记。 由于导出后的任何转换都可能更改标记名（排除修订时也可能发生这种情况），因此签名将不匹配。
+--signed-tags=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed tags. Since any transformation after the export (or during the export, such as excluding revisions) can change the hashes being signed, the signatures may become invalid.
 +
-当要求 'abort'（禁止，默认值）时，该程序将在遇到已签名标记时死亡。 如果使用 'strip'（剥夺），标签将被静默地取消签名；如果使用 'warn-strip'，标签将被取消签名，但会显示警告；如果使用 'verbatim'（逐字报告），标签将被静默地导出；如果使用 'warn'，标签将被导出，但会显示警告。
+When asking to 'abort' (which is the default), this program will die when encountering a signed tag. With 'strip', the tags will silently be made unsigned, with 'warn-strip' they will be made unsigned but a warning will be displayed, with 'verbatim', they will be silently exported and with 'warn-verbatim' (or 'warn', a deprecated synonym), they will be exported, but you will see a warning. 'verbatim' and 'warn-verbatim' should only be used if you know that no transformation affecting tags or any commit in their history will be performed by you or by fast-export or fast-import, or if you do not care that the resulting tag will have an invalid signature.
+
+--signed-commits=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed commits. Behaves exactly as '--signed-tags', but for commits. Default is 'abort'.
++
+Earlier versions this command that did not have '--signed-commits' behaved as if '--signed-commits=strip'. As an escape hatch for users of tools that call 'git fast-export' but do not yet support '--signed-commits', you may set the environment variable 'FAST_EXPORT_SIGNED_COMMITS_NOABORT=1' in order to change the default from 'abort' to 'warn-strip'.
 
 --tag-of-filtered-object=(abort|drop|rewrite)::
 	指定如何处理已过滤掉标记对象的标记。 由于要导出的版本和文件可能受路径限制，标记对象可能会被完全过滤掉。

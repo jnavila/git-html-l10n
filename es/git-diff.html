@@ -1,0 +1,2050 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="generator" content="Asciidoctor 2.0.23"/>
+<title>git-diff(1)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"/>
+<style>
+/*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment the following line when using as a custom stylesheet */
+/* @import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700"; */
+html{font-family:sans-serif;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+b,strong{font-weight:bold}
+abbr{font-size:.9em}
+abbr[title]{cursor:help;border-bottom:1px dotted #dddddf;text-decoration:none}
+dfn{font-style:italic}
+hr{height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type=button],input[type=reset],input[type=submit]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type=checkbox],input[type=radio]{padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,::before,::after{box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;line-height:1;position:relative;cursor:auto;-moz-tab-size:4;-o-tab-size:4;tab-size:4;word-wrap:anywhere;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ul.square{list-style-type:square}
+ul.circle ul:not([class]),ul.disc ul:not([class]),ul.square ul:not([class]){list-style:inherit}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:1px solid #dedede;word-wrap:normal}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre).nobreak{word-wrap:normal}
+:not(pre).nowrap{white-space:nowrap}
+:not(pre).pre-wrap{white-space:pre-wrap}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;border-radius:3px;box-shadow:0 1px 0 rgba(0,0,0,.2),inset 0 0 0 .1em #fff;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin:0 auto;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border:1px solid #e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:none;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:hsla(0,0%,100%,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details{margin-left:1.25rem}
+details>summary{cursor:pointer;display:block;position:relative;line-height:1.6;margin-bottom:.625rem;outline:none;-webkit-tap-highlight-color:transparent}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";border:solid transparent;border-left:solid;border-width:.3em 0 .3em .5em;position:absolute;top:.5em;left:-1.25rem;transform:translateX(15%)}
+details[open]>summary::before{border:solid transparent;border-top:solid;border-width:.5em .3em 0;transform:translateY(15%)}
+details>summary::after{content:"";width:1.25rem;height:1em;position:absolute;top:.3em;left:-1.25rem}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class=paragraph]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6);word-wrap:anywhere}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border:1px solid #e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;border-radius:4px}
+.sidebarblock{border:1px solid #dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;border-radius:4px}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:first-child,.sidebarblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child,.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{border-radius:4px;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos,pre.pygments .linenos{border-right:1px solid;opacity:.35;padding-right:.5em;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}
+pre.pygments span.linenos{display:inline-block;margin-right:.75em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans-serif;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;font-size:.85rem;text-align:left;margin-right:0}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content{margin-bottom:1.25em;word-wrap:anywhere}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>*>tr>*{border-width:1px}
+table.grid-cols>*>tr>*{border-width:0 1px}
+table.grid-rows>*>tr>*{border-width:1px 0}
+table.frame-all{border-width:1px}
+table.frame-ends{border-width:1px 0}
+table.frame-sides{border-width:0 1px}
+table.frame-none>colgroup+*>:first-child>*,table.frame-sides>colgroup+*>:first-child>*{border-top-width:0}
+table.frame-none>:last-child>:last-child>*,table.frame-sides>:last-child>:last-child>*{border-bottom-width:0}
+table.frame-none>*>tr>:first-child,table.frame-ends>*>tr>:first-child{border-left-width:0}
+table.frame-none>*>tr>:last-child,table.frame-ends>*>tr>:last-child{border-right-width:0}
+table.stripes-all>*>tr,table.stripes-odd>*>tr:nth-of-type(odd),table.stripes-even>*>tr:nth-of-type(even),table.stripes-hover>*>tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+li>p:empty:only-child::before{content:"";display:inline-block}
+ul.checklist>li>p:first-child{margin-left:-1em}
+ul.checklist>li>p:first-child>.fa-square-o:first-child,ul.checklist>li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist>li>p:first-child>input[type=checkbox]:first-child{margin-right:.25em}
+ul.inline{display:flex;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+td.hdlist2{word-wrap:anywhere}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:4px solid #fff;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);border-radius:50%;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt,summary{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,td.hdlist1,span.alt,summary{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]{border-bottom:1px dotted}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#header,#content,#footnotes,#footer{max-width:none}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media amzn-kf8,print{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+</head>
+<body class="manpage">
+<div id="header">
+<h1>git-diff(1) Manual Page</h1>
+<h2 id="_nombre">NOMBRE</h2>
+<div class="sectionbody">
+<p>git-diff - Muestra los cambios entre confirmaciones, confirmación y árbol de trabajo, etc</p>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_sinopsis">SINOPSIS</h2>
+<div class="sectionbody">
+<div class="verseblock">
+<pre class="content"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] [<em>&lt;confirmación&gt;</em>] [<code>--</code>] [<em>&lt;ruta&gt;</em>&#8230;&#8203;]
+<code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] <code>--cached</code> [<code>--merge-base</code>] [<em>&lt;confirmación&gt;</em>] [<code>--</code>] [<em>&lt;ruta&gt;</em>&#8230;&#8203;]
+<code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] [<code>--merge-base</code>] <em>&lt;confirmación&gt;</em> [&lt; <code>confirmaci</code>ón &gt;&#8230;&#8203;] &lt; <code>confirmaci</code>ón &gt; [<code>--</code>] [<em>&lt;ruta&gt;</em>&#8230;&#8203;]
+<code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] &lt; <code>confirmaci</code>ón &gt;...&lt; <code>confirmaci</code>ón &gt; [<code>--</code>] [<em>&lt;ruta&gt;</em>&#8230;&#8203;]
+<code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] <em>&lt;blob&gt;</em> <em>&lt;blob&gt;</em>
+<code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] <code>--no-index</code> [<code>--</code>] <em>&lt;ruta&gt;</em> <em>&lt;ruta&gt;</em></pre>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_descripción">DESCRIPCIÓN</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Muestra los cambios entre el árbol de trabajo y el índice o un árbol, cambios entre el índice y un árbol, cambios entre dos árboles, cambios resultantes de una fusión, cambios entre dos objetos blob, o cambios entre dos ficheros en disco.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] [<code>--</code>] [&lt;especificación-de-ruta&gt;...]</dt>
+<dd>
+<p>Esta forma es para ver los cambios relativos al índice que hiciste (área de presentación para la siguiente confirmación). En otras palabras, la diferencias son lo que <em>podrías</em> decirle a Git que añada al índice mas adelante pero aún no. Puedes presentar esos cambios usando <a href="git-add.html">git-add(1)</a>.</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] <code>--no-index</code> [<code>--</code>] <em>&lt;ruta&gt;</em> <em>&lt;ruta&gt;</em></dt>
+<dd>
+<p>Esta forma es para comparar las dos rutas en el sistema de ficheros dadas. Puedes omitir la opción <code>--no-index</code> cuando se ejecuta el comando en un árbol de trabajo controlado por Git y por lo menos una de las rutas apunta afuera del árbol de trabajo, o cuando se ejecuta el comando fuera de un árbol de trabajo controlado por Git. Esta forma implica <code>--exit-code</code>.</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] <code>--cached</code> [<code>--merge-base</code>] [&lt;confirmación&gt;] [<code>--</code>] [<em>&lt;ruta&gt;</em>...]</dt>
+<dd>
+<p>Esta forma es para ver los cambios que presentaste para la siguiente confirmación relativa a la <em>&lt;confirmación&gt;</em> nombrada. Típicamente querrás una comparación con la última confirmación, así que si no das <em>&lt;confirmación&gt;</em>, se predetermina a <code>HEAD</code>. Si <code>HEAD</code> no existe (ej. ramas sin nacer) y no se da <em>&lt;confirmación&gt;</em>, muestra todos los cambios presentados. <code>--staged</code> es un sinónimo de <code>--cached</code>.</p>
+<div class="paragraph">
+<p>Si se da <code>--merge-base</code>, en lugar de usar <em>&lt;confirmación&gt;</em>, usa la base de fusión de <em>&lt;confirmación&gt;</em> y <code>HEAD</code>. <code>git</code> <code>diff</code> <code>--cached</code> <code>--merge-base</code> <code>A</code> es equivalente a <code>git</code> <code>diff</code> <code>--cached</code> <code>$</code>(<code>git</code> <code>merge-base</code> <code>A</code> <code>HEAD</code>).</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] [<code>--merge-base</code>] <em>&lt;commit&gt;</em> [<code>--</code>] [<em>&lt;ruta&gt;</em>...]</dt>
+<dd>
+<p>Esta forma es para ver los cambios que tienes en tu árbol de trabajo relativos a la <em>&lt;confirmación&gt;</em> nombrada. Puedes usar <code>HEAD</code> para compararla con la última confirmación, o el nombre de una rama para comparar con la punta de una rama distinta.</p>
+<div class="paragraph">
+<p>Si se da <code>--merge-base</code>, en lugar de usar <em>&lt;confirmación&gt;</em>, usa la base de fusión de <em>&lt;confirmación&gt;</em> y <code>HEAD</code>. <code>git</code> <code>diff</code> <code>--merge-base</code> <code>A</code> es equivalente a <code>git</code> <code>diff</code> <code>$</code>(<code>git</code> <code>merge-base</code> <code>A</code> <code>HEAD</code>).</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] [<code>--merge-base</code>] &lt;confirmación&gt; &lt;confirmación&gt; [<code>--</code>] [<em>&lt;ruta&gt;</em>...]</dt>
+<dd>
+<p>Es para ver los cambios entre dos <em>&lt;confirmación&gt;</em> arbitrarias.</p>
+<div class="paragraph">
+<p>Si se da <code>--merge-base</code>, usa la base de fusión de las dos confirmaciones para el lado "antes". <code>git</code> <code>diff</code> <code>--merge-base</code> <code>A</code> <code>B</code> es equivalente a <code>git</code> <code>diff</code> <code>$</code>(<code>git</code> <code>merge-base</code> <code>A</code> <code>B</code>) <code>B</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] &lt;confirmación&gt; &lt;confirmación&gt;<code>...</code>&lt;confirmación&gt; [<code>--</code>] [<em>&lt;ruta&gt;</em>...]</dt>
+<dd>
+<p>Esta forma es para ver los resultados de una confirmación de fusión. La primer <em>&lt;confirmación&gt;</em> listada debe ser la fusión en sí; las dos o mas confirmaciones restantes deben ser sus padres. Algunas formas convenientes de producir el conjunto deseado de revisiones son usando los sufijos <code>@</code> y <code>^</code>!. Si <code>A</code> es una confirmación de fusión, entonces <code>git</code> <code>diff</code> <code>A</code> <code>A^@</code>, <code>git</code> <code>diff</code> <code>A^</code>! y <code>git</code> <code>show</code> <code>A</code> darán la misma diferencia combinada.</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] &lt;confirmación&gt;<code>..</code>&lt;confirmación&gt; [<code>--</code>] [<em>&lt;ruta&gt;</em>...]</dt>
+<dd>
+<p>Este es un sinónimo de la forma anterior (sin ...) para ver los cambios entre dos <em>&lt;confirmación&gt;_es arbitrarias. Si se omite _&lt;confirmación&gt;</em> en algún lado, tendrá el mismo efecto que si se usara <code>HEAD</code>.</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] &lt;confirmación&gt;<code>...</code>&lt;confirmación&gt; [<code>--</code>] [<em>&lt;ruta&gt;</em>...]</dt>
+<dd>
+<p>Esta forma es para ver los cambios en la rama que contiene hasta la segunda <em>&lt;confirmación&gt;</em>, comenzando en el ancestro común a ambas <em>&lt;confirmación&gt;_es. <code>git</code> <code>diff</code> <code>A</code><code>...</code><code>B</code> es equivalente a <code>git</code> <code>diff</code> <code>$</code>(<code>git</code> <code>merge-base</code> <code>A</code> <code>B</code>) <code>B</code>. Puedes omitir cualquier _&lt;confirmación&gt;</em>, que tendrá el mismo efecto que usar <code>HEAD</code>.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Sólo en caso que hagas algo exótico, debe notarse que toda <em>&lt;confirmación&gt;</em> en la descripción anterior, exceptuando el caso <code>--merge-base</code> y las últimas dos formas que usan la notación .., puede ser cualquier <em>&lt;árbol&gt;</em>. Un árbol de interés es al que apunta la referencia nombrada <code>AUTO_MERGE</code>, la cual se escribe por la estrategia de fusión <code>ort</code> al darse conflictos de fusión (ver <a href="git-merge.html">git-merge(1)</a>). Comparar el árbol de trabajo con <code>AUTO_MERGE</code> mostrará los cambios que has hecho hasta el momento para resolver los conflictos textuales (ver los ejemplos abajo).</p>
+</div>
+<div class="paragraph">
+<p>Para una lista mas completa de las maneras de invocar <em>&lt;confirmación&gt;</em>, ver la sección "ESPECIFICANDO REVISIONES" en <a href="gitrevisions.html">gitrevisions(7)</a>. Sin embargo, <code>diff</code> a para comparar dos <em>endpoints</em>, no rangos, y las notaciones de rangos (&lt;confirmación&gt;<code>..</code>&lt;confirmación&gt; y &lt;confirmación&gt;<code>...</code>&lt;confirmación&gt;) no significan un rango como se define en la sección "ESPECIFICANDO RANGOS" en <a href="gitrevisions.html">gitrevisions(7)</a>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>git</code> <code>diff</code> [<em>&lt;opciones&gt;</em>] <em>&lt;blob&gt;</em> <em>&lt;blob&gt;</em></dt>
+<dd>
+<p>Esta forma es para ver las diferencias entre dos contenidos en bruto de dos objetos blob.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_opciones">OPCIONES</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>-p</code></dt>
+<dt class="hdlist1"><code>-u</code></dt>
+<dt class="hdlist1"><code>--patch</code></dt>
+<dd>
+<p>Genera parche (ver <a href="#generate_patch_text_with_p">Generando texto de parche con -p</a>).
+Este es el predeterminado</p>
+</dd>
+<dt class="hdlist1"><code>-s</code></dt>
+<dt class="hdlist1"><code>--no-patch</code></dt>
+<dd>
+<p>Suprime toda la salida del mecanismo de diff. Útil para planchar la salida de comandos como <code>git</code> <code>show</code> que muestra predeterminadamente el parche, o para cancelar antes en la línea de comandos en un alias el efecto de opciones como <code>--patch</code>, <code>--stat</code>.</p>
+</dd>
+<dt class="hdlist1"><code>-U</code><em>&lt;n&gt;</em></dt>
+<dt class="hdlist1"><code>--unified=</code><em>&lt;n&gt;</em></dt>
+<dd>
+<p>Genera diffs con <em>&lt;n&gt;</em> líneas de contexto en lugar de las 3 usuales.
+Implica <code>--patch</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--output=</code><em>&lt;fichero&gt;</em></dt>
+<dd>
+<p>Salida a un fichero en específico en lugar de la salida estándar.</p>
+</dd>
+<dt class="hdlist1"><code>--output-indicator-new=</code><em>&lt;caracter&gt;</em></dt>
+<dt class="hdlist1"><code>--output-indicator-old=</code><em>&lt;caracter&gt;</em></dt>
+<dt class="hdlist1"><code>--output-indicator-context=</code><em>&lt;caracter&gt;</em></dt>
+<dd>
+<p>Especifica el caracter usado para indicar líneas nuevas, antiguas o de contexto en el parche generado. Normalmente son <code>+</code>, <code>-</code> y ' ' respectivamente.</p>
+</dd>
+<dt class="hdlist1"><code>--raw</code></dt>
+<dd>
+<p>Generar las diferencias en formato bruto.</p>
+</dd>
+<dt class="hdlist1"><code>--patch-with-raw</code></dt>
+<dd>
+<p>Sinónimo de <code>-p</code> <code>--raw</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--indent-heuristic</code></dt>
+<dd>
+<p>Habilita la heurística que aumenta los límites de fragmentos de diff para hacer los parches mas fáciles de leer. Este es el predeterminado.</p>
+</dd>
+<dt class="hdlist1"><code>--no-indent-heuristic</code></dt>
+<dd>
+<p>Deshabilita la heurística de indentación.</p>
+</dd>
+<dt class="hdlist1"><code>--minimal</code></dt>
+<dd>
+<p>Ocupa tiempo extra para asegurarse que se produce el diff más pequeño posible.</p>
+</dd>
+<dt class="hdlist1"><code>--patience</code></dt>
+<dd>
+<p>Generar diferencias mediante el algoritmo "patience diff".</p>
+</dd>
+<dt class="hdlist1"><code>--histogram</code></dt>
+<dd>
+<p>Generar diferencias mediante el algoritmo "histogram diff".</p>
+</dd>
+<dt class="hdlist1"><code>--anchored=</code><em>&lt;texto&gt;</em></dt>
+<dd>
+<p>Generar diferencias mediante el algoritmo "anchored diff".</p>
+<div class="paragraph">
+<p>Esta opción puede ser especificada más de una vez.</p>
+</div>
+<div class="paragraph">
+<p>Si una línea existe tanto en fuente como en destino, existe sólo una vez, y comienza con <em>&lt;texto&gt;</em>, éste algoritmo intenta prevenir que aparezca en la salida como un borrado o adición. Usa internamente el algoritmo "diff paciente".</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--diff-algorithm=</code>(<code>patience</code>|<code>minimal</code>|<code>histogram</code>|<code>myers</code>)</dt>
+<dd>
+<p>Elige un algoritmo de diff. La variantes son las siguientes:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>default</code></dt>
+<dt class="hdlist1"><code>myers</code></dt>
+<dd>
+<p>El algoritmo diff básico avaro. Actualmente, éste es el predeterminado.</p>
+</dd>
+<dt class="hdlist1"><code>minimal</code></dt>
+<dd>
+<p>Ocupa tiempo extra para asegurarse que se produce el diff más pequeño posible.</p>
+</dd>
+<dt class="hdlist1"><code>patience</code></dt>
+<dd>
+<p>Usa el algoritmo "diff paciente" al generar parches.</p>
+</dd>
+<dt class="hdlist1"><code>histogram</code></dt>
+<dd>
+<p>Este algoritmo extiende el algoritmo paciente para "soportar elementos comunes de baja ocurrencia".</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Por lo tanto, si configuraste la variable <code>diff.algorithm</code> a un valor no predeterminado y quieres usar el predeterminado, entonces tienes que usar la opción <code>--diff-algorithm=default</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--stat</code>[<code>=</code><em>&lt;anchura&gt;</em>[<code>,</code><em>&lt;anchura-nombre&gt;</em>[<code>,</code><em>&lt;recuento&gt;</em>]]]</dt>
+<dd>
+<p>Generate a diffstat. By default, as much space as necessary will be used for the filename part, and the rest for the graph part. Maximum width defaults to terminal width, or 80 columns if not connected to a terminal, and can be overridden by <em>&lt;width&gt;</em>. The width of the filename part can be limited by giving another width <em>&lt;name-width&gt;</em> after a comma or by setting <code>diff.statNameWidth=</code><em>&lt;name-width&gt;</em>. The width of the graph part can be limited by using <code>--stat-graph-width=</code><em>&lt;graph-width&gt;</em> or by setting <code>diff.statGraphWidth=</code><em>&lt;graph-width&gt;</em>. Using <code>--stat</code> or <code>--stat-graph-width</code> affects all commands generating a stat graph, while setting <code>diff.statNameWidth</code> or <code>diff.statGraphWidth</code> does not affect <code>git</code> <code>format-patch</code>. By giving a third parameter <em>&lt;count&gt;</em>, you can limit the output to the first <em>&lt;count&gt;</em> lines, followed by ... if there are more.</p>
+<div class="paragraph">
+<p>Estos parámetros también se puedes asignar individualmente con <code>--stat-width=</code><em>&lt;ancho&gt;</em>, <code>--stat-name-width=</code><em>&lt;nombre-ancho&gt;</em> y <code>--stat-count=</code><em>&lt;conteo&gt;</em>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--compact-summary</code></dt>
+<dd>
+<p>Da salida en el diffstat a un resumen condensado de información de encabezado extendido, como creaciones o eliminaciones de ficheros ("new" or "gone", opcionalmente <code>+l</code> si es un enlace simbólico) y cambios de modo (<code>+x</code> o <code>-x</code> para añadir o quitar el bit de ejecución respectivamente). La información se coloca entre la parte del nombre del fichero y la parte del grafo. Implica <code>--stat</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--numstat</code></dt>
+<dd>
+<p>Similar a <code>--stat</code>, pero muestra el número de líneas añadidas y borradas en notación decimal y el nombre de ruta sin abreviación, para hacerlo más amigable a la máquina. Para ficheros binarios, saca dos <code>-</code> en lugar de decir <code>00</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--shortstat</code></dt>
+<dd>
+<p>Da salida sólo a la última línea del formato <code>--stat</code> conteniendo el número total de ficheros modificados, así como el número de líneas añadidas y borradas.</p>
+</dd>
+<dt class="hdlist1"><code>-X</code> [&lt;parámetro&gt;<code>,..</code>.]</dt>
+<dt class="hdlist1"><code>--dirstat</code>[<code>=</code>&lt;parámetro&gt;<code>,..</code>.]</dt>
+<dd>
+<p>Da salida a la distribución de la cantidad relativa de cambios por cada sub-directorio. El comportamiento de <code>--dirstat</code> puede ser personalizado pasando una lista de parámetros separados por coma. Los predeterminados se controlan con la variable de configuración <code>diff.dirstat</code> (ver <a href="git-config.html">git-config(1)</a>). Están disponibles los parámetros siguientes:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>changes</code></dt>
+<dd>
+<p>Calcula los números de dirstat contando las líneas que han sido eliminadas del origen, o agregadas en el destino. Esto ignora la cantidad de movimientos de código puro dentro del fichero. En otras palabras, el reacomodo de líneas en un fichero no cuenta tanto como otros cambios. Este es el comportamiento predeterminado cuando no se dan parámetros.</p>
+</dd>
+<dt class="hdlist1"><code>lines</code></dt>
+<dd>
+<p>Calcula los números de dirstat haciendo el análisis de diferencias regular basado en líneas, y sumando los conteos de líneas quitadas/agregadas. (Para ficheros binarios, cuenta en cambio pedazos de 64 bytes, ya que los ficheros binarios no tienen el concepto natural de líneas). Este es un funcionamiento de <code>--dirstat</code> mas costoso que <code>changes</code>, pero el re-acomodo de líneas dentro de un fichero cuenta tanto como otros cambios. La salida resultante es consistente con lo que obtienes de las otras opciones <code>--</code>*stat.</p>
+</dd>
+<dt class="hdlist1"><code>files</code></dt>
+<dd>
+<p>Calcula los números de dirstat contando el número de ficheros modificados. Cada fichero modificado cuenta igualmente en el análisis de dirstat. Este es el funcionamiento <code>--dirstat</code> computacionalmente más barato, ya que no tiene que mirar el contenido del fichero en absoluto.</p>
+</dd>
+<dt class="hdlist1"><code>cumulative</code></dt>
+<dd>
+<p>Cuenta cambios en un directorio hijo también para el directorio padre. Nota que cuando se usa <code>cumulative</code>, la suma de los porcentajes reportados puede exceder 100%. El comportamiento predeterminado (no-acumulativo) se puede especificar con el parámetro <code>noncumulative</code>.</p>
+</dd>
+<dt class="hdlist1"><em>&lt;límite&gt;</em></dt>
+<dd>
+<p>Un parámetro entero especifica un porcentaje de corte (predeterminado a 3%). Directorios que contribuyan menos que éste porcentaje de cambios no se muestran en la salida.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Ejemplo: El siguiente contará ficheros modificados, ignorando directorios con menos del 10% de la cantidad total de ficheros modificados, y acumulando conteos en directorios hijo en los directorios padre: <code>--dirstat=files,10,cumulative</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--cumulative</code></dt>
+<dd>
+<p>Sinónimo de <code>--dirstat=cumulative</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--dirstat-by-file</code>[<code>=</code>&lt;parámetro&gt;<code>,..</code>.]</dt>
+<dd>
+<p>Sinónimo de <code>--dirstat=files,</code>&lt;parámetro&gt;<code>,..</code>..</p>
+</dd>
+<dt class="hdlist1"><code>--summary</code></dt>
+<dd>
+<p>Muestra un resumen condensado de información de encabezado extendido como creaciones, renombrados y cambios de modo.</p>
+</dd>
+<dt class="hdlist1"><code>--patch-with-stat</code></dt>
+<dd>
+<p>Sinónimo de <code>-p</code> <code>--stat</code>.</p>
+</dd>
+<dt class="hdlist1"><code>-z</code></dt>
+<dd>
+<p>Cuando se da <code>--raw</code>, <code>--numstat</code>, <code>--name-only</code> o <code>--name-status</code>,
+no manipula los nombres de ruta y usa NULs como salida de terminadores de campo.</p>
+<div class="paragraph">
+<p>Sin esta opción, los nombres de ruta con caracteres "inusuales" son entrecomillados como se explica para la variable de configuración <code>core.quotePath</code> (ver <a href="git-config.html">git-config(1)</a>).</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--name-only</code></dt>
+<dd>
+<p>Muestra sólo el nombre de cada fichero modificado en el árbol post-imagen. Los nombres de ficheros suelen codificarse con UTF-8. Para mas información ver la discusión sobre codificación en la página del manual de <a href="git-log.html">git-log(1)</a>.</p>
+</dd>
+<dt class="hdlist1"><code>--name-status</code></dt>
+<dd>
+<p>Muestra sólo nombre(s) y estatus de cada fichero modificado. Ver la descripción de la opción <code>--diff-filter</code> donde se explica el significado de las letras de estatus. Así como <code>--name-only</code> los nombres de fichero se suelen codificar en UTF-8.</p>
+</dd>
+<dt class="hdlist1"><code>--submodule</code>[<code>=</code><em>&lt;formato&gt;</em>]</dt>
+<dd>
+<p>Especifica cómo se muestran las diferencias en submódulos. Cuando se especifica <code>--submodule=short</code> se usa el formato <code>short</code>. Este formato sólo muestra nombres de los commits al principio y al fin del rango. Cuando se especifica <code>--submodule</code> o <code>--submodule=log</code> se usa el formato <code>log</code>. Este formato lista los commits en el rango como lo hace <a href="git-submodule.html">git-submodule(1)</a> <code>summary</code>. Cuando se especifica <code>--submodule=diff</code> se usa el formato <code>diff</code>. Este formato muestra un diff en-linea de los cambios en el contenido del submódulo entre el rango del commit. Se predetermina a <code>diff.submodule</code> o al formato <code>short</code> si la opción de configuración no es asignada.</p>
+</dd>
+<dt class="hdlist1"><code>--color</code>[<code>=</code><em>&lt;cuando&gt;</em>]</dt>
+<dd>
+<p>Muestra diff coloreado. <code>--color</code> (ej. sin <code>=</code><em>&lt;cuando&gt;</em>) es lo mismo que <code>--color=always</code>. <em>&lt;cuando&gt;</em> puede ser uno de <code>always</code>, <code>never</code> o <code>auto</code>.
+Puede se modificado por las configuraciones <code>color.ui</code> y
+<code>color.diff</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--no-color</code></dt>
+<dd>
+<p>Desactiva diff coloreado.
+Puede ser usado para sobre-escribir configuraciones.
+Es lo mismo que <code>--color=never</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--color-moved</code>[<code>=</code><em>&lt;modo&gt;</em>]</dt>
+<dd>
+<p>Los renglones de código trasladados se señalan con un color distinto.
+Puede ser modificado por la configuración <code>diff.colorMoved</code>.
+El <em>&lt;modo&gt;</em> se predetermina a <code>no</code> si no se da la opción
+y a <code>zebra</code> si se da la opción sin modo.
+El modo debe ser uno de:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>no</code></dt>
+<dd>
+<p>Lineas movidas no son resaltadas.</p>
+</dd>
+<dt class="hdlist1"><code>default</code></dt>
+<dd>
+<p>Es un sinónimo para <code>zebra</code>. Esto puede cambiar a un modo mas sensible en el futuro.</p>
+</dd>
+<dt class="hdlist1"><code>plain</code></dt>
+<dd>
+<p>Cualquier linea añadida en una ubicación y que haya sido removida en otra ubicación será coloreada con <code>color.diff.newMoved</code>. Similarmente <code>color.diff.oldMoved</code> será usado para líneas removidas que fueron añadidas en algún otro lado en el diff. Este modo toma cualquier línea movida, pero no es muy útil en un revisión para determinar si un bloque de código fue movido sin permutación.</p>
+</dd>
+<dt class="hdlist1"><code>blocks</code></dt>
+<dd>
+<p>Bloques de texto movido de al menos 20 caracteres alfanuméricos se detectan codiciosamente. Los bloques detectados se pintan usando cualquier color <code>color.diff.</code>(<code>old</code>|<code>new</code>)<code>Moved</code>. No se pueden distinguir bloques adyacentes.</p>
+</dd>
+<dt class="hdlist1"><code>zebra</code></dt>
+<dd>
+<p>Los bloques de texto movido se detectan como en el modo <code>blocks</code>. Los bloques se colorean con cualquier color <code>color.diff.</code>(<code>old</code>|<code>new</code>)<code>Moved</code> o <code>color.diff.</code>(<code>old</code>|<code>new</code>)<code>MovedAlternative</code>. El cambio entre los dos colores indica que fue detectado un bloque nuevo.</p>
+</dd>
+<dt class="hdlist1"><code>dimmed-zebra</code></dt>
+<dd>
+<p>Similar a <code>zebra</code>, pero se hace un oscurecimiento adicional de partes no-interesantes de código movido. Las líneas limitantes de dos bloques adyacentes se consideran interesantes, el resto es no-interesante. <code>dimmed_zebra</code> es un sinónimo obsoleto.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>--no-color-moved</code></dt>
+<dd>
+<p>Apaga la detección de movimiento. Puede ser usada para sobre-escribir configuraciones. Es lo mismo que <code>--color-moved=no</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--color-moved-ws=</code><em>&lt;modo&gt;</em><code>,..</code>.</dt>
+<dd>
+<p>Este configura como el espacio en blanco es ignorado cuando se hace la detección de movimiento para <code>--color-moved</code>.
+Puede ser asignado por la configuración <code>diff.colorMovedWS</code>.
+Estos modos pueden se dados como una lista separada por comas:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>no</code></dt>
+<dd>
+<p>No ignora espacio en blanco cuando se hace detección de movimiento.</p>
+</dd>
+<dt class="hdlist1"><code>ignore-space-at-eol</code></dt>
+<dd>
+<p>Ignorar cambios de espacios en blanco al finalizar renglón.</p>
+</dd>
+<dt class="hdlist1"><code>ignore-space-change</code></dt>
+<dd>
+<p>Ignora cambios en la cantidad de espacios en blanco. Esto ignora espacio en blanco al final de la línea, y considera todas las otras secuencias de uno o mas caracteres de espacio en blanco como equivalentes.</p>
+</dd>
+<dt class="hdlist1"><code>ignore-all-space</code></dt>
+<dd>
+<p>Ignora espacios en blanco al comparar líneas. Esto ignora diferencias incluso si una línea tiene espacio en blanco donde la otra no tiene alguno.</p>
+</dd>
+<dt class="hdlist1"><code>allow-indentation-change</code></dt>
+<dd>
+<p>Inicialmente ignora cualquier espacio en blanco en la detección de movimiento, y luego agrupa los bloques de código movido sólo en un bloque si el cambio en espacios en blanco es el mismo por línea. Esto es incompatible con los otros modos.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>--no-color-moved-ws</code></dt>
+<dd>
+<p>No ignorar espacio en blanco durante detección de movimiento. Esto puede usarse para anular ajustes de configuración. Es lo mismo que <code>--color-moved-ws=no</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--word-diff</code>[<code>=</code><em>&lt;modo&gt;</em>]</dt>
+<dd>
+<p>De manera predeterminada, las palabras se delimitan por espacios; consulte <code>--word-diff-regex</code> más abajo. El <em>&lt;modo&gt;</em> predeterminado es <code>plain</code>, y debe ser uno de:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>color</code></dt>
+<dd>
+<p>Resaltar palabras modificadas usando sólo colores. Implica <code>--color</code>.</p>
+</dd>
+<dt class="hdlist1"><code>plain</code></dt>
+<dd>
+<p>Mostrar palabras como [<code>-removed-</code>] y {<code>added</code>}. No intenta escapar delimitadores si aparecen en la entrada, entonces la salida puede ser ambigua.</p>
+</dd>
+<dt class="hdlist1"><code>porcelain</code></dt>
+<dd>
+<p>Usa un formato especial basado en líneas intencionado para consumo de scripts. Las acciones añadir/eliminar/sin-modificar se imprimen en el formato usual diff unificado, comenzando con un caracter <code>+</code>/<code>-</code>/` ` al principio de la línea y extendiendo al final de la línea. Nuevas líneas se representan con una tilde <code>~</code> en una línea misma.</p>
+</dd>
+<dt class="hdlist1"><code>none</code></dt>
+<dd>
+<p>Desactiva de nuevo las diferencias entre palabras.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Nota que a pesar del nombre del primer modo, el color -si esta habilitado- se usa para resaltar las partes cambiadas en todos los modos.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--word-diff-regex=</code>&lt;expresión-regular&gt;</dt>
+<dd>
+<p>Usa <em>&lt;expresión-regular&gt;</em> para decidir qué es una palabra, en lugar de considerar no-espacios en blanco seguidos como una palabra. También implica <code>--word-diff</code> a menos que ya haya sido habilitado.</p>
+<div class="paragraph">
+<p>Cada coincidencia sin traslape de <em>&lt;expresión-regular&gt;</em> se considera una palabra. Lo que esté entre esas coincidencias se considera espacio en blanco y es ignorado(!) para propósito de encontrar diferencias. Querrás agregar |[<code>^</code>[<code>:space:</code>]] a tu expresión regular para asegurarte que coincida todos lo caracteres que no son espacio en blanco. Una coincidencia que contenga salto de línea es silenciosamente truncada(!) en el salto de línea.</p>
+</div>
+<div class="paragraph">
+<p>Por ejemplo, <code>--word-diff-regex=.</code> tratará cada carácter como si fuese una palabra y, por tanto, mostrará las diferencias carácter por carácter.</p>
+</div>
+<div class="paragraph">
+<p>La expresión regular también puede asignarse por un controlador de diff u opción de configuración, ver <a href="gitattributes.html">gitattributes(5)</a> o <a href="git-config.html">git-config(1)</a>. Dándolo explícitamente anula cualquier controlador de diff u opción de configuración. Los controladores de diff anulan ajustes de configuración.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--color-words</code>[<code>=</code>&lt;expresión-regular&gt;]</dt>
+<dd>
+<p>Equivalente a <code>--word-diff=color</code> mas (si se especificó una expresión regular) <code>--word-diff-regex=</code>&lt;expresión-regular&gt;.</p>
+</dd>
+<dt class="hdlist1"><code>--no-renames</code></dt>
+<dd>
+<p>Apaga la detección de renombramiento, incluso cuando el fichero de configuración predetermina hacerlo.</p>
+</dd>
+<dt class="hdlist1"><code>--</code>[<code>no-</code>]<code>rename-empty</code></dt>
+<dd>
+<p>Si usar blobs vacíos como fuente de renombramiento.</p>
+</dd>
+<dt class="hdlist1"><code>--check</code></dt>
+<dd>
+<p>Advierte si los cambios introducidos conflictúan marcadores o errores de espacio en blanco. Lo que es considerado error de espacio en blanco es controlado por la configuración <code>core.whitespace</code>. Predeterminadamente, espacios en blanco al final (incluyendo líneas que consisten únicamente en espacios en blanco) y un caracter espacio que es inmediatamente seguido por una caracter tabulador dentro del indentado inicial de una línea, son considerados errores de espacio en blanco. Sale con un estatus no-cero si se encuentran problemas. No compatible con <code>--exit-code</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--ws-error-highlight=</code><em>&lt;tipo&gt;</em></dt>
+<dd>
+<p>Resalta errores de espacio en blanco en las líneas <code>context</code>, <code>old</code> ` <code>o</code> `new del diff. Valores múltiples se separan con coma, <code>none</code> restablece valores previos, <code>default</code> restablece la lista a <code>new</code> y <code>all</code> es una forma corta de <code>old,new,context</code>. Cuando no se da esta opción y no se asigna la variable de configuración <code>diff.wsErrorHighlight</code>, sólo se resaltan errores de espacio en blanco en líneas <code>new</code>. Los errores de espacio en blanco se colorean con <code>color.diff.whitespace</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--full-index</code></dt>
+<dd>
+<p>En lugar del primer puñado de caracteres, muestra los nombres completos pre- y post-imágen de objeto blob en la línea del índice cuando se genera la salida del formato de parche.</p>
+</dd>
+<dt class="hdlist1"><code>--binary</code></dt>
+<dd>
+<p>Además de <code>--full-index</code>, saca un diff binario que puede ser aplicado con <code>git-apply</code>.
+Implica <code>--patch</code>.</p>
+</dd>
+<dt class="hdlist1"><code>--abbrev</code>[<code>=</code><em>&lt;n&gt;</em>]</dt>
+<dd>
+<p>En lugar de mostrar el nombre de objeto completo en 40 bytes hexadecimal en la salida del formato diff-raw y en las líneas de encabezado de diff-tree, muestra el prefijo más corto que es de por lo menos <em>&lt;n&gt;</em> dígitos hexadecimales de largo que refiere únicamente al objeto. En el formato diff-patch, <code>--full-index</code> toma mayor precedencia, ej. si se especifica <code>--full-index</code>, se mostrarán los nombres completos de blob sin importar <code>--abbrev</code>. Un número no-predeterminado de dígitos puede especificarse con <code>--abbrev=</code><em>&lt;n&gt;</em>.</p>
+</dd>
+<dt class="hdlist1"><code>-B</code>[<em>&lt;n&gt;</em>][<code>/</code><em>&lt;m&gt;</em>]</dt>
+<dt class="hdlist1"><code>--break-rewrites</code>[<code>=</code>[<em>&lt;n&gt;</em>][<code>/</code><em>&lt;m&gt;</em>]]</dt>
+<dd>
+<p>Rompe cambios de reescritura completa en pares de borrado y creado. Esto sirve para dos propósitos:</p>
+<div class="paragraph">
+<p>Afecta la manera en que un cambio suma al total de reescrituras de un fichero, no como una serie de borrados e inserciones mezcladas con unas cuantas líneas que resultan coincidir textualmente con el contexto, sino como un sólo borrado de todo lo anterior seguido por una sola inserción de todo lo nuevo, y el número &lt;m&gt; controla éste aspecto de la opción <code>-B</code> (predeterminado a 60%). <code>-B/70</code>% especifica que menos del 30% del original debe permanecer en el resultado para que Git lo considere una reescritura total (ej. de lo contrario el parche resultante sería una serie de borrados e inserciones mezclada con líneas de contexto).</p>
+</div>
+<div class="paragraph">
+<p>Cuando se usa con <code>-M</code>, un fichero totalmente reescrito se considera la fuente de un cambio de nombre (usualmente <code>-M</code> sólo considera un fichero que desaparece como fuente de un cambio de nombre), y el número &lt;n&gt; controla éste aspecto de la opción <code>-B</code> (predeterminado a 50%). <code>-B20</code>% especifica que un cambio con adición y eliminación comparado con el 20% o mas del tamaño de fichero es elegible para ser seleccionado como una posible fuente de cambio de nombre a otro fichero.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>-M</code>[<em>&lt;n&gt;</em>]</dt>
+<dt class="hdlist1"><code>--find-renames</code>[<code>=</code><em>&lt;n&gt;</em>]</dt>
+<dd>
+<p>Detectar cambios de nombre.
+Si se especifica <em>&lt;n&gt;</em>, es un límite sobre el índice de semejanza
+(ej. la cantidad de adiciones/eliminaciones comparadas con
+el tamaño del fichero). Por ejemplo, <code>-M90</code>% significa que Git
+debe considerar un par eliminación/adición como un renombramiento
+si mas del 90% del fichero no ha cambiado. Sin el signo %, el número
+se leerá como una fraccion, con un punto decimal antes de él. Ej., <code>-M5</code>
+será 0.5, que por lo tanto es lo mismo que <code>-M50</code>%. Similarmente, <code>-M05</code> es
+lo mismo que <code>-M5</code>%. Para limitar la detección a renombramientos exactos,
+use <code>-M100</code>%. El índice de semejanza predeterminado es 50%.</p>
+</dd>
+<dt class="hdlist1"><code>-C</code>[<em>&lt;n&gt;</em>]</dt>
+<dt class="hdlist1"><code>--find-copies</code>[<code>=</code><em>&lt;n&gt;</em>]</dt>
+<dd>
+<p>Detecta tanto copias como renombramientos. Ver también <code>--find-copies-harder</code>. Si se especifica <em>&lt;n&gt;</em>, tiene el mismo significado que <code>-M</code><em>&lt;n&gt;</em>.</p>
+</dd>
+<dt class="hdlist1"><code>--find-copies-harder</code></dt>
+<dd>
+<p>Por razones de desempeño, predeterminadamente, la opción <code>-C</code> busca copias sólo si el fichero original de la copia fue modificado en el mismo conjunto de cambios. Esta bandera hace que el comando inspeccione ficheros sin modificar como candidatos a fuente de copia. Esta es una operación muy costosa para proyectos grandes, así que usarla con precaución. Dar más de una opción <code>-C</code> tiene el mismo efecto.</p>
+</dd>
+<dt class="hdlist1"><code>-D</code></dt>
+<dt class="hdlist1"><code>--irreversible-delete</code></dt>
+<dd>
+<p>Omit the preimage for deletes, i.e. print only the header but not the diff between the preimage and <code>/dev/null</code>. The resulting patch is not meant to be applied with <code>patch</code> or <code>git</code> <code>apply</code>; this is solely for people who want to just concentrate on reviewing the text after the change. In addition, the output obviously lacks enough information to apply such a patch in reverse, even manually, hence the name of the option.</p>
+<div class="paragraph">
+<p>Cuando se usa junto con <code>-B</code>, omite también la preimagen en la parte de borrado de un par borrar/crear.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>-l</code>&lt;número&gt;</dt>
+<dd>
+<p>Las opciones <code>-M</code>`y `-C involucran algunos pasos preliminares que pueden detectar subconjuntos de renombramientos/copias económicamente, seguido de una porción exhaustiva de iteraciones que compara todos los destinos remanentes sin pareja con todos los orígenes relevantes. (Para renombramientos, sólo los orígenes remanentes sin pareja son relevantes; para copias, todos los orígenes son relevantes). Para N orígenes y destinos, esta verificación exhaustiva es O(N^2). Esta opción previene la ejecución de la porción exhaustiva de detección de renombramiento/copia si el número de ficheros orígenes/destino involucrado excede el número especificado. Es predeterminado a <code>diff.renameLimit</code>. Nota que un valor de 0 es tratado como ilimitado.</p>
+</dd>
+<dt class="hdlist1"><code>--diff-filter=</code>[(<code>A</code>|<code>C</code>|<code>D</code>|<code>M</code>|<code>R</code>|<code>T</code>|<code>U</code>|<code>X</code>|<code>B</code>)<code>...</code>[*]]</dt>
+<dd>
+<p>Selecciona sólo los ficheros que son Agregados(<code>A</code>), Copiados (<code>C</code>), eliminados (<code>D</code>), Modificados (<code>M</code>), Renombrados (<code>R</code>), tienen su tipo (ej. fichero regular, enlace simbólico, submódulo, &#8230;&#8203;) cambiado (<code>T</code>), están sin fusionar (<code>U</code>), son desconocidos (<code>X</code>), o tienen su pareja rota (<code>B</code>). Se puede usar cualquier combinación de los caracteres filtro (incluyendo ninguno). Cuando se agrega *(todo-o-nada) a la combinación, todas las rutas son seleccionadas si hay algún fichero que cumpla otro criterio en la comparación; si no hay fichero que cumpla otro criterio, nada es seleccionado.</p>
+<div class="paragraph">
+<p>También, estas letras en mayúsculas pueden ser en minúscula para excluir. Ej. <code>--diff-filter=ad</code> excluye rutas añadidas y eliminadas.</p>
+</div>
+<div class="paragraph">
+<p>Nota que no todos los diffs pueden presentar todos los tipos. Por lo tanto, entradas copiadas y renombradas no pueden aparecer si la detección para esos tipos está deshabilitada.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>-S</code><em>&lt;cadena&gt;</em></dt>
+<dd>
+<p>Busca diferencias que cambian el número de ocurrencias de la <em>&lt;cadena&gt;</em> especificada (ej. adición/eliminación) en un fichero. Destinada para el uso de creadores de scripts.</p>
+<div class="paragraph">
+<p>Es útil cuando buscas un bloque exacto de código (como un struct), y quieres conocer el historial de ese bloque desde la primera vez que entró en existencia: use la característica iterativamente para alimentar el bloque de interés de vuelta a la preimagen <code>-S</code>, y seguir hasta que obtengas la primera versión del bloque.</p>
+</div>
+<div class="paragraph">
+<p>También se buscan ficheros binarios.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>-G</code>&lt;expresión-regular&gt;</dt>
+<dd>
+<p>Busca diferencias cuyo texto de parche contenga líneas agregadas/quitadas que coincidan <em>&lt;expresión-regular&gt;</em>.</p>
+<div class="paragraph">
+<p>Para ilustrar la diferencia entre <code>-S</code>&lt;expresión-regular&gt; <code>--pickaxe-regex</code> y <code>-G</code>&lt;expresión-regular&gt;, considere una confirmación con el diff siguiente en el mismo fichero:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>+    return frotz(nitfol, two-&gt;ptr, 1, 0);
+...
+-    hit = frotz(nitfol, mf2.ptr, 1, 0);</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Mientras <code>git</code> <code>log</code> <code>-G</code>"frotz\(<code>nitfol</code>" mostrará éste commit, <code>git</code> <code>log</code> <code>-S</code>"frotz\(<code>nitfol</code>" <code>--pickaxe-regex</code> no lo hará (porque el número de ocurrencias de esa cadena no cambió).</p>
+</div>
+<div class="paragraph">
+<p>A menos que se proporcione <code>--text</code>, parches de ficheros binarios sin un filtro de conversión de texto serán ignorados.</p>
+</div>
+<div class="paragraph">
+<p>Ver la entrada <em>pickaxe</em> en <a href="gitdiffcore.html">gitdiffcore(7)</a> para mas información.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--find-object=</code><em>&lt;id-de-objeto&gt;</em></dt>
+<dd>
+<p>Busca diferencias que cambien el número de ocurrencias del objeto especificado. Similar a <code>-S</code>, solo que el argumento es diferente en que no busca una cadena específica, sino un identificador de objeto específico.</p>
+<div class="paragraph">
+<p>El objeto puede ser un blob o un commit de submódulo. Implica la opción <code>-t</code> en <code>git-log</code> para también buscar árboles.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--pickaxe-all</code></dt>
+<dd>
+<p>Cuando <code>-S</code> o <code>-G</code> encuentra un cambio, muestra todos los cambios en ese conjunto de cambios, no sólo los ficheros que contienen el cambio en <em>&lt;cadena&gt;</em>.</p>
+</dd>
+<dt class="hdlist1"><code>--pickaxe-regex</code></dt>
+<dd>
+<p>Trata la <em>&lt;cadena&gt;</em> dada en <code>-S</code> como una expresión regular extendida de POSIX para coincidir.</p>
+</dd>
+<dt class="hdlist1"><code>-O</code><em>&lt;fichero-de-ordenamiento&gt;</em></dt>
+<dd>
+<p>Controla el orden en el que aparecen los ficheros en la salida. Esto anula la variable de configuración <code>diff.orderFile</code> (ver <a href="git-config.html">git-config(1)</a>). Para cancelar <code>diff.orderFile</code>, use <code>-O/dev/null</code>.</p>
+<div class="paragraph">
+<p>El orden de salida es determinado por el orden de patrones glob en <em>&lt;fichero-de-ordenamiento&gt;</em>. Todos los ficheros con nombres de ruta que coincidan el primer patrón salen primero, todos los ficheros con nombres de ruta que coincidan el segundo patrón (pero no el primero) salen después, y así sucesivamente. Todos los ficheros con nombres de ruta que no coincidan con algún patrón salen al último, como si hubiera implícito un patrón coincide-todo al final del fichero. Si varios nombres de ruta tienen el mismo rango (coinciden en el mismo patrón pero no en patrones anteriores), su orden de salida respecto al otro es el orden normal.</p>
+</div>
+<div class="paragraph">
+<p><em>&lt;fichero-de-ordenamiento&gt;</em> es analizado como sigue:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>Líneas en blanco son ignoradas, que se pueden usar como separadores por legibilidad.</p>
+</li>
+<li>
+<p>Líneas que comiencen con hash ("#") son ignoradas, que se pueden usar para comentarios. Agregue una diagonal invertida ("\") al inicio del patrón si comienza con un hash.</p>
+</li>
+<li>
+<p>Cada línea contiene un solo patrón.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Los patrones tienen la misma sintaxis y semántica que los patrones usados para <code>fnmatch</code>(3) sin la bandera <code>FNM_PATHNAME</code>, excepto que un nombre de ruta también coincida con un patrón si se le quita cualquier cantidad de componentes de ruta al final. Por ejemplo, el patrón "<code>foo</code>*bar" coincide "<code>fooasdbar</code>" y "<code>foo/bar/baz/asdf</code>" pero no "<code>foobarx</code>".</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>--skip-to=</code><em>&lt;fichero&gt;</em></dt>
+<dt class="hdlist1"><code>--rotate-to=</code><em>&lt;fichero&gt;</em></dt>
+<dd>
+<p>Descarta de la salida los ficheros que están antes que el <em>&lt;fichero&gt;</em> nombrado (ej. <em>skipt to</em>), o los mueve al final de la salida (ej. <em>rotate to</em>). Estas opciones se inventaron primordialmente para uso del comando <code>git</code> <code>difftool</code>, y pueden no ser útiles de otra forma.</p>
+</dd>
+<dt class="hdlist1"><code>-R</code></dt>
+<dd>
+<p>Intercambia dos entradas; esto es, muestra diferencias entre el índice o fichero en disco y el contenido del árbol.</p>
+</dd>
+<dt class="hdlist1"><code>--relative</code>[<code>=</code><em>&lt;ruta&gt;</em>]</dt>
+<dt class="hdlist1"><code>--no-relative</code></dt>
+<dd>
+<p>Cuando se ejecuta desde un subdirectorio del proyecto, se puede decir que se excluyan cambios fuera del directorio y mostrar los nombres de ruta relativos a él con ésta opción. Cuando no estas en un subdirectorio (ej. en un repositorio básico), puedes decir a cuál subdirectorio hacer relativa la salida dando una <em>&lt;ruta&gt;</em> como argumento. Se puede usar <code>--no-relative</code> para contrarrestar ambas opciones de configuración <code>diff.relative</code> y <code>--relative</code> previo.</p>
+</dd>
+<dt class="hdlist1"><code>-a</code></dt>
+<dt class="hdlist1"><code>--text</code></dt>
+<dd>
+<p>Tratar todos los ficheros como si fueran de texto.</p>
+</dd>
+<dt class="hdlist1"><code>--ignore-cr-at-eol</code></dt>
+<dd>
+<p>Ignora retornos de carro al final de la línea al comparar.</p>
+</dd>
+<dt class="hdlist1"><code>--ignore-space-at-eol</code></dt>
+<dd>
+<p>Ignorar cambios de espacios en blanco al finalizar renglón.</p>
+</dd>
+<dt class="hdlist1"><code>-b</code></dt>
+<dt class="hdlist1"><code>--ignore-space-change</code></dt>
+<dd>
+<p>Ignora cambios en la cantidad de espacios en blanco. Esto ignora espacio en blanco al final de la línea, y considera todas las otras secuencias de uno o mas caracteres de espacio en blanco como equivalentes.</p>
+</dd>
+<dt class="hdlist1"><code>-w</code></dt>
+<dt class="hdlist1"><code>--ignore-all-space</code></dt>
+<dd>
+<p>Ignora espacios en blanco al comparar líneas. Esto ignora diferencias incluso si una línea tiene espacio en blanco donde la otra no tiene alguno.</p>
+</dd>
+<dt class="hdlist1"><code>--ignore-blank-lines</code></dt>
+<dd>
+<p>Ignorar cambios cuyos renglones están todos vacíos.</p>
+</dd>
+<dt class="hdlist1"><code>-l</code>&lt;expresión-regular&gt;</dt>
+<dt class="hdlist1"><code>--ignore-matching-lines=</code>&lt;expresión-regular&gt;</dt>
+<dd>
+<p>Ignora cambios donde todas las líneas coincidan <em>&lt;expresión-regular&gt;</em>. Esta opción puede especificarse mas de una vez.</p>
+</dd>
+<dt class="hdlist1"><code>--inter-hunk-context=</code>&lt;número&gt;</dt>
+<dd>
+<p>Muestra el contexto entre pedazos de diferencia, hasta el <em>&lt;número&gt;</em> especificado de líneas, a modo de fusionar pedazos cercanos. Predeterminado a `diff.interHunkContext`o 0 si no se configura la opción.</p>
+</dd>
+<dt class="hdlist1"><code>-W</code></dt>
+<dt class="hdlist1"><code>--function-context</code></dt>
+<dd>
+<p>Mostrar la función completa como líneas de contexto para cada cambio. Los nombres de función se determinan de la misma manera que <code>git</code> <code>diff</code> maneja encabezados de pedazos de parche (ver "Definiendo un encabezado de pedazo personalizado" en <a href="gitattributes.html">gitattributes(5)</a>).</p>
+</dd>
+<dt class="hdlist1"><code>--exit-code</code></dt>
+<dd>
+<p>Hace al programa salir con códigos similares a <code>diff</code>(1). Esto es, sale con 1 si hubo diferencias y 0 significa sin diferencias.</p>
+</dd>
+<dt class="hdlist1"><code>--quiet</code></dt>
+<dd>
+<p>Deshabilita toda salida del programa. Implica <code>--exit-code</code>. Deshabilita la ejecución de diferencias externas auxiliares cuyo código de salida no es confiable, ej. su respectiva opción de configuración <code>diff.trustExitCode</code> o <code>diff.</code><em>&lt;controlador&gt;</em>.<code>trustExitCode</code> o la variable de ambiente <code>GIT_EXTERNAL_DIFF_TRUST_EXIT_CODE</code> es falsa.</p>
+</dd>
+<dt class="hdlist1"><code>--ext-diff</code></dt>
+<dd>
+<p>Permite la ejecución de un diff auxiliar externo. Si configuras un controlador de diff externo con <a href="gitattributes.html">gitattributes(5)</a>, necesitas usar esta opción con <a href="git-log.html">git-log(1)</a> y compañía.</p>
+</dd>
+<dt class="hdlist1"><code>--no-ext-diff</code></dt>
+<dd>
+<p>Rechaza controladores de diff externos.</p>
+</dd>
+<dt class="hdlist1"><code>--textconv</code></dt>
+<dt class="hdlist1"><code>--no-textconv</code></dt>
+<dd>
+<p>Permite (o rechaza) que se ejecuten filtros de conversión de texto externos cuando se comparan ficheros binarios. Ver <a href="gitattributes.html">gitattributes(5)</a> para detalles. Dado que filtros conversores de texto son típicamente unidireccionales, la diferencia resultante es adecuada para consumo humano, pero no puede ser aplicada. Por esta razón, filtros textconv se habilitan predeterminadamente sólo para <a href="git-diff.html">git-diff(1)</a> and <a href="git-log.html">git-log(1)</a>, pero no para <a href="git-format-patch.html">git-format-patch(1)</a> o comandos de plomería de diff.</p>
+</dd>
+<dt class="hdlist1"><code>--ignore-submodules</code>[<code>=</code>(<code>none</code>|<code>untracked</code>|<code>dirty</code>|<code>all</code>)]</dt>
+<dd>
+<p>Ignora cambios en submódulos en la generación de diferencias. El predeterminado es <code>all</code>. Usando <code>none</code> considerará el submódulo modificado ya sea cuando contenga ficheros sin rastreo o modificados, o su <code>HEAD</code> difiera de la confirmación registrada en el superproyecto y pueda se usada para sobremontar cualquiera de las configuraciones de la opción <code>ignore</code> en <a href="git-config.html">git-config(1)</a> o <a href="gitmodules.html">gitmodules(5)</a>. Cuando se usa <code>untracked</code> los submódulos no son considerados sucios cuando sólo contienen contenido sin rastreo (pero aún son escaneados para contenido modificado). Usando <code>dirty</code>, ignora todos los cambios al árbol de trabajo de submódulos, sólo se muestran cambios a las confirmaciones almacenadas en el superproyecto (este fue el comportamiento hasta 1.7.0). Usando <code>all</code> oculta todos los cambios a submódulos.</p>
+</dd>
+<dt class="hdlist1"><code>--src-prefix=</code><em>&lt;prefijo&gt;</em></dt>
+<dd>
+<p>Mostrar el <em>&lt;prefijo&gt;</em> de origen indicado en lugar de "a/".</p>
+</dd>
+<dt class="hdlist1"><code>--dst-prefix=</code><em>&lt;prefijo&gt;</em></dt>
+<dd>
+<p>Mostrar el <em>&lt;prefijo&gt;</em> de destino indicado en lugar de "b/".</p>
+</dd>
+<dt class="hdlist1"><code>--no-prefix</code></dt>
+<dd>
+<p>No mostrar ningún prefijo de origen o de destino.</p>
+</dd>
+<dt class="hdlist1"><code>--default-prefix</code></dt>
+<dd>
+<p>Usa los prefijos predeterminados de origen y destino ("a/" y "b/"). Esto anula variables de configuración como <code>diff.noprefix</code>, <code>diff.srcPrefix</code>, <code>diff.dstPrefix</code> y <code>diff.mnemonicPrefix</code> (ver <a href="git-config.html">git-config(1)</a>).</p>
+</dd>
+<dt class="hdlist1"><code>--line-prefix=</code><em>&lt;prefijo&gt;</em></dt>
+<dd>
+<p>Anteponer un <em>&lt;prefijo&gt;</em> adicional a cada línea de salida.</p>
+</dd>
+<dt class="hdlist1"><code>--ita-invisible-in-index</code></dt>
+<dd>
+<p>Predeterminadamente las entradas agregadas por <code>git</code> <code>add</code> <code>-N</code> aparecen como un fichero vacío existente en <code>git</code> <code>diff</code> y como un fichero nuevo en <code>git</code> <code>diff</code> <code>--cached</code>. Esta opción hace que la entrada aparezca como fichero nuevo en <code>git</code> <code>diff</code> y como inexistente en <code>git</code> <code>diff</code> <code>--cached</code>. Esta opción puede revertirse con <code>--ita-visible-in-index</code>. Ambas opciones son experimentales y pueden ser removidas en el futuro.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Para una explicación mas detallada sobre estas opciones comunes ver también <a href="gitdiffcore.html">gitdiffcore(7)</a>.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>-1</code></dt>
+<dt class="hdlist1"><code>--base</code></dt>
+<dt class="hdlist1"><code>-2</code></dt>
+<dt class="hdlist1"><code>--ours</code></dt>
+<dt class="hdlist1"><code>-3</code></dt>
+<dt class="hdlist1"><code>--theirs</code></dt>
+<dd>
+<p>Compara el árbol de trabajo con</p>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p>la versión "base" (etapa #1) cuando se usa <code>-1</code> o <code>--base</code>,</p>
+</li>
+<li>
+<p>"nuestra rama" (etapa #2) cuando se usa <code>-2</code> o <code>--ours</code>, or</p>
+</li>
+<li>
+<p>"su rama" (etapa #3) cuando se usa <code>-3</code> o <code>--theirs</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>The index contains these stages only for unmerged entries i.e. while resolving conflicts. See <a href="git-read-tree.html">git-read-tree(1)</a> section "3-Way Merge" for detailed information.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>-0</code></dt>
+<dd>
+<p>Omit diff output for unmerged entries and just show "Unmerged". Can be used only when comparing the working tree with the index.</p>
+</dd>
+<dt class="hdlist1"><em>&lt;ruta&gt;</em>...</dt>
+<dd>
+<p>The <em>&lt;path&gt;</em> parameters, when given, are used to limit the diff to the named paths (you can give directory names and get diff for all files under them).</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_formato_de_salida_bruta">Formato de salida bruta</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>El formato de la salida bruta de <code>git-diff-index</code>, <code>git-diff-tree</code>, <code>git-diff-files</code> y <code>git</code> <code>diff</code> <code>--raw</code> son muy similares.</p>
+</div>
+<div class="paragraph">
+<p>Todos estos comandos comparan dos conjuntos de cosas; lo que se compara difiere:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>git-diff-index</code> <em>&lt;arbol-ismo&gt;</em></dt>
+<dd>
+<p>compara el <em>&lt;arbol-ismo&gt;</em> y los ficheros en el sistema de ficheros.</p>
+</dd>
+<dt class="hdlist1"><code>git-diff-index</code> <code>--cached</code> <em>&lt;arbol-ismo&gt;</em></dt>
+<dd>
+<p>compara el <em>&lt;arbol-ismo&gt;</em> y el índice.</p>
+</dd>
+<dt class="hdlist1"><code>git-diff-tree</code> [<code>-r</code>] <em>&lt;arbol-ismo-1&gt;</em> <em>&lt;arbol-ismo-2&gt;</em> [<em>&lt;patron&gt;</em>...]</dt>
+<dd>
+<p>compara los árboles nombrados en los dos argumentos.</p>
+</dd>
+<dt class="hdlist1"><code>git-diff-files</code> [&lt;patrón&gt;...]</dt>
+<dd>
+<p>compara el índice y los ficheros en el sistema de ficheros.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>El comando <code>git-diff-tree</code> comienza su salida imprimiendo el hash de los que se compara. Después de eso, todos los comandos imprimen una línea de salida por fichero modificado.</p>
+</div>
+<div class="paragraph">
+<p>Un línea de salida se formatea así:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>in-place edit  :100644 100644 bcd1234 0123456 M fichero0
+copy-edit      :100644 100644 abcd123 1234567 C68 fichero1 fichero2
+rename-edit    :100644 100644 abcd123 1234567 R86 fichero1 fichero3
+create         :000000 100644 0000000 1234567 A fichero4
+delete         :100644 000000 1234567 0000000 D fichero5
+unmerged       :000000 000000 0000000 0000000 U fichero6</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Esto es, de izquierda a derecha:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>dos puntos.</p>
+</li>
+<li>
+<p>modo para "src"; 000000 si es creación o sin fusionar.</p>
+</li>
+<li>
+<p>un espacio.</p>
+</li>
+<li>
+<p>modo para "dst"; 000000 si se borra o sin fusionar.</p>
+</li>
+<li>
+<p>un espacio.</p>
+</li>
+<li>
+<p>sha1 para "src"; 0{40} si es creación o sin fusionar.</p>
+</li>
+<li>
+<p>un espacio.</p>
+</li>
+<li>
+<p>sha1 para "dst"; 0{40} si es borrado o sin fusionar o "árbol de trabajo está desincronizado con el índice".</p>
+</li>
+<li>
+<p>un espacio.</p>
+</li>
+<li>
+<p>estatus, seguido de número opcional "puntaje".</p>
+</li>
+<li>
+<p>un tabulador o un NUL cuando se usa la opción <code>-z</code>.</p>
+</li>
+<li>
+<p>ruta a "src"</p>
+</li>
+<li>
+<p>un tabulador o un NUL cuando se usa la opción <code>-z</code>; sólo existe para C o R.</p>
+</li>
+<li>
+<p>ruta a "dst"; sólo existe para C o R.</p>
+</li>
+<li>
+<p>un LF o un NUL cuando se usa la opción <code>-z</code>, para terminar el registro.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Las letras de estatus posibles son:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>A</code>: adición de un fichero</p>
+</li>
+<li>
+<p><code>C</code>: copia de un fichero en uno nuevo</p>
+</li>
+<li>
+<p><code>D</code>: borrado de un fichero</p>
+</li>
+<li>
+<p><code>M</code>: modificación del contenido o modo de un fichero</p>
+</li>
+<li>
+<p><code>R</code>: renombrado de un fichero</p>
+</li>
+<li>
+<p><code>T</code>: cambio en el tipo del fichero (fichero regular, liga simbólica o sub-módulo)</p>
+</li>
+<li>
+<p><code>U</code>: fichero sin fusionar (tú debes completar la fusión antes de que se pueda confirmar)</p>
+</li>
+<li>
+<p><code>X</code>: tipo de cambio "desconocido" (muy probablemente un bug, por favor repórtalo)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Las letras de estatus <code>C</code> y <code>R</code> siempre son seguidas de un puntaje (denotando el porcentaje de similaridad entre la fuente y el objetivo del movimiento o copia). La letra de estatus <code>M</code> puede ser seguida de un puntaje (denotando el porcentaje de disimilaridad) en re-escrituras de ficheros.</p>
+</div>
+<div class="paragraph">
+<p>El sha1 para "dst" se muestra como puros 0&#8217;s si un fichero en el sistema de ficheros esta desincronizado con el índice.</p>
+</div>
+<div class="paragraph">
+<p>Ejemplo:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>:100644 100644 5be4a4a 0000000 M fichero.c</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sin la opción <code>-z</code>, los nombres de rutas con caracteres "inusuales" son entrecomillados como se explica para la variable de configuración <code>core.quotePath</code> (ver <a href="git-config.html">git-config(1)</a>). Usando <code>-z</code> el nombre del fichero se manda a la salida literalmente y la línea se termina con un byte NUL.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_formatos_de_diff_para_fusiones">Formatos de diff para fusiones</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>git-diff-tree</code>, <code>git-diff-files</code> y <code>git-diff</code> <code>--raw</code> pueden tomar las opciones <code>-c</code> o <code>--cc</code> para generar salidas de diff también para confirmaciones de fusión. La salida difiere del formato descrito anteriormente de la manera siguiente:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>hay un dos puntos por cada antecesor</p>
+</li>
+<li>
+<p>hay mas modos "src" y sha1 de "src"</p>
+</li>
+<li>
+<p>estatus es la concatenación de caracteres de estatus de cada antecesor</p>
+</li>
+<li>
+<p>sin numero de "puntaje" opcional</p>
+</li>
+<li>
+<p>nombre(s) de ruta(s) del fichero separadas por tabulador</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Para <code>-c</code> y <code>--cc</code>, sólo la ruta destino o final es mostrada incluso si el fichero fue renombrado en cualquier lado del historial. Con <code>--combined-all-paths</code>, se muestra el nombre de la ruta en cada antecesor seguido del nombre de la ruta en el commit de fusión.</p>
+</div>
+<div class="paragraph">
+<p>Ejemplos para <code>-c</code> and <code>--cc</code> sin <code>--combined-all-paths</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>::100644 100644 100644 fabadb8 cc95eb0 4866510 MM       desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM       bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR       phooey.c</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ejemplos cuando se agrega <code>--combined-all-paths</code> a <code>-c</code> o <code>--cc</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>::100644 100644 100644 fabadb8 cc95eb0 4866510 MM       desc.c  desc.c  desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM       foo.sh  bar.sh  bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR       fooey.c fuey.c  phooey.c</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nótese que <em>combined diffs</em> lista sólo ficheros que fueron modificados de todos sus padres.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="generate_patch_text_with_p">Generando texto de parche con -p</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ejecutando <a href="git-diff.html">git-diff(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="git-show.html">git-show(1)</a>, <a href="git-diff-index.html">git-diff-index(1)</a>, <a href="git-diff-tree.html">git-diff-tree(1)</a>, o <a href="git-diff-files.html">git-diff-files(1)</a> la opción <code>-p</code> produce el texto del parche. Puedes personalizar la creación del texto del parche con las variables de ambiente <code>GIT_EXTERNAL_DIFF</code> y <code>GIT_DIFF_OPTS</code> (ver <a href="git.html">git(1)</a>), y el atributo <code>diff</code> (ver <a href="gitattributes.html">gitattributes(5)</a>).</p>
+</div>
+<div class="paragraph">
+<p>Lo que produce la opción <code>-p</code> es ligeramente diferente del formato tradicional de diff:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Es precedido por un encabezado "git diff" que se ve así:</p>
+<div class="literalblock">
+<div class="content">
+<pre>diff --git a/fichero1 b/fichero2</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Los nombres de fichero <code>a/</code> y <code>b/</code> son iguales a menos que involucre renombrado/copia. Especialmente, incluso para creación o eliminado, <code>/dev/null</code>`_no_ <code>se</code> <code>usa</code> <code>en</code> <code>lugar</code> <code>de</code> <code>los</code> <code>nombres</code> <code>de</code> <code>fichero</code> `a/ o <code>b/</code>.</p>
+</div>
+<div class="paragraph">
+<p>Cuando se involucra un renombre/copia, <code>fichero1</code> y <code>fichero2</code> muestra el nombre del fichero fuente del renombre/copia y el nombre del fichero que produce el renombre/copia, respectivamente.</p>
+</div>
+</li>
+<li>
+<p>Es seguido por una o mas líneas de encabezado extendido:</p>
+<div class="verseblock">
+<pre class="content"><code>old</code> <code>mode</code> <em>&lt;modo&gt;</em>
+<code>new</code> <code>mode</code> <em>&lt;modo&gt;</em>
+<code>deleted</code> <code>file</code> <code>mode</code> <em>&lt;modo&gt;</em>
+<code>new</code> <code>file</code> <code>mode</code> <em>&lt;modo&gt;</em>
+<code>copy</code> <code>from</code> <em>&lt;ruta&gt;</em>
+<code>copy</code> <code>to</code> <em>&lt;ruta&gt;</em>
+<code>rename</code> <code>from</code> <em>&lt;ruta&gt;</em>
+<code>rename</code> <code>to</code> <em>&lt;ruta&gt;</em>
+<code>similarity</code> <code>index</code> <em>&lt;número&gt;</em>
+<code>dissimilarity</code> <code>index</code> <em>&lt;número&gt;</em>
+<code>index</code> <em>&lt;hash&gt;</em>`..`<em>&lt;hash&gt;</em> <em>&lt;modo&gt;</em></pre>
+</div>
+<div class="paragraph">
+<p>Modos de fichero <em>&lt;modo&gt;</em> se imprimen como números octales de 6 dígitos incluyendo el tipo de fichero y los bits de permiso de fichero.</p>
+</div>
+<div class="paragraph">
+<p>Nombres de ruta en encabezados extendidos no incluyen los prefijos <code>a/</code> y <code>b/</code>.</p>
+</div>
+<div class="paragraph">
+<p>El índice de similaridad es el porcentaje de líneas sin cambios, y el índice de disimilaridad es el porcentaje de líneas modificadas. Es un entero redondeado hacia abajo, seguido por un signo de porcentaje. El índice de similaridad valor 100% es por lo tanto reservado para dos ficheros iguales, mientras que un 100% de disimilaridad significa que ninguna línea del fichero antiguo llegó al nuevo.</p>
+</div>
+<div class="paragraph">
+<p>La línea de índice incluye los nombres de objeto blob antes y después del cambio. El <em>&lt;modo&gt;</em> se incluye si el modo del fichero no cambia; de lo contrario, líneas separadas indican los modos anterior y nuevo.</p>
+</div>
+</li>
+<li>
+<p>Nombres de ruta con caracteres "inusuales" se entrecomillan como se explica para la variable de configuración <code>core.quotePath</code> (ver <a href="git-config.html">git-config(1)</a>).</p>
+</li>
+<li>
+<p>Todos los ficheros <code>fichero1</code> en la salida refieren a ficheros antes del commit, y todos los ficheros `fichero2`refieren a ficheros después del commit. Es incorrecto aplicar cada cambio a cada fichero secuencialmente. Por ejemplo, este parche intercambiará a y b:</p>
+<div class="literalblock">
+<div class="content">
+<pre>diff --git a/a b/b
+rename from a
+rename to b
+diff --git a/b b/a
+rename from b
+rename to a</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Encabezados de fragmento mencionan el nombre de la función a la cual se aplica el fragmento. Ver "Definiendo un encabezado de fragmento personalizado" en <a href="gitattributes.html">gitattributes(5)</a> para detalles de cómo ajustar éste a lenguajes específicos.</p>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_formato_de_diff_combinado">Formato de diff combinado</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cualquier comando que genere un diff puede tomar las opciones <code>-c</code> o <code>--cc</code> para producir una <em>diff combinada</em> cuando se muestra la fusión. Este es el formato predeterminado cuando se muestran fusiones con <a href="git-diff.html">git-diff(1)</a> o <a href="git-show.html">git-show(1)</a>. Note que también puede ser adecuado dar la opción <code>--diff-merges</code> a cualquiera de esos comandos para forzar la generación de diffs en un formato específico.</p>
+</div>
+<div class="paragraph">
+<p>Un formato "diff combinado" se ve así:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>diff --combined describe.c
+index fabadb8,cc95eb0..4866510
+--- a/describe.c
++++ b/describe.c
+@@@ -98,20 -98,12 +98,20 @@@
+        return (a_date &gt; b_date) ? -1 : (a_date == b_date) ? 0 : 1;
+  }
+
+- static void describe(char *arg)
+ -static void describe(struct commit *cmit, int last_one)
+++static void describe(char *arg, int last_one)
+  {
+ +      unsigned char sha1[20];
+ +      struct commit *cmit;
+        struct commit_list *list;
+        static int initialized = 0;
+        struct commit_name *n;
+
+ +      if (get_sha1(arg, sha1) &lt; 0)
+ +              usage(describe_usage);
+ +      cmit = lookup_commit_reference(sha1);
+ +      if (!cmit)
+ +              usage(describe_usage);
+ +
+        if (!initialized) {
+                initialized = 1;
+                for_each_ref(get_name);</pre>
+</div>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Es precedido por un encabezado "git diff", que se ve así (cuando se usa la opción <code>-c</code>):</p>
+<div class="literalblock">
+<div class="content">
+<pre>diff --combined fichero</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>o así (cuando se usa la opción <code>--cc</code>):</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>diff --cc fichero</pre>
+</div>
+</div>
+</li>
+<li>
+<p>Es seguido por uno o mas líneas de encabezado extendido (este ejemplo muestra una fusión con dos padres):</p>
+<div class="verseblock">
+<pre class="content"><code>index</code> <em>&lt;hash&gt;</em><code>,</code><em>&lt;hash&gt;</em>`..<code>__</code><em>&lt;hash&gt;</em><code>__</code>
+{empty}`mode <em>&lt;modo&gt;</em><code>,</code><em>&lt;modo&gt;</em>``..``<em>&lt;modo&gt;</em>
+<code>new</code> <code>file</code> <code>mode</code> <em>&lt;modo&gt;</em>
+<code>deleted</code> <code>file</code> <code>mode</code> <em>&lt;modo&gt;</em><code>,</code><em>&lt;modo&gt;</em></pre>
+</div>
+<div class="paragraph">
+<p>La línea <code>mode</code> <em>&lt;modo&gt;</em><code>,</code><em>&lt;modo&gt;</em><code>..</code><em>&lt;modo&gt;</em> sólo aparece si por lo menos uno de los &lt;modo&gt; es diferente del resto. Los encabezados extendidos con información sobre movimientos de contenido detectados (detección de renombrados y copia) están diseñados para trabajar con el diff de dos <em>&lt;arbol-ismos&gt;</em> y no se usan en el formato diff combinado.</p>
+</div>
+</li>
+<li>
+<p>Es seguido por un encabezado de dos líneas del-fichero/al-fichero:</p>
+<div class="literalblock">
+<div class="content">
+<pre>--- a/fichero
++++ b/fichero</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Similar al encabezado de dos líneas del formato diff tradicional <em>unificado</em>, se usa <code>/dev/null</code> para indicar ficheros creados o borrados.</p>
+</div>
+<div class="paragraph">
+<p>Sin embargo, si se da la opción --combined-all-paths, en lugar de dos líneas con de-fichero/a-fichero obtendrá un encabezado de-fichero/a-fichero de N+1 líneas, donde N es el número de padres en la confirmación de fusión:</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>--- a/fichero
+--- a/fichero
+--- a/fichero
++++ b/fichero</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Este formato extendido puede ser útil si la detección de renombre o copia esta activa, para permitirte ver el nombre original del fichero en padres diferentes.</p>
+</div>
+</li>
+<li>
+<p>El formato de encabezado de fragmento se modifica para prevenir a la gente de mandarlo accidentalmente a <code>patch</code> <code>-p1</code>. El formato diff combinado fue creado para revisión de cambios de commit de fusión, sin la intención de ser aplicado. El cambio es similar al cambio en el encabezado de <em>índice</em> extendido:</p>
+<div class="literalblock">
+<div class="content">
+<pre>@@@ &lt;rango-desde-fichero&gt; &lt;rango-desde-fichero&gt; &lt;rango-hacia-fichero&gt; @@@</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Hay (número de padres +1) caracteres <code>@</code> en el encabezado de fragmento para formato diff combinado.</p>
+</div>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>A diferencia del formato diff <em>unificado</em> tradicional, el cual muestra dos ficheros A Y B con una sola columna con los prefijos <code>-</code>(menos&#8201;&#8212;&#8201;aparece en A pero eliminado en B), <code>+</code>(mas&#8201;&#8212;&#8201;faltante en A pero agregado a B), o " " (espacio&#8201;&#8212;&#8201;sin cambio), este formato compara dos o mas ficheros fichero1, fichero2,&#8230;&#8203; con un fichero X, y muestra como X difiere de cada ficheroN. Una columna para cada uno de los ficheroN es antepuesta a la línea de salida para notar como la línea de X es diferente de ella.</p>
+</div>
+<div class="paragraph">
+<p>Un caracter <code>-</code> en la columna N significa que la línea aparece en ficheroN pero no aparece en el resultado. Un caracter <code>+</code> en la columna N significa que la línea aparece en el resultado, y ficheroN no tiene esa línea (en otras palabras, la línea fue añadida, desde el punto de vista del antecesor).</p>
+</div>
+<div class="paragraph">
+<p>En el ejemplo de salida de arriba, la firma de la función cambió en ambos ficheros (por eso los dos <code>-</code> eliminaciones de ambos ficheros fichero1 y fichero2, además <code>++</code> que significa que una línea agregada no aparece en ningún fichero de fichero1 o fichero2). Además, otras ocho líneas iguales del fichero1 que no aparecen en fichero2 (por eso prefijadas con <code>+</code>).</p>
+</div>
+<div class="paragraph">
+<p>Cuando se muestra por <code>git</code> <code>diff-tree-c</code>, compara los padres de un commit de fusión con el resultado de la fusión (ej. fichero1..ficheroN son los padres). Cuando se muestra por <code>git</code> <code>diff-files-c</code>, compara los dos padres de fusión no-resueltos con el fichero del árbol de trabajo (ej. fichero1 en etapa 2 conocida como "nuestra versión", fichero2 en etapa 3 conocida como "la versión de ellos").</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_otros_formatos_diff">otros formatos diff</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>La opción <code>--summary</code> describe ficheros recientemente agregados, eliminados, renombrados y copiados. La opción <code>--stat</code> agrega el grafo de <code>diffstat</code>(1) a la salida. Estas opciones pueden ser combinadas con otras, como <code>-p</code>, y su intención es para consumo humano.</p>
+</div>
+<div class="paragraph">
+<p>Cuando se muestra un cambio que involucra un renombrado o copia, la salida con <code>--stat</code> formatea compactamente los nombres de las rutas combinando prefijos y sufijos comunes de los nombres de ruta. Por ejemplo, un cambio que mueve <code>arch/i386/Makefile</code> a <code>arch/x86/Makefile</code> cuando se modifican 4 líneas se verá como:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>arch/{i386 =&gt; x86}/Makefile    |   4 +--</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>La opción <code>--numstat</code> da la información de diffstat(1), pero esta diseñada para un fácil consumo por máquina. Una entrada en la salida de <code>--numstat</code> se ve así:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>1       2       LEEME
+3       1       arch/{i386 =&gt; x86}/Makefile</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Esto es, de izquierda a derecha:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>el número de líneas añadidas;</p>
+</li>
+<li>
+<p>un tabulador;</p>
+</li>
+<li>
+<p>el número de líneas eliminadas;</p>
+</li>
+<li>
+<p>un tabulador;</p>
+</li>
+<li>
+<p>nombre de ruta (posiblemente con información de renombre/copia);</p>
+</li>
+<li>
+<p>un salto de línea.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>Cuando la opción de salida <code>-z</code> está en efecto, la salida se formatea así:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>1       2       LEEME NUL
+3       1       NUL arch/i386/Makefile NUL arch/x86/Makefile NUL</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Esto es:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>el número de líneas añadidas;</p>
+</li>
+<li>
+<p>un tabulador;</p>
+</li>
+<li>
+<p>el número de líneas eliminadas;</p>
+</li>
+<li>
+<p>un tabulador;</p>
+</li>
+<li>
+<p>un NUL (sólo existe si renombrado/copiado);</p>
+</li>
+<li>
+<p>nombre de ruta en pre-imagen;</p>
+</li>
+<li>
+<p>un NUL (sólo existe si renombrado/copiado);</p>
+</li>
+<li>
+<p>nombre de ruta en post-imagen (sólo existe si renombrado/copiado);</p>
+</li>
+<li>
+<p>un NUL.</p>
+</li>
+</ol>
+</div>
+<div class="paragraph">
+<p>El <code>NUL</code> extra antes de la ruta de pre-imagen en caso de renombrado es para permitir a los scripts que leen la salida decir si el registro actual leído es un registro de una sola ruta o un registro de renombre/copia sin lectura posterior. Después de leer las líneas agregadas y eliminadas, leer hasta <code>NUL</code> dará el nombre de ruta , pero si es <code>NUL</code>, el registro mostrará dos rutas.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ejemplos">EJEMPLOS</h2>
+<div class="sectionbody">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Varias formas de revisar tu árbol de trabajo</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git diff            <b class="conum">(1)</b>
+$ git diff --cached   <b class="conum">(2)</b>
+$ git diff HEAD       <b class="conum">(3)</b>
+$ git diff AUTO_MERGE <b class="conum">(4)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Cambios en el árbol de trabajo aún no presentados para la confirmación siguiente.</p>
+</li>
+<li>
+<p>Cambios entre el índice y tu última confirmación; lo que estarás confirmando si ejecutas <code>git</code> <code>commit</code> sin la opción <code>-a</code>.</p>
+</li>
+<li>
+<p>Changes in the working tree since your last commit; what you would be committing if you run <code>git</code> <code>commit</code> <code>-a</code></p>
+</li>
+<li>
+<p>Changes in the working tree you&#8217;ve made to resolve textual conflicts so far.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Comparando con confirmaciones arbitrarias</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git diff test            <b class="conum">(1)</b>
+$ git diff HEAD -- ./test  <b class="conum">(2)</b>
+$ git diff HEAD^ HEAD      <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>En lugar de usar la punta de la rama actual, compara con la punta de la rama "test".</p>
+</li>
+<li>
+<p>Instead of comparing with the tip of "test" branch, compare with the tip of the current branch, but limit the comparison to the file "test".</p>
+</li>
+<li>
+<p>Compara la versión antes de la última confirmación y la última confirmación.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Comparando ramas</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git diff topic master    <b class="conum">(1)</b>
+$ git diff topic..master   <b class="conum">(2)</b>
+$ git diff topic...master  <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Cambios entre las puntas de las ramas topic y master.</p>
+</li>
+<li>
+<p>Igual que el anterior.</p>
+</li>
+<li>
+<p>Changes that occurred on the master branch since when the topic branch was started off it.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Limitando la salida de diff</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git diff --diff-filter=MRC            <b class="conum">(1)</b>
+$ git diff --name-status                <b class="conum">(2)</b>
+$ git diff arch/i386 include/asm-i386   <b class="conum">(3)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Show only modification, rename, and copy, but not addition or deletion.</p>
+</li>
+<li>
+<p>Show only names and the nature of change, but not actual diff output.</p>
+</li>
+<li>
+<p>Limit diff output to named subtrees.</p>
+</li>
+</ol>
+</div>
+</dd>
+<dt class="hdlist1">Munging the diff output</dt>
+<dd>
+<div class="listingblock">
+<div class="content">
+<pre>$ git diff --find-copies-harder -B -C  <b class="conum">(1)</b>
+$ git diff -R                          <b class="conum">(2)</b></pre>
+</div>
+</div>
+<div class="colist arabic">
+<ol>
+<li>
+<p>Spend extra cycles to find renames, copies and complete rewrites (very expensive).</p>
+</li>
+<li>
+<p>Output diff in reverse.</p>
+</li>
+</ol>
+</div>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_configuración">CONFIGURACIÓN</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Todo debajo de ésta línea en ésta sección es incluido selectivamente de la documentación de <a href="git-config.html">git-config(1)</a>. El contenido es el mismo al que se encuentra ahí:</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>diff.autoRefreshIndex</code></dt>
+<dd>
+<p>Cuando se usa <code>git-diff</code> para comparar con ficheros del árbol de trabajo, no considera cambios stat-only como changed. En su lugar, ejecuta silenciosamente <code>git</code> <code>update-index</code> <code>--refresh</code> para actualizar la información estadística en antememoria para rutas cuyo contenido en el árbol de trabajo coincide con el contenido en el índice. Ésta opción se predetermina a <code>true</code>. Nota que esto afecta sólo a <code>git</code> <code>diff</code> porcelana, y no a comandos <code>diff</code> de mas bajo nivel como <code>git</code> <code>diff-files</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.dirstat</code></dt>
+<dd>
+<p>Una lista separada por comas de parámetros de <code>--dirstat</code> especificando el
+comportamiento predeterminado de la opción <code>--dirstat</code> para <code>git</code> <code>diff</code> y sus amigos.
+Los predeterminados pueden ser anulados en la línea de comandos
+(usando <code>--dirstat=</code>&lt;parámetro&gt;<code>,..</code>.). Los predeterminados por omisión
+(cuando no son modificados por <code>diff.dirstat</code>) son <code>changes,noncumulative,3</code>.
+Esta disponibles los parámetros siguientes:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>changes</code></dt>
+<dd>
+<p>Calcula los números de dirstat contando las líneas que han sido eliminadas del origen, o agregadas en el destino. Esto ignora la cantidad de movimientos de código puro dentro del fichero. En otras palabras, el reacomodo de líneas en un fichero no cuenta tanto como otros cambios. Este es el comportamiento predeterminado cuando no se dan parámetros.</p>
+</dd>
+<dt class="hdlist1"><code>lines</code></dt>
+<dd>
+<p>Calcula los números de dirstat haciendo el análisis de diferencias regular basado en líneas, y sumando los conteos de líneas quitadas/agregadas. (Para ficheros binarios, cuenta en cambio pedazos de 64 bytes, ya que los ficheros binarios no tienen el concepto natural de líneas). Este es un funcionamiento de <code>--dirstat</code> mas costoso que <code>changes</code>, pero el re-acomodo de líneas dentro de un fichero cuenta tanto como otros cambios. La salida resultante es consistente con lo que obtienes de las otras opciones <code>--</code>*stat.</p>
+</dd>
+<dt class="hdlist1"><code>files</code></dt>
+<dd>
+<p>Calcula los números de dirstat contando el número de ficheros modificados. Cada fichero modificado cuenta igualmente en el análisis de dirstat. Este es el funcionamiento <code>--dirstat</code> computacionalmente más barato, ya que no tiene que mirar el contenido del fichero en absoluto.</p>
+</dd>
+<dt class="hdlist1"><code>cumulative</code></dt>
+<dd>
+<p>Cuenta cambios en un directorio hijo también para el directorio padre. Nota que cuando se usa <code>cumulative</code>, la suma de los porcentajes reportados puede exceder 100%. El comportamiento predeterminado (no-acumulativo) se puede especificar con el parámetro <code>noncumulative</code>.</p>
+</dd>
+<dt class="hdlist1"><em>&lt;límite&gt;</em></dt>
+<dd>
+<p>Un parámetro entero especifica un porcentaje de corte (predeterminado a 3%). Directorios que contribuyan menos que éste porcentaje de cambios no se muestran en la salida.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Ejemplo: El siguiente contará ficheros modificados, ignorando directorios con menos del 10% de la cantidad total de ficheros modificados, y acumulando conteos en directorios hijo en los directorios padre: <code>files,10,cumulative</code>.</p>
+</div>
+</dd>
+<dt class="hdlist1"><code>diff.statNameWidth</code></dt>
+<dd>
+<p>Limita el ancho de la parte del nombre de fichero en la salida de <code>--stat</code>. Si se asigna, aplica a todos los comandos que generan salida <code>--sta</code>`t <code>exceptuando</code> `format-patch.</p>
+</dd>
+<dt class="hdlist1"><code>diff.statGraphWidth</code></dt>
+<dd>
+<p>Limita el ancho de la parte del grafo en la salida de <code>--stat</code>. Si se asigna, aplica a todos los comandos que generan salida de <code>--stat</code> exceptuando <code>format-patch</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.context</code></dt>
+<dd>
+<p>Genera diffs con <em>&lt;n&gt;</em> líneas de contexto en lugar de las 3 predeterminadas. El valor es anulado con la opción <code>-U</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.interHunkContext</code></dt>
+<dd>
+<p>Muestra el contexto entre pedazos de diferencia, hasta el número especificado de líneas, a modo de fusionar los pedazos cercanos. Este valor sirve como predeterminado para la opción de línea de comandos <code>--inter-hunk-context</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.external</code></dt>
+<dd>
+<p>Si se asigna esta variable de configuración, las generación de diferencias no se hace con la maquinaria interna de diferencias, sino usando el comando dado. Puede ser anulado con la variable de ambiente <code>GIT_EXTERNAL_DIFF</code>. El comando es llamado con parámetros como se describe en "Diferencias de Git" en <a href="git.html">git(1)</a>. Nota: si quieres usar un programa de diferencias externo sólo en un subconjunto de tus ficheros, en su lugar querrías usar <a href="gitattributes.html">gitattributes(5)</a>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.trustExitCode</code></dt>
+<dd>
+<p>Si a este valor booleano se le asigna <code>true</code> entonces se espera que el comando <code>diff.external</code> regrese un código de salida 0 si considera que los ficheros de entrada son iguales, o 1 si considera que son diferentes, como <code>diff</code>(1). Si se le asigna <code>false</code>, el cual es el predeterminado, entonces se espera que el comando regrese un código de salida <code>0</code> independientemente de la igualdad. Cualquier otro código de salida provoca a Git a reportar un error fatal.</p>
+</dd>
+<dt class="hdlist1"><code>diff.ignoreSubmodules</code></dt>
+<dd>
+<p>Asigna el valor predeterminado de <code>--ignore-submodules</code>. Nota que esto afecta sólo a la porcelana <code>git</code> <code>diff</code>, y no a los comandos <code>diff</code> de mas bajo nivel como <code>git</code> <code>diff-files</code>. <code>git</code> <code>checkout</code> y <code>git</code> <code>switch</code> también respetan esta configuración cuando se reportan cambios sin confirmar. Asignándole <code>all</code> deshabilita el resumen de sub-módulos normalmente mostrado por <code>git</code> <code>commit</code> y <code>git</code> <code>status</code> cuando se asigna <code>status.submoduleSummary</code> a menos que sea anulado por la opción de línea de comando <code>--ignore-submodules</code>. Los comandos <code>git</code> <code>submodule</code> no son afectados por esta configuración. Predeterminadamente se le asigna untracked, de tal manera que cualquier sub-módulo sin rastreo es ignorado.</p>
+</dd>
+<dt class="hdlist1"><code>diff.mnemonicPrefix</code></dt>
+<dd>
+<p>Si se asigna, <code>git</code> <code>diff</code> usa un par de prefijos distintos a los estándar <code>a/</code> y <code>b/</code> dependiendo de lo que se esté comparando. Cuando ésta configuración está en efecto, la salida de la diferencia inversa también intercambia el orden de los prefijos:</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>git</code> <code>diff</code></dt>
+<dd>
+<p>compara el índice (i) y árbol de trabajo (w);</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> <code>HEAD</code></dt>
+<dd>
+<p>compara una (c)onfirmación y el árbol de trabajo (w);</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> <code>--cached</code></dt>
+<dd>
+<p>compara una (c)onfirmación y el índice (i);</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> <code>HEAD:</code><em>&lt;fichero1&gt;</em>&lt; <code>fichero2</code>&gt;</dt>
+<dd>
+<p>compara un (o)bjeto y una entidad de árbol de trabajo (w);</p>
+</dd>
+<dt class="hdlist1"><code>git</code> <code>diff</code> <code>--no-index</code> <em>&lt;a&gt;</em> <em>&lt;b&gt;</em></dt>
+<dd>
+<p>compara dos cosas no-git <em>&lt;a&gt;</em> y <em>&lt;b&gt;</em>.</p>
+</dd>
+</dl>
+</div>
+</dd>
+<dt class="hdlist1"><code>diff.noPrefix</code></dt>
+<dd>
+<p>Si se asigna, <code>git</code> <code>diff</code> no muestra ningún prefijo de origen o de destino.</p>
+</dd>
+<dt class="hdlist1"><code>diff.srcPrefix</code></dt>
+<dd>
+<p>Si se asigna, <code>git</code> <code>diff</code> usa este prefijo de origen. Predeterminado a <code>a/</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.dstPrefix</code></dt>
+<dd>
+<p>Si se asigna, <code>git</code> <code>diff</code> usa este prefijo de destino. Predeterminado a <code>b/</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.relative</code></dt>
+<dd>
+<p>Si se le asigna <code>true</code>, <code>git</code> <code>diff</code> no muestra cambios fuera del directorio y muestra nombres de ruta relativos al directorio actual.</p>
+</dd>
+<dt class="hdlist1"><code>diff.orderFile</code></dt>
+<dd>
+<p>Fichero que indica cómo ordenar los ficheros dentro de una diff.
+Ver la opción <code>-O</code> para detalles.
+Si <code>diff.orderFile</code> es un nombre de ruta relativo, es tratado como
+relativo al tope del árbol de trabajo.</p>
+</dd>
+<dt class="hdlist1"><code>diff.renameLimit</code></dt>
+<dd>
+<p>El número de ficheros a considerar en la porción exhaustiva de detección de copia/cambio de nombre; equivalente a la opción <code>-l</code> de <code>git</code> <code>diff</code>. Si no se asigna, el valor predeterminado actualmente es 1000. Esta configuración no tiene efecto si la detección de cambio de nombre esta apagada.</p>
+</dd>
+<dt class="hdlist1"><code>diff.renames</code></dt>
+<dd>
+<p>Si y cómo Git detecta cambios de nombre. Si se le asigna <code>false</code>, se deshabilita la detección de cambios de nombre. Si se le asigna <code>true,</code> <code>se</code> <code>habilita</code> <code>la</code> <code>detecci</code>ón <code>b</code>ásica <code>de</code> <code>cambios</code> <code>de</code> <code>nombre.</code> <code>Si</code> <code>se</code> <code>le</code> <code>asigna</code> `copies o <code>copy</code>, Git detectará también copias. Predeterminado a <code>true</code>. Nota que esto sólo afecta a <code>git</code> <code>diff</code> porcelanas como <a href="git-diff.html">git-diff(1)</a> y <a href="git-log.html">git-log(1)</a>, y no a comandos de nivel mas bajo como <a href="git-diff-files.html">git-diff-files(1)</a>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.suppressBlankEmpty</code></dt>
+<dd>
+<p>Un booleano para inhibir la comportamiento estándar de imprimir un espacio antes de cada línea de salida vacía. Predeterminado a <code>false</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.submodule</code></dt>
+<dd>
+<p>Especifica el formato en el que se muestran las diferencias en submódulos. El formato <code>short</code> sólo muestra nombres de las confirmaciones al principio y al fin del rango. El formato <code>log</code> lista las confirmaciones en el rango como lo hace <a href="git-submodule.html">git-submodule(1)</a> <code>summary</code>. El formato <code>diff</code> muestra un diff en-linea de los contenidos modificados del submódulo. Se predetermina a <code>short</code>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.wordRegex</code></dt>
+<dd>
+<p>Una Expresión Regular Extendida de POSIX usada para determinar qué es una "palabra" cuando se calculan diferencias palabra por palabra. Secuencias de caracteres que coincidan con la expresión regular son "palabras", todos los demás caracteres son espacios en blanco <strong>ignorables</strong>.</p>
+</dd>
+<dt class="hdlist1"><code>diff.</code><em>&lt;controlador&gt;</em><code>.command</code></dt>
+<dd>
+<p>El comando de controlador de diff personalizado. Ver <a href="gitattributes.html">gitattributes(5)</a> para detalles.</p>
+</dd>
+<dt class="hdlist1"><code>diff.</code><em>&lt;controlador&gt;</em>. <code>trustExitCode</code></dt>
+<dd>
+<p>Si a este valor booleano se le asigna <code>true</code> entonces se espera que el comando <code>diff.</code><em>&lt;controlador&gt;</em><code>.command</code> regrese un código de salida 0 si considera que los ficheros de entrada son iguales, o 1 si considera que son diferentes, como <code>diff</code>(1). Si se le asigna <code>false</code>, el cual es el predeterminado, entonces se espera que el comando regrese un código de salida 0 independientemente de la igualdad. Cualquier otro código de salida provoca a Git a reportar un error fatal.</p>
+</dd>
+<dt class="hdlist1"><code>diff.</code><em>&lt;controlador&gt;</em><code>.xfuncname</code></dt>
+<dd>
+<p>La expresión regular que el controlador de diff puede usar para reconocer el encabezado de bloque. También se puede usar un patrón inter-construido. Ver <a href="gitattributes.html">gitattributes(5)</a> para detalles.</p>
+</dd>
+<dt class="hdlist1"><code>diff.</code><em>&lt;controlador&gt;</em><code>.binary</code></dt>
+<dd>
+<p>Asigne a esta opción <code>true</code> para hacer que el controlador de diferencias trate a los ficheros como binarios. Ver <a href="gitattributes.html">gitattributes(5)</a> para detalles.</p>
+</dd>
+<dt class="hdlist1"><code>diff.</code><em>&lt;controlador&gt;</em><code>.textconv</code></dt>
+<dd>
+<p>El comando al que el controlador de diferencias debe llamar para generar la versión convertida a texto de un fichero. El resultado de la conversión es usado para generar una diferencia legible al humano. Ver <a href="gitattributes.html">gitattributes(5)</a> para detalles.</p>
+</dd>
+<dt class="hdlist1"><code>diff.</code><em>&lt;controlador&gt;</em><code>.wordRegex</code></dt>
+<dd>
+<p>La expresión regular que el controlador de diferencias debe usar para dividir palabras en una línea. Ver <a href="gitattributes.html">gitattributes(5)</a> para detalles.</p>
+</dd>
+<dt class="hdlist1"><code>diff.</code><em>&lt;controlador&gt;</em><code>.cachetextconv</code></dt>
+<dd>
+<p>Asigne a esta opción <code>true</code> para hacer que el controlador de diferencias antememorice las salidas de conversión de texto. Ver <a href="gitattributes.html">gitattributes(5)</a> para detalles.</p>
+</dd>
+<dt class="hdlist1"><code>diff.indentHeuristic</code></dt>
+<dd>
+<p>Asignar a esta opción <code>false</code> para deshabilitar la heurística predeterminada que aumenta los límites de fragmentos de diff para facilitar la lectura de los parches.</p>
+</dd>
+<dt class="hdlist1"><code>diff.algorithm</code></dt>
+<dd>
+<p>Elige un algoritmo de diff. La variantes son las siguientes:</p>
+<div class="openblock">
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1"><code>default</code></dt>
+<dt class="hdlist1"><code>myers</code></dt>
+<dd>
+<p>El algoritmo diff básico avaro. Actualmente, éste es el predeterminado.</p>
+</dd>
+<dt class="hdlist1"><code>minimal</code></dt>
+<dd>
+<p>Ocupa tiempo extra para asegurarse que se produce el diff más pequeño posible.</p>
+</dd>
+<dt class="hdlist1"><code>patience</code></dt>
+<dd>
+<p>Usa el algoritmo "diff paciente" al generar parches.</p>
+</dd>
+<dt class="hdlist1"><code>histogram</code></dt>
+<dd>
+<p>Este algoritmo extiende el algoritmo paciente para "soportar elementos comunes de baja ocurrencia".</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</dd>
+<dt class="hdlist1"><code>diff.wsErrorHighlight</code></dt>
+<dd>
+<p>Resalta errores de espacio en blanco en las líneas <code>context</code>, <code>old</code> ` <code>o</code> `new del diff. Valores múltiples se separan con coma, <code>none</code> restablece valores previos, <code>default</code> restablece la lista a <code>new</code> y <code>all</code> es una forma corta de <code>old,new,context</code>. Los errores de espacio en blanco se colorean con <code>color.diff.whitespace</code>. La opción de línea de comandos `--ws-error-highlight=&lt;tipo&gt;`anula ésta configuración.</p>
+</dd>
+<dt class="hdlist1"><code>diff.colorMoved</code></dt>
+<dd>
+<p>Ya sea que se le asigne un <em>&lt;modo&gt;</em> válido o el valor <code>true</code>, las líneas movidas en una diferencia se colorean diferente.
+Para detalles de modos válidos ver <code>--color-moved</code>.
+Si se asigna simplemente <code>true</code> se usará el modo de color predeterminado. Cuando
+se asigna <code>false</code>, las líneas movidas no serán coloreadas.</p>
+</dd>
+<dt class="hdlist1"><code>diff.colorMovedWS</code></dt>
+<dd>
+<p>Cuando las líneas movidas son coloreadas, usando por ejemplo la configuración <code>diff.colorMoved</code>, esta opción controla cómo el modo trata a los espacios. Para detalles de los modos válidos ver <code>--color-moved-ws</code> en <a href="git-diff.html">git-diff(1)</a>.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_ver_también">VER TAMBIÉN</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p><code>diff</code>(1), <a href="git-difftool.html">git-difftool(1)</a>, <a href="git-log.html">git-log(1)</a>, <a href="gitdiffcore.html">gitdiffcore(7)</a>, <a href="git-format-patch.html">git-format-patch(1)</a>, <a href="git-apply.html">git-apply(1)</a>, <a href="git-show.html">git-show(1)</a></p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Parte de la suite de <a href="git.html">git(1)</a></p>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Last updated 2025-06-21 17:16:45 +0200
+</div>
+</div>
+</body>
+</html>

@@ -1235,6 +1235,9 @@ git rebase master topic</pre>
 <dd>
 <p>这是拉取或合并一个分支时的默认合并策略。 这个策略只能使用三方合并算法解决两个头。 当有一个以上的共同祖先可用于三方合并时，它会创建一个共同祖先的合并树，并将其作为三方合并的参考树。 据报道，通过对Linux 2.6内核开发历史中的实际合并提交的测试，这导致了较少的合并冲突，而不会引起错误的合并。 此外，这个策略可以检测并处理涉及重命名的合并。 它并不使用检测到的副本。 这个算法的名字是一个缩写（"Ostensibly Recursive&#8217;s Twin"），来自于它是作为以前的默认算法`recursive`的替代而编写的。</p>
 <div class="paragraph">
+<p>In the case where the path is a submodule, if the submodule commit used on one side of the merge is a descendant of the submodule commit used on the other side of the merge, Git attempts to fast-forward to the descendant. Otherwise, Git will treat this case as a conflict, suggesting as a resolution a submodule commit that is descendant of the conflicting ones, if one exists.</p>
+</div>
+<div class="paragraph">
 <p><em>ort</em> 策略可以采取以下选项：</p>
 </div>
 <div class="dlist">
@@ -1286,6 +1289,22 @@ git rebase master topic</pre>
 <dd>
 <p>废弃的，<code>find-renames=</code><em>&lt;n&gt;</em> 的同义词。</p>
 </dd>
+<dt class="hdlist1">no-renames</dt>
+<dd>
+<p>关闭重名检测。这覆盖了 <code>merge.renames</code> 的配置变量。 参见<a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>。</p>
+</dd>
+<dt class="hdlist1">histogram</dt>
+<dd>
+<p>Deprecated synonym for <code>diff-algorithm=histogram</code>.</p>
+</dd>
+<dt class="hdlist1">patience</dt>
+<dd>
+<p>废弃的，<code>diff-algorithm=patience</code> 的同义词。</p>
+</dd>
+<dt class="hdlist1">diff-algorithm=[histogram|minimal|myers|patience]</dt>
+<dd>
+<p>Use a different diff algorithm while merging, which can help avoid mismerges that occur due to unimportant matching lines (such as braces from distinct functions). See also <a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>. Note that <code>ort</code> defaults to <code>diff-algorithm=histogram</code>, while regular diffs currently default to the <code>diff.algorithm</code> config setting.</p>
+</dd>
 <dt class="hdlist1">subtree[=&lt;路径&gt;]</dt>
 <dd>
 <p>这个选项是 <em>子树</em> 策略的更高级形式，该策略对两棵树在合并时必须如何移位以相互匹配进行猜测。 相反，指定的路径是前缀（或从开始剥离），以使两棵树的形状相匹配。</p>
@@ -1295,26 +1314,7 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">recursive</dt>
 <dd>
-<p>这只能用三方合并算法解决两个头。 当有一个以上的共同祖先可用于三方合并时，它会创建一个共同祖先的合并树，并使用它作为三方合并的参考树。 据报道，通过对Linux 2.6内核开发历史中的实际合并提交的测试，这导致了较少的合并冲突，而不会引起错误的合并。 此外，它可以检测并处理涉及重命名的合并。 它并不使用检测到的副本。 从Git v0.99.9k到v2.33.0，这是解决双头的默认策略。</p>
-<div class="paragraph">
-<p><em>recursive</em> 策略采用与 <em>ort</em> 相同的选项。 然而，有三个 <em>ort</em> 忽略的额外选项（上面没有记录），对 <em>recursive</em> 策略有潜在的作用：</p>
-</div>
-<div class="dlist">
-<dl>
-<dt class="hdlist1">patience</dt>
-<dd>
-<p>废弃的，<code>diff-algorithm=patience</code> 的同义词。</p>
-</dd>
-<dt class="hdlist1">diff-algorithm=[patience|minimal|histogram|myers]</dt>
-<dd>
-<p>在合并时使用不同的差异算法，这可以帮助避免由于不重要的匹配行（比如不同函数的大括号）而发生的错误合并。 参见<a href="git-diff.html">git-diff(1)</a> <code>--diff-algorithm</code>。 注意，<code>ort</code> 特定 <code>diff-algorithm=histogram</code>，而`recursive`默认为`diff.algorithm`配置设置。</p>
-</dd>
-<dt class="hdlist1">no-renames</dt>
-<dd>
-<p>关闭重名检测。这覆盖了 <code>merge.renames</code> 的配置变量。 参见<a href="git-diff.html">git-diff(1)</a> <code>--no-renames</code>。</p>
-</dd>
-</dl>
-</div>
+<p>This is now a synonym for <code>ort</code>. It was an alternative implementation until v2.49.0, but was redirected to mean <code>ort</code> in v2.50.0. The previous recursive strategy was the default strategy for resolving two heads from Git v0.99.9k until v2.33.0.</p>
 </dd>
 <dt class="hdlist1">resolve</dt>
 <dd>
@@ -1326,7 +1326,7 @@ git rebase master topic</pre>
 </dd>
 <dt class="hdlist1">ours</dt>
 <dd>
-<p>这可以解决任何数量的头，但合并的结果总是当前分支头的树，有效地忽略了所有其他分支的变化。 它是用来取代侧边分支的旧开发历史的。 注意，这与 <em>recursive</em> 合并策略的-Xours选项不同。</p>
+<p>This resolves any number of heads, but the resulting tree of the merge is always that of the current branch head, effectively ignoring all changes from all other branches. It is meant to be used to supersede old development history of side branches. Note that this is different from the -Xours option to the <em>ort</em> merge strategy.</p>
 </dd>
 <dt class="hdlist1">subtree</dt>
 <dd>
@@ -1634,177 +1634,197 @@ exec make test</pre>
 <pre>    $ git rebase subsystem</pre>
 </div>
 </div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_您将获得固定的历史记录">您将获得固定的历史记录</h2>
-<div class="sectionbody">
-<div class="literalblock">
-<div class="content">
-<pre>o---o---o---o---o---o---o---o  master
- \
-  o'--o'--o'--o'--o'  subsystem
-		   \
-		    *---*---*  topic</pre>
-</div>
+<div class="paragraph">
+<p>您将获得固定的历史记录</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>困难的例子
-~~~~~
-
-如果 ‘子系统’ 的变化与重置前的变化不完全一致，情况就会变得更加复杂。
-
-NOTE: 虽然 ‘简单恢复案例’ 有时看似成功
+<pre>    o---o---o---o---o---o---o---o  master
+                                 \
+                                  o'--o'--o'--o'--o'  subsystem
+                                                   \
+                                                    *---*---*  topic</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_困难的例子">困难的例子</h3>
+<div class="paragraph">
+<p>如果 ‘子系统’ 的变化与重置前的变化不完全一致，情况就会变得更加复杂。</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<div class="title">Note</div>
+</td>
+<td class="content">
+虽然 ‘简单恢复案例’ 有时看似成功
       即使在疑难案件中，也可能产生意想不到的后果。
-      例如，通过 `git rebase
-      --interactive` 删除的提交将被**恢复**！
-
-我们的想法是手动告诉 `git rebase` “旧的 ‘子系统’ 分支在哪里结束，而您的 ‘主题’ 分支在哪里开始”，也就是说，它们之间的旧合并基础是什么。 例如，你必须找到一种方法来命名旧 ‘子系统’ 分支的最后一次提交：
-
-* 使用 ‘子系统’ 引用日志：在 `git fetch` 之后，‘子系统’ 的旧 tip 位于 `subsystem@{1}`。 随后的获取将增加这个数字。 (参见 linkgit:git-reflog[1]）
-
-* 与 ‘主题’ 分支的 tip 有关：由于 ‘topic’ 分支有三次提交，所以 ‘子系统’ 分支的旧提示必须是 `topic~3`。
-
-然后，您可以将旧的 `subsystem..topic`（子系统..主题）移植到新的提示中，方法是（对于引用日志的情况，假设您已经在 ‘主题’ 分支中）：</pre>
+      例如，通过 <code>git</code> <code>rebase</code>
+      <code>--interactive</code> 删除的提交将被<strong>恢复</strong>！
+</td>
+</tr>
+</table>
 </div>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>$ git rebase --onto subsystem subsystem@{1}</pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre>“困难例子” 恢复的连锁反应尤其糟糕：‘主题’ 下游的 ‘每个人’ 现在也必须执行 “困难例子” 恢复！
-
-变基合并
-----
-
-交互式变基命令最初是为处理单个补丁系列而设计的。因此，将合并提交排除在待办事项列表之外是有道理的，因为开发人员在分支上工作时，可能已经合并了当时的 `master`，只是最终将所有提交重置到了 `master`上（跳过了合并提交）。
-
-不过，开发人员想要重新创建合并提交也有合理的原因：在多个相互关联的分支上工作时，为了保持分支结构（或 “提交拓扑”）。
-
-在下面的示例中，开发人员在一个重构了按钮定义方式的特性分支上工作，并在另一个特性分支上使用重构实现了 “报告错误” 按钮。`git log --graph --format=%s -5` 的输出可能是这样的：</pre>
-</div>
+<div class="paragraph">
+<p>我们的想法是手动告诉 <code>git</code> <code>rebase</code> “旧的 ‘子系统’ 分支在哪里结束，而您的 ‘主题’ 分支在哪里开始”，也就是说，它们之间的旧合并基础是什么。 例如，你必须找到一种方法来命名旧 ‘子系统’ 分支的最后一次提交：</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>合并分支 <em>report-a-bug</em>
-|\
-| * 添加反馈按钮</p>
+<p>使用 ‘子系统’ 引用日志：在 <code>git</code> <code>fetch</code> 之后，‘子系统’ 的旧 tip 位于 <code>subsystem@</code>{1}。 随后的获取将增加这个数字。 (参见 <a href="git-reflog.html">git-reflog(1)</a>）</p>
 </li>
 <li>
-<p>| 合并分支 <em>refactor-button</em>
-|\ \
-| |/
-| * 为所有的按钮使用 Button 类
-| * 从 DownloadButton 类中提取一个通用 Button 类</p>
+<p>与 ‘主题’ 分支的 tip 有关：由于 ‘topic’ 分支有三次提交，所以 ‘子系统’ 分支的旧提示必须是 <code>topic~3</code>。</p>
 </li>
 </ul>
 </div>
+<div class="paragraph">
+<p>然后，您可以将旧的 <code>subsystem</code><code>..</code><code>topic</code>（子系统..主题）移植到新的提示中，方法是（对于引用日志的情况，假设您已经在 ‘主题’ 分支中）：</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre>开发人员可能希望在保留分支拓扑的同时，将这些提交重定向到更新的 `master` 分支，例如，当第一个特性分支比第二个分支更早集成到 `master` 分支时，开发人员可能希望解决与 “下载按钮” 类的合并冲突，因为 “下载按钮” 类已经集成到了 `master` 分支。
+<pre>    $ git rebase --onto subsystem subsystem@{1}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>“困难例子” 恢复的连锁反应尤其糟糕：‘主题’ 下游的 ‘每个人’ 现在也必须执行 “困难例子” 恢复！</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_变基合并">变基合并</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>交互式变基命令最初是为处理单个补丁系列而设计的。因此，将合并提交排除在待办事项列表之外是有道理的，因为开发人员在分支上工作时，可能已经合并了当时的 <code>master</code>，只是最终将所有提交重置到了 `master`上（跳过了合并提交）。</p>
+</div>
+<div class="paragraph">
+<p>不过，开发人员想要重新创建合并提交也有合理的原因：在多个相互关联的分支上工作时，为了保持分支结构（或 “提交拓扑”）。</p>
+</div>
+<div class="paragraph">
+<p>在下面的示例中，开发人员在一个重构了按钮定义方式的特性分支上工作，并在另一个特性分支上使用重构实现了 “报告错误” 按钮。<code>git</code> <code>log</code> <code>--graph</code> <code>--format=</code>%s <code>-5</code> 的输出可能是这样的：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>*   合并分支 'report-a-bug'
+|\
+| * 添加反馈按钮
+* | 合并分支 'refactor-button'
+|\ \
+| |/
+| * 为所有的按钮使用 Button 类
+| * 从 DownloadButton 类中提取一个通用 Button 类</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>开发人员可能希望在保留分支拓扑的同时，将这些提交重定向到更新的 <code>master</code> 分支，例如，当第一个特性分支比第二个分支更早集成到 <code>master</code> 分支时，开发人员可能希望解决与 “下载按钮” 类的合并冲突，因为 “下载按钮” 类已经集成到了 <code>master</code> 分支。</p>
+</div>
+<div class="paragraph">
+<p>可以使用 <code>--rebase-merges</code> 选项进行重置。 它将生成如下的待办事项列表：</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>标签上的
 
-可以使用 `--rebase-merges` 选项进行重置。 它将生成如下的待办事项列表：</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>标签上的</p>
-</div>
-</div>
-</div>
-<h1 id="_分支重构按钮" class="sect0">分支：重构按钮</h1>
-<div class="paragraph">
-<p>重置到
+# 分支：重构按钮
+重置到
 选 123456 从下载按钮类中提取一个通用按钮类
 选取 654321 对所有按钮使用按钮类
-label refactor-button（重构按钮）</p>
-</div>
-<h1 id="_分支报告一个错误" class="sect0">分支：报告一个错误</h1>
-<div class="paragraph">
-<p>reset refactor-button （重构按钮）# 所有按钮都使用按钮类
+label refactor-button（重构按钮）
+
+# 分支：报告一个错误
+reset refactor-button （重构按钮）# 所有按钮都使用按钮类
 pick abcdef 添加反馈按钮
-label report-a-bug（报告一个错误）</p>
+label report-a-bug（报告一个错误）
+
+重置到
+merge -C a1b2c3 refactor-button # 合并 “重构按钮”
+merge -C 6f5e4d report-a-bug # 合并 “报告一个错误”</pre>
+</div>
 </div>
 <div class="paragraph">
-<p>重置到
-merge -C a1b2c3 refactor-button # 合并 “重构按钮”
-merge -C 6f5e4d report-a-bug # 合并 “报告一个错误”</p>
+<p>与常规的交互式变基不同，除了 <code>pick</code>（选取）命令外，还有 <code>label</code>（标签）、<code>reset</code>（重置） 和 <code>merge</code>（合并） 命令。</p>
+</div>
+<div class="paragraph">
+<p><code>label</code> 命令会在执行该命令时将一个标签与当前 HEAD 关联。这些标签被创建为工作树本地引用（<code>refs/rewritten/</code><em>&lt;label&gt;</em>），并将在重置完成后被删除。这样，链接到同一仓库的多个工作树中的重置操作就不会相互干扰。如果 <code>label</code> 命令失败，会立即重新安排，并给出如何继续的提示信息。</p>
+</div>
+<div class="paragraph">
+<p><code>reset</code> 命令会将 HEAD、索引和工作树重置为指定的版本。它类似于 <code>exec</code> <code>git</code> <code>reset</code> <code>--hard</code> <em>&lt;label&gt;</em>，但拒绝覆盖未跟踪的文件。如果 <code>reset</code> 命令失败，会立即重新安排，并附带如何编辑待办事项列表的提示信息（这种情况通常发生在 <code>reset</code> 命令被手动插入待办事项列表且包含错字的情况下）。</p>
+</div>
+<div class="paragraph">
+<p><code>merge</code>（合并）命令会将指定的版本合并到当时的 HEAD 中。使用 <code>-C</code> &lt;源提交&gt; 时，将使用指定合并提交的提交信息。如果将 <code>-C</code> 改为小写的 <code>-c</code>，合并成功后，提交信息将在编辑器中打开，以便用户编辑信息。</p>
+</div>
+<div class="paragraph">
+<p>如果 <code>merge</code>（合并）命令因合并冲突以外的任何原因失败（即合并操作甚至没有开始），则会立即重新安排。</p>
+</div>
+<div class="paragraph">
+<p>默认情况下，<code>merge</code>（合并）命令将对常规合并使用 <code>ort</code> ` 合并策略，对多路合并使用 `octopus 合并策略。 我们可以在调用变基命令时使用 <code>--strategy</code> 参数为所有合并指定一个默认策略，也可以在交互式命令列表中使用 <code>exec</code> 命令显式地调用 <code>git</code> <code>merge</code> 并加上 <code>--strategy</code> 参数来覆盖特定的合并策略。 需要注意的是，像这样显式调用 <code>git</code> <code>merge</code> 时，可以利用标签是工作区本地引用（例如，引用 <code>refs/rewritten/onto</code> 将对应标签 <code>onto</code>）这一事实来引用要合并的分支。</p>
+</div>
+<div class="paragraph">
+<p>注意：第一条命令（<code>label</code> <code>onto</code>）会标注提交所基于的修订版本；<code>onto</code> ` 只是一个约定俗成的名称，是对 `--onto 选项的一种提示。</p>
+</div>
+<div class="paragraph">
+<p>也可以通过添加 <code>merge</code> &lt;合并起点&gt; 命令，从头开始引入全新的合并提交。这种形式会生成暂定提交信息，并始终打开编辑器让用户编辑。例如，当一个特性分支要解决的问题不止一个，需要拆分成两个甚至更多特性分支时，这个命令就很有用。请看这个待办事项列表：</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>与常规的交互式变基不同，除了 `pick`（选取）命令外，还有 `label`（标签）、`reset`（重置） 和 `merge`（合并） 命令。
-
-`label` 命令会在执行该命令时将一个标签与当前 HEAD 关联。这些标签被创建为工作树本地引用（`refs/rewritten/&lt;label&gt;`），并将在重置完成后被删除。这样，链接到同一仓库的多个工作树中的重置操作就不会相互干扰。如果 `label` 命令失败，会立即重新安排，并给出如何继续的提示信息。
-
-`reset` 命令会将 HEAD、索引和工作树重置为指定的版本。它类似于 `exec git reset --hard &lt;label&gt;`，但拒绝覆盖未跟踪的文件。如果 `reset` 命令失败，会立即重新安排，并附带如何编辑待办事项列表的提示信息（这种情况通常发生在 `reset` 命令被手动插入待办事项列表且包含错字的情况下）。
-
-`merge`（合并）命令会将指定的版本合并到当时的 HEAD 中。使用 `-C &lt;源提交&gt;` 时，将使用指定合并提交的提交信息。如果将 `-C` 改为小写的 `-c`，合并成功后，提交信息将在编辑器中打开，以便用户编辑信息。
-
-如果 `merge`（合并）命令因合并冲突以外的任何原因失败（即合并操作甚至没有开始），则会立即重新安排。
-
-默认情况下，`merge`（合并）命令将对常规合并使用 `ort ` 合并策略，对多路合并使用 `octopus` 合并策略。 我们可以在调用变基命令时使用 `--strategy` 参数为所有合并指定一个默认策略，也可以在交互式命令列表中使用 `exec` 命令显式地调用 `git merge` 并加上 `--strategy` 参数来覆盖特定的合并策略。 需要注意的是，像这样显式调用 `git merge` 时，可以利用标签是工作区本地引用（例如，引用 `refs/rewritten/onto` 将对应标签 `onto`）这一事实来引用要合并的分支。
-
-注意：第一条命令（`label onto`）会标注提交所基于的修订版本；`onto ` 只是一个约定俗成的名称，是对 `--onto` 选项的一种提示。
-
-也可以通过添加 `merge &lt;合并起点&gt;` 命令，从头开始引入全新的合并提交。这种形式会生成暂定提交信息，并始终打开编辑器让用户编辑。例如，当一个特性分支要解决的问题不止一个，需要拆分成两个甚至更多特性分支时，这个命令就很有用。请看这个待办事项列表：</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>pick 192837 从 GNU Makefiles 切换到 CMake
+<pre>pick 192837 从 GNU Makefiles 切换到 CMake
 pick 5a6c7e 记录切换到 CMake 的过程
 pick 918273 修复 CMake 中的 OpenSSL 检测问题
 pick afbecd http：添加对 TLS v1.3 的支持
-pick fdbaec 在 Windows 上修复 CMake 对 cURL 的检测</p>
+pick fdbaec 在 Windows 上修复 CMake 对 cURL 的检测</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>该列表中与 CMake 无关的一个提交很可能是为了修复所有因改用 CMake 而引入的错误，但它解决的是另一个问题。要把这个分支分成两个主题分支，可以这样编辑待办事项列表：</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>该列表中与 CMake 无关的一个提交很可能是为了修复所有因改用 CMake 而引入的错误，但它解决的是另一个问题。要把这个分支分成两个主题分支，可以这样编辑待办事项列表：</pre>
-</div>
-</div>
-<div class="paragraph">
-<p>标签上的</p>
-</div>
-<div class="paragraph">
-<p>选择 afbecd http：添加对 TLS v1.3 的支持
-label tlsv1.3</p>
-</div>
-<div class="paragraph">
-<p>reset onto
+<pre>标签上的
+
+选择 afbecd http：添加对 TLS v1.3 的支持
+label tlsv1.3
+
+reset onto
 pick 192837 从 GNU Makefiles 切换到 CMake
 pick 918273 修复 CMake 中的 OpenSSL 检测问题
 pick fdbaec 在 Windows 上修复 CMake 对 cURL 的检测
 pick 5a6c7e 记录切换到 CMake 的过程
-label cmake</p>
+label cmake
+
+reset onto
+merge tlsv1.3
+merge cmake</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_配置">配置</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>本节中这一行以下的内容都是从 <a href="git-config.html">git-config(1)</a> 文档中摘录的。其内容与那里的内容相同：</p>
 </div>
 <div class="paragraph">
-<p>reset onto
-merge tlsv1.3
-merge cmake</p>
+<p>Unresolved directive in git-rebase.adoc - include::config/rebase.adoc[]
+Unresolved directive in git-rebase.adoc - include::config/sequencer.adoc[]</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre>配置
---
-
-本节中这一行以下的内容都是从 linkgit:git-config[1] 文档中摘录的。其内容与那里的内容相同：
-
-Unresolved directive in git-rebase.adoc - include::config/rebase.adoc[]
-Unresolved directive in git-rebase.adoc - include::config/sequencer.adoc[]
-
-GIT
----
-属于 linkgit:git[1] 文档</pre>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_git">GIT</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>属于 <a href="git.html">git(1)</a> 文档</p>
+</div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-23 12:03:54 +0100
+Last updated 2025-05-29 13:37:13 +0200
 </div>
 </div>
 </body>

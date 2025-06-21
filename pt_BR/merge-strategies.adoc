@@ -6,6 +6,8 @@ O mecanismo de mesclagem (os comandos `git merge` e `git pull`) permite que as '
 ort::
 	Esta é a estratégia de mesclagem predefinida ao extrair ou ao mesclar um ramo. Esta estratégia só pode resolver dois `HEADS` usando um algoritmo de mesclagem de 3 vias. Quando há mais de um ancestral comum que pode ser usado para a mesclagem de 3 vias, ele cria uma árvore mesclada dos ancestrais comuns e a utiliza como uma árvore de referência para a mesclagem de 3 vias. Foi relatado que isso resulta em menos conflitos de mesclagem sem causar erros de mesclagem através dos testes feitos na mesclagem dos commits reais retirados do histórico de desenvolvimento do kernel do Linux 2.6. Além disso, esta estratégia pode detectar e lidar com as mesclagens que envolvam renomeações. Não faz uso de cópias detectadas. O nome desse algoritmo é um acrônimo ("Ostensibly Recursive's Twin") e surgiu do fato de que ele foi escrito como um substituto para o padrão di algoritmo anterior, `recursive`.
 +
+In the case where the path is a submodule, if the submodule commit used on one side of the merge is a descendant of the submodule commit used on the other side of the merge, Git attempts to fast-forward to the descendant. Otherwise, Git will treat this case as a conflict, suggesting as a resolution a submodule commit that is descendant of the conflicting ones, if one exists.
++
 A estratégia 'ort' pode adotar as seguintes opções:
 
 ours;;
@@ -38,22 +40,23 @@ find-renames[=<n>];;
 rename-threshold=<n>;;
 	É um sinônimo obsoleto para `find-renames=<n>`.
 
-subtree[=<caminho>];;
-	Esta opção é uma forma mais avançada de estratégia de 'subárvore', onde a estratégia faz uma estimativa de como as duas árvores devem ser deslocadas para coincidir uma com a outra durante a mesclagem. Em vez disso, o caminho especificado é prefixado (ou retirado do início) para fazer com que a forma das duas árvores coincida.
+no-renames;;
+	Desativa a detecção de renomeação. Isto sobrepõem a variável de configuração `merge.renames` configuration. Consulte também linkgit:git-diff[1] `--no-renames`.
 
-recursive::
-	Isso só pode resolver dois cabeçalhos usando um algoritmo de mesclagem de 3 vias. Quando há mais de um ancestral comum que pode ser usado para a mesclagem de 3 vias, ele cria uma árvore mesclada dos ancestrais comuns e a utiliza como uma árvore de referência para a mesclagem de 3 vias. Foi relatado que isso resulta em menos conflitos de mesclagem sem causar erros de mesclagem através dos testes feitos na mesclagem dos commits reais retirados do histórico de desenvolvimento do kernel do Linux 2.6. Além disso, ele pode detectar e lidar com mesclagens que envolvam renomeações. Não faz uso de cópias detectadas. Essa era a estratégia padrão para resolver dois cabeçalhos do Git v0.99.9k até a v2.33.0.
-+
-A estratégia 'recursiva' usa as mesmas opções que a 'ort'. Entretanto, há três opções adicionais que o 'ort' ignora (não documentadas acima) e que podem ser úteis com a estratégia 'recursiva':
+histogram;;
+	Deprecated synonym for `diff-algorithm=histogram`.
 
 patience;;
 	É um sinônimo obsoleto para `diff-algorithm=patience`.
 
-diff-algorithm=[patience|minimal|histogram|myers];;
-	Use um algoritmo de comparação diferente durante a mesclagem, o que pode ajudar a evitar mesclagens incorretas que ocorrem devido a linhas correspondentes sem importância (como chaves de funções distintas). Consulte também linkgit:git-diff[1] `--diff-algorithm`. Observe que `ort` usa especificamente `diff-algorithm=histogram`, enquanto `recursive` usa como predefinição a configuração `diff.algorithm`.
+diff-algorithm=[histogram|minimal|myers|patience];;
+	Use a different diff algorithm while merging, which can help avoid mismerges that occur due to unimportant matching lines (such as braces from distinct functions). See also linkgit:git-diff[1] `--diff-algorithm`. Note that `ort` defaults to `diff-algorithm=histogram`, while regular diffs currently default to the `diff.algorithm` config setting.
 
-no-renames;;
-	Desativa a detecção de renomeação. Isto sobrepõem a variável de configuração `merge.renames` configuration. Consulte também linkgit:git-diff[1] `--no-renames`.
+subtree[=<caminho>];;
+	Esta opção é uma forma mais avançada de estratégia de 'subárvore', onde a estratégia faz uma estimativa de como as duas árvores devem ser deslocadas para coincidir uma com a outra durante a mesclagem. Em vez disso, o caminho especificado é prefixado (ou retirado do início) para fazer com que a forma das duas árvores coincida.
+
+recursive::
+	This is now a synonym for `ort`. It was an alternative implementation until v2.49.0, but was redirected to mean `ort` in v2.50.0. The previous recursive strategy was the default strategy for resolving two heads from Git v0.99.9k until v2.33.0.
 
 resolve::
 	Isso só pode resolver duas cabeças (ou seja, o ramo atual e outro ramo do qual você retirou) usando um algoritmo de mesclagem de três vias. Ele tenta detectar cuidadosamente as ambiguidades de mesclagem cruzada. Ele não lida com renomeações.
@@ -62,7 +65,7 @@ octopus::
 	Isso resolve casos com mais de dois cabeçalhos, mas se recusa a fazer uma mesclagem complexa que precise de uma resolução manual. Seu principal objetivo é ser usado para agrupar os tópicos dos cabeçalhos juntos. Esta é a estratégia de mesclagem predefinida ao obter (fazer um pull) ou ao mesclar um ramo.
 
 ours::
-	Isso resolve qualquer quantidade de cabeçalhos, mas a árvore resultante da mesclagem é sempre a do cabeçalho do ramo atual, ignorando efetivamente todas as alterações de todos os outros ramos. Ele deve ser usado para substituir o histórico de desenvolvimento antigo das ramificações paralelas. Observe que isso é diferente da opção `-Xours` para a estratégia de mesclagem da opção 'recursive'.
+	This resolves any number of heads, but the resulting tree of the merge is always that of the current branch head, effectively ignoring all changes from all other branches. It is meant to be used to supersede old development history of side branches. Note that this is different from the -Xours option to the 'ort' merge strategy.
 
 subtree::
 	Esta é uma estratégia `ort` modificada. Ao mesclar as árvores 'A' e 'B', caso 'B' corresponda a uma subárvore de 'A', o 'B' será ajustado primeiro para coincidir à estrutura da árvore 'A', em vez de ler as árvores no mesmo nível. Esse ajuste também é feito na árvore ancestral comum.

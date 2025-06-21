@@ -1,0 +1,176 @@
+git-diff(1)
+===========
+
+NOMBRE
+------
+git-diff - Muestra los cambios entre confirmaciones, confirmación y árbol de trabajo, etc
+
+
+SINOPSIS
+--------
+[synopsis]
+git diff [<opciones>] [<confirmación>] [--] [<ruta>...]
+git diff [<opciones>] --cached [--merge-base] [<confirmación>] [--] [<ruta>...]
+git diff [<opciones>] [--merge-base] <confirmación> [< confirmación >...] < confirmación > [--] [<ruta>...]
+git diff [<opciones>] < confirmación >...< confirmación > [--] [<ruta>...]
+git diff [<opciones>] <blob> <blob>
+git diff [<opciones>] --no-index [--] <ruta> <ruta>
+
+DESCRIPCIÓN
+-----------
+Muestra los cambios entre el árbol de trabajo y el índice o un árbol, cambios entre el índice y un árbol, cambios entre dos árboles, cambios resultantes de una fusión, cambios entre dos objetos blob, o cambios entre dos ficheros en disco.
+
+`git diff [<opciones>] [--] [<especificación-de-ruta>...]`::
+
+	Esta forma es para ver los cambios relativos al índice que hiciste (área de presentación para la siguiente confirmación). En otras palabras, la diferencias son lo que _podrías_ decirle a Git que añada al índice mas adelante pero aún no. Puedes presentar esos cambios usando linkgit:git-add[1].
+
+`git diff [<opciones>] --no-index [--] <ruta> <ruta>`::
+
+	Esta forma es para comparar las dos rutas en el sistema de ficheros dadas. Puedes omitir la opción `--no-index` cuando se ejecuta el comando en un árbol de trabajo controlado por Git y por lo menos una de las rutas apunta afuera del árbol de trabajo, o cuando se ejecuta el comando fuera de un árbol de trabajo controlado por Git. Esta forma implica `--exit-code`.
+
+`git diff [<opciones>] --cached [--merge-base] [<confirmación>] [--] [<ruta>...]`::
+
+	Esta forma es para ver los cambios que presentaste para la siguiente confirmación relativa a la _<confirmación>_ nombrada. Típicamente querrás una comparación con la última confirmación, así que si no das _<confirmación>_, se predetermina a `HEAD`. Si `HEAD` no existe (ej. ramas sin nacer) y no se da _<confirmación>_, muestra todos los cambios presentados. `--staged` es un sinónimo de `--cached`.
++
+Si se da `--merge-base`, en lugar de usar _<confirmación>_, usa la base de fusión de _<confirmación>_ y `HEAD`. `git diff --cached --merge-base A` es equivalente a `git diff --cached $(git merge-base A HEAD)`.
+
+`git diff [<opciones>] [--merge-base] <commit> [--] [<ruta>...]`::
+
+	Esta forma es para ver los cambios que tienes en tu árbol de trabajo relativos a la _<confirmación>_ nombrada. Puedes usar `HEAD` para compararla con la última confirmación, o el nombre de una rama para comparar con la punta de una rama distinta.
++
+Si se da `--merge-base`, en lugar de usar _<confirmación>_, usa la base de fusión de _<confirmación>_ y `HEAD`. `git diff --merge-base A` es equivalente a `git diff $(git merge-base A HEAD)`.
+
+`git diff [<opciones>] [--merge-base] <confirmación> <confirmación> [--] [<ruta>...]`::
+
+	Es para ver los cambios entre dos _<confirmación>_ arbitrarias.
++
+Si se da `--merge-base`, usa la base de fusión de las dos confirmaciones para el lado "antes". `git diff --merge-base A B` es equivalente a `git diff $(git merge-base A B) B`.
+
+`git diff [<opciones>] <confirmación> <confirmación>...<confirmación> [--] [<ruta>...]`::
+
+	Esta forma es para ver los resultados de una confirmación de fusión. La primer _<confirmación>_ listada debe ser la fusión en sí; las dos o mas confirmaciones restantes deben ser sus padres. Algunas formas convenientes de producir el conjunto deseado de revisiones son usando los sufijos `@` y `^!`. Si `A` es una confirmación de fusión, entonces `git diff A A^@`, `git diff A^!` y `git show A` darán la misma diferencia combinada.
+
+`git diff [<opciones>] <confirmación>..<confirmación> [--] [<ruta>...]`::
+
+	Este es un sinónimo de la forma anterior (sin `...`) para ver los cambios entre dos _<confirmación>_es arbitrarias. Si se omite _<confirmación>_ en algún lado, tendrá el mismo efecto que si se usara `HEAD`.
+
+`git diff [<opciones>] <confirmación>...<confirmación> [--] [<ruta>...]`::
+
+	Esta forma es para ver los cambios en la rama que contiene hasta la segunda _<confirmación>_, comenzando en el ancestro común a ambas _<confirmación>_es. `git diff A...B` es equivalente a `git diff $(git merge-base A B) B`. Puedes omitir cualquier _<confirmación>_, que tendrá el mismo efecto que usar `HEAD`.
+
+Sólo en caso que hagas algo exótico, debe notarse que toda _<confirmación>_ en la descripción anterior, exceptuando el caso `--merge-base` y las últimas dos formas que usan la notación `..`, puede ser cualquier _<árbol>_. Un árbol de interés es al que apunta la referencia nombrada `AUTO_MERGE`, la cual se escribe por la estrategia de fusión `ort` al darse conflictos de fusión (ver linkgit:git-merge[1]). Comparar el árbol de trabajo con `AUTO_MERGE` mostrará los cambios que has hecho hasta el momento para resolver los conflictos textuales (ver los ejemplos abajo).
+
+Para una lista mas completa de las maneras de invocar _<confirmación>_, ver la sección "ESPECIFICANDO REVISIONES" en linkgit:gitrevisions[7]. Sin embargo, `diff` a para comparar dos _endpoints_, no rangos, y las notaciones de rangos (`<confirmación>..<confirmación>` y `<confirmación>...<confirmación>`) no significan un rango como se define en la sección "ESPECIFICANDO RANGOS" en linkgit:gitrevisions[7].
+
+`git diff [<opciones>] <blob> <blob>`::
+
+	Esta forma es para ver las diferencias entre dos contenidos en bruto de dos objetos blob.
+
+OPCIONES
+--------
+:git-diff: 1
+include::diff-options.adoc[]
+
+`-1`::
+`--base`::
+`-2`::
+`--ours`::
+`-3`::
+`--theirs`::
+	Compara el árbol de trabajo con
++
+--
+ * la versión "base" (etapa #1) cuando se usa `-1` o `--base`,
+ * "nuestra rama" (etapa #2) cuando se usa `-2` o `--ours`, or
+ * "su rama" (etapa #3) cuando se usa `-3` o `--theirs`.
+--
++
+The index contains these stages only for unmerged entries i.e. while resolving conflicts. See linkgit:git-read-tree[1] section "3-Way Merge" for detailed information.
+
+`-0`::
+	Omit diff output for unmerged entries and just show "Unmerged". Can be used only when comparing the working tree with the index.
+
+`<ruta>...`::
+	The _<path>_ parameters, when given, are used to limit the diff to the named paths (you can give directory names and get diff for all files under them).
+
+
+include::diff-format.adoc[]
+
+EJEMPLOS
+--------
+
+Varias formas de revisar tu árbol de trabajo::
++
+------------
+$ git diff            <1>
+$ git diff --cached   <2>
+$ git diff HEAD       <3>
+$ git diff AUTO_MERGE <4>
+------------
++
+<1> Cambios en el árbol de trabajo aún no presentados para la confirmación siguiente.
+<2> Cambios entre el índice y tu última confirmación; lo que estarás confirmando si ejecutas `git commit` sin la opción `-a`.
+<3> Changes in the working tree since your last commit; what you would be committing if you run `git commit -a`
+<4> Changes in the working tree you've made to resolve textual conflicts so far.
+
+Comparando con confirmaciones arbitrarias::
++
+------------
+$ git diff test            <1>
+$ git diff HEAD -- ./test  <2>
+$ git diff HEAD^ HEAD      <3>
+------------
++
+<1> En lugar de usar la punta de la rama actual, compara con la punta de la rama "test".
+<2> Instead of comparing with the tip of "test" branch, compare with the tip of the current branch, but limit the comparison to the file "test".
+<3> Compara la versión antes de la última confirmación y la última confirmación.
+
+Comparando ramas::
++
+------------
+$ git diff topic master    <1>
+$ git diff topic..master   <2>
+$ git diff topic...master  <3>
+------------
++
+<1> Cambios entre las puntas de las ramas topic y master.
+<2> Igual que el anterior.
+<3> Changes that occurred on the master branch since when the topic branch was started off it.
+
+Limitando la salida de diff::
++
+------------
+$ git diff --diff-filter=MRC            <1>
+$ git diff --name-status                <2>
+$ git diff arch/i386 include/asm-i386   <3>
+------------
++
+<1> Show only modification, rename, and copy, but not addition or deletion.
+<2> Show only names and the nature of change, but not actual diff output.
+<3> Limit diff output to named subtrees.
+
+Munging the diff output::
++
+------------
+$ git diff --find-copies-harder -B -C  <1>
+$ git diff -R                          <2>
+------------
++
+<1> Spend extra cycles to find renames, copies and complete rewrites (very expensive).
+<2> Output diff in reverse.
+
+CONFIGURACIÓN
+-------------
+
+include::includes/cmd-config-section-all.adoc[]
+
+:git-diff: 1
+include::config/diff.adoc[]
+
+VER TAMBIÉN
+-----------
+`diff`(1), linkgit:git-difftool[1], linkgit:git-log[1], linkgit:gitdiffcore[7], linkgit:git-format-patch[1], linkgit:git-apply[1], linkgit:git-show[1]
+
+GIT
+---
+Parte de la suite de linkgit:git[1]

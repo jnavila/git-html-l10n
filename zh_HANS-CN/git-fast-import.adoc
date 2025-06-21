@@ -222,16 +222,25 @@ fast-import 接受多条命令来更新当前仓库和控制当前导入过程�
 ~~~~~~~~
 用新的提交创建或更新分支，记录项目的逻辑变更。
 
+////
+Yes, it's intentional that the 'gpgsig' line doesn't have a trailing
+`LF`; the definition of `data` has a byte-count prefix, so it
+doesn't need an `LF` to act as a terminator (and `data` also already
+includes an optional trailing `LF?` just in case you want to include
+one).
+////
+
 ....
-	'commit' SP <引用> LF
+	'commit' SP <ref> LF
 	mark?
 	original-oid?
-	('author' (SP <名称>)? SP LT <email> GT SP <when> LF)?
-	'committer' (SP <名称>)? SP LT <email> GT SP <when> LF
-	('encoding' SP <编码>)?
+	('author' (SP <name>)? SP LT <email> GT SP <when> LF)?
+	'committer' (SP <name>)? SP LT <email> GT SP <when> LF
+	('gpgsig' SP <alg> LF data)?
+	('encoding' SP <encoding> LF)?
 	data
-	('from' SP <提交号> LF)?
-	('merge' SP <提交号> LF)*
+	('from' SP <commit-ish> LF)?
+	('merge' SP <commit-ish> LF)*
 	(filemodify | filedelete | filecopy | filerename | filedeleteall | notemodify)*
 	LF?
 ....
@@ -257,6 +266,13 @@ fast-import 接受多条命令来更新当前仓库和控制当前导入过程�
 这里的`<名称>`是个人的显示名（例如 ''Com M Itter''），`<email>`是个人的电子邮件地址（''\cm@example.com''）。 `LT` 和 `GT` 是字面上的小于（\x3c）和大于（\x3e）符号。 需要使用这些符号将电子邮件地址与行中的其他字段分隔开来。 请注意，`<名称>` 和 `<email>`是自由格式，可以包含任何字节序列，但 `LT`、`GT` 和`LF` 除外。 `<名称>` 通常采用 UTF-8 编码。
 
 更改的时间由 `<when>`指定，并使用 --date-format=<日期格式> 命令行选项选择的日期格式。 有关支持的格式及其语法，请参阅上文的 ''日期格式''。
+
+`gpgsig`
+^^^^^^^^
+
+The optional `gpgsig` command is used to include a PGP/GPG signature that signs the commit data.
+
+Here <alg> specifies which hashing algorithm is used for this signature, either `sha1` or `sha256`.
 
 `encoding`
 ^^^^^^^^^^

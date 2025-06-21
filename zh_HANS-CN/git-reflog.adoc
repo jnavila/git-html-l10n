@@ -13,9 +13,10 @@ git-reflog - 管理重引用日志信息
 'git reflog list'
 'git reflog expire' [--expire=<time>] [--expire-unreachable=<time>]
 	[--rewrite] [--updateref] [--stale-fix]
-	[--dry-run | -n] [--verbose] [--all [--single-worktree] | <refs>...]
+	[--dry-run | -n] [--verbose] [--all [--single-worktree] | <ref>...]
 'git reflog delete' [--rewrite] [--updateref]
 	[--dry-run | -n] [--verbose] <ref>@{<specifier>}...
+'git reflog drop' [--all [--single-worktree] | <ref>...]
 'git reflog exists' <ref>
 
 描述
@@ -32,7 +33,9 @@ git-reflog - 管理重引用日志信息
 
 "expire" 子命令用于删除旧的引用日志条目。超过 `expire` 时间的条目，或超过 `expire-unreachable` 时间且当前 tip 无法访问的条目，都会从引用日志中删除。 终端用户通常不会直接使用该子项，请参见 linkgit:git-gc[1]。
 
-"delete" 子命令用于删除应用日志中的单个条目。其参数必须是一个_exact_条目（例如"`git reflog delete master@{2}`"）。最终用户通常也不会直接使用该子命令。
+The "delete" subcommand deletes single entries from the reflog, but not the reflog itself. Its argument must be an _exact_ entry (e.g. "`git reflog delete master@{2}`"). This subcommand is also typically not used directly by end users.
+
+The "drop" subcommand completely removes the reflog for the specified references. This is in contrast to "expire" and "delete", both of which can be used to delete reflog entries, but not the reflog itself.
 
 "exists" 子命令检查引用是否有引用日志。 如果引用日志存在，则以零状态退出；如果不存在，则以非零状态退出。
 
@@ -84,6 +87,14 @@ git-reflog - 管理重引用日志信息
 
 `git reflog delete` 接受选项 `--updateref`、`--rewrite`、`-n`、`--dry-run` 和 `--verbose`，其含义与与 `expire` 一起使用时相同。
 
+Options for `drop`
+~~~~~~~~~~~~~~~~~~
+
+--all::
+	Drop the reflogs of all references from all worktrees.
+
+--single-worktree::
+	By default when `--all` is specified, reflogs from all working trees are dropped. This option limits the processing to reflogs from the current working tree only.
 
 GIT
 ---

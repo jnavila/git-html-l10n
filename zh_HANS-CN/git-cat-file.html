@@ -447,9 +447,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_概述">概述</h2>
 <div class="sectionbody">
 <div class="verseblock">
-<pre class="content"><em>git cat-file</em> &lt;类型&gt; &lt;对象&gt;
-<em>git cat-file</em> (-e | -p) &lt;对象&gt;
-<em>git cat-file</em> (-t | -s) [--allow-unknown-type] &lt;对象&gt;
+<pre class="content"><em>git cat-file</em> &lt;type&gt; &lt;object&gt;
+<em>git cat-file</em> (-e | -p | -t | -s) &lt;object&gt;
 <em>git cat-file</em> (--textconv | --filters)
              [&lt;rev&gt;:&lt;path|tree-ish&gt; | --path=&lt;path|tree-ish&gt; &lt;rev&gt;]
 <em>git cat-file</em> (--batch | --batch-check | --batch-command) [--batch-all-objects]
@@ -516,6 +515,20 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--filters</dt>
 <dd>
 <p>显示经当前工作树中为给定的 &lt;路径&gt; 配置的过滤器（即污点过滤器、行结束符转换等）转换后的内容。在这种情况下，&lt;对象&gt; 的形式必须是`&lt;目录树对象&gt;:&lt;路径&gt;，或 `:&lt;路径&gt;。</p>
+</dd>
+<dt class="hdlist1">--filter=&lt;过滤器定义&gt;</dt>
+<dt class="hdlist1">--no-filter</dt>
+<dd>
+<p>Omit objects from the list of printed objects. This can only be used in combination with one of the batched modes. Excluded objects that have been explicitly requested via any of the batch modes that read objects via standard input (<code>--batch</code>, <code>--batch-check</code>) will be reported as "filtered". Excluded objects in <code>--batch-all-objects</code> mode will not be printed at all. The <em>&lt;filter-spec&gt;</em> may be one of the following:</p>
+<div class="paragraph">
+<p>'--filter=blob:none&#8217;的形式可以省略所有的blob。</p>
+</div>
+<div class="paragraph">
+<p>格式 <em>--filter=blob:limit=&lt;n&gt;[kmg]</em> 会忽略大小至少为 n 字节或单位的 blob。后缀 k、m 和 g 可用来命名 KiB、MiB 或 GiB 单位。例如，<em>blob:limit=1k</em> 与 <em>blob:limit=1024</em> 相同。</p>
+</div>
+<div class="paragraph">
+<p>'--filter=object:type=(tag|commit|tree|blob)'的形式会省略所有不属于请求类型的对象。</p>
+</div>
 </dd>
 <dt class="hdlist1">--path=&lt;路径&gt;</dt>
 <dd>
@@ -614,10 +627,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <dt class="hdlist1">--unordered</dt>
 <dd>
 <p>当使用 <code>--batch-all-objects</code> 时，访问对象的顺序可能比散列顺序更有效率。顺序的具体细节未作规定，但如果不需要特定顺序，通常会加快输出速度，特别是在使用 <code>--batch</code>`时。 请注意，即使每个对象在仓库中存储了多次，`cat-file 仍然只会显示一次。</p>
-</dd>
-<dt class="hdlist1">--allow-unknown-type</dt>
-<dd>
-<p>允许 <code>-s</code> 或 <code>-t</code> 查询已损坏/损坏的未知类型对象。</p>
 </dd>
 <dt class="hdlist1">--follow-symlinks</dt>
 <dd>
@@ -795,6 +804,14 @@ alink: 链接到 /etc/passwd 的符号链接</pre>
 </div>
 </div>
 <div class="paragraph">
+<p>If a name is specified on stdin that is filtered out via <code>--filter=</code>, then <code>cat-file</code> will ignore any custom format and print:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;object&gt; SP excluded LF</pre>
+</div>
+</div>
+<div class="paragraph">
 <p>如果指定的名称可能指向多个对象（模棱两可的 短 sha），则 <code>cat-file</code> 将忽略任何自定义格式并打印：</p>
 </div>
 <div class="listingblock">
@@ -879,7 +896,7 @@ alink: 链接到 /etc/passwd 的符号链接</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-23 12:03:50 +0100
+Last updated 2025-05-29 13:37:09 +0200
 </div>
 </div>
 </body>

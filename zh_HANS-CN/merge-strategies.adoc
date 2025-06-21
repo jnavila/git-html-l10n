@@ -6,6 +6,8 @@
 ort 策略::
 	这是拉取或合并一个分支时的默认合并策略。 这个策略只能使用三方合并算法解决两个头。 当有一个以上的共同祖先可用于三方合并时，它会创建一个共同祖先的合并树，并将其作为三方合并的参考树。 据报道，通过对Linux 2.6内核开发历史中的实际合并提交的测试，这导致了较少的合并冲突，而不会引起错误的合并。 此外，这个策略可以检测并处理涉及重命名的合并。 它并不使用检测到的副本。 这个算法的名字是一个缩写（"Ostensibly Recursive's Twin"），来自于它是作为以前的默认算法`recursive`的替代而编写的。
 +
+In the case where the path is a submodule, if the submodule commit used on one side of the merge is a descendant of the submodule commit used on the other side of the merge, Git attempts to fast-forward to the descendant. Otherwise, Git will treat this case as a conflict, suggesting as a resolution a submodule commit that is descendant of the conflicting ones, if one exists.
++
 'ort' 策略可以采取以下选项：
 
 ours;;
@@ -38,22 +40,23 @@ find-renames[=<n>];;
 rename-threshold=<n>;;
 	废弃的，`find-renames=<n>` 的同义词。
 
-subtree[=<路径>];;
-	这个选项是 '子树' 策略的更高级形式，该策略对两棵树在合并时必须如何移位以相互匹配进行猜测。 相反，指定的路径是前缀（或从开始剥离），以使两棵树的形状相匹配。
+no-renames;;
+	关闭重名检测。这覆盖了 `merge.renames` 的配置变量。 参见linkgit:git-diff[1] `--no-renames`。
 
-recursive::
-	这只能用三方合并算法解决两个头。 当有一个以上的共同祖先可用于三方合并时，它会创建一个共同祖先的合并树，并使用它作为三方合并的参考树。 据报道，通过对Linux 2.6内核开发历史中的实际合并提交的测试，这导致了较少的合并冲突，而不会引起错误的合并。 此外，它可以检测并处理涉及重命名的合并。 它并不使用检测到的副本。 从Git v0.99.9k到v2.33.0，这是解决双头的默认策略。
-+
-'recursive' 策略采用与 'ort' 相同的选项。 然而，有三个 'ort' 忽略的额外选项（上面没有记录），对 'recursive' 策略有潜在的作用：
+histogram;;
+	Deprecated synonym for `diff-algorithm=histogram`.
 
 patience;;
 	废弃的，`diff-algorithm=patience` 的同义词。
 
-diff-algorithm=[patience|minimal|histogram|myers];;
-	在合并时使用不同的差异算法，这可以帮助避免由于不重要的匹配行（比如不同函数的大括号）而发生的错误合并。 参见linkgit:git-diff[1] `--diff-algorithm`。 注意，`ort` 特定 `diff-algorithm=histogram`，而`recursive`默认为`diff.algorithm`配置设置。
+diff-algorithm=[histogram|minimal|myers|patience];;
+	Use a different diff algorithm while merging, which can help avoid mismerges that occur due to unimportant matching lines (such as braces from distinct functions). See also linkgit:git-diff[1] `--diff-algorithm`. Note that `ort` defaults to `diff-algorithm=histogram`, while regular diffs currently default to the `diff.algorithm` config setting.
 
-no-renames;;
-	关闭重名检测。这覆盖了 `merge.renames` 的配置变量。 参见linkgit:git-diff[1] `--no-renames`。
+subtree[=<路径>];;
+	这个选项是 '子树' 策略的更高级形式，该策略对两棵树在合并时必须如何移位以相互匹配进行猜测。 相反，指定的路径是前缀（或从开始剥离），以使两棵树的形状相匹配。
+
+recursive::
+	This is now a synonym for `ort`. It was an alternative implementation until v2.49.0, but was redirected to mean `ort` in v2.50.0. The previous recursive strategy was the default strategy for resolving two heads from Git v0.99.9k until v2.33.0.
 
 resolve::
 	这只能用三方合并算法解决两个头（即当前分支和你拉来的另一个分支）。 它试图仔细检测纵横交错的合并歧义。 它不处理重名。
@@ -62,7 +65,7 @@ octopus::
 	这可以解决有两个以上头的情况，但拒绝做复杂的合并，需要手动解决。 它主要是用于将主题分支头捆绑在一起。 当拉动或合并一个以上的分支时，这是默认的合并策略。
 
 ours::
-	这可以解决任何数量的头，但合并的结果总是当前分支头的树，有效地忽略了所有其他分支的变化。 它是用来取代侧边分支的旧开发历史的。 注意，这与 'recursive' 合并策略的-Xours选项不同。
+	This resolves any number of heads, but the resulting tree of the merge is always that of the current branch head, effectively ignoring all changes from all other branches. It is meant to be used to supersede old development history of side branches. Note that this is different from the -Xours option to the 'ort' merge strategy.
 
 subtree::
 	这是一个修正的 `ort` 策略。当合并树A和B时，如果B对应于A的子树，B首先被调整为与A的树结构相匹配，而不是在同一级别读取树。这种调整也是针对共同祖先树进行的。

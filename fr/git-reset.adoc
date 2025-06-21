@@ -7,54 +7,54 @@ git-reset - Réinitialise la HEAD actuelle à l'état spécifié
 
 SYNOPSIS
 --------
-[verse]
-'git reset' [-q] [<arbre-esque>] [--] <spec-de-chemin>...
-'git reset' [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]
-'git reset' (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]
-'git reset' [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
+[synopsis]
+git reset [-q] [<arbre-esque>] [--] <spec-de-chemin>...
+git reset [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]
+git reset (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]
+git reset [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
 
 DESCRIPTION
 -----------
 Dans la première et la troisième forme, cette commande copie les entrées depuis `<arbre-esque>` vers l'index. Dans la dernière forme, elle amène le sommet de la branche actuelle (`HEAD`) à `<commit>`, optionnellement en modifiant l'index et l'arbre de travail en correspondance. L'`<arbre-esque>`/`<commit>` vaut par défaut `HEAD` dans toutes les formes.
 
-'git reset' [-q] [<arbre-esque>] [--] <spec-de-chemin>...::
-'git reset' [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]::
-	Ces formes réinitialisent les entrées d'index pour tous fichiers correspondant à <spec-de-chemin> à leur état de `<arbre-esque>` (ceci n'affecte pas l'arbre de travail ou la branche actuelle.)
+`git reset [-q] [<arbre-esque>] [--] <spec-de-chemin>...`::
+`git reset [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]`::
+	Ces formes réinitialisent les entrées d'index pour tous fichiers correspondant à _<spec-de-chemin>_ à leur état de _<arbre-esque>_ (ceci n'affecte pas l'arbre de travail ou la branche actuelle.)
 +
 Cela signifie que `git reset <spec-de-chemin>` est l'opposé de `git add <spec-de-chemin>`. Cette commande est équivalent à `git restore [--source=<arbre-esque>] --staged <spec-de-chemin>...`.
 +
 Après avoir lancé `git reset <spec-de-chemin>` pour mettre à jour l'entrée d'index, vous pouvez linkgit:git-restore[1] pour extraire le contenu de l'index dans l'arbre de travail. Alternativement, en utilisant linkgit:git-restore[1] et en spécifiant un commit avec `--source`, vous pouvez copier le contenu d'un chemin d'un commit vers l'index et l'arbre de travail d'une seule traite.
 
-'git reset' (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]::
-	Sélectionner interactivement les sections dans la différence entre l'index et l'<arbre-esque> (par défaut `HEAD`). Les sections choisies sont ensuite appliquées en ordre inversé à l'index.
+`git reset' (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]`::
+	Sélectionner interactivement les sections dans la différence entre l'index et l'_<arbre-esque>_ (par défaut `HEAD`). Les sections choisies sont ensuite appliquées en ordre inversé à l'index.
 +
 Ceci signifie que `git reset -p` est l'opposé de `git add -p`, autrement dit, vous pouvez l'utiliser pour réinitialiser sélectivement les sections. Voir la section « Mode interactif » de linkgit:git-add[1] pour apprendre comment utiliser le mode `--patch`.
 
-'git reset' [<mode>] [<commit>]::
-	Cette forme réinitialise le sommet de la branche actuelle à `<commit>` et met à jour l'index éventuellement (en le réinitialisant à l'arbre de `<commit>`) et l'arbre de travail en fonction de `<mode>`. Avant l'opération, `ORIG_HEAD` est définie sur le sommet de la branche actuelle. Si `<mode>` est omis, l'option par défaut est `--mixed`. Le mode est une valeur parmi :
+`git reset' [<mode>] [<commit>]`::
+	Cette forme réinitialise le sommet de la branche actuelle à _<commit>_ et met à jour l'index éventuellement (en le réinitialisant à l'arbre de _<commit>_) et l'arbre de travail en fonction de _<mode>_. Avant l'opération, `ORIG_HEAD` est définie sur le sommet de la branche actuelle. Si _<mode>_ est omis, l'option par défaut est `--mixed`. Le _<mode>_ est une valeur parmi :
 +
 --
---soft::
-	Ne pas toucher du tout le fichier d'index ou l'arbre de travail (mais réinitialise le sommet à `<commit>`, juste comme le font tous les modes). Cela laisse tous vos fichiers modifiés « Modifications qui seront validées », comme l'indiquerait `git status`.
+`--soft`::
+	Ne pas toucher du tout le fichier d'index ou l'arbre de travail (mais réinitialise le sommet à _<commit>_, juste comme le font tous les modes). Cela laisse tous vos fichiers modifiés « Modifications qui seront validées », comme l'indiquerait `git status`.
 
---mixed::
+`--mixed`::
 	Réinitialiser l'index mais pas l'arbre de travail (c'est-à-dire, les fichiers modifiés sont préservés mais marqués pour la validation) et affiche ce qui n'a pas été mis à jour. C'est l'action par défaut.
 +
 Si `-N` est spécifié, les chemins supprimés sont marqués comme « à ajouter » (voir linkgit:git-add[1]).
 
---hard::
-	Réinitialiser l'index et l'arbre de travail. Toute modification sur les fichiers suivis dans l'arbre de travail depuis `<commit>` est supprimée. Tous les fichiers ou répertoires non suivis qui empêchent l'écriture des fichiers suivis sont simplement supprimés.
+`--hard`::
+	Réinitialiser l'index et l'arbre de travail. Toute modification sur les fichiers suivis dans l'arbre de travail depuis _<commit>_ est supprimée. Tous les fichiers ou répertoires non suivis qui empêchent l'écriture des fichiers suivis sont simplement supprimés.
 
---merge::
-	Réinitialiser l'index et mettre à jour les fichiers de l'arbre de travail qui sont différents entre `<commit>` et `HEAD`, mais conserver ceux qui sont différents entre l'index et l'arbre de travail (c-à-d qui ont des modifications qui n'ont pas été indexés). Si un fichier qui est différent entre `<commit>` et l'index a des modifications non indexées, la réinitialisation est annulée.
+`--merge`::
+	Réinitialiser l'index et mettre à jour les fichiers de l'arbre de travail qui sont différents entre _<commit>_ et `HEAD`, mais conserver ceux qui sont différents entre l'index et l'arbre de travail (c-à-d qui ont des modifications qui n'ont pas été indexés). Si un fichier qui est différent entre _<commit>_ et l'index a des modifications non indexées, la réinitialisation est annulée.
 +
 En d'autres termes, `--merge` fait quelque chose comme `git read-tree -u -m <commit>`, mais transfère les entrées d'index non indexées.
 
---keep::
-	Réinitialiser les entrées d'index et mettre à jour les fichiers dans l'arbre de travail qui sont différents entre `<commit>` et `HEAD`. Si un fichier qui est différent entre `<commit>` et `HEAD` a des modifications locales, la réinitialisation est annulée.
+`--keep`::
+	Réinitialiser les entrées d'index et mettre à jour les fichiers dans l'arbre de travail qui sont différents entre _<commit>_ et `HEAD`. Si un fichier qui est différent entre _<commit>_ et `HEAD` a des modifications locales, la réinitialisation est annulée.
 
---[no-]recurse-submodules::
-	Lorsque l'arbre de travail est mis à jour, l'utilisation de --recurse-submodules réinitialisera également de manière récursive l'arbre de travail de tous les sous-modules actifs en fonction du commit enregistré dans le superprojet, en définissant également la HEAD des sous-modules à détacher à ce commit.
+`--[no-]recurse-submodules`::
+	Lorsque l'arbre de travail est mis à jour, l'utilisation de `--recurse-submodules` réinitialisera également de manière récursive l'arbre de travail de tous les sous-modules actifs en fonction du commit enregistré dans le superprojet, en définissant également la `HEAD` des sous-modules à détacher à ce commit.
 --
 
 Voir « Reset, restore et revert » dans linkgit:git[1] pour les différences entre les trois commandes.
@@ -63,24 +63,24 @@ Voir « Reset, restore et revert » dans linkgit:git[1] pour les différences 
 OPTIONS
 -------
 
--q::
---quiet::
+`-q`::
+`--quiet`::
 	mode silencieux, n'afficher que les messages d'erreur.
 
---refresh::
---no-refresh::
+`--refresh`::
+`--no-refresh`::
 	Rafraîchir l'index après une réinitialisation mixte. Activé par défaut.
 
---pathspec-from-file=<fichier>::
-	Le spécificateur de chemin est passé dans `<fichier>` au lieu des arguments de la ligne de commande. Si `<fichier>` vaut `-` alors l'entrée standard est utilisée. Les éléments du spécificateur de chemin sont séparés par LF ou CR/LF. Les éléments du spécificateur de chemin peuvent être cités comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Voir aussi l'option `--pathspec-file-nul` et l'option globale `--literal-pathspecs`.
+`--pathspec-from-file=<fichier>`::
+	Le spécificateur de chemin est passé dans _<fichier>_ au lieu des arguments de la ligne de commande. Si _<fichier>_ vaut `-` alors l'entrée standard est utilisée. Les éléments du spécificateur de chemin sont séparés par _LF_ ou _CR_/_LF_. Les éléments du spécificateur de chemin peuvent être cités comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Voir aussi l'option `--pathspec-file-nul` et l'option globale `--literal-pathspecs`.
 
---pathspec-file-nul::
-	Uniquement significatif avec `--pathspec-from-file`. Les éléments du spécificateur de chemin sont séparés par le caractère NUL et tous les autres caractères sont utilisés littéralement (y compris les retours à la ligne et les guillemets).
+`--pathspec-file-nul`::
+	Uniquement significatif avec `--pathspec-from-file`. Les éléments du spécificateur de chemin sont séparés par le caractère _NUL_ et tous les autres caractères sont utilisés littéralement (y compris les retours à la ligne et les guillemets).
 
-\--::
+`--`::
 	Ne pas interpréter les arguments qui suivent comme options.
 
-<spécificateur de chemin>...::
+`<spécificateur-de-chemin>...`::
 	Limite les chemins affectés par l'opération.
 +
 Pour plus de détail, voir l'entrée 'spécificateur de chemin' dans linkgit:gitglossary[7].
@@ -242,7 +242,7 @@ $ git diff --cached                         <7>
 $ git commit ...                            <8>
 ------------
 +
-<1> Réinitialise d'abord l'historique en arrière d'un commit de manière à retirer le commit original, mais laisse l'arbre de travail avec toutes ses modifications. Le drapeau -N garantit que tous les nouveaux fichiers ajoutés avec `HEAD` sont toujours marqués de telle manière que `git add -p` les trouve.
+<1> Réinitialise d'abord l'historique en arrière d'un commit de manière à retirer le commit original, mais laisse l'arbre de travail avec toutes ses modifications. Le drapeau `-N` garantit que tous les nouveaux fichiers ajoutés avec `HEAD` sont toujours marqués de telle manière que `git add -p` les trouve.
 <2> Ensuite, on sélectionne interactivement les sections de diff à ajouter en utilisant `git add -p`. Ceci vous demandera pour chaque section de diff l'une après l'autre et vous pouvez répondre simplement « oui, à inclure », « non, ne pas inclure » ou même utiliser la fonctionnalité puissante d'édition de la section.
 <3> Une fois satisfait des sections à inclure, vous devriez vérifier ce qui a été préparé pour la première validation en utilisant `git diff --cached`. Cela montre toutes les modifications qui ont été indexées et sont sur le point d'être validées.
 <4> Ensuite, valider les modifications stockées dans l'index. L'option `-c` indique de pré-remplir le message de validation avec le message original qui a servi au premier commit. C'est utile pour éviter de le retaper. Le `HEAD@{1}` est une notation spéciale pour le commit que `HEAD` a été avant le commit original réinitialisé (il y a une modification). Voir linkgit:git-reflog[1] pour plus de détails. Vous pouvez aussi utiliser une référence à tout autre commit valide.
@@ -325,9 +325,9 @@ travail index HEAD cible         travail index HEAD
 			  --keep   B       C     C
 ....
 
-`reset --merge` est fait pour être utilisé lors de la réinitialisation d'une fusion conflictuelle. Toute opération de type fusion garantit que le fichier de l'arbre de travail qui est impliqué dans une fusion ne subit pas de modification locale par rapport à l'index avant son démarrage, et qu'elle écrit le résultat dans l'arbre de travail. Donc si nous voyons des différences entre l'index et la cible et aussi entre l'index et l'arbre de travail, alors cela signifie que nous ne réinitialisons pas depuis un état qu'une opération de type fusion a laissé après un échec de conflit. C'est pourquoi l'option `--merge` est interdite dans ce cas.
+`git reset --merge` est fait pour être utilisé lors de la réinitialisation d'une fusion conflictuelle. Toute opération de type fusion garantit que le fichier de l'arbre de travail qui est impliqué dans une fusion ne subit pas de modification locale par rapport à l'index avant son démarrage, et qu'elle écrit le résultat dans l'arbre de travail. Donc si nous voyons des différences entre l'index et la cible et aussi entre l'index et l'arbre de travail, alors cela signifie que nous ne réinitialisons pas depuis un état qu'une opération de type fusion a laissé après un échec de conflit. C'est pourquoi l'option `--merge` est interdite dans ce cas.
 
-`reset --keep` est fait pour être utilisé lors de la suppression d'un certain nombre des derniers commits dans la branche actuelle tout en conservant les modifications dans l'arbre de travail. S'il pouvait y avoir conflit entre les modifications dans le commit que nous souhaitons retirer et les modifications dans l'arbre de travail que nous souhaitons conserver, la réinitialisation est interdite. C'est pourquoi il est interdit s'il y a des modifications à la fois dans l'arbre de travail et dans `HEAD`, et entre `HEAD` et la cible. Pour plus de sécurité, c'est aussi interdit quand des entrées sont non fusionnées.
+`git reset --keep` est fait pour être utilisé lors de la suppression d'un certain nombre des derniers commits dans la branche actuelle tout en conservant les modifications dans l'arbre de travail. S'il pouvait y avoir conflit entre les modifications dans le commit que nous souhaitons retirer et les modifications dans l'arbre de travail que nous souhaitons conserver, la réinitialisation est interdite. C'est pourquoi il est interdit s'il y a des modifications à la fois dans l'arbre de travail et dans `HEAD`, et entre `HEAD` et la cible. Pour plus de sécurité, c'est aussi interdit quand des entrées sont non fusionnées.
 
 Le tableau suivant montre ce qui arrive quand il y a des entrées non fusionnées :
 

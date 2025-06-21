@@ -1,12 +1,12 @@
 [[generate_patch_text_with_p]]
--p を使用したパッチ テキストの生成
--------------------
+-pを使用したパッチテキストの生成
+-----------------
 
 linkgit:git-diff[1]、linkgit:git-log[1]、linkgit:git-show[1]、linkgit:git-diff-index[1]、linkgit:git-diff-tree[1]、または linkgit:git-diff-files[1] に `-p` オプションをつけて実行すると、パッチテキストが作成されます。環境変数の `GIT_EXTERNAL_DIFF` と `GIT_DIFF_OPTS` (linkgit:git[1] 参照) や `diff` 属性 (linkgit:gitattributes[5] 参照) を使ってパッチテキストの作成をカスタマイズすることができます。
 
-What the `-p` option produces is slightly different from the traditional diff format:
+`-p` オプションが生成するものは、伝統的なdiffフォーマットとは少し異なります：
 
-1.   これは、次のような「gitdiff」ヘッダーに先行します:
+1.   これは、次のような「git diff」ヘッダーに先行します：
 
        diff --git a/file1 b/file2
 +
@@ -14,32 +14,32 @@ What the `-p` option produces is slightly different from the traditional diff fo
 +
 リネーム/コピー が絡む場合、`file1` と `file2` はそれぞれ リネーム/コピー の元となるファイルの名前と、リネーム/コピー が生成するファイルの名前を示しています。
 
-2.   それに続いて、1つまたは複数の拡張ヘッダーラインがあります。
+2.   それに続いて、1つまたは複数の拡張ヘッダーラインがあります：
 +
 [synopsis]
-old mode <mode>
-new mode <mode>
-deleted file mode <mode>
-new file mode <mode>
-copy from <path>
-copy to <path>
-rename from <path>
-rename to <path>
-similarity index <number>
-dissimilarity index <number>
-index <hash>..<hash> <mode>
+old mode <モード>
+new mode <モード>
+deleted file mode <モード>
+new file mode <モード>
+copy from <パス>
+copy to <パス>
+rename from <パス>
+rename to <パス>
+similarity index <数値>
+dissimilarity index <数値>
+index <ハッシュ>..<ハッシュ> <モード>
 +
-File modes _<mode>_ are printed as 6-digit octal numbers including the file type and file permission bits.
+ファイルモード _<モード>_ は、ファイルタイプとファイルパーミッションビットを含む6桁の8進数で表示されます。
 +
 拡張ヘッダーのパス名には、 `a/` および `b/` プレフィックスは含まれません。
 +
-類似性指数は変化していない線の割合、非類似性指数は変化した線の割合です。これは、切り捨てられた整数の後にパーセント記号を付けたものです。したがって、類似度指数の値が100%の場合は、2つの等しいファイルのために予約され、一方、非類似度が100%の場合は、古いファイルから新しいファイルに入った行がないことを意味します。
+類似性指数は変化していない行の割合、非類似性指数は変化した行の割合です。これは、切り捨てられた整数の後にパーセント記号を付けたものです。したがって、類似度指数の値が100%の場合は、2つの等しいファイルのために予約され、一方、非類似度が100%の場合は、古いファイルから新しいファイルに入った行がないことを意味します。
 +
-The index line includes the blob object names before and after the change. The _<mode>_ is included if the file mode does not change; otherwise, separate lines indicate the old and the new mode.
+インデックス行には、変更前と変更後のblobオブジェクト名が記載されています。ファイルモードが変更されない場合は、_<モード>_ が含まれ、そうでない場合は、新旧のモードを別々の行で示します。
 
 3.  "異常な"文字を含むパス名は、設定変数 `core.quotePath` の説明に従って引用されます（linkgit:git-config[1]を参照）。
 
-4.  出力に含まれるすべての `file1` ファイルはコミット前のファイルを指し、すべての `file2` ファイルはコミット後のファイルを指します。各変更を各ファイルに順次適用するのは正しくありません。例えば、このパッチは a と b を入れ替えます。
+4.  出力に含まれるすべての `file1` ファイルはコミット前のファイルを指し、すべての `file2` ファイルはコミット後のファイルを指します。各変更を各ファイルに順次適用するのは正しくありません。例えば、このパッチは a と b を入れ替えます：
 
       diff --git a/a b/b
       rename from a
@@ -88,50 +88,50 @@ index fabadb8,cc95eb0..4866510
 		for_each_ref(get_name);
 ------------
 
-1.   これの前には "git diff" というヘッダーが付けられ、次のようになります（`-c` オプションを使用した場合）:
+1.   これの前には "git diff" というヘッダーが付けられ、次のようになります（`-c` オプションを使用した場合）：
 
        diff --combined file
 +
-または次のようになります（`--cc` オプションを使用した場合）。
+または次のようになります（`--cc` オプションを使用した場合）：
 
        diff --cc file
 
 2.   これに続いて、1つまたは複数の拡張ヘッダーラインが表示されます（この例では、2つの親を持つマージを示しています）。
 +
 [synopsis]
-index <hash>,<hash>..<hash>
-mode <mode>,<mode>`..`<mode>
-new file mode <mode>
-deleted file mode <mode>,<mode>
+index <ハッシュ>,<ハッシュ>..<ハッシュ>
+mode <モード>,<モード>..<モード>
+new file mode <モード>
+deleted file mode <モード>,<モード>
 +
-The `mode <mode>,<mode>..<mode>` line appears only if at least one of the <mode> is different from the rest. Extended headers with information about detected content movement (renames and copying detection) are designed to work with the diff of two _<tree-ish>_ and are not used by combined diff format.
+`mode <モード>,<モード>..<モード>` の行は、少なくとも1つの <モード> が他と異なる場合にのみ表示されます。コンテンツの移動（リネームやコピー検出）に関する情報を含む拡張ヘッダーは、2つの <tree-ish> のdiffで動作するように設計されており、結合されたdiffフォーマットでは使用されません。
 
-3.   これに続いて2行の 元ファイル/先ファイル ヘッダーがあります:
+3.   これに続いて2行の 元ファイル/先ファイル ヘッダーがあります：
 
        --- a/file
        +++ b/file
 +
 従来の 'unified' diffフォーマットの2行ヘッダーと同様に、`/dev/null` はファイルの作成や削除を知らせるために使われます。
 +
-ただし、--combined-all-pathsオプションを指定すると、2行の 元ファイル/先ファイル ではなく、N+1行の 元ファイル/先ファイル ヘッダーが表示されます（Nはマージコミットの親の数です）:
+ただし、--combined-all-pathsオプションを指定すると、2行の 元ファイル/先ファイル ではなく、N+1行の 元ファイル/先ファイル ヘッダーが表示されます（Nはマージコミットの親の数です）：
 
        --- a/file
        --- a/file
        --- a/file
        +++ b/file
 +
-この拡張フォーマットは、名前の変更やコピーの検出が有効な場合に便利で、ファイルの元の名前を異なる親で確認することができます。
+この拡張フォーマットは、リネームやコピーの検出が有効な場合に便利で、ファイルの元の名前を異なる親で確認することができます。
 
 4.   誤って `patch -p1` に与えてしまわないように、チャンクのヘッダ形式を変更しました。結合されたdiff形式は、マージコミットの変更点を確認するために作成されたもので、適用することを意図したものではありません。この変更は、拡張 'index' ヘッダーの変更と同様です。
 
        @@@ <元ファイルの範囲> <元ファイルの範囲> <先ファイルの範囲> @@@
 +
-結合されたdiff形式のチャンクヘッダーには（親の数+ 1の） `@` 文字があります。
+結合されたdiff形式のチャンクヘッダーには（親の数+1の） `@` 文字があります。
 
-従来の'unified' diff形式とは異なり、2つのファイルAとBを、`-` (マイナス -- AにあるがBでは削除された)、`+` (プラス -- Aに無いがBに追加された)、`" "` (スペース -- 変更されていない)の接頭辞を持つ1つの列で表示するこの形式では、2つ以上のファイルfile1, file2,...と1つのファイルXを比較し、XがfileNのそれぞれとどのように異なるかを表示します。fileNのそれぞれの1列が出力行の前に付加され、Xの行がそれとどのように異なるかを記します。
+従来の 'unified' diff 形式とは異なり、2つのファイルAとBを、`-`（マイナス：AにありBで削除）、`+`（プラス：Aに無くBで追加）、`" "`（スペース：変更なし）の1列で表示するのに対し、この形式では2つ以上のファイル file1, file2,... と1つのファイルXを比較し、Xが各fileNとどう異なるかを示します。fileNごとに1列が出力行の先頭に付加され、Xの行がそれぞれとどう異なるかを示します。
 
 N列の `-` 文字は、その行がfileNに現れているが、結果には現れていないことを意味します。N列の `+` 文字は、その行が結果に現れ、fileNにはその行がないことを意味します（つまり、その親から見れば、その行は追加されたことになります）。
 
-上記の出力例では、関数のシグネチャが両方のファイルから変更されています（そのため、ファイル1とファイル2の両方から2つの `-` が削除され、さらに、追加された1行がファイル1とファイル2のどちらにも現れないことを意味する `++` が追加されています）。また、他の8行は、ファイル1からは同じですが、ファイル2には現れません（そのため、前に `+` が付いています）。
+上記の出力例では、関数のシグネチャが両方のファイルから変更されています（そのため、file1とfile2の両方から2つの `-` が削除され、さらに、追加された1行がfile1とfile2のどちらにも現れないことを意味する `++` が追加されています）。また、他の8行はfile1からは同じですが、file2には現れません（そのため、前に `+` が付いています）。
 
-`git diff-tree -c` で表示すると、マージコミットの親とマージ結果を比較します (つまり、 file1..fileN が親)。`git diff-files -c` で表示される場合は、2つの未解決のマージ親と作業ツリーファイルを比較します(つまり、file1 はステージ2、別名 "私たちのバージョン" 、file2 はステージ3、別名 "彼らのバージョン" )。
+`git diff-tree -c` で表示すると、マージコミットの親とマージ結果を比較します（つまり、file1..fileN が親）。`git diff-files -c` で表示される場合は、2つの未解決のマージ親と作業ツリーファイルを比較します（つまり、file1 はステージ2（「自分のバージョン」）、file2 はステージ3（「相手のバージョン」）です）。

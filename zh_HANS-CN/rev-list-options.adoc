@@ -206,6 +206,24 @@ ifdef::git-rev-list[]
 
 --progress=<头信息>::
 	在考虑对象时在stderr上显示进度报告。`<标题>`文本将在每次进度更新时打印。
+
+-z::
+	Instead of being newline-delimited, each outputted object and its accompanying metadata is delimited using NUL bytes. Output is printed in the following form:
++
+-----------------------------------------------------------------------
+<OID> NUL [<token>=<value> NUL]...
+-----------------------------------------------------------------------
++
+Additional object metadata, such as object paths or boundary objects, is printed using the `<token>=<value>` form. Token values are printed as-is without any encoding/truncation. An OID entry never contains a '=' character and thus is used to signal the start of a new object record. Examples:
++
+-----------------------------------------------------------------------
+<OID> NUL
+<OID> NUL path=<path> NUL
+<OID> NUL boundary=yes NUL
+<OID> NUL missing=yes NUL [<token>=<value> NUL]...
+-----------------------------------------------------------------------
++
+This mode is only compatible with the `--objects`, `--boundary`, and `--missing` output options.
 endif::git-rev-list[]
 
 简化历史
@@ -251,6 +269,7 @@ endif::git-rev-list[]
 假设你指定了 `foo` 作为 <路径>。 我们将把修改 `foo` 的提交称为 !TREESAME，其余的称为 TREESAME。 (在为 `foo` 过滤的差异中，它们看起来分别是不同的和相同的。）
 
 在下文中，我们将始终引用同一个历史实例来说明简化设置之间的差异。 我们假设你在这个提交图中过滤的是一个文件 `foo`：
+
 -----------------------------------------------------------------------
 	  .-A---M---N---O---P---Q
 	 /     /   /   /   /   /
@@ -258,6 +277,7 @@ endif::git-rev-list[]
 	 \   /   /   /   /   /
 	  `-------------'   X
 -----------------------------------------------------------------------
+
 历史 A---Q 的横线被认为是每次合并的第一个父本。 这些提交是：
 
 * `I`是初始提交，其中`foo`存在，内容是`asdf''，文件`quux`存在，内容是`quux''。初始提交与空树比较，所以`I`是！`TREESAME。
@@ -394,7 +414,7 @@ endif::git-rev-list[]
 -----------------------------------------------------------------------
 		E
 		 \
-		  G---H---I---J
+	      C---G---H---I---J
 			       \
 				L--M
 -----------------------------------------------------------------------

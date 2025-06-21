@@ -8,9 +8,8 @@ git-cat-file - 提供仓库对象的内容或详细信息
 概述
 --
 [verse]
-'git cat-file' <类型> <对象>
-'git cat-file' (-e | -p) <对象>
-'git cat-file' (-t | -s) [--allow-unknown-type] <对象>
+'git cat-file' <type> <object>
+'git cat-file' (-e | -p | -t | -s) <object>
 'git cat-file' (--textconv | --filters)
 	     [<rev>:<path|tree-ish> | --path=<path|tree-ish> <rev>]
 'git cat-file' (--batch | --batch-check | --batch-command) [--batch-all-objects]
@@ -56,6 +55,16 @@ git-cat-file - 提供仓库对象的内容或详细信息
 
 --filters::
 	显示经当前工作树中为给定的 `<路径>` 配置的过滤器（即污点过滤器、行结束符转换等）转换后的内容。在这种情况下，`<对象>` 的形式必须是`<目录树对象>:<路径>`，或 `:<路径>`。
+
+--filter=<过滤器定义>::
+--no-filter::
+	Omit objects from the list of printed objects. This can only be used in combination with one of the batched modes. Excluded objects that have been explicitly requested via any of the batch modes that read objects via standard input (`--batch`, `--batch-check`) will be reported as "filtered". Excluded objects in `--batch-all-objects` mode will not be printed at all. The '<filter-spec>' may be one of the following:
++
+'--filter=blob:none'的形式可以省略所有的blob。
++
+格式 '--filter=blob:limit=<n>[kmg]' 会忽略大小至少为 n 字节或单位的 blob。后缀 k、m 和 g 可用来命名 KiB、MiB 或 GiB 单位。例如，'blob:limit=1k' 与 'blob:limit=1024' 相同。
++
+'--filter=object:type=(tag|commit|tree|blob)'的形式会省略所有不属于请求类型的对象。
 
 --path=<路径>::
 	与 `--textconv`或 `--filters`一起使用，允许分别指定对象名称和路径，例如，当难以确定 blob 来自哪个版本时。
@@ -114,9 +123,6 @@ flush （刷新）::
 
 --unordered::
 	当使用 `--batch-all-objects` 时，访问对象的顺序可能比散列顺序更有效率。顺序的具体细节未作规定，但如果不需要特定顺序，通常会加快输出速度，特别是在使用 `--batch`时。 请注意，即使每个对象在仓库中存储了多次，`cat-file` 仍然只会显示一次。
-
---allow-unknown-type::
-	允许 `-s` 或 `-t` 查询已损坏/损坏的未知类型对象。
 
 --follow-symlinks::
 	使用 `--batch` 或 `--batch-check` 选项，在请求使用 tree-ish:path-in-tree 形式的扩展 SHA-1 表达式的对象时，可跟踪仓库内部的符号链接。 与其提供链接本身的输出，不如提供链接对象的输出。 如果符号链接指向 tree-ish 以外（例如指向 `/foo` 的链接或指向 `../foo` 的根级链接），则会打印链接在目录树外的部分。
@@ -211,10 +217,10 @@ If `--batch` or `--batch-check` is given, `cat-file` will read objects from stdi
 
 例如，不使用自定义格式的 `--batch` 会产生结果：
 
-------------
+-----------
 <对象 ID> SP <类型> SP <尺寸> LF
 <内容> LF
-------------
+-----------
 
 而 `--batch-check='%(objectname) %(objecttype)'` 则会产生：
 
@@ -226,6 +232,12 @@ If `--batch` or `--batch-check` is given, `cat-file` will read objects from stdi
 
 ------------
 <对象> SP 丢失 LF
+------------
+
+If a name is specified on stdin that is filtered out via `--filter=`, then `cat-file` will ignore any custom format and print:
+
+------------
+<object> SP excluded LF
 ------------
 
 如果指定的名称可能指向多个对象（模棱两可的 短 sha），则 `cat-file` 将忽略任何自定义格式并打印：

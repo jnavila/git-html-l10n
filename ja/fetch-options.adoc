@@ -1,0 +1,191 @@
+--[no-]all::
+	`remote.<name>.skipFetchAll`設定変数が設定されているリモートを除く、すべてのリモートをフェッチします。これは設定変数`fetch.all`を上書きします。
+
+-a::
+--append::
+	フェッチされた参照の参照名とオブジェクト名を、既存の`.git/FETCH_HEAD`の内容に追加します。このオプションがない場合、`.git/FETCH_HEAD`内の古いデータは上書きされます。
+
+--atomic::
+	ローカル参照の更新にアトミック・トランザクションを使用します。すべての参照が更新されるか、エラーの場合はどの参照も更新されません。
+
+--depth=<深さ>::
+	リモートブランチの履歴の先端から指定された数のコミットに限定してフェッチします。`--depth=<深さ>`オプションを使用した`git clone`によって作成された'shallow'（浅い）リポジトリにフェッチする場合（linkgit:git-clone[1]を参照）、履歴を指定された数のコミットに深くするか短くします。深くなったコミットのタグはフェッチされません。
+
+--deepen=<深さ>::
+	--depthと似ていますが、各リモートブランチの履歴の先端からではなく、現在の浅い境界からのコミット数を指定します。
+
+--shallow-since=<日付>::
+	浅いリポジトリの履歴を<日付>以降のすべての到達可能なコミットを含むように深くするか短くします。
+
+--shallow-exclude=<参照>::
+	指定したリモートブランチやタグから到達できるコミットを除外して、浅いリポジトリの履歴を深くしたり短くしたりします。このオプションは複数回指定できます。
+
+--unshallow::
+	ソースリポジトリが完全な場合、浅いリポジトリを完全なリポジトリに変換し、浅いリポジトリによって課されるすべての制限を削除します。
++
+ソースリポジトリが浅い場合、現在のリポジトリがソースリポジトリと同じ履歴を持つように可能な限りフェッチします。
+
+--update-shallow::
+	デフォルトでは、浅いリポジトリからフェッチするとき、`git fetch`は.git/shallowの更新を必要とする参照を拒否します。このオプションは.git/shallowを更新し、そのような参照を受け入れます。
+
+--negotiation-tip=<コミット|グロブ>::
+	デフォルトでは、Gitはサーバーに対して、受信するpackfileのサイズを減らすために共通のコミットを見つけるため、すべてのローカル参照から到達可能なコミットを報告します。指定された場合、Gitは指定されたtipから到達可能なコミットのみを報告します。これは、ユーザーがどのローカル参照がフェッチされるアップストリーム参照と共通のコミットを持つ可能性が高いかを知っている場合に、フェッチを高速化するのに役立ちます。
++
+このオプションは複数回指定できます。その場合、Gitは指定されたコミットのいずれかから到達可能なコミットを報告します。
++
+このオプションの引数は、参照名のグロブ、参照、またはコミットの（省略可能な）SHA-1です。グロブを指定することは、一致する参照名ごとにこのオプションを複数回指定することと同等です。
++
+linkgit:git-config[1]で説明されている`fetch.negotiationAlgorithm`および`push.negotiate`設定変数、および以下の`--negotiate-only`オプションも参照してください。
+
+--negotiate-only::
+	サーバーから何もフェッチせず、代わりに提供された`--negotiation-tip=*`引数の先祖で、サーバーと共通のものを表示します。
++
+これは`--recurse-submodules=[yes|on-demand]`と互換性がありません。内部的には、これは`push.negotiate`オプションを実装するために使用されます。linkgit:git-config[1]を参照してください。
+
+--dry-run::
+	変更を加えずに、何が行われるかを表示します。
+
+--porcelain::
+	スクリプト用に解析しやすい形式で標準出力に出力します。詳細についてはlinkgit:git-fetch[1]のOUTPUTセクションを参照してください。
++
+これは`--recurse-submodules=[yes|on-demand]`と互換性がなく、`fetch.output`設定オプションよりも優先されます。
+
+ifndef::git-pull[]
+--[no-]write-fetch-head::
+	フェッチされたリモート参照のリストを`$GIT_DIR`の直下の`FETCH_HEAD`ファイルに書き込みます。これがデフォルトです。コマンドラインから`--no-write-fetch-head`を渡すと、Gitにファイルを書き込まないように指示します。`--dry-run`オプションの下では、ファイルは決して書き込まれません。
+endif::git-pull[]
+
+-f::
+--force::
+	'git fetch'が`<src>:<dst>`リファレンス指定で使用される場合、次のように説明されているようにローカルブランチの更新を拒否することがあります
+ifdef::git-pull[]
+	linkgit:git-fetch[1]のドキュメントの`<refspec>`の部分で
+	解説しています。
+endif::git-pull[]
+ifndef::git-pull[]
+	以下の`<refspec>`の部分で。
+endif::git-pull[]
+	このオプションはそのチェックを上書きします。
+
+-k::
+--keep::
+	ダウンロードしたパックを保持します。
+
+ifndef::git-pull[]
+--multiple::
+	複数の<リポジトリ>と<グループ>引数の指定を許可します。<refspec>は指定できません。
+
+--[no-]auto-maintenance::
+--[no-]auto-gc::
+	必要に応じて自動リポジトリメンテナンスを実行するために、最後に`git maintenance run --auto`を実行します。(`--[no-]auto-gc`は同義語です)。これはデフォルトで有効です。
+
+--[no-]write-commit-graph::
+	フェッチ後にコミットグラフを書き込みます。これは設定`fetch.writeCommitGraph`を上書きします。
+endif::git-pull[]
+
+--prefetch::
+	設定されたrefspecを変更して、すべての参照を`refs/prefetch/`名前空間に配置します。linkgit:git-maintenance[1]の`prefetch`タスクを参照してください。
+
+-p::
+--prune::
+	フェッチの前に、リモートに存在しなくなったリモート追跡参照をすべて削除します。デフォルトのタグ自動フォローまたは--tagsオプションによってのみフェッチされる場合、タグは剪定の対象にはなりません。ただし、明示的なrefspec（コマンドラインまたはリモート設定で、例えばリモートが--mirrorオプションでクローンされた場合など）によってタグがフェッチされる場合、それらも剪定の対象になります。`--prune-tags`を指定することは、タグrefspecを提供するための短縮形です。
+ifndef::git-pull[]
++
+詳細については、以下のPRUNINGセクションを参照してください。
+
+-P::
+--prune-tags::
+	`--prune`が有効な場合、フェッチの前にリモートに存在しなくなったローカルタグをすべて削除します。このオプションは`--prune`とは異なり、作成されたローカル参照（ローカルタグ）を削除するため、より慎重に使用する必要があります。このオプションは、`--prune`と共に明示的なタグrefspecを提供するための短縮形です。詳細については、そのドキュメントでの説明を参照してください。
++
+詳細については、以下のPRUNINGセクションを参照してください。
+
+endif::git-pull[]
+
+ifndef::git-pull[]
+-n::
+endif::git-pull[]
+--no-tags::
+	デフォルトでは、リモートリポジトリからダウンロードされたオブジェクトを指すタグがフェッチされ、ローカルに保存されます。このオプションは、この自動タグフォローを無効にします。リモートのデフォルト動作は、remote.<name>.tagOpt設定で指定できます。linkgit:git-config[1]を参照してください。
+
+ifndef::git-pull[]
+--refetch::
+	ローカルにすでに存在するコミットおよび関連オブジェクトの転送を避けるためにサーバーとネゴシエーションする代わりに、このオプションは新規クローンと同じようにすべてのオブジェクトをフェッチします。フィルター定義が変更されたときに、設定から部分クローンフィルターを再適用するか、`--filter=`を使用するためにこれを使用します。自動フェッチ後のメンテナンスは、重複するオブジェクトを削除するためにオブジェクトデータベースのパック統合を実行します。
+endif::git-pull[]
+
+--refmap=<refspec>::
+	コマンドラインにリストされている参照をフェッチするとき、リモートリポジトリの`remote.*.fetch`設定変数の値の代わりに、指定されたrefspec（複数回指定可能）を使用して参照をリモート追跡ブランチにマッピングします。`--refmap`オプションに空の`<refspec>`を提供すると、Gitは設定されたrefspecを無視し、コマンドライン引数として提供されたrefspecに完全に依存します。詳細については、「設定されたリモート追跡ブランチ」のセクションを参照してください。
+
+-t::
+--tags::
+	その他の方法でフェッチされるものに加えて、リモートからすべてのタグをフェッチします（つまり、リモートタグ`refs/tags/*`を同じ名前のローカルタグにフェッチします）。このオプションだけを使用しても、--pruneが使用されていても、タグは剪定の対象にはなりません（ただし、タグが明示的なrefspecの宛先である場合は剪定される可能性があります。`--prune`を参照）。
+
+ifndef::git-pull[]
+--recurse-submodules[=(yes|on-demand|no)]::
+	このオプションは、サブモジュールの新しいコミットをフェッチするかどうか、およびどのような条件でフェッチするかを制御します。サブモジュールを再帰的に処理する場合、`git fetch`は常に「変更された」サブモジュール、つまり、新しくフェッチされたスーパープロジェクトのコミットによって参照されているが、ローカルサブモジュールクローンには存在しないコミットを持つサブモジュールをフェッチしようとします。変更されたサブモジュールは、`$GIT_DIR/modules/`などにローカルに存在する限りフェッチできます（linkgit:gitsubmodules[7]を参照）；アップストリームが新しいサブモジュールを追加した場合、そのサブモジュールは`git submodule update`などによってクローンされるまでフェッチできません。
++
+'on-demand'に設定すると、変更されたサブモジュールのみがフェッチされます。'yes'に設定すると、すべての有効なサブモジュールがフェッチされ、無効化されていて変更されたサブモジュールもフェッチされます。'no'に設定すると、サブモジュールはフェッチされません。
++
+指定されていない場合、これは設定されていれば`fetch.recurseSubmodules`の値を使用します（linkgit:git-config[1]を参照）、設定されていない場合はデフォルトで'on-demand'になります。このオプションが値なしで使用される場合、デフォルトは'yes'です。
+endif::git-pull[]
+
+-j::
+--jobs=<n>::
+	すべての形式のフェッチに使用される並列子プロセスの数。
++
+`--multiple`オプションが指定されている場合、異なるリモートは並行にフェッチされます。複数のサブモジュールがフェッチされる場合、それらは並行にフェッチされます。これらを独立して制御するには、`fetch.parallel`および`submodule.fetchJobs`設定を使用します（linkgit:git-config[1]を参照）。
++
+通常、並列再帰的およびマルチリモートフェッチの方が高速です。デフォルトでは、フェッチは並列ではなく順次実行されます。
+
+ifndef::git-pull[]
+--no-recurse-submodules::
+	サブモジュールの再帰的なフェッチを無効にします（これは`--recurse-submodules=no`オプションを使用するのと同じ効果があります）。
+endif::git-pull[]
+
+--set-upstream::
+	リモートが正常にフェッチされた場合、引数なしのlinkgit:git-pull[1]およびその他のコマンドで使用されるアップストリーム（トラッキング）参照を追加します。詳細については、linkgit:git-config[1]の`branch.<name>.merge`および`branch.<name>.remote`を参照してください。
+
+ifndef::git-pull[]
+--submodule-prefix=<パス>::
+	「Fetching submodule foo」などの情報メッセージで表示されるパスの前に<パス>を付加します。このオプションは、サブモジュールを再帰処理するときに内部的に使用されます。
+
+--recurse-submodules-default=[yes|on-demand]::
+	このオプションは、--recurse-submodulesオプションの非負のデフォルト値を一時的に提供するために内部的に使用されます。フェッチのサブモジュール再帰を設定する他のすべての方法（linkgit:gitmodules[5]およびlinkgit:git-config[1]の設定など）は、このオプションを上書きします。直接--[no-]recurse-submodulesを指定した場合も同様です。
+
+-u::
+--update-head-ok::
+	デフォルトでは、'git fetch'は現在のブランチに対応するヘッドの更新を拒否します。このフラグはそのチェックを無効にします。これは純粋に'git pull'が'git fetch'と通信するための内部使用のためのものであり、独自のポーセレンを実装していない限り、使用することを想定していません。
+endif::git-pull[]
+
+--upload-pack <アップロードするパック>::
+	指定された場合、およびフェッチ元のリポジトリが'git fetch-pack'によって処理される場合、`--exec=<upload-pack>`がコマンドに渡され、他端で実行されるコマンドの非デフォルトパスを指定します。
+
+ifndef::git-pull[]
+-q::
+--quiet::
+	--quietをgit-fetch-packに渡し、内部で使用されるその他のgitコマンドをすべて無音にします。進行状況は標準エラーストリームに報告されません。
+
+-v::
+--verbose::
+	詳細が表示されます。
+endif::git-pull[]
+
+--progress::
+	進行状況は、-q が指定されていない限り、端末に接続されているときにデフォルトで標準エラーストリームで報告されます。このフラグは、標準エラーストリームが端末に送信されない場合でも、進行状況を強制します。
+
+-o <オプション>::
+--server-option=<オプション>::
+	Transmit the given string to the server when communicating using protocol version 2. The given string must not contain a NUL or LF character. The server's handling of server options, including unknown ones, is server-specific. When multiple `--server-option=<option>` are given, they are all sent to the other side in the order listed on the command line. When no `--server-option=<option>` is given from the command line, the values of configuration variable `remote.<name>.serverOption` are used instead.
+
+--show-forced-updates::
+	デフォルトでは、git はフェッチ中にブランチが強制的に更新されるかどうかをチェックします。 これは fetch.showForcedUpdates で無効にできますが、--show-forced-updates オプションはこのチェックが行われることを保証します。linkgit:git-config[1] を参照してください。
+
+--no-show-forced-updates::
+	デフォルトでは、git はフェッチ中にブランチが強制的にアップデートされるかどうかをチェックします。--no-show-forced-updates を渡すか、fetch.showForcedUpdates を false に設定して、パフォーマンス上の理由からこのチェックをスキップします。'git-pull' 中に使用した場合、--ff-only オプションは、fast-forward アップデートを試みる前に、強制アップデートをチェックします。linkgit:git-config[1] を参照してください。
+
+-4::
+--ipv4::
+	IPv6 アドレスを無視して、IPv4 アドレスのみを使用します。
+
+-6::
+--ipv6::
+	IPv4 アドレスを無視して、IPv6 アドレスのみを使用します。

@@ -8,9 +8,8 @@ git-cat-file - Forneça as informações ou detalhes dos objetos do repositório
 RESUMO
 ------
 [verse]
-'git cat-file' <tipo> <objeto>
-'git cat-file' (-e | -p) <objeto>
-'git cat-file' (-t | -s) [--allow-unknown-type] <objeto>
+'git cat-file' <type> <object>
+'git cat-file' (-e | -p | -t | -s) <object>
 'git cat-file' (--textconv | --filters)
 	     [<rev>:<path|tree-ish> | --path=<path|tree-ish> <rev>]
 'git cat-file' (--batch | --batch-check | --batch-command) [--batch-all-objects]
@@ -56,6 +55,16 @@ OPÇÕES
 
 --filters::
 	Exiba o conteúdo conforme foi convertido pelos filtros configurados na árvore de trabalho atual para o `<caminho>` informado (por exemplo, filtros de manchas, conversão da quebra de linha, etc.). Nesse caso, o `<objeto>` deve estar no formato `<árvore>:<caminho>` ou `:<caminho>`.
+
+--filter=<filter-spec>::
+--no-filter::
+	Omit objects from the list of printed objects. This can only be used in combination with one of the batched modes. Excluded objects that have been explicitly requested via any of the batch modes that read objects via standard input (`--batch`, `--batch-check`) will be reported as "filtered". Excluded objects in `--batch-all-objects` mode will not be printed at all. The '<filter-spec>' may be one of the following:
++
+O formulário '--filter=blob:none' omite todos as "bolhas".
++
+A opção '--filter=blob:limit=<n>[kmg]' omite as bolhas com tamanho de pelo menos n bytes ou com n unidades. O n pode ser zero. Os sufixos k, m e g podem ser usados para nomear as unidades em KiB, MiB ou GiB. Por exemplo, 'blob:limit=1k' é o mesmo que 'blob:limit=1024'.
++
+A forma '--filter=object:type=(tag|commit|tree|blob)' omite todo os objetos que não sejam do mesmo tipo que foi requisitado.
 
 --path=<caminho>::
 	Para a utilização com o comando `--textconv` ou `--filters`, permitindo a definição de um nome do objeto e um caminho separadamente, quando for difícil descobrir a revisão de onde a bolha veio por exemplo.
@@ -114,9 +123,6 @@ flush::
 
 --unordered::
 	Quando a opção `--batch-all-objects` estiver em uso, visite os objetos numa ordem que possa ser mais eficiente para acessar o conteúdo do objeto do que a ordem do hash. Os detalhes exatos da ordem não são especificados, porém caso não precise de uma ordem específica, isso geralmente resultará numa saída mais rápida, especialmente com a opção `--batch`. Observe que o comando `cat-file` ainda mostrará cada objeto apenas uma vez, ainda que ele esteja armazenado diversas vezes no repositório.
-
---allow-unknown-type::
-	Permita que `-s` ou `-t` consultem os objetos quebrados/corrompidos de um tipo desconhecido.
 
 --follow-symlinks::
 	Com o comando `--batch` ou o `--batch-check`, siga os links simbólicos dentro do repositório ao solicitar os objetos com expressões SHA-1 estendidas com o formato tree-ish:path-in-tree. Em vez de fornecer a saída sobre o próprio link, forneça a saída sobre o objeto vinculado. Se um link simbólico apontar para fora da árvore (um link para `/foo` ou um link de nível raiz para `../foo` por exemplo), será impressa a parte do link que está fora da árvore.
@@ -211,10 +217,10 @@ Caso `--batch` seja utilizado, ou caso o `--batch-command` seja utilizado com o 
 
 Por exemplo, o comando `--batch` sem um formato personalizado produziria:
 
-------------
+-----------
 <oid> SP <tipo> SP <tamanho> LF
 <conteúdo> LF
-------------
+-----------
 
 Considerando que `--batch-check='%(object-name) %(object-type)'` produziria:
 
@@ -226,6 +232,12 @@ Caso um nome seja utilizado no stdin que não possa ser resolvido como um objeto
 
 ------------
 <objeto> SP faltando LF
+------------
+
+If a name is specified on stdin that is filtered out via `--filter=`, then `cat-file` will ignore any custom format and print:
+
+------------
+<object> SP excluded LF
 ------------
 
 Caso seja utilizado um nome que possa se referir a mais de um objeto (um SHA-1 curto e ambíguo), então o `cat-file` ignorará qualquer formato personalizado e exibirá:

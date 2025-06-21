@@ -222,13 +222,22 @@ A importação rápida aceita vários comandos para atualizar o repositório atu
 ~~~~~~~~
 Crie ou atualize uma ramificação com um novo commit, registrando uma alteração lógica no projeto.
 
+////
+Yes, it's intentional that the 'gpgsig' line doesn't have a trailing
+`LF`; the definition of `data` has a byte-count prefix, so it
+doesn't need an `LF` to act as a terminator (and `data` also already
+includes an optional trailing `LF?` just in case you want to include
+one).
+////
+
 ....
 	'commit' SP <ref> LF
 	mark?
 	original-oid?
-	('author' (SP <nome>)? SP LT <e-mail> GT SP <quando> LF)?
-	'committer' (SP <nome>)? SP LT <e-mail> GT SP <quando> LF
-	('encoding' SP <codificação>)?
+	('author' (SP <name>)? SP LT <email> GT SP <when> LF)?
+	'committer' (SP <name>)? SP LT <email> GT SP <when> LF
+	('gpgsig' SP <alg> LF data)?
+	('encoding' SP <encoding> LF)?
 	data
 	('from' SP <commit-ish> LF)?
 	('merge' SP <commit-ish> LF)*
@@ -257,6 +266,13 @@ O comando `committer` indica quem foi que fez o commit e quando foi feito.
 Aqui, `<nome>` é o nome de exibição da pessoa (por exemplo, ``Com M Itter'') e `<email>` é o endereço de e-mail da pessoa (``\cm@example.com''). Já `LT` e `GT` são os símbolos literais menor que (\x3c) e maior que (\x3e). Eles são necessários para delimitar o endereço de e-mail dos outros campos da linha. Observe que `<nome>` e `<email>` são de formato livre e podem conter qualquer sequência de bytes, exceto `LT`, `GT` e `LF`. O `<nome>` é normalmente codificado em UTF-8.
 
 A hora da alteração é especificada por `<quando>` usando o formato de data que foi selecionado pela opção de linha de comando `--date-format=<fmt>`. Consulte ``Formatos de data'' abaixo para obter mais detalhes sobre quais os formatos são compatíveis e a sua sintaxe.
+
+`gpgsig`
+^^^^^^^^
+
+The optional `gpgsig` command is used to include a PGP/GPG signature that signs the commit data.
+
+Here <alg> specifies which hashing algorithm is used for this signature, either `sha1` or `sha256`.
 
 `encoding`
 ^^^^^^^^^^

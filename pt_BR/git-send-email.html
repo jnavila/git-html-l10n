@@ -551,6 +551,16 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>É apenas necessário caso a opção <code>--compose</code> também seja definida. Caso a opção <code>--compose</code> não tenha sido definida, isso será solicitado posteriormente.</p>
 </div>
 </dd>
+<dt class="hdlist1">--[no-]outlook-id-fix</dt>
+<dd>
+<p>Microsoft Outlook SMTP servers discard the Message-ID sent via email and assign a new random Message-ID, thus breaking threads.</p>
+<div class="paragraph">
+<p>With <code>--outlook-id-fix</code>, <em>git send-email</em> uses a mechanism specific to Outlook servers to learn the Message-ID the server assigned to fix the threading. Use it only when you know that the server reports the rewritten Message-ID the same way as Outlook servers do.</p>
+</div>
+<div class="paragraph">
+<p>Without this option specified, the fix is done by default when talking to <em>smtp.office365.com</em> or <em>smtp-mail.outlook.com</em>. Use <code>--no-outlook-id-fix</code> to disable even when talking to these two servers.</p>
+</div>
+</dd>
 <dt class="hdlist1">--subject=&lt;texto&gt;</dt>
 <dd>
 <p>Especifique o assunto inicial do tópico do e-mail. É apenas necessário caso a opção <code>--compose</code> também seja definida. Caso a opção <code>--compose</code> não tenha sido definida, isso será solicitado posteriormente.</p>
@@ -896,12 +906,12 @@ isso se deve aos limites do SMTP, conforme descrito em
 </div>
 </div>
 <div class="sect1">
-<h2 id="_exemplos">EXEMPLOS</h2>
+<h2 id="_examples_of_smtp_servers">EXAMPLES OF SMTP SERVERS</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_utilize_o_gmail_como_servidor_smtp">Utilize o gmail como servidor smtp</h3>
+<h3 id="_use_gmail_as_the_smtp_server">Use Gmail as the SMTP Server</h3>
 <div class="paragraph">
-<p>Para usar o <em>git send-email</em> para enviar os seus patches através do servidor SMTP do GMail, edite <em>~/.gitconfig</em> para definir as configurações da sua conta:</p>
+<p>To use <code>git</code> <code>send-email</code> to send your patches through the Gmail SMTP server, edit <code>~/.gitconfig</code> to specify your account settings:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -916,6 +926,44 @@ isso se deve aos limites do SMTP, conforme descrito em
 <p>Caso opte pela autenticação em várias etapas configurada na sua conta do Gmail, será possível gerar uma senha específica do aplicativo para que possa ser usado com o comando <em>git send-email</em>. Visite o link <a href="https://security.google.com/settings/security/apppasswords" class="bare">https://security.google.com/settings/security/apppasswords</a> para criá-la.</p>
 </div>
 <div class="paragraph">
+<p>You can also use OAuth2.0 authentication with Gmail. <code>OAUTHBEARER</code> and <code>XOAUTH2</code> are common methods used for this type of authentication. Gmail supports both of them. As an example, if you want to use <code>OAUTHBEARER</code>, edit your <code>~/.gitconfig</code> file and add <code>smtpAuth</code> <code>=</code> <code>OAUTHBEARER</code> to your account settings:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[sendemail]
+        smtpEncryption = tls
+        smtpServer = smtp.gmail.com
+        smtpUser = yourname@gmail.com
+        smtpServerPort = 587
+        smtpAuth = OAUTHBEARER</pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_use_microsoft_outlook_as_the_smtp_server">Use Microsoft Outlook as the SMTP Server</h3>
+<div class="paragraph">
+<p>Unlike Gmail, Microsoft Outlook no longer supports app-specific passwords. Therefore, OAuth2.0 authentication must be used for Outlook. Also, it only supports <code>XOAUTH2</code> authentication method.</p>
+</div>
+<div class="paragraph">
+<p>Edit <code>~/.gitconfig</code> to specify your account settings for Outlook and use its SMTP server with <code>git</code> <code>send-email</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>[sendemail]
+        smtpEncryption = tls
+        smtpServer = smtp.office365.com
+        smtpUser = yourname@outlook.com
+        smtpServerPort = 587
+        smtpAuth = XOAUTH2</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_sending_patches">SENDING PATCHES</h2>
+<div class="sectionbody">
+<div class="paragraph">
 <p>Quando os seus commits estiverem prontos para serem enviadas para a lista de discussão, execute os seguintes comandos:</p>
 </div>
 <div class="literalblock">
@@ -926,11 +974,29 @@ $ git send-email outgoing/*</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Na primeira vez em que for executado, você será solicitado a fornecer as suas credenciais. Digite a senha específica do aplicativo ou a sua senha normal, conforme for apropriado. Se você tiver configurado o auxiliar de credencial (consulte <a href="git-credential.html">git-credential(1)</a>), a senha será salva no armazenamento de credenciais para que você não precise digitá-la na próxima vez.</p>
+<p>The first time you run it, you will be prompted for your credentials. Enter the app-specific or your regular password as appropriate.</p>
+</div>
+<div class="paragraph">
+<p>If you have a credential helper configured (see <a href="git-credential.html">git-credential(1)</a>), the password will be saved in the credential store so you won&#8217;t have to type it the next time.</p>
+</div>
+<div class="paragraph">
+<p>If you are using OAuth2.0 authentication, you need to use an access token in place of a password when prompted. Various OAuth2.0 token generators are available online. Community maintained credential helpers for Gmail and Outlook are also available:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="https://github.com/AdityaGarg8/git-credential-email">git-credential-gmail</a> (cross platform, dedicated helper for authenticating Gmail accounts)</p>
+</li>
+<li>
+<p><a href="https://github.com/AdityaGarg8/git-credential-email">git-credential-outlook</a> (cross platform, dedicated helper for authenticating Microsoft Outlook accounts)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You can also see <a href="gitcredentials.html">gitcredentials(7)</a> for more OAuth based authentication helpers.</p>
 </div>
 <div class="paragraph">
 <p>Observação: são necessários os seguintes módulos principais do Perl que podem estar instalados com a sua distribuição do Perl: MIME::Base64, MIME::QuotedPrint, Net::Domain e Net::SMTP. Esses módulos adicionais do Perl também são necessários: Authen::SASL e Mail::Address.</p>
-</div>
 </div>
 </div>
 </div>
@@ -953,7 +1019,7 @@ $ git send-email outgoing/*</pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2025-03-23 12:03:45 +0100
+Last updated 2025-05-29 13:37:02 +0200
 </div>
 </div>
 </body>

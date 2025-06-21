@@ -81,6 +81,13 @@ Assim, por exemplo, quando `--thread` e `--no-chain-reply-to` sejam utilizados, 
 +
 É apenas necessário caso a opção `--compose` também seja definida. Caso a opção `--compose` não tenha sido definida, isso será solicitado posteriormente.
 
+--[no-]outlook-id-fix::
+	Microsoft Outlook SMTP servers discard the Message-ID sent via email and assign a new random Message-ID, thus breaking threads.
++
+With `--outlook-id-fix`, 'git send-email' uses a mechanism specific to Outlook servers to learn the Message-ID the server assigned to fix the threading. Use it only when you know that the server reports the rewritten Message-ID the same way as Outlook servers do.
++
+Without this option specified, the fix is done by default when talking to 'smtp.office365.com' or 'smtp-mail.outlook.com'. Use `--no-outlook-id-fix` to disable even when talking to these two servers.
+
 --subject=<texto>::
 	Especifique o assunto inicial do tópico do e-mail. É apenas necessário caso a opção `--compose` também seja definida. Caso a opção `--compose` não tenha sido definida, isso será solicitado posteriormente.
 
@@ -296,11 +303,11 @@ include::includes/cmd-config-section-all.adoc[]
 
 include::config/sendemail.adoc[]
 
-EXEMPLOS
---------
-Utilize o gmail como servidor smtp
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Para usar o 'git send-email' para enviar os seus patches através do servidor SMTP do GMail, edite '~/.gitconfig' para definir as configurações da sua conta:
+EXAMPLES OF SMTP SERVERS
+------------------------
+Use Gmail as the SMTP Server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To use `git send-email` to send your patches through the Gmail SMTP server, edit `~/.gitconfig` to specify your account settings:
 
 ----
 [sendemail]
@@ -312,13 +319,51 @@ Para usar o 'git send-email' para enviar os seus patches através do servidor SM
 
 Caso opte pela autenticação em várias etapas configurada na sua conta do Gmail, será possível gerar uma senha específica do aplicativo para que possa ser usado com o comando 'git send-email'. Visite o link https://security.google.com/settings/security/apppasswords para criá-la.
 
+You can also use OAuth2.0 authentication with Gmail. `OAUTHBEARER` and `XOAUTH2` are common methods used for this type of authentication. Gmail supports both of them. As an example, if you want to use `OAUTHBEARER`, edit your `~/.gitconfig` file and add `smtpAuth = OAUTHBEARER` to your account settings:
+
+----
+[sendemail]
+	smtpEncryption = tls
+	smtpServer = smtp.gmail.com
+	smtpUser = yourname@gmail.com
+	smtpServerPort = 587
+	smtpAuth = OAUTHBEARER
+----
+
+Use Microsoft Outlook as the SMTP Server
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unlike Gmail, Microsoft Outlook no longer supports app-specific passwords. Therefore, OAuth2.0 authentication must be used for Outlook. Also, it only supports `XOAUTH2` authentication method.
+
+Edit `~/.gitconfig` to specify your account settings for Outlook and use its SMTP server with `git send-email`:
+
+----
+[sendemail]
+	smtpEncryption = tls
+	smtpServer = smtp.office365.com
+	smtpUser = yourname@outlook.com
+	smtpServerPort = 587
+	smtpAuth = XOAUTH2
+----
+
+SENDING PATCHES
+---------------
 Quando os seus commits estiverem prontos para serem enviadas para a lista de discussão, execute os seguintes comandos:
 
 	$ git format-patch --cover-letter -M origin/master -o outgoing/
 	$ edit outgoing/0000-*
 	$ git send-email outgoing/*
 
-Na primeira vez em que for executado, você será solicitado a fornecer as suas credenciais. Digite a senha específica do aplicativo ou a sua senha normal, conforme for apropriado. Se você tiver configurado o auxiliar de credencial (consulte linkgit:git-credential[1]), a senha será salva no armazenamento de credenciais para que você não precise digitá-la na próxima vez.
+The first time you run it, you will be prompted for your credentials. Enter the app-specific or your regular password as appropriate.
+
+If you have a credential helper configured (see linkgit:git-credential[1]), the password will be saved in the credential store so you won't have to type it the next time.
+
+If you are using OAuth2.0 authentication, you need to use an access token in place of a password when prompted. Various OAuth2.0 token generators are available online. Community maintained credential helpers for Gmail and Outlook are also available:
+
+	- https://github.com/AdityaGarg8/git-credential-email[git-credential-gmail] (cross platform, dedicated helper for authenticating Gmail accounts)
+
+	- https://github.com/AdityaGarg8/git-credential-email[git-credential-outlook] (cross platform, dedicated helper for authenticating Microsoft Outlook accounts)
+
+You can also see linkgit:gitcredentials[7] for more OAuth based authentication helpers.
 
 Observação: são necessários os seguintes módulos principais do Perl que podem estar instalados com a sua distribuição do Perl: MIME::Base64, MIME::QuotedPrint, Net::Domain e Net::SMTP. Esses módulos adicionais do Perl também são necessários: Authen::SASL e Mail::Address.
 

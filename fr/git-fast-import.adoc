@@ -222,13 +222,22 @@ fast-import accepte plusieurs commandes pour mettre à jour le dépôt actuel et
 ~~~~~~~~
 Créer ou mettre à jour une branche avec un nouveau commit, en enregistrant une modification logique au projet.
 
+////
+Yes, it's intentional that the 'gpgsig' line doesn't have a trailing
+`LF`; the definition of `data` has a byte-count prefix, so it
+doesn't need an `LF` to act as a terminator (and `data` also already
+includes an optional trailing `LF?` just in case you want to include
+one).
+////
+
 ....
 	'commit' SP <ref> LF
 	mark?
 	original-oid?
 	('author' (SP <nom>)? SP LT <email> GT SP <quand> LF)?
 	'committer' (SP <nom>)? SP LT <email> GT SP <quand> LF
-	('encoding' SP <encodage>)?
+	('gpgsig' SP <alg> LF data)?
+	('encoding' SP <encodage> LF)?
 	data
 	('from' SP <commit-esque> LF)?
 	('merge' SP <commit-esque> LF)*
@@ -257,6 +266,13 @@ La commande `committer` indique qui a fait ce commit, et quand il l'a fait.
 Ici, `<om>` est le nom d'affichage de la personne' (par exemple ``Com M Itter'') et `<email>` est l'adresse électronique de la personne (``\cm@example.com''). `LT` et `GT` sont les symboles littéraux moins que (\x3c) et plus que (\x3e). Ils sont nécessaires pour délimiter l'adresse électronique des autres champs de la ligne. Notez que `<nom>` et `<email>` sont de forme libre et peuvent contenir n'importe quelle séquence d'octets, sauf `LT`, `GT` et `LF`. Le nom est généralement codé en UTF-8.
 
 L'heure de la modification est spécifiée par `<quand>` en utilisant le format de date qui a été sélectionné par l'option de ligne de commande --date-format=<fmt>. Voir "Formats de date'' ci-dessus pour l'ensemble des formats pris en charge et leur syntaxe.
+
+`gpgsig`
+^^^^^^^^
+
+The optional `gpgsig` command is used to include a PGP/GPG signature that signs the commit data.
+
+Here <alg> specifies which hashing algorithm is used for this signature, either `sha1` or `sha256`.
 
 `encoding`
 ^^^^^^^^^^
