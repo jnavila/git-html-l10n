@@ -10,13 +10,13 @@ RESUMO
 ------
 [verse]
 'git pack-objects' [-q | --progress | --all-progress] [--all-progress-implied]
-	[--no-reuse-delta] [--delta-base-offset] [--non-empty]
-	[--local] [--incremental] [--window=<n>] [--depth=<n>]
-	[--revs [--unpacked | --all]] [--keep-pack=<pack-name>]
-	[--cruft] [--cruft-expiration=<time>]
-	[--stdout [--filter=<filter-spec>] | <base-name>]
-	[--shallow] [--keep-true-parents] [--[no-]sparse]
-	[--name-hash-version=<n>] < <object-list>
+		   [--no-reuse-delta] [--delta-base-offset] [--non-empty]
+		   [--local] [--incremental] [--window=<n>] [--depth=<n>]
+		   [--revs [--unpacked | --all]] [--keep-pack=<pack-name>]
+		   [--cruft] [--cruft-expiration=<time>]
+		   [--stdout [--filter=<filter-spec>] | <base-name>]
+		   [--shallow] [--keep-true-parents] [--[no-]sparse]
+		   [--name-hash-version=<n>] [--path-walk] < <object-list>
 
 
 DESCRIÇÃO
@@ -52,8 +52,10 @@ base-name::
 --include-tag::
 	Inclua as etiquetas anotadas não solicitadas se o objeto de onde elas fazem referência foi incluído no arquivo resultante do pacote. Isso pode ser útil para enviar novas etiquetas para clientes nativos do Git.
 
---stdin-packs::
+--stdin-packs[=<mode>]::
 	Lê os nomes base dos arquivos de pacote (`pack-1234abcd.pack` por exemplo) da entrada predefinida, em vez dos nomes dos objetos ou das opções de revisão. O pacote resultante contém todos os objetos listados nos pacotes incluídos (aqueles que não começam com `^`), excluindo todos os objetos listados nos pacotes excluídos (que começam com `^`).
++
+When `mode` is "follow", objects from packs not listed on stdin receive special treatment. Objects within unlisted packs will be included if those objects are (1) reachable from the included packs, and (2) not found in any excluded packs. This mode is useful, for example, to resurrect once-unreachable objects found in cruft packs to generate packs which are closed under reachability up to the boundary set by the excluded packs.
 +
 É incompatível com a opção `--revs`, ou opções que impliquem no uso de `--revs` (como `--all`), menos com a opção `--unpacked`, que é compatível.
 
@@ -176,6 +178,11 @@ A opção `--missing=allow-promisor` é como 'allow-any', mas só permitirá que
 The default name hash version is `1`, which prioritizes hash locality by considering the final bytes of the path as providing the maximum magnitude to the hash function. This version excels at distinguishing short paths and finding renames across directories. However, the hash function depends primarily on the final 16 bytes of the path. If there are many paths in the repo that have the same final 16 bytes and differ only by parent directory, then this name-hash may lead to too many collisions and cause poor results. At the moment, this version is required when writing reachability bitmap files with `--write-bitmap-index`.
 +
 The name hash version `2` has similar locality features as version `1`, except it considers each path component separately and overlays the hashes with a shift. This still prioritizes the final bytes of the path, but also "salts" the lower bits of the hash using the parent directory names. This method allows for some of the locality benefits of version `1` while breaking most of the collisions from a similarly-named file appearing in many different directories. At the moment, this version is not allowed when writing reachability bitmap files with `--write-bitmap-index` and it will be automatically changed to version `1`.
+
+--path-walk::
+	Perform compression by first organizing objects by path, then a second pass that compresses across paths as normal. This has the potential to improve delta compression especially in the presence of filenames that cause collisions in Git's default name-hash algorithm.
++
+Incompatible with `--delta-islands`, `--shallow`, or `--filter`. The `--use-bitmap-index` option will be ignored in the presence of `--path-walk.`
 
 
 ILHAS DELTA

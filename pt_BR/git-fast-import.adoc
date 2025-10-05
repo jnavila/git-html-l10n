@@ -100,7 +100,7 @@ fastimport.unpackLimit::
 
 DESEMPENHO
 ----------
-O design da importação rápida (fast-import) permite que ele importe grandes projetos com um mínimo de uso de memória e tempo de processamento. Supondo que o "front-end" seja capaz de acompanhar a importação rápida e alimentá-lo com um fluxo constante de dados, os tempos de importação de projetos com mais de 10 anos de histórico e contendo mais de 100.000 commits individuais geralmente são concluídos em apenas uma ou duas horas num hardware bastante modesto (cerca de US$ 2.000).
+The design of fast-import allows it to import large projects in a minimum amount of memory usage and processing time. Assuming the frontend is able to keep up with fast-import and feed it a constant stream of data, import times for projects holding 10+ years of history and containing 100,000+ individual commits are generally completed in just 1-2 hours on quite modest hardware (~$2,000 USD in 2007).
 
 A maioria dos gargalos parece estar no acesso aos dados da fonte externa (a fonte simplesmente não consegue extrair as revisões com rapidez suficiente) ou na E/S do disco (a importação rápida faz o registro tão rápidas quanto o disco for capaz de aceitar os dados). As importações serão executadas mais rapidamente se os dados da origem forem armazenados numa unidade diferente do repositório Git de destino (devido à menor contenção de IO).
 
@@ -236,7 +236,7 @@ one).
 	original-oid?
 	('author' (SP <name>)? SP LT <email> GT SP <when> LF)?
 	'committer' (SP <name>)? SP LT <email> GT SP <when> LF
-	('gpgsig' SP <alg> LF data)?
+	('gpgsig' SP <algo> SP <format> LF data)?
 	('encoding' SP <encoding> LF)?
 	data
 	('from' SP <commit-ish> LF)?
@@ -270,9 +270,25 @@ A hora da alteração é especificada por `<quando>` usando o formato de data qu
 `gpgsig`
 ^^^^^^^^
 
-The optional `gpgsig` command is used to include a PGP/GPG signature that signs the commit data.
+The optional `gpgsig` command is used to include a PGP/GPG signature or other cryptographic signature that signs the commit data.
 
-Here <alg> specifies which hashing algorithm is used for this signature, either `sha1` or `sha256`.
+....
+	'gpgsig' SP <git-hash-algo> SP <signature-format> LF data
+....
+
+The `gpgsig` command takes two arguments:
+
+* `<git-hash-algo>` specifies which Git object format this signature applies to, either `sha1` or `sha256`. This allows to know which representation of the commit was signed (the SHA-1 or the SHA-256 version) which helps with both signature verification and interoperability between repos with different hash functions.
+
+* `<signature-format>` specifies the type of signature, such as `openpgp`, `x509`, `ssh`, or `unknown`. This is a convenience for tools that process the stream, so they don't have to parse the ASCII armor to identify the signature type.
+
+A commit may have at most one signature for the SHA-1 object format (stored in the "gpgsig" header) and one for the SHA-256 object format (stored in the "gpgsig-sha256" header).
+
+See below for a detailed description of the `data` command which contains the raw signature data.
+
+Signatures are not yet checked in the current implementation though. (Already setting the `extensions.compatObjectFormat` configuration option might help with verifying both SHA-1 and SHA-256 object format signatures when it will be implemented.)
+
+NOTE: This is highly experimental and the format of the `gpgsig` command may change in the future without compatibility guarantees.
 
 `encoding`
 ^^^^^^^^^^

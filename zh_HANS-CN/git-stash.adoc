@@ -8,21 +8,23 @@ git-stash - 贮藏脏工作区中的更改
 概述
 --
 [verse]
-'git stash' list [<日志选项>]
-'git stash' show [-u | --include-untracked | --only-untracked] [<差异选项>] [<暂存>]
-'git stash' drop [-q | --quiet] [<暂存>]
-'git stash' pop [--index] [-q | --quiet] [<暂存>]
-'git stash' apply [--index] [-q | --quiet] [<暂存>]
-'git stash' branch <分支名> [<暂存>]
+'git stash' list [<log-options>]
+'git stash' show [-u | --include-untracked | --only-untracked] [<diff-options>] [<stash>]
+'git stash' drop [-q | --quiet] [<stash>]
+'git stash' pop [--index] [-q | --quiet] [<stash>]
+'git stash' apply [--index] [-q | --quiet] [<stash>]
+'git stash' branch <branchname> [<stash>]
 'git stash' [push [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
-	     [-u | --include-untracked] [-a | --all] [(-m | --message) <信息>]
-	     [--pathspec-from-file=<文件> [--pathspec-file-nul]]
-	     [--] [<路径规范>...]]
+	     [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]
+	     [--pathspec-from-file=<file> [--pathspec-file-nul]]
+	     [--] [<pathspec>...]]
 'git stash' save [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
-	     [-u | --include-untracked] [-a | --all] [<信息>]
+	     [-u | --include-untracked] [-a | --all] [<message>]
 'git stash' clear
-'git stash' create [<信息>]
-'git stash' store [(-m | --message) <信息>] [-q | --quiet] <提交>
+'git stash' create [<message>]
+'git stash' store [(-m | --message) <message>] [-q | --quiet] <commit>
+'git stash' export (--print | --to-ref <ref>) [<stash>...]
+'git stash' import <commit>
 
 描述
 --
@@ -92,6 +94,14 @@ create::
 
 	将通过'git stash create'（这是一个悬空的合并提交）创建的特定贮藏库存储在贮藏库引用中，更新贮藏库参考文件。 这是为了对脚本有用。 这条命令可能不是你想要的；见上文"push"。
 
+export ( --print | --to-ref <ref> ) [<stash>...]::
+
+	Export the specified stashes, or all of them if none are specified, to a chain of commits which can be transferred using the normal fetch and push mechanisms, then imported using the `import` subcommand.
+
+import <commit>::
+
+	Import the specified stashes from the specified commit, which must have been created by `export`, and add them to the list of stashes. To replace the existing stashes, use `clear` first.
+
 选项
 --
 -a::
@@ -132,6 +142,8 @@ create::
 +
 选项 `--patch` 意味着 `--keep-index`。 你可以使用 `--no-keep-index` 来覆盖它。
 
+include::diff-context-options.adoc[]
+
 -S::
 --staged::
 	这个选项只对`push`和`save`命令有效。
@@ -156,6 +168,16 @@ Pathspec 在 `<文件>` 中传递，而不是在命令行参数中传递。如�
 +
 静默，压制反馈信息。
 
+--print::
+	This option is only valid for the `export` command.
++
+Create the chain of commits representing the exported stashes without storing it anywhere in the ref namespace and print the object ID to standard output. This is designed for scripts.
+
+--to-ref::
+	This option is only valid for the `export` command.
++
+Create the chain of commits representing the exported stashes and store it to the specified ref.
+
 \--::
 	这个选项只对`push`命令有效。
 +
@@ -169,7 +191,7 @@ Pathspec 在 `<文件>` 中传递，而不是在命令行参数中传递。如�
 更多细节请参见 linkgit:gitglossary[7] 中的 '路径规范' 条目。
 
 <暂存>::
-	这个选项只对`apply`、`branch`、`drop`、`pop`、`show`命令有效。
+	This option is only valid for `apply`, `branch`, `drop`, `pop`, `show`, and `export` commands.
 +
 一个形式为`stash@{<版本>}`的引用。如果没有给出`<贮藏项>`，则假定是最新的储藏库（即`stash@{0}`）。
 

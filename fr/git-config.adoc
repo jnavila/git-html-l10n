@@ -9,20 +9,20 @@ git-config - Lire et écrire les options du dépôt et les options globales
 SYNOPSIS
 --------
 [verse]
-'git config list' [<option-de-fichier>] [<option-d-affichage>] [--includes]
-'git config get' [<option-de-fichier>] [<option-d-affichage>] [--includes] [--all] [--regexp] [--value=<valeur>] [--fixed-value] [--default=<default>] <nom>
-'git config set' [<option-de-fichier>] [--type=<type>] [--all] [--value=<valeur>] [--fixed-value] <nom> <valeur>
-'git config unset' [<option-de-fichier>] [--all] [--value=<valeur>] [--fixed-value] <nom>
-'git config rename-section' [<option-de-fichier>] <ancien-name> <nouveau-name>
-'git config remove-section' [<option-de-fichier>] <nom>
-'git config edit' [<option-de-fichier>]
-'git config' [<option-de-fichier>] --get-colorbool <nom> [<stdout-est-tty>]
+'git config list' [<file-option>] [<display-option>] [--includes]
+'git config get' [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<pattern>] [--fixed-value] [--default=<default>] [--url=<url>] <name>
+'git config set' [<file-option>] [--type=<type>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>
+'git config unset' [<file-option>] [--all] [--value=<pattern>] [--fixed-value] <name>
+'git config rename-section' [<file-option>] <old-name> <new-name>
+'git config remove-section' [<file-option>] <name>
+'git config edit' [<file-option>]
+'git config' [<file-option>] --get-colorbool <name> [<stdout-is-tty>]
 
 DESCRIPTION
 -----------
 Vous pouvez interroger/définir/remplacer/annuler les options avec cette commande. Le nom est en fait la section et la clé séparées par un point, et la valeur sera échappée.
 
-Plusieurs lignes peuvent être ajoutées à une option en utilisant l'option `--append`. Si vous voulez mettre à jour ou annuler une option qui peut se trouver sur plusieurs lignes, un "motif-de-valeur" (qui est une expression régulière étendue, à moins que l'option "--fixed-value" soit donnée) doit être donné. Seules les valeurs existantes qui correspondent au motif sont mises à jour ou annulées. Si vous voulez gérer les lignes qui ne correspondent *pas* au motif, ajoutez simplement un point d'exclamation devant (voir aussi <<EXAMPLES>>), mais notez que cela ne fonctionne que lorsque l'option `--fixed-value` n'est pas utilisée.
+Multiple lines can be added to an option by using the `--append` option. If you want to update or unset an option which can occur on multiple lines, `--value=<pattern>` (which is an extended regular expression, unless the `--fixed-value` option is given) needs to be given. Only the existing values that match the pattern are updated or unset. If you want to handle the lines that do *not* match the pattern, just prepend a single exclamation mark in front (see also <<EXAMPLES>>), but note that this only works when the `--fixed-value` option is not in use.
 
 L'option `--type=<type>` indique à 'git config' de s'assurer que les valeurs entrantes et sortantes peuvent être canonisées sous le <type> donné. Si aucun `--type=<type>` n'est donné, aucune canonisation ne sera effectuée. Les appelants peuvent annuler un spécificateur `--type` existant avec `--no-type`.
 
@@ -73,7 +73,7 @@ OPTIONS
 -------
 
 --replace-all::
-	Le comportement par défaut est de remplacer au maximum une ligne. Ceci remplace toutes les lignes correspondant à la clé (et optionnellement au `motif-de-valeur`).
+	Default behavior is to replace at most one line. This replaces all lines matching the key (and optionally `--value=<pattern>`).
 
 --append::
 	Ajoute une nouvelle ligne à l'option sans modifier les valeurs existantes. C'est la même chose que de fournir `--value=^$` à `set`.
@@ -127,8 +127,14 @@ Voir aussi <<FILES>>.
 --blob <blob>::
 	Similaire à `--file` mais utiliser le blob donné au lieu d'un fichier. Par exemple, vous pouvez utiliser 'master:.gitmodules' pour lire les valeurs du fichier '.gitmodules' dans la branche master. Voir la section "SPECIFICATION DE REVISIONS" dans linkgit:gitrevisions[7] pour une liste plus complète des façons d'épeler les noms de blob.
 
+`--value=<pattern>`::
+`--no-value`::
+	With `get`, `set`, and `unset`, match only against _<pattern>_. The pattern is an extended regular expression unless `--fixed-value` is given.
++
+Use `--no-value` to unset _<pattern>_.
+
 --fixed-value::
-	Lorsqu’utilisé avec l’argument 'value-pattern', traiter 'motif-de-valeur' comme une chaîne exacte au lieu d’une expression régulière. Cela limitera les paires nom/valeur qui sont trouvées à celles dont la valeur est exactement égale au `motif-de-valeur`.
+	When used with `--value=<pattern>`, treat _<pattern>_ as an exact string instead of a regular expression. This will restrict the name/value pairs that are matched to only those where the value is exactly equal to _<pattern>_.
 
 --type <type>::
   'git config' s'assurera que toute entrée ou sortie est valide sous la ou les contraintes de type fournies, et canonisera les valeurs sortantes dans la forme canonique de `<type>`.
@@ -159,6 +165,10 @@ Les « <type> » valides comprennent :
 
 --name-only::
 	Afficher seulement les noms des variables de configuration pour `list` ou `get`.
+
+`--show-names`::
+`--no-show-names`::
+	With `get`, show config keys in addition to their values. The default is `--no-show-names` unless `--url` is given and there are no subsections in _<name>_.
 
 --show-origin::
 	Augmenter la sortie de toutes les options de configuration interrogées avec le type d'origine (fichier, entrée standard, blob, ligne de commande) et l'origine réelle (chemin du fichier de configuration, ref, ou identifiant du blob si applicable).

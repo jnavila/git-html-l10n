@@ -23,6 +23,8 @@ SYNOPSIS
 'git stash' clear
 'git stash' create [<message>]
 'git stash' store [(-m | --message) <message>] [-q | --quiet] <commit>
+'git stash' export (--print | --to-ref <réf>) [<remisage>...]
+'git stash' import <commit>
 
 DESCRIPTION
 -----------
@@ -92,6 +94,14 @@ store::
 
 	Stocker un remisage donné créé via 'git stash create' (qui est un commit de fusion en cours) dans la référence de remisage, en mettant à jour le reflog de remisage. Ceci est destiné à être utilisé par des scripts. Ce n'est probablement pas la commande que vous souhaitez utiliser ; voir "push" ci-dessus.
 
+export ( --print | --to-ref <ref> ) [<stash>...]::
+
+	Export the specified stashes, or all of them if none are specified, to a chain of commits which can be transferred using the normal fetch and push mechanisms, then imported using the `import` subcommand.
+
+import <commit>::
+
+	Import the specified stashes from the specified commit, which must have been created by `export`, and add them to the list of stashes. To replace the existing stashes, use `clear` first.
+
 OPTIONS
 -------
 -a::
@@ -132,6 +142,8 @@ Sélectionner interactivement les section à remiser à partir de la différence
 +
 L'option `--patch` implique `--keep-index`. Vous pouvez utiliser l'option `--no-keep-index` pour passer outre.
 
+include::diff-context-options.adoc[]
+
 -S::
 --staged::
 	Cette option n'est valable que pour les commandes `push` et `save`.
@@ -156,6 +168,16 @@ Uniquement significatif avec `--pathspec-from-file`. Les éléments du spécific
 +
 Silencieux, supprimer les messages d'état.
 
+--print::
+	This option is only valid for the `export` command.
++
+Créer la chaîne de commits représentant les remisages exportés sans la stocker nulle part dans l'espace des références et afficher l'identifiant d'objet sur la sortie standard. Destiné à être utilisé par les scripts.
+
+--to-ref::
+	This option is only valid for the `export` command.
++
+Créer la chaîne de commits représentant les remisages exportés et le stocker à la réf spécifiée.
+
 \--::
 	Cette option n'est valide que pour la commande `push`.
 +
@@ -169,7 +191,7 @@ La nouvelle entrée de remisage enregistre les états modifiés uniquement pour 
 Pour plus de détail, voir l'entrée 'spécificateur de chemin' dans linkgit:gitglossary[7].
 
 <remisage>::
-	Cette option n'est valable que pour les commandes `apply`, `branch`, `drop`, `pop`, `show`.
+	Cette option n'est valable que pour les commandes `apply`, `branch`, `drop`, `pop`, `show` et `export`.
 +
 Une référence de la forme `stash@{<révision>}`. Lorsqu'aucun `<remisage>` n'est donné, le dernier remisage est supposé (c'est-à-dire, `stash@{0}`).
 

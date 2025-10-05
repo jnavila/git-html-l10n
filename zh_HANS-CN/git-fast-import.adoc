@@ -100,7 +100,7 @@ fastimport.unpackLimit::
 
 性能
 --
-fast-import 的设计使其能够以最少的内存占用和处理时间导入大型项目。 假设前端能够跟上 fast-import 的速度，并向其提供源源不断的数据流，那么对于拥有 10 年以上历史、包含 100,000 多次单独提交的项目，通常只需 1-2 个小时就能完成导入，而且硬件配置也不高（约 2,000 美元）。
+The design of fast-import allows it to import large projects in a minimum amount of memory usage and processing time. Assuming the frontend is able to keep up with fast-import and feed it a constant stream of data, import times for projects holding 10+ years of history and containing 100,000+ individual commits are generally completed in just 1-2 hours on quite modest hardware (~$2,000 USD in 2007).
 
 大多数瓶颈似乎都出现在国外源数据访问（源无法以足够快的速度提取修订）或磁盘 IO（快速导入写入的速度与磁盘接受数据的速度一样快）上。 如果源数据存储在与目标 Git 仓库不同的驱动器上，导入速度会更快（因为 IO 竞争更少）。
 
@@ -236,7 +236,7 @@ one).
 	original-oid?
 	('author' (SP <name>)? SP LT <email> GT SP <when> LF)?
 	'committer' (SP <name>)? SP LT <email> GT SP <when> LF
-	('gpgsig' SP <alg> LF data)?
+	('gpgsig' SP <algo> SP <format> LF data)?
 	('encoding' SP <encoding> LF)?
 	data
 	('from' SP <commit-ish> LF)?
@@ -270,9 +270,25 @@ one).
 `gpgsig`
 ^^^^^^^^
 
-The optional `gpgsig` command is used to include a PGP/GPG signature that signs the commit data.
+The optional `gpgsig` command is used to include a PGP/GPG signature or other cryptographic signature that signs the commit data.
 
-Here <alg> specifies which hashing algorithm is used for this signature, either `sha1` or `sha256`.
+....
+	'gpgsig' SP <git-hash-algo> SP <signature-format> LF data
+....
+
+The `gpgsig` command takes two arguments:
+
+* `<git-hash-algo>` specifies which Git object format this signature applies to, either `sha1` or `sha256`. This allows to know which representation of the commit was signed (the SHA-1 or the SHA-256 version) which helps with both signature verification and interoperability between repos with different hash functions.
+
+* `<signature-format>` specifies the type of signature, such as `openpgp`, `x509`, `ssh`, or `unknown`. This is a convenience for tools that process the stream, so they don't have to parse the ASCII armor to identify the signature type.
+
+A commit may have at most one signature for the SHA-1 object format (stored in the "gpgsig" header) and one for the SHA-256 object format (stored in the "gpgsig-sha256" header).
+
+See below for a detailed description of the `data` command which contains the raw signature data.
+
+Signatures are not yet checked in the current implementation though. (Already setting the `extensions.compatObjectFormat` configuration option might help with verifying both SHA-1 and SHA-256 object format signatures when it will be implemented.)
+
+NOTE: This is highly experimental and the format of the `gpgsig` command may change in the future without compatibility guarantees.
 
 `encoding`
 ^^^^^^^^^^

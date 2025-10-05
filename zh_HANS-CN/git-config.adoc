@@ -10,9 +10,9 @@ git-config - 获取和设置仓库或全局选项
 --
 [verse]
 'git config list' [<file-option>] [<display-option>] [--includes]
-'git config get' [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<value>] [--fixed-value] [--default=<default>] <name>
-'git config set' [<file-option>] [--type=<type>] [--all] [--value=<value>] [--fixed-value] <name> <value>
-'git config unset' [<file-option>] [--all] [--value=<value>] [--fixed-value] <name>
+'git config get' [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<pattern>] [--fixed-value] [--default=<default>] [--url=<url>] <name>
+'git config set' [<file-option>] [--type=<type>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>
+'git config unset' [<file-option>] [--all] [--value=<pattern>] [--fixed-value] <name>
 'git config rename-section' [<file-option>] <old-name> <new-name>
 'git config remove-section' [<file-option>] <name>
 'git config edit' [<file-option>]
@@ -22,7 +22,7 @@ git-config - 获取和设置仓库或全局选项
 --
 你可以用这个命令查询/设置/替换/取消选项。名称(name)实际上是用点隔开的节和键，值(value)会被转义。
 
-Multiple lines can be added to an option by using the `--append` option. If you want to update or unset an option which can occur on multiple lines, a `value-pattern` (which is an extended regular expression, unless the `--fixed-value` option is given) needs to be given. Only the existing values that match the pattern are updated or unset. If you want to handle the lines that do *not* match the pattern, just prepend a single exclamation mark in front (see also <<EXAMPLES>>), but note that this only works when the `--fixed-value` option is not in use.
+Multiple lines can be added to an option by using the `--append` option. If you want to update or unset an option which can occur on multiple lines, `--value=<pattern>` (which is an extended regular expression, unless the `--fixed-value` option is given) needs to be given. Only the existing values that match the pattern are updated or unset. If you want to handle the lines that do *not* match the pattern, just prepend a single exclamation mark in front (see also <<EXAMPLES>>), but note that this only works when the `--fixed-value` option is not in use.
 
 `--type=<类型>` 选项指示 'git config' 确保传入和传出的值在给定的 <类型> 下是可以被规范化的。 如果没有给定 `--type=<类型>`，将不执行规范化。调用者可以用 `--no-type` 选项取消现有 `--type` 选项的指定。
 
@@ -73,7 +73,7 @@ edit::
 --
 
 --replace-all::
-	默认行为是最多替换一行。这将会替换所有与键（以及可选的 `value-pattern` ）匹配的行。
+	Default behavior is to replace at most one line. This replaces all lines matching the key (and optionally `--value=<pattern>`).
 
 --append::
 	Adds a new line to the option without altering any existing values. This is the same as providing '--value=^$' in `set`.
@@ -127,8 +127,14 @@ edit::
 --blob <blob>::
 	类似于 `--file` 选项，但使用指定的二进制对象而不是文件。例如，你可以使用 'master:.gitmodules' 来读取主分支中 '.gitmodules' 文件中的值。参见 linkgit:gitrevisions[7] 中的 “指定的修正” 部分，以获得更完整的二进制对象名称拼写方式。
 
+`--value=<pattern>`::
+`--no-value`::
+	With `get`, `set`, and `unset`, match only against _<pattern>_. The pattern is an extended regular expression unless `--fixed-value` is given.
++
+Use `--no-value` to unset _<pattern>_.
+
 --fixed-value::
-	当与 `value-pattern` 参数一起使用时，将 `value-pattern` 视为精确的字符串，而不是正则表达式。这将使得被匹配的名称/值对只有那些值与 `value-pattern` 完全相等的名称/值对。
+	When used with `--value=<pattern>`, treat _<pattern>_ as an exact string instead of a regular expression. This will restrict the name/value pairs that are matched to only those where the value is exactly equal to _<pattern>_.
 
 --type <类型>::
   'git config' 将确保任何输入或输出在给定的类型约束下是有效的，并将以 `<类型>` 的规范形式将输出的值规范化。
@@ -159,6 +165,10 @@ edit::
 
 --name-only::
 	Output only the names of config variables for `list` or `get`.
+
+`--show-names`::
+`--no-show-names`::
+	With `get`, show config keys in addition to their values. The default is `--no-show-names` unless `--url` is given and there are no subsections in _<name>_.
 
 --show-origin::
 	用来源类型（文件、标准输入、blob、命令行）和实际来源（配置文件路径、引用或 blob id（如适用））对所有查询到的配置选项的输出进行扩充。

@@ -8,21 +8,23 @@ git-stash - Guarda as alterações em um outro diretório de trabalho
 RESUMO
 ------
 [verse]
-'git stash' list [<opções-do-log>]
-'git stash' show [-u | --include-untracked | --only-untracked] [<opções-do-diff>] [<stash>]
+'git stash' list [<log-options>]
+'git stash' show [-u | --include-untracked | --only-untracked] [<diff-options>] [<stash>]
 'git stash' drop [-q | --quiet] [<stash>]
 'git stash' pop [--index] [-q | --quiet] [<stash>]
 'git stash' apply [--index] [-q | --quiet] [<stash>]
 'git stash' branch <branchname> [<stash>]
 'git stash' [push [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
-	     [-u | --include-untracked] [-a | --all] [(-m | --message) <mensagem>]
+	     [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]
 	     [--pathspec-from-file=<file> [--pathspec-file-nul]]
 	     [--] [<pathspec>...]]
 'git stash' save [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
 	     [-u | --include-untracked] [-a | --all] [<message>]
 'git stash' clear
-'git stash' create [<mensagem>]
-'git stash' store [(-m | --message) <mensagem>] [-q | --quiet] <commit>
+'git stash' create [<message>]
+'git stash' store [(-m | --message) <message>] [-q | --quiet] <commit>
+'git stash' export (--print | --to-ref <ref>) [<stash>...]
+'git stash' import <commit>
 
 DESCRIÇÃO
 ---------
@@ -92,6 +94,14 @@ store::
 
 	Armazena um determinado estoque criado via comando `git stash create` (onde é a mesclagem de um commit pendente) na referência do estoque, atualizando o reflog do estoque. Esse recurso deve ser útil para scripts. Provavelmente, esse não é o comando que você deseja usar; consulte "push" acima.
 
+export ( --print | --to-ref <ref> ) [<stash>...]::
+
+	Export the specified stashes, or all of them if none are specified, to a chain of commits which can be transferred using the normal fetch and push mechanisms, then imported using the `import` subcommand.
+
+import <commit>::
+
+	Import the specified stashes from the specified commit, which must have been created by `export`, and add them to the list of stashes. To replace the existing stashes, use `clear` first.
+
 OPÇÕES
 ------
 -a::
@@ -132,6 +142,8 @@ Selecione interativamente as partes da diferença entre o `HEAD` e a árvore de 
 +
 A opção `--patch` implica no uso da opção `--keep-index`. Você pode usar a opção `--no-keep-index` para substituir isso.
 
+include::diff-context-options.adoc[]
+
 -S::
 --staged::
 	Esta opção só é válida para os comandos `push` e `save`.
@@ -156,6 +168,16 @@ Só faz algum sentido caso seja utilizado junto com a opção `--pathspec-from-f
 +
 Silencioso, suprima as mensagens de feedback.
 
+--print::
+	This option is only valid for the `export` command.
++
+Create the chain of commits representing the exported stashes without storing it anywhere in the ref namespace and print the object ID to standard output. This is designed for scripts.
+
+--to-ref::
+	This option is only valid for the `export` command.
++
+Create the chain of commits representing the exported stashes and store it to the specified ref.
+
 \--::
 	Esta opção só é válida para o comando `push`.
 +
@@ -169,7 +191,7 @@ A nova entrada no estoque registra os estados modificados apenas para os arquivo
 Para mais detalhes sobre a sintaxe, consulte a entrada 'pathspec' em linkgit:gitglossary[7].
 
 <stash>::
-	Esta opção só é válida para os comandos `apply`, `branch`, `drop`, `pop` e `show`.
+	This option is only valid for `apply`, `branch`, `drop`, `pop`, `show`, and `export` commands.
 +
 Uma referência do formulário `stash@{<revisão>}`. Quando nenhum `<stash>` é informado, o último "stash" é assumido (ou seja, `stash@{0}`).
 

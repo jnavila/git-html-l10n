@@ -56,6 +56,8 @@ En mode `--stdin`, prendre les lignes au format
 ----------
 +
 sur l'entrée standard, et copier les notes de chaque _<objet-source>_ vers son _<objet-cible>_ correspondant. (Le`_<rest>_` optionnel est ignoré afin que la commande puisse lire l'entrée donnée au crochet `post-rewrite`.)
++
+`--stdin` ne peut être combiné avec des noms d'objets donnés sur la ligne de commande.
 
 `append`::
 	Appliquer un ou plusieurs nouveaux messages donnés par des options `-m` ou `-F` à une note existante, ou les ajouter comme une nouvelle note si aucune n'existe , pour l'objet (par défaut à `HEAD`). Lorsqu'elle continue une note existante, une ligne vierge est ajoutée avant chaque nouveau message en tant que séparateur inter-paragraphe. Le séparateur peut être personnalisé avec l'option `--separator`. Éditer les notes à ajouter données par les options `-m` et `-F` et `-e` interactivement (en utilisant un éditeur) avant d'ajouter la note.
@@ -73,6 +75,8 @@ Si des conflits surviennent et qu'une stratégie pour résoudre automatiquement 
 
 `remove`::
 	Supprimer les notes pour les objets donnés (la valeur par défaut est `HEAD`). Lorsque l'on donne zéro ou un objet depuis la ligne de commande, cela équivaut à spécifier un message de note vide à la sous-commande `edit`.
++
+En mode `--stdin`, supprimer également les noms d'objets donnés sur l'entrée standard. En d'autres termes, `--stdin` peut être combiné avec les noms d'objets de la ligne de commande.
 
 `prune`::
 	Supprimer toutes les notes relatives aux objets inexistants ou inaccessibles.
@@ -88,15 +92,15 @@ OPTIONS
 
 `-m <msg>`::
 `--message=<msg>`::
-	Utiliser le message de note fourni (au lieu de le demander). Si plusieurs options `-m` sont fournies, leurs valeurs sont concaténées comme paragraphes séparés. Les lignes commençant par `#` et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes. Si vous souhaitez les garder verbatim, utilisez `--no-stripspace`.
+	Utiliser le message de note donné (au lieu de le demander). Si plusieurs options `-m` sont fournies, leurs valeurs sont concaténées comme paragraphes séparés.
 
 `-F <fichier>`::
 `--file=<fichier>`::
-	Prendre le message de note depuis le fichier indiqué. Utilisez `-` pour lire le message depuis l'entrée standard. Les lignes commençant par `#` et les lignes vides sont supprimées si elles ne sont pas uniques entre paragraphes. Si vous souhaitez les garder verbatim, utilisez `--no-stripspace`.
+	Prendre le message de note depuis le _<fichier>_. Utilisez '-' pour lire le message de note depuis l'entrée standard.
 
 `-C <objet>`::
 `--reuse-message=<objet>`::
-	Prendre l'objet blob donné (par exemple, une autre note) comme message de note. (Utilisez `git notes copy <objet>` au lieu de copier les notes entre les objets). Par défaut, le message sera copié verbatim, mais si vous souhaitez supprimer les lignes commençant par `#` et les lignes vides autres que les lignes uniques entre les paragraphes, utilisez l'option `--stripspace`.
+	Prendre l'objet blob donné (par exemple, une autre note) comme message de note. (Utilisez `git notes copy <objet>` au lieu de copier les notes entre les objets). Implique `--no-stripspace` puisque le comportement par défaut est de copier le message verbatim.
 
 `-c <objet>`::
 `--reedit-message=<objet>`::
@@ -105,21 +109,32 @@ OPTIONS
 `--allow-empty`::
 	Permettre de stocker un objet note vide. Le comportement par défaut consiste à supprimer automatiquement les notes vides.
 
-`--[no-]separator`::
 `--separator=<coupure-paragraphe>`::
+`--separator`::
+`--no-separator`::
 	Spécifier une chaîne utilisée comme séparateur d'inter-paragraphe personnalisé (une nouvelle ligne est ajoutée à la fin si nécessaire). Si `--no-separator` , aucun séparateur ne sera ajouté entre les paragraphes. Par défaut, la valeur est une ligne vierge.
 
-`--[no-]stripspace`::
-	Éliminer les espaces précédant et suivant le message de note. Également éliminer les lignes vides autres que les lignes uniques entre les paragraphes. Les lignes commençant par `#` seront nettoyées dans des cas sans éditeur comme `-m`, `-F` et `-C`, mais pas dans les cas avec éditeur comme `git notes edit`, `-c`, etc.
+`--stripspace`::
+`--no-stripspace`::
+	Nettoyer les espaces. Plus précisément, voir linkgit:git-stripspace[1] :
++
+--
+- retirer les espaces de toutes les lignes
+- réduire plusieurs lignes vides consécutives en une ligne vide
+- supprimer les lignes vides au début et à la fin de l'entrée
+- ajouter un `\n` manquant à la dernière ligne si nécessaire.
+--
++
+`--stripspace` est la valeur par défaut sauf `-C`/`--reuse-message`. Cependant, il faut garder à l'esprit que cela dépend de l'ordre des options similaires. Par exemple, pour `-C <objet> -m <message>`, `--stripspace` sera utilisé parce que la valeur par défaut pour `-m` écrase les `-C` précédentes. C'est une limite connue qui peut être corrigée à l'avenir.
 
-`--ref <réf>`::
+`--ref=<réf>`::
 	Manipuler l'arbre des notes dans _<réf>_. Ceci a priorité sur `GIT_NOTES_REF` et la configuration `core.notesRef`. La réf spécifie le nom complet de la réf quand elle commence par `refs/notes/` ; quand elle commence par `notes/`, `refs/` ou autre, `refs/notes/` est préfixé pour former un nom complet de la réf.
 
 `--ignore-missing`::
 	Ne pas considérer comme une erreur de demander la suppression des notes d'un objet qui n'a pas de notes qui lui sont attachées.
 
 `--stdin`::
-	Lire également les noms d'objets pour supprimer les notes à partir de l'entrée standard (il n'y a aucune raison pour que vous ne puissiez pas combiner cela avec les noms d'objets à partir de la ligne de commande).
+	Seulement valable pour `remove` et `copy`. Voir les sous-commandes respectives.
 
 `-n`::
 `--dry-run`::

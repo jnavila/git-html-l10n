@@ -14,7 +14,7 @@ git diff [<opciones>] --cached [--merge-base] [<confirmación>] [--] [<ruta>...]
 git diff [<opciones>] [--merge-base] <confirmación> [< confirmación >...] < confirmación > [--] [<ruta>...]
 git diff [<opciones>] < confirmación >...< confirmación > [--] [<ruta>...]
 git diff [<opciones>] <blob> <blob>
-git diff [<opciones>] --no-index [--] <ruta> <ruta>
+git diff [<opciones>] --no-index [--] <ruta> <ruta> [<espcificación-de-ruta>...]
 
 DESCRIPCIÓN
 -----------
@@ -24,9 +24,9 @@ Muestra los cambios entre el árbol de trabajo y el índice o un árbol, cambios
 
 	Esta forma es para ver los cambios relativos al índice que hiciste (área de presentación para la siguiente confirmación). En otras palabras, la diferencias son lo que _podrías_ decirle a Git que añada al índice mas adelante pero aún no. Puedes presentar esos cambios usando linkgit:git-add[1].
 
-`git diff [<opciones>] --no-index [--] <ruta> <ruta>`::
+`git diff [<opciones>] --no-index [--] <ruta> <ruta> [<especificación-de-ruta>...]`::
 
-	Esta forma es para comparar las dos rutas en el sistema de ficheros dadas. Puedes omitir la opción `--no-index` cuando se ejecuta el comando en un árbol de trabajo controlado por Git y por lo menos una de las rutas apunta afuera del árbol de trabajo, o cuando se ejecuta el comando fuera de un árbol de trabajo controlado por Git. Esta forma implica `--exit-code`.
+	Esta forma es para comparar las dos rutas en el sistema de ficheros dadas. Puedes omitir la opción `--no-index` cuando se ejecuta el comando en un árbol de trabajo controlado por Git y por lo menos una de las rutas apunta afuera del árbol de trabajo, o cuando se ejecuta el comando fuera de un árbol de trabajo controlado por Git. Esta forma implica `--exit-code`. Si ambas rutas apuntan a directorios, se pueden proporcionar especificaciones de ruta adicionales. Esas limitarán los ficheros incluidos en la diferencia. Todas esas especificaciones de ruta deben ser relativas ya que se aplican en ambos lados de la diferencia.
 
 `git diff [<opciones>] --cached [--merge-base] [<confirmación>] [--] [<ruta>...]`::
 
@@ -85,13 +85,13 @@ include::diff-options.adoc[]
  * "su rama" (etapa #3) cuando se usa `-3` o `--theirs`.
 --
 +
-The index contains these stages only for unmerged entries i.e. while resolving conflicts. See linkgit:git-read-tree[1] section "3-Way Merge" for detailed information.
+El índice contiene esas etapas sólo para entradas sin fusionar, ej. cuando se resuelven conflictos. Ver linkgit:git-read-tree[1] en la sección "Fusión de 3 vías" para información detallada.
 
 `-0`::
-	Omit diff output for unmerged entries and just show "Unmerged". Can be used only when comparing the working tree with the index.
+	Omite en la salida la diferencia para entradas sin fusionar y sólo muestra "Unmerged". Puede usarse solamente cuando se compara el árbol de trabajo con el índice.
 
 `<ruta>...`::
-	The _<path>_ parameters, when given, are used to limit the diff to the named paths (you can give directory names and get diff for all files under them).
+	Los parámetros _<ruta>_, cuando se proporcionan, se usan para limitar la diferencia a las rutas señaladas (puedes dar nombres de directorios y obtener la diferencia para todos los ficheros bajo ellos).
 
 
 include::diff-format.adoc[]
@@ -110,8 +110,8 @@ $ git diff AUTO_MERGE <4>
 +
 <1> Cambios en el árbol de trabajo aún no presentados para la confirmación siguiente.
 <2> Cambios entre el índice y tu última confirmación; lo que estarás confirmando si ejecutas `git commit` sin la opción `-a`.
-<3> Changes in the working tree since your last commit; what you would be committing if you run `git commit -a`
-<4> Changes in the working tree you've made to resolve textual conflicts so far.
+<3> Cambios en el árbol de trabajo desde tu última confirmación; lo que se confirmará si ejecutas `git commit -a`
+<4> Cambios en el árbol de trabajo que has hecho hasta el momento para resolver conflictos textuales.
 
 Comparando con confirmaciones arbitrarias::
 +
@@ -122,7 +122,7 @@ $ git diff HEAD^ HEAD      <3>
 ------------
 +
 <1> En lugar de usar la punta de la rama actual, compara con la punta de la rama "test".
-<2> Instead of comparing with the tip of "test" branch, compare with the tip of the current branch, but limit the comparison to the file "test".
+<2> En lugar de comparar con la punta de la rama "test", compara con la punta de la rama actual, pero limita la comparación al fichero "test".
 <3> Compara la versión antes de la última confirmación y la última confirmación.
 
 Comparando ramas::
@@ -135,7 +135,7 @@ $ git diff topic...master  <3>
 +
 <1> Cambios entre las puntas de las ramas topic y master.
 <2> Igual que el anterior.
-<3> Changes that occurred on the master branch since when the topic branch was started off it.
+<3> Cambios que ocurrieron en la rama master desde que la rama topic comenzó a partir de ella.
 
 Limitando la salida de diff::
 +
@@ -145,19 +145,19 @@ $ git diff --name-status                <2>
 $ git diff arch/i386 include/asm-i386   <3>
 ------------
 +
-<1> Show only modification, rename, and copy, but not addition or deletion.
-<2> Show only names and the nature of change, but not actual diff output.
-<3> Limit diff output to named subtrees.
+<1> Muestra sólo modificación, cambio de nombre, y copia, pero no adición y eliminación.
+<2> Muestra sólo nombres y la naturaleza del cambio, pero no la salida de diferencia actual.
+<3> Limita la salida de diferencia a los sub-árboles señalados.
 
-Munging the diff output::
+Trastocando la salida de diferencia::
 +
 ------------
 $ git diff --find-copies-harder -B -C  <1>
 $ git diff -R                          <2>
 ------------
 +
-<1> Spend extra cycles to find renames, copies and complete rewrites (very expensive).
-<2> Output diff in reverse.
+<1> Gasta ciclos extra para encontrar cambios de nombre, copias y reescrituras completas (muy costoso).
+<2> Da salida a la diferencia en reversa.
 
 CONFIGURACIÓN
 -------------
