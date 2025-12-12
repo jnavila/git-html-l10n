@@ -8,57 +8,51 @@ git-pull - Rapatrier et intégrer un autre dépôt ou une branche locale
 
 SYNOPSIS
 --------
-[verse]
-'git pull' [<options>] [<dépôt> [<spécification-de-référence>...]]
+[synopsis]
+git pull [<options>] [<dépôt> [<spécification-de-référence>...]]
 
 
 DESCRIPTION
 -----------
 
-Incorpore les modifications d'un dépôt distant dans la branche courante. Si la branche courante est en retard par rapport à la branche distante, alors par défaut, cela avancera rapidement la branche courante pour correspondre à la branche distante. Si la branche courante et le dépôt distant ont divergé, l'utilisateur doit spécifier comment réconcilier les branches divergentes avec `--rebase` ou `--no-rebase` (ou l'option de configuration correspondante dans `pull.rebase`).
+Intégrer les modifications d'un dépôt distant dans la branche actuelle.
 
-Plus précisément, `git pull` exécute `git fetch` avec les paramètres donnés et ensuite, selon les options de configuration ou les drapeaux de la ligne de commande, appellera soit `git rebase` soit `git merge` pour réconcilier les branches divergentes.
+Tout d'abord, `git pull` lance `git fetch` avec les mêmes arguments (sauf les options de fusion) pour récupérer la ou les branches distantes. Ensuite, il décide quelle branche distante à intégrer : si vous exécutez `git pull` avec aucun argument c'est par défaut l'<<UPSTREAM-BRANCHES,amont>> de la branche actuelle. Puis il intègre cette branche dans la branche actuelle.
 
-<dépôt> doit être le nom d'un dépôt distant tel que passé à linkgit:git-fetch[1]. <spéc-de-réf> peut nommer une réf distante arbitraire (par exemple, le nom d'une étiquette) ou même une collection de réfs avec les branches de suivi à distance correspondantes (par exemple, refs/heads/{asterisk}:refs/remotes/origin/{asterisk}), mais c'est généralement le nom d'une branche du dépôt distant.
+Il existe 4 options principales pour intégrer la branche distante :
 
-Les valeurs par défaut pour <dépôt> et <branche> sont lues à partir de la configuration "remote" et "merge" pour la branche actuelle comme défini par linkgit:git-branch[1] `--track`.
+1. `git pull --ff-only` ne fera que des mises à jour "en avance rapide" : elle échoue si votre branche locale a divergé de la branche distante. C'est le comportement par défaut.
+2. `git pull --rebase` lancer `git rebase`
+3. `git pull --no-rebase` lance `git merge`.
+4. `git pull --squash` lance `git merge --squash`
 
-Supposons que l'historique suivant existe et que la branche actuelle est `master` :
+Vous pouvez également définir les options de configuration `pull.rebase`, `pull.squash`, ou `pull.ff` avec votre comportement préféré.
 
-------------
-	  A---B---C master sur origin
-	 /
-    D---E---F---G master
-	^
-	origin/master dans votre dépôt
-------------
-
-Ensuite, "`git pull`" récupère et rejoue les modifications de la branche `master` distante, puisqu'elle a divergé du `master` local (c'est-à-dire `E`) jusqu'à son commit actuel (`C`) en plus de `master` et enregistre le résultat dans un nouveau commit avec les noms des deux commits parents et un message de journal de l'utilisateur décrivant les modifications.
-
-------------
-	  A---B---C origin/master
-	 /         \
-    D---E---F---G---H master
-------------
-
-Voir linkgit:git-merge[1] pour plus de détails, notamment sur la manière dont les conflits sont présentés et traités.
-
-Dans Git 1.7.0 ou une version ultérieure, pour annuler une fusion conflictuelle, utilisez `git reset --merge`. *Avertissement* : dans les anciennes versions de Git, il est déconseillé d'exécuter 'git pull' avec des modifications non validées : bien que cela soit possible, cela vous laisse dans un état dont il peut être difficile de se défaire en cas de conflit.
-
-Si l'une des modifications sur le distant chevauche des modifications locales non validées, la fusion sera automatiquement annulée et l'arbre de travail sera conservé. Il est généralement préférable de mettre les modifications locales en ordre de marche ou de les remiser avec linkgit:git-stash[1] avant de tirer.
+S'il y a un conflit de fusion pendant la fusion ou le rebasage que vous ne voulez pas manipuler, vous pouvez l'arrêter en toute sécurité avec `git merge --abort` ou `git --rebase abort`.
 
 OPTIONS
 -------
 
--q::
---quiet::
+_<dépôt>_::
+	Le dépôt "distant" duquel tirer. Ce paramètre peut être soit une URL (voir la section <<URLS, URLS GIT>> ci-dessous) soit le nom d'un remote (voir la section <<REMOTES,DISTANTS>> ci-dessous).
++
+Par défaut, c'est l'amont configuré pour la branche courante, ou `origin`. Voir <<UPSTREAM-BRANCHES,BRANCHES AMONT>> ci-dessous pour en savoir plus sur la façon de configurer les amonts.
+
+_<spéc-de-réf>_::
+	Branche ou autre(s) référence(s) à récupérer et intégrer dans la branche actuelle, par exemple `main` dans `git pull origin main`. Par défaut à l'amont configuré pour la branche actuelle.
++
+Cela peut être une branche, une étiquette ou une autre collection de références. Voir <<fetch-refspec,_<spéc-de-réf>_>> ci-dessous sous "Options liées à la récupération" pour la syntaxe complète, et <<DEFAULT-BEHAVIOUR,COMPORTEMENT PAR DÉFAUT>> ci-dessous pour comment `git pull` utilise cet argument pour déterminer quelle branche distante à intégrer.
+
+`-q`::
+`--quiet`::
 	Ceci est transmis à la fois au git-fetch sous-jacent pour éliminer les rapports lors du transfert et au git-merge sous-jacent pour éliminer les rapports lors de la fusion.
 
--v::
---verbose::
-	Passer --verbose à git-fetch et git-merge.
+`-v`::
+`--verbose`::
+	Passer `--verbose` à git-fetch et git-merge.
 
---[no-]recurse-submodules[=(yes|on-demand|no)]::
+`--recurse-submodules[=(yes|on-demand|no)]`::
+`--no-recurse-submodules`::
 	Cette option contrôle si les nouveaux commits des sous-modules peuplés doivent être récupérés et si les arbres de travail des sous-modules actifs devraient être aussi mis à jour (voir linkgit:git-fetch[1], linkgit:git-config[1] et linkgit:gitmodules[5]).
 +
 Si l'extraction est effectuée via un rebasage, les commits des sous-module locaux sont également rebasés.
@@ -72,23 +66,22 @@ Options relatives à la fusion
 
 include::merge-options.adoc[]
 
--r::
---rebase[=(false|true|merges|interactive)]::
-	Lorsque c'est le cas, rebaser la branche actuelle sur la branche amont après l'avoir récupérée. S'il existe une branche de suivi à distance correspondant à la branche en amont et que la branche en amont a été rebasée depuis la dernière extraction, le rebasage utilise cette information pour éviter de rebaser des modifications non locales.
-+
-Lorsqu'il est défini sur `merges`, rebaser en utilisant `git rebase --rebase-merges` de sorte que les commits de fusion locaux soient inclus dans le rebasage (voir linkgit:git-rebase[1] pour plus de détails).
-+
-Lorsqu'elle est fausse, fusionner la branche amont dans la branche actuelle.
-+
-Lorsque vous êtes en mode `interactive`, activer le mode interactif de rebase.
+`-r`::
+`--rebase[=(true|merges|false|interactive)]`::
+`true`;; rebaser la branche actuelle sur la branche amont après l'avoir récupérée. S'il existe une branche de suivi à distance correspondant à la branche en amont et que la branche en amont a été rebasée depuis la dernière extraction, le rebasage utilise cette information pour éviter de rebaser des modifications non locales. C'est le comportement par défaut.
+
+`merges`;; rebaser en utilisant `git rebase --rebase-merges` de sorte que les commits de fusion locaux soient inclus dans le rebasage (voir linkgit:git-rebase[1] pour plus de détails).
+`false`;; fusionner la branche amont dans la branche actuelle.
+`interactive`;; activer le mode interactif de rebase.
+
 +
 Voir `pull.rebase`, `branch. <nom> .rebase` et `branch.autoSetupRebase` dans linkgit:git-config[1] si vous voulez que `git pull` utilise toujours `--rebase` au lieu de fusionner .
 +
 [NOTE]
 C'est un mode de fonctionnement potentiellement _dangereux_. Il réécrit l'historique, ce qui n'est pas de bon augure lorsque vous avez déjà publié cette historique. N'utilisez *pas* cette option à moins d'avoir lu attentivement linkgit:git-rebase[1].
 
---no-rebase::
-	C'est un raccourci pour --rebase=false.
+`--no-rebase`::
+	C'est un raccourci pour `--rebase=false`.
 
 Options relatives au rapatriement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -101,6 +94,7 @@ include::urls-remotes.adoc[]
 
 include::merge-strategies.adoc[]
 
+[[DEFAULT-BEHAVIOUR]]
 COMPORTEMENT PAR DÉFAUT
 -----------------------
 

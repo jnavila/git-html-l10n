@@ -12,58 +12,68 @@ git checkout [-q] [-f] [-m] [<branche>]
 git checkout [-q] [-f] [-m] --detach [<branche>]
 git checkout [-q] [-f] [-m] [--detach] <commit>
 git checkout [-q] [-f] [-m] [[-b|-B|--orphan] <nouvelle-branche>] [<point-de-départ>]
-git checkout [-f] <arbre-esque> [--] <spec-de-chemin>...
-git checkout [-f] <arbre-esque> --pathspec-from-file=<fichier> [--pathspec-file-nul]
+git checkout <arbre-esque> [--] <spec-de-chemin>...
+git checkout <arbre-esque> --pathspec-from-file=<fichier> [--pathspec-file-nul]
 git checkout [-f|--ours|--theirs|-m|--conflict=<style>] [--] <spec-de-chemin>...
 git checkout [-f|--ours|--theirs|-m|--conflict=<style>] --pathspec-from-file=<fichier> [--pathspec-file-nul]
 git checkout (-p|--patch) [<arbre-esque>] [--] [<spec-de-chemin>...]
 
 DESCRIPTION
 -----------
-Met à jour les fichiers dans l'arbre de travail pour correspondre à la version dans l'index ou dans l'arbre spécifié. Si aucun spécificateur de chemin n'est fourni, `git checkout` met aussi à jour `HEAD` pour positionner la branche spécifiée comme la branche actuelle.
+
+`git checkout` a deux modes principaux :
+
+1. **Basculer de branche**, avec `git checkout <branche>`
+2. **Restaurer une autre version d'un fichier**, par exemple avec `git checkout <commit> <nom-de-fichier>` ou `git checkout <nom-de-fichier>`
+
+Voir DÉSAMBIGUÏSATION D'ARGUMENT ci-dessous pour la façon dont Git décide lequel utiliser.
 
 `git checkout [<branche>]`::
-	Pour se préparer à travailler sur _<branche>_, basculer dessus en mettant l'index et les fichiers de l'arbre de travail à jour, et en pointant `HEAD` sur cette branche. Les modifications locales aux fichiers de l'arbre de travail sont conservées, de sorte qu'elles peuvent être validées sur la _<branche>_.
+	Passage à _<branche>_. Cela définit la branche actuelle à _ <branche>_ et met à jour les fichiers dans votre répertoire de travail. L'extraction échouera s'il n'y a des changements non validés dans les fichiers où _< branche>_ et votre commit actuel ont un contenu différent. Les changements non validés seront conservés sinon.
 +
-Si la _<branche>_ n'est pas trouvée mais qu'il existe une branche de suivi pour un dépôt distant unique (appelée _distant>_) avec un nom correspondant et `--no-guess` n'est pas spécifié, le traiter comme équivalent à
+Si la _<branche>_ n'est pas trouvée mais qu'il existe une branche de suivi pour un dépôt distant unique (appelé _<distant>_) avec un nom correspondant et `--no-guess` n'est pas spécifié, le traiter comme équivalent à
 +
 ------------
 $ git checkout -b <branche> --track <distant>/<branche>
 ------------
 +
-Vous pourriez omettre _<branche>_ auquel cas la commande dégénère en « extraire la branche actuelle », qui est une opération nulle de luxe avec des effets de bord plutôt chers de ne montrer que l'information de suivi, si elle existe, pour la branche actuelle.
+Lancer `git checkout` sans spécifier une branche n'a aucun effet sauf pour afficher les informations de suivi pour la branche actuelle.
 
-`git checkout (-b|-B) <nouvelle-branche> [<point-de-départ>]`::
+`git checkout -b <nouvelle-branche> [<point-de-départ>]`::
 
-	Spécifier `-b` provoque la création d'une nouvelle branche comme si linkgit:git-branch[1] était lancé puis la branche extraite. Dans ce cas, vous pouvez utiliser les options `--track` ou `--no-track`, qui seront passées à `git branch`. Pour plus de confort, `--track` sans `-b` implique la création d'une branche ; voir la description de `--track` ci-dessous.
+	Créer une nouvelle branche nommée _<nouvelle-branche>_, la commencer à _<point-de-départ>_ (par défaut le commit actuel), et basculer sur cette nouvelle branche. Vous pouvez utiliser les options `--track` ou `--no-track` pour renseigner l'information de suivi amont de cette branche.
 +
-Si `-B` est fourni, _<nouvelle-branche>_ est créée si elle n'existe pas ; sinon, elle est réinitialisée. C'est l'équivalent transactionnel de
-+
-------------
-$ git branch -f <branche> [<point-de-départ>]
-$ git checkout <branche>
-------------
-+
-c'est-à-dire que la branche n'est pas réinitialisée/créée à moins que "git checkout" soit réussi (par exemple, lorsque la branche est utilisée dans un autre arbre de travail, pas seulement que la branche actuelle reste la même, mais la branche n'est pas réinitialisée au point de départ non plus).
+Cela échouera s'il y a une erreur lors de l'extraction de _<nouvelle-branche>, par exemple si extraire le commit _<point-de-départ>_ écraserait vos changements non validés.
+
+`git checkout -B <nouvelle-branche> [<point-de-départ>]`::
+
+	La même chose que `-b`, sauf que si la branche existe déjà, Git réinitialise _<branche>_ au point de départ au lieu d'échouer.
 
 `git checkout --detach [<branche>]`::
 `git checkout [--detach] <commit>`::
 
-	Prépare à travailler par-dessus _<commit>_, en détachant `HEAD` dessus (voir la section « HEAD DÉTACHÉE »), et en mettant l'index et les fichiers de l'arbre de travail à jour. Les modifications locales des fichiers dans l'arbre de travail sont conservées, de sorte que l'arbre de travail sera le résultat du commit plus les modifications locales.
-+
-Quand l'argument _<commit>_ est un nom de branche, l'option `--detach` peut être utilisée pour détacher `HEAD` au sommet de la branche (`git checkout <branche>` extrairait cette branche sans détacher `HEAD`).
+	La même chose que `git checkout <branche>`, sauf que, au lieu de pointer `HEAD` sur la branche, pointe `HEAD` à l'ID de commit. Voir la section HEAD DÉTACHÉE ci-dessous pour plus de détails.
 +
 Omettre _<branche>_ détache `HEAD` au sommet de la branche actuelle.
 
-`git checkout [-f | --ours | --theirs | -m | --conflict=<style>] [<arbre-esque>] [--] <spéc-de-chemin>...`::
-`git checkout [-f|--ours|--theirs|-m|--conflict=<style>] [<arbre-esque>] --pathspec-from-file=<fichier> [--pathspec-file-nul]`::
+`git checkout <arbre-esque> [--] <spéc-de-chemin>...`::
+`git checkout <arbre-esque> --pathspec-from-file=<fichier> [--pathspec-file-nul]`::
 
-	Écraser le contenu des fichiers qui correspondent au spécificateur-de-chemin. Lorsque le _<arbre-esque>_ (le plus souvent un commit) n'est pas donné, écraser l'arbre de travail avec le contenu de l'index. Lorsque le _<arbre-esque>_ est donné, écraser à la fois l'index et l'arbre de travail avec le contenu du _<arbre-esque>_.
+	Remplacer les fichiers et/ou les répertoires spécifiés par la version du commit ou de l'arbre donné et les ajouter à l'index (également connu sous le nom de « zone de préparation »).
 +
-L'index peut contenir des entrées non fusionnées à cause d'un échec précédent de fusion. Par défaut, si vous essayez d'extraire une telle entrée depuis l'index, l'opération d'extraction échouera et rien ne sera extrait. L'utilisation de `-f` forcera à ignorer ces entrées non fusionnées. Le contenu depuis un côté donné de la fusion peut être extrait de l'index en utilisant `--ours` (notre côté) ou `--theirs` (l'autre côté). Avec `-m`, les modifications opérées sur le fichier de l'arbre de travail peuvent être jetées pour récréer le résultat originel de conflit de fusion.
+Par exemple, `git checkout main fichier.txt` remplacera `fichier.txt` par sa version dans `main`.
+
+`git checkout [-f | --ours | --theirs | -m | --conflict=<style>] [--] <spéc-de-chemin>...`::
+`git checkout [-f|--ours|--theirs|-m|--conflict=<style>] --pathspec-from-file=<fichier> [--pathspec-file-nul]`::
+
+	Remplacer les fichiers et/ou les répertoires spécifiés par la version de l'index.
++
+Par exemple, si vous extrayez un commit, puis modifiez `fichier.txt`, puis décidez que ces changements étaient une erreur, `git checkout fichier.txt` va supprimer tout changement non indexé dans `fichier.txt`.
++
+Cela échouera si le fichier a un conflit de fusion et vous n'avez pas encore lancé `git add fichier.txt` (ou quelque chose d'équivalent) pour le marquer comme résolu. Vous pouvez utiliser `-f` pour ignorer les fichiers non fusionnés au lieu d'échouer, utiliser `--ours` ou `--theirs` pour les remplacer par la version d'un côté spécifique de la fusion, ou utiliser `-m` pour les remplacer par le résultat original du conflit de fusion.
 
 `git checkout (-p|--patch) [<arbre-esque>] [--] [<spéc. de chemin>...]`::
-	C'est similaire au mode précédent, mais vous laisse utiliser l'interface interactive pour afficher la sortie « diff » et choisir quelles sections utiliser dans le résultat. Voir plus bas la description de l'option `--patch`.
+	C'est similaire aux deux modes précédents, mais vous laisse utiliser l'interface interactive pour afficher la sortie « diff » et choisir quelles sections utiliser dans le résultat. Voir plus bas la description de l'option `--patch`.
 
 OPTIONS
 -------
@@ -93,11 +103,11 @@ C'est parce que `rebase` est utilisé dans une approche qui traite l'historique 
 	Créer une nouvelle branche nommée _<nouvelle-branche>_, la commencer à _<point-de-départ>_ et extraire la branche résultante ; voir linkgit:git-branch[1] pour plus de détails.
 
 `-B <nouvelle-branche>`::
-	Créer la branche _<nouvelle-branche>_, la commencer à _<point-de-départ>_ et l'extraire ; si elle existe déjà, alors la réinitialise à _<point-de-départ>_. C'est équivalent à lancer `git branch` avec `-f` suivi de `git checkout` de cette branche ; voir linkgit:git-branch[1] pour plus de détails.
+	La même chose que `-b`, sauf que si la branche existe déjà, Git réinitialise _<branche>_ au point de départ au lieu d'échouer.
 
 `-t`::
 `--track[=(direct|inherit)]`::
-	À la création d'une nouvelle branche, établir la configuration 'upstream' (branche amont). Voir `--track` dans linkgit:git-branch[1] pour plus de détails.
+	À la création d'une nouvelle branche, établir la configuration 'upstream' (branche amont). Voir `--track` dans linkgit:git-branch[1] pour plus de détails. Par commodité, `--track` sans `-b` implique la création de la branche.
 +
 Si aucune option `-b` n'est fournie, le nom de la nouvelle branche sera dérivé de la branche de suivi à distance, en regardant la partie locale de la spécification de référence configurée pour le distant correspondant et en enlevant la partie initiale jusqu'au "*". Cela indiquerait d'utiliser le nom « `hack` » comme branche locale créée à partir de `origin/hack` (ou `remotes/origin/hack`, ou même `refs/remotes/origin/hack`). Si le nom fourni ne contient pas de barre oblique, ou si le résultat de la dérivation est un nom vide, la dérivation échoue. Vous pouvez spécifier explicitement un nom avec `-b` dans ce cas.
 
@@ -173,7 +183,7 @@ include::diff-context-options.adoc[]
 
 `--overlay`::
 `--no-overlay`::
-	In the default overlay mode, `git checkout` never removes files from the index or the working tree. When specifying `--no-overlay`, files that appear in the index and working tree, but not in _<tree-ish>_ are removed, to make them match _<tree-ish>_ exactly.
+	Dans le mode de superposition par défaut, `git checkout` ne supprime jamais les fichiers de l’index ou de l’arbre de travail. Lorsque vous spécifiez `--no-overlay`, les fichiers qui apparaissent dans l’index et l’arbre de travail, mais pas dans _<arbre-esque>_ sont supprimés, pour les faire correspondre à _<arbre-esque>_ exactement.
 
 `--pathspec-from-file=<fichier>`::
 	Le spécificateur de chemin est passé dans _<fichier>_ au lieu des arguments de la ligne de commande. Si _<fichier>_ vaut `-` alors l'entrée standard est utilisée. Les éléments du spécificateur de chemin sont séparés par _LF_ ou _CR_/_LF_. Les éléments du spécificateur de chemin peuvent être cités comme expliqué pour la variable de configuration `core.quotePath` (voir linkgit:git-config[1]). Voir aussi l'option `--pathspec-file-nul` et l'option globale `--literal-pathspecs`.
@@ -181,7 +191,7 @@ include::diff-context-options.adoc[]
 `--pathspec-file-nul`::
 	Uniquement significatif avec `--pathspec-from-file`. Les éléments du spécificateur de chemin sont séparés par le caractère _NUL_ et tous les autres caractères sont utilisés littéralement (y compris les retours à la ligne et les guillemets).
 
-<branche>::
+`<branche>`::
 	Branche à extraire ; si c'est une référence à une branche (c'est-à-dire un nom qui, préfixé par « refs/heads/ » est une référence valide), alors cette branche est extraite. Sinon, si c'est une référence à un commit valide, votre `HEAD` devient « détachée » et vous n'êtes plus sur aucune branche (voir plus bas pour plus de détails).
 +
 Vous pouvez utiliser la syntaxe `@{-N}` pour faire référence à la N-ième dernière branche ou commit extrait en utilisant une opération « git checkout ». Vous pouvez aussi spécifier `-` qui est synonyme de `@{-1}`.
@@ -319,7 +329,13 @@ $ git log -g -2 HEAD
 DÉSAMBIGUÏSATION D'ARGUMENT
 ---------------------------
 
-Quand il n'y a qu'un argument fourni et qu'il n'est pas `--` (par exemple `git checkout abc`) et quand l'argument est à la fois un _<arbre-esque>_ valide (par exemple une branche `abc` existe) et un _<spécificateur-de-chemin>_ valide (par exemple un fichier ou un répertoire du nom de « abc » existe), Git vous demandera généralement de lever l'ambiguïté. Du fait qu'extraire une branche est une opération très commune, cependant, `git checkout abc` considère « abc » comme un _<arbre-esque>_ dans une telle situation. Utilisez `git checkout -- <spécificateur-de-chemin>` si vous voulez extraire ces chemins depuis l'index.
+Quand vous lancez `git checkout <quelque-chose>`, Git essaye de deviner si _<quelque-chose>_ est destiné à être une branche, un commit, ou un ensemble de fichier(s), et ensuite soit se déplace vers cette branche, ou valide ou restaure les fichiers spécifiés.
+
+S'il y a une ambiguïté, Git traitera _<quelque-chose>_ en tant que branche ou commit, mais vous pouvez utiliser le double tiret `--` pour forcer Git à traiter le paramètre comme une liste de fichiers et/ou de répertoires, comme ceci :
+
+----------
+git checkout -- file.txt
+----------
 
 EXEMPLES
 --------

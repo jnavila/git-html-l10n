@@ -262,11 +262,11 @@ Mode par défaut::
 	Option supplémentaire à `--full-history` pour supprimer certaines fusions inutiles de l'historique résultant, car il n'y a pas de commits sélectionnés contribuant à cette fusion.
 
 `--ancestry-path[=<commit>]`::
-	When given a range of commits to display (e.g. `<commit1>..<commit2>` or `<commit2> ^<commit1>`), and a commit _<commit>_ in that range, only display commits in that range that are ancestors of _<commit>_, descendants of _<commit>_, or _<commit>_ itself. If no commit is specified, use _<commit1>_ (the excluded part of the range) as _<commit>_. Can be passed multiple times; if so, a commit is included if it is any of the commits given or if it is an ancestor or descendant of one of them.
+	Lorsque l'on donne une plage de commits à afficher (par exemple `<commit1>..<commit2>` ou `<commit2> ^<commit1>`) et un _<commit>_ dans cette plage, n'afficher que les commits de cette plage qui sont des ancêtres de _<commit>_, des descendants de _<commit>_, ou _<commit>_ lui-même. Si aucun commit n'est spécifié, utiliser _<commit1>_ (la partie exclue de la plage) comme _<commit>_. Peut être passée plusieurs fois ; si c'est le cas, un commit est inclus s'il est l'un des commits donnés ou s'il est un ancêtre ou un descendant de l'un d'eux.
 
 Une explication plus détaillée suit.
 
-Suppose you specified `foo` as the _<paths>_. We shall call commits that modify `foo` !TREESAME, and the rest TREESAME. (In a diff filtered for `foo`, they look different and equal, respectively.)
+Supposons que vous ayez spécifié `foo` pour _<chemins>_. Nous appellerons les commits qui modifient `foo` !MEMEARBRE, et le reste MEMEARBRE. (Dans un diff filtré pour `foo`, ils sont différents et égaux, respectivement.)
 
 Dans ce qui suit, nous nous référerons toujours au même exemple d'historique pour illustrer les différences entre les paramètres de simplification. Nous supposons que vous filtrez pour un fichier `foo` dans ce graphe de commits :
 
@@ -280,17 +280,17 @@ Dans ce qui suit, nous nous référerons toujours au même exemple d'historique 
 
 La ligne horizontale de l'historique A---Q est prise pour être le premier parent de chaque fusion. Les commits sont :
 
-* `I` is the initial commit, in which `foo` exists with contents `asdf`, and a file `quux` exists with contents `quux`. Initial commits are compared to an empty tree, so `I` is !TREESAME.
+* `I` est le commit initial, dans lequel 'foo` existe avec le contenu `asdf`, et un fichier `quux` existe avec le contenu `quux`. Les commits initiaux sont comparés à un arbre vide, donc `I` est !MEMEARBRE.
 
-* In `A`, `foo` contains just `foo`.
+* Dans `A`, `foo` ne contient que `foo`.
 
 * `B` contient le même changement que `A`. Sa fusion `M` est triviale et donc MEMEARBRE pour tous les parents.
 
-* `C` does not change `foo`, but its merge `N` changes it to `foobar`, so it is not TREESAME to any parent.
+* `C` ne change pas `foo`, mais sa fusion `N` le change en `foobar`, donc ce n'est pas MEMEARBRE à aucun parent.
 
-* `D` sets `foo` to `baz`. Its merge `O` combines the strings from `N` and `D` to `foobarbaz`; i.e., it is not TREESAME to any parent.
+* `D` met `foo` sur `baz`. Sa fusion `O` combine les chaînes de caractères de `N` et `D` à `foobarbaz` ; c'est-à-dire qu'elle n'est pas MEMEARBRE à aucun parent.
 
-* `E` changes `quux` to `xyzzy`, and its merge `P` combines the strings to `quux xyzzy`. `P` is TREESAME to `O`, but not to `E`.
+* `E` change `quux` en `xyzzy`, et sa fusion `P` combine les chaînes en `quux xyzzy`. `P` est MEMEARBRE à `O`, mais pas à `E`.
 
 * `X` est un commit racine indépendant qui a ajouté un nouveau fichier `side`, et `Y` l'a modifié. `Y` est MEMEARBRE à `X`. Sa fusion `Q` a ajouté `side` à `P`, et `Q` est MEMEARBRE à `P`, mais pas à `Y`.
 
@@ -383,7 +383,7 @@ Notez les principales différences entre `N`, `P` et `Q` par rapport à `--full-
 Il existe un autre mode de simplification :
 
 `--ancestry-path[=<commit>]`::
-	Limit the displayed commits to those which are an ancestor of _<commit>_, or which are a descendant of _<commit>_, or are _<commit>_ itself.
+	Limiter les commits affichés à ceux qui sont un ancêtre de _<commit>_, ou qui sont soit un descendant de _<commit>_, soit _<commit>_ lui-même.
 +
 À titre d'exemple, considérons l'historique de commits suivant :
 +
@@ -395,9 +395,9 @@ Il existe un autre mode de simplification :
 	A-------K---------------L--M
 -----------------------------------------------------------------------
 +
-A regular 'D..M' computes the set of commits that are ancestors of `M`, but excludes the ones that are ancestors of `D`. This is useful to see what happened to the history leading to `M` since `D`, in the sense that "what does `M` have that did not exist in `D`". The result in this example would be all the commits, except `A` and `B` (and `D` itself, of course).
+Un 'D..M' régulier calcule l'ensemble des commits qui sont les ancêtres de `M`, mais exclut ceux qui sont les ancêtres de `D`. C'est utile pour voir ce qui s'est passé dans l'historique qui a mené à `M` depuis le `D`, au sens de « ce que `M` a qui n'existait pas dans `D` ». Le résultat dans cet exemple serait tous les commits, sauf `A` et `B` (et `D` lui-même, bien sûr).
 +
-When we want to find out what commits in `M` are contaminated with the bug introduced by `D` and need fixing, however, we might want to view only the subset of `D..M` that are actually descendants of `D`, i.e. excluding `C` and `K`. This is exactly what the `--ancestry-path` option does. Applied to the `D..M` range, it results in:
+Quand nous voulons savoir quels commits dans `M` sont contaminés par le bogue introduit par `D` et ont besoin d'être corrigés, cependant, nous pourrions vouloir voir seulement le sous-ensemble de `D..M` qui sont en fait des descendants de `D`, c'est-à-dire en excluant `C` et `K`. C'est exactement ce que fait l'option `--ancestry-path`. Appliqué à l'intervalle `D..M`, il se traduit en :
 +
 -----------------------------------------------------------------------
 		E-------F
@@ -407,7 +407,7 @@ When we want to find out what commits in `M` are contaminated with the bug intro
 				L--M
 -----------------------------------------------------------------------
 +
-We can also use `--ancestry-path=D` instead of `--ancestry-path` which means the same thing when applied to the `D..M` range but is just more explicit.
+Nous pouvons également utiliser `--ancestry-path=D` au lieu de `--ancestry-path` qui signifie la même chose lorsqu'il est appliqué à la plage `D..M` mais est juste plus explicite.
 +
 Si nous sommes plutôt intéressés par un sujet donné dans cette plage, et tous les commits affectés par ce sujet, nous pouvons seulement vouloir voir ceux du sous-ensemble de `D..M` qui contiennent ce sujet dans leur chemin d'ascendance. Ainsi, en utilisant `--ancestry-path=H D..M` par exemple, on obtiendrait le résultat suivant :
 +
@@ -565,7 +565,7 @@ où les nombres indiquent l'ordre des horodatages de commit, `git rev-list` et c
 Avec `--topo-order`, ils afficheraient 8 6 5 5 3 3 7 4 7 4 2 1 (ou 8 7 4 2 2 6 5 5 3 1) ; certains commits plus anciens sont affichés avant les plus récents afin d'éviter de montrer mélangés ensemble les commits de deux pistes de développement parallèles.
 
 `--reverse`::
-	Output the commits chosen to be shown (see 'Commit Limiting' section above) in reverse order. Cannot be combined with `--walk-reflogs`.
+	Sortir les commits choisis pour être affichés (voir la section 'Limitation des commits' ci-dessus) dans l'ordre inverse. Ne peut pas être combiné avec `--walk-reflogs`.
 endif::git-shortlog[]
 
 ifndef::git-shortlog[]
@@ -576,13 +576,13 @@ Ces options sont principalement destinées à l'empaquetage des dépôts Git.
 
 ifdef::git-rev-list[]
 `--objects`::
-	Print the object IDs of any object referenced by the listed commits. `--objects foo ^bar` thus means "send me all object IDs which I need to download if I have the commit object `bar` but not `foo`". See also `--object-names` below.
+	Imprimer les ID d'objet de tout objet référencé par les commits listés. `--objects foo ^bar` signifie donc « envoie-moi tous les ID d'objets que je dois télécharger si j'ai l'objet commit `bar` mais pas `foo` ». Voir aussi `--object-names` ci-dessous.
 
 `--in-commit-order`::
 	Imprimer les identifiants des arbres et des blobs dans l'ordre des commits. Les identifiants des arbres et des blobs sont imprimés que lors qu'ils sont référencés la première fois par un commit.
 
 `--objects-edge`::
-	Similar to `--objects`, but also print the IDs of excluded commits prefixed with a "`-`" character. This is used by linkgit:git-pack-objects[1] to build a ``thin'' pack, which records objects in deltified form based on objects contained in these excluded commits to reduce network traffic.
+	Semblable à `--objects`, mais afficher aussi les ID des commits exclus préfixés par un caractère "`-`''. Ceci est utilisé par linkgit:git-pack-objects[1] pour construire un paquet ``thin'', qui enregistre les objets sous forme déltaifiée en fonction des objets contenus dans ces commits exclus pour réduire le trafic réseau.
 
 `--objects-edge-aggressive`::
 	Similaire à `--objects-edge`, mais s'efforce de trouver les commits exclus au prix d'un temps plus long de traitement. Ceci est utilisé à la place de `--objects-edge` pour construire des paquets ``thin'' pour les dépôts superficiels.
@@ -600,25 +600,25 @@ ifdef::git-rev-list[]
 	Uniquement utile avec `--objects` ; ne pas afficher les noms des ID des objets trouvés. Ceci inverse `--object-names`. Ce drapeau permet à la sortie d'être plus facilement analysée par des commandes telles que linkgit:git-cat-file[1].
 
 `--filter=<spéc. du filtre>`::
-	Only useful with one of the `--objects*`; omits objects (usually blobs) from the list of printed objects. The _<filter-spec>_ may be one of the following:
+	Uniquement utile avec l'un des `--objects*' ; omettre des objets (généralement les blobs) de la liste des objets affichés. Le _<spécificateur-de-filtre>_ peut être l'un des suivants :
 +
-The form `--filter=blob:none` omits all blobs.
+La forme `--filter=blob:none` omet tous les blobs.
 +
-The form `--filter=blob:limit=<n>[kmg]` omits blobs of size at least _<n>_ bytes or units. _<n>_ may be zero. The suffixes `k`, `m`, and `g` can be used to name units in KiB, MiB, or GiB. For example, `blob:limit=1k` is the same as 'blob:limit=1024'.
+La forme `--filter=blob:limit=<n>[kmg]` omet les blobs d'au moins _<n>_ octets ou unités. _<n>_ peut être zéro. Les suffixes `k`, `m` et `g` peuvent être utilisés pour nommer les unités en Kio, Mio ou Gio. Par exemple, `blob:limit=1k` est identique à `blob:limit=1024`.
 +
-The form `--filter=object:type=(tag|commit|tree|blob)` omits all objects which are not of the requested type.
+La forme `--filter=object:type=(tag|commit|tree|blob)` permet d'omettre tous les objets qui ne sont pas du type demandé.
 +
-The form `--filter=sparse:oid=<blob-ish>` uses a sparse-checkout specification contained in the blob (or blob-expression) _<blob-ish>_ to omit blobs that would not be required for a sparse checkout on the requested refs.
+La forme `--filter=sparse:oid=<blob-esque>` utilise une spécification d'extraction clairsemée contenue dans le blob (ou l'expression de blob) _<blob-esque>_ pour omettre les blobs qui ne seraient pas nécessaires pour une extraction clairsemée sur les références demandées.
 +
-The form `--filter=tree:<depth>` omits all blobs and trees whose depth from the root tree is >= _<depth>_ (minimum depth if an object is located at multiple depths in the commits traversed). _<depth>_=0 will not include any trees or blobs unless included explicitly in the command-line (or standard input when `--stdin` is used). _<depth>_=1 will include only the tree and blobs which are referenced directly by a commit reachable from _<commit>_ or an explicitly-given object. _<depth>_=2 is like <depth>=1 while also including trees and blobs one more level removed from an explicitly-given commit or tree.
+La forme `--filter=tree:<profondeur>` omet tous les blobs et tous les arbres dont la profondeur de l'arbre racine est >= _<profondeur>_ (profondeur minimale si un objet est situé à plusieurs profondeurs dans les commits traversés). _<profondeur>_=0 n'inclura pas d'arbres ni de blobs à moins d'être inclus explicitement dans la ligne de commande (ou dans l'entrée standard lorsque `--stdin` est utilisé). _<profondeur>_=1 inclura seulement l'arbre et les blobs qui sont référencés directement par un commit accessible depuis _<commit>_ ou un objet explicitement donné. _<profondeur>_=2 est comme _<profondeur>_=1 tout en incluant aussi les arbres et les blobs d'un niveau supplémentaire tiré d'un commit ou d'un arbre explicitement donné.
 +
-Note that the form `--filter=sparse:path=<path>` that wants to read from an arbitrary path on the filesystem has been dropped for security reasons.
+Notez que la forme `--filter=sparse:path=<chemin>` qui veut lire à partir d'un chemin arbitraire sur le système de fichiers a été supprimé pour des raisons de sécurité.
 +
-Multiple `--filter=` flags can be specified to combine filters. Only objects which are accepted by every filter are included.
+Plusieurs drapeaux `--filter=` peuvent être spécifiés pour combiner les filtres. Seuls les objets acceptés par tous les filtres sont inclus.
 +
-The form `--filter=combine:<filter1>+<filter2>+...<filterN>` can also be used to combined several filters, but this is harder than just repeating the `--filter` flag and is usually not necessary. Filters are joined by '{plus}' and individual filters are %-encoded (i.e. URL-encoded). Besides the '{plus}' and '%' characters, the following characters are reserved and also must be encoded: `~!@#$^&*()[]{}\;",<>?`+&#39;&#96;+ as well as all characters with ASCII code &lt;= `0x20`, which includes space and newline.
+La forme `--filter=combine:<filtre1>+<filtre2>+...<filtreN>` peut aussi être utilisée pour combiner plusieurs filtres, mais c'est plus difficile que de répéter simplement le drapeau `--filter` et ce n'est généralement pas nécessaire. Les filtres sont joints par des signes '{plus}' et les filtres individuels sont codés en % (c'est-à-dire codés comme des URL). Outre les caractères '{plus}' et'%', les caractères suivants sont réservés et doivent également être encodés : `~!@#$^^&*()[]{]{}\ ;",<>?`+&#39;&#96;+ ainsi que tous les caractères avec un code ASCII <= `0x20`, qui inclut l'espace et la ligne nouvelle.
 +
-Other arbitrary characters can also be encoded. For instance, `combine:tree:3+blob:none` and `combine:tree%3A3+blob%3Anone` are equivalent.
+D'autres caractères arbitraires peuvent également être encodés. Par exemple, `combine:tree:3+blob:none' et 'combine:tree%3A3+blob%3Anone` sont équivalents.
 
 `--no-filter`::
 	Désactiver tout argument `--filter=` précédent.
@@ -629,21 +629,21 @@ Other arbitrary characters can also be encoded. For instance, `combine:tree:3+bl
 `--filter-print-omitted`::
 	Uniquement utile avec `--filter=` ; imprimer une liste des objets omis par le filtre. Les ID d'objet sont préfixés par un caractère "~".
 
-`--missing=<missing-action>`::
+`--missing=<action-manquante>`::
 	Une option de débogage pour aider au développement futur de "clones partiels". Cette option spécifie comment les objets manquants sont traités.
 +
-The form `--missing=error` requests that rev-list stop with an error if a missing object is encountered. This is the default action.
+La forme `--missing=error` demande que rev-list s'arrête avec une erreur si un objet manquant est rencontré. C'est l'action par défaut.
 +
-The form `--missing=allow-any` will allow object traversal to continue if a missing object is encountered. Missing objects will silently be omitted from the results.
+La forme `--missing=allow-any` permet de continuer le parcours d'objet si un objet manquant est rencontré. Les objets manquants seront silencieusement omis des résultats.
 +
-The form `--missing=allow-promisor` is like `allow-any`, but will only allow object traversal to continue for EXPECTED promisor missing objects. Unexpected missing objects will raise an error.
+Le forme `--missing=allow-promisor` est comme `allow-any`, mais ne permettra la traversée d'objets de continuer que pour les objets manquants du promettant EXPECTED. Les objets manquants inattendus entraîneront une erreur.
 +
-The form `--missing=print` is like `allow-any`, but will also print a list of the missing objects. Object IDs are prefixed with a ``?'' character.
+La forme `--missing=print` est comme `allow-any`, mais affichera aussi une liste des objets manquants. Les ID d'objet sont préfixés par un caractère "?".
 +
 La forme `--missing=print-info` est comme `print`, mais il va également afficher des informations supplémentaires sur l'objet manquant inféré de son objet contenant. Les informations sont toutes affichées sur la même ligne avec l'identifiant de l'objet manquant dans la forme: `? <oid> [<jeton>=<valeur>]...` . Les paires `<jeton>=<valeur>` contenant des informations supplémentaires sont séparées les unes des autres par un caractères _SP_. La valeur est encodée d'une manière spécifique, mais les _SP_ ou _LF_ contenus une valeur sont toujours censés être représentés de telle sorte que la valeur encodée résultante n'ait pas l'un de ces deux octets problématiques. Chaque `<jeton>=<valeur>` peut être :
 +
 --
-* The `path=<path>` shows the path of the missing object inferred from a containing object. A path containing _SP_ or special characters is enclosed in double-quotes in the C style as needed.
+* Le `path=<chemin>` montre le chemin de l'objet manquant inféré d'un objet contenant. Un chemin contenant _SP_ ou des caractères spéciaux est protégé en double-quotes dans le style C au besoin.
 +
 * Le terme `type=<type>` montre le type de l'objet manquant inféré d'un objet contenant.
 --
@@ -706,7 +706,7 @@ include::pretty-options.adoc[]
 
 `--date=unix` affiche la date sous forme d'un horodatage d'époque Unix (secondes depuis 1970). Comme dans le cas de `--raw`, c'est toujours en UTC et donc `-local` n'a aucun effet.
 
-`--date=format:<format>` feeds the _<format>_ to your system `strftime`, except for `%s`, `%z`, and `%Z`, which are handled internally. Use `--date=format:%c` to show the date in your system locale's preferred format. See the `strftime`(3) manual for a complete list of format placeholders. When using `-local`, the correct syntax is `--date=format-local:<format>`.
+`--date=format:<format>` alimente le format _<format>_ vers `strftime` de votre système , sauf pour `%s`, `%z` et `%Z`, qui sont gérés en interne. Utilisez `--date=format:%c` pour afficher la date dans le format préféré de la locale de votre système. Voir le manuel de `strftime`(3) pour une liste complète des espaces réservés de format. Quand on utilise `-local`, la syntaxe correcte est `--date=format-local:<format>`.
 
 `--date=default` est le format par défaut, et est basé sur la sortie de ctime(3). Il affiche une seule ligne avec le jour de la semaine à trois lettres, le mois à trois lettres, le jour du mois, l'heure, la minute et la seconde au format "HH:MM:SS", suivi de l'année à 4 chiffres, plus les informations du fuseau horaire, à moins que le fuseau horaire local ne soit utilisé, par exemple `Thu Jan 1 00:00:00 1970 +0000`.
 --
@@ -766,8 +766,8 @@ Cela permet la réécriture des parents, voir « Simplification de l'historique 
 +
 Cela implique l'option `--topo-order` par défaut, mais l'option `--date-order` peut aussi être spécifiée.
 
-`--show-linear-break[=<barrier>]`::
-	When `--graph` is not used, all history branches are flattened which can make it hard to see that the two consecutive commits do not belong to a linear branch. This option puts a barrier in between them in that case. If _<barrier>_ is specified, it is the string that will be shown instead of the default one.
+`--show-linear-break[=<barrière>]`::
+	Lorsque `--graph` n'est pas utilisé, toutes les branches de l'historique sont aplaties, ce qui peut rendre difficile de voir que les deux commits consécutifs n'appartiennent pas à une branche linéaire. Dans ce cas, cette option met une barrière entre les deux. Si _<barrière>_ est spécifié, c'est la chaîne de caractères qui sera affichée à la place de celle par défaut.
 
 ifdef::git-rev-list[]
 `--count`::

@@ -3,26 +3,26 @@ git-tag(1)
 
 NOM
 ---
-git-tag - Créer, lister, supprimer ou vérifier un objet étiquette signé avec GPG
+git-tag - Créer, lister, supprimer ou vérifier des étiquettes
 
 
 SYNOPSIS
 --------
-[verse]
-'git tag' [-a | -s | -u <id-clé>] [-f] [-m <msg> | -F <fichier>] [-e]
-		[(--trailer <jeton>[(=|:)<valeur>])...]
+[synopsis]
+git tag [-a | -s | -u <id-clé>] [-f] [-m <msg> | -F <fichier>] [-e]
+	[(--trailer <jeton>[(=|:)<valeur>])...]
 	<nom-d-étiquette> [<commit> | <objet>]
-'git tag' -d <nom-d-étiquette>...
-'git tag' [-n[<num>]] -l [--contains <commit>] [--no-contains <commit>]
+git tag -d <nom-d-étiquette>...
+git tag [-n[<num>]] -l [--contains <commit>] [--no-contains <commit>]
 	[--points-at <objet>] [--column[=<options>] | --no-column]
 	[--create-reflog] [--sort=<clé>] [--format=<format>]
 	[--merged <commit>] [--no-merged [<commit>]] [<motif>...]
-'git tag' -v [--format=<format>] <nom-d-étiquette>...
+git tag -v [--format=<format>] <nom-d-étiquette>...
 
 DESCRIPTION
 -----------
 
-Ajouter une référence d'étiquette dans `refs/tags/`, à moins que `-d/-l/-v` ne soit donné pour supprimer, lister ou vérifier des étiquettes.
+Ajouter une référence d'étiquette dans `refs/tags/`, à moins que `-d`/`-l`/`-v` ne soit donné pour supprimer, lister ou vérifier des étiquettes.
 
 A moins que le `-f` ne soit donné, l'étiquette indiquée ne doit pas encore exister.
 
@@ -32,130 +32,136 @@ Si `-m <msg>` ou `-F <fichier>` ou `--trailer <jeton>[=<valeur>]`est donné et q
 
 Sinon, une référence d'étiquette qui pointe directement sur l'objet donné (c'est-à-dire une étiquette légère) est créée.
 
-Un objet étiquette signé avec GnuPG sera créé lorsque `-s` ou `-u <id-clé>` est utilisé. Lorsque `-u <id-clé>` n'est pas utilisé, l'identité du validateur pour l'utilisateur actuel est utilisée pour trouver la clé GnuPG pour signer. La variable de configuration `gpg.program` est utilisée pour spécifier un binaire GnuPG personnalisé.
+Un objet étiquette signé cryptographiquement sera créé lorsque `-s` ou `-u <id-clé>` est utilisé. La méthode de signature (GPG, X.509, SSH, etc.) est contrôlée par la variable de configuration `gpg.format`, par défaut `OpenGPG`. Lorsque `-u <id-clé>` n'est pas utilisé, l'identité du validateur pour l'utilisateur actuel est utilisée pour trouver la clé pour signer. La variable de configuration `gpg.program` est utilisée pour spécifier un programme de signature personnalisé.
 
-Les objets étiquette (créés avec `-a`, `-s`, ou `-u`) sont appelés étiquettes « annotées » ; ils contiennent une date de création, le nom et l'e-mail de l'étiqueteur, un message d'étiquetage, et une signature GnuPG optionnelle. Alors qu'une étiquette « légère » est simplement un nom pour un objet (généralement un objet commit).
+Les objets étiquette (créés avec `-a`, `-s`, ou `-u`) sont appelés étiquettes « annotées » ; ils contiennent une date de création, le nom et l'e-mail de l'étiqueteur, un message d'étiquetage, et une signature cryptographique optionnelle. Alors qu'une étiquette « légère » est simplement un nom pour un objet (généralement un objet commit).
 
 Les étiquettes annotées sont destinées à être diffusées, tandis que les étiquettes légères sont destinées à l'étiquetage d'objets privés ou temporaires. Pour cette raison, certaines commandes git pour nommer les objets (comme `git describe`) ignorent par défaut les étiquettes légères.
 
 
 OPTIONS
 -------
--a::
---annotate::
+`-a`::
+`--annotate`::
 	Faire un objet étiquette non signé et annoté
 
--s::
---sign::
-	Faites une étiquette signée GPG, en utilisant la clé de l'adresse électronique par défaut. Le comportement par défaut de signature GPG d'étiquette GPG est contrôlé par la variable de configuration `tag.gpgSign` si elle existe, ou désactivé sinon. Voir linkgit:git-config[1].
+`-s`::
+`--sign`::
+	Faire une étiquette cryptographiquement signée, en utilisant la clé de signature par défaut. Le backend de signature utilisé dépend de la variable de configuration `gpg.format. La clé par défaut est déterminée par le backend. Pour GPG, il est basé sur l'adresse courriel du validateur, alors que pour SSH, il peut s'agir d'un fichier ou d'une identité d'agent. Voir linkgit:git-config[1].
 
---no-sign::
+`--no-sign`::
 	Surcharge `tag.gpgSign` qui force toutes les étiquettes à être signées.
 
--u <id-clé>::
---local-user=<id-clé>::
-	Faire une étiquette signée par GPG, en utilisant la clé donnée.
+`-u <id-clé>`::
+`--local-user=<id-clé>`::
+	Faire une étiquette cryptographiquement signée avec la clé donnée. Le format de l'_<id-clé>_ et du backend utilisés dépendent de la variable de configuration `gpg.format` . Voir linkgit:git-config[1].
 
--f::
---force::
+`-f`::
+`--force`::
 	Remplacer une étiquette existante par le nom fourni (au lieu d'échouer)
 
--d::
---delete::
+`-d`::
+`--delete`::
 	Supprimer les étiquettes existantes avec les noms fournis.
 
--v::
---verify::
-	Vérifier la signature GPG des noms d'étiquette donnés.
+`-v`::
+`--verify`::
+	Vérifier la signature cryptographique des étiquette données.
 
--n<num>::
-	<num> indique combien de lignes de l'annotation, le cas échéant, sont imprimées lorsque l'on utilise -l. Implique `--list`.
+`-n<num>`::
+	_<num>_ indique combien de lignes de l'annotation, le cas échéant, sont imprimées lorsque l'on utilise `-l`. Implique `--list`.
 +
 Par défaut, aucune ligne d'annotation n'est affichée. Si aucun nombre n'est donné à `-n`, seule la première ligne est affichée. Si l'étiquette n'est pas annotée, le message de commit est affiché à la place.
 
--l::
---list::
+`-l`::
+`--list`::
 	Lister les étiquettes. Avec l'option `<motif>...`, par exemple `git tag --list 'v-*' `, ne lister que les étiquettes qui correspondent au(x) motif(s).
 +
-L'exécution de "git tag" sans arguments permet également de lister toutes les étiquettes. Le motif est un joker shell (c'est-à-dire que la correspondance est effectuée avec fnmatch(3)). Plusieurs motifs peuvent être donnés ; si l'un d'eux correspond, l'étiquette est affichée.
+L'exécution de `git tag` sans arguments permet également de lister toutes les étiquettes. Le motif est un joker shell (c'est-à-dire que la correspondance est effectuée avec `fnmatch`(3)). Plusieurs motifs peuvent être donnés ; si l'un d'eux correspond, l'étiquette est affichée.
 +
 Cette option est implicitement fournie si une autre option de type liste telle que `--contains` est fournie. Pour plus de détails, voir la documentation relative à chacune de ces options.
 
---sort=<clé>::
-	Trier en fonction de la clé donnée. Préfixer par `-` pour trier par ordre décroissant de la valeur. Vous pouvez utiliser l'option --sort=<clé> plusieurs fois, auquel cas la dernière clé devient la clé primaire. Prend également en charge "version:nom-de-réf" ou "v:nom-de-réf" (les noms d'étiquettes sont traités comme des versions). L'ordre de tri de "version:nom-de-réf" peut également être affecté par la variable de configuration "versionsort.suffixe". Les clés supportées sont les mêmes que celles de `git for-each-ref`. L'ordre de tri est par défaut la valeur configurée pour la variable `tag.sort` si elle existe, ou l'ordre lexicographique sinon. Voir linkgit:git-config[1].
+`--sort=<clé>`::
+	Trier en fonction de la clé donnée. Préfixer par `-` pour trier par ordre décroissant de la valeur. Vous pouvez utiliser l'option `--sort=<clé>` plusieurs fois, auquel cas la dernière _<clé>_ devient la clé primaire. Prend également en charge "`version:refname`" ou "`v:refname`" (les noms d'étiquettes sont traités comme des versions). L'ordre de tri "`version:refname`" peut également être affecté par la variable de configuration "`versionsort.suffix`". Les clés supportées sont les mêmes que celles de `git for-each-ref`. L'ordre de tri est par défaut la valeur configurée pour la variable `tag.sort` si elle existe, ou l'ordre lexicographique sinon. Voir linkgit:git-config[1].
 
---color[=<quand>]::
-	Respecter toutes les couleurs spécifiées dans l'option `--format`. Le champ `<quand>` doit être un des valeur `always`, `never`, ou `auto` (si `<quand>` est absent, se comporter comme si `always` était donné).
+`--color[=<quand>]`::
+	Respecter toutes les couleurs spécifiées dans l'option `--format`. Le champ _<quand>_ doit être un des valeur `always`, `never`, ou `auto` (si _<quand>_ est absent, se comporter comme si `always` était donné).
 
--i::
---ignore-case::
+`-i`::
+`--ignore-case`::
 	Le tri et le filtrage des étiquettes sont non-sensibles à la casse.
 
---omit-empty::
+`--omit-empty`::
 	Ne pas afficher de nouvelle ligne après les refs formatés lorsque le format se développe en chaîne vide.
 
---column[=<options>]::
---no-column::
-	Afficher les étiquettes en colonnes. Voir la variable de configuration `column.tag` pour la syntaxe de l'option. `--column` et `--no-column` sans options sont équivalents à 'always' et 'never' respectivement.
+`--column[=<options>]`::
+`--no-column`::
+	Afficher les étiquettes en colonnes. Voir la variable de configuration `column.tag` pour la syntaxe de l'option. `--column` et `--no-column` sans options sont équivalents à `always` et `never` respectivement.
 +
 Cette option n'est applicable que pour les listes d'étiquettes sans lignes d'annotation.
 
---contains [<commit>]::
-	Ne répertorier que les étiquettes qui contiennent le commit spécifié (HEAD si non spécifié). Implique `--list`.
+`--contains [<commit>]`::
+	N'indiquer que les étiquettes qui contiennent le commit spécifié (`HEAD` si non spécifié). Implique `--list`.
 
---no-contains [<commit>]::
-	Ne répertorier que les étiquettes qui ne contiennent pas le commit spécifié (HEAD si non spécifié). Implique `--list`.
+`--no-contains [<commit>]`::
+	N'indiquer que les étiquettes qui ne contiennent pas _<commit>_ (`HEAD` si non spécifié). Implique `--list`.
 
---merged [<commit>]::
-	Ne lister que les étiquettes dont les commits sont accessibles à partir du commit spécifié (`HEAD` si non spécifié).
+`--merged [<commit>]`::
+	Ne lister que les étiquettes dont les commits sont accessibles à partir de _<commit>_ (`HEAD` si non spécifié).
 
---no-merged [<commit>]::
-	Ne lister que les étiquettes dont les commits ne sont pas accessibles à partir du commit spécifié (`HEAD` si non spécifié).
+`--no-merged [<commit>]`::
+	Ne lister que les étiquettes dont les commits ne sont pas accessibles à partir de _<commit>_ (`HEAD` si non spécifié).
 
---points-at <objet>::
-	Ne répertorier que les étiquettes de l'objet donné (HEAD si non spécifié). Implique `--list`.
+`--points-at [<objet>]`::
+	Ne lister que les étiquettes de _<object>_ (`HEAD` si elles ne sont pas spécifiées). Implique `--list`.
 
--m <msg>::
---message=<msg>::
-	Utiliser le message d'étiquette fourni (au lieu de le demander). Si plusieurs options `-m` sont fournies, leurs valeurs sont concaténées comme paragraphes séparés. Implique `-a` si ni `-a`, ni `-s` et ni `-u <id-clé>` n'est fourni.
+`-m <msg>`::
+`--message=<msg>`::
+	Utiliser _<msg>_ (au lieu de le demander). Si plusieurs options `-m` sont fournies, leurs valeurs sont concaténées comme paragraphes séparés. Implique `-a` si ni `-a`, ni `-s` et ni `-u <id-clé>` n'est fourni.
 
--F <fichier>::
---file=<fichier>::
-	Prendre le message d'étiquette fourni dans le fichier indiqué. Utiliser '-' pour lire le message depuis l'entrée standard. Implique `-a` si ni `-a`, ni `-s` et ni `-u <id-clé>` n'est fourni.
+`-F <fichier>`::
+`--file=<fichier>`::
+	Prendre le message d'étiquette fourni dans _<fichier_>. Utiliser `-` pour lire le message depuis l'entrée standard. Implique `-a` si ni `-a`, ni `-s` et ni `-u <id-clé>` n'est fourni.
 
---trailer <jeton>[(=| :)<valeur>]::
-	Spécifier une paire (<jeton>, <valeur>) qui doit être appliquée comme une ligne terminale (par exemple, `git tag --trailer "Clé-Personnalisée:valeur"` ajoutera la ligne terminale "Clé-Personnelle" au message d'étiquette). Les variables de configuration `trailer.*` (linkgit:git-interpret-trailers[1]) peuvent être utilisées pour définir si une ligne terminale dupliquée est omise, ou où chaque ligne terminale apparaîtrait dans la série de lignes terminales, et d'autres détails. Les lignes terminales peuvent être extraites dans `git tag --list`, en utilisant `--format="%(trailers)"`.
+`--trailer <jeton>[(=| :)<valeur>]`::
+	Spécifier une paire (_<jeton>_, _<valeur>_) qui doit être appliquée comme une ligne terminale (par exemple, `git tag --trailer "Clé-Personnalisée:valeur"` ajoutera la ligne terminale "Clé-Personnelle" au message d'étiquette). Les variables de configuration `trailer.*` (linkgit:git-interpret-trailers[1]) peuvent être utilisées pour définir si une ligne terminale dupliquée est omise, ou où chaque ligne terminale apparaîtrait dans la série de lignes terminales, et d'autres détails. Les lignes terminales peuvent être extraites dans `git tag --list`, en utilisant `--format="%(trailers)"`.
 
--e::
---edit::
-	Le message tiré d'un fichier avec `-F`, ou de la ligne de commande avec `-m` est généralement utilisé sans modification. Cette option permet d'éditer au passage le message tiré de ces sources.
+`-e`::
+`--edit`::
+	Permettre d'éditer plus avant le message pris à partir du fichier avec `-F` et la ligne de commande avec `-m`.
 
---cleanup=<mode>::
-	Cette option définit la manière dont le message de l'étiquette est nettoyé. Le '<mode>' peut être un 'verbatim', 'whitespace' ou 'strip'. Le mode 'strip' est le mode par défaut. Le mode 'verbatim' ne modifie pas du tout le message, 'whitespace' supprime uniquement les lignes vides de début et de fin et 'strip' supprime à la fois les espaces et les commentaires.
+`--cleanup=<mode>`::
+	Définir la manière dont le message de l'étiquette est nettoyé. Le _<mode>_ peut être un `verbatim`, `whitespace` ou `strip`. Le mode `strip` est le mode par défaut. Le mode `verbatim` ne modifie pas du tout le message, `whitespace` supprime uniquement les lignes vides de début et de fin et `strip` supprime à la fois les espaces et les commentaires.
 
---create-reflog::
+`--create-reflog`::
 	Créer un reflog pour l'étiquette. Pour activer globalement les reflogs pour les étiquettes, voir `core.logAllRefUpdates` dans linkgit:git-config[1]. La forme inversée `--no-create-reflog` ne fait que remplacer une précédente `--create-reflog`, mais n'annule pas actuellement le paramètre de `core.logAllRefUpdates`.
 
---format=<format>::
+`--format=<format>`::
 	Une chaîne qui interpole `%(fieldname)` à partir d'une référence d'étiquette affichée et de l'objet qu'il pointe. Le format est le même que celui de linkgit:git-for-each-ref[1]. Lorsqu'elle n'est pas spécifiée, la valeur par défaut est `%(refname:strip=2)`.
 
-<nom-d-étiquette>::
+_<nom-d-étiquette>_::
 	Le nom de l'étiquette à créer, supprimer ou décrire. Le nouveau nom de l'étiquette doit passer tous les contrôles définis par linkgit:git-check-ref-format[1]. Certains de ces contrôles peuvent restreindre les caractères autorisés dans un nom d'étiquette.
 
-<commit>::
-<objet>::
-	L'objet auquel la nouvelle étiquette fera référence, généralement un commit. La valeur par défaut est HEAD.
+_<commit>_::
+_<objet>_::
+	L'objet auquel la nouvelle étiquette fera référence, généralement un commit. La valeur par défaut est `HEAD`.
 
 CONFIGURATION
 -------------
-Par défaut, 'git tag' en mode signer-par-défaut (-s) utilisera votre identité de validateur (de la forme `Votre Nom <votre@adresse.courriel>`) pour trouver une clé. Si vous souhaitez utiliser une clé par défaut différente, vous pouvez la spécifier dans la configuration du dépôt comme suit :
+Par défaut, `git tag` en mode signer-par-défaut (`-s`) utilisera votre identité de validateur (de la forme `Votre Nom <votre@adresse.courriel>`) pour trouver une clé. Si vous souhaitez utiliser une clé par défaut différente, vous pouvez la spécifier dans la configuration du dépôt comme suit :
 
 -------------------------------------
 [user]
-    signingKey = <id-clé-gpg>
+    signingKey = <id-clé>
 -------------------------------------
 
-`pager.tag` n'est respecté que lors de l'énumération des étiquettes, c'est-à-dire lorsque le `-l` est utilisé ou sous-entendu. La valeur par défaut est l'utilisation d'un pager. Voir linkgit:git-config[1].
+Le backend de signature peut être choisi via la variable de configuration `gpg.format`, qui par défaut est `openpgp`. Voir linkgit:git-config[1] pour une liste d'autres formats pris en charge.
+
+Le chemin vers le programme utilisé pour chaque backend de signature peut être spécifié avec la variable de configuration `gpg.<format>.program`. Pour le backend `openpgp`, `gpg.program` peut être utilisé comme synonyme de `gpg.openpgp.program`. Voir linkgit:git-config[1] pour plus de détails.
+
+`pager.tag` n'est respecté que lors de l'énumération des étiquettes, c'est-à-dire lorsque le `-l` est utilisé ou sous-entendu. La valeur par défaut est l'utilisation d'un pager.
+
+Voir linkgit:git-config[1] pour plus de détail et d'autres variables de configuration.
 
 DISCUSSION
 ----------
@@ -165,15 +171,15 @@ DISCUSSION
 
 Que devez-vous faire lorsque vous marquez un mauvais commit et que vous souhaitez ré-étiqueter ?
 
-Si vous n'avez jamais rien pousser à l'extérieur, il suffit de le re-étiqueter. Utilisez "-f" pour remplacer l'ancienne étiquette. Et c'est fini.
+Si vous n'avez jamais rien poussé à distance, il suffit de le re-étiqueter. Utilisez `-f` pour remplacer l'ancienne étiquette. Et c'est fini.
 
 Mais si vous avez poussé des choses (ou si d'autres ont pu lire directement votre dépôt), alors d'autres auront déjà vu l'ancienne étiquette. Dans ce cas, vous pouvez faire l'une des deux choses suivantes :
 
 . Le bon comportement. Admettez juste que vous avez foiré, et utilisez un autre nom. D'autres ont déjà vu un nom d'étiquette, et si vous gardez le même nom, vous pouvez vous retrouver dans la situation où deux personnes ont toutes deux une "version X", mais en fait elles ont des "X" différents. Il suffit donc de baptiser le bon commit "X.1" et cela règle l'affaire.
 
-. Le comportement débile. Vous voulez vraiment appeler la nouvelle version "X" aussi, "même si" d'autres ont déjà vu l'ancienne. Alors utilisez à nouveau l'étiquette "git tag -f", comme si vous n'aviez pas déjà publié l'ancienne version.
+. Le comportement débile. Vous voulez vraiment appeler la nouvelle version "X" aussi, "même si" d'autres ont déjà vu l'ancienne. Alors utilisez à nouveau l'étiquette `git tag -f`, comme si vous n'aviez pas déjà publié l'ancienne version.
 
-Cependant, Git ne change *pas* (et ne devrait pas changer) les étiquettes dans le dos les utilisateurs. Ainsi, si quelqu'un a déjà l'ancienne étiquette, le fait de faire un 'git pull' sur votre arbre ne devrait simplement pas l'obliger à écraser l'ancienne.
+Cependant, Git ne change *pas* (et ne devrait pas changer) les étiquettes dans le dos les utilisateurs. Ainsi, si quelqu'un a déjà l'ancienne étiquette, le fait de faire un `git pull` sur votre arbre ne devrait simplement pas l'obliger à écraser l'ancienne.
 
 Si quelqu'un a reçu de vous une étiquette de publication, vous ne pouvez simplement pas la changer chez lui en mettant à jour votre propre étiquette. Il s'agit d'un problème de sécurité important, car les gens DOIVENT pouvoir faire confiance en leur nom d'étiquette. Si vous voulez vraiment faire une folie, vous devez simplement le reconnaître et dire aux gens que vous avez fait une erreur. Vous pouvez le faire en faisant une annonce très publique disant :
 
@@ -208,7 +214,7 @@ Si vous suivez l'arbre de quelqu'un d'autre, vous utilisez très probablement de
 
 D'autre part, si vous récupérez parce que vous voudriez une seule fois une fusion de quelqu'un d'autre, vous ne voulez généralement pas obtenir d'étiquettes à partir de là. Cela se produit plus souvent pour les personnes proches du niveau supérieur, mais pas seulement pour elles. Les simples mortels qui se tirent les uns des autres ne veulent pas nécessairement obtenir automatiquement des étiquettes de point d'ancrage privés de l'autre personne.
 
-Souvent, les messages "veuillez tirer" sur la liste de diffusion ne fournissent que deux informations : une URL de dépôt et un nom de branche ; ils sont conçus pour être facilement coupés-collés à la fin d'une ligne de commande "git fetch" :
+Souvent, les messages "veuillez tirer" sur la liste de diffusion ne fournissent que deux informations : une URL de dépôt et un nom de branche ; ils sont conçus pour être facilement coupés-collés à la fin d'une ligne de command `git fetch` :
 
 ------------
 Linus, veuillez tirer de
@@ -253,6 +259,14 @@ FICHIERS
 
 `$GIT_DIR/TAG_EDITMSG`::
 	Ce fichier contient le message de l'étiquette annotée en cours. Si `git tag` sort à cause d'une erreur avant de créer une étiquette annotée, alors le message de l'étiquette annotée fourni par l'utilisateur dans une session d'éditeur sera disponible dans ce fichier, mais sera écrasé par l'invocation suivante de `git tag`.
+
+CONFIGURATION
+-------------
+
+include::includes/cmd-config-section-all.adoc[]
+
+:git-tag: 1
+include::config/tag.adoc[]
 
 NOTES
 -----

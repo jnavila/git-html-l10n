@@ -35,7 +35,13 @@ OPTIONS
 --allow-unsafe-features::
 	De nombreuses options de ligne de commande peuvent être fournies dans le flux de fast-import lui-même en utilisant les commandes `feature` ou `option`. Cependant, certaines de ces options ne sont pas sûres (par exemple, permettre à fast-import d'accéder au système de fichiers en dehors du dépôt). Ces options sont désactivées par défaut, mais peuvent être autorisées en fournissant cette option sur la ligne de commande. Ceci n'affecte actuellement que les commandes `export-marks`, `import-marks`, et `import-marks-if-exists`.
 +
-	N'activez cette option que si vous faites confiance au programme qui génère le flux d'importation rapide ! Cette option est activée automatiquement pour les assistants à distance qui utilisent la capacité `import`, car ils sont déjà autorisés à exécuter leur propre code.
+N'activez cette option que si vous faites confiance au programme qui génère le flux d'importation rapide ! Cette option est activée automatiquement pour les assistants à distance qui utilisent la capacité `import`, car ils sont déjà autorisés à exécuter leur propre code.
+
+--signed-tags=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed tags. Behaves in the same way as the same option in linkgit:git-fast-export[1], except that default is 'verbatim' (instead of 'abort').
+
+--signed-commits=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed commits. Behaves in the same way as the same option in linkgit:git-fast-export[1], except that default is 'verbatim' (instead of 'abort').
 
 Options pour les frontaux
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -61,7 +67,8 @@ Emplacement des fichiers de marques
 --import-marks-if-exists=<fichier>::
 	Comme --import-marks mais au lieu de faire une erreur, ignore silencieusement le fichier s’il n’existe pas.
 
---[no-]relative-marks::
+--relative-marks::
+--no-relative-marks::
 	Après avoir spécifié --relative-marks, les chemins spécifiés avec --import-marks= et --export-marks= sont relatifs à un répertoire interne du dépôt actuel. Dans git-fast-import, cela signifie que les chemins sont relatifs au répertoire .git/info/fast-import. Cependant, d'autres importateurs peuvent utiliser un emplacement différent.
 +
 Les marques relatives et non relatives peuvent être combinées en entremêlant --(no-)-relative-marks avec les options --(import|export)-marks=.
@@ -100,7 +107,7 @@ fastimport.unpackLimit::
 
 PERFORMANCE
 -----------
-The design of fast-import allows it to import large projects in a minimum amount of memory usage and processing time. Assuming the frontend is able to keep up with fast-import and feed it a constant stream of data, import times for projects holding 10+ years of history and containing 100,000+ individual commits are generally completed in just 1-2 hours on quite modest hardware (~$2,000 USD in 2007).
+La conception de fast-import lui permet d’importer de grands projets dans un minimum d’utilisation de la mémoire et de temps de traitement. En supposant que le frontal est capable de suivre fast-import et de lui fournir un flux constant de données, les importations pour les projets contenant plus de 10 ans d’histoire et contenant plus de 100 000 commits individuels sont généralement réalisées en seulement 1 à 2 heures sur du matériel assez modeste (~ 2 000 USD en 2007).
 
 La plupart des goulets d'étranglement semblent se situer au niveau de l'accès aux données de la source étrangère (la source ne peut tout simplement pas extraire les révisions assez rapidement) ou de l'E/S du disque (l'importation rapide écrit aussi vite que le disque peut prendre les données). Les importations s'exécuteront plus rapidement si les données sources sont stockées sur un lecteur différent de celui du dépôt Git de destination (en raison d'une moindre contention des entrées/sorties).
 
@@ -284,7 +291,7 @@ The `gpgsig` command takes two arguments:
 
 A commit may have at most one signature for the SHA-1 object format (stored in the "gpgsig" header) and one for the SHA-256 object format (stored in the "gpgsig-sha256" header).
 
-See below for a detailed description of the `data` command which contains the raw signature data.
+Voir ci-dessous pour une description détaillée de la commande `data` qui contient les données de signature brute.
 
 Signatures are not yet checked in the current implementation though. (Already setting the `extensions.compatObjectFormat` configuration option might help with verifying both SHA-1 and SHA-256 object format signatures when it will be implemented.)
 
@@ -319,9 +326,11 @@ Les marques doivent être déclarées (via `mark`) avant de pouvoir être utilis
 * Le SHA-1 spécial nul (40 zéros) indique que la branche doit être supprimée.
 
 Le cas particulier de la reprise d'une importation incrémentale à partir de la valeur actuelle de la branche doit être écrit comme suit :
+
 ----
 	from refs/heads/branch^0
 ----
+
 Le suffixe `^0` est nécessaire car fast-import ne permet pas à une branche de démarrer à partir d'elle-même, et la branche est créée en mémoire avant même que la commande `from` ne soit lue en entrée. L'ajout de `^0` forcera fast-import à résoudre le commit à travers la bibliothèque d'analyse de révision de Git's, plutôt que sa table de branche interne, chargeant ainsi la valeur existante de la branche.
 
 `merge`

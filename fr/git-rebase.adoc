@@ -16,22 +16,9 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-Si l ' on spécifie `<branche> ` , `git rebase` effectuera un `git switch <branche>` automatique avant de faire autre chose. Sinon, il reste sur la branche actuelle.
+Transplant a series of commits onto a different starting point. You can also use `git rebase` to reorder or combine commits: see INTERACTIVE MODE below for how to do that.
 
-Si `<amont>` n'est pas spécifié, on utilisera l'amont configuré dans les options `branch.<nom>. remote` et `branch.<nom>.merge` (voir linkgit:git-config[1] pour plus de détails) et on suppose l'option `--fork-point`. Si vous n'êtes actuellement sur aucune branche ou si la branche actuelle n'a pas d'amont configuré, le rebasage échouera.
-
-Tous les changements apportés par des commits dans la branche actuelle, mais qui ne sont pas dans `<amont>` sont enregistrés dans une zone temporaire. Il s'agit de la même série de commits qui serait affichée par `git log <amont>.HEAD` ; ou par `git log 'fork_point'.HEAD`, si `--fork-point` est actif (voir la description de `--fork-point` ci-dessous) ; ou par `git log HEAD` si l'option `--root` est spécifiée.
-
-La branche actuelle est réinitialisée à `<amont>` ou `<nouvellebase>` si l'option `--onto` a été fournie. Cela a le même effet que `git reset --hard <amont>` (ou `<nouvellebase>`). `ORIG_HEAD` est fixé pour pointer au sommet de la branche avant la réinitialisation.
-
-[NOTE]
-`ORIG_HEAD` n'est pas garanti de toujours pointer vers le sommet de la branche précédente à la fin du rebasage si d'autres commandes qui écrivent cette pseudo-réf (par exemple `git reset`) sont utilisées pendant le rebasage. La pointe de la branche précédente, cependant, est accessible en utilisant le reflog de la branche actuelle (i.e. `@{1}`, voir linkgit:gitrevisions[7]).
-
-Les commits qui ont été précédemment sauvés dans la zone temporaire sont ensuite réappliqués à la branche actuelle, un par un, dans l'ordre. Notez que tout commit dans `HEAD` qui introduit les mêmes changements textuels que ceux d'un commit dans `HEAD..<amont>` sont omis (c.-à-d. une rustine déjà acceptée en amont avec un autre message de validation ou un autre horodatage sera ignorée).
-
-Il est possible qu'un échec de fusion empêche ce processus d'être complètement automatique. Vous devrez résoudre un tel échec de fusion et exécuter `git rebase --continue`. Une autre option est de contourner le commit qui a causé l'échec de fusion avec `git rebase --skip`. Pour extraire la `<branche>`originale et supprimer les fichiers de travail de `.git/rebase-apply`, utilisez la commande `git rebase --abort` à la place.
-
-Supposons que l'historique suivant existe et que la branche actuelle est "sujet" :
+Par exemple, imaginez que vous avez travaillé sur la branche `sujet` de cet historique, et vous voulez « rattraper » le travail effectué sur la branche `master`.
 
 ------------
           A---B---C sujet
@@ -39,13 +26,7 @@ Supposons que l'historique suivant existe et que la branche actuelle est "sujet"
     D---E---F---G master
 ------------
 
-À partir de là, le résultat de l'une des commandes suivantes :
-
-
-    git rebase master
-    git rebase master sujet
-
-serait :
+Vous voulez transplanter les commits que vous avez faits sur `sujet` car il a divergé de `master` (c'est-à-dire A, B, et C), sur le sommet du `master` actuel. Vous pouvez le faire en utilisant `git rebase master` pendant que la branche `sujet` est extraite. Si vous voulez rebaser `sujet` tandis que sur une autre branche, `git rebase master sujet` est un raccourci pour `git checkout sujet && git rebase master`.
 
 ------------
                   A'--B'--C' sujet
@@ -53,23 +34,35 @@ serait :
     D---E---F---G master
 ------------
 
-*NOTE:* Cette dernière forme n'est qu'un raccourcis de`git checkout sujet` suivi par `git rebase master` . Lorsque rebase se termine, `sujet` restera à la branche extraite.
 
-Si la branche amont contient déjà un changement que vous avez fait (par exemple, parce que vous avez envoyé une rustine qui a été appliquée en amont), alors ce commit sera ignoré et des avertissements seront émis (si le backend 'merge' est utilisé). Par exemple, l'exécution de `git rebase master` sur l'historique suivant (dans lequel `A'` et `A` introduisent le même ensemble de modifications, mais ont des informations de validateur différentes) :
+S'il y a un conflit de fusions au cours de ce processus, `git rebase` s'arrêtera au premier problème et laissera des marqueurs de conflit. Si cela arrive, vous pouvez faire une de ces choses :
 
-------------
-          A---B---C sujet
-         /
-    D---E---A'---F master
-------------
+1. Résoudre le conflit. Vous pouvez utiliser `git diff` pour trouver les marqueurs (<<<<<<) et faire des modification pour résoudre le conflit. Pour chaque fichier que vous éditez, vous devez dire à Git que le conflit a été résolu. Vous pouvez marque le conflit comme résolu avec `git add <nom-de-fichier>`. Après avoir résolu tous les conflits, vous pouvez continuer le processus de rebasage avec
 
-donnera :
+   git rebase --continue
 
-------------
-                   B'---C' sujet
-                  /
-    D---E---A'---F master
-------------
+2. Arrêtez `git rebase' et retournez votre branche à son état original avec
+
+   git rebase --abort
+
+3. Sautez le commit qui a causé le conflit de fusion avec
+
+   git rebase --skip
+
+si vous ne spécifiez par un _<amont>_ sur lequel rebaser, l'amont configuré dans les options `branch.<nom>. remote` et `branch.<nom>.merge` sera utilisé (voir linkgit:git-config[1] pour plus de détails) et on suppose l'option `--fork-point`. Si vous n'êtes actuellement sur aucune branche ou si la branche actuelle n'a pas d'amont configuré, le rebasage échouera.
+
+Voici une description simplifiée de ce que `git rebase <amont>` fait :
+
+1. Faites une liste de tous les commits sur votre branche actuelle depuis qu'il a branché depuis `<amont>` qui n'ont pas un commit équivalent dans `<amont>`.
+2. Extrayez `<amont>` avec l'équivalent de `git checkout --detach <amont>`.
+3. Rejouer les commits, un par un, en ordre. C'est similaire à l'exécution de `git cherry-pick <commit> ` pour chaque commit. Voir REBASER LES FUSIONS pour comment les fusions sont gérées.
+4. Update your branch to point to the final commit with the equivalent of `git checkout -B <branch>`.
+
+[NOTE]
+Lors du commencement du rebasage, `ORIG_HEAD` est positionné sur le commit au sommet de la branche à rebaser. Cependant, `ORIG_HEAD` n'est pas garanti de toujours pointer vers ce commit à la fin du rebasage si d'autres commandes qui change `ORIG_HEAD` (par exemple `git reset`) sont utilisées pendant le rebasage. La pointe de la branche précédente, cependant, est accessible en utilisant le reflog de la branche actuelle (i.e. `@{1}`, voir linkgit:gitrevisions[7]).
+
+TRANSPLANTING A TOPIC BRANCH WITH --ONTO
+----------------------------------------
 
 Voici comment vous transplanteriez une branche de sujet basée sur une branche sur une autre, pour prétendre que vous avez fourché la branche de sujet de cette dernière branche, en utilisant `rebase --onto`.
 
@@ -142,23 +135,6 @@ entraînerait le retrait des commits F et G :
 
 Ceci est utile si F et G ont été corrompues d'une certaine manière, ou ne devraient pas faire partie de sujetA. Notez que l'argument pour `--onto` et le paramètre `<amont>` peuvent être n'importe quel commit-esque valide.
 
-En cas de conflit, `git rebase` s'arrêtera au premier commit problématique et laissera les marqueurs de conflit dans l'arbre. Vous pouvez utiliser `git diff` pour localiser les marqueurs (<<<<<<) et faire des modification pour résoudre le conflit. Pour chaque fichier que vous éditez, vous devez dire à Git que le conflit a été résolu, généralement cela serait fait avec
-
-
-    git add <fichier>
-
-
-Après avoir résolu le conflit manuellement et mis à jour l'index avec la résolution souhaitée, vous pouvez poursuivre le processus de rebasage avec
-
-
-    git rebase --continue
-
-
-Alternativement, vous pouvez défaire le 'git rebase' avec
-
-
-    git rebase --abort
-
 OPTIONS DE MODE
 ---------------
 
@@ -188,6 +164,8 @@ OPTIONS
 	Point de départ pour créer les nouveaux commits. Si l ' option `--onto` n'est pas spécifiée, le point de départ est `<amont>` . Peut être tout commit valide, et pas seulement un nom de branche existant.
 +
 Autre cas spécial, vous pouvez utiliser « A\...B » comme raccourci pour la base de fusion de `A` et `B` s'il y a exactement une seule base de fusion. Vous pouvez ne pas spécifier `A` ou `B`, auquel cas ce sera `HEAD` par défaut.
+
+See TRANSPLANTING A TOPIC BRANCH WITH --ONTO above for examples.
 
 --keep-base::
 	Définir le point de départ pour créer les nouveaux commits à la base de fusion de `<amont>` et `<branche>`. Lancer `git rebase --keep-base <amont> <branche>` équivaut à lancer `git rebase --reapply-cherry-picks --no-fork-point --onto <amont>...<branche> <amont> <branche>`.
