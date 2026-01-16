@@ -16,22 +16,9 @@ RESUMO
 
 DESCRIÇÃO
 ---------
-Se o `<ramo>` for especificado, o `git rebase` executará um `git switch <ramo>` automático antes de fazer qualquer outra coisa. Caso contrário, ele permanecerá no ramo atual.
+Transplant a series of commits onto a different starting point. You can also use `git rebase` to reorder or combine commits: see INTERACTIVE MODE below for how to do that.
 
-Se o `<upstream>` não for especificado, será utilizado o "upstream" configurado nas opções `branch.<nome>.remote` e `branch.<nome>.merge` (para mais detalhes consulte linkgit:git-config[1]) e a opção `--fork-point` será assumida. Se você não estiver em nenhuma ramificação no momento ou se a ramificação atual não tiver um "upstream" configurado, o rebase será abortado.
-
-Todas as alterações feitas por commits no ramo atual, mas que não estão no `<upstream>`, são salvos numa área temporária. Esse é o mesmo conjunto de commits que seria exibido pelo comando `git log <upstream>..HEAD`; ou pelo comando `git log 'fork_point'..HEAD`, se a opção `--fork-point` estiver ativa (consulte abaixo a descrição sobre a opção `--fork-point`); ou pelo `git log HEAD`, caso a opção `--root` seja usada.
-
-O ramo atual é redefinido para `<upstream>` ou `<newbase>` caso a opção `--onto` tenha sido usada. Isso tem exatamente o mesmo efeito que `git reset --hard <upstream>` (ou `<newbase>`). O `ORIG_HEAD` é definido para apontar para o cume do ramo antes da reinicialização.
-
-[NOTE]
-Não é garantido que `ORIG_HEAD` ainda aponte para o cume de uma ramificação anterior no final do "rebase" caso os outros comandos que escrevem essa pseudo-ref (`git reset` por exemplo) sejam usados durante o "rebase". O cume da ramificação anterior, no entanto, é acessível usando o "reflog" da ramificação atual (ou seja, `@{1}`, consulte linkgit:gitrevisions[7]).
-
-Os commits que foram salvos anteriormente na área temporária são reaplicadas no ramo atual, uma por uma e em ordem. Observe que quaisquer commits no `HEAD` que introduzam as mesmas alterações textuais que um commit no `HEAD..<upstream>` são omitidas (ou seja, um patch já aceito na inicial com uma mensagem de commit ou carimbo de data e hora diferente, serão ignorados).
-
-É possível que uma falha na mesclagem impeça que este processo seja totalmente automático. Você terá que resolver qualquer falha na mesclagem e executar o comando `git rebase --continue`. Outra opção é ignorar o commit que causou a falha na mesclagem com comando `git rebase --skip`. Para verificar o `<ramo>` original e remover os arquivos de trabalho `.git/rebase-apply`, use o comando `git rebase --abort`.
-
-Suponha que o seguinte histórico exista e que o ramo atual seja "topic":
+For example, imagine that you have been working on the `topic` branch in this history, and you want to "catch up" to the work done on the `master` branch.
 
 ------------
           A---B---C topic
@@ -39,13 +26,7 @@ Suponha que o seguinte histórico exista e que o ramo atual seja "topic":
     D---E---F---G master
 ------------
 
-A partir deste ponto, o resultado de um dos seguintes comandos:
-
-
-    git rebase master
-    git rebase master topic
-
-seria:
+You want to transplant the commits you made on `topic` since it diverged from `master` (i.e. A, B, and C), on top of the current `master`. You can do this by running `git rebase master` while the `topic` branch is checked out. If you want to rebase `topic` while on another branch, `git rebase master topic` is a shortcut for `git checkout topic && git rebase master`.
 
 ------------
                   A'--B'--C' topic
@@ -53,23 +34,35 @@ seria:
     D---E---F---G master
 ------------
 
-*OBSERVAÇÃO:* A última maneira é apenas uma abreviação do comando `git checkout topic` seguido de `git rebase master`. Quando o "rebase" for encerrado, o `topic` continuará sendo o ramo com o check-out.
 
-Se o ramo "upstream" já tiver uma alteração que você fez (porque você enviou uma correção que foi aplicado no "upstream" por exemplo), este commit será ignorado e serão emitidos avisos (se o backend 'merge' for usado). Por exemplo, executar o comando `git rebase master` no seguinte histórico (onde `A'` e `A` introduzem o mesmo conjunto de alterações, mas têm informações diferentes de quem fez o commit):
+If there is a merge conflict during this process, `git rebase` will stop at the first problematic commit and leave conflict markers. If this happens, you can do one of these things:
 
-------------
-          A---B---C topic
-         /
-    D---E---A'---F master
-------------
+1. Resolve the conflict. You can use `git diff` to find the markers (<<<<<<) and make edits to resolve the conflict. For each file you edit, you need to tell Git that the conflict has been resolved. You can mark the conflict as resolved with `git add <filename>`. After resolving all of the conflicts, you can continue the rebasing process with
 
-vai resultar em:
+   git rebase --continue
 
-------------
-                   B'---C' topic
-                  /
-    D---E---A'---F master
-------------
+2. Stop the `git rebase` and return your branch to its original state with
+
+   git rebase --abort
+
+3. Skip the commit that caused the merge conflict with
+
+   git rebase --skip
+
+If you don't specify an `<upstream>` to rebase onto, the upstream configured in `branch.<name>.remote` and `branch.<name>.merge` options will be used (see linkgit:git-config[1] for details) and the `--fork-point` option is assumed. If you are currently not on any branch or if the current branch does not have a configured upstream, the rebase will abort.
+
+Here is a simplified description of what `git rebase <upstream>` does:
+
+1. Make a list of all commits on your current branch since it branched off from `<upstream>` that do not have an equivalent commit in `<upstream>`.
+2. Check out `<upstream>` with the equivalent of `git checkout --detach <upstream>`.
+3. Replay the commits, one by one, in order. This is similar to running `git cherry-pick <commit>` for each commit. See REBASING MERGES for how merges are handled.
+4. Update your branch to point to the final commit with the equivalent of `git checkout -B <branch>`.
+
+[NOTE]
+When starting the rebase, `ORIG_HEAD` is set to point to the commit at the tip of the to-be-rebased branch. However, `ORIG_HEAD` is not guaranteed to still point to that commit at the end of the rebase if other commands that change `ORIG_HEAD` (like `git reset`) are used during the rebase. The previous branch tip, however, is accessible using the reflog of the current branch (i.e. `@{1}`, see linkgit:gitrevisions[7].
+
+TRANSPLANTING A TOPIC BRANCH WITH --ONTO
+----------------------------------------
 
 Aqui está como você transplantaria um ramo do tópico com base num ramo para outro, para fingir que você bifurcou o ramo do tópico deste último ramo, utilizando `rebase --onto`.
 
@@ -142,23 +135,6 @@ resultaria na remoção dos commits 'F' e 'G':
 
 Isso é útil se F e G tiverem alguma falha ou não devam fazer parte do "topicA". Observe que o argumento para a opção `--onto` e o parâmetro `<upstream>` podem ser qualquer tipo válido de commit.
 
-Em caso de conflito, o comando `git rebase` encerrará no primeiro commit problemático e deixará marcadores de conflito na árvore. Você pode usar o comando `git diff` para localizar os marcadores (<<<<<<) e fazer as edições para resolver o conflito. Para cada arquivo editado, você precisa informar ao Git que o conflito foi resolvido; normalmente, isso seria feito com
-
-
-    git add <nome-do-arquivo>
-
-
-Depois de resolver o conflito manualmente e atualizar o índice com a resolução desejada, você pode continuar o processo de reconstrução com o comando
-
-
-    git rebase --continue
-
-
-Como alternativa, você pode desfazer o 'git rebase' com
-
-
-    git rebase --abort
-
 MAIS OPÇÕES
 -----------
 
@@ -188,6 +164,8 @@ OPÇÕES
 	Ponto de partida para a criação de novos commits. Se a opção `--onto` não for usada, o ponto de partida será `<upstream>`. Pode ser qualquer commit válido, e não apenas um nome já existente do ramo.
 +
 Como um caso especial, você pode utilizar "A\...B" como um atalho para a base de mesclagem 'A' e 'B' caso haja exatamente uma base para mesclagem. Você pode deixar de fora no máximo um de 'A' e 'B'; nesse caso, a predefinição retorna para `HEAD`.
+
+See TRANSPLANTING A TOPIC BRANCH WITH --ONTO above for examples.
 
 --keep-base::
 	Defina o ponto de partida para criar os novos commits para a mesclagem base do `<upstream>` e `<ramo>`. Executando o comando `git rebase --keep-base <upstream> <ramo>` é o mesmo que executar o comando `git rebase --reapply-cherry-picks --no-fork-point --onto <upstream>...<ramo> <upstream> <ramo>`.

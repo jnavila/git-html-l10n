@@ -19,15 +19,21 @@ RESUMO
 DESCRIÇÃO
 ---------
 
-Atualiza as refs remotas utilizando as refs locais, enquanto envia os objetos necessários para que seja concluída as refs informadas.
+Updates one or more branches, tags, or other references in a remote repository from your local repository, and sends all necessary data that isn't already on the remote.
+
+The simplest way to push is `git push <remote> <branch>`. `git push origin main` will push the local `main` branch to the `main` branch on the remote named `origin`.
+
+The `<repository>` argument defaults to the upstream for the current branch, or `origin` if there's no configured upstream.
+
+To decide which branches, tags, or other refs to push, Git uses (in order of precedence):
+
+1. The `<refspec>` argument(s) (for example `main` in `git push origin main`) or the `--all`, `--mirror`, or `--tags` options
+2. The `remote.*.push` configuration for the repository being pushed to
+3. The `push.default` configuration. The default is `push.default=simple`, which will push to a branch with the same name as the current branch. See the <<CONFIGURATION,CONFIGURATION>> section below for more on `push.default`.
+
+`git push` may fail if you haven't set an upstream for the current branch, depending on what `push.default` is set to. See the <<UPSTREAM-BRANCHES,UPSTREAM BRANCHES>> section below for more on how to set and use upstreams.
 
 É possível fazer com que coisas interessantes aconteçam num repositório toda vez que você fizer um "push" nele, ao configurar "ganchos" nele. Consulte a documentação para linkgit:git-receive-pack[1].
-
-Quando a linha de comando não especifica onde fazer o 'push' com o argumento `<repositório>`, a configuração `branch.*.remote` da ramificação atual é consultada para determinar onde fazer o 'push'. Se a configuração estiver ausente, a predefinição será 'origin'.
-
-Quando a linha de comando não especifica o que impulsionar (push) com as opções `<refspec>...` ou com as opções `--all`, `--mirror`, `--tags`, o comando encontra a predefinição `<refspec>` consultando a configuração `remote.*.push` e caso ainda não tenha sido encontrado, honra a configuração do `push.default` para decidir o que enviar (para saber o significado de `push.default` consultelinkgit:git-config[1].
-
-Quando nem a linha de comando nem a configuração informam o que enviar, o comportamento predefinido é utilizado, que corresponde ao valor `simple` para `push.default`: o ramo atual é enviado ao ramo upstream correspondente, porém como uma medida segurança, o envio será cancelado caso o ramo upstream não esteja com o mesmo nome que o ramo local.
 
 
 OPÇÕES[[OPTIONS]]
@@ -36,42 +42,30 @@ OPÇÕES[[OPTIONS]]
 	O repositório "remote" que é o destino de uma operação 'push'. Este parâmetro pode ser uma URL (consulte a seção <<URLS,GIT URLS>> abaixo) ou o nome de um controle remoto (consulte a seção <<REMOTES,RAMOS REMOTOS>> abaixo).
 
 <refspec>...::
-	Especifique qual ref. de destino deve ser atualizada com qual origem do objeto. O formato de um parâmetro <refspec> é um sinal de adição opcional `+`, seguido pelo objeto de origem <src>, seguido por dois-pontos `:`, seguido pela referência de destino <dst>.
+	Specify what destination ref to update with what source object.
 +
-Geralmente `<src>` é o nome do ramo que você deseja impulsionar, pode ser qualquer "expressão SHA-1" arbitrária, como `master~4` ou `HEAD` (consulte linkgit:gitrevisions[7]).
+The format for a refspec is [+]<src>[:<dst>], for example `main`, `main:other`, or `HEAD^:refs/heads/main`.
 +
-O <dst> informa qual referência no lado remoto é atualizado com este 'push'. Aqui as expressões arbitrárias não podem ser usadas, uma referência real deve ser mencionada. Se o comando `git push [<repositório>]` sem nenhum argumento `<refspec>` for definido para atualizar alguma referência no destino com `<src>` com a variável de configuração `remote.<repositório>.push`, a parte `:<dst>` pode ser omitida - este 'push' atualizará uma referência que o `<src>` normalmente atualiza sem nenhum `<refspec>` na linha de comando. Caso contrário, a ausência de `:<dst>` significa atualizar a mesma referência que o `<src>`.
+The `<src>` is often the name of the local branch to push, but it can be any arbitrary "SHA-1 expression" (see linkgit:gitrevisions[7]).
 +
-Caso o <dst> não comece com `refs/` (como `refs/heads/master` por exemplo), tentaremos inferir onde em `refs/*` no <repositório> de destino, ele pertença com base no tipo da <src> sendo impulsionado e caso o <dst> seja ambíguo.
+The `<dst>` determines what ref to update on the remote side. It must be the name of a branch, tag, or other ref, not an arbitrary expression.
 +
---
-* Caso o <dst> se refira inequivocamente a uma "ref" no <repositório> do ramo remoto, então faça um impulsionamento "push" nesta ref.
+The `+` is optional and does the same thing as `--force`.
++
+You can write a refspec using the fully expanded form (for example `refs/heads/main:refs/heads/main`) which specifies the exact source and destination, or with a shorter form (for example `main` or `main:other`). Here are the rules for how refspecs are expanded, as well as various other special refspec forms:
++
+ *  `<src>` without a `:<dst>` means to update the same ref as the `<src>`, unless the `remote.<repository>.push` configuration specifies a different <dst>. For example, if `main` is a branch, then the refspec `main` expands to `main:refs/heads/main`.
+ *  If `<dst>` unambiguously refers to a ref on the <repository> remote, then expand it to that ref. For example, if `v1.0` is a tag on the remote, then `HEAD:v1.0` expands to `HEAD:refs/tags/v1.0`.
+ *  If `<src>` resolves to a ref starting with `refs/heads/` or `refs/tags/`, then prepend that to <dst>. For example, if `main` is a branch, then `main:other` expands to `main:refs/heads/other`
+ *  O refspec especial `:` (ou `+:` para permitir atualizações que não sejam de avanço rápido) direciona o Git a enviar ramificações "correspondentes": para cada ramificação que existe no lado local, o lado remoto é atualizado quando uma ramificação com o mesmo nome já existir no lado remoto.
+ *  <src> may contain a * to indicate a simple pattern match. This works like a glob that matches any ref matching the pattern. There must be only one * in both the `<src>` and `<dst>`. It will map refs to the destination by replacing the * with the contents matched from the source. For example, `refs/heads/*:refs/heads/*` will push all branches.
+ *  A refspec starting with `^` is a negative refspec. This specifies refs to exclude. A ref will be considered to match if it matches at least one positive refspec, and does not match any negative refspec. Negative refspecs can be pattern refspecs. They must only contain a `<src>`. Fully spelled out hex object names are also not supported. For example, `git push origin 'refs/heads/*' '^refs/heads/dev-*'` will push all branches except for those starting with `dev-`
+ *  If `<src>` is empty, it deletes the `<dst>` ref from the remote repository. For example, `git push origin :dev` will delete the `dev` branch.
+ *  `tag <tag>` expands to `refs/tags/<tag>:refs/tags/<tag>`.
+	This is technically a special syntax for `git push` and not a refspec, since in `git push origin tag v1.0` the arguments `tag` and `v1.0` are separate.
+ *  If the refspec can't be expanded unambiguously, error out with an error indicating what was tried, and depending on the `advice.pushUnqualifiedRefname` configuration (see linkgit:git-config[1]) suggest what refs/ namespace you may have wanted to push to.
 
-* Caso o <src> seja resolvido para uma "ref" começando com `refs/heads/` ou `refs/tags/`, coloque um prefixo no <dst>.
-
-* Outras resoluções de ambiguidade podem ser adicionadas no futuro, mas, por enquanto, outros casos apresentarão um erro indicando o que tentamos e dependendo da configuração `advice.pushUnqualifiedRefname` (consulte linkgit:git-config[1]), sugere qual 'refs/ namespace' você possa querer impulsionar.
-
---
-+
-O objeto referenciado por <src> é utilizado para atualizar a referência <dst> no lado remoto. Caso isso seja permitido, vai depender de onde em `refs/*` a referência <dst> vive como descrito com mais detalhes logo abaixo, nestas seções "update" indica que quaisquer modificações, exceto as exclusões, que serão descritos nas próximas seções, são tratadas de forma diferente.
-+
-O espaço de nomes `refs/heads/*` aceitarão apenas os objetos commit e será atualizado apenas caso eles possam avançar de forma rápida.
-+
-O espaço de nomes `refs/tags/*` aceitarão quaisquer tipos de objeto (como commits, árvores e bolhas que possam ser marcados) e quaisquer atualizações para eles serão rejeitadas.
-+
-É possível impulsionar qualquer tipo de objeto para qualquer espaço de nomes fora do `refs/{tags,heads}/*`. No caso das tags e dos commits, estes serão tratados como se fossem os commits dentro do `refs/heads/*` para os propósitos caso a atualização seja permitida.
-+
-Um avanço rápido dos commits e das tags fora do `refs/{tags,heads}/*` por exemplo, é permitido, mesmo nos casos onde o que está sendo acelerado não é um commit e sim um objeto da tag que aponte para um novo commit onde seja um avanço rápido do commit da última tag (ou commit) que está sendo substituindo. Também é permitida a reposição de uma tag por uma outra totalmente diferente, caso ela apontar para o mesmo commit, bem como ao impulsionar uma tag já descascada, ou seja, impulsionar o commit onde o objeto existente do tag aponte ou um novo objeto da tag onde o commit existente esteja apontando.
-+
-Os objetos da árvore e da bolha fora do `refs{tags,heads}/*` serão tratados da mesma maneira como se estivessem dentro do `refs/tags/*`, qualquer outra atualização deles será rejeitada.
-+
-Todas as regras descritas acima sobre o que não é permitido como uma atualização, podem ser substituídas adicionando um sinal opcional `+` inicial num "refspec" (ou utilizando a opção da linha de comando `--force`). A única exceção a isso é que nenhuma quantidade de imposição fará com que o espaço de nomes `refs/heads/*` aceite um objeto que não seja um commit. Os ganchos e configurações também podem substituir ou alterar estas regras, consulte, por exemplo, `receive.denyNonFastForwards` no linkgit:git-config[1] e `pre-receive` e `update` no linkgit:githooks[5].
-+
-Fazer um impulsionamento "push" de um <src> vazio permite excluir o <dst> "ref" do repositório remoto. As exclusões sempre são aceitas sem um sinal `+` inicial no "refspec" (ou com a opção `--force`), exceto quando for proibido pela configuração ou pelos ganchos. Consulte `receive.denyDeletes` no linkgit:git-config[1] e `pre-receive` e `update` no linkgit:githooks[5].
-+
-O refspec especial `:` (ou `+:` para permitir atualizações que não sejam de avanço rápido) direciona o Git a enviar ramificações "correspondentes": para cada ramificação que existe no lado local, o lado remoto é atualizado quando uma ramificação com o mesmo nome já existir no lado remoto.
-+
-A `tag <tag>` significa o mesmo que `refs/tags/<tag>:refs/tags/<tag>`.
+Not all updates are allowed: see PUSH RULES below for the details.
 
 --all::
 --branches::
@@ -100,11 +94,13 @@ A `tag <tag>` significa o mesmo que `refs/tags/<tag>:refs/tags/<tag>`.
 --follow-tags::
 	Envie todas as refs que seriam enviadas sem essa opção e também envie as etiquetas anotadas em `refs/tags` que estão faltando no controle remoto, mas que estão apontando para os commits que são acessíveis a partir das refs que estão sendo enviadas. Isso também pode ser definido na variável de configuração `push.followTags`. Para mais informações consulte `push.followTags` do comando linkgit:git-config[1].
 
---[no-]signed::
+--signed::
+--no-signed::
 --signed=(true|false|if-asked)::
 	Assine com GPG a solicitação de envio para atualizar as referências no lado receptor, para permitir que ela seja verificada pelos ganchos ou para que seja registrada. Se for `false` ou `--no-signed`, não haverá tentativa de assinatura. Se for `true` ou `--signed`, o 'push' falhará se o servidor não suportar envios assinados. Se for definido como `if-asked`, assine, funciona apenas se o servidor suportar envios assinados. O envio também falhará se a chamada real para a opção `gpg --sign` falhar. Para mais detalhes sobre o recebimento consulte linkgit:git-receive-pack[1].
 
---[no-]atomic::
+--atomic::
+--no-atomic::
 	Use uma transação atômica no lado remoto, caso esteja disponível. Todas as refs são atualizadas ou, em caso de erro, nenhuma será. Se o servidor não for compatível com envios atômicos, o envio falhará.
 
 -o <opção>::
@@ -115,7 +111,8 @@ A `tag <tag>` significa o mesmo que `refs/tags/<tag>:refs/tags/<tag>`.
 --exec=<git-receive-pack>::
 	O caminho para o programa 'git-receive-pack' no lado remoto. Às vezes, é útil durante um "push" ao enviar para um repositório remoto via ssh e você não tem o programa no diretório do $PATH predefinido.
 
---[no-]force-with-lease::
+--force-with-lease::
+--no-force-with-lease::
 --force-with-lease=<refname>::
 --force-with-lease=<refname>:<expect>::
 	Normalmente, o comando "git push" se recusa a atualizar uma "ref" remota que não seja um ancestral da "ref" local utilizada para substituí-la.
@@ -162,13 +159,14 @@ Alternativamente, ao usar a opção `--force-if-includes` como uma opção auxil
 
 -f::
 --force::
-	Normalmente, o comando se recusa a atualizar uma referência remota que não seja um ancestral com referência local usada para substituí-la. Além disso, quando a opção `--force-with-lease` é usada, o comando se recusa a atualizar uma referência remota cujo valor atual não corresponda ao esperado.
+	Usually, `git push` will refuse to update a branch that is not an ancestor of the commit being pushed.
 +
-Esta opção desativa estas verificações e pode causar a perda do commit no repositório remoto; utilize com cuidado.
+This flag disables that check, the other safety checks in PUSH RULES below, and the checks in --force-with-lease. It can cause the remote repository to lose commits; use it with care.
 +
 Observe que a opção `--force` se aplica a todas as refs que forem enviadas, portanto, usá-lo com `push.default` definido como `matching` ou com vários destinos de envio configurados com `remote.*.push` pode substituir diferentes refs do ramo atual (incluindo as refs locais que estão estritamente atrás de sua contraparte remota). Para forçar um envio para apenas um ramo, use um `+` na frente do refspec que será enviado (`git push origin +master` para forçar um envio para o ramo `master` por exemplo). Para mais detalhes consulte a seção `<refspec>...` acima.
 
---[no-]force-if-includes::
+--force-if-includes::
+--no-force-if-includes::
 	Impõem uma atualização apenas se o topo da ref monitorada remotamente estiver integrada localmente.
 +
 Esta opção permite uma checagem que verifica se o topo da referência monitorada remotamente é alcançável a partir de uma das entradas "reflog" do ramo local e feita com base nela para uma reescrita. A verificação assegura que quaisquer atualizações do ramo remoto foram incorporadas localmente, rejeitando a atualização forçada se não for esse o caso.
@@ -184,7 +182,8 @@ Usando a opção `--no-force-if-includes` desativa este comportamento.
 --set-upstream::
 	Para cada ramo atualizado ou impulsionada com êxito, adicione uma referência "upstream" (monitorado), utilizada sem argumento pelo linkgit:git-pull[1] e os outros comandos. Para mais informações, consulte `branch.<nome>.merge` no linkgit:git-config[1].
 
---[no-]thin::
+--thin::
+--no-thin::
 	Estas opções são passadas para o linkgit:git-send-pack[1]. Uma pequena transferência "thin" reduz significativamente a quantidade dos dados enviados quando o remetente e o destinatário compartilham muito dos mesmos objetos em comum. A predefinição é `--thin`.
 
 -q::
@@ -204,7 +203,8 @@ Usando a opção `--no-force-if-includes` desativa este comportamento.
 +
 Ao usar 'on-demand' ou 'only', caso um submódulo tenha uma configuração "push.recurseSubmodules={on-demand,only}" ou "submodule.recurse", haverá uma recursão adicional. Nesse caso, "only" é tratado como "on-demand"(sob demanda).
 
---[no-]verify::
+--verify::
+--no-verify::
 	Ative o gancho prévio do 'push' (para mais detalhes consulte linkgit:githooks[5]). A predefinição é `--verify`, dando ao hook a chance de impedir o 'push'. Com a opção `--no-verify`, o hook é completamente ignorado.
 
 -4::
@@ -269,6 +269,23 @@ para::
 
 motivo::
 	Uma explicação legível para pessoas. No caso dos refs que forem enviados com sucesso, nenhuma explicação é necessária. Para um "ref" que falhou, o motivo do fracasso então é descrito.
+
+PUSH RULES
+----------
+
+As a safety feature, the `git push` command only allows certain kinds of updates to prevent you from accidentally losing data on the remote.
+
+Because branches and tags are intended to be used differently, the safety rules for pushing to a branch are different from the rules for pushing to a tag. In the following rules "update" means any modifications except deletions and creations. Deletions and creations are always allowed, except when forbidden by configuration or hooks.
+
+1. If the push destination is a **branch** (`refs/heads/*`): only fast-forward updates are allowed, which means the destination must be an ancestor of the source commit. The source must be a commit.
+2. If the push destination is a **tag** (`refs/tags/*`): all updates will be rejected. The source can be any object.
+3. If the push destination is not a branch or tag:
+   * If the source is a tree or blob object, any updates will be rejected
+   * If the source is a tag or commit object, any fast-forward update is allowed, even in cases where what's being fast-forwarded is not a commit, but a tag object which happens to point to a new commit which is a fast-forward of the commit the last tag (or commit) it's replacing. Replacing a tag with an entirely different tag is also allowed, if it points to the same commit, as well as pushing a peeled tag, i.e. pushing the commit that existing tag object points to, or a new tag object which an existing commit points to.
+
+You can override these rules by passing `--force` or by adding the optional leading `+` to a refspec. The only exceptions are that no amount of forcing will make a branch accept a non-commit object, and forcing won't make the remote repository accept a push that it's configured to deny.
+
+Hooks and configuration can also override or amend these rules, see e.g. `receive.denyNonFastForwards` and `receive.denyDeletes` in linkgit:git-config[1] and `pre-receive` and `update` in linkgit:githooks[5].
 
 NOTA SOBRE AVANÇOS RÁPIDOS
 --------------------------
@@ -385,6 +402,7 @@ Os commits A e B não pertenceriam mais a uma ramificação com um nome simbóli
 
 include::transfer-data-leaks.adoc[]
 
+[[CONFIGURATION]]
 CONFIGURAÇÃO
 ------------
 

@@ -52,7 +52,7 @@ ifdef::git-log[]
 `--no-diff-merges`::
 	Синоним для `--diff-merges=off`.
 
-`--diff-merges=<format>`::
+`--diff-merges=<формат>`::
 	Задаёт формат diff, который будет использоваться для коммитов слияния. По умолчанию используется {diff-merges-default}, если только не задан параметр `--first-parent`, в таком случае по умолчанию используется `first-parent`.
 +
 Поддерживаются следующие форматы:
@@ -224,9 +224,9 @@ ifndef::git-format-patch[]
 
 `-z`::
 ifdef::git-log[]
-	Separate the commits with __NUL__s instead of newlines.
+	Разделять коммиты __NUL__-символами вместо переводов строк.
 +
-Also, when `--raw` or `--numstat` has been given, do not munge pathnames and use __NUL__s as output field terminators.
+Также, когда заданы параметры `--raw` или `--numstat`, не вносить ни какие изменения в пути файлов и использовать __NUL__-символ в качестве разделителя полей вывода.
 endif::git-log[]
 ifndef::git-log[]
 	Когда заданы параметры `--raw`, `--numstat`, `--name-only` или `--name-status`, не вносить ни
@@ -340,7 +340,8 @@ endif::git-format-patch[]
 `--no-renames`::
 	Отключить обнаружение переименований, даже если в файле конфигурации оно включено по умолчанию.
 
-`--[no-]rename-empty`::
+`--rename-empty`::
+`--no-rename-empty`::
 	Определяет, рассматривать ли пустые бинарные объекты, как возможные источники переименований.
 
 ifndef::git-format-patch[]
@@ -510,7 +511,7 @@ endif::git-format-patch[]
 	Игнорировать изменения, в которых все строки сопоставляются _<регулярному-выражению>_. Этот параметр может быть указан несколько раз.
 
 `--inter-hunk-context=<число>`::
-	Выводить в качестве контекста между блоками изменений до указанного _<числа>_ строк, тем самым объединяя близкие блоки изменений. По умолчанию равно значению переменной конфигурации `diff.interHunkContext` или 0, если оно не установлено.
+	Выводить в качестве контекста между блоками изменений до _<n>_ строк, тем самым объединяя близкие блоки изменений. По умолчанию равно значению переменной конфигурации `diff.interHunkContext` или 0, если она не установлена.
 
 `-W`::
 `--function-context`::
@@ -557,5 +558,24 @@ endif::git-format-patch[]
 
 `--ita-invisible-in-index`::
 	По умолчанию записи, добавленные командой `git add -N`, отображаются в выводе `git diff` как существующий пустой файл, а в выводе git diff --cached` — как новый файл. Этот параметр делает так, что такие записи отображаются как новый файл в выводе `git diff` и отсутствовать в выводе `git diff --cached`. Этот параметр может быть переопределён с помощью `--ita-visible-in-index`. Оба эти параметра являются экспериментальными и могут быть удалены в будущем.
+
+--max-depth=<глубина>::
+	Для каждого заданного в командной строке спецификатора пути спускаться не более чем на указанную <глубину> по дереву каталогов. Значение `-1` означает «без ограничений». Нельзя использовать, если в спецификаторах пути есть символы-джокеры. Так для дерева, содержащего `foo/bar/baz`, каждый из вариантов аргумента даст следующий результат:
++
+--
+ - `--max-depth=0 -- foo`: `foo`
+
+ - `--max-depth=1 -- foo`: `foo/bar`
+
+ - `--max-depth=1 -- foo/bar`: `foo/bar/baz`
+
+ - `--max-depth=1 -- foo foo/bar`: `foo/bar/baz`
+
+ - `--max-depth=2 -- foo`: `foo/bar/baz`
+--
++
+If no pathspec is given, the depth is measured as if all top-level entries were specified. Note that this is different than measuring from the root, in that `--max-depth=0` would still return `foo`. This allows you to still limit depth while asking for a subset of the top-level entries.
++
+Note that this option is only supported for diffs between tree objects, not against the index or working tree.
 
 См. linkgit:gitdiffcore[7] для более подробного описания этих общих параметров.

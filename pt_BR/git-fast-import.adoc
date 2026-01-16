@@ -35,7 +35,13 @@ OPÇÕES
 --allow-unsafe-features::
 	Muitas opções de linha de comando podem ser usadas como parte do próprio fluxo de importação rápida, usando os comandos `feature` ou `option`. No entanto, algumas dessas opções não são seguras (permitir que a importação rápida acesse o sistema de arquivos fora do repositório por exemplo). Estas opções são desativadas por padrão, mas podem ser permitidas usando essa opção na linha de comando. Atualmente, isso afeta apenas os comandos `export-marks`, `import-marks` e `import-marks-if-exists`.
 +
-	Ative esta opção apenas caso confie no programa que gera o fluxo de importação rápida! Esta opção é ativada automaticamente para os auxiliares remotos que usem o recurso `import`, pois eles já são confiáveis para executar o seu próprio código.
+Ative esta opção apenas caso confie no programa que gera o fluxo de importação rápida! Esta opção é ativada automaticamente para os auxiliares remotos que usem o recurso `import`, pois eles já são confiáveis para executar o seu próprio código.
+
+--signed-tags=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed tags. Behaves in the same way as the same option in linkgit:git-fast-export[1], except that default is 'verbatim' (instead of 'abort').
+
+--signed-commits=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed commits. Behaves in the same way as the same option in linkgit:git-fast-export[1], except that default is 'verbatim' (instead of 'abort').
 
 Opções para Front-ends
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -61,7 +67,8 @@ Localizações dos arquivos de marcação
 --import-marks-if-exists=<arquivo>::
 	Como `--import-marks` porém caso não exista, em vez de exibir um erro, ignora silenciosamente o arquivo.
 
---[no-]relative-marks::
+--relative-marks::
+--no-relative-marks::
 	Após o uso da opção `--relative-marks`, os caminhos especificados com a opção `--import-marks=` e `--export-marks=` são relativos a um diretório interno no repositório atual. No "git-fast-import", isso significa que os caminhos são relativos ao diretório .`git/info/fast-import`. Entretanto, outros importadores podem usar um local diferente.
 +
 Marcações relativas ou não podem ser combinadas entrelaçando `--(no-)-relative-marks` com a opção `--(import|export)-marks=`.
@@ -319,9 +326,11 @@ As marcações devem ser declaradas (através de `mark`) antes de poderem ser ut
 * O SHA-1 nulo especial (40 zeros) especifica que a ramificação deve ser removida.
 
 O caso especial de reiniciar uma importação incremental do valor atual do ramo deve ser escrito como:
+
 ----
 	from refs/heads/branch^0
 ----
+
 O sufixo `^0` é necessário, pois a importação rápida não permite que uma ramificação inicie a partir de si mesma, e a ramificação é criada na memória antes mesmo que o comando `from` seja lido na entrada. A adição de `^0` fará com que a importação rápida resolva o commit através da biblioteca de análise de revisão do Git, em vez da sua tabela de ramificação interna, carregando assim o valor existente da ramificação.
 
 `merge`
@@ -341,7 +350,7 @@ Formato de dados externos::
 	'M' SP <modo> SP <dataref> SP <caminho> LF
 ....
 +
-Aqui, normalmente, `<dataref>` deve ser uma marcação de referência (`:<idnum>`) definida por um comando `blob` anterior ou um SHA-1 completo com 40 bytes de um objeto blob do Git já existente. Se o `<modo>` for `040000``, então `<dataref>` deve ser o SHA-1 completo com 40 bytes de um objeto de árvore Git existente ou um conjunto de marcação de referência com a opção `--import-marks`.
+Here usually `<dataref>` must be either a mark reference (`:<idnum>`) set by a prior `blob` command, or a full 40-byte SHA-1 of an existing Git blob object. If `<mode>` is `040000` then `<dataref>` must be the full 40-byte SHA-1 of an existing Git tree object or a mark reference set with `--import-marks`.
 
 Formato de dados em linha::
 	O conteúdo de dados do arquivo ainda não foi fornecido. O front-end deseja fornecê-lo como parte deste comando de alteração.

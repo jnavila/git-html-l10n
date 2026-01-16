@@ -35,7 +35,13 @@ fast-import 从标准输入端读取混合命令/数据流，并将一个或多�
 --allow-unsafe-features::
 	通过使用 `feature` 或 `option` 命令，许多命令行选项可以作为 fast-import 流本身的一部分提供。然而，其中一些选项是不安全的（例如，允许 fast-import 访问仓库之外的文件系统）。这些选项默认是禁用的，但可以通过在命令行中提供该选项来允许。 目前这只影响 `export-marks`、`import-marks` 和 `import-marks-if-exists`。
 +
-	只有在信任生成快速导入流的程序时，才能启用此选项！对于使用 `import` 功能的远程帮助程序，该选项会自动启用，因为它们已经被信任可以运行自己的代码。
+只有在信任生成快速导入流的程序时，才能启用此选项！对于使用 `import` 功能的远程帮助程序，该选项会自动启用，因为它们已经被信任可以运行自己的代码。
+
+--signed-tags=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed tags. Behaves in the same way as the same option in linkgit:git-fast-export[1], except that default is 'verbatim' (instead of 'abort').
+
+--signed-commits=(verbatim|warn-verbatim|warn-strip|strip|abort)::
+	Specify how to handle signed commits. Behaves in the same way as the same option in linkgit:git-fast-export[1], except that default is 'verbatim' (instead of 'abort').
 
 前端的选项
 ~~~~~
@@ -61,7 +67,8 @@ fast-import 从标准输入端读取混合命令/数据流，并将一个或多�
 --import-marks-if-exists=<文件>::
 	与 --import-marks 类似，但不会出错，而是在文件不存在时自动跳过。
 
---[no-]relative-marks::
+--relative-marks::
+--no-relative-marks::
 	指定 --relative-marks（相对标记）后，用 --import-marks= 和 --export-marks= 指定的路径将相对于当前仓库的内部目录。 在 git-fast-import 中，这意味着路径是相对于 .git/info/fast-import 目录的。不过，其他导入程序可能会使用不同的位置。
 +
 相对标记和非相对标记可以通过--(no-)-relative-marks 与--(import|export)-marks= 选项交织使用。
@@ -319,9 +326,11 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 * 特殊的空 SHA-1（40 个零）表示要删除分支。
 
 从当前分支值重新开始增量导入的特殊情况应写为：
+
 ----
 	from refs/heads/branch^0
 ----
+
 后缀 `^0` 是必要的，因为 fast-import 不允许分支从自身开始，分支会在从输入的 `from` 命令读取之前在内存中创建。 添加 `^0` 会强制 fast-import 通过 Git 的修订解析库而非内部分支表来解析提交，从而加载分支的现有值。
 
 `merge`
@@ -341,7 +350,7 @@ fast-import 使用 `:` 表示标记引用的原因是，这个字符在 Git 分�
 	'M' SP <模式> SP <引用日期> SP <路径> LF
 ....
 +
-通常情况下，`<数据引用>` 必须是由之前的 `blob` 命令设置的标记引用 (`:<idnum>`)，或者是现有 Git blob 对象的完整 40 字节 SHA-1 值。 如果 `<模式>` 是 `040000``，则 `<数据引用>` 必须是现有 Git 树对象的完整 40 字节 SHA-1 或用 `--import-marks` 设置的标记引用。
+Here usually `<dataref>` must be either a mark reference (`:<idnum>`) set by a prior `blob` command, or a full 40-byte SHA-1 of an existing Git blob object. If `<mode>` is `040000` then `<dataref>` must be the full 40-byte SHA-1 of an existing Git tree object or a mark reference set with `--import-marks`.
 
 内联数据格式::
 	文件的数据内容尚未提供。 前台希望将其作为该修改命令的一部分提供。

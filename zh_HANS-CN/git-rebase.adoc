@@ -16,22 +16,9 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 
 描述
 --
-如果指定了 `<branch>`，`git rebase` 会自动执行 `git switch <branch>`，然后再做其他事情。 否则，它会保留在当前分支上。
+Transplant a series of commits onto a different starting point. You can also use `git rebase` to reorder or combine commits: see INTERACTIVE MODE below for how to do that.
 
-如果未指定 `<upstream>`，将使用 `branch.<name>.remote` 和 `branch.<name>.merge` 选项中配置的上游（详见 linkgit:git-config[1]），并假定使用 `--fork-point`选项。 如果您当前不在任何分支上，或者当前分支没有配置上游，变基操作会中止。
-
-当前分支中的所有提交所做的改动，但不在 `<upstream>` 中的，都会被保存到一个临时区域。 这与 `git log <upstream>..HEAD` 或 `git log 'fork_point'..HEAD` 所显示的提交相同（如果启用了 `--fork-point`，请参阅下文关于 `--fork-point`的描述）；或者，如果指定了 `--root` 选项，则与 `git log HEAD` 所显示的提交相同。
-
-如果提供了 `--onto` 选项，当前分支会重置为 `<upstream>` 或 `<newbase>`。 这与 `git reset --hard <upstream>`（或 `<newbase>`）的效果完全相同。`ORIG_HEAD` 设置为指向重置前分支的顶端。
-
-[NOTE]
-如果在重置过程中使用了其他写入伪引用的命令（例如 `git reset`），就不能保证 `ORIG_HEAD` 在重置结束时仍然指向前一个分支的分支提示。不过，使用当前分支的 引用日志（即 `@{1}`，参见 linkgit:gitrevisions[7]）可以访问前一个分支的分支提示。
-
-然后，先前保存在临时区域的提交将按顺序逐一重新应用到当前分支。请注意，`HEAD` 中任何与 `HEAD...<upstream>` 中的提交有相同文字改动的提交都会被省略（也就是说，上游已经接受的补丁，如果提交信息或时间戳不同，就会被跳过）。
-
-合并失败有可能导致该过程无法完全自动进行。 您必须解决合并失败问题，然后运行 `git rebase --continue`。 另一种方法是使用 `git rebase --skip` 绕过导致合并失败的提交。 要检查原始的 `<branch>` 并移除 `.git/rebase-apply` 工作文件，请使用 `git rebase --abort` 命令。
-
-假设存在以下历史记录，当前分支为 "topic"：
+For example, imagine that you have been working on the `topic` branch in this history, and you want to "catch up" to the work done on the `master` branch.
 
 ------------
           A---B---C topic
@@ -39,13 +26,7 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
     D---E---F---G master
 ------------
 
-从这一点来看，以下任一命令的结果都是如此：
-
-
-    git rebase master
-    git rebase master topic
-
-那就是 :
+You want to transplant the commits you made on `topic` since it diverged from `master` (i.e. A, B, and C), on top of the current `master`. You can do this by running `git rebase master` while the `topic` branch is checked out. If you want to rebase `topic` while on another branch, `git rebase master topic` is a shortcut for `git checkout topic && git rebase master`.
 
 ------------
                   A'--B'--C' topic
@@ -53,23 +34,35 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
     D---E---F---G master
 ------------
 
-*注：* 后一种形式只是 `git checkout topic` 的简写。后接 `git rebase master`。当 rebase 退出时，`topic` 将仍是已签出的分支。
 
-如果上游分支已经包含了您所做的修改（例如，因为您邮寄的补丁被应用到了上游），那么该提交将被跳过，并发出警告（如果使用了 “合并” 后台）。 例如，在以下历史记录上运行 `git rebase master`（其中 `A'` 和 `A` 引入了相同的变更集，但提交者信息不同）：
+If there is a merge conflict during this process, `git rebase` will stop at the first problematic commit and leave conflict markers. If this happens, you can do one of these things:
 
-------------
-          A---B---C topic
-         /
-    D---E---A'---F master
-------------
+1. Resolve the conflict. You can use `git diff` to find the markers (<<<<<<) and make edits to resolve the conflict. For each file you edit, you need to tell Git that the conflict has been resolved. You can mark the conflict as resolved with `git add <filename>`. After resolving all of the conflicts, you can continue the rebasing process with
 
-将导致 :
+   git rebase --continue
 
-------------
-                   B'---C' topic
-                  /
-    D---E---A'---F master
-------------
+2. Stop the `git rebase` and return your branch to its original state with
+
+   git rebase --abort
+
+3. Skip the commit that caused the merge conflict with
+
+   git rebase --skip
+
+If you don't specify an `<upstream>` to rebase onto, the upstream configured in `branch.<name>.remote` and `branch.<name>.merge` options will be used (see linkgit:git-config[1] for details) and the `--fork-point` option is assumed. If you are currently not on any branch or if the current branch does not have a configured upstream, the rebase will abort.
+
+Here is a simplified description of what `git rebase <upstream>` does:
+
+1. Make a list of all commits on your current branch since it branched off from `<upstream>` that do not have an equivalent commit in `<upstream>`.
+2. Check out `<upstream>` with the equivalent of `git checkout --detach <upstream>`.
+3. Replay the commits, one by one, in order. This is similar to running `git cherry-pick <commit>` for each commit. See REBASING MERGES for how merges are handled.
+4. Update your branch to point to the final commit with the equivalent of `git checkout -B <branch>`.
+
+[NOTE]
+When starting the rebase, `ORIG_HEAD` is set to point to the commit at the tip of the to-be-rebased branch. However, `ORIG_HEAD` is not guaranteed to still point to that commit at the end of the rebase if other commands that change `ORIG_HEAD` (like `git reset`) are used during the rebase. The previous branch tip, however, is accessible using the reflog of the current branch (i.e. `@{1}`, see linkgit:gitrevisions[7].
+
+TRANSPLANTING A TOPIC BRANCH WITH --ONTO
+----------------------------------------
 
 下面是如何使用 `rebase --onto` 将基于一个分支的特性分支移植到另一个分支，以假装特性分支是从后一个分支分叉而来。
 
@@ -142,23 +135,6 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 
 如果 F 和 G 在某些方面有缺陷，或者不应该是 topicA 的一部分，这一点就很有用。 请注意，`--onto` 参数和 `<upstream>` 参数可以是任何有效的提交。
 
-如果出现冲突，`git rebase` 会在第一个有问题的提交处停止，并在树中留下冲突标记。 你可以用 `git diff` 找到这些标记 (<<<<<<)，并进行编辑以解决冲突。 每编辑一个文件，都需要告诉 Git 冲突已被解决，通常可以用
-
-
-    git add <filename>
-
-
-手动解决冲突并以所需的分辨率更新索引后，您可以使用
-
-
-    git rebase --continue
-
-
-或者，您也可以通过以下方法撤销 'git rebase' 操作
-
-
-    git rebase --abort
-
 模式选项
 ----
 
@@ -188,6 +164,8 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 	创建新提交的起点。如果未指定 `--onto` 选项，则起点为 `<upstream>`。 可以是任何有效的提交，而不仅仅是现有的分支名称。
 +
 作为一种特殊情况，如果 A 和 B 的合并库只有一个，则可以使用 "A\...B "作为合并库的快捷方式。您最多可以省略 A 和 B 中的一个，在这种情况下，它默认为 HEAD。
+
+See TRANSPLANTING A TOPIC BRANCH WITH --ONTO above for examples.
 
 --keep-base::
 	将创建新提交的起点设为 `<upstream>` 和 `<branch>` 的合并库。运行 `git rebase --keep-base <upstream> <branch>` 相当于运行 `git rebase --reapply-cherry-picks --no-fork-point --onto <upstream>...<branch> <upstream> <branch>` 。
