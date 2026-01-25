@@ -1,0 +1,48 @@
+Lista incheckning som kan nås genom att följa `förälder`-länkarna från den/de angivna commit(s), men exkludera commits som kan nås från den/de som anges med ett `{caret}` framför sig. Utdata ges som standard i omvänd kronologisk ordning.
+
+Du kan tänka på detta som en set-operation. Incheckningar som kan nås från någon av de incheckningar som anges på kommandoraden bildar en set, och sedan subtraheras incheckningar som kan nås från någon av de som anges med '{caret}' framför från den setet. De återstående incheckningar är det som visas i kommandots utdata. Olika andra alternativ och sökvägsparametrar kan användas för att ytterligare begränsa resultatet.
+
+Således, följande kommando:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list foo bar ^baz
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log foo bar ^baz
+-----------------------------------------------------------------------
+endif::git-log[]
+
+betyder "lista alla incheckningar som är nåbara från 'foo' eller 'bar', men inte från 'baz'".
+
+A special notation "`<commit1>..<commit2>`" can be used as a short-hand for "`^<commit1> <commit2>`". For example, either of the following may be used interchangeably:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list origin..HEAD
+$ git rev-list HEAD ^origin
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log origin..HEAD
+$ git log HEAD ^origin
+-----------------------------------------------------------------------
+endif::git-log[]
+
+En annan speciell notation är "`<inchecking1>...<inchecking2>`" vilket är användbart för sammanslagningar. Den resulterande uppsättningen commits är den symmetriska skillnaden mellan de två operanderna. Följande två kommandon är ekvivalenta:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list A B --not $(git merge-base --all A B)
+$ git rev-list A...B
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log A B --not $(git merge-base --all A B)
+$ git log A...B
+-----------------------------------------------------------------------
+endif::git-log[]

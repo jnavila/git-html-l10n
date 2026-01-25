@@ -1,0 +1,388 @@
+KONFIGURATIONSFIL
+-----------------
+
+Git-konfigurationsfilen innehåller ett antal variabler som påverkar Git-kommandonas beteende. Filerna `.git/config` och eventuellt `config.worktree` (se avsnittet "KONFIGURATIONSFIL" i linkgit:git-worktree[1]) i varje repository används för att lagra konfigurationen för det repositoriet, och `$HOME/.gitconfig` används för att lagra en konfiguration per användare som reservvärden för `.git/config`-filen. Filen `/etc/gitconfig` kan användas för att lagra en systemomfattande standardkonfiguration.
+
+Konfigurationsvariablerna används av både Git Plumbing- och Porcelain-kommandona. Variablerna är indelade i sektioner, där det fullständigt kvalificerade variabelnamnet av variabeln själv är det sista punktseparerade segmentet och sektionsnamnet är allt före den sista punkten. Variabelnamnen är Skiftlägesoberoende, tillåter endast alfanumeriska tecken och `-`, och måste börja med ett alfabetiskt tecken. Vissa variabler kan förekomma flera gånger; vi säger då att variabeln är flervärdig.
+
+Syntax
+~~~~~~
+
+Syntaxen är ganska flexibel och tillåtande. Blanktecken, som i detta sammanhang är mellanslagstecknet (SP) och horisontell tabuleringstecken (HT), ignoreras oftast. Tecknen '#' och ';' börjar kommentarer till slutet av raden. Tomma rader ignoreras.
+
+Filen består av sektioner och variabler. Ett avsnitt börjar med avsnittets namn inom hakparenteser och fortsätter tills nästa avsnitt börjar. Sektionsnamn är inte skiftlägeskänsliga. Endast alfanumeriska tecken, `-` och `.` är tillåtna i sektionsnamn. Varje variabel måste tillhöra ett avsnitt, vilket innebär att det måste finnas en sektionsrubrik före den första inställningen av en variabel.
+
+Avsnitt kan vidare delas in i underavsnitt. För att börja ett underavsnitt, skriv dess namn inom dubbla citationstecken, separerade med mellanslag från avsnittsnamnet, i avsnittsrubriken, som i exemplet nedan:
+
+--------
+	[section "underavsnitt"]
+
+--------
+
+Namn på underavsnitt är skiftlägeskänsliga och kan innehålla vilka tecken som helst förutom nyrad och nullbyte. Dubbelcitat `"` och bakåtsnedstreck kan inkluderas genom att använda escape-tecken som `\"` respektive `\\`. Bakåtsnedstreck som föregår andra tecken tas bort vid läsning; till exempel läses `\t` som `t` och `\0` läses som `0`. Avsnittsrubriker kan inte sträcka sig över flera rader. Variabler kan tillhöra direkt ett avsnitt eller ett givet underavsnitt. Du kan ha `[avsnitt]` om du har `[avsnitt "underavsnitt"]`, men du behöver inte ha det.
+
+Det finns också en föråldrad syntax `[section.subsection]`. Med denna syntax konverteras underavdelningsnamnet till gemener och jämförs även med gemener/skiftlägeskänslighet. Dessa underavdelningsnamn följer samma begränsningar som sektionsnamn.
+
+Alla andra rader (och resten av raden efter avsnittsrubriken) känns igen som inställningsvariabler i formen 'namn = värde' (eller bara 'namn', vilket är en förkortning för att variabeln är den booleska "sant"). Variabelnamnen är skiftlägesoberoende, tillåter endast alfanumeriska tecken och `-` och måste börja med ett alfabetiskt tecken.
+
+Mellanslag som omger `name`, `=` och `value` kasseras. Interna mellanslag inom 'value' behålls ordagrant. Kommentarer som börjar med antingen `#` eller `;` och fortsätter till slutet av raden kasseras. En rad som definierar ett värde kan fortsätta till nästa rad genom att avsluta den med ett omvänt snedstreck (`\`); det bakåtsnedstreck och radslutstecknen kasseras.
+
+Om `value` behöver innehålla inledande eller efterföljande blanksteg måste det omges av dubbla citattecken (`"`). Inom dubbla citattecken måste dubbla citattecken (`"`) och omvänt snedstreck (`\`) omges av escape-tecken: använd `\`` för `"` och `\\` för `\`.
+
+Följande escape-sekvenser (förutom `\"` och `\\`) känns igen: `\n` för nyradstecken (NL), `\t` för horisontell tabulering (HT, TAB) och `\b` för backsteg (BS). Andra tecken-escape-sekvenser (inklusive oktala escape-sekvenser) är ogiltiga.
+
+
+Inkluderar
+~~~~~~~~~~
+
+Avsnitten `include` och `includeIf` låter dig inkludera konfigurationsdirektiv från en annan källa. Dessa avsnitt beter sig identiskt med varandra med undantaget att `includeIf`-avsnitt kan ignoreras om deras villkor inte utvärderas till sant; se "Villkorliga inkluderingar" nedan.
+
+Du kan inkludera en konfigurationsfil från en annan genom att sätta den speciella variabeln `include.path` (eller `includeIf.*.path`) till namnet på den fil som ska inkluderas. Variabeln tar ett sökvägsnamn som värde och är föremål för tildeexpansion. Dessa variabler kan anges flera gånger.
+
+Innehållet i den inkluderade filen infogas omedelbart, som om det hade hittats på platsen för include-direktivet. Om variabelns värde är en relativ sökväg anses sökvägen vara relativ till konfigurationsfilen där include-direktivet hittades. Se nedan för exempel.
+
+Villkorliga inkluderingar
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Du kan villkorligt inkludera en konfigurationsfil från en annan genom att ställa in variabeln `includeIf.<villkor>.path` i namnet på den fil som ska inkluderas.
+
+Villkoret börjar med ett nyckelord följt av ett kolon och lite data vars format och betydelse beror på nyckelordet. Nyckelord som stöds är:
+
+`gitdir`::
+	Data som följer efter nyckelordet `gitdir` och ett kolon används som ett glob-mönster. Om platsen för .git-katalogen matchar mönstret är include-villkoret uppfyllt.
++
+.git-platsen kan vara auto-upptäckt, eller komma från miljövariabeln `$GIT_DIR`. Om repot är auto-upptäckt via en .git-fil (t.ex. från undermoduler eller ett länkat arbetsträd), skulle .git-platsen vara den slutliga platsen där .git-katalogen finns, inte där .git-filen finns.
++
+Mönstret kan innehålla vanliga globbing-jokertecken och två ytterligare, `**/` och `/**`, som kan matcha flera sökvägskomponenter. Se linkgit:gitignore[5] för mer information. För enkelhetens skull:
+
+ * Om mönstret börjar med `~/` kommer `~` att ersättas med innehållet i miljövariabeln `HOME`.
+
+ * Om mönstret börjar med `./` ersätts det med katalogen som innehåller den aktuella konfigurationsfilen.
+
+ * Om mönstret inte börjar med vare sig `~/`, `./` eller `/`, kommer `**/` automatiskt att läggas till före. Till exempel blir mönstret `foo/bar` till `**/foo/bar` och skulle matcha `/any/path/to/foo/bar`.
+
+ * Om mönstret slutar med `/`, läggs `**` till automatiskt. Till exempel blir mönstret `foo/` till `foo/**`. Med andra ord matchar det "foo" och allt inuti, rekursivt.
+
+`gitdir/i`::
+	Detta är samma sak som `gitdir` förutom att matchningen görs skiftlägesoberoende (t.ex. på filsystem som är skiftlägesoberoende)
+
+`onbranch`::
+	Data som följer nyckelordet `onbranch` och ett kolon tas som ett mönster med vanliga globbing-jokertecken och två ytterligare, `**/` och `/**`, som kan matcha flera sökvägskomponenter. Om vi befinner oss i ett arbetsträd där namnet på den gren som för närvarande är utcheckad matchar mönstret, är include-villkoret uppfyllt.
++
+Om mönstret slutar med `/` läggs `**` till automatiskt. Till exempel blir mönstret `foo/` till `foo/**`. Med andra ord matchar det alla grenar som börjar med `foo/`. Detta är användbart om dina grenar är organiserade hierarkiskt och du vill tillämpa en konfiguration på alla grenar i den hierarkin.
+
+`hasconfig:remote.*.url`::
+	Data som följer efter detta nyckelord och ett kolon tas som ett mönster med vanliga globbing-jokertecken och två ytterligare, `**/` och `/**`, som kan matcha flera komponenter. Första gången detta nyckelord ses kommer resten av konfigurationsfilerna att skannas efter fjärr-URL:er (utan att tillämpa några värden). Om det finns minst en fjärr-URL som matchar detta mönster är inkluderingsvillkoret uppfyllt.
++
+Filer som inkluderas av det här alternativet (direkt eller indirekt) får inte innehålla fjärr-URL:er.
++
+Observera att till skillnad från andra includeIf-villkor, är lösningen av detta villkor beroende av information som ännu inte är känd vid tidpunkten för läsning av villkoret. Ett typiskt användningsfall är att detta alternativ finns som en konfiguration på systemnivå eller global nivå, och att fjärr-URL:en finns i en konfiguration på lokal nivå; därav behovet av att skanna framåt när detta villkor löses. För att undvika hönan-och-ägget-problemet där potentiellt inkluderade filer kan påverka huruvida sådana filer potentiellt inkluderas, bryter Git cykeln genom att förbjuda dessa filer att påverka lösningen av dessa villkor (och därmed förbjuda dem att deklarera fjärr-URL:er).
++
+När det gäller namngivningen av detta nyckelord, så är det för framåtkompatibilitet med ett namngivningsschema som stöder mer variabelbaserade inkluderingsvillkor, men för närvarande stöder Git bara exakt det nyckelord som beskrivs ovan.
+
+Några fler anteckningar om matchning via `gitdir` och `gitdir/i`:
+
+ * Symlänkar i `$GIT_DIR` löses inte innan matchning.
+
+ * Både symlänk- och realpath-versionerna av sökvägarna kommer att matchas utanför `$GIT_DIR`. T.ex. om ~/git är en symlänk till /mnt/storage/git, kommer både `gitdir:~/git` och `gitdir:/mnt/storage/git` att matcha.
++
+This was not the case in the initial release of this feature in v2.13.0, which only matched the realpath version. Configuration that wants to be compatible with the initial release of this feature needs to either specify only the realpath version, or both versions.
+
+ * Observera att "../" inte är speciellt och kommer att matcha bokstavligt, vilket sannolikt inte är vad du vill ha.
+
+Exempel
+~~~~~~~
+
+----
+# Kärnvariabler
+[core]
+	; Lita inte på fillägen
+	filemode = false
+
+# Vår diff-algoritm
+[diff]
+	external = /usr/local/bin/diff-wrapper
+	renames = true
+
+[branch "utveckling"]
+	remote = origin
+	merge = refs/heads/devel
+
+# Proxyinställningar
+[core]
+	gitProxy="ssh" for "kernel.org"
+	gitProxy=default-proxy ; för resten
+
+[include]
+	path = /path/to/foo.inc ; inkludera med absolut sökväg
+	path = foo.inc ; hitta "foo.inc" relativt till den aktuella filen
+	path = ~/foo.inc ; hitta "foo.inc" i din `$HOME`-katalog
+
+; inkludera om $GIT_DIR är /path/to/foo/.git
+[includeIf "gitdir:/path/to/foo/.git"]
+	path = /path/to/foo.inc
+
+; includera för alla repositories inuti /path/to/group
+[includeIf "gitdir:/path/to/group/"]
+	path = /path/to/foo.inc
+
+; inkludera för alla repon i $HOME/to/group
+[includeIf "gitdir:~/to/group/"]
+	path = /path/to/foo.inc
+
+; relativa sökvägar är alltid relativa till den inkluderande
+; filen (om villkoret är sant); deras plats påverkas inte
+; av villkoret
+[includeIf "gitdir:/path/to/group/"]
+	path = foo.inc
+
+; inkludera endast om vi är i ett arbetsträd där foo-branch är
+; för närvarande utcheckad
+[includeIf "onbranch:foo-branch"]
+	path = foo.inc
+
+; include only if a remote with the given URL exists (note
+; that such a URL may be provided later in a file or in a
+; file read after this file is read, as seen in this example)
+[includeIf "hasconfig:remote.*.url:https://example.com/**"]
+	path = foo.inc
+[remote "origin"]
+	url = https://example.com/git
+----
+
+Värden
+~~~~~~
+
+Värden för många variabler behandlas som en enkel sträng, men det finns variabler som tar värden av specifika typer och det finns regler för hur man stavar dem.
+
+boolesk::
+
+       När en variabel sägs anta ett booleskt värde accepteras många synonymer för 'sant' och 'falskt'; dessa är alla skiftlägesoberoende.
+
+	sant;; Booleska sanna literaler är `yes`, `on`, `sant` och `1`. Dessutom tas en variabel definierad utan `= <value>` som sann.
+
+	false;; Booleska falska literaler är `no`, `off`, `false`, `0` och den tomma strängen.
++
+När man konverterar ett värde till dess kanoniska form med typspecifikationen `--type=bool`, kommer `git config' att säkerställa att utdata är "true" eller "false" (stavat med gemener).
+
+heltal::
+       Värdet för många variabler som anger olika storlekar kan ges suffix med `k`, `M`,... för att betyda "skala talet med 1024", "med 1024x1024", etc.
+
+color::
+       Värdet för en variabel som tar en färg är en lista med färger (högst två, en för förgrund och en för bakgrund) och attribut (så många du vill), separerade med mellanslag.
++
+De accepterade grundfärgerna är `normal`, `black` (svart), `red` (röd), `green` (grön), `yellow` (gul), `blue` (blå), `magenta`, `cyan`, `white` (vit) and `default` (standard). Den första färgen som anges är förgrunden; den andra är bakgrunden. Alla grundfärger utom `normal` och `default` har en ljus variant som kan anges genom att prefixet `bright` (ljus) skrivs ut för färgen, som `brightred` (ljusröd).
++
+Färgen `normal` ändrar inte färgen. Den är samma som en tom sträng, men kan användas som förgrundsfärg när man anger enbart en bakgrundsfärg (till exempel "normal red" (normal röd)).
++
+Färgen `standard` återställer explicit färgen till terminalens standardinställning, till exempel för att ange en ren bakgrund. Även om det varierar mellan terminaler är detta vanligtvis inte detsamma som att ställa in den på "white black" (vit svart).
++
+Färger kan också anges som siffror mellan 0 och 255; dessa använder ANSI 256-färgläge (men observera att inte alla terminaler stöder detta). Om din terminal stöder det kan du också ange 24-bitars RGB-värden som hexagoner, som `#ff0ab3`, eller 12-bitars RGB-värden som `#f1b`, vilket motsvarar 24-bitarsfärgen `#ff11bb`.
++
+De accepterade attributen är `bold` (fet), `dim`, `ul` (understruken), `blink` (blinka), `reverse` (omvänd), `italic` (kursiv) och `strike` (för överstrukna eller genomstrukna bokstäver). Attributens position i förhållande till färgerna (före, efter eller däremellan) spelar ingen roll. Specifika attribut kan stängas av genom att prefixet `no` eller `no-` läggs till (t.ex. `noreverse`, `no-ul`, etc.).` och `strike` (för överstrukna eller genomstrukna bokstäver).
++
+Pseudoattributet `reset` återställer alla färger och attribut innan den angivna färgen tillämpas. Till exempel kommer `reset green` att resultera i en grön förgrund och standardbakgrund utan några aktiva attribut.
++
+En tom färgsträng ger ingen färgeffekt alls. Detta kan användas för att undvika att färglägga specifika element utan att helt inaktivera färg.
++
+For git's pre-defined color slots, the attributes are meant to be reset at the beginning of each item in the colored output. So setting `color.decorate.branch` to `black` will paint that branch name in a plain `black`, even if the previous thing on the same output line (e.g. opening parenthesis before the list of branch names in `log --decorate` output) is set to be painted with `bold` or some other attribute. However, custom log formats may do more complicated and layered coloring, and the negated forms may be useful there.
+
+sökvägsnamn::
+	En variabel som tar ett sökvägsvärde kan ges en sträng som börjar med "`~/`" eller "`~user/`", och den vanliga tilde-expansionen sker för en sådan sträng: `~/` expanderas till värdet `$HOME` och `~user/` till den angivna användarens hemkatalog.
++
+Om en sökväg börjar med `%(prefix)/` tolkas resten som en sökväg relativt till Gits "runtime prefix", d.v.s. relativt till platsen där Git självt installerades. Till exempel refererar `%(prefix)/bin/` till katalogen där själva Git-filen finns. Om Git kompilerades utan stöd för runtime prefix kommer det kompilerade prefixet att ersättas. I det osannolika fallet att en litteral sökväg behöver anges som _inte_ ska expanderas, måste den prefixas med `./`, så här: `./%(prefix)/bin`.
++
+Om prefixet `:(valfritt)` används behandlas konfigurationsvariabeln som om den inte existerar, om den namngivna sökvägen inte existerar.
+
+Variabler
+~~~~~~~~~
+
+Observera att den här listan inte är heltäckande och inte nödvändigtvis komplett. För kommandospecifika variabler hittar du en mer detaljerad beskrivning på motsvarande manualsida.
+
+Andra git-relaterade verktyg kan använda, och använder, sina egna variabler. När du uppfinner nya variabler för användning i ditt eget verktyg, se till att deras namn inte står i konflikt med de som används av Git självt och andra populära verktyg, och beskriv dem i din dokumentation.
+
+include::config/add.adoc[]
+
+include::config/advice.adoc[]
+
+include::config/alias.adoc[]
+
+include::config/am.adoc[]
+
+include::config/apply.adoc[]
+
+include::config/attr.adoc[]
+
+include::config/bitmap-pseudo-merge.adoc[]
+
+include::config/blame.adoc[]
+
+include::config/branch.adoc[]
+
+include::config/browser.adoc[]
+
+include::config/bundle.adoc[]
+
+include::config/checkout.adoc[]
+
+include::config/clean.adoc[]
+
+include::config/clone.adoc[]
+
+include::config/color.adoc[]
+
+include::config/column.adoc[]
+
+include::config/commit.adoc[]
+
+include::config/commitgraph.adoc[]
+
+include::config/completion.adoc[]
+
+include::config/core.adoc[]
+
+include::config/credential.adoc[]
+
+include::config/diff.adoc[]
+
+include::config/difftool.adoc[]
+
+include::config/extensions.adoc[]
+
+include::config/fastimport.adoc[]
+
+include::config/feature.adoc[]
+
+include::config/fetch.adoc[]
+
+include::config/filter.adoc[]
+
+include::config/format.adoc[]
+
+include::config/fsck.adoc[]
+
+include::config/fsmonitor--daemon.adoc[]
+
+include::config/gc.adoc[]
+
+include::config/gitcvs.adoc[]
+
+include::config/gitweb.adoc[]
+
+include::config/gpg.adoc[]
+
+include::config/grep.adoc[]
+
+include::config/gui.adoc[]
+
+include::config/guitool.adoc[]
+
+include::config/help.adoc[]
+
+include::config/http.adoc[]
+
+include::config/i18n.adoc[]
+
+include::config/imap.adoc[]
+
+include::config/includeif.adoc[]
+
+include::config/index.adoc[]
+
+include::config/init.adoc[]
+
+include::config/instaweb.adoc[]
+
+include::config/interactive.adoc[]
+
+include::config/log.adoc[]
+
+include::config/lsrefs.adoc[]
+
+include::config/mailinfo.adoc[]
+
+include::config/mailmap.adoc[]
+
+include::config/maintenance.adoc[]
+
+include::config/man.adoc[]
+
+include::config/merge.adoc[]
+
+include::config/mergetool.adoc[]
+
+include::config/notes.adoc[]
+
+include::config/pack.adoc[]
+
+include::config/pager.adoc[]
+
+include::config/pretty.adoc[]
+
+include::config/promisor.adoc[]
+
+include::config/protocol.adoc[]
+
+include::config/pull.adoc[]
+
+include::config/push.adoc[]
+
+include::config/rebase.adoc[]
+
+include::config/receive.adoc[]
+
+include::config/reftable.adoc[]
+
+include::config/remote.adoc[]
+
+include::config/remotes.adoc[]
+
+include::config/repack.adoc[]
+
+include::config/rerere.adoc[]
+
+include::config/revert.adoc[]
+
+include::config/safe.adoc[]
+
+include::config/sendemail.adoc[]
+
+include::config/sequencer.adoc[]
+
+include::config/showbranch.adoc[]
+
+include::config/sparse.adoc[]
+
+include::config/splitindex.adoc[]
+
+include::config/ssh.adoc[]
+
+include::config/stash.adoc[]
+
+include::config/status.adoc[]
+
+include::config/submodule.adoc[]
+
+include::config/tag.adoc[]
+
+include::config/tar.adoc[]
+
+include::config/trace2.adoc[]
+
+include::config/trailer.adoc[]
+
+include::config/transfer.adoc[]
+
+include::config/uploadarchive.adoc[]
+
+include::config/uploadpack.adoc[]
+
+include::config/url.adoc[]
+
+include::config/user.adoc[]
+
+include::config/versionsort.adoc[]
+
+include::config/web.adoc[]
+
+include::config/worktree.adoc[]

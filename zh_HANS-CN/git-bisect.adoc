@@ -9,25 +9,22 @@ git-bisect - 使用二进制搜索查找引入错误的提交
 概述
 --
 [verse]
-'git bisect' <子命令> <选项>
+'git bisect' start [--term-(bad|new)=<term-new> --term-(good|old)=<term-old>]
+		   [--no-checkout] [--first-parent] [<bad> [<good>...]] [--] [<pathspec>...]
+'git bisect' (bad|new|<term-new>) [<rev>]
+'git bisect' (good|old|<term-old>) [<rev>...]
+'git bisect' terms [--term-(good|old) | --term-(bad|new)]
+'git bisect' skip [(<rev>|<range>)...]
+'git bisect' next
+'git bisect' reset [<commit>]
+'git bisect' (visualize|view)
+'git bisect' replay <logfile>
+'git bisect' log
+'git bisect' run <cmd> [<arg>...]
+'git bisect' help
 
 描述
 --
-该命令采取不同的子命令，并根据子命令有不同的选项：
-
- git bisect start [--term-(bad|new)=<term-new> --term-(good|old)=<term-old>]
-		  [--no-checkout] [--first-parent] [<bad> [<good>...]] [--] [<pathspec>...]
- git bisect (bad|new|<term-new>) [<rev>]
- git bisect (good|old|<term-old>) [<rev>...]
- git bisect terms [--term-(good|old) | --term-(bad|new)]
- git bisect skip [(<rev>|<range>)...]
- git bisect reset [<commit>]
- git bisect (visualize|view)
- git bisect replay <logfile>
- git bisect log
- git bisect run <cmd> [<arg>...]
- git bisect help
-
 这个命令使用二分搜索算法来查找项目历史中哪个提交引入了一个错误。使用该命令时，首先告诉它一个已知包含错误的 "坏" 提交，以及一个已知在错误出现之前的 "好" 提交。然后 `git bisect` 在这两个端点之间挑选一个提交，并询问你所选的提交是 "好" 还是 "坏"。它继续缩小范围，直到找到引入该修改的确切提交。
 
 事实上，`git bisect` 可以用来查找改变项目 *任何* 属性的提交；例如，修复了一个 bug 的提交，或者使一个基准的性能得到改善的提交。为了支持这种更普遍的用法，可以用 "old" 和 "new" 来代替 "good" 和 "bad"，或者您可以选择自己的术语。更多信息见下文 "替代术语 "一节。
@@ -220,6 +217,16 @@ $ git bisect skip v2.5 v2.5..v2.6
 
 这告诉二分查找进程，应该跳过 `v2.5` 和 `v2.6`（包括）之间的提交。
 
+Bisect next
+~~~~~~~~~~~
+
+Normally, after marking a revision as good or bad, Git automatically computes and checks out the next revision to test. However, if you need to explicitly request the next bisection step, you can use:
+
+------------
+$ git bisect next
+------------
+
+You might use this to resume the bisection process after interrupting it by checking out a different revision.
 
 通过提供更多的参数来削减二分查找的起点
 ~~~~~~~~~~~~~~~~~~~

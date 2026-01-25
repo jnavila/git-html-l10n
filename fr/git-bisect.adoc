@@ -9,25 +9,22 @@ git-bisect - Trouver par recherche binaire la modification qui a introduit un bo
 SYNOPSIS
 --------
 [verse]
-'git bisect' <sous-commande> <options>
+git bisect start [--term-(bad|new)=<terme-nouveau> --term-(good|old)=<terme-ancien>]
+		  [--no-checkout] [--first-parent] [<mauvais> [<bon>...]] [--] [<spéc-de-chemin>...]
+git bisect (bad|new|<terme-nouveau>) [<rev>]
+git bisect (good|old|<terme-ancien>) [<rev>...]
+git bisect terms [--term-good | --term-bad]
+git bisect skip [(<rev>|<plage>)...]
+git bisect next
+git bisect reset [<commit>]
+git bisect (visualize|view)
+git bisect replay <fichier-journal>
+git bisect log
+git bisect run <cmd> [<arg>...]
+git bisect help
 
 DESCRIPTION
 -----------
-La commande prend diverses sous-commandes et différentes options selon la sous-commande :
-
- git bisect start [--term-(bad|new)=<terme-nouveau> --term-(good|old)=<terme-ancien>]
-		  [--no-checkout] [--first-parent] [<mauvais> [<bon>...]] [--] [<spéc-de-chemin>...]
- git bisect (bad|new|<terme-nouveau>) [<rev>]
- git bisect (good|old|<terme-ancien>) [<rev>...]
- git bisect terms [--term-good | --term-bad]
- git bisect skip [(<rev>|<plage>)...]
- git bisect reset [<commit>]
- git bisect (visualize|view)
- git bisect replay <fichier-journal>
- git bisect log
- git bisect run <cmd> [<arg>...]
- git bisect help
-
 Cette commande utilise un algorithme de recherche binaire pour trouver quel commit dans l'historique de votre projet a introduit un bogue. Vous l'utilisez en lui indiquant d'abord un "mauvais" commit qui est connu pour contenir le bogue, et un "bon" commit qui est connu pour être avant que le bogue ne soit introduit. Ensuite, `git bisect` choisit un commit entre ces deux points de terminaison et vous demande si le commit sélectionné est" bon "ou" mauvais ". Il continue de réduire la plage jusqu'à ce qu'il trouve le commit exact qui a introduit le changement coupable.
 
 En fait, « git bisect » peut être utilisé pour trouver le commit qui a changé *n’importe quelle* propriété de votre projet ; par exemple, le commit qui a corrigé un bogue, ou le commit qui a causé l’amélioration des performances d’un benchmark. Pour gérer cette utilisation plus générale, les termes "old" (ancien) et "new" (nouveau) peuvent être utilisés à la place de "bad" (mauvais) et "good" (bon), ou vous pouvez choisir vos propres termes. Voir la section « Autres termes » ci-dessous pour plus d’informations.
@@ -220,6 +217,16 @@ $ git bisect skip v2.5 v2.5..v2.6
 
 Cela indique au processus de bissection que les commits entre `v2.5` et `v2.6` (inclus) doivent être ignorés.
 
+Bisect next
+~~~~~~~~~~~
+
+Normalement, après avoir marqué une révision comme bonne ou mauvaise, Git calcule automatiquement et vérifie la prochaine révision à tester. Cependant, si vous devez explicitement demander la prochaine étape de la bisection, vous pouvez utiliser  :
+
+------------
+$ git bisect next
+------------
+
+Vous pouvez l'utiliser pour reprendre le processus de bisection après l'interrompre en extrayant une révision différente.
 
 Réduire la bissection en donnant plus de paramètres au début de la bissection
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

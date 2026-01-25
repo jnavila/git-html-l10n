@@ -1,0 +1,167 @@
+git-pull(1)
+===========
+
+NAMN
+----
+git-pull - Hämta från och integrera med annat repo eller en lokal gren
+
+
+SYNOPSIS
+--------
+[synopsis]
+git pull [<flaggor>] [<repo> [<refspec>...]]
+
+
+BESKRIVNING
+-----------
+
+Integrera ändringar från ett fjärr-repo i den aktuella grenen.
+
+Först kör `git pull` `git fetch` med samma argument (exklusive sammanslagningsalternativ) för att hämta fjärrgren(ar). Sedan bestämmer den vilken fjärrgren som ska integreras: om du kör `git pull` utan argument används som standard <<UPSTREAM-BRANCHES,upstream>> för den aktuella grenen. Sedan integreras den grenen i den aktuella grenen.
+
+Det finns fyra huvudalternativ för att integrera fjärrgrenen:
+
+1. `git pull --ff-only` kommer bara att göra "snabbspola framåt"-uppdateringar: det misslyckas om din lokala gren har divergerat från fjärrgrenen. Detta är standardinställningen.
+2. `git pull --rebase` kör `git rebase`
+3. `git pull --no-rebase` kör `git merge`.
+4. `git pull --squash` kör `git merge --squash`
+
+Du kan också ställa in konfigurationsalternativen `pull.rebase`, `pull.squash` eller `pull.ff` med ditt föredragna beteende.
+
+Om det uppstår en sammanslagningskonflikt under sammanslagningen eller ombasering som du inte vill hantera, kan du säkert avbryta den med `git merge --abort` eller `git rebase --abort`.
+
+ALTERNATIV
+----------
+
+_<repo>_::
+	"Fjärr"-arkivet att hämta från. Detta kan antingen vara en URL (se avsnittet <<URLS,GIT URLS>> nedan) eller namnet på en fjärrenhet (se avsnittet <<REMOTES,FJÄRR>> nedan).
++
+Standardinställningen är den konfigurerade uppströmsfilen för den aktuella grenen, eller `origin`. Se <<UPSTREAM-BRANCHES,UPPSTRÖMS-GRENAR>> nedan för mer information om hur man konfigurerar uppströmsfilar.
+
+_<refspec>_::
+	Vilken gren eller annan referens(er) som ska hämtas och integreras i den aktuella grenen, till exempel `main` i `git pull origin main`. Standardinställningen är den konfigurerade uppström för den aktuella grenen.
++
+Detta kan vara en gren, tagg eller annan samling av referenser. Se <<fetch-refspec,_<refspec>_>> nedan under "Alternativ relaterade till hämtning" för den fullständiga syntaxen, och <<DEFAULT-BEHAVIOUR,STANDARDBETEENDE>> nedan för hur `git pull` använder detta argument för att avgöra vilken fjärrgren som ska integreras.
+
+`-q`::
+`--quiet`::
+	Detta skickas till både underliggande git-fetch till kväva rapportering under överföring, och underliggande git-merge för att kväva-utdata under sammanslagning.
+
+`-v`::
+`--verbose`::
+	Skicka `--verbose` till git-fetch och git-merge.
+
+`--recurse-submodules[=(yes|on-demand|no)]`::
+`--no-recurse-submodules`::
+	Det här alternativet styr om nya incheckningar för ifyllda undermoduler ska hämtas, och om de fungerande träden för aktiva undermoduler också ska uppdateras (se linkgit:git-fetch[1], linkgit:git-config[1] och linkgit:gitmodules[5]).
++
+Om utcheckningen görs via ombasering, ombaseras även lokala undermodul-incheckningar.
++
+Om uppdateringen görs via sammanslagning, löses undermodulkonflikterna och de checkas ut.
+
+Alternativ gällande sammanslagning
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+:git-pull: 1
+
+include::merge-options.adoc[]
+
+`-r`::
+`--rebase[=(true|merges|false|interactive)]`::
+`true`;; Ombasera den aktuella grenen ovanpå den uppströms grenen efter hämtning. Om det finns en fjärrspårningsgren som motsvarar den uppströms grenen och den uppströms grenen har ombaserats sedan den senaste hämtningen, använder ombasen den informationen för att undvika ombasering av icke-lokala ändringar. Detta är standardinställningen.
+
+`merges`;; ombasering med `git rebase --rebase-merges` så att de lokala sammanslagnings-incheckningar inkluderas i rebasen (se linkgit:git-rebase[1] för detaljer).
+`false`;; sammanfoga den uppströms grenen med den nuvarande grenen.
+`interactive`;; aktivera det interaktiva läget för ombasering.
+
++
+Se `pull.rebase`, `branch.<name>.rebase` och `branch.autoSetupRebase` i linkgit:git-config[1] om du vill att `git pull` alltid ska använda `--rebase` istället för sammanslagning.
++
+[NOTE]
+Detta är ett potentiellt _farligt_ driftläge. Det skriver om historiken, vilket inte bådar gott när du redan har publicerat den historiken. Använd *inte* det här alternativet om du inte har läst linkgit:git-rebase[1] noggrant.
+
+`--no-rebase`::
+	Detta är en förkortning för `--rebase=false`.
+
+Alternativ gällande hämtningar
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+include::fetch-options.adoc[]
+
+include::pull-fetch-param.adoc[]
+
+include::urls-remotes.adoc[]
+
+include::merge-strategies.adoc[]
+
+[[DEFAULT-BEHAVIOUR]]
+STANDARDBETEENDE
+----------------
+
+Ofta använder man `git pull` utan att ange någon parameter. Traditionellt, har detta motsvarat att säga `git pull origin`. Men när konfigurationen `branch.<namn>.remote` finns på grenen `<namn>`, används det värdet istället för `origin`.
+
+För att avgöra vilken URL som ska användas för att hämta från, konsulteras värdet för konfigurationen `remote.<fjärr>.url` och om det inte finns någon sådan variabel används värdet på raden `URL:` i `$GIT_DIR/remotes/<fjärr>`.
+
+För att avgöra vilka fjärrgrenar som ska hämtas (och eventuellt lagras i fjärrspårningsgrenarna) när kommandot körs utan några refspec-parametrar på kommandoraden, konsulteras värden för konfigurationsvariabeln `remote.<fjärr>.fetch`, och om det inte finns några konsulteras `$GIT_DIR/remotes/<fjärr>` och dess `Pull:`-rader används. Förutom refspec-formaten som beskrivs i avsnittet OPTIONS kan du ha en globbing-refspec som ser ut så här:
+
+------------
+refs/heads/*:refs/remotes/origin/*
+------------
+
+En globbande refspec måste ha en icke-tom RHS (dvs. måste lagra det som hämtades i fjärrspårningsgrenar), och dess LHS och RHS måste sluta med `/*`. Ovanstående anger att alla fjärrgrenar spåras med hjälp av fjärrspårningsgrenar i `refs/remotes/origin/`-hierarkin under samma namn.
+
+Regeln för att avgöra vilken fjärrgren som ska sammanfogas efter hämtning är lite invecklad för att inte bryta bakåtkompatibiliteten.
+
+Om explicita refspecs angavs på kommandoraden för `git pull`, slås de alla samman.
+
+När ingen refspec angavs på kommandoraden använder `git pull` refspec från konfigurationen eller `$GIT_DIR/remotes/<fjärr>`. I sådana fall gäller följande regler:
+
+. Om konfigurationen `branch.<namn>.merge` för den aktuella branch _<namn>_ finns, är det namnet på branchen på den fjärrplats som slås samman.
+
+. Om refspecifikationen är en globbing-specifikation slås ingenting samman.
+
+. Annars slås den fjärrgrenen av den första refspecifikationen samman.
+
+
+EXEMPEL
+-------
+
+* Uppdatera grenarna för fjärrspårning för det repo du klonade från, och sammanfoga sedan en av dem med din nuvarande gren:
++
+------------------------------------------------
+$ git pull
+$ git pull origin
+------------------------------------------------
++
+Normalt sett är den sammanslagna grenen `HEAD` för fjärrarkivet, men valet bestäms av alternativen `branch.<name>.remote` och `branch.<name>.merge`; se linkgit:git-config[1] för detaljer.
+
+* Sammanfoga den fjärrstyrda grenen `next` med den aktuella grenen:
++
+------------------------------------------------
+$ git pull origin next
+------------------------------------------------
++
+Detta lämnar en kopia av `next` tillfälligt i `FETCH_HEAD` och uppdaterar fjärrspårningsgrenen `origin/next`. Detsamma kan göras genom att anropa fetch och merge:
++
+------------------------------------------------
+$ git fetch origin
+$ git merge origin/next
+------------------------------------------------
+
+
+If you tried a pull which resulted in complex conflicts and would want to start over, you can recover with `git reset`.
+
+
+include::transfer-data-leaks.adoc[]
+
+BUGGAR
+------
+Att använda `--recurse-submodules` kan bara hämta nya incheckningar i redan utcheckade undermoduler just nu. När t.ex. upstream lägger till en ny undermodul i de just hämtade incheckningar i superprojektet kan inte själva undermodulen hämtas, vilket gör det omöjligt att checka ut den undermodulen senare utan att behöva göra en hämtning (fetch) igen. Detta förväntas bli åtgärdat i en framtida Git-version.
+
+SE ÄVEN
+-------
+linkgit:git-fetch[1], linkgit:git-merge[1], linkgit:git-config[1]
+
+GIT
+---
+En del av linkgit:git[1]-sviten

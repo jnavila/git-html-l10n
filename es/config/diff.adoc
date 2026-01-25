@@ -1,0 +1,161 @@
+`diff.autoRefreshIndex`::
+	Cuando se usa `git-diff` para comparar con ficheros del árbol de trabajo, no considera cambios stat-only como changed. En su lugar, ejecuta silenciosamente `git update-index --refresh` para actualizar la información estadística en antememoria para rutas cuyo contenido en el árbol de trabajo coincide con el contenido en el índice. Ésta opción se predetermina a `true`. Nota que esto afecta sólo a `git diff` porcelana, y no a comandos `diff` de mas bajo nivel como `git diff-files`.
+
+`diff.dirstat`::
+ifdef::git-diff[]
+	Una lista separada por comas de parámetros de `--dirstat` especificando el
+	comportamiento predeterminado de la opción `--dirstat` para `git diff` y sus amigos.
+endif::git-diff[]
+ifndef::git-diff[]
+	Una lista separada por comas de parámetros `--dirstat` especificando el
+	comportamiento predeterminado de la opción `--dirstat` para linkgit:git-diff[1]
+	y sus amigos.
+endif::git-diff[]
+	Los predeterminados pueden ser anulados en la línea de comandos
+	(usando `--dirstat=<parámetro>,...`). Los predeterminados por omisión
+	(cuando no son modificados por `diff.dirstat`) son `changes,noncumulative,3`.
+	Esta disponibles los parámetros siguientes:
++
+--
+`changes`;;
+	Calcula los números de dirstat contando las líneas que han sido eliminadas del origen, o agregadas en el destino. Esto ignora la cantidad de movimientos de código puro dentro del fichero. En otras palabras, el reacomodo de líneas en un fichero no cuenta tanto como otros cambios. Este es el comportamiento predeterminado cuando no se dan parámetros.
+`lines`;;
+	Calcula los números de dirstat haciendo el análisis de diferencias regular basado en líneas, y sumando los conteos de líneas quitadas/agregadas. (Para ficheros binarios, cuenta en cambio pedazos de 64 bytes, ya que los ficheros binarios no tienen el concepto natural de líneas). Este es un funcionamiento de `--dirstat` mas costoso que `changes`, pero el re-acomodo de líneas dentro de un fichero cuenta tanto como otros cambios. La salida resultante es consistente con lo que obtienes de las otras opciones `--*stat`.
+`files`;;
+	Calcula los números de dirstat contando el número de ficheros modificados. Cada fichero modificado cuenta igualmente en el análisis de dirstat. Este es el funcionamiento `--dirstat` computacionalmente más barato, ya que no tiene que mirar el contenido del fichero en absoluto.
+`cumulative`;;
+	Cuenta cambios en un directorio hijo también para el directorio padre. Nota que cuando se usa `cumulative`, la suma de los porcentajes reportados puede exceder 100%. El comportamiento predeterminado (no-acumulativo) se puede especificar con el parámetro `noncumulative`.
+_<límite>_;;
+	Un parámetro entero especifica un porcentaje de corte (predeterminado a 3%). Directorios que contribuyan menos que éste porcentaje de cambios no se muestran en la salida.
+--
++
+Ejemplo: El siguiente contará ficheros modificados, ignorando directorios con menos del 10% de la cantidad total de ficheros modificados, y acumulando conteos en directorios hijo en los directorios padre: `files,10,cumulative`.
+
+`diff.statNameWidth`::
+	Limita el ancho de la parte del nombre de fichero en la salida de `--stat`. Si se asigna, aplica a todos los comandos que generan salida `--sta`t exceptuando `format-patch`.
+
+`diff.statGraphWidth`::
+	Limita el ancho de la parte del grafo en la salida de `--stat`. Si se asigna, aplica a todos los comandos que generan salida de `--stat` exceptuando `format-patch`.
+
+`diff.context`::
+	Genera diffs con _<n>_ líneas de contexto en lugar de las 3 predeterminadas. El valor es anulado con la opción `-U`.
+
+`diff.interHunkContext`::
+	Muestra el contexto entre pedazos de diferencia, hasta el número especificado de líneas, a modo de fusionar los pedazos cercanos. Este valor sirve como predeterminado para la opción de línea de comandos `--inter-hunk-context`.
+
+`diff.external`::
+	Si se asigna esta variable de configuración, las generación de diferencias no se hace con la maquinaria interna de diferencias, sino usando el comando dado. Puede ser anulado con la variable de ambiente `GIT_EXTERNAL_DIFF`. El comando es llamado con parámetros como se describe en "Diferencias de Git" en linkgit:git[1]. Nota: si quieres usar un programa de diferencias externo sólo en un subconjunto de tus ficheros, en su lugar querrías usar linkgit:gitattributes[5].
+
+`diff.trustExitCode`::
+	Si a este valor booleano se le asigna `true` entonces se espera que el comando `diff.external` regrese un código de salida 0 si considera que los ficheros de entrada son iguales, o 1 si considera que son diferentes, como `diff`(1). Si se le asigna `false`, el cual es el predeterminado, entonces se espera que el comando regrese un código de salida `0` independientemente de la igualdad. Cualquier otro código de salida provoca a Git a reportar un error fatal.
+
+`diff.ignoreSubmodules`::
+	Asigna el valor predeterminado de `--ignore-submodules`. Nota que esto afecta sólo a la porcelana `git diff`, y no a los comandos `diff` de mas bajo nivel como `git diff-files`. `git checkout` y `git switch` también respetan esta configuración cuando se reportan cambios sin confirmar. Asignándole `all` deshabilita el resumen de sub-módulos normalmente mostrado por `git commit` y `git status` cuando se asigna `status.submoduleSummary` a menos que sea anulado por la opción de línea de comando `--ignore-submodules`. Los comandos `git submodule` no son afectados por esta configuración. Predeterminadamente se le asigna untracked, de tal manera que cualquier sub-módulo sin rastreo es ignorado.
+
+`diff.mnemonicPrefix`::
+	Si se asigna, `git diff` usa un par de prefijos distintos a los estándar `a/` y `b/` dependiendo de lo que se esté comparando. Cuando ésta configuración está en efecto, la salida de la diferencia inversa también intercambia el orden de los prefijos:
+`git diff`;;
+	compara el índice (i) y árbol de trabajo (w);
+`git diff HEAD`;;
+	 compara una (c)onfirmación y el árbol de trabajo (w);
+`git diff --cached`;;
+	compara una (c)onfirmación y el índice (i);
+`git diff HEAD:<fichero1>< fichero2>`;;
+	compara un (o)bjeto y una entidad de árbol de trabajo (w);
+`git diff --no-index <a> <b>`;;
+	compara dos cosas no-git _<a>_ y _<b>_.
+
+`diff.noPrefix`::
+	Si se asigna, `git diff` no muestra ningún prefijo de origen o de destino.
+
+`diff.srcPrefix`::
+	Si se asigna, `git diff` usa este prefijo de origen. Predeterminado a `a/`.
+
+`diff.dstPrefix`::
+	Si se asigna, `git diff` usa este prefijo de destino. Predeterminado a `b/`.
+
+`diff.relative`::
+	Si se le asigna `true`, `git diff` no muestra cambios fuera del directorio y muestra nombres de ruta relativos al directorio actual.
+
+`diff.orderFile`::
+	Fichero que indica cómo ordenar los ficheros dentro de una diff.
+ifdef::git-diff[]
+	Ver la opción `-O` para detalles.
+endif::git-diff[]
+ifndef::git-diff[]
+	Ver la opción `-O` para linkgit:git-diff[1] para detalles.
+endif::git-diff[]
+	Si `diff.orderFile` es un nombre de ruta relativo, es tratado como
+	relativo al tope del árbol de trabajo.
+
+`diff.renameLimit`::
+	El número de ficheros a considerar en la porción exhaustiva de detección de copia/cambio de nombre; equivalente a la opción `-l` de `git diff`. Si no se asigna, el valor predeterminado actualmente es 1000. Esta configuración no tiene efecto si la detección de cambio de nombre esta apagada.
+
+`diff.renames`::
+	Si y cómo Git detecta cambios de nombre. Si se le asigna `false`, se deshabilita la detección de cambios de nombre. Si se le asigna `true, se habilita la detección básica de cambios de nombre. Si se le asigna `copies` o `copy`, Git detectará también copias. Predeterminado a `true`. Nota que esto sólo afecta a `git diff` porcelanas como linkgit:git-diff[1] y linkgit:git-log[1], y no a comandos de nivel mas bajo como linkgit:git-diff-files[1].
+
+`diff.suppressBlankEmpty`::
+	Un booleano para inhibir la comportamiento estándar de imprimir un espacio antes de cada línea de salida vacía. Predeterminado a `false`.
+
+`diff.submodule`::
+	Especifica el formato en el que se muestran las diferencias en submódulos. El formato `short` sólo muestra nombres de las confirmaciones al principio y al fin del rango. El formato `log` lista las confirmaciones en el rango como lo hace linkgit:git-submodule[1] `summary`. El formato `diff` muestra un diff en-linea de los contenidos modificados del submódulo. Se predetermina a `short`.
+
+`diff.wordRegex`::
+	Una Expresión Regular Extendida de POSIX usada para determinar qué es una "palabra" cuando se calculan diferencias palabra por palabra. Secuencias de caracteres que coincidan con la expresión regular son "palabras", todos los demás caracteres son espacios en blanco *ignorables*.
+
+`diff.<controlador>.command`::
+	El comando de controlador de diff personalizado. Ver linkgit:gitattributes[5] para detalles.
+
+`diff.<controlador>. trustExitCode`::
+	Si a este valor booleano se le asigna `true` entonces se espera que el comando `diff.<controlador>.command` regrese un código de salida 0 si considera que los ficheros de entrada son iguales, o 1 si considera que son diferentes, como `diff`(1). Si se le asigna `false`, el cual es el predeterminado, entonces se espera que el comando regrese un código de salida 0 independientemente de la igualdad. Cualquier otro código de salida provoca a Git a reportar un error fatal.
+
+`diff.<controlador>.xfuncname`::
+	La expresión regular que el controlador de diff puede usar para reconocer el encabezado de bloque. También se puede usar un patrón inter-construido. Ver linkgit:gitattributes[5] para detalles.
+
+`diff.<controlador>.binary`::
+	Asigne a esta opción `true` para hacer que el controlador de diferencias trate a los ficheros como binarios. Ver linkgit:gitattributes[5] para detalles.
+
+`diff.<controlador>.textconv`::
+	El comando al que el controlador de diferencias debe llamar para generar la versión convertida a texto de un fichero. El resultado de la conversión es usado para generar una diferencia legible al humano. Ver linkgit:gitattributes[5] para detalles.
+
+`diff.<controlador>.wordRegex`::
+	La expresión regular que el controlador de diferencias debe usar para dividir palabras en una línea. Ver linkgit:gitattributes[5] para detalles.
+
+`diff.<controlador>.cachetextconv`::
+	Asigne a esta opción `true` para hacer que el controlador de diferencias antememorice las salidas de conversión de texto. Ver linkgit:gitattributes[5] para detalles.
+
+`diff.indentHeuristic`::
+	Asignar a esta opción `false` para deshabilitar la heurística predeterminada que aumenta los límites de fragmentos de diff para facilitar la lectura de los parches.
+
+`diff.algorithm`::
+	Elige un algoritmo de diff. La variantes son las siguientes:
++
+--
+`default`;;
+`myers`;;
+	El algoritmo diff básico avaro. Actualmente, éste es el predeterminado.
+`minimal`;;
+	Ocupa tiempo extra para asegurarse que se produce el diff más pequeño posible.
+`patience`;;
+	Usa el algoritmo "diff paciente" al generar parches.
+`histogram`;;
+	Este algoritmo extiende el algoritmo paciente para "soportar elementos comunes de baja ocurrencia".
+--
++
+
+`diff.wsErrorHighlight`::
+	Resalta errores de espacio en blanco en las líneas `context`, `old ` o `new` del diff. Valores múltiples se separan con coma, `none` restablece valores previos, `default` restablece la lista a `new` y `all` es una forma corta de `old,new,context`. Los errores de espacio en blanco se colorean con `color.diff.whitespace`. La opción de línea de comandos `--ws-error-highlight=<tipo>`anula ésta configuración.
+
+`diff.colorMoved`::
+	Ya sea que se le asigne un _<modo>_ válido o el valor `true`, las líneas movidas en una diferencia se colorean diferente.
+ifdef::git-diff[]
+	Para detalles de modos válidos ver `--color-moved`.
+endif::git-diff[]
+ifndef::git-diff[]
+	Para detalles de los modos válidos ver `--color-moved` en linkgit:git-diff[1].
+endif::git-diff[]
+	Si se asigna simplemente `true` se usará el modo de color predeterminado. Cuando
+	se asigna `false`, las líneas movidas no serán coloreadas.
+
+`diff.colorMovedWS`::
+	Cuando las líneas movidas son coloreadas, usando por ejemplo la configuración `diff.colorMoved`, esta opción controla cómo el modo trata a los espacios. Para detalles de los modos válidos ver `--color-moved-ws` en linkgit:git-diff[1].

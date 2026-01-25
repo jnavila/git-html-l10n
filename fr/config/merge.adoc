@@ -1,0 +1,67 @@
+`merge.conflictStyle`::
+	Spécifier le style dans lequel les sections en conflit sont écrites dans les fichiers de l'arbre de travail lors de la fusion. La valeur par défaut est "merge", qui affiche un marqueur de conflit +<<<<<<<+, les modifications faites par un côté, un marqueur `==========`, les modifications faites par l'autre côté, et ensuite un marqueur +>>>>>>>+. Un style alternatif, "diff3", ajoute un marqueur +|||||||+ et le texte original avant le marqueur `========`. Le style "merge" tend à produire des régions de conflit plus petites que diff3, à la fois à cause de l'exclusion du texte original, et parce que lorsqu'un sous-ensemble de lignes correspondent des deux côtés, elles sont simplement retirées de la région de conflit. Un autre style alternatif, "zdiff3" est similaire à diff3 mais supprime les lignes correspondantes des deux côtés de la région de conflit lorsque ces lignes correspondantes apparaissent près du début ou de la fin d'une région de conflit.
+
+`merge.defaultToUpstream`::
+	Si la fusion est appelée sans aucun argument de commit, fusionner les branches amont configurées pour la branche courante en utilisant leurs dernières valeurs observées stockées dans leurs branches de suivi à distance. Les valeurs de `branch.<branche-courante>.merge` qui nomment les branches distantes nommées par `branch.<branche-courante>.remote` sont consultées, puis elles sont mappées via `remote.<distant>.fetch` vers leurs branches de suivi à distance correspondantes, et les extrémités de ces branches de suivi sont fusionnées. La valeur par défaut est true.
+
+`merge.ff`::
+	Par défaut, Git ne crée pas de commit de fusion supplémentaire lors de la fusion d'un commit descendant du commit courant. Au lieu de cela, le sommet de la branche courante est avancé rapidement. Quand elle est définie à `false`, cette variable indique à Git de créer un commit de fusion supplémentaire dans un tel cas (équivalent à donner l'option `--no-ff` de la ligne de commande). Lorsqu'il est défini à `only`, seules ces fusions en avance rapide sont autorisées (ce qui équivaut à donner l'option `--ff-only` depuis la ligne de commande).
+
+`merge.verifySignatures`::
+	Si vrai, c'est équivalent à l'option de ligne de commande `--verify-signatures`. Voir linkgit:git-merge[1] pour plus de détails.
+
+include::fmt-merge-msg.adoc[]
+
+`merge.renameLimit`::
+	Le nombre de fichiers à prendre en compte dans la partie restante de la détection de renommage lors d'une fusion ; s'il n'est pas spécifié, la valeur par défaut est celle de `diff.renameLimit`. Si ni `merge.renameLimit` ni `diff.renameLimit` ne sont spécifiés, la valeur par défaut est 7000. Ce réglage n'a aucun effet si la détection de renommage est désactivée.
+
+`merge.renames`::
+	Indique si Git doit détecter les renommages. S'il est défini à `false`, la détection de renommage est désactivée. S'il est défini à `true`, la détection de renommage de base est activée. La valeur par défaut est diff.renames.
+
+`merge.directoryRenames`::
+	Que Git détecte les renommages de répertoire, affectant ce qui arrive au moment de la fusion à de nouveaux fichiers ajoutés à un répertoire d'un côté de l'historique lorsque ce répertoire a été renommé de l'autre côté de l'historique. Les valeurs possibles sont :
++
+--
+`false`;; La détection de renommage de répertoire est désactivée, ce qui signifie que ces nouveaux fichiers seront abandonnés dans l'ancien répertoire.
+`true`;; La détection de renommage de répertoire est activée, ce qui signifie que ces nouveaux fichiers seront déplacés dans le nouveau répertoire.
+`conflict`;; Un conflit sera signalé pour de tels chemins.
+--
++
+Si `merge.renames` est `false` , `merge.directoryRenames ` est ignoré et traité comme `faux` . Vaut par défaut `conflict`.
+
+`merge.renormalize`::
+	Indiquer à Git que la représentation canonique des fichiers dans le dépôt a changé au fil du temps (par exemple, les premiers commits enregistrent les fichiers avec des fins de ligne _CRLF_, mais les plus récents utilisent des fins de ligne _LF_). Dans un tel dépôt, pour chaque fichier où une fusion à trois branche est nécessaire, Git peut convertir les données enregistrées dans les commits en une forme canonique avant d'effectuer une fusion pour réduire les conflits inutiles. Pour plus d'informations, voir la section "Fusionner des branches avec des attributs d'entrée/de sortie différents" dans linkgit:gitattributes[5].
+
+`merge.stat`::
+	Ce qu'il faut afficher entre `ORIG_HEAD` et le résultat de la fusion à la fin de la fusion, si cela existe. Les valeurs possibles sont :
++
+--
+`false`;; Ne rien afficher.
+`true`;; Montrer `git diff --diffstat --summary ORIG_HEAD ` .
+`compact`;; Afficher `git diff --compact-summary ORIG_HEAD`.
+--
++
+mais toute valeur non reconnue (p. ex., une valeur ajoutée par une future version de Git) est considérée comme `true` au lieu de déclencher une erreur. Par défaut à `true`.
+
+`merge.autoStash`::
+	Lorsque réglé sur `true`, créer automatiquement une entrée temporaire de remisage avant le début de l'opération, et l'appliquer après la fin de l'opération. Cela signifie que vous pouvez exécuter la fusion sur un arbre de travail sale. Cependant, à utiliser avec précaution : l'application finale du remisage après une fusion réussie peut entraîner des conflits non négligeables. Cette option peut être remplacée par les options `--no-autostash` et `--autostash` de linkgit:git-merge[1]. La valeur par défaut est `false`.
+
+`merge.tool`::
+	Contrôle quel outil de fusion est utilisé par linkgit:git-mergetool[1]. La liste ci-dessous indique les valeurs pré-intégrées valides. Toute autre valeur est traitée comme un outil de fusion personnalisé et nécessite qu'une variable `mergetool.<outil>.cmd` correspondante soit définie.
+
+`merge.guitool`::
+	Contrôle quel outil de fusion est utilisé par linkgit:git-mergetool[1] lorsque le drapeau `-g`/`--gui` est spécifié. La liste ci-dessous indique les valeurs pré-intégrées valides. Toute autre valeur est traitée comme un outil de fusion personnalisé et nécessite qu'une variable `mergetool.<outilgraphique>.cmd` correspondante soit définie.
+
+include::{build_dir}/mergetools-merge.adoc[]
+
+`merge.verbosity`::
+	Contrôle la quantité de production affichée par la stratégie de fusion récursive. Le niveau 0 ne produit rien, sauf un message d'erreur final si des conflits ont été détectés. Le niveau 1 ne produit que des conflits, le niveau 2 produit des conflits et des changements de fichiers. Les niveaux 5 et plus produisent des informations de débogage. La valeur par défaut est le niveau 2. Peut être écrasée par la variable d'environnement `GIT_MERGE_VERBOSITY`.
+
+`merge.<pilote>.name`::
+	Définit un nom lisible par l'homme pour un pilote de fusion personnalisé de bas niveau. Voir linkgit:gitattributes[5] pour plus de détails.
+
+`merge.<pilote>.driver`::
+	Définit la commande qui met en œuvre un pilote de fusion de bas niveau personnalisé. Voir linkgit:gitattributes[5] pour plus de détails.
+
+`merge.<pilote>.recursive`::
+	Nomme un pilote de fusion de bas niveau à utiliser lors d'une fusion interne entre des ancêtres communs. Voir linkgit:gitattributes[5] pour plus de détails.

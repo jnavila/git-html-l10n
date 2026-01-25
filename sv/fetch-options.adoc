@@ -1,0 +1,194 @@
+`--all`::
+`--no-all`::
+	Hämta ("fetcha") alla fjärrar, förutom de som har konfigurationsvariabeln `remote.<namn>.skipFetchAll` angiven. Detta åsidosätter konfigurationsvariabeln `fetch.all`.
+
+`-a`::
+`--append`::
+	Lägg till referensnamn och objektnamn för hämtade referenser till det befintliga innehållet i `.git/FETCH_HEAD`. Utan detta alternativ kommer gammal data i `.git/FETCH_HEAD` att skrivas över.
+
+`--atomic`::
+	Använd en atomär transaktion för att uppdatera lokala referenser. Antingen uppdateras alla referenser, eller så uppdateras inga referenser vid fel.
+
+`--depth=<djup>`::
+	Begränsa hämtningen till det angivna antalet incheckningar från toppen av varje fjärrgrenhistorik. Om hämtning sker till ett ytligt-repo ('shallow') skapat av `git clone` med alternativet `--depth=<djup>` (se linkgit:git-clone[1]), fördjupa eller förkorta historiken till det angivna antalet incheckningar. Taggar för de fördjupade incheckningar hämtas inte.
+
+`--deepen=<djup>`::
+	Liknar `--depth`, förutom att den anger antalet incheckningar från den aktuella ytliga gränsen istället för från toppen av varje fjärrgrenhistorik.
+
+`--shallow-since=<datum>`::
+	Fördjupa eller förkorta historiken för ett ytligt repo för att inkludera alla nåbara incheckningar efter _<datum>_.
+
+`--shallow-exclude=<ref>`::
+	Fördjupa eller förkorta historiken för ett ytligt repo för att exkludera incheckningar som är åtkomliga från en specifik fjärrgren eller tagg. Det här alternativet kan anges flera gånger.
+
+`--unshallow`::
+	Om käll-repot är komplett, konvertera ett ytligt repo till ett komplett, och ta bort alla begränsningar som ytliga repon medför.
++
+Om käll-repot är ytligt, hämta så mycket som möjligt så att det aktuella repot har samma historik som käll-repot.
+
+`--update-shallow`::
+	Som standard vid hämtning från ett ytligt repo, vägrar `git fetch` referenser som kräver uppdatering av `.git/shallow`. Det här alternativet uppdaterar `.git/shallow` och accepterar sådana referenser.
+
+`--negotiation-tip=(<incheckning>|<glob>)`::
+	Som standard, rapporterar Git incheckningar till servern som är nåbara från alla lokala referenser för att hitta gemensamma incheckningar i ett försök att minska storleken på den packfil som ska tas emot. Om detta anges kommer Git bara att rapportera incheckningar som är nåbara från de givna tipsen. Detta är användbart för att påskynda hämtningar när användaren vet vilken lokal referens som sannolikt har incheckningar gemensamt med den uppströms referens som hämtas.
++
+Det här alternativet kan anges mer än en gång; om så är fallet kommer Git att rapportera incheckningar som är åtkomliga från vilken som helst av de givna incheckningar.
++
+Argumentet till detta alternativ kan vara en glob på referensnamn, en ref eller (eventuellt förkortad) SHA-1 för en commit. Att ange en glob är liktydigt med att ange detta alternativ flera gånger, en för varje matchande referensnamn.
++
+Se även konfigurationsvariablerna `fetch.negotiationAlgorithm` och `push.negotiate` som är dokumenterade i linkgit:git-config[1], och alternativet `--negotiate-only` nedan.
+
+`--negotiate-only`::
+	Hämta ingenting från servern, och skriv istället ut de förfäder till den angivna `--negotiation-tip=`-argumenten, som vi har gemensamt med servern.
++
+Detta är inkompatibelt med `--recurse-submodules=(yes|on-demand)`. Internt används detta för att implementera alternativet `push.negotiate`, se linkgit:git-config[1].
+
+`--dry-run`::
+	Visa vad som skulle göras, utan att göra några ändringar.
+
+`--porcelain`::
+	Skriv ut utdata till standardutdata i ett lätttolkat format för skript. Se avsnittet UTMATNING i linkgit:git-fetch[1] för mer information.
++
+Detta är inkompatibelt med `--recurse-submodules=(yes|on-demand)` och har företräde framför konfigurationsalternativet `fetch.output`.
+
+ifndef::git-pull[]
+`--write-fetch-head`::
+`--no-write-fetch-head`::
+	Skriv listan över hämtade fjärrreferenser i filen `FETCH_HEAD` direkt under `$GIT_DIR`. Detta är standardinställningen. Om `--no-write-fetch-head` skickas från kommandoraden får Git besked om att inte skriva filen. Med alternativet `--dry-run` skrivs filen aldrig.
+endif::git-pull[]
+
+`-f`::
+`--force`::
+ifdef::git-pull[]
+När `git fetch` används med `<src>:<dst>` refspec, kan den vägra att uppdatera den lokala grenen vilket diskuteras i _<refspec>_-delen av linkgit:git-fetch[1]-dokumentationen.
+endif::git-pull[]
+ifndef::git-pull[]
+När `git fetch` används med `<src>:<dst>` refspec kan den vägra att uppdatera den lokala grenen, vilket diskuteras i _<refspec>_-delen nedan.
+endif::git-pull[]
+Det här alternativet åsidosätter den kontrollen.
+
+`-k`::
+`--keep`::
+	Behåll hämtade paket.
+
+ifndef::git-pull[]
+`--multiple`::
+	Tillåt att flera _<repo>_- och _<grupp>_-argument anges. Inga __<refspec>__-argument får anges.
+
+`--auto-maintenance`::
+`--no-auto-maintenance`::
+`--auto-gc`::
+`--no-auto-gc`::
+	Kör `git maintenance run --auto` i slutet för att utföra automatiskt underhåll av repot om det behövs. Detta är aktiverat som standard.
+
+`--write-commit-graph`::
+`--no-write-commit-graph`::
+	Skriv en inchecknings-graf efter hämtning. Detta åsidosätter konfigurationsinställningen `fetch.writeCommitGraph`.
+endif::git-pull[]
+
+`--prefetch`::
+	Ändra den konfigurerade refspec:en för att placera alla referenser i namnrymden `refs/prefetch/`. Se `prefetch`-uppgiften i linkgit:git-maintenance[1].
+
+`-p`::
+`--prune`::
+	Innan du hämtar, ta bort alla referenser till fjärrspårning som inte längre finns på fjärren. Taggar kan inte beskäras om de bara hämtas på grund av standardtaggens automatiska efterföljning eller på grund av ett `--tags`-alternativ. Men om taggar hämtas på grund av en explicit refspec (antingen på kommandoraden eller i fjärrkonfigurationen, till exempel om fjärren klonades med alternativet `--mirror`), kan de också beskäras. Att ange `--prune-tags` är en förkortning för att ange taggens refspec.
+ifndef::git-pull[]
++
+Se avsnittet BESÄRNING nedan för mer information.
+
+`-P`::
+`--prune-tags`::
+	Innan du hämtar, ta bort alla lokala taggar som inte längre finns på fjärren om `--prune` är aktiverat. Det här alternativet bör användas mer försiktigt, till skillnad från `--prune` tar det bort alla lokala referenser (lokala taggar) som har skapats. Det här alternativet är en förkortning för att tillhandahålla den explicita tagg refspec tillsammans med `--prune`, se diskussionen om det i dess dokumentation.
++
+Se avsnittet BESÄRNING nedan för mer information.
+
+endif::git-pull[]
+
+ifndef::git-pull[]
+`-n`::
+endif::git-pull[]
+`--no-tags`::
+	Som standard, hämtas och lagras taggar som pekar på objekt som laddas ner från fjärr-repot lokalt. Det här alternativet inaktiverar denna automatiska taggföljningen. Standardbeteendet för en fjärren kan anges med inställningen `remote.<namn>.tagOpt`. Se linkgit:git-config[1].
+
+ifndef::git-pull[]
+`--refetch`::
+	Istället för att förhandla med servern för att undvika att överföra incheckningar och tillhörande objekt som redan finns lokalt, hämtar det här alternativet alla objekt som en ny klon skulle göra. Använd detta för att återanvända ett partiellt klonfilter från konfigurationen eller med hjälp av `--filter=` när filterdefinitionen har ändrats. Automatiskt underhåll efter hämtning (fetch) utför konsolidering av objektdatabaspaket för att ta bort eventuella dubbletter av objekt.
+endif::git-pull[]
+
+`--refmap=<refspec>`::
+	När du hämtar referenser som listas på kommandoraden, använd den angivna refspecen (kan anges mer än en gång) för att mappa referenserna till fjärrspårningsgrenar, istället för värdena för `remote.<name>.fetch`-konfigurationsvariabler för fjärr-repot. Om du anger ett tomt _<refspec>_ till alternativet `--refmap` ignorerar Git de konfigurerade refspecs och förlitar sig helt på de refspecs som anges som kommandoradsargument. Se avsnittet om "Konfigurerade fjärrspårningsgrenar" för mer information.
+
+`-t`::
+`--tags`::
+	Hämta alla taggar från fjärrkontrollen (dvs. hämta fjärrtaggar `refs/tags/*` till lokala taggar med samma namn), utöver vad som annars skulle hämtas. Att använda det här alternativet ensamt utsätter inte taggar för beskärning, även om `--prune` används (även om taggar kan beskäras ändå om de också är destinationen för en explicit refspec; se `--prune`).
+
+ifndef::git-pull[]
+`--recurse-submodules[=(yes|on-demand|no)]`::
+	Kontrollera om och under vilka villkor nya incheckning för undermoduler också ska hämtas. Vid rekursiv genom undermoduler försöker `git fetch` alltid hämta "ändrade" undermoduler, det vill säga en undermodul som har incheckningar som refereras till av en nyligen hämtad superprojektsincheckning men saknas i den lokala undermodul-klonen. En ändrad submodul kan hämtas så länge den finns lokalt, t.ex. i `$GIT_DIR/modules/` (se linkgit:gitsubmodules[7]); om uppströmen lägger till en ny submodul kan den undermodulen inte hämtas förrän den klonas, t.ex. av `git submodule update`.
++
+När den är inställd på `on-demand` hämtas endast ändrade undermoduler. När den är inställd på `yes` hämtas alla ifyllda undermoduler och undermoduler som både är ofyllda och ändrade hämtas. När den är inställd på `no` hämtas aldrig undermoduler.
++
+Om det inte är angivet använder detta värdet för `fetch.recurseSubmodules` om det är satt (se linkgit:git-config[1]), och standardvärdet är `on-demand` om det inte är satt. När det här alternativet används utan något värde används standardvärdet `yes`.
+endif::git-pull[]
+
+`-j <n>`::
+`--jobs=<n>`::
+	Parallellisera alla former av hämtning upp till _<n>_ jobb åt gången.
++
+Om alternativet `--multiple` angavs kommer de olika fjärrar att hämtas parallellt. Om flera undermoduler hämtas kommer de att hämtas parallellt. För att styra dem oberoende av varandra, använd konfigurationsinställningarna `fetch.parallel` och `submodule.fetchJobs` (se linkgit:git-config[1]).
++
+Vanligtvis är parallella rekursiva hämtningar och hämtningar från flera fjärrar snabbare. Som standard utförs hämtningar sekventiellt, inte parallellt.
+
+ifndef::git-pull[]
+`--no-recurse-submodules`::
+	Inaktivera rekursiv hämtning av undermoduler (detta har samma effekt som att använda alternativet `--recurse-submodules=no`).
+endif::git-pull[]
+
+`--set-upstream`::
+	Om fjärr hämtas korrekt, lägg till en uppströmsreferens (spårningsreferens), som används av argumentlösa linkgit:git-pull[1] och andra kommandon. För mer information, se `branch.<namn>.merge` och `branch.<namn>.remote` i linkgit:git-config[1].
+
+ifndef::git-pull[]
+`--submodule-prefix=<sökväg>`::
+	Lägg till _<sökväg>_ framför sökvägar som skrivs ut i informativa meddelanden som "Hämtar undermodule foo". Detta alternativ används internt vid rekursion över undermodul.
+
+`--recurse-submodules-default=(yes|on-demand)`::
+	Det här alternativet används internt för att tillfälligt tillhandahålla ett icke-negativt standardvärde för alternativet `--recurse-submodules`. Alla andra metoder för att konfigurera hämtingar (fetchs) undermoduls-rekursion (som inställningar i linkgit:gitmodules[5] och linkgit:git-config[1]) åsidosätter det här alternativet, liksom att ange `--[no-]recurse-submodules` direkt.
+
+`-u`::
+`--update-head-ok`::
+	Som standard vägrar `git fetch` att uppdatera huvud-filen som motsvarar den aktuella grenen. Denna flagga inaktiverar kontrollen. Detta är enbart för internt bruk för `git pull` att kommunicera med `git fetch`, och om du inte implementerar ditt eget Porcelain ska du inte använda det.
+endif::git-pull[]
+
+`--upload-pack <upload-pack>`::
+	När det anges, och repot att hämta från hanteras av `git fetch-pack`, skickas `--exec=<upload-pack>` till kommandot för att ange en icke-standardsökväg för kommandot som körs i andra änden.
+
+ifndef::git-pull[]
+`-q`::
+`--quiet`::
+	Skicka `--quiet` till `git-fetch-pack` och tysta alla andra internt använda git-kommandon. Förloppet rapporteras inte till standardfelströmmen.
+
+`-v`::
+`--verbose`::
+	Var pratsam.
+endif::git-pull[]
+
+`--progress`::
+	Förloppsstatus rapporteras som standard i standardfelströmmen när den är kopplad till en terminal, såvida inte `-q` anges. Denna flagga tvingar fram förloppsstatus även om standardfelströmmen inte dirigeras till en terminal.
+
+`-o <alternativ>`::
+`--server-option=<alternativ>`::
+	Skicka den givna strängen till servern vid kommunikation med protokollversion 2. Den givna strängen får inte innehålla tecknet _NUL_ eller _LF_. Serverns hantering av serveralternativ, inklusive okända, är serverspecifik. När flera `--server-option=<alternativ>` anges skickas de alla till den andra sidan i den ordning som anges på kommandoraden. När ingen `--server-option=<alternativ>` anges från kommandoraden används istället värdena för konfigurationsvariabeln `remote.<namn>.serverOption`.
+
+`--show-forced-updates`::
+	Som standard kontrollerar git om en branch tvångsuppdateras under hämtning. Detta kan inaktiveras via `fetch.showForcedUpdates`, men alternativet `--show-forced-updates` garanterar att denna kontroll sker. Se linkgit:git-config[1].
+
+`--no-show-forced-updates`::
+	Som standard kontrollerar git om en gren tvångsuppdateras under hämtning. Skicka `--no-show-forced-updates` eller sätt `fetch.showForcedUpdates` till "false" för att hoppa över denna kontroll av prestandaskäl. Om det används under `git-pull` kommer alternativet `--ff-only` fortfarande att kontrollera om det finns tvångsuppdateringar innan en snabbuppdatering försöker göras. Se linkgit:git-config[1].
+
+`-4`::
+`--ipv4`::
+	Använd endast IPv4-adresser och ignorera IPv6-adresser.
+
+`-6`::
+`--ipv6`::
+	Använd endast IPv6-adresser och ignorera IPv4-adresser.
