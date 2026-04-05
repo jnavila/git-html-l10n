@@ -1,0 +1,54 @@
+`fetch.recurseSubmodules`::
+	Cette option contrôle si `git fetch` (et la récupération sous-jacente dans `git pull`) va se récupérer récursivement dans les sous-modules peuplés. Cette option peut être définie soit à une valeur booléenne, soit à `on-demand`. La régler à une valeur booléenne modifie le comportement de la récupération et de tirage pour aller récursivement dans les sous-modules quand elle est à `true` et à ne pas aller récursivement du tout si elle est à `false`. Lorsqu'elle est mise à `on-demand`, la récupération et le tirage ne seront traités récursivement dans un sous-module peuplé que lorsque son superprojet récupère un commit qui met à jour la référence du sous-module. Par défaut à `on-demand` ou à la valeur de `submodule.recurse` si elle est renseignée.
+
+`fetch.fsckObjects`::
+	Si elle est définie à true, git-fetch-pack vérifiera tous les objets récupérés. Voir `transfer.fsckObjects` pour indiquer ce qui est vérifié. Par défaut à `false`. Si elle n'est pas définie, la valeur de `transfer.fsckObjects ' est utilisée à la place.
+
+`fetch.fsck.<id-msg>`::
+	Agit comme `fsck.<id-msg>`, mais est utilisé par linkgit:git-fetch-pack[1] au lieu de linkgit:git-fsck[1]. Voir la documentation de `fsck.<id-msg>` pour les détails.
+
+`fetch.fsck.skipList`::
+	Agit comme `fsck.skipList`, mais est utilisé par linkgit:git-fetch-pack[1] au lieu de linkgit:git-fsck[1]. Voir la documentation de `fsck.skipList` pour les détails.
+
+`fetch.unpackLimit`::
+	Si le nombre d'objets récupérés lors du transfert natif Git est inférieur à cette limite, les objets seront déballés dans des fichiers d'objets esseulés. Toutefois, si le nombre d'objets reçus est égal ou supérieur à cette limite, le paquet reçu sera stocké comme un fichier paquet, après avoir ajouté toute base delta manquante. Le stockage du paquet à partir d'une poussée peut rendre l'opération de poussée complète plus rapidement, surtout sur les systèmes de fichiers lents. Si elle n'est pas définie, la valeur de `transfer.unpackLimit` est utilisée à la place.
+
+`fetch.prune`::
+	Si true, fetch se comportera automatiquement comme si l'option `--prune` était donnée sur la ligne de commande. Voir aussi `remote.<nom>.prune` et la section ÉLAGAGE de linkgit:git-fetch[1].
+
+`fetch.pruneTags`::
+	Si la valeur est true, la récupération se comportera automatiquement comme si les spécs de réf `refs/tags/*:refs/tags/*` avaient été fournies lors de l'élagage, si ce n'était pas déjà réglé. Cela permet de configurer à la fois cette option et `fetch.prune` pour maintenir une cartographie de 1=1 avec les réfs en amont. Voir aussi `remote.<nom>.pruneTags` et la section ÉLAGAGE de linkgit:git-fetch[1].
+
+`fetch.all`::
+	Si sa valeur est true, fetch tentera de mettre à jour tous les distants disponibles. Ce comportement peut être surchargé en passant `--no-all` ou en spécifiant explicitement un ou plusieurs distants à récupérer. Par défaut à `false`.
+
+`fetch.output`::
+	Contrôler comment le statut de mise à jour de ref est affiché. Les valeurs valides sont `full` et `compact` . La valeur par défaut est `full`. Voir la section SORTIE dans linkgit:git-fetch[1] pour plus de détails.
+
+`fetch.negotiationAlgorithm`::
+	Contrôler comment les informations sur les commits dans le dépôt local sont envoyées lors de la négociation du contenu du fichier paquet à envoyer par le serveur. Définir à `consecutive` pour utiliser un algorithme qui parcourt les commits consécutifs en vérifiant chacun. Réglez-la à `skipping` pour utiliser un algorithme qui saute les commits dans un effort pour converger plus rapidement, mais peut entraîner un paquet plus important que nécessaire ; ou réglez-la à `noop` pour ne pas envoyer d'informations du tout, ce qui entraînera presque certainement un paquet plus grand que nécessaire, mais sautera l'étape de négociation. Définissez-la à `defaut` pour surcharger les réglages faits précédemment et utiliser le comportement par défaut. La valeur par défaut est normalement `consecutive`, mais si `feature.experimental` est `true`, alors la valeur par défaut est `skipping`. Les valeurs inconnues causeront une erreur de `git fetch`.
++
+Voir aussi les options `--negotiate-only` et `--negotiation-tip` de linkgit:git-fetch[1].
+
+`fetch.showForcedUpdates`::
+	Définissez-la à `false` pour activer `--no-show-forced-updates` dans les commandes linkgit:git-fetch[1] et linkgit:git-pull[1]. Par défaut à `true`.
+
+`fetch.parallel`::
+	Spécifie le nombre maximal d'opérations de récupération à exécuter en parallèle à un moment (submodules ou distants lorsque l'option `--multiple` de linkgit:git-fetch[1] est en vigueur).
++
+Une valeur de 0 donnera une certaine valeur par défaut raisonnable. Si non initialisé, elle est par défaut de 1.
++
+Pour les sous-modules, ce réglage peut être surchargé par le paramètre de configuration `submodule.fetchJobs`.
+
+`fetch.writeCommitGraph`::
+	Réglez-le à `true` pour écrire un graphe de commit après chaque commande `git fetch` qui télécharge un fichier paquet depuis un distant. En utilisant l'option `--split`, la plupart des exécutions créeront un très petit fichier de graphe de commits sur le ou les fichiers de graphe de commits existants. Parfois, ces fichiers fusionnent et l'écriture peut prendre plus de temps. Ayant un fichier de graphe de commit mis à jour aide à la performance de nombreuses commandes Git, y compris `git merge-base`, `git push -f`, et `git log --graph`. Par défaut à `false`.
+
+`fetch.bundleURI`::
+	Cette valeur stocke une URI pour le téléchargement Git des données d'objets d'un URI groupé avant d'effectuer une récupération incrémentale depuis le serveur Git d'origine. Cela ressemble à la façon dont l'option `--bundle-uri` se comporte dans linkgit:git-clone[1]. `git clone --bundle-uri` va régler la valeur de `fetch.bundleURI` si l'URI groupé qui est organisé pour les récupérations supplémentaires.
++
+Si vous modifiez cette valeur et que votre dépôt a une valeur pour `fetch.bundleCreationToken`, puis retirez cette valeur `fetch.bundleCreationToken` avant de récupérer depuis la nouvelle URI de colis.
+
+`fetch.bundleCreationToken`::
+	Lors de l'utilisation de `fetch.bundleURI` pour récupérer progressivement à partir d'une liste de colis qui utilise l'heuristique "`creationToken`", cette valeur de configuration stocke la valeur maximale `creationToken` des paquets téléchargés. Cette valeur est utilisée pour empêcher le téléchargement des colis dans le futur si la `creationToken' annoncée n'est pas strictement plus grande que cette valeur.
++
+Les valeurs de jeton de création sont choisies par le fournisseur qui sert l'URI de colis spécifique. Si vous modifiez l'URI à `fetch.bundleURI ' , alors assurez-vous de supprimer la valeur pour la configuration `fetch.bundleCreationToken` avant de récupérer.

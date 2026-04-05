@@ -1,0 +1,164 @@
+git-log(1)
+==========
+
+NAMN
+----
+git-log - Visa inchecknings-loggar
+
+
+SYNOPSIS
+--------
+[synopsis]
+git log [<flaggor>] [<versionsintervall>] [[--] <sökväg>...]
+
+BESKRIVNING
+-----------
+Visar inchecknings-loggarna.
+
+:git-log: 1
+include::rev-list-description.adoc[]
+
+Kommandot använder alternativ som är tillämpliga för kommandot linkgit:git-rev-list[1] för att kontrollera vad som visas och hur, och alternativ som är tillämpliga för kommandot linkgit:git-diff[1] för att kontrollera hur de ändringar som varje commit introducerar visas.
+
+
+ALTERNATIV
+----------
+
+`--follow`::
+	Fortsätt lista historiken för en fil utöver namnbyten (fungerar bara för en enskild fil).
+
+`--no-decorate`::
+`--decorate[=(short|full|auto|no)]`::
+	Skriv ut referensnamnen för alla incheckningar som visas. Möjliga värden är:
++
+----
+`short`;; prefixen för referensnamn `refs/heads/`, `refs/tags/` och
+	`refs/remotes/` skrivs inte ut.
+`full`;; hela referensnamnet (inklusive prefix) skrivs ut.
+`auto`:: om utdata går till en terminal visas referensnamnen 
+	som om `short` hade angetts, annars visas inga
+	referensnamn.
+----
++
+Alternativet `--decorate` är en förkortning för `--decorate=short`. Standardvärdet är `log.decorate` om det är konfigurerat, annars `auto`.
+
+`--decorate-refs=<mönster>`::
+`--decorate-refs-exclude=<mönster>`::
+	För varje kandidatreferens, använd den inte för dekoration om den matchar någon av _<mönster>_-parametrarna som anges till `--decorate-refs-exclude` eller om den inte matchar någon av _<mönster>_-parametrarna som anges till `--decorate-refs`. Konfigurationsalternativet `log.excludeDecoration` tillåter att referenser exkluderas från dekorationerna, men ett explicit `--decorate-refs`-mönster kommer att åsidosätta en matchning i `log.excludeDecoration`.
++
+Om inget av dessa alternativ eller konfigurationsinställningar anges, används referenser som dekoration om de matchar `HEAD`, `refs/heads/`, `refs/remotes/`, `refs/stash/` eller `refs/tags/`.
+
+`--clear-decorations`::
+	När det här alternativet anges, rensar det alla tidigare `--decorate-refs`- eller `--decorate-refs-exclude`-alternativ och minskar standardfiltret för dekoration så att det inkluderar alla referenser. Detta alternativ antas om konfigurationsvärdet `log.initialDecorationSet` är satt till `all`.
+
+`--source`::
+	Skriv ut referensnamnet som anges på kommandoraden genom vilket varje incheckning nåddes.
+
+`--mailmap`::
+`--no-mailmap`::
+`--use-mailmap`::
+`--no-use-mailmap`::
+	Använd mailmap-filen för att mappa författar- och committer-namn och e-postadresser till kanoniska riktiga namn och e-postadresser. Se linkgit:git-shortlog[1].
+
+`--full-diff`::
+	Utan denna flagga, visar `git log -p <sökväg>...` incheckningar som berör de angivna sökvägarna, och diffs kring samma angivna sökvägar. Med detta, visas hela diffen för incheckningar som berör de angivna sökvägarna; detta betyder att "`<sökväg>...`" endast begränsar incheckningar, och begränsar inte diff för dessa incheckningar.
++
+Observera att detta påverkar alla diff-baserade utdatatyper, t.ex. de som produceras av `--stat`, etc.
+
+`--log-size`::
+	Inkludera en rad `log size <nummer>` i utdata för varje incheckning, där _<nummer>_ är längden på inchecknings-meddelande i byte. Avsedd att snabba upp verktyg som läser loggmeddelanden från `git log`-utdata genom att låta dem allokera utrymme i förväg.
+
+include::line-range-options.adoc[]
+
+_<revisionsintervall>_::
+	Visa endast incheckningar inom det angivna revisionsintervallet. När ingen _<revisionsintervall>_ anges, används som standard `HEAD` (dvs. hela historiken som leder till den aktuella incheckningen). `origin..HEAD` anger alla incheckningar som är åtkomliga från den aktuella incheckningen (dvs. `HEAD`), men inte från `origin`. För en komplett lista över sätt att stava _<revisionsintervall>_, se avsnittet 'Ange intervall' i linkgit:gitrevisions[7].
+
+`[--] <sökväg>...`::
+	Visa endast incheckningar som är tillräckliga för att förklara hur filerna som matchar de angivna sökvägarna uppstod. Se 'Historikförenkling' nedan för detaljer och andra förenklingslägen.
++
+Sökvägar kan behöva prefixas med `--` för att separera dem från alternativ eller revisionsintervallet, när förvirring uppstår.
+
+include::rev-list-options.adoc[]
+
+include::pretty-formats.adoc[]
+
+DIFF-FORMATERING
+----------------
+
+Som standard, genererar `git log` ingen diff-utdata. Alternativen nedan kan användas för att visa ändringarna som gjorts av varje incheckning.
+
+Observera att om inte någon av varianterna av `--diff-merges` (inklusive korta `-m`, `-c`, `--cc` och `--dd`) uttryckligen anges, kommer sammanslagnings-incheckningar inte att visa en diff, även om ett diff-format som `--patch` är valt, och de kommer inte heller att matcha sökalternativ som `-S`. Undantaget är när `--first-parent` används, i vilket fall `first-parent` är standardformatet för merge-commits.
+
+:git-log: 1
+:diff-merges-default: `off`
+include::diff-options.adoc[]
+
+include::diff-generate-patch.adoc[]
+
+EXEMPEL
+-------
+`git log --no-merges`::
+
+	Visa hela incheckning-historiken, men hoppa över alla sammanslagningar
+
+`git log v2.6.12.. include/scsi drivers/scsi`::
+
+	Visa alla incheckningar sedan version 'v2.6.12' som ändrat någon fil i underkatalogerna `include/scsi` eller `drivers/scsi`
+
+`git log --since="2 weeks ago" -- gitk`::
+
+	Visa alla commits sedan version 'v2.6.12' som ändrat någon fil i underkatalogerna `include/scsi` eller `drivers/scsi`
+
+`git log --name-status release..test`::
+
+	Visa de incheckning som finns i grenen "`test`" men ännu inte i grenen "`release`", tillsammans med listan över sökvägar som varje commit ändrar.
+
+`git log --follow builtin/rev-list.c`::
+
+	Visar de incheckningar som ändrade `builtin/rev-list.c`, inklusive de commits som gjordes innan filen fick sitt nuvarande namn.
+
+`git log --branches --not --remotes=origin`::
+
+	Visar alla incheckningar som finns i någon av de lokala grenarna men inte i någon av de fjärrspårande grenarna för `origin` (det du har som origin inte har).
+
+`git log master --not --remotes=*/master`::
+
+	Visar alla incheckningar som finns i den lokala mastern men inte i några master-grenar för fjärrkodförrådet.
+
+`git log -p -m --first-parent`::
+
+	Visar historiken inklusive ändringsskillnader, men bara från "huvudgrenens" perspektiv, hoppar över incheckningar som kommer från sammanslagna grenar och visar fullständiga skillnader för ändringar som introducerats av sammanslagningarna. Detta är bara meningsfullt när man följer en strikt policy att sammanfoga alla ämnesgrenar när man stannar kvar på en enda integrationsgren.
+
+`git log -L '/int main/',/^}/:main.c`::
+
+	Visar hur funktionen `main()` i filen `main.c` utvecklades över tid.
+
+`git log -3`::
+
+	Begränsar antalet incheckningar som ska visas till 3.
+
+DISKUSSION
+----------
+
+include::i18n.adoc[]
+
+KONFIGURATION
+-------------
+
+Se linkgit:git-config[1] för kärnvariabler och linkgit:git-diff[1] för inställningar relaterade till diff-generering.
+
+`format.pretty`::
+	Standardinställning för alternativet `--format`. (Se 'Vackra format' ovan.) Standardinställningen är `medium`.
+
+`i18n.logOutputEncoding`::
+	Kodning att använda vid visning av loggar. (Se 'Diskussion' ovan.) Standardvärdet är `i18n.commitEncoding` om det är inställt, och UTF-8 annars.
+
+include::includes/cmd-config-section-rest.adoc[]
+
+include::config/log.adoc[]
+
+include::config/notes.adoc[]
+
+GIT
+---
+En del av linkgit:git[1]-sviten

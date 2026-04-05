@@ -1,0 +1,31 @@
+Git es hasta cierto punto agnóstico de codificación de caracteres.
+
+ - El contenido de objetos blob son secuencias de bytes sin interpretar. No hay traducción de codificación a nivel núcleo.
+
+ - Los nombres de rutas están codificadas en normalización UTF-8 desde C. Esto aplica a objetos árbol, el fichero índice, nombres de referencias, así como los nombres de rutas en argumentos de línea de comandos, variables de ambiente y ficheros de configuración (`.git/config` (ver linkgit:git-config[1]), linkgit:gitignore[5], linkgit:gitattributes[5] y linkgit:gitmodules[5]).
++
+Nótese que Git, al nivel de núcleo, trata los nombres de rutas simplemente como secuencias de bytes no nulos; no hay conversión de codificación de nombre de ruta (exceptuando Mac y Windows). Por lo tanto, usar nombres de rutas no-ASCII funcionará en la mayoría de las plataformas, incluso en sistemas de ficheros que usan codificaciones extendidas de ASCII legadas. Sin embargo, los repositorios creados en tales sistemas no funcionarán apropiadamente en sistemas basados en UTF-8 (p. ej. Linux, Mac, Windows) y viceversa. Además, muchas herramientas basadas en Git simplemente asumen que los nombres están en UTF-8 y mostrarán incorrectamente otras codificaciones.
+
+ - Los mensajes de confirmación están típicamente codificados en UTF-8, pero también se soportan otras codificaciones ASCII extendidas. Esto incluye a ISO-8859-x, CP125x y muchas otras, pero _no_ UTF-16/32, EBCDIC y codificaciones multibyte CJK (GBK, Swift-JIS, Big5, EUC-x, CP9xx, etc.).
+
+Aunque alentamos que los mensajes de confirmación estén codificados en UTF-8, tanto el núcleo como porcelanas de Git están diseñados para no forzar UTF-8 en los proyectos. Si todos los participantes de un proyecto en particular encuentran más conveniente usar codificaciones legadas, Git no lo prohibe. Sin embargo, hay algunas cosas a tener en mente.
+
+. `git commit` y `git commit-tree` emiten una advertencia si el mensaje de registro de confirmación no parece una cadena UTF-8 válida, a menos que digas explícitamente que tu proyecto usa una codificación legada. La forma de hacerlo es poniendo `i18n.commitEncoding` en el fichero `.git/config`, así:
++
+------------
+[i18n]
+	commitEncoding = ISO-8859-1
+------------
++
+Los objetos de confirmación creados con la configuración de arriba registran el valor de `i18n.commitEncoding` en su encabezado `encoding`. Esto para ayudar a otras personas que lo verán después. La falta de este encabezado implica que el mensaje de registro de confirmación está codificado en UTF-8.
+
+. `git log`, `git show`, `git blame` y sus amigos buscan el encabezado `encoding` de un objeto confirmación, e intentan re-codificar el mensaje de registro a UTF-8 a menos que se especifique lo contrario. Se puede especificar la codificación de salida deseada con `i18n.logOutputEncoding` en el fichero `.git/config`, así:
++
+------------
+[i18n]
+	logOutputEncoding = ISO-8859-1
+------------
++
+Si no se tiene esta variable de configuración se usa en su lugar el valor de `i18n.commitEncoding`.
+
+Nótese que deliberadamente decidimos no recodificar los mensajes de registro de confirmación para forzar UTF-8 a nivel de objeto de confirmación, porque recodificar a UTF-8 no es siempre una operación reversible.

@@ -1,0 +1,76 @@
+`push.autoSetupRemote`::
+	Si c'est réglé à `true`, suppose `--set-upstream` sur une poussée par défaut lorsqu'il n'existe pas de suivi en amont pour la branche actuelle ; cette option prend effet avec les options de `push.default`, `simple`, `upstream`, et `current`. Il est utile si par défaut vous voulez que les nouvelles branches soient poussées vers le distant par défaut (comme le comportement de `push.default=current`) et vous voulez également que le suivi en amont soit défini. Les flux de travail les plus susceptibles de bénéficier de cette option sont des flux de travail centraux `simple` où toutes les branches devraient avoir le même nom sur le distant.
+
+`push.default`::
+	Définit l'action que `git push` devrait prendre si aucun refspec n'est donné (que ce soit depuis la ligne de commande, depuis la configuration ou d'ailleurs). Différentes valeurs sont bien adaptées pour des flux de travail spécifiques ; par exemple, dans un flux de travail purement central (c.-à-d. la source de récupération est égale à la destination de poussée), `upstream` est probablement ce que vous voulez. Les valeurs possibles sont :
++
+--
+`nothing`;;
+ne rien pousser (finir en erreur) à moins qu'une refspec ne soit donnée. Ceci est principalement destiné aux personnes qui veulent éviter les erreurs en étant toujours explicite.
+
+`current`;;
+pousser la branche actuelle pour mettre à jour une branche avec le même nom sur l'hôte distant. Fonctionne avec les flux de travail centraux et non centraux.
+
+`upstream`;;
+repousser la branche actuelle vers la branche dont les modifications sont généralement intégrées dans la branche actuelle (qui s'appelle `@{upstream}`). Ce mode n'a de sens que si vous poussez vers le même dépôt que vous tireriez normalement (c.-à-d. le flux de travail central).
+
+`tracking`;;
+c'est un synonyme obsolète pour `upstream`.
+
+`simple`;;
+pousser la branche actuelle vers le même nom sur le distant.
++
+Si vous travaillez avec un flux de travail centralisé (en poussant sur le même dépôt que celui dont vous tirez, qui est généralement `origin`), alors vous devez configurer une branche amont avec le même nom.
++
+Ce mode est le mode par défaut depuis Git 2.0, et est l'option la plus sûre adaptée aux débutants.
+
+`matching`;;
+pousser toutes les branches ayant le même nom de part et d'autre. Cela fait que le dépôt sur lequel vous poussez à se souviendra de l'ensemble de branches qui seront poussées (par exemple, si vous poussez toujours `maint` et `master` dessus et pas d'autres branches, le dépôt sur lequel vous poussez aura ces deux branches, et votre `maint` local et `master` seront poussées dessus).
++
+Pour utiliser ce mode efficacement, vous devez vous assurer que _toutes_ les branches que vous pourriez pousser sont prêtes à être poussée avant de lancer `git push`, car tout l'intérêt de ce mode est de vous permettre de pousser toutes les branches en une seule passe . Si vous terminez habituellement le travail sur une seule branche et poussez le résultat, alors que d'autres branches sont inachevées, ce mode n'est pas pour vous. Aussi ce mode n'est pas approprié pour pousser vers un dépôt central partagé, car d'autres personnes peuvent y ajouter de nouvelles branches, ou mettre à jour le sommet des branches existantes en dehors de votre contrôle.
++
+Ceci était le comportement par défaut, mais plus depuis Git 2.0 (`simple` est le nouveau comportement par défaut).
+
+--
+
+`push.followTags`::
+	Si défini à true, activer l'option `--follow-tags` par défaut. Vous pouvez remplacer cette configuration au moment de la poussée en spécifiant `--no-follow-tags`.
+
+`push.gpgSign`::
+	Peut être fixé à une valeur booléenne, ou la chaîne `if-asked`. Une valeur true provoque la signature GPG de toutes les poussées, comme si `--signed` était passé à linkgit:git-push[1]. La chaîne `if-asked` provoque la signature des poussées si le serveur les gère, comme si `--signed=if-asked` était passé à `git push`. Une valeur `false` peut remplacer une valeur depuis un fichier de configuration de priorité inférieure. Un drapeau de ligne de commande explicite remplace toujours cette option de configuration.
+
+`push.pushOption`::
+	Quand aucun argument `--push-option=<option>` n'est donné en ligne de commande, `git push` se comporte comme si chaque _<option>_ de cette variable était donné comme `--push-option=<option>`.
++
+Il s'agit d'une variable multi-valeur, et une valeur vide peut être utilisée dans un fichier de configuration prioritaire (par exemple `.git/config` dans un dépôt) pour effacer les valeurs héritées d'un fichier de configuration de priorité inférieure (par exemple `$HOME/.gitconfig ' ).
++
+----
+
+Exemple :
+
+/etc/gitconfig
+  push.pushoption = a
+  push.pushoption = b
+
+~/.gitconfig
+  push.pushoption = c
+
+repo/.git/config
+  push.pushoption =
+  push.pushoption = b
+
+Cela ne résultera qu'en b (a et c sont effacés).
+
+----
+
+`push.recurseSubmodules`::
+	Peut être `check`, `on-demand`, `only`, ou `no`, avec le même comportement que celui de `push --recurse-submodules`. Si ce n'est pas défini, `no` est utilisé par défaut, sauf si `submodule.recurse` est fixé (auquel cas une valeur `true` signifie `on-demand` ).
+
+`push.useForceIfIncludes`::
+	Si c'est fixé à `true`, cela équivaut à spécifier `--force-if-includes` comme option à linkgit:git-push[1] sur la ligne de commande. Ajouter `--no-force-if-includes` au moment de pousser surcharge ce réglage de configuration.
+
+`push.negotiate`::
+	Si c'est réglé à `true`, essayer de réduire la taille du fichier paquet envoyé par des rondes de négociation dans lesquelles le client et le serveur tentent de trouver des commits en commun. Si `false`, Git s'appuiera uniquement sur l'annonce des réfs du serveur pour trouver des commits en commun.
+
+`push.useBitmaps`::
+	Si c'est réglé à `false` , désactiver l'utilisation de bitmaps pour `git push` même si `pack.useBitmaps` est `true` , sans empêcher d'autres opérations de git d'utiliser des bitmaps. La valeur par défaut est `true`.

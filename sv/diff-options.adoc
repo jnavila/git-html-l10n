@@ -1,0 +1,566 @@
+// Please don't remove this comment as asciidoc behaves badly when
+// the first non-empty line is ifdef/ifndef. The symptom is that
+// without this comment the <git-diff-core> attribute conditionally
+// defined below ends up being defined unconditionally.
+// Last checked with asciidoc 7.0.2.
+
+ifndef::git-format-patch[]
+ifndef::git-diff[]
+ifndef::git-log[]
+:git-diff-core: 1
+endif::git-log[]
+endif::git-diff[]
+endif::git-format-patch[]
+
+ifdef::git-format-patch[]
+-p::
+--no-stat::
+	Generera vanliga patchar utan några diffstatistik.
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+`-p`::
+`-u`::
+`--patch`::
+	Generera patch (se <<generate_patch_text_with_p>>).
+ifdef::git-diff[]
+	Detta är standardvärdet..
+endif::git-diff[]
+
+`-s`::
+`--no-patch`::
+	Undertryck all utdata från diff-maskineriet. Användbart för kommandon som `git show` som visar patchen som standard för att undertrycka deras utdata, eller för att avbryta effekten av alternativ som `--patch`, `--stat` tidigare på kommandoraden i ett alias.
+
+endif::git-format-patch[]
+
+ifdef::git-log[]
+`-m`::
+	Visa differenser för sammanslagings-incheckningar i standardformatet. Detta liknar `--diff-merges=on`, förutom att `-m` inte kommer att producera någon utdata om inte `-p` också anges.
+
+`-c`::
+	Producera kombinerad diff-utdata för sammanslagings-incheckningar. Genväg för `--diff-merges=combined -p`.
+
+`--cc`::
+	Producera tät kombinerad diff-utdata för sammanslagnings-incheckningar. Genväg för `--diff-merges=dense-combined -p`.
+
+`--dd`::
+	Skapa diff med avseende på första föräldern för både sammanslå- och reguljära incheckningar. Genväg för `--diff-merges=first-parent -p`.
+
+`--remerge-diff`::
+	Producera remerge-diff utdata för sammanslagnings-incheckningar. Genväg för `--diff-merges=remerge -p`.
+
+`--no-diff-merges`::
+	Synonym för `--diff-merges=off`.
+
+`--diff-merges=<format>`::
+	Ange diff-formatet som ska användas för sammanslagnings-incheckningar. Standardinställningen är {diff-merges-default} om inte `--first-parent` används, i vilket fall `first-parent` är standardinställningen.
++
+Följande format stöds:
++
+--
+`off`::
+`none`::
+	Inaktivera utdata för diffs för sammanslagnings-incheckningar. Användbart för att åsidosätta implicita värden.
+
+`on`::
+`m`::
+	Gör diff-utdata för sammanslagnings-incheckningar så att de visas i standardformatet. Standardformatet kan ändras med hjälp av konfigurationsvariabeln `log.diffMerges`, vars standardvärde är `separate`.
+
+`first-parent`::
+`1`::
+	Visa fullständig skillnad med avseende på första föräldern. Detta är samma format som `--patch` producerar för icke-sammanslagna incheckningar.
+
+`separate`::
+	Visa fullständig differens med avseende på varje förälder. Separat loggpost och differens genereras för varje förälder.
+
+`combined`::
+`c`::
+	Visa skillnader från varje förälder till sammanslagningsresultatet samtidigt istället för att visa parvisa skillnader mellan en förälder och resultatet en i taget. Dessutom listas endast filer som har ändrats från alla föräldrar.
+
+`dense-combined`::
+`cc`::
+	Komprimera ytterligare utdata som produceras av `--diff-merges=combined` genom att utelämna ointressanta stycken vars innehåll i föräldrarna bara har två varianter och sammanslagningsresultatet väljer en av dem utan modifiering.
+
+`remerge`::
+`r`:: Återsammanfoga två-föräldra sammanslagnings-incheckningar för att skapa ett temporärt trädobjekt – potentiellt innehållande filer med konfliktmarkörer och liknande. En skillnad visas sedan mellan det temporära trädet och den faktiska sammanslagnings-incheckningen.
+--
++
+Utdata som genereras när detta alternativ används kan komma att ändras, och detsamma gäller dess interaktion med andra alternativ (såvida det inte uttryckligen dokumenterats).
+
+
+`--combined-all-paths`::
+	Gör att kombinerade diffs (används försammanslagnings-incheckningar) listar namnet på filen från alla föräldrar. Det har således bara effekt när `--diff-merges=[dense-]combined` används, och är sannolikt bara användbart om filnamnsändringar upptäcks (dvs. när antingen namnbyte eller kopieringsdetektering har begärts).
+endif::git-log[]
+
+`-U<n>`::
+`--unified=<n>`::
+	Generera skillnader med _<n>_ kontextrader istället för de vanliga tre.
+ifndef::git-format-patch[]
+	implicerar `--patch`.
+endif::git-format-patch[]
+
+`--output=<fil>`::
+	Utdata till en specifik fil istället för stdout.
+
+`--output-indicator-new=<tecken>`::
+`--output-indicator-old=<tecken>`::
+`--output-indicator-context=<tecken>`::
+	Ange tecknet som används för att indikera nya, gamla eller kontextuella rader i den genererade patchen. Normalt är de `+`, `-` respektive ' '.
+
+ifndef::git-format-patch[]
+`--raw`::
+ifndef::git-log[]
+	generera diff i råformat
+ifdef::git-diff-core[]
+	Detta är standardvärdet..
+endif::git-diff-core[]
+endif::git-log[]
+ifdef::git-log[]
+	För varje incheckning, visa en sammanfattning av ändringarna med hjälp av raw diff
+	-formatet. Se avsnittet "RÅTTUTGÅNGSFORMAT" i
+	linkgit:git-diff[1]. Detta skiljer sig från att visa själva loggen 
+	i råformat, vilket du kan uppnå med
+	`--format=raw`.
+endif::git-log[]
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+`--patch-with-raw`::
+	Synonym till `-p --raw`.
+endif::git-format-patch[]
+
+ifdef::git-log[]
+`-t`::
+	Visa trädobjekten i diff-utdata.
+endif::git-log[]
+
+`--indent-heuristic`::
+	Aktivera heuristiken som flyttar olika styckesgränser för att göra patchar lättare att läsa. Detta är standardinställningen.
+
+`--no-indent-heuristic`::
+	Inaktivera indenteringsheuristiken.
+
+`--minimal`::
+	Lägg extra tid på att se till att minsta möjliga skillnad produceras.
+
+`--patience`::
+	Generera en diff med algoritmen "patience diff".
+
+`--histogram`::
+	Generera en diff med algoritmen "histogram diff".
+
+`--anchored=<text>`::
+	Generera en diff med algoritmen "anchored diff".
++
+Det här alternativet kan anges mer än en gång.
++
+Om en rad finns i både käll- och destinationsraden, bara finns en gång och börjar med _<text>_, försöker den här algoritmen förhindra att den visas som en borttagning eller tillägg i utdata. Den använder algoritmen "patience diff" internt.
+
+include::diff-algorithm-option.adoc[]
+
+`--stat[=<bredd>[,<namn-bredd>[,<antal>]]`::
+	Generera en diffstat. Som standard används så mycket utrymme som behövs för filnamnsdelen och resten för grafdelen. Maximal bredd är som standard terminalbredd, eller 80 kolumner om den inte är ansluten till en terminal, och kan åsidosättas av _<bredd>_. Bredden på filnamnsdelen kan begränsas genom att ge en annan bredd _<namnbredd>_ efter ett kommatecken eller genom att ställa in `diff.statNameWidth=<namnbredd>`. Bredden på grafdelen kan begränsas genom att använda `--stat-graph-width=<grafbredd>` eller genom att ställa in `diff.statGraphWidth=<grafbredd>`. Att använda `--stat` eller `--stat-graph-width` påverkar alla kommandon som genererar en statistisk graf, medan att ställa in `diff.statNameWidth` eller `diff.statGraphWidth` inte påverkar `git format-patch`. Genom att ange en tredje parameter _<count>_ kan du begränsa utdata till de första _<count>_ raderna, följt av `...` om det finns fler.
++
+Dessa parametrar kan också ställas in individuellt med `--stat-width=<bredd>`, `--stat-name-width=<namn-bredd>` och `--stat-count=<antal>`.
+
+`--compact-summary`::
+	Skriv ut en komprimerad sammanfattning av utökad huvud-information, såsom skapande eller borttagning av filer ("ny" eller "borta", valfritt `+l` om det är en symbolisk länk) och lägesändringar (`+x` eller `-x` för att lägga till respektive ta bort en körbar bit) i diffstat. Informationen placeras mellan filnamnsdelen och grafdelen. Innebär `--stat`.
+
+`--numstat`::
+	Liknar `--stat`, men visar antalet tillagda och borttagna rader i decimalnotation och sökväg utan förkortning, för att göra det mer maskinvänligt. För binära filer matas två `-` ut istället för att säga `0 0`.
+
+`--shortstat`::
+	Skriv endast ut den sista raden i formatet `--stat` som innehåller det totala antalet ändrade filer, samt antalet tillagda och borttagna rader.
+
+`-X [<param>,...]`::
+`--dirstat[=<param>,...]`::
+	Visar fördelningen av den relativa mängden ändringar för varje underkatalog. Beteendet för `--dirstat` kan anpassas genom att skicka en kommaseparerad lista med parametrar. Standardvärdena styrs av konfigurationsvariabeln `diff.dirstat` (se linkgit:git-config[1]). Följande parametrar är tillgängliga:
++
+--
+`changes`;;
+	Beräkna dirstat-talen genom att räkna raderna som har tagits bort från källan eller lagts till i destinationen. Detta ignorerar mängden rena kodförflyttningar inom en fil. Med andra ord räknas inte omarrangemang av rader i en fil lika mycket som andra ändringar. Detta är standardbeteendet när ingen parameter anges.
+`lines`;;
+	Beräkna dirstat-talen genom att göra den vanliga radbaserade diff-analysen och summera antalet borttagna/tillagda rader. (För binära filer, räkna istället 64-byte-block, eftersom binära filer inte har något naturligt koncept för rader). Detta är ett dyrare `--dirstat`-beteende än `changes`-beteendet, men det räknar omordnade rader i en fil lika mycket som andra ändringar. Den resulterande utdata överensstämmer med vad du får från de andra `--*stat`-alternativen.
+`files`;;
+	Beräkna dirstat-talen genom att räkna antalet ändrade filer. Varje ändrad fil räknas lika i dirstat-analysen. Detta är det beräkningsmässigt billigaste beteendet för `--dirstat`, eftersom det inte behöver titta på filinnehållet alls.
+`cumulative`;;
+	Count changes in a child directory for the parent directory as well. Note that when using `cumulative`, the sum of the percentages reported may exceed 100%. The default (non-cumulative) behavior can be specified with the `noncumulative` parameter.
+_<gränsvärde>_;;
+	En heltalsparameter anger en gränsvärde i procent (3 % som standard). Kataloger som bidrar med mindre än denna procentandel av ändringarna visas inte i utdata.
+--
++
+Exempel: Följande räknar ändrade filer, ignorerar kataloger med mindre än 10 % av den totala mängden ändrade filer och ackumulerar antal underkataloger i överordnade kataloger: `--dirstat=files,10,cumulative`.
+
+`--cumulative`::
+	Synonym för `--dirstat=cumulative`.
+
+`--dirstat-by-file[=<param>,...]`::
+	Synonym för `--dirstat=files,<param>,...`.
+
+`--summary`::
+	Skriv ut en komprimerad sammanfattning av utökad huvud-information, såsom skapanden, namnbyten och läges-ändringar.
+
+ifndef::git-format-patch[]
+`--patch-with-stat`::
+	Synonym till `-p --stat`.
+endif::git-format-patch[]
+
+ifndef::git-format-patch[]
+
+`-z`::
+ifdef::git-log[]
+	Separera incheckningar med __NUL__ istället för newlines.
++
+Also, when `--raw` or `--numstat` has been given, do not munge pathnames and use __NUL__s as output field terminators.
+endif::git-log[]
+ifndef::git-log[]
+	När `--raw`, `--numstat`, `--name-only` eller `--name-status` har angetts,
+	ändra inte sökvägar och använd NUL:er som terminatorer för utdatafält.
+endif::git-log[]
++
+Utan detta alternativ, citeras sökvägar med "ovanliga" tecken enligt beskrivningen för konfigurationsvariabeln `core.quotePath` (se linkgit:git-config[1]).
+
+`--name-only`::
+	Visa endast namnet på varje ändrad fil i trädet efter avbildningen. Filnamnen är ofta kodade i UTF-8. För mer information, se diskussionen om kodning på manualsidan för linkgit:git-log[1].
+
+`--name-status`::
+	Visa endast namn och status för varje ändrad fil. Se beskrivningen av alternativet `--diff-filter` för information om vad statusbokstäverna betyder. Precis som `--name-only` är filnamnen ofta kodade i UTF-8.
+
+`--submodule[=<format>]`::
+	Ange hur skillnader i undermoduler visas. När `--submodule=short` anges används formatet `short`. Detta format visar bara namnen på incheckningar i början och slutet av intervallet. När `--submodule` eller `--submodule=log` anges används formatet `log`. Detta format listar incheckningar i intervallet, precis som linkgit:git-submodule[1] `summary` gör. När `--submodule=diff` anges används formatet `diff`. Detta format visar en inline-diff av ändringarna i undermodulinnehållet mellan inchecknings-intervallet. Standardinställningen är `diff.submodule` eller formatet `short` om konfigurationsalternativet inte är inställt.
+
+`--color[=<när>]`::
+	Visa färglagd skillnad. `--color` (dvs. utan `=<när>`) är samma sak som `--color=always`. _<när>_ kan vara en av `always`, `aldrig` eller `auto`.
+ifdef::git-diff[]
+	Det kan ändras med konfigurationsinställningarna
+	`color.ui` och `color.diff`.
+endif::git-diff[]
+
+`--no-color`::
+	Stäng av färgad diff.
+ifdef::git-diff[]
+	Detta kan användas för att åsidosätta konfigurationsinställningar.
+endif::git-diff[]
+	Det är samma sak som `--color=never`.
+
+`--color-moved[=<läge>]`::
+	Flyttade kodrader färgas annorlunda.
+ifdef::git-diff[]
+	Det kan ändras med konfigurationsinställningen `diff.colorMoved`.
+endif::git-diff[]
+	Standardvärdet för _<läge>_ är `no` om alternativet inte anges
+	och `zebra` om alternativet utan läge anges.
+	Läget måste vara ett av:
++
+--
+`no`::
+	Flyttade linjer markeras inte.
+`default`::
+	Är en synonym för "zebra". Detta kan komma att ändras till ett mer förnuftigt läge i framtiden.
+`plain`::
+	Alla rader som läggs till på en plats och togs bort på en annan plats kommer att färgas med `color.diff.newMoved`. På liknande sätt kommer `color.diff.oldMoved` att användas för borttagna rader som läggs till någon annanstans i diff-filen. Det här läget plockar upp alla flyttade rader, men det är inte särskilt användbart i en granskning för att avgöra om ett kodblock flyttades utan permutation.
+`blocks`::
+	Block med flyttad text på minst 20 alfanumeriska tecken upptäcks snabbt. De upptäckta blocken målas med antingen färgen `color.diff.(old|new)Moved`. Intilliggande block kan inte skiljas åt.
+`zebra`::
+	Block med flyttad text detekteras som i `blocks`-läge. Blocken målas med antingen färgen `color.diff.(old|new)Moved` eller `color.diff.(old|new)MovedAlternative`. Växlingen mellan de två färgerna indikerar att ett nytt block har detekterats.
+`dimmed-zebra`::
+	Liknar `zebra`, men ytterligare nedtoning av ointressanta delar av flyttad kod utförs. Gränslinjerna för två intilliggande block anses intressanta, resten är ointressant. `dimmed_zebra` är en föråldrad synonym.
+--
+
+`--no-color-moved`::
+	Stäng av rörelsedetektering. Detta kan användas för att åsidosätta konfigurationsinställningar. Det är samma sak som `--color-moved=no`.
+
+`--color-moved-ws=<läge>,...`::
+	Detta konfigurerar hur blanksteg ignoreras när rörelsedetektering utförs för `--color-moved`.
+ifdef::git-diff[]
+	Det kan ställas in med konfigurationsinställningen `diff.colorMovedWS`.
+endif::git-diff[]
+	Dessa lägen kan anges som en kommaseparerad lista:
++
+--
+`no`::
+	Ignorera inte blanksteg när du utför rörelsedetektering.
+`ignore-space-at-eol`::
+	Ignorera ändringar i blanktecken vid radslut.
+`ignore-space-change`::
+	Ignorera ändringar i mängden blanktecken. Detta ignorerar blanktecken i radslutet och betraktar alla andra sekvenser av ett eller flera mellanslagstecken som likvärdiga.
+`ignore-all-space`::
+	Ignorera blanktecken när du jämför rader. Detta ignorerar skillnader även om en rad har blanktecken medan den andra raden inte har något.
+`allow-indentation-change`::
+	Ignorera först eventuella blanksteg i flyttdetekteringen, gruppera sedan de flyttade kodblocken endast i ett block om ändringen i blanksteg är densamma per rad. Detta är inkompatibelt med de andra lägena.
+--
+
+`--no-color-moved-ws`::
+	Ignorera inte blanksteg när du utför rörelsedetektering. Detta kan användas för att åsidosätta konfigurationsinställningar. Det är samma sak som `--color-moved-ws=no`.
+
+`--word-diff[=<läge>]`::
+	Som standard avgränsas ord med blanksteg; se `--word-diff-regex` nedan. _<läge>_ har som standard `plain` och måste vara en av:
++
+--
+`color`::
+	Markera ändrade ord med endast färger. Innebär `--color`.
+`plain`::
+	Visar ord som ++[-borttagen-]++ och ++{+tillagd+}++. Gör inga försök att ta escape avgränsare om de förekommer i indata, så utdata kan vara tvetydig.
+`porcelain`::
+	Använd ett speciellt radbaserat format avsett för skriptanvändning. Tillagda/borttagna/oändrade körningar skrivs ut i det vanliga enhetliga diff-formatet, med början med ett `+`/`-`/` `-tecknet i början av raden och sträcker sig till slutet av raden. Nya rader i inmatningen representeras av en tilde `~` på en egen rad.
+`none`::
+	Inaktivera orddiff igen.
+--
++
+Observera att trots namnet på det första läget, används färg för att markera de ändrade delarna i alla lägen om det är aktiverat.
+
+`--word-diff-regex=<regex>`::
+	Använd _<regex>_ för att avgöra vad ett ord är, istället för att betrakta sträckor av icke-blanksteg som ett ord. Innebär även `--word-diff` om det inte redan var aktiverat.
++
+Varje icke-överlappande matchning av _<regex>_ betraktas som ett ord. Allt mellan dessa matchningar betraktas som blanktecken och ignoreras(!) i syfte att hitta skillnader. Du kanske vill lägga till `|[^[:space:]]` i ditt reguljära uttryck för att se till att det matchar alla tecken som inte är blanktecken. En matchning som innehåller en nyrad avkortas tyst(!) vid nyradslinjen.
++
+Till exempel kommer `--word-diff-regex=.` att behandla varje tecken som ett ord och, på motsvarande sätt, visa skillnader tecken för tecken.
++
+Regex-funktionen kan också ställas in via en diff-drivrutin eller ett konfigurationsalternativ, se linkgit:gitattributes[5] eller linkgit:git-config[1]. Om du anger den explicit åsidosätts alla diff-drivrutiner eller konfigurationsinställningar. Diff-drivrutiner åsidosätter konfigurationsinställningar.
+
+`--color-words[=<regex>]`::
+	Motsvarande `--word-diff=color` plus (om ett regex angavs) `--word-diff-regex=<regex>`.
+endif::git-format-patch[]
+
+`--no-renames`::
+	Stäng av namnbytesdetektering, även när konfigurationsfilen anger standardinställningen för det.
+
+`--rename-empty`::
+`--no-rename-empty`::
+	Huruvida tomma blobbar ska användas som namnbyteskälla.
+
+ifndef::git-format-patch[]
+`--check`::
+	Varna om ändringar introducerar konfliktmarkörer eller blankteckenfel. Vad som anses vara blankteckenfel styrs av konfigurationen av `core.whitespace`. Som standard betraktas efterföljande blanktecken (inklusive rader som enbart består av blanktecken) och ett mellanslagstecken som omedelbart följs av ett tabbtecken inuti radens första indrag som blankteckenfel. Avslutas med status som inte är noll om problem upptäcks. Inte kompatibel med `--exit-code`.
+
+`--ws-error-highlight=<slag>`::
+	Markera blankteckenfel i raderna `context`, `old` eller `new` i diff-filen. Flera värden separeras med kommatecken, `none` återställer tidigare värden, `default` återställer listan till `new` och `all` är en förkortning för `old,new,context`. När detta alternativ inte anges och konfigurationsvariabeln `diff.wsErrorHighlight` inte är angiven, markeras endast blankteckenfel i raderna `new`. Blankteckenfelen är färgade med `color.diff.whitespace`.
+
+endif::git-format-patch[]
+
+`--full-index`::
+	Istället för de första tecknen, visa de fullständiga namnen på blob-objekten före och efter avbildningen på "index"-raden när du genererar utdata för patch-format.
+
+`--binary`::
+	Förutom `--full-index`, mata ut en binär diff som kan tillämpas med `git-apply`.
+ifndef::git-format-patch[]
+	implicerar `--patch`.
+endif::git-format-patch[]
+
+`--abbrev[=<n>]`::
+	Istället för att visa det fullständiga 40-byte hexadecimala objektnamnet i utdata i diff-raw-format och diff-tree-huvud-rader, visa det kortaste prefixet som är minst _<n>_ hexdigits långt och som unikt refererar till objektet. I diff-patch-utdataformat har `--full-index` högre prioritet, d.v.s. om `--full-index` anges kommer fullständiga blobnamn att visas oavsett `--abbrev`. Antal siffror som inte är standard kan anges med `--abbrev=<n>`.
+
+`-B[<n>][/<m>]`::
+`--break-rewrites[=[<n>][/<m>]]`::
+	Dela upp fullständiga omskrivningsändringar i par av radera och skapa. Detta tjänar två syften:
++
+Det påverkar hur en förändring som innebär en total omskrivning av en fil, inte som en serie borttagningar och infogningar blandade med ett fåtal rader som råkar matcha textuellt som kontexten, utan som en enda borttagning av allt gammalt följt av en enda infogning av allt nytt, och siffran _<m>_ styr denna aspekt av `-B`-alternativet (standard är 60%). `-B/70%` anger att mindre än 30% av originalet ska finnas kvar i resultatet för att Git ska betrakta det som en total omskrivning (dvs. annars kommer den resulterande patchen att vara en serie borttagningar och infogningar blandade med kontextrader).
++
+När den används med `-M` betraktas även en helt omskriven fil som källa till ett namnbyte (vanligtvis betraktar `-M` bara en fil som försvunnit som källa till ett namnbyte), och siffran _<n>_ styr denna aspekt av alternativet `-B` (standard är 50%). `-B20%` anger att en ändring med tillägg och borttagning jämfört med 20% eller mer av filens storlek är berättigad att plockas upp som en möjlig källa till ett namnbyte till en annan fil.
+
+`-M[<n>]`::
+`--find-renames[=<n>]`::
+ifndef::git-log[]
+	detektera namnändringar
+endif::git-log[]
+ifdef::git-log[]
+	Om du genererar diffs, upptäck och rapportera namnbyten för varje .
+	incheckning För att följa filer över namnbyten medan du går igenom 
+	historiken, se `--follow`.
+endif::git-log[]
+	Om _<n>_ anges, är det ett tröskelvärde för likhetsindexet (dvs. 
+	mängden tillägg/borttagningar jämfört med filens storlek).
+	Till exempel betyder `-M90%` att Git ska betrakta ett 
+	borttagnings-/tilläggspar som ett namnbyte om mer än 90 % av filen
+	inte har ändrats. Utan ett `%`-tecken ska talet läsas som
+	ett bråktral, med ett decimaltecken före. Dvs. `-M5` blir 0,5 
+	och är således detsamma som `-M50%`. På liknande sätt är 
+	`-M05` detsamma som `-M5%`. För att begränsa detekteringen 
+	till exakta namnbyten, använd `-M100%`. Standardlikhetsindexet är 50 %.
+
+`-C[<n>]`::
+`--find-copies[=<n>]`::
+	Identifiera kopior såväl som byt namn. Se även `--find-copies-harder`. Om _<n>_ anges har det samma betydelse som för `-M<n>`.
+
+`--find-copies-harder`::
+	Av prestandaskäl hittar `-C`-alternativet som standard bara kopior om originalfilen för kopian ändrades i samma ändringsuppsättning. Denna flagga gör att kommandot inspekterar omodifierade filer som kandidater för kopians källa. Detta är en mycket dyr operation för stora projekt, så använd den med försiktighet. Att ge mer än ett `-C`-alternativ har samma effekt.
+
+`-D`::
+`--irreversible-delete`::
+	Utelämna preimage för borttagningar, d.v.s. skriv bara ut huvudet men inte skillnaden mellan preimage och `/dev/null`. Den resulterande patchen är inte avsedd att tillämpas med `patch` eller `git apply`; detta är enbart för personer som bara vill koncentrera sig på att granska texten efter ändringen. Dessutom saknar utdata uppenbarligen tillräckligt med information för att tillämpa en sådan patch i omvänd ordning, även manuellt, därav namnet på alternativet.
++
+När det används tillsammans med `-B`, utelämna även förbilden i borttagningsdelen av ett borttagnings-/skaparpar.
+
+`-l<num>`::
+	Alternativen `-M` och `-C` involverar några preliminära steg som kan upptäcka delmängder av namnbyten/kopior billigt, följt av en uttömmande reservdel som jämför alla återstående oparade destinationer med alla relevanta källor. (För namnbyten är endast återstående oparade källor relevanta; för kopior är alla originalkällor relevanta.) För N källor och destinationer är denna uttömmande kontroll O(N^2). Detta alternativ förhindrar att den uttömmande delen av namnbytes-/kopieringsdetektering körs om antalet inblandade käll-/destinationsfiler överstiger det angivna antalet. Standardvärdet är `diff.renameLimit`. Observera att värdet 0 behandlas som obegränsat.
+
+ifndef::git-format-patch[]
+`--diff-filter=[(A|C|D|M|R|T|U|X|B)...[*]]`::
+	Markera endast filer som är Tillagda (`A`), Kopierade (`C`), Borttagna (`D`), Modifierade (`M`), Omdöpta (`R`), har sin typ (dvs. vanlig fil, symlänk, undermodul, ...) ändrad (`T`), är Osammanslagna (`U`), är Okända (`X`) eller har fått sin parning Bruten (`B`). Vilken kombination som helst av filtertecknen (inklusive inga) kan användas. När `*` (Allt-eller-inget) läggs till i kombinationen markeras alla sökvägar om det finns någon fil som matchar andra kriterier i jämförelsen; om det inte finns någon fil som matchar andra kriterier markeras ingenting.
++
+Även, dessa versaler kan ändras till gemener för att exkludera. T.ex. exkluderar `--diff-filter=ad` tillagda och borttagna sökvägar.
++
+Observera att inte alla diffs kan innehålla alla typer. Till exempel kan kopierade och omdöpta poster inte visas om detektering för dessa typer är inaktiverat.
+
+`-S<sträng>`::
+	Leta efter skillnader som ändrar antalet förekomster av den angivna _<sträng>_ (dvs. tillägg/borttagning) i en fil. Avsedd för skriptutvecklarens bruk.
++
+Det är användbart när du letar efter ett exakt kodblock (som en struktur) och vill veta blockets historia sedan det först kom till: använd funktionen iterativt för att mata in det intressanta blocket i föravbildningen tillbaka till `-S` och fortsätt tills du får den allra första versionen av blocket.
++
+Binära filer genomsöks också.
+
+`-G<regex>`::
+	Leta efter skillnader vars patchtext innehåller tillagda/borttagna rader som matchar _<regex>_.
++
+För att illustrera skillnaden mellan `-S<regex>` `--pickaxe-regex` och `-G<regex>`, betrakta en incheckning med följande diff i samma fil:
++
+----
++    return frotz(nitfol, two->ptr, 1, 0);
+...
+-    hit = frotz(nitfol, mf2.ptr, 1, 0);
+----
++
+Medan `git log -G"frotz\(nitfol"` visar denna incheckning, gör `git log -S"frotz\(nitfol" --pickaxe-regex` inte det (eftersom antalet förekomster av den strängen inte ändrades).
++
+Om inte `--text` anges kommer patchar av binära filer utan ett textconv-filter att ignoreras.
++
+Se posten 'pickaxe' i linkgit:gitdiffcore[7] för mer information.
+
+`--find-object=<objekt-id>`::
+	Leta efter skillnader som ändrar antalet förekomster av det angivna objektet. I likhet med `-S` är det bara argumentet som skiljer sig genom att det inte söker efter en specifik sträng utan efter ett specifikt objekt-id.
++
+Objektet kan vara en blob eller en undermodul-incheckning. Det innebär att `-t`-alternativet i `git-log` också kan hitta träd.
+
+`--pickaxe-all`::
+	När `-S` eller `-G` hittar en ändring, visa alla ändringar i den ändringsmängden, inte bara de filer som innehåller ändringen i _<sträng>_.
+
+`--pickaxe-regex`::
+	Behandla _<sträng>_ som ges till `-S` som ett utökat POSIX-reguljärt uttryck som matchar.
+
+endif::git-format-patch[]
+
+`-O<ordingsfil>`::
+	Styr ordningen i vilka filer visas i utdata. Detta åsidosätter konfigurationsvariabeln `diff.orderFile` (se linkgit:git-config[1]). För att avbryta `diff.orderFile`, använd `-O/dev/null`.
++
+Utmatningsordningen bestäms av ordningen på glob-mönstren i _<ordingsfil>_. Alla filer med sökvägar som matchar det första mönstret matas ut först, alla filer med sökvägar som matchar det andra mönstret (men inte det första) matas ut härnäst, och så vidare. Alla filer med sökvägar som inte matchar något mönster matas ut sist, som om det fanns ett implicit match-all-mönster i slutet av filen. Om flera sökvägar har samma rangordning (de matchar samma mönster men inga tidigare mönster), är deras utmatningsordning i förhållande till varandra den normala ordningen.
++
+_<ordingsfil>_ tolkas enligt följande:
++
+--
+ - Tomma rader ignoreras, så de kan användas som avgränsare för läsbarhet.
+
+ - Rader som börjar med en hash ("`#`") ignoreras, så de kan användas för kommentarer. Lägg till ett bakåtsnedstreck ("`\`") i början av mönstret om det börjar med en hash.
+
+ - Varje annan rad innehåller ett enda mönster.
+--
++
+Mönster har samma syntax och semantik som mönster som används för `fnmatch`(3) utan `FNM_PATHNAME`-flaggan, förutom att ett sökvägsnamn också matchar ett mönster om borttagning av ett antal av de slutliga sökvägsnamnskomponenterna matchar mönstret. Till exempel matchar mönstret "`foo*bar`" "`fooasdfbar`" och "`foo/bar/baz/asdf`" men inte "`foobarx`".
+
+`--skip-to=<fil>`::
+`--rotate-to=<fil>`::
+	Släng filerna före den namngivna _<fil>_ från utdata (dvs. 'hoppa till'), eller flytta dem till slutet av utdata (dvs. 'rotera till'). Dessa alternativ uppfanns främst för användning av `git difftool`-kommandot, och kanske inte är särskilt användbara annars.
+
+ifndef::git-format-patch[]
+`-R`::
+	Växla två indata; det vill säga visa skillnader mellan index eller fil på disk och trädinnehåll.
+endif::git-format-patch[]
+
+`--relative[=<sökväg>]`::
+`--no-relative`::
+	När den körs från en underkatalog till projektet kan den få instruktioner att exkludera ändringar utanför katalogen och visa sökvägar relativa till den med detta alternativ. När du inte befinner dig i en underkatalog (t.ex. i ett bart arkiv) kan du namnge vilken underkatalog som utdata ska vara relativ till genom att ange _<sökväg>_ som argument. `--no-relative` kan användas för att ångra både konfigurationsalternativet `diff.relative` och föregående `--relative`.
+
+`-a`::
+`--text`::
+	Hantera alla filer som text.
+
+`--ignore-cr-at-eol`::
+	Ignorera vagnretur i slutet av raden vid en jämförelse.
+
+`--ignore-space-at-eol`::
+	Ignorera ändringar i blanktecken vid radslut.
+
+`-b`::
+`--ignore-space-change`::
+	Ignorera ändringar i mängden blanktecken. Detta ignorerar blanktecken i radslutet och betraktar alla andra sekvenser av ett eller flera mellanslagstecken som likvärdiga.
+
+`-w`::
+`--ignore-all-space`::
+	Ignorera blanktecken när du jämför rader. Detta ignorerar skillnader även om en rad har blanktecken medan den andra raden inte har något.
+
+`--ignore-blank-lines`::
+	Ignorera ändringar i rader som är helt blanka.
+
+
+`-I<regex>`::
+`--ignore-matching-lines=<regex>`::
+	Ignorera ändringar vars alla rader matchar _<regex>_. Det här alternativet kan anges mer än en gång.
+
+`--inter-hunk-context=<nummer>`::
+	Visar sammanhanget mellan olika stycken, upp till det angivna _<antal>_ rader, och sammanfogar därmed stycken som ligger nära varandra. Standardvärdet är `diff.interHunkContext` eller 0 om konfigurationsalternativet inte är inställt.
+
+`-W`::
+`--function-context`::
+	Visa hela funktionen som kontextrader för varje ändring. Funktionsnamnen bestäms på samma sätt som `git diff` räknar ut patch-hunk-huvuden (se "Definiera en anpassad styckes-huvud" i linkgit:gitattributes[5]).
+
+ifndef::git-format-patch[]
+ifndef::git-log[]
+`--exit-code`::
+	Få programmet att avslutas med koder som liknar `diff`(1). Det vill säga, det avslutas med 1 om det fanns skillnader och 0 betyder inga skillnader.
+
+`--quiet`::
+	Inaktivera all utdata från programmet. Innebär `--exit-code`. Inaktiverar exekvering av externa diff-hjälpprogram vars avslutningskod inte är betrodd, d.v.s. deras respektive konfigurationsalternativ `diff.trustExitCode` eller ++diff.++__<driver>__++.trustExitCode++ eller miljövariabeln `GIT_EXTERNAL_DIFF_TRUST_EXIT_CODE` är falskt.
+endif::git-log[]
+endif::git-format-patch[]
+
+`--ext-diff`::
+	Tillåt att en extern diff-hjälp körs. Om du ställer in en extern diff-drivrutin med linkgit:gitattributes[5], måste du använda den här alternativet med linkgit:git-log[1] och vänner.
+
+`--no-ext-diff`::
+	Tillåt inte externa diff-drivrutiner.
+
+`--textconv`::
+`--no-textconv`::
+	Tillåt (eller förbjud) att externa textkonverteringsfilter körs vid jämförelse av binära filer. Se linkgit:gitattributes[5] för mer information. Eftersom textconv-filter vanligtvis är en envägskonvertering är den resulterande diff-funktionen lämplig för mänsklig konsumtion, men kan inte tillämpas. Av denna anledning är textconv-filter som standard endast aktiverade för linkgit:git-diff[1] och linkgit:git-log[1], men inte för linkgit:git-format-patch[1] eller diff rörmokeri-kommandon.
+
+
+`--ignore-submodules[=(none|untracked|dirty|all)]`::
+	Ignorera ändringar i undermoduler i diff-genereringen. `all` är standardinställningen. Om `none` används betraktas undermodulen som modifierad när den antingen innehåller ospårade eller modifierade filer, eller om dess `HEAD` skiljer sig från incheckningen som registrerats i superprojektet, och kan användas för att åsidosätta alla inställningar i `ignore`-alternativet i linkgit:git-config[1] eller linkgit:gitmodules[5]. När `untracked` används anses undermoduler inte vara smutsiga när de bara innehåller ospårat innehåll (men de skannas fortfarande efter modifierat innehåll). Om `dirty` används ignoreras alla ändringar i arbetsträdet för undermoduler, endast ändringar i de incheckningar som lagras i superprojektet visas (detta var beteendet fram till 1.7.0). Om `all` används döljs alla ändringar i undermoduler.
+
+`--src-prefix=<prefix>`::
+	Visa givet käll_<prefix>_ istället för ”a/”.
+
+`--dst-prefix=<prefix>`::
+	Visa den angivna mål _<prefix>_ istället för "b/".
+
+`--no-prefix`::
+	Visa inte käll- eller målprefix.
+
+`--default-prefix`::
+	Använd standard käll- och destinationsprefixen ("a/" och "b/"). Detta åsidosätter konfigurationsvariabler som `diff.noprefix`, `diff.srcPrefix`, `diff.dstPrefix` och `diff.mnemonicPrefix` (se linkgit:git-config[1]).
+
+`--line-prefix=<prefix>`::
+	Lägg till ett ytterligare _<prefix>_ före varje utdatarad.
+
+`--ita-invisible-in-index`::
+	Som standard visas poster som läggs till av `git add -N` som en befintlig tom fil i `git diff` och en ny fil i `git diff --cached`. Det här alternativet gör att posten visas som en ny fil i `git diff` och obefintlig i `git diff --cached`. Det här alternativet kan ångras med `--ita-visible-in-index`. Båda alternativen är experimentella och kan komma att tas bort i framtiden.
+
+--max-depth=<djup>::
+	För varje sökvägsmönster som anges på kommandoraden, gå ner högst `<djup>`-nivåer i kataloger. Värdet `-1` betyder ingen gräns. Kan inte kombineras med jokertecken i sökvägsmönster. Givet ett träd som innehåller `foo/bar/baz` visar följande lista de träffar som genereras av varje uppsättning alternativ:
++
+--
+ - `--max-depth=0 -- foo`: `foo`
+
+ - `--max-depth=1 -- foo`: `foo/bar`
+
+ - `--max-depth=1 -- foo/bar`: `foo/bar/baz`
+
+ - `--max-depth=1 -- foo foo/bar`: `foo/bar/baz`
+
+ - `--max-depth=2 -- foo`: `foo/bar/baz`
+--
++
+Om ingen sökvägsmönster anges mäts djupet som om alla poster på toppnivå vore specificerade. Observera att detta skiljer sig från att mäta från roten, eftersom `--max-depth=0` fortfarande skulle returnera `foo`. Detta låter dig fortfarande begränsa djupet samtidigt som du frågar efter en delmängd av posterna på toppnivå.
++
+Observera att det här alternativet endast stöds för skillnader mellan trädobjekt, inte mot indexet eller arbetskatalog.
+
+För en mer detaljerad förklaring av dessa vanliga alternativ, se även linkgit:gitdiffcore[7].

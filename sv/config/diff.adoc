@@ -1,0 +1,161 @@
+`diff.autoRefreshIndex`::
+	När du använder `git diff` för att jämföra med arbetsträdfiler, betrakta inte ändringar som endast innehåller statistiska data som ändrade. Kör istället `git update-index --refresh` i tysthet för att uppdatera den cachade statistiska informationen för sökvägar vars innehåll i arbetsträdet matchar innehållet i indexet. Standardvärdet för detta alternativ är `true`. Observera att detta endast påverkar `git diff` Porslin, och inte `diff`-kommandon på lägre nivå som `git diff-files`.
+
+`diff.dirstat`::
+ifdef::git-diff[]
+	En kommaseparerad lista med `--dirstat`-parametrar som anger
+	standardbeteendet för `--dirstat`-alternativet för `git diff` och vänner.
+endif::git-diff[]
+ifndef::git-diff[]
+	En kommaseparerad lista med `--dirstat`-parametrar som anger 
+	standardbeteendet för `--dirstat`-alternativet till linkgit:git-diff[1]
+	och vänner.
+endif::git-diff[]
+	Standardvärdena kan åsidosättas på kommandoraden
+	(med `--dirstat=<param>,...`). Reservstandardvärdena
+	(när de inte ändras av `diff.dirstat`) är `changes,noncumulative,3`.
+	Följande parametrar är tillgängliga:
++
+--
+`changes`;;
+	Beräkna dirstat-talen genom att räkna raderna som har tagits bort från källan eller lagts till i destinationen. Detta ignorerar mängden rena kodförflyttningar inom en fil. Med andra ord räknas inte omarrangemang av rader i en fil lika mycket som andra ändringar. Detta är standardbeteendet när ingen parameter anges.
+`lines`;;
+	Beräkna dirstat-talen genom att göra den vanliga radbaserade diff-analysen och summera antalet borttagna/tillagda rader. (För binära filer, räkna istället 64-byte-block, eftersom binära filer inte har något naturligt koncept för rader). Detta är ett dyrare `--dirstat`-beteende än `changes`-beteendet, men det räknar omordnade rader i en fil lika mycket som andra ändringar. Den resulterande utdata överensstämmer med vad du får från de andra `--*stat`-alternativen.
+`files`;;
+	Beräkna dirstat-talen genom att räkna antalet ändrade filer. Varje ändrad fil räknas lika i dirstat-analysen. Detta är det beräkningsmässigt billigaste beteendet för `--dirstat`, eftersom det inte behöver titta på filinnehållet alls.
+`cumulative`;;
+	Count changes in a child directory for the parent directory as well. Note that when using `cumulative`, the sum of the percentages reported may exceed 100%. The default (non-cumulative) behavior can be specified with the `noncumulative` parameter.
+_<gränsvärde>_;;
+	En heltalsparameter anger en gränsvärde i procent (3 % som standard). Kataloger som bidrar med mindre än denna procentandel av ändringarna visas inte i utdata.
+--
++
+Exempel: Följande räknar ändrade filer, ignorerar kataloger med mindre än 10 % av den totala mängden ändrade filer och ackumulerar antal underkataloger i de överordnade katalogerna: `files,10,cumulative`.
+
+`diff.statNameWidth`::
+	Begränsa bredden på filnamnsdelen i `--stat`-utdata. Om angivet gäller det alla kommandon som genererar `--stat`-utdata förutom `format-patch`.
+
+`diff.statGraphWidth`::
+	Begränsa bredden på grafdelen i `--stat`-utdata. Om angivet gäller det alla kommandon som genererar `--stat`-utdata förutom `format-patch`.
+
+`diff.context`::
+	Generera diffar med _<n>_ rader kontext istället för standardvärdet 3. Detta värde åsidosätts av alternativet `-U`.
+
+`diff.interHunkContext`::
+	Visa sammanhanget mellan olika stycken, upp till det angivna antalet rader, och sammanfoga därmed de stycken som ligger nära varandra. Detta värde fungerar som standardvärde för kommandoradsalternativet `--inter-hunk-context`.
+
+`diff.external`::
+	Om denna konfigurationsvariabel är satt, utförs diff-generering inte med hjälp av den interna diff-maskineriet, utan med hjälp av det givna kommandot. Kan åsidosättas med miljövariabeln `GIT_EXTERNAL_DIFF`. Kommandot anropas med parametrar som beskrivs under "git Diffs" i linkgit:git[1]. Obs: om du bara vill använda ett externt diff-program på en delmängd av dina filer, kanske du vill använda linkgit:gitattributes[5] istället.
+
+`diff.trustExitCode`::
+	Om detta booleska värde är satt till `true` förväntas kommandot `diff.external` returnera avslutningskoden 0 om det anser att indatafilerna är lika eller 1 om det anser att de är olika, som `diff`(1). Om det är satt till `false`, vilket är standardvärdet, förväntas kommandot returnera avslutningskoden `0` oavsett likhet. All annan avslutningskod gör att Git rapporterar ett allvarligt fel.
+
+`diff.ignoreSubmodules`::
+	Ställer in standardvärdet för `--ignore-submodules`. Observera att detta endast påverkar `git diff` Porslin, och inte lägre nivåer av `diff`-kommandon som `git diff-files`. `git checkout` och `git switch` respekterar också denna inställning vid rapportering av ej incheckade ändringar. Om den ställs in på `all` inaktiveras undermoduls-ammanfattningen som normalt visas av `git commit` och `git status` när `status.submoduleSummary` är inställt om den inte åsidosätts med hjälp av kommandoradsalternativet `--ignore-submodules`. Kommandona `git submodule` påverkas inte av denna inställning. Som standard är detta inställt på ospårad så att eventuella ej spårade undermoduler ignoreras.
+
+`diff.mnemonicPrefix`::
+	Om detta är satt använder `git diff` ett prefixpar som skiljer sig från standard `a/` och `b/` beroende på vad som jämförs. När denna konfiguration är aktiv byter även omvänd diff-utmatning ordningen på prefixen:
+`git diff`;;
+	compares the (i)ndex and the (w)ork tree;
+`git diff HEAD`;;
+	 compares a (c)ommit and the (w)ork tree;
+`git diff --cached`;;
+	compares a (c)ommit and the (i)ndex;
+`git diff HEAD:<fil1> <fil2>`;;
+	compares an (o)bject and a (w)ork tree entity;
+`git diff --no-index <a> <b>`;;
+	jämför två icke-git-saker _<a>_ och _<b>_.
+
+`diff.noPrefix`::
+	Om angivet visar `git diff` inget käll- eller destinationsprefix.
+
+`diff.srcPrefix`::
+	Om angivet använder `git diff` detta källkodsprefix. Standardvärdet är `a/`.
+
+`diff.dstPrefix`::
+	Om angivet använder `git diff` detta destinationsprefix. Standardvärdet är `b/`.
+
+`diff.relative`::
+	Om den är satt till `true` visar `git diff` inte ändringar utanför katalogen och visar sökvägar i förhållande till den aktuella katalogen.
+
+`diff.orderFile`::
+	Fil som anger hur filer ska ordnas inom en diff.
+ifdef::git-diff[]
+	Se alternativet `-O` för mer information.
+endif::git-diff[]
+ifndef::git-diff[]
+	Se `-O`-flaggan till linkgit:git-diff[1] för mer information..
+endif::git-diff[]
+	Om `diff.orderFile` är en relativ sökväg behandlas den som
+	relativt till toppen av arbetskatalogen.
+
+`diff.renameLimit`::
+	Antalet filer som ska beaktas i den uttömmande delen av kopierings-/namnbytesdetektering; motsvarande `git diff`flaggan `-l`. Om det inte är inställt är standardvärdet för närvarande 1000. Denna inställning har ingen effekt om namnbytesdetektering är avstängd.
+
+`diff.renames`::
+	Om och hur Git identifierar namnbyten. Om det är satt till `false` är namnbytesdetektering inaktiverad. Om det är satt till `true` är grundläggande namnbytesdetektering aktiverad. Om det är satt till `copies` eller `copy` kommer Git även att identifiera kopior. Standardvärdet är `true`. Observera att detta endast påverkar `git diff` Porslinskommandon som linkgit:git-diff[1] och linkgit:git-log[1], och inte lägre kommandon som linkgit:git-diff-files[1].
+
+`diff.suppressBlankEmpty`::
+	Ett booleskt värde för att förhindra standardbeteendet att skriva ut ett mellanslag före varje tom utdatarad. Standardvärdet är `false`.
+
+`diff.submodule`::
+	Ange formatet i vilket skillnader i undermoduler visas. Formatet `short` visar bara namnen på incheckningar i början och slutet av intervallet. Formatet `log` listar incheckningar i intervallet, precis som linkgit:git-submodule[1] `summary` gör. Formatet `diff` visar en inline-diff av det ändrade innehållet i undermodulen. Standardinställningen är `short`.
+
+`diff.wordRegex`::
+	Ett utökat reguljärt uttryck i POSIX som används för att avgöra vad som är ett "ord" vid ord-för-ord-differensberäkningar. Teckensekvenser som matchar det reguljära uttrycket är "ord", alla andra tecken är *ignorerbara* blanksteg.
+
+`diff.<förare>.command`::
+	Anpassat diff förare kommando. Se linkgit:gitattributes[5] för mer information.
+
+`diff.<förare>.trustExitCode`::
+	Om detta booleska värde är satt till `true` förväntas kommandot `diff.<förare>.command` returnera avslutningskod 0 om det anser att indatafilerna är lika eller 1 om det anser att de är olika, som `diff`(1). Om det är satt till `false`, vilket är standardvärdet, förväntas kommandot returnera avslutningskod 0 oavsett likhet. All annan avslutningskod gör att Git rapporterar ett allvarligt fel.
+
+`diff.<förare>.xfuncname`::
+	Det reguljära uttryck som diff-föraren ska använda för att känna igen styckes-huvuden. Ett inbyggt mönster kan också användas. Se linkgit:gitattributes[5] för mer information.
+
+`diff.<driver>.binary`::
+	Sätt det här alternativet till `true` för att få diff-förare att behandla filer som binära. Se linkgit:gitattributes[5] för mer information.
+
+`diff.<förare>.textconv`::
+	Kommandot som diff-drivrutinen ska anropa för att generera den textkonverterade versionen av en fil. Resultatet av konverteringen används för att generera en människoläsbar diff. Se linkgit:gitattributes[5] för mer information.
+
+`diff.<förare>.wordRegex`::
+	Det reguljära uttryck som diff-drivrutinen ska använda för att dela upp ord på en rad. Se linkgit:gitattributes[5] för mer information.
+
+`diff.<förare>.cachetextconv`::
+	Sätt det här alternativet till `true` för att få diff-drivrutinen att cachelagra textkonverteringsutdata. Se linkgit:gitattributes[5] för mer information.
+
+`diff.indentHeuristic`::
+	Ställ in det här alternativet på `false` för att inaktivera standardheuristiken som flyttar olika hunk-gränser för att göra patchar lättare att läsa.
+
+`diff.algorithm`::
+	Välj en diff-algoritm. Varianterna är följande:
++
+--
+`default`;;
+`myers`;;
+	Den grundläggande giriga diff-algoritmen. För närvarande är detta standard.
+`minimal`;;
+	Lägg extra tid på att se till att minsta möjliga skillnad produceras.
+`patience`;;
+	Använd algoritmen "patience diff" när du genererar patchar.
+`histogram`;;
+	Denna algoritm utökar tålamodsalgoritmen till att "stödja vanliga element med låg förekomst".
+--
++
+
+`diff.wsErrorHighlight`::
+	Markera blankteckenfel i raderna `context`, `old` eller `new` i diff-filen. Flera värden separeras med kommatecken, `none` återställer tidigare värden, `default` återställer listan till `new` och `all` är en förkortning för `old,new,context`. Blankteckenfelen är färgade med `color.diff.whitespace`. Kommandoradsalternativet `--ws-error-highlight=<slag>` åsidosätter denna inställning.
+
+`diff.colorMoved`::
+	Om den är satt till antingen ett giltigt _<läge>_ eller ett `sant`-värde, färgas flyttade linjer i en diff olika.
+ifdef::git-diff[]
+	För detaljer om giltiga lägen, se `--color-moved`.
+endif::git-diff[]
+ifndef::git-diff[]
+	För detaljer om giltiga lägen, se `--color-moved` i linkgit:git-diff[1].
+endif::git-diff[]
+	Om den bara ställs in på `sant` används standardfärgläget. När
+	den ställs in på `false` färgas inte flyttade linjer.
+
+`diff.colorMovedWS`::
+	När flyttade linjer färgläggs med t.ex. inställningen `diff.colorMoved`, styr detta alternativ läget för hur mellanslag behandlas. För detaljer om giltiga lägen, se `--color-moved-ws` i linkgit:git-diff[1].

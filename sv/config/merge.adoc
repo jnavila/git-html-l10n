@@ -1,0 +1,78 @@
+`merge.conflictStyle`::
+	Ange stilen med vilken konfliktfyllda stycken skrivs ut till arbetsträdfiler
+vid sammanslagning. Standardinställningen är "merge", som visar en +<<<<<<<+
+konfliktmarkör, ändringar gjorda av ena sidan, en `=======`-markör,
+ändringar gjorda av den andra sidan och sedan en +>>>>>>>+ markör. En
+alternativ stil, "diff3", lägger till en +||||||||+ markör och
+originaltexten före `=======`-markören. Stilen "merge" tenderar att
+producera mindre konfliktområden än diff3, både på grund av att
+originaltexten utesluts och för att när en delmängd av rader matchar på de
+två sidorna, dras de bara ut ur konfliktområdet. En annan alternativ stil,
+"zdiff3", liknar diff3 men tar bort matchande rader på de två sidorna från
+konfliktområdet när dessa matchande rader visas nära antingen början eller
+slutet av ett konfliktområde.
+
+`merge.defaultToUpstream`::
+	Om merge anropas utan något inchecknings-argument, sammanfogas de uppströmsgrenar som konfigurerats för den aktuella grenen med hjälp av deras senast observerade värden som lagrats i deras fjärrspårningsgrenar. Värdena för `branch.<nuvarande gren>.merge` som namnger grenarna på fjärrvärd namngiven av `branch.<nuvarande gren>.remote` konsulteras, och sedan mappas de via `remote.<fjärrvärd>.fetch` till deras motsvarande fjärrspårningsgrenar, och topparna för dessa spårningsgrenar sammanfogas. Standardvärdet är sant.
+
+`merge.ff`::
+	Som standard, skapar Git inte en extra sammanslagnings-incheckningar när den sammanfogar en incheckning som är en underordnad till den topen av aktuell incheckning. Istället snabbspolas spetsen för den aktuella grenen framåt. När den är satt till `false`, talar denna variabel om för Git att skapa en extra sammanslagnings-incheckning i ett sådant fall (motsvarande att ge alternativet `--no-ff` från kommandoraden). När den är satt till `only`, tillåts endast sådana snabbspolnings-sammanslagningar (motsvarande att ge alternativet `--ff-only` från kommandoraden).
+
+`merge.verifySignatures`::
+	Om sant, motsvarar detta kommandoradsalternativet `--verify-signatures`. Se linkgit:git-merge[1] för mer information.
+
+include::fmt-merge-msg.adoc[]
+
+`merge.renameLimit`::
+	Antalet filer som ska beaktas i den uttömmande delen av namnbytesdetektering under en sammanslagning. Om inget anges används standardvärdet `diff.renameLimit`. Om varken `merge.renameLimit` eller `diff.renameLimit` anges används standardvärdet för närvarande 7000. Denna inställning har ingen effekt om namnbytesdetektering är avstängd.
+
+`merge.renames`::
+	Huruvida Git detekterar namnbyten. Om det är satt till `false` är namnbytesdetektering inaktiverad. Om det är satt till `true` är grundläggande namnbytesdetektering aktiverad. Standardvärdet är diff.renames.
+
+`merge.directoryRenames`::
+	Huruvida Git detekterar katalogbyten, vilket påverkar vad som händer vid sammanslagningstillfället med nya filer som läggs till i en katalog på ena sidan av historiken när den katalogen döptes om på den andra sidan av historiken. Möjliga värden är:
++
+--
+`false`;; Detektering av katalog-namnbyte är inaktiverat, vilket innebär att sådana nya filer kommer att lämnas kvar i den gamla katalogen.
+`true`;; Detektering av katalog namnbyte är aktiverat, vilket innebär att sådana nya filer flyttas till den nya katalogen.
+`conflict`;; En konflikt kommer att rapporteras för sådana sökvägar.
+--
++
+Om `merge.renames` är `false` ignoreras `merge.directoryRenames` och behandlas som `false`. Standardvärdet är `conflict`.
+
+`merge.renormalize`::
+	Informera Git om att den kanoniska representationen av filer i kodförråd har förändrats över tid (t.ex. tidigare incheckningar registrerade textfiler med _CRLF_ radslut, men nyare använder _LF_ radslut). I ett sådant kodförråd kan Git, för varje fil där en trevägs innehållssammanslagning behövs, konvertera data som registrerats i incheckningar till en kanonisk form innan en sammanslagning utförs för att minska onödiga konflikter. För mer information, se avsnittet "Sammanfoga grenar med olika inchecknings-/utcheckningsattribut" i linkgit:gitattributes[5].
+
+`merge.stat`::
+	Vad, om något, ska skrivas ut mellan `ORIG_HEAD` och sammanslagningsresultatet i slutet av sammanslagningen. Möjliga värden är:
++
+--
+`false`;; Visa ingenting.
+`true`;; Visa `git diff --diffstat --summary ORIG_HEAD`.
+`compact`;; Visa `git diff --compact-summary ORIG_HEAD`.
+--
++
+men alla okända värden (t.ex. ett värde som läggs till av en framtida version av Git) tas som `sant` istället för att utlösa ett fel. Standardvärdet är `sant`.
+
+`merge.autoStash`::
+	När den är satt till `true` skapas automatiskt en tillfällig gömma-post innan operationen börjar och tillämpas efter att operationen är avslutad. Detta innebär att du kan köra merge på ett smutsigt arbetsträd. Använd dock med försiktighet: den slutliga stash-applikationen efter en lyckad merge kan resultera i icke-triviala konflikter. Detta alternativ kan åsidosättas av alternativen `--no-autostash` och `--autostash` i linkgit:git-merge[1]. Standardvärdet är `false`.
+
+`merge.tool`::
+	Kontrollerar vilket sammanslagningsverktyg som används av linkgit:git-mergetool[1]. Listan nedan visar de giltiga inbyggda värdena. Alla andra värden behandlas som ett anpassat sammanslagningsverktyg och kräver att en motsvarande `mergetool.<verktyg>.cmd`-variabel definieras.
+
+`merge.guitool`::
+	Styr vilket sammanslagningsverktyg som används av linkgit:git-mergetool[1] när flaggan `-g`/`--gui` är specificerad. Listan nedan visar de giltiga inbyggda värdena. Alla andra värden behandlas som ett anpassat sammanslagningsverktyg och kräver att en motsvarande variabel `mergetool.<gui-verktyg>.cmd` definieras.
+
+include::{build_dir}/mergetools-merge.adoc[]
+
+`merge.verbosity`::
+	Styr mängden utdata som visas av den rekursiva sammanslagningsstrategin. Nivå 0 matar ut ingenting förutom ett slutligt felmeddelande om konflikter upptäcktes. Nivå 1 matar endast ut konflikter, 2 matar ut konflikter och filändringar. Nivå 5 och högre matar ut felsökningsinformation. Standardinställningen är nivå 2. Kan åsidosättas av miljövariabeln `GIT_MERGE_VERBOSITY`.
+
+`merge.<förare>.name`::
+	Definierar ett människoläsbart namn för en anpassad lågnivå-sammanslagningsdrivrutin. Se linkgit:gitattributes[5] för mer information.
+
+`merge.<förare>.driver`::
+	Definierar kommandot som implementerar en anpassad lågnivå-sammanslagningsdrivrutin. Se linkgit:gitattributes[5] för mer information.
+
+`merge.<förare>.recursive`::
+	Namnger en lågnivå-sammanslagningsdrivrutin som ska användas vid intern sammanslagning mellan gemensamma förfäder. Se linkgit:gitattributes[5] för mer information.

@@ -1,0 +1,478 @@
+git-config(1)
+=============
+
+NAMN
+----
+git-config - Hämta och ange kodförråd eller globala alternativ
+
+
+SYNOPSIS
+--------
+[verse]
+'git config list' [<fil-flaggor>] [<visningsalternativ] [--includes]
+'git config get' [<fil-flaggor>] [<visningsalternativ>] [--includes] [--all] [--regexp] [--value=<mönster>] [--fixed-value] [--default=<standard>] [--url=<url>] <namn>
+'git config set' [<fil-flaggor>] [--type=<typ>] [--all] [--value=<mönster>] [--fixed-value] <namn> <värde>
+'git config unset' [<fil-flaggor>] [--all] [--value=<mönster>] [--fixed-value] <namn>
+'git config rename-section' [<fil-flaggor>] <gammalt-namn> <nytt-namn>
+'git config remove-section' [<fil-flaggor>] <namn>
+'git config edit' [<fil-flaggor>]
+'git config' [<file-option>] --get-colorbool <namn> [<stdout-is-tty>]
+
+BESKRIVNING
+-----------
+Du kan söka efter/ställa in/ersätta/avaktivera alternativ med det här kommandot. Namnet är egentligen sektionen och nyckeln separerade med en punkt, och värdet kommer att vara ett escape-tecken.
+
+Flera rader kan läggas till i ett alternativ med hjälp av alternativet `--append`. Om du vill uppdatera eller avaktivera ett alternativ som kan förekomma på flera rader, behöver `--value=<mönster>` (vilket är ett utökat reguljärt uttryck, såvida inte alternativet `--fixed-value` anges) anges. Endast de befintliga värden som matchar mönstret uppdateras eller avaktiveras. Om du vill hantera de rader som *inte* matchar mönstret, lägg bara till ett utropstecken framför (se även <<EXAMPLES>>), men observera att detta bara fungerar när alternativet `--fixed-value` inte används.
+
+Alternativet `--type=<typ>` instruerar 'git config' att säkerställa att inkommande och utgående värden kan kanoniseras under den givna <typen>. Om ingen `--type=<typ>` anges kommer ingen kanonisering att utföras. Anropare kan avaktivera en befintlig `--type`-specifikation med `--no-type`.
+
+Vid läsning läses värdena som standard från system-, globala och lokala konfigurationsfiler för förvaret, och alternativen `--system`, `--global`, `--local`, `--worktree` och `--file <filnamn>` kan användas för att ange att kommandot ska läsa endast från den platsen (se <<FILES>>).
+
+Vid skrivning, skrivs det nya värdet som standard till den lokala konfigurationsfilen för repot, och alternativen `--system`, `--global`, `--worktree`, `--file <filnamn>` kan användas för att ange att kommandot ska skriva till den platsen (du kan säga `--local` men det är standardvärdet).
+
+Det här kommandot kommer att misslyckas med status som inte är noll vid fel. Några avslutningskoder är:
+
+- Avsnittet eller nyckeln är ogiltig (ret=1),
+- inget avsnitt eller namn angavs (ret=2),
+- konfigurationsfilen är ogiltig (ret=3),
+- konfigurationsfilen kan inte skrivas (ret=4),
+- du försöker avaktivera ett alternativ som inte finns (ret=5),
+- du försöker avaktivera/aktivera ett alternativ som flera rader matchar för (ret=5), eller
+- Du försöker använda ett ogiltigt regexp (ret=6).
+
+Vid lyckat resultat, returnerar kommandot avslutningskoden 0.
+
+En lista över alla tillgängliga konfigurationsvariabler kan erhållas med hjälp av kommandot `git help --config`.
+
+KOMMANDON
+---------
+
+list::
+	Lista alla variabler som är inställda i konfigurationsfilen, tillsammans med deras värden.
+
+get::
+	Avger värdet för den angivna nyckeln. Om nyckeln finns flera gånger i konfigurationen avges det sista värdet. Om `--all` anges avges alla värden som är associerade med nyckeln. Returnerar felkod 1 om nyckeln inte finns.
+
+set::
+	Ange värde för ett eller flera konfigurationsalternativ. Som standard vägrar det här kommandot att skriva flervärdeskonfigurationsalternativ. Om `--all` skickas ersätts alla flervärdeskonfigurationsalternativ med det nya värdet, medan `--value=` ersätter alla konfigurationsalternativ vars värden matchar det givna mönstret.
+
+unset::
+	Avaktivera värde för ett eller flera konfigurationsalternativ. Som standard vägrar det här kommandot att avaktivera flervärdesnycklar. Om `--all` skickas avaktiveras alla flervärdeskonfigurationsalternativ, medan `--value` avaktiverar alla konfigurationsalternativ vars värden matchar det givna mönstret.
+
+rename-section::
+	Byt namn på det angivna avsnittet till ett nytt namn.
+
+remove-section::
+	Ta bort det angivna avsnittet från konfigurationsfilen.
+
+edit::
+	Öppnar en editor för att ändra den angivna konfigurationsfilen; antingen `--system`, `--global`, `--local` (standard), `--worktree` eller `--file <konfigurationsfil>`.
+
+[[OPTIONS]]
+ALTERNATIV
+----------
+
+--replace-all::
+	Standardbeteendet är att ersätta högst en rad. Detta ersätter alla rader som matchar nyckeln (och valfritt `--value=<mönster>`).
+
+--append::
+	Lägger till en ny rad i alternativet utan att ändra några befintliga värden. Detta är samma sak som att ange '--value=^$' i `set`.
+
+--comment <meddelande>::
+	Lägg till en kommentar i slutet av nya eller ändrade rader.
++
+Om _<meddelande>_ börjar med ett eller flera blanksteg följt av "#" används det som det är. Om det börjar med "#" läggs ett mellanslag till innan det används. Annars läggs en sträng " # " (ett mellanslag följt av en hash följt av ett mellanslag) till. Och den resulterande strängen placeras omedelbart efter det värde som definierats för variabeln. _<meddelande>_ får inte innehålla radmatningstecken (inga kommentarer med flera rader är tillåtna).
+
+--all::
+	Med `get` returnerar du alla värden för en nyckel med flera värden.
+
+--regexp::
+	Med `get` tolkas namnet som ett reguljärt uttryck. Matchning av reguljära uttryck är för närvarande skiftlägeskänsligt och görs mot en kanonialiserad version av nyckeln där sektions- och variabelnamn är gemener, men undersektionsnamn inte.
+
+--url=<URL>::
+	När ett tvådelat <namn> anges som <sektion>.<nyckel>, returneras värdet för <sektion>.<URL>.<nyckel> vars <URL>-del bäst matchar den angivna URL:en (om ingen sådan nyckel finns används värdet för <sektion>.<nyckel> som reserv). När endast <sektion> anges som namn, gör det för alla nycklar i sektionen och lista dem. Returnerar felkod 1 om inget värde hittas.
+
+--global::
+	För skrivalternativ: skriv till den globala `~/.gitconfig`-filen istället för arkivet `.git/config`, skriv till `$XDG_CONFIG_HOME/git/config`-filen om den här filen finns och `~/.gitconfig`-filen inte gör det.
++
+För läsalternativ: läs endast från global `~/.gitconfig` och från `$XDG_CONFIG_HOME/git/config` snarare än från alla tillgängliga filer.
++
+Se även <<FILES>>.
+
+--system::
+	För skrivalternativ: skriv till systemomfattande `$(prefix)/etc/gitconfig` istället för kodförrådets `.git/config`.
++
+För läsalternativ: läs endast från systemomfattande `$(prefix)/etc/gitconfig` snarare än från alla tillgängliga filer.
++
+Se även <<FILES>>.
+
+--local::
+	För skrivalternativ: skriv til kodförrådets `.git/config`-fil. Detta är standardbeteendet.
++
+För läsalternativ: läs endast från arkivet `.git/config` snarare än från alla tillgängliga filer.
++
+Se även <<FILES>>.
+
+--worktree::
+	Liknar `--local` förutom att `$GIT_DIR/config.worktree` läses från eller skrivs till om `extensions.worktreeConfig` är aktiverat. Om inte är det samma sak som `--local`. Observera att `$GIT_DIR` är lika med `$GIT_COMMON_DIR` för det huvudsakliga arbetskatalog, men har formen `$GIT_DIR/worktrees/<id>/` för andra arbetsträd. Se linkgit:git-worktree[1] för att lära dig hur man aktiverar `extensions.worktreeConfig`.
+
+-f <<konfigurationsfil>::
+--file <c<konfigurationsfil>::
+	För skrivalternativ: skriv till den angivna filen istället för kodförrådet `.git/config`.
++
+För läsalternativ: läs endast från den angivna filen istället för från alla tillgängliga filer.
++
+Se även <<FILES>>.
+
+--blob <blob>::
+	Liknar `--file` men använd den givna blobben istället för en fil. Du kan t.ex. använda 'master:.gitmodules' för att läsa värden från filen '.gitmodules' i master-grenen. Se avsnittet "SPECIFICERING AV REVISIONER" i linkgit:gitrevisions[7] för en mer komplett lista över sätt att stava blobbnamn.
+
+`--value=<mönster>`::
+`--no-value`::
+	Med `get`, `set` och `unset`, matchas endast mot _<mönster>_. Mönstret är ett utökat reguljärt uttryck om inte `--fixed-value` anges.
++
+Använd `--no-value` för att avaktivera _<mönster>_.
+
+--fixed-value::
+	När det används med `--value=<mönster>`, behandla _<mönster>_ som en exakt sträng istället för ett reguljärt uttryck. Detta begränsar namn/värde-paren som matchas till endast de där värdet är exakt lika med _<mönster>_.
+
+--type <typ>::
+  'git config' säkerställer att all in- eller utdata är giltig under den/de givna typbegränsningen/-begränsningarna, och kanoniserar utgående värden i `<typ>`s kanoniska form.
++
+Valid `<typ>`'s include:
++
+- 'bool': kanonisera värdena `true`, `yes`, `on` och positiva tal som "true", och värdena `false`, `no`, `off` och `0` som "false".
+- 'int': kanoniserar värden som enkla decimaltal. Ett valfritt suffix av 'k', 'm' eller 'g' gör att värdet multipliceras med 1024, 1048576 eller 1073741824 vid inmatning.
+- 'bool-or-int': kanonisera enligt antingen 'bool' eller 'int', som beskrivits ovan.
+- 'path': kanonisera genom att expandera ett inledande `~` till värdet `$HOME` och `~user` till hemkatalogen för den angivna användaren. Denna specificeraren har ingen effekt när värdet anges (men du kan använda `git config section.variable ~/` från kommandoraden för att låta ditt shell utföra expansionen.)
+- 'expiry-date': kanonisera genom att konvertera från en fast eller relativ datumsträng till en tidsstämpel. Denna specifikation har ingen effekt när värdet anges.
+- 'color': När ett värde hämtas, kanonisera genom att konvertera till en ANSI-färg escape-sekvens. När ett värde anges utförs en rimlighetskontroll för att säkerställa att det givna värdet kan kanoniseras som en ANSI-färg, men att det skrivs som det är.
++
+
+--bool::
+--int::
+--bool-or-int::
+--path::
+--expiry-date::
+  Historiska alternativ för att välja en typspecifikation. Föredra istället `--type` (se ovan).
+
+--no-type::
+  Avaktiverar den tidigare angivna typspecifikationen (om en sådan tidigare angavs). Detta alternativ begär att 'git config' inte kanoniserar den hämtade variabeln. `--no-type` har ingen effekt utan `--type=<typ>` eller `--<typ>`.
+
+-z::
+--null::
+	För alla alternativ som matar ut värden och/eller nycklar, avsluta alltid värden med null-tecknet (istället för en nyrad). Använd istället nyrad som avgränsare mellan nyckel och värde. Detta möjliggör säker parsning av utdata utan att bli förvirrad av t.ex. värden som innehåller radbrytningar.
+
+--name-only::
+	Matar endast ut namnen på konfigurationsvariablerna för `list` eller `get`.
+
+`--show-names`::
+`--no-show-names`::
+	Med `get` visas konfigurationsnycklar utöver deras värden. Standardvärdet är `--no-show-names` om inte `--url` anges och det inte finns några underavsnitt i _<namn>_.
+
+--show-origin::
+	Utöka utdata för alla efterfrågade konfigurationsalternativ med ursprungstypen (fil, standardindata, blob, kommandorad) och det faktiska ursprunget (konfigurationsfilens sökväg, referens eller blob-id om tillämpligt).
+
+--show-scope::
+	Liknar `--show-origin` i det att den utökar utdata från alla efterfrågade konfigurationsalternativ med omfattningen av det värdet (arbetsträd, lokalt, globalt, system, kommando).
+
+--get-colorbool <namn> [<stdout-är-tty>]::
+
+	Hitta färginställningen för `<namn>` (t.ex. `color.diff`) och skriv ut "true" eller "false". `<stdout-is-tty>` ska vara antingen "true" eller "false" och beaktas när konfigurationen säger "auto". Om `<stdout-is-tty>` saknas kontrolleras standardutdata för själva kommandot och avslutas med status 0 om färg ska användas, eller avslutas med status 1 annars. När färginställningen för `namn` är odefinierad använder kommandot `color.ui` som reserv.
+
+--includes::
+--no-includes::
+	Respektera `include.*`-direktiven i konfigurationsfiler när du söker efter värden. Standardinställningen är `off` när en specifik fil anges (t.ex. genom att använda `--file`, `--global`, etc.) och `on` när du söker i alla konfigurationsfiler.
+
+--default <värde>::
+  När `get` används och den begärda variabeln inte hittas, bete dig som om <värde> vore det värde som tilldelats variabeln.
+
+FÖRÅLDRDE LÄGEN
+---------------
+
+Följande lägen har föråldrats till förmån för underkommandon. Det rekommenderas att migrera till den nya syntaxen.
+
+'git config <namn>'::
+	Ersatt av `git config get <namn>`.
+
+'git config <namn> <värde> [<värde-mönster>]'::
+	Ersatt av `git config set [--value=<mönster>] <namn> <värde>`.
+
+-l::
+--list::
+	Ersatt av `git config list`.
+
+--get <namn> [<värde-mönster>]::
+	Ersatt av `git config get [--value=<mönster>] <namn>`.
+
+--get-all <namn> [<värde-mönster>]::
+	Ersatt av `git config get [--value=<mönster>] --all <namn>`.
+
+--get-regexp <namn-regexp>::
+	Replaced by `git config get --all --show-names --regexp <namn-regexp>`.
+
+--get-urlmatch <namn> <URL>::
+	Ersatt av `git config get --all --show-names --url=<URL> <namn>`.
+
+--get-color <namn> [<standard>]::
+	Ersatt av `git config get --type=color [--default=<standard>] <namn>`.
+
+--add <namn> <värde>::
+	Ersatt av `git config set --append <namn> <värde>`.
+
+--unset <namn> [<värde-mönster>]::
+	Ersatt av `git config unset [--value=<mönster>] <namn>`.
+
+--unset-all <namn> [<värde-mönster>]::
+	Ersatt av `git config unset [--value=<mönster>] --all <namn>`.
+
+--rename-section <gammalt-namn> <nytt-namn>::
+	Ersatt av `git config rename-section <gammalt-namn> <nytt-namn>`.
+
+--remove-section <namn>::
+	Ersatt av `git config remove-section <namn>`.
+
+-e::
+--edit::
+	Ersatt av `git config edit`.
+
+KONFIGURATION
+-------------
+`pager.config` respekteras bara när konfigurationen listas, dvs. när `list` eller `get` används, vilka kan returnera flera resultat. Standardinställningen är att använda en bläddrare.
+
+[[FILES]]
+FILER
+-----
+
+Som standard läser 'git config' konfigurationsalternativ från flera filer:
+
+$(prefix)/etc/gitconfig::
+	Systemomfattande konfigurationsfil.
+
+$XDG_CONFIG_HOME/git/config::
+~/.gitconfig::
+	Användarspecifika konfigurationsfiler. När miljövariabeln XDG_CONFIG_HOME inte är angiven eller tom används $HOME/.config/ som $XDG_CONFIG_HOME.
++
+Dessa kallas även "globala" konfigurationsfiler. Om båda filerna finns läses båda filerna i den ordning som anges ovan.
+
+$GIT_DIR/config::
+	Förvars specifik konfigurationsfil.
+
+$GIT_DIR/config.worktree::
+	Detta är valfritt och söks endast efter när `extensions.worktreeConfig` finns i $GIT_DIR/config.
+
+Du kan också ange ytterligare konfigurationsparametrar när du kör ett git-kommando genom att använda alternativet `-c`. Se linkgit:git[1] för mer information.
+
+Alternativ kommer att läsas från alla dessa tillgängliga filer. Om de globala eller systemomfattande konfigurationsfilerna saknas eller är oläsliga kommer de att ignoreras. Om kodförrådets konfigurationsfil saknas eller är oläslig kommer 'git config' att avslutas med en felkod som inte är noll. Ett felmeddelande visas om filen är oläslig, men inte om den saknas.
+
+Filerna läses i den ordning som anges ovan, där det senast funna värdet prioriteras framför det tidigare lästa värdet. När flera värden tas kommer alla värden från en nyckel från alla filer att användas.
+
+Som standard, skrivs alternativ endast till den specifika konfigurationsfilen för arkivet. Observera att detta även påverkar alternativ som `set` och `unset`. *'git config' kommer bara att ändra en fil åt gången*.
+
+Du kan begränsa vilka konfigurationskällor som läses från eller skrivs till genom att ange sökvägen till en fil med alternativet `--file`, eller genom att ange ett konfigurationsomfång med `--system`, `--global`, `--local` eller `--worktree`. För mer information, se <<OPTIONS>> ovan.
+
+[[SCOPES]]
+OMFATTNINGAR
+------------
+
+Varje konfigurationskälla faller inom ett konfigurationsomfång. Omfången är:
+
+system::
+	$(prefix)/etc/gitconfig
+
+global::
+	$XDG_CONFIG_HOME/git/config
++
+~/.gitconfig
+
+lokal::
+	$GIT_DIR/config
+
+arbetsträd::
+	$GIT_DIR/config.worktree
+
+kommando::
+	GIT_CONFIG_{COUNT,KEY,VALUE} miljövariabler (se <<ENVIRONMENT>> nedan)
++
+alternativet `-c`
+
+Med undantag för 'command' motsvarar varje omfång ett kommandoradsalternativ: `--system`, `--global`, `--local`, `--worktree`.
+
+När man läser alternativ och anger ett scope, läses endast alternativ från filerna inom det omfånget. När man skriver alternativ och anger ett omfång, skrivs det till filerna inom det omfånget (istället för till den databasspecifika konfigurationsfilen). Se <<OPTIONS>> ovan för en fullständig beskrivning.
+
+De flesta konfigurationsalternativ respekteras oavsett vilket omfång de definieras i, men vissa alternativ respekteras endast i vissa omfång. Se respektive alternativs dokumentation för fullständig information.
+
+Skyddad konfiguration
+~~~~~~~~~~~~~~~~~~~~~
+
+Skyddad konfiguration hänvisar till omfången 'system', 'global' och 'kommando'. Av säkerhetsskäl respekteras vissa alternativ endast när de anges i skyddad konfiguration och ignoreras annars.
+
+Git behandlar dessa omfång som om de kontrolleras av användaren eller en betrodd administratör. Detta beror på att en angripare som kontrollerar dessa omfång kan orsaka betydande skada utan att använda Git, så det antas att användarens miljö skyddar dessa omfång mot angripare.
+
+[[ENVIRONMENT]]
+MILJÖ
+-----
+
+GIT_CONFIG_GLOBAL::
+GIT_CONFIG_SYSTEM::
+	Hämta konfigurationen från de givna filerna istället från global eller systemnivåkonfiguration. Se linkgit:git[1] för mer information.
+
+GIT_CONFIG_NOSYSTEM::
+	Om läsning av inställningar från den systemomfattande $(prefix)/etc/gitconfig-filen ska hoppas över. Se linkgit:git[1] för mer information.
+
+Se även <<FILES>>.
+
+GIT_CONFIG_COUNT::
+GIT_CONFIG_KEY_<n>::
+GIT_CONFIG_VALUE_<n>::
+	Om GIT_CONFIG_COUNT sätts till ett positivt tal, kommer alla miljöpar GIT_CONFIG_KEY_<n> och GIT_CONFIG_VALUE_<n> upp till det numret att läggas till i processens körtidskonfiguration. Konfigurationsparen nollindexeras. Alla saknade nyckelr eller värden behandlas som ett fel. En tom GIT_CONFIG_COUNT behandlas på samma sätt som GIT_CONFIG_COUNT=0, det vill säga inga par bearbetas. Dessa miljövariabler kommer att åsidosätta värden i konfigurationsfiler, men kommer att åsidosättas av eventuella explicita alternativ som skickas via `git -c`.
++
+Detta är användbart i fall där du vill skapa flera git-kommandon med en gemensam konfiguration men inte kan vara beroende av en konfigurationsfil, till exempel när du skriver skript.
+
+GIT_CONFIG::
+	Om ingen `--file`-inställning finns i `git config`, använd filen som ges av `GIT_CONFIG` som om den tillhandahölls via `--file`. Denna variabel har ingen effekt på andra Git-kommandon och är främst till för historisk kompatibilitet; det finns generellt ingen anledning att använda den istället för `--file`-inställningen.
+
+[[EXAMPLES]]
+EXEMPEL
+-------
+
+Givet en .git/config som denna:
+
+------------
+#
+# Detta är konfigurationsfilen, och
+# ett '#' eller ';'-tecken indikerar
+# en kommentar
+#
+
+; kärnvariabler
+[core]
+	; Lita inte på fillägen
+	filemode = false
+
+; Vår diff-algoritm
+[diff]
+	external = /usr/local/bin/diff-wrapper
+	renames = true
+
+; Proxyinställningar
+[core]
+	gitproxy=proxy-command for kernel.org
+	gitproxy=default-proxy ; för alla de andra
+
+; HTTP
+[http]
+	sslVerify
+[http "https://weak.example.com"]
+	sslVerify = false
+	cookieFile = /tmp/cookie.txt
+------------
+
+du kan ställa in filläget till sant med
+
+------------
+% git config set core.filemode true
+------------
+
+De hypotetiska proxykommandoposterna har faktiskt ett postfix för att urskilja vilken URL de gäller. Så här ändrar du posten för kernel.org till "ssh".
+
+------------
+% git config set --value='for kernel.org$' core.gitproxy '"ssh" for kernel.org'
+------------
+
+Detta säkerställer att endast nyckel/värde-paret för kernel.org ersätts.
+
+För att ta bort posten för namnbyten, gör
+
+------------
+% git config unset diff.renames
+------------
+
+Om du vill ta bort en post för en multivariabel (som core.gitproxy ovan) måste du ange en regex som matchar värdet på exakt en rad.
+
+För att fråga efter värdet för en given nyckel, gör
+
+------------
+% git config get core.filemode
+------------
+
+eller, för att fråga en multivariabel:
+
+------------
+% git config get --value="for kernel.org$" core.gitproxy
+------------
+
+Om du vill veta alla värden för en multivariabel, gör:
+
+------------
+% git config get --all --show-names core.gitproxy
+------------
+
+Om du gillar att leva farligt, kan du ersätta *all* core.gitproxy med en ny med
+
+------------
+% git config set --all core.gitproxy ssh
+------------
+
+Men om du bara vill ersätta raden för standardproxyn, dvs. den utan ett "för ..."-postfix, gör något så här:
+
+------------
+% git config set --value='! for ' core.gitproxy ssh
+------------
+
+För att faktiskt bara matcha värden med ett utropstecken, måste du
+
+------------
+% git config set --value='[!]' section.key value
+------------
+
+För att lägga till en ny proxy utan att ändra någon av de befintliga, använd
+
+------------
+% git config set --append core.gitproxy '"proxy-command" for example.com'
+------------
+
+Ett exempel på hur man använder anpassad färg från konfigurationen i ditt skript:
+
+------------
+#!/bin/sh
+WS=$(git config get --type=color --default="blue reverse" color.diff.whitespace)
+RESET=$(git config get --type=color --default="reset" "")
+echo "${WS}your whitespace color or blue reverse${RESET}"
+------------
+
+För URL:er i `https://weak.example.com` är `http.sslVerify` satt till falskt, medan det är satt till `true` för alla andra:
+
+------------
+% git config get --type=bool --url=https://good.example.com http.sslverify
+true
+% git config get --type=bool --url=https://weak.example.com http.sslverify
+false
+% git config get --url=https://weak.example.com http
+http.cookieFile /tmp/cookie.txt
+http.sslverify false
+------------
+
+include::config.adoc[]
+
+BUGGAR
+------
+När man använder den föråldrade syntaxen `[section.subsection]` kommer ändring av ett värde att resultera i att en flerradig nyckel läggs till istället för en ändring, om underavsnittet anges med minst en versal. Till exempel när konfigurationen ser ut så här
+
+--------
+  [sektion.undersecktion]
+    nyckel = värde1
+--------
+
+och att köra `git config sektion.Undersektion.key värde2` kommer att resultera i
+
+--------
+  [sektion.undersecktion]
+    nyckel = värde1
+    nyckel = värde2
+--------
+
+
+GIT
+---
+En del av linkgit:git[1]-sviten

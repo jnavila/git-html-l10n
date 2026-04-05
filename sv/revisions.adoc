@@ -1,0 +1,260 @@
+SPECIFICERING AV REVIDERINGAR
+-----------------------------
+
+En revisionsparameter '<rev>' namnger vanligtvis, men inte nödvändigtvis, ett inchecknings-objekt. Den använder det som kallas en 'utökad SHA-1'-syntax. Här är olika sätt att stava objektnamn. De som listas nära slutet av den här listan namnger träd och blobbar som finns i en incheckning.
+
+NOTE: Det här dokumentet visar den "råa" syntaxen så som den visas i git. Skalet och andra användargränssnitt kan kräva ytterligare citatering för att skydda specialtecken och undvika orddelning.
+
+'<sha1>', t.ex. 'dae86e1950b1277e545cee180551750029cfe735', 'dae86e'::
+  Det fullständiga SHA-1-objektnamnet (en hexadecimal sträng på 40 byte), eller en inledande delsträng som är unik inom arkivet. T.ex. dae86e1950b1277e545cee180551750029cfe735 och dae86e namnger båda samma inchecknings-objekt om det inte finns något annat objekt i ditt kodförråd vars objektnamn börjar med dae86e.
+
+'<beskrivUtdata>', t.ex. 'v1.7.4.2-679-g3bee7fb'::
+  Utdata från `git describe`; d.v.s. en närmaste tagg, valfritt följt av ett bindestreck och ett antal incheckningar, följt av ett bindestreck, ett 'g' och ett förkortat objektnamn.
+
+'<refnamn>', t.ex. 'master', 'heads/master', 'refs/heads/master'::
+  Ett symboliskt referensnamn. T.ex. 'master' betyder vanligtvis det inchecknings-objekt som refereras av 'refs/heads/master'. Om du råkar ha både 'heads/master' och 'tags/master' kan du uttryckligen säga 'heads/master' för att tala om för Git vilket du menar. När det är tvetydigt, defineras ett '<refnamn>' genom att ta den första matchningen i följande regler:
++
+  . Om '$GIT_DIR/<refnamn>' existerar, är det vad du menar (detta är vanligtvis bara användbart för `HEAD`, `FETCH_HEAD`, `ORIG_HEAD`, `MERGE_HEAD`, `REBASE_HEAD`, `REVERT_HEAD`, `CHERRY_PICK_HEAD`, `BISECT_HEAD` och `AUTO_MERGE`);
+
+  . annars, 'refs/<refnamn>' om det finns;
+
+  . annars, 'refs/tags/<refnamn>' om det finns;
+
+  . annars, 'refs/heads/<refnamn>' om det finns;
+
+  . annars, 'refs/remotes/<refnamn>' om det finns;
+
+  . annars, 'refs/remotes/<refnamn>/HEAD' om det finns.
+
++
+  `HEAD`:::
+    namnger den incheckning som du baserade ändringarna i arbetskatalog på.
+  `FETCH_HEAD`:::
+    registrerar grenen som du hämtade från ett fjärrkodförråd med
+    din senaste `git fetch`-invokering.
+  `ORIG_HEAD`:::
+    skapas av kommandon som flyttar din `HEAD` på ett drastiskt sätt (`git
+    am`, `git merge`, `git rebase`, `git reset`), för att registrera positionen
+    för `HEAD` innan de körs, så att du enkelt kan ändra
+    grenens top tillbaka till tillståndet innan du körde dem.
+  `MERGE_HEAD`:::
+    registrerar den/de incheckning(er) som du sammanslår i din gren när du
+    kör `git merge`.
+  `REBASE_HEAD`:::
+    under en rebase, registrerar den incheckningen där operationen för
+    närvarande stoppas, antingen på grund av konflikter eller ett 
+    `edit`-kommando i en interaktiv rebase.
+  `REVERT_HEAD`:::
+    registrerar den incheckning som du återställer när du kör `git revert`.
+  `CHERRY_PICK_HEAD`:::
+    registrerar den incheckning som du plockar som ett russin i kakan 
+    är du kör `git cherry-pick`.
+  `BISECT_HEAD`:::
+    registrerar den aktuella incheckning som ska testas när du kör `git bisect
+    --no-checkout`.
+  `AUTO_MERGE`:::
+    registrerar ett trädobjekt som motsvarar det tillstånd som 
+    'ort'-sammanslagningsstrategin skrev till arbetskatalogen när en 
+    sammanslagningsoperation resulterade i konflikter.
+
++
+Observera att alla 'refs/*'-fall ovan kan komma antingen från katalogen `$GIT_DIR/refs` eller från filen `$GIT_DIR/packed-refs`. Även om referensnamnskodningen är ospecificerad, föredras UTF-8 eftersom viss utdatabehandling kan anta referensnamn i UTF-8.
+
+'@'::
+  '@' enbart är en genväg för `HEAD`.
+
+'[<refnamn>]@{<datum>}', t.ex. 'master@\{yesterday\}', 'HEAD@{5 minutes ago}'::
+  En referens följt av suffixet '@' med en datumspecifikation inom ett par klammerpar (t.ex. '\{yesterday\}', '{1 month 2 weeks 3 days 1 hour 1 second ago}' eller '{1979-02-26 18:30:00}') anger värdet för referensen vid en tidigare tidpunkt. Detta suffix får endast användas omedelbart efter ett referensnamn och referensen måste ha en befintlig logg ('$GIT_DIR/logs/<ref>'). Observera att detta söker upp tillståndet för din *lokala* referens vid en given tidpunkt; t.ex. vad som fanns i din lokala 'master'-gren förra veckan. Om du vill titta på incheckningar som gjordes under vissa tidpunkter, se `--since` och `--until`.
+
+'<refnamn>@{<n>}', t.ex. 'master@\{1\}'::
+  En referens följt av suffixet '@' med en ordinalspecifikation inom ett par klammerpar (t.ex. '\{1\}', '\{15\}') anger det n:te föregående värdet för den referensen. Till exempel är 'master@\{1\}' det omedelbart föregående värdet för 'master' medan 'master@\{5\}' är det femte föregående värdet för 'master'. Detta suffix får endast användas omedelbart efter ett referensnamn och referensen måste ha en befintlig logg ('$GIT_DIR/logs/<refnamn>').
+
+'@{<n>}', t.ex. '@\{1\}'::
+  Du kan använda '@'-konstruktionen med en tom ref-del för att komma till en reflog-post för den aktuella grenen. Om du till exempel är på grenen 'blabla' betyder '@\{1\}' samma sak som 'blabla@\{1\}'.
+
+'@{-<n>}', t.ex. '@{-1}'::
+  Konstruktionen '@{-<n>}' betyder den <n>:e gren/incheckning som checkats ut före den nuvarande.
+
+'[<branchname>]@\{upstream\}', e.g. 'master@\{upstream\}', '@\{u\}'::
+  En gren B kan konfigureras för att bygga ovanpå en gren X (konfigurerad med `branch.<namn>.merge`) på en fjärr R (konfigurerad med `branch.<namn>.remote`). B@{u} refererar till den fjärrspårande grenen för gren X som tas från fjärr R, vanligtvis hittad på `refs/remotes/R/X`.
+
+'[<branchname>]@\{push\}', e.g. 'master@\{push\}', '@\{push\}'::
+  Suffixet '@\{push}' rapporterar grenen "dit vi skulle pusha till" om `git push` kördes medan `grennamn` checkades ut (eller den aktuella `HEAD` om inget grennamn anges). Precis som för '@\{upstream\}' rapporterar vi den fjärrspårande grenen som motsvarar den grenen på fjärrdatorn.
++
+Här är ett exempel för att göra det tydligare:
++
+------------------------------
+$ git config push.default current
+$ git config remote.pushdefault mingren
+$ git switch -c mybranch origin/master
+
+$ git rev-parse --symbolic-full-name @{upstream}
+refs/remotes/origin/master
+
+$ git rev-parse --symbolic-full-name @{push}
+refs/remotes/mingren/mybranch
+------------------------------
++
+Observera i exemplet att vi skapar ett triangulärt arbetsflöde, där vi hämtar från en plats och pushar till en annan. I ett icke-triangulärt arbetsflöde är '@\{push}' detsamma som '@\{upstream}', och det finns inget behov av det.
++
+Detta suffix accepteras även när det stavas med versaler och betyder samma sak oavsett versaler.
+
+'<rev>{caret}[<n>]', t.ex. 'HEAD{caret}, v1.5.1{caret}0'::
+  Ett suffix '{caret}' till en revisionsparameter avser den första föräldern till det inchecknings-objektet. '{caret}<n>' avser den <n>:te föräldern (dvs. '<rev>{caret}' är ekvivalent med '<rev>{caret}1'). Som en specialregel avser '<rev>{caret}0' själva inchecknings-objektet och används när '<rev>' är objektnamnet på ett taggobjekt som refererar till ett inchecknings-objekt.
+
+'<rev>{tilde}[<n>]', t.ex. 'HEAD{tilde}, master{tilde}3'::
+  Ett suffix '{tilde}' till en revisionsparameter avser den första föräldern till det inchecknings-objektet. Ett suffix '{tilde}<n>' till en revisionsparameter avser det inchecknings-objekt som är den <n>:e generationens förfader till det namngivna inchecknings-objektet, efter endast de första föräldrarna. Dvs. '<rev>{tilde}3' är ekvivalent med '<rev>{caret}{caret}{caret}' vilket är ekvivalent med '<rev>{caret}1{caret}1{caret}1'. Se nedan för en illustration av användningen av denna form.
+
+'<rev>{caret}{<type>}', t.ex. 'v0.99.8{caret}\{commit\}'::
+  Ett suffix '{caret}' följt av ett objekttypnamn inom klammerpar betyder att objektet vid '<rev>' avrefereras rekursivt tills ett objekt av typen '<type>' hittas eller objektet inte längre kan avrefereras (i vilket fall, barf). Till exempel, om '<rev>' är ett incheckning-igt objekt, beskriver '<rev>{caret}\{commit\}' motsvarande inchecknings-objekt. På liknande sätt, om '<rev>' är ett träd-liknande objekt, beskriver '<rev>{caret}\{tree\}' motsvarande träd-objekt. '<rev>{caret}0' är en förkortning för '<rev>{caret}\{commit\}'.
++
+'<rev>{caret}\{object\}' kan användas för att säkerställa att '<rev>' namnger ett objekt som existerar, utan att '<rev>' behöver vara en tagg, och utan att avreferensera '<rev>'; eftersom en tagg redan är ett objekt behöver den inte avreferenseras ens en gång för att komma till ett objekt.
++
+'<rev>{caret}\{tag\}' kan användas för att säkerställa att '<rev>' identifierar ett befintligt taggobjekt.
+
+'<rev>{caret}{}', t.ex. 'v0.99.8{caret}{}'::
+  Ett suffix '{caret}' följt av ett tomt parenteser betyder att objektet kan vara en tagg och avreferera rekursivt tills ett objekt som inte är en tagg hittas.
+
+'<rev>{caret}{/<text>}', t.ex. 'HEAD^{/fixa otäck bugg}'::
+  Ett suffix '{caret}' till en revisionsparameter, följt av ett par klammerpar som innehåller en text inledd av ett snedstreck, är samma som syntaxen ':/fix nasty bug' nedan förutom att den returnerar den yngsta matchande incheckningen som är nåbar från '<rev>' före '{caret}'.
+
+':/<text>', t.ex. ':/fixa otäck bugg'::
+  Ett kolon, följt av ett snedstreck, följt av en text, namnger en incheckning vars inchecknings-meddelande matchar det angivna reguljära uttrycket. Detta namn returnerar den yngsta matchande incheckningen som är nåbar från vilken referens som helst, inklusive HEAD. Det reguljära uttrycket kan matcha vilken del som helst av inchecknings-meddelandet. För att matcha meddelanden som börjar med en sträng kan man använda t.ex. ':/^foo'. Den speciella sekvensen ':/!' är reserverad för modifierare av det som matchas. ':/!-foo' utför en negativ matchning, medan ':/!!foo' matchar ett bokstavligt '!'-tecken, följt av 'foo'. Alla andra sekvenser som börjar med ':/!' är reserverade för tillfället. Beroende på den givna texten kan skalets orddelningsregler kräva ytterligare citering.
+
+'<rev>:<sökväg>', t.ex. 'HEAD:README', 'master:./README'::
+  Ett suffix ':' följt av en sökväg namnger blobben eller trädet vid den givna sökvägen i det träd-igt objektet som namnges av delen före kolon. En sökväg som börjar med './' eller '../' är relativ till den aktuella arbetskatalogen. Den givna sökvägen kommer att konverteras till att vara relativ till arbetskatalogens rotkatalog. Detta är mest användbart för att adressera en blob eller ett träd från en incheckning eller ett träd som har samma trädstruktur som arbetskatalogen.
+
+':[<n>:]<sökväg>', e.g. ':0:README', ':README'::
+  Ett kolon, valfritt följt av ett stegnummer (0 till 3) och ett kolon, följt av en sökväg, namnger ett blobobjekt i indexet vid den angivna sökvägen. Ett saknat stegnummer (och kolonet som följer det) namnger en steg 0-post. Under en sammanslagning är steg 1 den gemensamma förfadern, steg 2 är målgrenens version (vanligtvis den aktuella grenen) och steg 3 är versionen från grenen som sammanfogas.
+
+Här är en illustration av Jon Loeliger. Både inchecknings-noderna B och C är föräldrar till inchecknings-nod A. Föräldra-incheckningar är ordnade från vänster till höger.
+
+........................................
+G   H   I   J
+ \ /     \ /
+  D   E   F
+   \  |  / \
+    \ | /   |
+     \|/    |
+      B     C
+       \   /
+        \ /
+         A
+........................................
+
+    A =      = A^0
+    B = A^   = A^1     = A~1
+    C =      = A^2
+    D = A^^  = A^1^1   = A~2
+    E = B^2  = A^^2
+    F = B^3  = A^^3
+    G = A^^^ = A^1^1^1 = A~3
+    H = D^2  = B^^2    = A^^^2  = A~2^2
+    I = F^   = B^3^    = A^^3^
+    J = F^2  = B^3^2   = A^^3^2
+
+
+ANGE INTERVALL
+--------------
+
+Kommandon för historikgenomgång som `git log` fungerar på en uppsättning incheckningar, inte bara en enda incheckning.
+
+För dessa kommandon innebär angivandet av en enda revision, med hjälp av notationen som beskrivs i föregående avsnitt, att uppsättningen incheckningar är "nåbara" från den givna incheckningen.
+
+Att ange flera revisioner innebär den uppsättning incheckningar som kan nås från vilken som helst av de givna incheckningarna.
+
+En inchecknings nåbara uppsättning är själva incheckningen och incheckningar i dess förfäders-kedja.
+
+Det finns flera notationer för att specificera en uppsättning sammankopplade incheckningar (kallat ett "revisionsintervall"), illustrerade nedan.
+
+
+Inchecknings Exlcuderingar
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+'{caret}<rev>' (caret) Notation::
+ För att exkludera incheckningar som kan nås från en incheckning, används en prefix '{caret}' notation. T.ex. betyder '{caret}r1 r2' incheckningar som kan nås från 'r2' men exkluderar de som kan nås från 'r1' (dvs. 'r1' och dess föregångare).
+
+Dotted Range Notations
+~~~~~~~~~~~~~~~~~~~~~~
+
+'..' (två punkter) Avståndsnotationen::
+ Set-operationen '{caret}r1 r2' förekommer så ofta att det finns en förkortning för den. När du har två incheckningar 'r1' och 'r2' (namngivna enligt syntaxen som förklaras i SPECIFIKERA REVISIONER ovan), kan du fråga efter incheckningar som är nåbara från r2 exklusive de som är nåbara från r1 med '{caret}r1 r2' och det kan skrivas som 'r1..r2'.
+
+'\...' (tre punkter) Symmetrisk differensnotationen::
+ En liknande notation 'r1\...r2' kallas symmetrisk skillnad mellan 'r1' och 'r2' och definieras som 'r1 r2 --not $(git merge-base --all r1 r2)'. Det är den mängd incheckningar som kan nås från antingen 'r1' (vänster sida) eller 'r2' (höger sida) men inte från båda.
+
+I dessa två förkortningsnotationer, kan du utelämna en ände och låta den vara standardvärdet HEAD. Till exempel är 'origin..' en förkortning för 'origin..HEAD' och frågar "Vad gjorde jag sedan jag förgrenads från origin-grenen?". På liknande sätt är '..origin' en förkortning för 'HEAD..origin' och frågar "Vad gjorde origo sedan jag förgrenads från dem?". Observera att '..' skulle betyda 'HEAD..HEAD' vilket är ett tomt intervall som både kan nås och inte kan nås från HEAD.
+
+Kommandon som är specifikt utformade för att ta två distinkta intervall (t.ex. "git range-diff R1 R2" för att jämföra två intervall) existerar, men de är undantag. Om inget annat anges, arbetar alla "git"-kommandon som arbetar på en uppsättning incheckningar på ett enda revisionsområde. Med andra ord, att skriva två "tvåpunktsintervallnotationer" bredvid varandra, t.ex.
+
+    $ git log A..B C..D
+
+anger *inte* två revisionsintervall för de flesta kommandon. Istället kommer den att namnge en enda sammankopplad uppsättning incheckningar, d.v.s. de som är nåbara från antingen B eller D men inte kan nås från varken A eller C. I en linjär historik som denna:
+
+    ---A---B---o---o---C---D
+
+eftersom A och B kan nås från C, är revisionsintervallet som anges av dessa två prickade intervall en enda incheckning D.
+
+
+Other <rev>{caret} Parent Shorthand Notations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Tre andra förkortningar finns, särskilt användbara för sammanslagnings-incheckningar, för att namnge en uppsättning som bildas av en incheckning och dess förälder incheckningar.
+
+Notationen 'r1{caret}@' betyder alla föräldrar till 'r1'.
+
+Notationen 'r1{caret}!' inkluderar incheckning 'r1' men exkluderar alla dess föräldrar. Denna notation betecknar i sig den enskilda incheckningen 'r1'.
+
+Notationen '<rev>{caret}-[<n>]' inkluderar '<rev>' men exkluderar den <n>:te föräldern (dvs. en förkortning för '<rev>{caret}<n>..<rev>'), med '<n>' = 1 om den inte anges. Detta är vanligtvis användbart för sammanslagnings-incheckningar där du bara kan skicka '<incheckning>{caret}-' för att hämta alla incheckningar i grenen som slogs samman i sammanslagnings-incheckningen '<incheckning>' (inklusive '<incheckningen>' själv).
+
+Medan '<rev>{caret}<n>' handlade om att specificera en enda inchecknings-förälder, tar dessa tre notationer även hänsyn till dess föräldrar. Till exempel kan du säga 'HEAD{caret}2{caret}@', men du kan inte säga 'HEAD{caret}@{caret}2'.
+
+Revision Range Summary
+----------------------
+
+'<rev>'::
+	Inkludera incheckningar som är nåbara från <rev> (dvs. <rev> och dess föregångare).
+
+'{caret}<rev>'::
+	Exkludera incheckningar som är nåbara från <rev> (dvs. <rev> och dess förfäder).
+
+'<rev1>..<rev2>'::
+	Inkludera incheckningar som kan nås från <rev2> men exkludera de som kan nås från <rev1>. När antingen <rev1> eller <rev2> utelämnas, används `HEAD` som standard.
+
+'<rev1>\...<rev2>'::
+	Inkludera incheckningar som kan nås från antingen <rev1> eller <rev2> men exkludera de som kan nås från båda. När antingen <rev1> eller <rev2> utelämnas, används `HEAD` som standard.
+
+'<rev>{caret}@', t.ex. 'HEAD{caret}@'::
+  Ett suffix '{caret}' följt av ett at-tecken är detsamma som att lista alla föräldrar till '<rev>' (vilket betyder, att inkludera allt som kan nås från dess föräldrar, men inte själva incheckningen).
+
+'<rev>{caret}!', t.ex. 'HEAD{caret}!'::
+  Ett suffix '{caret}' följt av ett utropstecken är detsamma som att ge incheckning '<rev>' och alla dess föräldrar prefixet '{caret}' för att exkludera dem (och deras förfäder).
+
+'<rev>{caret}-<n>', t.ex. 'HEAD{caret}-, HEAD{caret}-2'::
+	Motsvarande '<rev>{caret}<n>..<rev>', med '<n>' = 1 om inte angiven.
+
+Här är ett antal exempel som använder Loeliger-illustrationen ovan, där varje steg i notationens expansion och val noggrant anges:
+
+....
+   Args   Utökade argument    Valda incheckningar
+   D                            G H D
+   D F                          G H I J D F
+   ^G D                         H D
+   ^D B                         E I J F B
+   ^D B C                       E I J F B C
+   C                            I J F C
+   B..C   = ^B C                C
+   B...C  = B ^F C              G H D E B C
+   B^-    = B^..B
+	  = ^B^1 B              E I J F B
+   C^@    = C^1
+	  = F                   I J F
+   B^@    = B^1 B^2 B^3
+	  = D E F               D G H E F I J
+   C^!    = C ^C^@
+	  = C ^C^1
+	  = C ^F                C
+   B^!    = B ^B^@
+	  = B ^B^1 ^B^2 ^B^3
+	  = B ^D ^E ^F          B
+   F^! D  = F ^I ^J D           G H D F
+....

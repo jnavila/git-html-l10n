@@ -1,0 +1,276 @@
+git-merge(1)
+============
+
+NAMN
+----
+git-merge - Sammanfoga två eller flera utvecklingshistoriker
+
+
+SYNOPSIS
+--------
+[synopsis]
+git merge [-n] [--stat] [--compact-summary] [--no-commit] [--squash] [--[no-]edit]
+	[--no-verify] [-s <strategi>] [-X <strategi-flaggor>] [-S[<nyckelid>]]
+	[--[no-]allow-unrelated-histories]
+	[--[no-]rerere-autoupdate] [-m <msg>] [-F <fil>]
+	[--into-name <gren>] [<incheckning>...]
+git merge (--continue | --abort | --quit)
+
+BESKRIVNING
+-----------
+Inkorporerar ändringar från de namngivna incheckningar (sedan deras historik avvek från den aktuella grenen) i den aktuella grenen. Detta kommando används av `git pull` för att införliva ändringar från ett annat arkiv och kan användas manuellt för att sammanfoga ändringar från en gren till en annan.
+
+Anta att följande historik finns och att den aktuella grenen är `master`:
+
+------------
+          A---B---C ämne
+         /
+    D---E---F---G master
+------------
+
+Sedan kommer `git merge ämne` att spela upp ändringarna som gjorts på grenen `ämne` sedan den avvek från `master` (d.v.s. `E`) fram till dess nuvarande incheckning (`C`) ovanpå `master`, och registrera resultatet i en ny incheckning tillsammans med namnen på de två föräldraincheckningarna och ett loggmeddelande från användaren som beskriver ändringarna. Innan operationen sätts `ORIG_HEAD` till toppen av den nuvarande grenen (`G`).
+
+------------
+          A---B---C ämne
+         /         \
+    D---E---F---G---H master
+------------
+
+En sammanslagning stoppas om det finns en konflikt som inte kan lösas automatiskt eller om `--no-commit` angavs när sammanslagningen initierades. Vid den tidpunkten kan du köra `git merge --abort` eller `git merge --continue`.
+
+`git merge --abort` avbryter sammanslagningsprocessen och försöker rekonstruera tillståndet före sammanslagningen. Om det dock fanns obekräftade ändringar när sammanslagningen startade (och särskilt om dessa ändringar modifierades ytterligare efter att sammanslagningen startades), kommer `git merge --abort` i vissa fall inte att kunna rekonstruera de ursprungliga (före sammanslagningen) ändringarna. Därför:
+
+WARNING: Att köra `git merge` med icke-triviala oincheckade ändringar avråds: även om det är möjligt kan det försätta dig i ett tillstånd som är svårt att ta sig ur i händelse av en konflikt.
+
+ALTERNATIV
+----------
+:git-merge: 1
+
+include::merge-options.adoc[]
+
+`-m <medd>`::
+	Ange incheckningsmeddelandet som ska användas för sammanslagningsincheckning (om en sådan skapas).
++
+Om `--log` anges, kommer en kort logg över de incheckningar som sammanfogas att läggas till i det angivna meddelandet.
++
+Kommandot `git fmt-merge-msg` kan användas för att ge en bra standard för automatiserade `git merge`-anrop. Det automatiserade meddelandet kan innehålla grenbeskrivningen.
+
+`--into-name <gren>`::
+	Förbered standardmeddelandet för sammanslagning som om man sammanfogar till grenen _<gren>_, i stället för namnet på den riktiga gren som sammanslagningen görs till.
+
+`-F <fil>`::
+`--file=<fil>`::
+	Läs incheckningsmeddelandet som ska användas för sammanslagningsincheckning (om en sådan skapas).
++
+Om `--log` anges, kommer en kort logg över de incheckningar som sammanfogas att läggas till i det angivna meddelandet.
+
+include::rerere-options.adoc[]
+
+`--overwrite-ignore`::
+`--no-overwrite-ignore`::
+	Skriv tyst över ignorerade filer från sammanslagningsresultatet. Detta är standardbeteendet. Använd `--no-overwrite-ignore` för att avbryta.
+
+`--abort`::
+	Avbryt den aktuella konfliktlösningsprocessen och försök att rekonstruera tillståndet före sammanslagningen. Om en autostash-post finns, tillämpa den på arbetsträdet.
++
+Om det fanns oincheckade arbetsträdsändringar när sammanslagningen startade, kommer `git merge --abort` i vissa fall inte att kunna rekonstruera dessa ändringar. Det rekommenderas därför att alltid inchecka eller gömma dina ändringar innan du kör `git merge`.
++
+`git merge --abort` är ekvivalent med `git reset --merge` när `MERGE_HEAD` finns, såvida inte `MERGE_AUTOSTASH` också finns, i vilket fall `git merge --abort` tillämpar stash-posten på arbetsträdet medan `git reset --merge` sparar de gömmda ändringarna i stash-listan.
+
+`--quit`::
+	Glöm den pågående sammanslagningen. Lämna indexet och arbetsträdet som de är. Om `MERGE_AUTOSTASH` finns, kommer stash-posten att sparas i stash-listan.
+
+`--continue`::
+	Efter att en `git merge` har stoppats på grund av konflikter kan du avsluta sammanslagningen genom att köra `git merge --continue` (se avsnittet "HUR MAN LÖSER KONFLIKTER" nedan).
+
+`<incheckning>...`::
+	Commits, vanligtvis andra grenhuvuden, för att slås samman med vår gren. Om du anger mer än en incheckning skapas en sammanslagning med mer än två föräldrar (kärleksfullt kallad en bläckfisk-sammanslagning).
++
+Om ingen commit ges från kommandoraden, sammanfoga de fjärrspårade grenar som den aktuella grenen är konfigurerad att använda som sin uppström. Se även konfigurationsavsnittet på den här manualsidan.
++
+När `FETCH_HEAD` (och ingen annan incheckning) anges, slås grenarna som registrerats i `.git/FETCH_HEAD`-filen genom föregående anrop av `git fetch` för sammanslagning samman med den aktuella grenen.
+
+
+KONTROLLER FÖRE SAMMANSLAGNING
+------------------------------
+
+Innan du tillämpar externa ändringar bör du få ditt eget arbete i gott skick och checka in det lokalt, så att det inte blir förstört om det uppstår konflikter. Se även linkgit:git-stash[1]. `git pull` och `git merge` kommer att stoppas utan att göra någonting när lokala oincheckade ändringar överlappar med filer som `git pull`/`git merge` kan behöva uppdatera.
+
+För att undvika att orelaterade ändringar registreras i sammanslagningsincheckningen, kommer `git pull` och `git merge` också att avbrytas om det finns några ändringar registrerade i indexet i förhållande till `HEAD`-commiten. (Särskilda snäva undantag från denna regel kan finnas beroende på vilken sammanslagnings-strategi som används, men generellt måste indexet matcha `HEAD`.)
+
+Om alla namngivna incheckningar redan är föregångare till `HEAD`, kommer `git merge` att avslutas tidigt med meddelandet "Redan uppdaterad".
+
+SNABBSPOLNING FRAMÅT SAMMANSLAGNING
+-----------------------------------
+
+Ofta är det aktuella grenhuvudet en förfader till den namngivna incheckningen. Detta är det vanligaste fallet, särskilt när det anropas från `git pull`: du spårar ett uppströms kodförråd, du har inte checkat in några lokala ändringar och nu vill du uppdatera till en nyare uppströmsversion. I det här fallet behövs inte en ny incheckning för att lagra den kombinerade historiken; i stället uppdateras `HEAD` (tillsammans med indexet) för att peka på den namngivna incheckningen, utan att skapa en extra sammanslagningsincheckning.
+
+Det här beteende kan undertryckas med alternativet `--no-ff`.
+
+SANN SAMMANSLAGNING
+-------------------
+
+Förutom i en snabbsamlare (se ovan) måste grenarna som ska slås samman knytas samman av en sammanslagningsincheckning som har båda som sina föräldrar.
+
+En sammanfogad version som avstämmer ändringarna från alla grenar som ska sammanfogas implementeras, och din `HEAD`, index och arbetsträd uppdateras till den. Det är möjligt att ha ändringar i arbetsträdet så länge de inte överlappar varandra; uppdateringen kommer att bevara dem.
+
+När det inte är uppenbart hur ändringarna ska avstämmas händer följande:
+
+1. Pekaren `HEAD` förblir densamma.
+2. Referensen `MERGE_HEAD` är inställd att peka på den andra grenhuvudet.
+3. Sökvägar som sammanfogats korrekt uppdateras både i indexfilen och i ditt arbetsträd.
+4. För motstridiga sökvägar registrerar indexfilen upp till tre versioner: steg
+1 lagrar versionen från den gemensamma förfadern, steg 2 från `HEAD` och
+steg 3 från `MERGE_HEAD` (du kan inspektera stegen med `git ls-files
+-u`). Arbetskatalogen innehåller resultatet av sammanslagningsoperationen;
+dvs. 3-vägs sammanslagningsresultat med välkända konfliktmarkörer +<<<+
+`===` +>>>+.
+5. En referens med namnet `AUTO_MERGE` skrivs, som pekar på ett träd som motsvarar det aktuella innehållet i arbetsträdet (inklusive konfliktmarkörer för textkonflikter). Observera att denna referens endast skrivs när sammanslagningsstrategin `ort` används (standard).
+6. Inga andra ändringar görs. I synnerhet kommer de lokala ändringar du hade innan du började sammanfoga att förbli desamma och indexposterna för dem förblir som de var, dvs. matchar `HEAD`.
+
+Om du försökte en sammanslagning som resulterade i komplexa konflikter och vill börja om, kan du återställa med `git merge --abort`.
+
+SAMMANSLAGNING AV TAGG
+----------------------
+
+När man sammanfogar en kommenterad (och eventuellt signerad) tagg skapar Git alltid en sammanslagningsincheckning även om en snabbspolning är möjlig, och incheckningsmeddelandemallen förbereds med taggmeddelandet. Om taggen dessutom är signerad rapporteras signaturkontrollen som en kommentar i meddelandemallen. Se även linkgit:git-tag[1].
+
+När du bara vill integrera med det arbete som leder till den incheckning som råkar vara taggad, t.ex. synkronisera med en uppströms utgivningspunkt, kanske du inte vill göra en onödig sammanslagningsincheckning.
+
+I ett sådant fall, kan du "packa upp" taggen själv innan du skickar den till `git merge`, eller skicka `--ff-only` när du inte har något eget arbete. t.ex.
+
+----
+git fetch origin
+git merge v1.2.3^0
+git merge --ff-only v1.2.3
+----
+
+HUR KONFLIKTER PRESENTERAS
+--------------------------
+
+Under en sammanslagning uppdateras arbetsträd för att återspegla resultatet av sammanslagningen. Bland de ändringar som gjorts i den gemensamma förfaderns version införlivas icke-överlappande ändringar (det vill säga att du ändrade ett område i filen medan den andra sidan lämnade det området intakt, eller vice versa) ordagrant i det slutliga resultatet. När båda sidor har gjort ändringar i samma område kan Git dock inte slumpmässigt välja den ena sidan framför den andra, och ber dig att lösa det genom att lämna vad båda sidor gjorde i det området.
+
+Som standard använder Git samma stil som den som används av "merge"-programmet från RCS-sviten för att presentera en sådan konfliktfylld bit, så här:
+
+------------
+Här är rader som antingen är oförändrade från den gemensamma
+förfadern, eller är rent upplösta eftersom bara en sida har ändrats,
+eller är rent upplösta eftersom båda sidor har ändrats på samma sätt.
+<<<<<<<< din:prov.txt
+Konfliktlösning är svårt;
+låt oss gå och handla.
+=======
+Git gör konfliktlösning enkelt.
+>>>>>>>> deras:prov.txt
+Och här är en annan rad som är rent upplöst eller omodifierad.
+------------
+
+Området där ett par motstridiga ändringar inträffade markeras med markörerna +<<<<<<<<+, `=======` och +>>>>>>>+. Delen före `=======` är vanligtvis din sida, och delen efteråt är vanligtvis deras sida.
+
+Standardformatet visar inte vad originalet sa i konfliktområdet. Du kan inte se hur många rader som har tagits bort och ersatts med Barbies kommentar på din sida. Det enda du kan se är att din sida vill säga att det är svårt och att du hellre vill handla, medan den andra sidan vill påstå att det är lätt.
+
+En alternativ stil kan användas genom att ställa in konfigurationsvariabeln `merge.conflictStyle` till antingen `diff3` eller `zdiff3`. I `diff3`-stilen kan konflikten ovan se ut så här:
+
+------------
+Här är rader som antingen är oförändrade från den gemensamma
+förfadern, eller rent lösta eftersom bara en sida ändrades,
+<<<<<<<< din:prov.txt
+eller rent lösta eftersom båda sidor ändrades på samma sätt.
+Konfliktlösning är svårt;
+låt oss gå och handla.
+||||||| bas:prov.txt
+eller rent lösta eftersom båda sidor ändrades identiskt.
+Konfliktlösning är svårt.
+=======
+eller rent lösta eftersom båda sidor ändrades på samma sätt.
+Git gör konfliktlösning enkel.
+>>>>>>> deras:prov.txt
+Och här är en annan rad som är rent löst eller omodifierad.
+------------
+
+i `zdiff3`-stil kan det se ut så här:
+
+------------
+Här är rader som antingen är oförändrade från den gemensamma
+förfadern, eller rent lösta eftersom bara en sida ändrades,
+eller rent lösta eftersom båda sidor ändrades på samma sätt.
+<<<<<<<< din:prov.txt
+Konfliktlösning är svårt;
+låt oss gå och shoppa.
+||||||| bas:prov.txt
+eller rent lösta eftersom båda sidor ändrades identiskt.
+Konfliktlösning är svårt.
+=======
+Git gör konfliktlösning enkel.
+>>>>>>>> deras:prov.txt
+Och här är en annan rad som är rent löst eller omodifierad.
+------------
+
+Förutom markörerna +<<<<<<<+, `=======` och +>>>>>>>+ används ytterligare en markör +||||||||+ som följs av originaltexten. Du kan se att originalet bara konstaterade ett faktum, och din sida gav helt enkelt efter för det påståendet och upp, medan den andra sidan försökte ha en mer positiv attityd. Ibland kan du komma fram till en bättre lösning genom att titta på originalet.
+
+
+HUR MAN LÖSER KONFLIKTER
+------------------------
+
+Efter att ha sett en konflikt kan du göra två saker:
+
+ * Bestäm dig för att inte sammanfoga. De enda rensningarna du behöver göra är att återställa indexfilen till `HEAD`-incheckning för att vända 2. och att rensa upp fungerande trädändringar gjorda av 2. och 3.; `git merge --abort` kan användas för detta.
+
+ * Lös konflikterna. Git markerar konflikterna i arbetsträdet. Redigera filerna till rätt form och `git add` dem till indexet. Använd `git commit` eller `git merge --continue` för att avsluta affären. Det senare kommandot kontrollerar om det pågår en (avbruten) sammanslagning innan `git commit` anropas.
+
+Du kan bearbeta konflikten med ett antal verktyg:
+
+ * Använd ett mergetool. `git mergetool` för att starta ett grafiskt mergetool som kommer att arbeta genom sammanslagningsprocessen tillsammans med dig.
+
+ * Titta på skillnaderna. `git diff` visar en trevägsdiff som markerar ändringar från både `HEAD`- och `MERGE_HEAD`-versionerna. `git diff AUTO_MERGE` visar vilka ändringar du har gjort hittills för att lösa textkonflikter.
+
+ * Titta på skillnaderna från varje gren. `git log --merge -p <sökväg>` visar först skillnaderna för `HEAD`-versionen och sedan `MERGE_HEAD`-versionen.
+
+ * Titta på originalversionerna. `git show :1:filnamn` visar den gemensamma förfadern, `git show :2:filnamn` visar `HEAD`-versionen och `git show :3:filnamn` visar `MERGE_HEAD`-versionen.
+
+
+EXEMPEL
+-------
+
+* Sammanfoga grenarna `fixes` och `förbättringar` ovanpå den aktuella grenen, vilket skapar en bläckfisk-sammanslagning:
++
+------------------------------------------------
+$ git merge fixar förbättringar
+------------------------------------------------
+
+* Sammanfoga grenen `obsolete` med den aktuella grenen med hjälp av sammanslagningsstrategin `ours`:
++
+------------------------------------------------
+$ git merge -s ours obsolete
+------------------------------------------------
+
+* Sammanfoga grenen `maint` med den aktuella grenen, men gör inte en ny incheckning automatiskt:
++
+------------------------------------------------
+$ git merge --no-commit maint
+------------------------------------------------
++
+Det här kan användas när du vill inkludera ytterligare ändringar i sammanslagningen, eller vill skriva ditt eget sammanslagningsmeddelande.
++
+Du bör avstå från att missbruka det här alternativet för att smyga in väsentliga ändringar i en sammanslagningsincheckningen. Små korrigeringar som att bumpa utgåva/versionsnamn skulle vara acceptabla.
+
+
+include::merge-strategies.adoc[]
+
+KONFIGURATION
+-------------
+
+`branch.<namn>.mergeOptions`::
+	Ställer in standardalternativ för sammanslagning till grenen _<namn>_. Syntaxen och de alternativ som stöds är desamma som för `git merge`, men alternativvärden som innehåller blanksteg stöds för närvarande inte.
+
+include::includes/cmd-config-section-rest.adoc[]
+
+include::config/merge.adoc[]
+
+SE ÄVEN
+-------
+linkgit:git-fmt-merge-msg[1], linkgit:git-pull[1], linkgit:gitattributes[5], linkgit:git-reset[1], linkgit:git-diff[1], linkgit:git-ls-files[1], linkgit:git-add[1], linkgit:git-rm[1], linkgit:git-mergetool[1]
+
+GIT
+---
+En del av linkgit:git[1]-sviten

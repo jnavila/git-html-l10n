@@ -1,0 +1,88 @@
+git-diff-tree(1)
+================
+
+NAMN
+----
+git-diff-tree - Jämför innehållet och läget för blobbar som hittats via två trädobjekt
+
+
+SYNOPSIS
+--------
+[verse]
+'git diff-tree' [--stdin] [-m] [-s] [-v] [--no-commit-id] [--pretty]
+	      [-t] [-r] [-c | --cc] [--combined-all-paths] [--root] [--merge-base]
+	      [<vanliga-diff-alternativ>] <tträdlikt> [<trädlikt>] [<sökväg>...]
+
+BESKRIVNING
+-----------
+Jämför innehållet och läget för blobbar som hittats via två trädobjekt.
+
+Om det bara finns en <trädlikt> given jämförs incheckning med dess föräldrar (se --stdin nedan).
+
+Observera att 'git diff-tree' kan använda trädet som är inkapslat i ett incheckningsobjekt.
+
+ALTERNATIV
+----------
+include::diff-options.adoc[]
+
+<trädlikt>::
+	Id:t för ett trädobjekt.
+
+<sökväg>...::
+	Om det anges är resultaten begränsade till en delmängd av filer som matchar en av de angivna sökvägsmönster.
+
+-r::
+	Rekursera ner i underträd.
+
+-t::
+	Visar själva trädposten såväl som underträd. Innebär -r.
+
+--root::
+	När `--root` anges kommer den initiala incheckningen att visas som en stor skapandehändelse. Detta motsvarar en diff mot NULL-trädet.
+
+--merge-base::
+	I stället för att jämföra <trädlikt> direkt, använd sammanslagningsbasen mellan de två <trädlikt> som "före"-sida. Det måste finnas två <trädlikt> givna och båda måste vara incheckningar.
+
+--stdin::
+	När `--stdin` anges tar kommandot inte <trädlikt>-argument från kommandoraden. I stället läser det rader som innehåller antingen två <träd>, en <incheckning> eller en lista med <incheckning> från standardindata. (Använd ett enda mellanslag som avgränsare.)
++
+När två träd anges jämförs det första trädet med det andra. När en enda incheckning anges jämförs incheckningen med dess föräldrar. De återstående incheckningarna, när de anges, används som om de vore föräldrar till den första incheckningen.
++
+När man jämför två träd skrivs ID:t för båda träden (separerade med ett mellanslag och avslutade med en nyrad) ut före skillnaden. När man jämför incheckningar skrivs ID:t för den första (eller enda) incheckningen ut, följt av en nyrad.
++
+Följande flaggor påverkar ytterligare beteendet vid jämförelse av incheckningar (men inte träd).
+
+-m::
+	Som standard visar 'git diff-tree --stdin' inte skillnader för sammanslagningsincheckningar. Med den här flaggan visas skillnader från den incheckningen till alla dess föräldrar. Se även `-c`.
+
+-s::
+	Som standard visar 'git diff-tree --stdin' skillnader, antingen i maskinläsbar form (utan `-p`) eller i patch-form (med `-p`). Denna utdata kan undertryckas. Den är bara användbar med flaggan `-v`.
+
+-v::
+	Denna flagga gör att 'git diff-tree --stdin' också visar incheckningsmeddelandet före skillnaderna.
+
+include::pretty-options.adoc[]
+
+--no-commit-id::
+	'git diff-tree' matar ut en rad med inchecknings-ID:t när det är tillämpligt. Denna flagga undertrycker utdata för inchecknings-ID:t.
+
+-c::
+	Denna flagga ändrar hur en sammanslagningsincheckning visas (vilket innebär att den bara är användbar när kommandot ges en <trädlikt>, eller `--stdin`). Den visar skillnaderna från varje förälder till sammanslagningsresultatet samtidigt i stället för att visa parvisa skillnader mellan en förälder och resultatet en i taget (vilket är vad `-m`-alternativet gör). Dessutom listar den bara filer som har modifierats från alla föräldrar.
+
+--cc::
+	Denna flagga ändrar hur en sammanslagningsincheckningspatch visas, på ett liknande sätt som alternativet `-c`. Den impliserar alternativen `-c` och `-p` och komprimerar ytterligare patch-utdata genom att utelämna ointressanta stycken vars innehåll i föräldrarna bara har två varianter och merge-resultatet väljer en av dem utan modifiering. När alla stycken är ointressanta visas inte själva commiten och incheckningsloggmeddelandet, precis som i alla andra fall av "tom diff".
+
+--combined-all-paths::
+	Den här flaggan gör att kombinerade diffar (används för sammanslagningsincheckningar) listar namnet på filen från alla föräldrar. Den har således bara effekt när -c eller --cc anges, och är sannolikt bara användbar om filnamnsändringar upptäcks (d.v.s. när antingen namnbyte eller kopieringsdetektering har begärts).
+
+--always::
+	Visa själva incheckning och incheckningsloggmeddelandet även om själva diff-filen är tom.
+
+
+include::pretty-formats.adoc[]
+
+include::diff-format.adoc[]
+
+GIT
+---
+En del av linkgit:git[1]-sviten

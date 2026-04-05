@@ -1,0 +1,60 @@
+`--pretty[=<format>]`::
+`--format=<format>`::
+
+	Skriv ut innehållet i inchecknings-loggarna i ett givet format med en pretty-print, där '<format>' kan vara ett av följande: `oneline`, `short`, `medium`, `full`, `fuller`, `reference`, `email`, `raw`, `format:<string>` och `tformat:<string>`. När _<format>_ inte är något av ovanstående, och innehåller `%<placeholder>`, fungerar det som om `--pretty=tformat:<format>` vore angivet.
++
+Se avsnittet "VACKERT FORMAT" för ytterligare information om varje format. När `=<format>`-delen utelämnas används `medium` som standard.
++
+NOTE: Du kan ange standardformatet för pretty i kodförråds-konfigurationen (se linkgit:git-config[1]).
+
+`--abbrev-commit`::
+	Istället för att visa det fullständiga 40-byte hexadecimala inchecknings-objektnamnet, visa ett prefix som namnger objektet unikt. Alternativet `--abbrev=<n>` (som också modifierar diff-utdata, om det visas) kan användas för att ange prefixets minsta längd.
++
+Detta borde göra `--pretty=oneline` mycket mer läsbar för personer som använder terminaler med 80 kolumner.
+
+`--no-abbrev-commit`::
+	Visa det fullständiga 40-byte hexadecimala inchecknings-objektnamnet. Detta negerar `--abbrev-commit`, antingen explicit eller underförstått av andra alternativ som `--oneline`. Det åsidosätter också variabeln `log.abbrevCommit`.
+
+`--oneline`::
+	Detta är en förkortning för `--pretty=oneline --abbrev-commit` som används tillsammans.
+
+`--encoding=<kodning>`::
+	Incheckning-objekt registrerar teckenkodningen som används för loggmeddelandet i deras kodnings-huvud; det här alternativet kan användas för att ange att kommandot ska koda om inchecknings-loggmeddelandet i den kodning som användaren föredrar. För icke-rörmokeri-kommandon är standardvärdet UTF-8. Observera att om ett objekt påstår sig vara kodat i `X` och vi matar ut i `X`, kommer vi att mata ut objektet ordagrant; det betyder att ogiltiga sekvenser i den ursprungliga commiten kan kopieras till utdata. På samma sätt, om iconv(3) misslyckas med att konvertera incheckningen, kommer vi att mata ut det ursprungliga objektet ordagrant i tysthet.
+
+`--expand-tabs=<n>`::
+`--expand-tabs`::
+`--no-expand-tabs`::
+	Utför en tabbexpandering (ersätt varje tabb med tillräckligt med mellanslag för att fylla till nästa visningskolumn som är en multipel av _<n>_) i loggmeddelandet innan det visas i utdata. `--expand-tabs` är en förkortning för `--expand-tabs=8`, och `--no-expand-tabs` är en förkortning för `--expand-tabs=0`, vilket inaktiverar tabbexpandering.
++
+Som standard expanderas flikarna i snygga format som indenterar loggmeddelandet med 4 mellanslag (dvs. `medium`, som är standard, `full` och `fuller`).
+
+ifndef::git-rev-list[]
+`--notes[=<ref>]`::
+	Visa anteckningarna (se linkgit:git-notes[1]) som kommenterar incheckningen när inchecknings-loggmeddelandet visas.
+ifndef::with-breaking-changes[]
+Detta är standardinställningen för kommandona `git log`, `git show` och `git whatchanged` när det inte finns något `--pretty`, `--format` eller `--oneline`-alternativ angivet på kommandoraden.
+endif::with-breaking-changes[]
+ifdef::with-breaking-changes[]
+Detta är standardinställningen för kommandona `git log` och `git show` när det inte finns något `--pretty`, `--format` eller `--oneline`-alternativ angivet på kommandoraden.
+endif::with-breaking-changes[]
++
+Som standard, är de anteckningar som visas från anteckningsreferenserna som listas i variablerna `core.notesRef` och `notes.displayRef` (eller motsvarande miljööverskridanden). Se linkgit:git-config[1] för mer information.
++
+Med ett valfritt argument '<ref>', använd ref för att hitta de anteckningar som ska visas. Ref kan ange hela referensnamnet när det börjar med `refs/notes/`; när det börjar med `notes/`, prefixeras `refs/` och annars `refs/notes/` för att bilda referensens fullständiga namn.
++
+Flera `--notes`-alternativ kan kombineras för att styra vilka anteckningar som visas. Exempel: "`--notes=foo`" visar endast anteckningar från `refs/notes/foo`; "`--notes=foo --notes`" visar både anteckningar från "refs/notes/foo" och från standardanteckningsreferenserna.
+
+`--no-notes`::
+	Visa inte anteckningar. Detta upphäver ovanstående alternativ `--notes`, genom att återställa listan över anteckningsreferenser från vilka anteckningar visas. Alternativ analyseras i den ordning som anges på kommandoraden, så t.ex. "`--notes --notes=foo --no-notes --notes=bar`" kommer bara att visa anteckningar från `refs/notes/bar`.
+
+`--show-notes-by-default`::
+	Visa standardanteckningarna om inte alternativ för att visa specifika anteckningar anges.
+
+`--show-notes[=<ref>]`::
+`--standard-notes`::
+`--no-standard-notes`::
+	Dessa alternativ är föråldrade. Använd alternativen `--notes`/`--no-notes` ovan istället.
+endif::git-rev-list[]
+
+`--show-signature`::
+	Kontrollera giltigheten hos ett signerat inchecknings-objekt genom att skicka signaturen till `gpg --verify` och visa utdata.

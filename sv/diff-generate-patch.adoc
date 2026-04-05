@@ -1,0 +1,137 @@
+[[generate_patch_text_with_p]]
+Generera patchtext med -p
+-------------------------
+
+Att köra linkgit:git-diff[1], linkgit:git-log[1], linkgit:git-show[1], linkgit:git-diff-index[1], linkgit:git-diff-tree[1] eller linkgit:git-diff-files[1] med alternativet `-p` producerar patchtext. Du kan anpassa skapandet av patchtext via miljövariablerna `GIT_EXTERNAL_DIFF` och `GIT_DIFF_OPTS` (se linkgit:git[1]), och attributet `diff` (se linkgit:gitattributes[5]).
+
+Det som `-p`-alternativet producerar skiljer sig något från det traditionella diff-formatet:
+
+1.   Det föregås av ett "git diff"-huvudet som ser ut så här:
+
+       diff --git a/fil1 b/fil2
++
+Filnamnen `a/` och `b/` är desamma om det inte rör sig om att byta namn/kopiera. Speciellt, även vid skapande eller borttagning, används `/dev/null` _inte_ istället för filnamnen `a/` eller `b/`.
++
+När ett namnbyte/kopiering är inblandat visar `fil1` och `fil2` namnet på källfilen för namnbytet/kopieringen respektive namnet på filen som namnbytet/kopieringen producerar.
+
+2.   Den följs av en eller flera utökade huvud-rader:
++
+[synopsis]
+old mode <sökväg>
+new mode <behörigheter>
+deleted file mode <behörigheter>
+new file mode <läge>
+copy from <sökväg>
+copy to <sökväg>
+rename from <sökväg>
+rename to <sökväg>
+similarity index <nummer>
+dissimilarity index <nummer>
+index <hash>..<hash> <behörigheter>
++
+Fil-rättigheter _<behörigheter>_ skrivs ut som 6-siffriga oktala tal inklusive filtyp och filbehörighetsbitar.
++
+Sökvägar i utökade huvuden inkluderar inte prefixen `a/` och `b/`.
++
+Likhetsindexet är andelen oförändrade rader och olikhetsindexet är andelen ändrade rader. Det är ett avrundat heltal följt av ett procenttecken. Likhetsindexvärdet 100 % är således reserverat för två lika filer, medan 100 % olikhet innebär att ingen rad från den gamla filen kom med i den nya.
++
+Indexraden innehåller namnen på blob-objekten före och efter ändringen. _<behörigheter>_ inkluderas om fil-rättigheterna inte ändras; annars anger separata rader det gamla och det nya läget.
+
+3.  Sökvägar med "ovanliga" tecken anges i citat enligt beskrivningen för konfigurationsvariabeln `core.quotePath` (se linkgit:git-config[1]).
+
+4.  Alla `fil1`-filer i utdata refererar till filer före incheckning, och alla `fil2`-filer refererar till filer efter incheckning. Det är felaktigt att tillämpa varje ändring på varje fil sekventiellt. Till exempel kommer den här patchen att byta a och b:
+
+      diff --git a/a b/b
+      rename from a
+      rename to b
+      diff --git a/b b/a
+      rename from b
+      rename to a
+
+5.  Hunk-rubriker nämner namnet på den funktion som stycket gäller för. Se "Definiera en anpassat styckes-huvud" i linkgit:gitattributes[5] för detaljer om hur man anpassar detta till specifika språk.
+
+
+Kombinerat diff-format
+----------------------
+
+Alla diff-genererande kommandon kan använda `-c` eller `--cc` alternativet för att skapa en 'kombinerad diff' när en merge visas. Detta är standardformatet när merges visas med linkgit:git-diff[1] eller linkgit:git-show[1]. Observera också att du kan ge lämplig `--diff-merges` alternativ till vilket som helst av dessa kommandon för att tvinga generering av diffs i ett specifikt format.
+
+Ett "kombinerat diff"-format ser ut så här:
+
+------------
+diff --combined describe.c
+index fabadb8,cc95eb0..4866510
+--- a/describe.c
++++ b/describe.c
+@@@ -98,20 -98,12 +98,20 @@@
+	return (a_date > b_date) ? -1 : (a_date == b_date) ? 0 : 1;
+  }
+
+- static void describe(char *arg)
+ -static void describe(struct commit *cmit, int last_one)
+++static void describe(char *arg, int last_one)
+  {
+ +	unsigned char sha1[20];
+ +	struct commit *cmit;
+	struct commit_list *list;
+	static int initialized = 0;
+	struct commit_name *n;
+
+ +	if (get_sha1(arg, sha1) < 0)
+ +		usage(describe_usage);
+ +	cmit = lookup_commit_reference(sha1);
+ +	if (!cmit)
+ +		usage(describe_usage);
+ +
+	if (!initialized) {
+		initialized = 1;
+		for_each_ref(get_name);
+------------
+
+1.   Den föregås av ett "git diff"-huvudet, som ser ut så här (när alternativet `-c` används):
+
+       diff --combined fil
++
+eller så här (när `--cc`-alternativet används):
+
+       diff --cc fil
+
+2.   Den följs av ett eller flera utökade huvud-rader (detta exempel visar en sammanslagning med två föräldrar):
++
+[synopsis]
+index <hash>,<hash>..<hash>
+mode <behörighter>,<behörighter>..<behörighter>
+new file mode <behörighter>
+deleted file mode <behörighter>,<behörighter>
++
+Raden `mode <behörighter>,<behörighter>..<behörighter>` visas bara om minst en av <behörighter> skiljer sig från resten. Utökade huvuden med information om detekterad innehållsförflyttning (namnbyten och kopieringsdetektering) är utformade för att fungera med diff-värdet för två _<trädlikt>_ och används inte av kombinerat diff-format.
+
+3.   Den följs av en tvåradig från-fil/till-fil huvud:
+
+       --- a/fil
+       +++ b/fil
++
+I likhet med det tvåradiga huvud för det traditionella 'unified' diff-formatet används `/dev/null` för att signalera skapade eller raderade filer.
++
+Om alternativet --combined-all-paths däremot anges, får du istället för en tvåradig från-fil/till-fil-rubrik en N+1-radig from-file/to-file huvud, där N är antalet föräldrar i sammanslagings-incheckning:
+
+       --- a/fil
+       --- a/fil
+       --- a/fil
+       +++ b/fil
++
+Detta utökade format kan vara användbart om namnbytes- eller kopieringsdetektering är aktivt, så att du kan se filens ursprungliga namn i olika överordnade filer.
+
+4.   Chunk-huvud-formatet är modifierat för att förhindra att folk av misstag matar in det i `patch -p1`. Kombinerat diff-format skapades för granskning av sammanslagings inchecknings-ändringar och var inte avsett att tillämpas. Ändringen liknar ändringen i det utökade 'index'-huvudet:
+
+       @@@ <från-fil-omfång> <från-fil-omfång> <till-fil-omfånge> @@@
++
+Det finns (antal föräldrar + 1) `@`-tecken i chunk-huvudet för kombinerat diff-format.
+
+Till skillnad från det traditionella "unified" diff-formatet, som visar två filer A och B med en enda kolumn som har prefixet `-` (minus -- visas i A men tas bort i B), `+` (plus -- saknas i A men läggs till i B) eller `" "` (mellanslag -- oförändrat), jämför detta format två eller flera filer fil1, fil2,... med en fil X, och visar hur X skiljer sig från var och en av filN. En kolumn för var och en av filN läggs till på utdataraden för att ange hur X:s rad skiljer sig från den.
+
+Ett `-`-tecknet i kolumn N betyder att raden visas i fileN men inte i resultatet. Ett `+`-tecknet i kolumn N betyder att raden visas i resultatet, och fileN har inte den raden (med andra ord, raden lades till, ur den överordnade filens synvinkel).
+
+I exemplet ovan ändrades funktionssignaturen från båda filerna (därav två borttagningar av `-` från både fil1 och fil2, plus `++` för att betyda att en rad som lades till inte visas i vare sig fil1 eller fil2). Dessutom är åtta andra rader desamma från fil1 men visas inte i fil2 (därav prefixet `+`).
+
+När det visas med `git diff-tree -c` jämför den föräldrarna till en sammanslagnings-incheckning med sammanslagnings-resultatet (dvs. file1..fileN är föräldrarna). När det visas med `git diff-files -c` jämför den de två olösta sammanslagnings-föräldrarna med den fungerande arbetskatalog filen (dvs. file1 är steg 2, även kallad "vår version", file2 är steg 3, även kallad "deras version").

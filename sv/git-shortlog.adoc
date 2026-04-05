@@ -1,0 +1,90 @@
+git-shortlog(1)
+===============
+
+NAMN
+----
+git-shortlog - Sammanfatta utdata från 'git log'
+
+SYNOPSIS
+--------
+[verse]
+'git shortlog' [<flaggor>] [<revision-omfång>] [[--] <sökväg>...]
+git log --pretty=short | 'git shortlog' [<flaggor>]
+
+BESKRIVNING
+-----------
+Sammanfattar utdata från 'git log' i ett format som är lämpligt för inkludering i utgivningsmeddelanden. Varje incheckning grupperas efter författare och titel.
+
+Dessutom kommer "[PATCH]" att tas bort från incheckningsbeskrivningen.
+
+Om inga revisioner skickas på kommandoraden och antingen standardinmatningen inte är en terminal eller om det inte finns någon aktuell gren, kommer 'git shortlog' att mata ut en sammanfattning av loggen som lästs från standardinmatningen, utan referens till det aktuella kodförrådet.
+
+ALTERNATIV
+----------
+
+-n::
+--numbered::
+	Sortera utdata efter antal incheckningar per författare i stället för författarens alfabetiska ordning.
+
+-s::
+--summary::
+	Undertryck incheckningsbeskrivningen och ge endast en sammanfattning av antalet incheckningar.
+
+-e::
+--email::
+	Visa e-postadress för varje författare.
+
+--format[=<format>]::
+	I stället för incheckningsrubriken, använd annan information för att beskriva varje incheckning. '<format>' kan vara vilken sträng som helst som accepteras av `--format`-alternativet i 'git log', till exempel '* [%h] %s'. (Se avsnittet "VACKRA FORMAT" i linkgit:git-log[1].)
++
+Varje vackert utskriven incheckning kommer att ompaketeras innan den visas.
+
+--date=<format>::
+	Visa datum formaterade enligt den givna datumsträngen. (Se alternativet `--date` i avsnittet "Incheckningsformatering" i linkgit:git-log[1]). Användbart med `--group=format:<format>`.
+
+--group=<typ>::
+	Gruppincheckningar baserade på `<typ>`. Om inget `--group`-alternativ anges är standardvärdet `author`. `<typ>` är en av:
++
+--
+ - `author`, incheckningar grupperas efter författare
+ - `incheckare`, incheckningar grupperas efter incheckare (samma som `-c`)
+ - `trailer:<fält>`, `<fält>` tolkas som en trailer för incheckningsmeddelanden som inte är skiftlägeskänslig (se linkgit:git-interpret-trailers[1]). Om ditt projekt till exempel använder trailers för `Reviewed-by` kanske du vill se vem som har granskat med `git shortlog -ns --group=trailer:reviewed-by`.
+ - `format:<format>`, vilken sträng som helst som accepteras av `--format`-alternativet i 'git log'. (Se avsnittet "VACKRA FORMAT" i linkgit:git-log[1].)
++
+Observera att incheckningar som inte inkluderar slutraden inte kommer att räknas. Likaså kan incheckningar med flera slutrader (t.ex. flera signoffs) räknas mer än en gång (men bara en gång per unikt slutradsvärde i den incheckningen).
++
+Shortlog kommer att försöka tolka varje slutradsvärde som en `name <mejl>`-identitet. Om det lyckas tillämpas e-postmappningen och e-postadressen utelämnas om inte alternativet `--email` anges. Om värdet inte kan tolkas som en identitet kommer det att tas bokstavligt och fullständigt.
+--
++
+Om `--group` anges flera gånger räknas incheckningar under varje värde (men återigen, bara en gång per unikt värde i den incheckningen). Till exempel räknar `git shortlog --group=author --group=trailer:co-authored-by` både författare och medförfattare.
+
+-c::
+--committer::
+	Detta är ett alias för `--group=committer`.
+
+-w[<bredd>[,<indent1>[,<indent2>]]]::
+	Radbryt utdata genom att radbryta varje rad vid `bredd`. Den första raden i varje post är indenterad med `indent1`-mellanslag, och den andra och efterföljande raderna är indenterade med `indent2`-mellanslag. `width`, `indent1` och `indent2` är som standard 76, 6 respektive 9.
++
+Om bredden är `0` (noll) dra då in raderna i utdata utan att radbryta dem.
+
+<revisionsintervall>::
+	Visa endast incheckningar inom det angivna revisionsintervallet. När inget <revisionsintervall> anges används som standard `HEAD` (d.v.s. hela historiken som leder till den aktuella incheckningen). `origin..HEAD` anger alla incheckningar som är åtkomliga från den aktuella incheckningen (d.v.s. `HEAD`), men inte från `origin`. För en komplett lista över sätt att stava <revisionsintervall>, se avsnittet "Ange intervall" i linkgit:gitrevisions[7].
+
+[--] <sökväg>...::
+	Betrakta endast incheckningar som är tillräckliga för att förklara hur filerna som matchar de angivna sökvägarna kom till.
++
+Sökvägar kan behöva prefixas med `--` för att separera dem från alternativ eller revisionsintervallet, när förvirring uppstår.
+
+:git-shortlog: 1
+include::rev-list-options.adoc[]
+
+KARTLÄGG FÖRFATTARE
+-------------------
+
+Se linkgit:gitmailmap[5].
+
+Observera att om `git shortlog` körs utanför ett kodförråd (för att bearbeta logginnehåll på standardindata), kommer den att leta efter en `.mailmap`-fil i den aktuella katalogen.
+
+GIT
+---
+En del av linkgit:git[1]-sviten

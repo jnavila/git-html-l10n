@@ -1,0 +1,78 @@
+git-commit-tree(1)
+==================
+
+NAMN
+----
+git-commit-tree - Skapa ett nytt inchecknings-objekt
+
+
+SYNOPSIS
+--------
+[verse]
+'git commit-tree' <träd> [(-p <förälder>)...]
+'git commit-tree' [(-p <parent>)...] [-S[<keyid>]] [(-m <meddelande>)...]
+		  [(-F <fil>)...] <träd>
+
+
+BESKRIVNING
+-----------
+Detta är vanligtvis inte vad en slutanvändare vill köra direkt. Se linkgit:git-commit[1] istället.
+
+Skapar ett nytt inchecknings-objekt baserat på det angivna trädobjektet och genererar det nya inchecknings-objekt-id:t vid stdout. Loggmeddelandet läses från standardindata, såvida inte alternativen `-m` eller `-F` anges.
+
+Alternativen `-m` och `-F` kan anges hur många gånger som helst, i valfri ordning. Meddelandet i inchecknings-loggen kommer att skrivas i den ordning alternativen anges.
+
+Ett inchecknings-objekt kan ha ett valfritt antal föräldrar. Med exakt en förälder är det en vanlig incheckning. Att ha mer än en förälder gör incheckningen till en sammanslagning mellan flera historik-linjer. Initiala (root) commits har inga föräldrar.
+
+Medan ett träd representerar ett visst katalogtillstånd i en arbetskatalog, representerar en incheckning det tillståndet i "tid" och förklarar hur man kommer dit.
+
+Normalt sett skulle en incheckning identifiera ett nytt "HEAD"-tillstånd, och även om Git inte bryr sig om var du sparar anteckningen om det tillståndet, tenderar vi i praktiken att bara skriva resultatet till filen som `.git/HEAD` pekar på, så att vi alltid kan se vad det senaste incheckade tillståndet var.
+
+ALTERNATIV
+----------
+<träd>::
+	Ett befintligt trädobjekt.
+
+-p <förälder>::
+	Varje `-p` anger id:t för ett överordnat inchecknings-objekt.
+
+-m <meddelande>::
+	Ett stycke i incheckning-loggmeddelandet. Detta kan ges mer än en gång och varje <meddelande> blir ett eget stycke.
+
+-F <fil>::
+	Läs inchecknings-loggmeddelandet från den givna filen. Använd `-` för att läsa från standardindata. Detta kan anges mer än en gång och innehållet i varje fil blir ett eget stycke.
+
+-S[<nyckeld>]::
+--gpg-sign[=<nyckelid>]::
+--no-gpg-sign::
+	GPG-signera incheckningar. Argumentet `keyid` är valfritt och används som standard för committer-identiteten; om det anges måste det fästas vid alternativet utan mellanslag. `--no-gpg-sign` är användbart för att ångra ett `--gpg-sign`-alternativ som angetts tidigare på kommandoraden.
+
+Inchecknings-information
+------------------------
+
+En incheckning inkapslar:
+
+- alla överordnade objekt-id:n
+- författarnamn, e-postadress och datum
+- namn och e-postadress för incheckaren och inchecknings-tid.
+
+En inchecknings-kommentar läses från stdin. Om en ändringsloggpost inte anges via omdirigering med "<", kommer 'git commit-tree' bara att vänta på att en ska anges och avslutas med ^D.
+
+include::date-formats.adoc[]
+
+Diskussion
+----------
+
+include::i18n.adoc[]
+
+FILER
+-----
+/etc/mailname
+
+SE ÄVEN
+-------
+linkgit:git-write-tree[1] linkgit:git-commit[1]
+
+GIT
+---
+En del av linkgit:git[1]-sviten

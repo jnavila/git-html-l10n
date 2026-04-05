@@ -1,0 +1,109 @@
+git-rev-list(1)
+===============
+
+NAMN
+----
+git-rev-list - Visa incheckningsobjekt i omvänd kronologisk ordning
+
+
+SYNOPSIS
+--------
+[verse]
+'git rev-list' [<flaggor>] <incheckning>... [--] [<sökväg>...]
+
+BESKRIVNING
+-----------
+
+:git-rev-list: 1
+include::rev-list-description.adoc[]
+
+'rev-list' är ett viktigt Git-kommando eftersom det ger möjlighet att bygga och gå igenom incheckning-härkomst-grafer. Av denna anledning har det många olika alternativ som gör att det kan användas av kommandon så olika som 'git bisect' och 'git repack'.
+
+ALTERNATIV
+----------
+
+:git-rev-list: 1
+include::rev-list-options.adoc[]
+
+include::pretty-formats.adoc[]
+
+EXEMPEL
+-------
+
+* Skriv ut listan över incheckningar som kan nås från den aktuella grenen.
++
+----------
+git rev-list HEAD
+----------
+
+* Skriv ut listan över incheckningar på den här grenen, men som inte finns i uppströmsgrenen.
++
+----------
+git rev-list @{upstream}..HEAD
+----------
+
+* Formatera incheckningar med deras författare och inchecknings-meddelande (se även porslin linkgit:git-log[1]).
++
+----------
+git rev-list --format=medium HEAD
+----------
+
+* Formatera incheckningar tillsammans med deras diffs (se även porslins-länken linkgit:git-log[1], som kan göra detta i en enda process).
++
+----------
+git rev-list HEAD |
+git diff-tree --stdin --format=medium -p
+----------
+
+* Skriv ut listan över incheckningar på den aktuella grenen som berörde någon fil i katalogen `Dokumentation`.
++
+----------
+git rev-list HEAD -- Dokumentation/
+----------
+
+* Skriv ut listan över incheckningar som du har författat under det senaste året, på valfri gren, tagg eller annan referens.
++
+----------
+git rev-list --author=you@example.com --since=1.year.ago --all
+----------
+
+* Skriv ut listan över objekt som kan nås från den aktuella grenen (dvs. alla incheckningar och de blobbar och träd de innehåller).
++
+----------
+git rev-list --objects HEAD
+----------
+
+* Jämför diskstorleken för alla nåbara objekt, med de som är nåbara från refloggar, och den totala packade storleken. Detta kan avgöra om `git repack -ad` kan minska kodförrådets storlek (genom att ta bort oåtkomliga objekt), och om utgångna refloggar kan hjälpa.
++
+----------
+# nåbara objekt
+git rev-list --disk-usage --objects --all
+# plus refloggar
+git rev-list --disk-usage --objects --all --reflog
+# total diskstorlek som används
+du -c .git/objects/pack/*.pack .git/objects/??/*
+# alternativ till du: lägg ihop fälten "size" och "size-pack"
+git count-objects -v
+----------
+
+* Rapportera diskstorleken för varje gren, exklusive objekt som används av den aktuella grenen. Detta kan hitta extremvärden som bidrar till en uppblåst kodförråds-storlek (t.ex. för att någon av misstag har genomfört stora byggartefakter).
++
+----------
+git for-each-ref --format='%(refname)' |
+while read branch
+do
+	size=$(git rev-list --disk-usage --objects HEAD..$branch)
+	echo "$size $branch"
+done |
+sort -n
+----------
+
+* Jämför storleken på disken för grenar i en grupp av referenser, med undantag för en annan. Om du blandar objekt från flera fjärrar i ett enda arkiv kan detta visa vilka fjärrar som bidrar till kodförrådets storlek (med storleken på `origin` som baslinje).
++
+----------
+git rev-list --disk-usage --objects --remotes=$suspect --not --remotes=origin
+----------
+
+GIT
+---
+En del av linkgit:git[1]-sviten

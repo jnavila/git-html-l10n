@@ -4,28 +4,28 @@ Git är till viss del teckenkodningsagnostisk.
 
  - Sökvägsnamn är kodade i UTF-8-normaliseringsform C. Detta gäller trädobjekt, indexfilen, referensnamn, såväl som sökvägsnamn i kommandoradsargument, miljövariabler och konfigurationsfiler (`.git/config` (se linkgit:git-config[1]), linkgit:gitignore[5], linkgit:gitattributes[5] och linkgit:gitmodules[5]).
 +
-Observera att Git på kärnnivå behandlar sökvägsnamn helt enkelt som sekvenser av icke-NUL-byte, det finns inga konverteringar av sökvägskodning (förutom på Mac och Windows). Därför fungerar användning av sökvägsnamn som inte är ASCII-namn oftast även på plattformar och filsystem som använder äldre utökade ASCII-kodningar. Repos som skapas på sådana system kommer dock inte att fungera korrekt på UTF-8-baserade system (t.ex. Linux, Mac, Windows) och vice versa. Dessutom antar många Git-baserade verktyg helt enkelt att sökvägsnamn är UTF-8 och kommer inte att kunna visa andra kodningar korrekt.
+Observera att Git på kärnnivå behandlar sökvägsnamn helt enkelt som sekvenser av icke-NUL-byte, det finns inga konverteringar av sökvägskodning (förutom på Mac och Windows). Därför fungerar användning av sökvägsnamn som inte är ASCII-namn oftast även på plattformar och filsystem som använder äldre utökade ASCII-kodningar. Förvar som skapas på sådana system kommer dock inte att fungera korrekt på UTF-8-baserade system (t.ex. Linux, Mac, Windows) och vice versa. Dessutom antar många Git-baserade verktyg helt enkelt att sökvägsnamn är UTF-8 och kommer inte att kunna visa andra kodningar korrekt.
 
  - Meddelanden i commitloggar kodas vanligtvis i UTF-8, men andra utökade ASCII-kodningar stöds också. Detta inkluderar ISO-8859-x, CP125x och många andra, men _inte_ UTF-16/32, EBCDIC och CJK multibyte-kodningar (GBK, Shift-JIS, Big5, EUC-x, CP9xx etc.).
 
-Även om vi uppmuntrar att incheckning-loggmeddelandena kodas i UTF-8, är både kärnan och Git Porcelain utformade för att inte tvinga fram UTF-8 på projekt. Om alla deltagare i ett visst projekt tycker att det är bekvämare att använda äldre kodningar, förbjuder inte Git det. Det finns dock några saker att tänka på.
+Även om vi uppmuntrar att incheckningsloggmeddelanden kodas i UTF-8, är både kärnan och användarkommandona (porcelain) i Git utformade för att inte tvinga fram UTF-8 i projekt. Om alla deltagare i ett visst projekt tycker att det är bekvämare att använda äldre kodningar, förbjuder inte Git det. Det finns dock några saker att tänka på.
 
-. `git commit` och `git commit-tree` utfärdar en varning om incheckning-loggmeddelandet som ges till det inte ser ut som en giltig UTF-8-sträng, såvida du inte uttryckligen anger att ditt projekt använder en äldre kodning. Sättet att säga detta är att ha `i18n.commitEncoding` i `.git/config`-filen, så här:
+. `git commit` och `git commit-tree` utfärdar en varning om incheckningsloggmeddelandet som ges till det inte ser ut som en giltig UTF-8-sträng, såvida du inte uttryckligen anger att ditt projekt använder en äldre kodning. Sättet att säga detta är att ha `i18n.commitEncoding` i `.git/config`-filen, så här:
 +
 ------------
 [i18n]
 	commitEncoding = ISO-8859-1
 ------------
 +
-Inchecknings-objekt som skapats med ovanstående inställning registrerar värdet för `i18n.commitEncoding` i sin `encoding`-header. Detta är för att hjälpa andra som tittar på dem senare. Avsaknaden av denna header innebär att inchecknings-loggmeddelandet är kodat i UTF-8.
+Incheckningsobjekt som skapats med ovanstående inställning registrerar värdet för `i18n.commitEncoding` i sin `encoding`-header. Detta är för att hjälpa andra som tittar på dem senare. Avsaknaden av denna header innebär att incheckningsloggmeddelandet är kodat i UTF-8.
 
-. `git log`, `git show`, `git blame` och vänner tittar på `encoding`-headern för ett inchecknings-objekt och försöker koda om loggmeddelandet till UTF-8 om inget annat anges. Du kan ange önskad utdatakodning med `i18n.logOutputEncoding` i `.git/config`-filen, så här:
+. `git log`, `git show`, `git blame` och vänner tittar på `encoding`-headern för ett incheckningsobjekt och försöker koda om loggmeddelandet till UTF-8 om inget annat anges. Du kan ange önskad utdatakodning med `i18n.logOutputEncoding` i `.git/config`-filen, så här:
 +
 ------------
 [i18n]
 	logOutputEncoding = ISO-8859-1
 ------------
 +
-Om du inte har den här konfigurationsvariabeln, används värdet för `i18n.commitEncoding` istället.
+Om du inte har den här konfigurationsvariabeln används värdet för `i18n.commitEncoding` i stället.
 
-Observera att vi medvetet valde att inte koda om incheckning-loggmeddelandet när en incheckning görs för att tvinga fram UTF-8 på inchecknings-objektnivå, eftersom omkodning till UTF-8 inte nödvändigtvis är en reversibel operation.
+Observera att vi medvetet valde att inte koda om incheckningsloggmeddelandet när en incheckning görs för att tvinga fram UTF-8 på incheckningsobjektnivå, eftersom omkodning till UTF-8 inte nödvändigtvis är en reversibel operation.

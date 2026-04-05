@@ -1,0 +1,44 @@
+`branch.autoSetupMerge`::
+	Anger för `git branch`, `git switch` och `git checkout` att ställa in nya grenar så att linkgit:git-pull[1] sammanslås korrekt från startpunktsgrenen. Observera att även om detta alternativ inte är angivet kan detta beteende väljas per gren med hjälp av alternativen `--track` och `--no-track`. Standardinställningen för detta alternativ är `true`. De giltiga inställningarna är:
+`false`;; ingen automatisk inställning görs
+`true`;; automatisk inställning görs när startpunkten är en fjärrspårningsgren
+`always`;; automatisk inställning görs när startpunkten är antingen en lokal gren eller en fjärrspårningsgren
+`inherit`;; Om startpunkten har en spårningskonfiguration, kopieras den till den nya grenen
+`simple`;; automatisk inställning görs endast när startpunkten är en fjärrspårningsgren och den nya grenen har samma namn som fjärrgrenen.
+
+`branch.autoSetupRebase`::
+	När en ny gern skapas med `git branch`, `git switch` eller `git checkout` som spårar en annan gren, talar denna variabel om för Git att ställa in pull för att obasera istället för sammanslå (se `branch.<name>.rebase`). De giltiga inställningarna är:
+`never`;; ombasera sätts aldrig automatiskt till true.
+`local`;; rebase is set to true for tracked branches of other local branches.
+`remote`;; rebase är satt till sant för spårade grenar av fjärrspårande grenar.
+`always`;; ombasera kommer att sättas till true för alla spårningsgrenar.
+
++
+Se `branch.autoSetupMerge` för information om hur man konfigurerar en gren för att spåra en annan gren. Standardinställningen är `never`.
+
+`branch.sort`::
+	Denna variabel styr sorteringsordningen för grenar när de visas av linkgit:git-branch[1]. Utan alternativet `--sort=<värde>` kommer värdet för denna variabel att användas som standard. Se fältnamnen i linkgit:git-for-each-ref[1] för giltiga värden.
+
+`branch.<name>.remote`::
+	När den är på grenen _<namn>_, talar den om för `git fetch` och `git push` vilken fjärr som ska hämtas från eller pushas till. Fjärren som pushas till kan åsidosättas med `remote.pushDefault` (för alla grenar). Fjärren som pushas till, för den aktuella grenen, kan ytterligare åsidosättas av `branch.<namn>.pushRemote`. Om ingen fjärr är konfigurerad, eller om du inte är på någon gren och det finns mer än en fjärr definierad i förvaret, används som standard `origin` för hämtning och `remote.pushDefault` för push:ing. Dessutom är `.` (en punkt) det aktuella lokala förvaret (ett punkt-förvar), se `branch.<namn>.merge`s sista anmärkning nedan.
+
+`branch.<name>.pushRemote`::
+	När den är på branch _<name>_, åsidosätter den `branch.<name>.remote` för push:ning. Den åsidosätter också `remote.pushDefault` för push:ning från gren _<name>_. När du hämtar från en plats (t.ex. din uppströms) och pushar till en annan plats (t.ex. ditt eget publiceringsfövar), vill du ställa in `remote.pushDefault` för att ange fjärren som push-funktionen ska skickas till för alla grenar, och använda det här alternativet för att åsidosätta det för en specifik gren.
+
+`branch.<name>.merge`::
+	Definierar, tillsammans med `branch.<namn>.remote`, uppströmsgrenen för den givna grenen. Den anger för `git fetch`/`git pull`/`git rebase` vilken gren som ska sammanslås och kan också påverka `git push` (se `push.default`). I grenen _<namn>_ anger den för `git fetch` vilken standardrefspec som ska markeras för sammanfogning i `FETCH_HEAD`. Värdet hanteras som den fjärr-delen av en refspec och måste matcha en ref som hämtas från fjärren som anges av `branch.<namn>.remote`. Sammanslagnings-informationen används av `git pull` (som först anropar `git fetch`) för att söka efter standardgrenen för sammanfogning. Utan detta alternativ sammanslår `git pull` som standard den första hämtade refspecen. Ange flera värden för att få en bläckfisk-sammanfogning. Om du vill konfigurera `git pull` så att den sammanfogas med _<namn>_ från en annan gren i det lokala arkivet, kan du peka `branch.<namn>.merge` till önskad gren och använda den relativa sökvägsinställningen `.` (en punkt) för `branch.<namn>.remote`.
+
+`branch.<namn>.mergeOptions`::
+	Ställer in standardalternativ för sammanslagning till grenen _<namn>_. Syntaxen och de alternativ som stöds är desamma som för linkgit:git-merge[1], men alternativvärden som innehåller blanksteg stöds för närvarande inte.
+
+`branch.<name>.rebase`::
+	När det är sant, ombasera grenen _<namn>_ ovanpå den hämtade grenen, istället för att sammanfoga standardgrenen från standardfjärren när `git pull` körs. Se `pull.rebase` för att göra detta på ett icke-grenspecifikt sätt.
++
+När `merges` (eller bara `m`) används, skicka `--rebase-merges`-alternativet till `git rebase` så att de lokala sammanslagnings-incheckningen inkluderas i ombaseringen (se linkgit:git-rebase[1] för detaljer).
++
+När värdet är `interactive` (eller bara `i`) körs ombaseringen i interaktivt läge.
++
+*OBS*: detta är en potentiellt farlig operation; använd den *inte* om du inte förstår konsekvenserna (se linkgit:git-rebase[1] för mer information).
+
+`branch.<name>.description`::
+	Grenbeskrivning, kan redigeras med `git branch --edit-description`. Grenbeskrivningen läggs automatiskt till i `format-patch` följebrevet eller `request-pull` sammanfattningen.

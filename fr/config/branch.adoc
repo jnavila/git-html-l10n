@@ -1,0 +1,44 @@
+`branch.autoSetupMerge`::
+	Dis à `git branch`, `git switch` et `git checkout`de créer des nouvelles branches de manière à ce que linkgit:git-pull[1] fusionnera de manière appropriée depuis la branche de départ. Notez que même si cette option n'est pas définie, ce comportement peut être choisi branche par branche en utilisant les options `--track` et `--no-track`. Cette option vaut par défaut `true`. Les paramètres valides sont :
+`false`;; aucune configuration automatique n'est faite
+`true`;; la configuration automatique est faite lorsque le point de départ est une branche de suivi à distance
+`always`;; la configuration automatique est faite lorsque le point de départ est soit une branche locale ou une branche de suivi à distance
+`inherit`;; si le point de départ a une configuration de suivi, elle est copiée dans la nouvelle branche
+`simple`;; la configuration automatique n'est effectuée que lorsque le point de départ est une branche de suivi à distance et que la nouvelle branche a le même nom que la branche distante.
+
+`branch.autoSetupRebase`::
+	Quand une nouvelle branche est créée avec `git branch`, `git switch` ou `git checkout` qui suit une autre branche, cette variable dit à Git de mettre en place le rebasage lors du tirage au lieu de la fusion (voir `branch.<nom>.rebase`). Les paramètres valides sont :
+`never`;; rebase n'est jamais automatiquement définie à `true`.
+`local`;; rebase est définie à vrai pour les branches suivies d'autres branches locales.
+`remote`;; rebase est définie à `true` pour les branches suivies des branches de suivi à distance.
+`always`;; rebase sera réglé à `true` pour toutes les branches de suivi.
+
++
+Voir `branch.autoSetupMerge` pour plus de détails sur la façon de mettre en place une branche pour suivre une autre branche. Cette option vaut par défaut `never`.
+
+`branch.sort`::
+	Cette variable contrôle l'ordre de tri des branches lorsqu'elles sont affichées par linkgit:git-branch[1]. Sans l'option `--sort=<valeur>`, la valeur de cette variable comme valeur par défaut. Voir les noms de champs de linkgit:git-for-each-ref[1] pour les valeurs valides.
+
+`branch.<nom>.remote`::
+	Sur la branche _<nom>_, il dit à `git fetch` et `git push` quel distant duquel récupérer ou sur lequel pousser. Le distant sur lequel pousser peut être remplacée par `remote.pushDefault` (pour toutes les branches). Le distant sur lequel pousser, pour la branche actuelle, peut être encore surchargé par `branch.<nom>.pushRemote`. Si aucun distant n'est configurée, ou si vous n'êtes pas sur une branche et qu'il y a plus d'un distant défini dans le dépôt, il vaut par défaut `origin` pour la récupération et `remote.pushDefault` pour la poussée. En outre, `.` (un point) est le dépôt local actuel (un dépôt point), voir la dernière note de `branch.<nom>.merge` ci-dessous.
+
+`branch.<nom>.pushRemote`::
+	Quand la branche _<nom>_ est extraite, surcharge `branch.<nom>.remote` pour pousser. Il remplace aussi `remote.pushDefault` pour pousser depuis la branche _<nom>_. Lorsque vous tirez d'un endroit (p. ex. votre amont) et poussez vers un autre endroit (p. ex. votre propre dépôt de publication), vous voudriez définir `remote.pushDefault` pour spécifier le distant où pousser pour toutes les branches, et utiliser cette option pour la surcharger pour une branche spécifique.
+
+`branch.<nom>.merge`::
+	Définit, avec `branch.<nom>.remote` la branche amont de la branche donnée. Cela indique à `git fetch`/`git pull`/`git rebase` quelle branche fusionner et peut aussi affecter `git push` (voir `push.default`). Quand dans la branche _<nom>_, cela indique à `git fetch` le spéc de réf par défaut à marquer pour la fusion dans `FETCH_HEAD`. La valeur est manipulée comme la partie distante d'une spéc de réf, et doit correspondre à une réf qui est récupérée depuis un distant donné par `branch.<nom>.remote`. Les informations de fusion sont utilisées par `git pull` (qui appelle d'abord `git fetch`) pour rechercher la branche par défaut à fusionner. Sans cette option, `git pull` fusionne par défaut le premier spéc de réf récupéré. Spécifiez plusieurs valeurs pour obtenir une fusion octopus. Si vous souhaitez configurer `git pull` afin qu'il fusionne dans _<nom>_ depuis une autre branche dans le dépôt local, vous pouvez pointer `branch.<nom>.merge`sur la branche souhaitée, et utiliser le chemin relatif `.` (un point) pour `branch.<nom>.remote`.
+
+`branch.<nom>.mergeOptions`::
+	Définir les options par défaut pour la fusion dans la branche _<nom>_. La syntaxe et les options prises en charge sont les mêmes que celles de linkgit:git-merge[1], mais les valeurs d'options contenant des espaces ne sont actuellement pas prises en charge.
+
+`branch.<nom>.rebase`::
+	Quand cela est vrai, rebaser la branche _<nom>_ au sommet de la branche récupérée, au lieu de fusionner la branche par défaut depuis le distant par défaut quand `git pull` est exécuté. Voir `pull.rebase` pour ce faire d'une manière non spécifique à une branche.
++
+Avec `merges` (ou juste `m`), passer l'option `--rebase-merges` à `git rebase` de sorte que les commits de fusion locaux soient inclus dans le rebasage (voir linkgit:git-rebase[1] pour plus de détails).
++
+Lorsque la valeur est `interactive` (ou simplement `i` ), le rebasage est exécuté en mode interactif.
++
+*NOTE* : il s'agit d'une opération potentiellement dangereuse ; ne l'utilisez *pas* à moins que vous ne compreniez les implications (voir linkgit:git-rebase[1] pour les détails).
+
+`branch.<nom>.description`::
+	Description de la branche, peut être modifiée avec `git branch --edit-description`. La description de la branche est automatiquement ajoutée à la lettre d'introduction de `format-patch` ou `request-pull`.

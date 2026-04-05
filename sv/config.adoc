@@ -1,35 +1,35 @@
 KONFIGURATIONSFIL
 -----------------
 
-Git-konfigurationsfilen innehåller ett antal variabler som påverkar Git-kommandonas beteende. Filerna `.git/config` och eventuellt `config.worktree` (se avsnittet "KONFIGURATIONSFIL" i linkgit:git-worktree[1]) i varje repository används för att lagra konfigurationen för det repositoriet, och `$HOME/.gitconfig` används för att lagra en konfiguration per användare som reservvärden för `.git/config`-filen. Filen `/etc/gitconfig` kan användas för att lagra en systemomfattande standardkonfiguration.
+Git-konfigurationsfilen innehåller ett antal variabler som påverkar Git-kommandonas beteende. Filerna `.git/config` och eventuellt `config.worktree` (se avsnittet "KONFIGURATIONSFIL" i linkgit:git-worktree[1]) i varje kodförråd används för att lagra konfigurationen för det kodförrådet, och `$HOME/.gitconfig` används för att lagra en konfiguration per användare som reservvärden för `.git/config`-filen. Filen `/etc/gitconfig` kan användas för att lagra en systemomfattande standardkonfiguration.
 
-Konfigurationsvariablerna används av både Git Plumbing- och Porcelain-kommandona. Variablerna är indelade i sektioner, där det fullständigt kvalificerade variabelnamnet av variabeln själv är det sista punktseparerade segmentet och sektionsnamnet är allt före den sista punkten. Variabelnamnen är Skiftlägesoberoende, tillåter endast alfanumeriska tecken och `-`, och måste börja med ett alfabetiskt tecken. Vissa variabler kan förekomma flera gånger; vi säger då att variabeln är flervärdig.
+Konfigurationsvariablerna används av både Git-lågnivåkommandon och högnivåkommandon. Variablerna är indelade i sektioner, där det fullständigt kvalificerade variabelnamnet är det sista punktseparerade segmentet och sektionsnamnet är allt före den sista punkten. Variabelnamnen är skiftlägesoberoende, tillåter endast alfanumeriska tecken och `-`, och måste börja med ett alfabetiskt tecken. Vissa variabler kan förekomma flera gånger; då säger vi att variabeln är flervärdig.
 
 Syntax
 ~~~~~~
 
 Syntaxen är ganska flexibel och tillåtande. Blanktecken, som i detta sammanhang är mellanslagstecknet (SP) och horisontell tabuleringstecken (HT), ignoreras oftast. Tecknen '#' och ';' börjar kommentarer till slutet av raden. Tomma rader ignoreras.
 
-Filen består av sektioner och variabler. Ett avsnitt börjar med avsnittets namn inom hakparenteser och fortsätter tills nästa avsnitt börjar. Sektionsnamn är inte skiftlägeskänsliga. Endast alfanumeriska tecken, `-` och `.` är tillåtna i sektionsnamn. Varje variabel måste tillhöra ett avsnitt, vilket innebär att det måste finnas en sektionsrubrik före den första inställningen av en variabel.
+Filen består av sektioner och variabler. Ett avsnitt börjar med avsnittets namn inom hakparenteser och fortsätter tills nästa avsnitt börjar. Sektionsnamn är inte skiftlägeskänsliga. Endast alfanumeriska tecken, `-` och `.` är tillåtna i sektionsnamn. Varje variabel måste tillhöra ett avsnitt, vilket innebär att det måste finnas en sektions-huvud före den första inställningen av en variabel.
 
-Avsnitt kan vidare delas in i underavsnitt. För att börja ett underavsnitt, skriv dess namn inom dubbla citationstecken, separerade med mellanslag från avsnittsnamnet, i avsnittsrubriken, som i exemplet nedan:
+Avsnitt kan vidare delas in i underavsnitt. För att börja ett underavsnitt, skriv dess namn inom dubbla citationstecken, separerade med mellanslag från avsnittsnamnet, i sektion-huvudet, som i exemplet nedan:
 
 --------
 	[section "underavsnitt"]
 
 --------
 
-Namn på underavsnitt är skiftlägeskänsliga och kan innehålla vilka tecken som helst förutom nyrad och nullbyte. Dubbelcitat `"` och bakåtsnedstreck kan inkluderas genom att använda escape-tecken som `\"` respektive `\\`. Bakåtsnedstreck som föregår andra tecken tas bort vid läsning; till exempel läses `\t` som `t` och `\0` läses som `0`. Avsnittsrubriker kan inte sträcka sig över flera rader. Variabler kan tillhöra direkt ett avsnitt eller ett givet underavsnitt. Du kan ha `[avsnitt]` om du har `[avsnitt "underavsnitt"]`, men du behöver inte ha det.
+Namn på underavsnitt är skiftlägeskänsliga och kan innehålla vilka tecken som helst förutom nyrad och nullbyte. Dubbelcitat `"` och bakåtsnedstreck kan inkluderas genom att använda escapetecken som `\"` respektive `\\`. Bakåtsnedstreck som föregår andra tecken tas bort vid läsning; till exempel läses `\t` som `t` och `\0` läses som `0`. Avsnittsrubriker kan inte sträcka sig över flera rader. Variabler kan tillhöra direkt ett avsnitt eller ett givet underavsnitt. Du kan ha `[avsnitt]` om du har `[avsnitt "underavsnitt"]`, men du behöver inte ha det.
 
 Det finns också en föråldrad syntax `[section.subsection]`. Med denna syntax konverteras underavdelningsnamnet till gemener och jämförs även med gemener/skiftlägeskänslighet. Dessa underavdelningsnamn följer samma begränsningar som sektionsnamn.
 
-Alla andra rader (och resten av raden efter avsnittsrubriken) känns igen som inställningsvariabler i formen 'namn = värde' (eller bara 'namn', vilket är en förkortning för att variabeln är den booleska "sant"). Variabelnamnen är skiftlägesoberoende, tillåter endast alfanumeriska tecken och `-` och måste börja med ett alfabetiskt tecken.
+Alla andra rader (och resten av raden efter sektions-huvudet) känns igen som inställningsvariabler i formen 'namn = värde' (eller bara 'namn', vilket är en förkortning för att variabeln är den booleska "sant"). Variabelnamnen är skiftlägesoberoende, tillåter endast alfanumeriska tecken och `-` och måste börja med ett alfabetiskt tecken.
 
-Mellanslag som omger `name`, `=` och `value` kasseras. Interna mellanslag inom 'value' behålls ordagrant. Kommentarer som börjar med antingen `#` eller `;` och fortsätter till slutet av raden kasseras. En rad som definierar ett värde kan fortsätta till nästa rad genom att avsluta den med ett omvänt snedstreck (`\`); det bakåtsnedstreck och radslutstecknen kasseras.
+Blanktecken som omger `name`, `=` och `value` kasseras. Interna blanktecken inom 'value' behålls ordagrant. Kommentarer som börjar med antingen `#` eller `;` och fortsätter till slutet av raden kasseras. En rad som definierar ett värde kan fortsätta till nästa rad genom att avsluta den med ett bakåtsnedstreck (`\`); det bakåtsnedstreck och radslutstecknen kasseras.
 
-Om `value` behöver innehålla inledande eller efterföljande blanksteg måste det omges av dubbla citattecken (`"`). Inom dubbla citattecken måste dubbla citattecken (`"`) och omvänt snedstreck (`\`) omges av escape-tecken: använd `\`` för `"` och `\\` för `\`.
+Om `value` behöver innehålla inledande eller efterföljande blanksteg måste det omges av dubbla citattecken (`"`). Inom dubbla citattecken måste dubbla citattecken (`"`) och bakåtsnedstreck (`\`) omges av escapetecken: använd `\`` för `"` och `\\` för `\`.
 
-Följande escape-sekvenser (förutom `\"` och `\\`) känns igen: `\n` för nyradstecken (NL), `\t` för horisontell tabulering (HT, TAB) och `\b` för backsteg (BS). Andra tecken-escape-sekvenser (inklusive oktala escape-sekvenser) är ogiltiga.
+Följande escapesekvenser (förutom `\"` och `\\`) känns igen: `\n` för nyradstecken (NL), `\t` för horisontell tabulering (HT, TAB) och `\b` för backsteg (BS). Andra tecken-escapesekvenser (inklusive oktala escapesekvenser) är ogiltiga.
 
 
 Inkluderar
@@ -51,7 +51,7 @@ Villkoret börjar med ett nyckelord följt av ett kolon och lite data vars forma
 `gitdir`::
 	Data som följer efter nyckelordet `gitdir` och ett kolon används som ett glob-mönster. Om platsen för .git-katalogen matchar mönstret är include-villkoret uppfyllt.
 +
-.git-platsen kan vara auto-upptäckt, eller komma från miljövariabeln `$GIT_DIR`. Om repot är auto-upptäckt via en .git-fil (t.ex. från undermoduler eller ett länkat arbetsträd), skulle .git-platsen vara den slutliga platsen där .git-katalogen finns, inte där .git-filen finns.
+.git-platsen kan vara auto-upptäckt, eller komma från miljövariabeln `$GIT_DIR`. Om kodförrådet är auto-upptäckt via en .git-fil (t.ex. från undermoduler eller ett länkat arbetsträd), skulle .git-platsen vara den slutliga platsen där .git-katalogen finns, inte där .git-filen finns.
 +
 Mönstret kan innehålla vanliga globbing-jokertecken och två ytterligare, `**/` och `/**`, som kan matcha flera sökvägskomponenter. Se linkgit:gitignore[5] för mer information. För enkelhetens skull:
 
@@ -64,7 +64,7 @@ Mönstret kan innehålla vanliga globbing-jokertecken och två ytterligare, `**/
  * Om mönstret slutar med `/`, läggs `**` till automatiskt. Till exempel blir mönstret `foo/` till `foo/**`. Med andra ord matchar det "foo" och allt inuti, rekursivt.
 
 `gitdir/i`::
-	Detta är samma sak som `gitdir` förutom att matchningen görs skiftlägesoberoende (t.ex. på filsystem som är skiftlägesoberoende)
+	Det här är samma sak som `gitdir` förutom att matchningen görs skiftlägesoberoende (t.ex. på filsystem som är skiftlägesoberoende)
 
 `onbranch`::
 	Data som följer nyckelordet `onbranch` och ett kolon tas som ett mönster med vanliga globbing-jokertecken och två ytterligare, `**/` och `/**`, som kan matcha flera sökvägskomponenter. Om vi befinner oss i ett arbetsträd där namnet på den gren som för närvarande är utcheckad matchar mönstret, är include-villkoret uppfyllt.
@@ -86,7 +86,7 @@ Några fler anteckningar om matchning via `gitdir` och `gitdir/i`:
 
  * Både symlänk- och realpath-versionerna av sökvägarna kommer att matchas utanför `$GIT_DIR`. T.ex. om ~/git är en symlänk till /mnt/storage/git, kommer både `gitdir:~/git` och `gitdir:/mnt/storage/git` att matcha.
 +
-This was not the case in the initial release of this feature in v2.13.0, which only matched the realpath version. Configuration that wants to be compatible with the initial release of this feature needs to either specify only the realpath version, or both versions.
+Det här var inte fallet i den första versionen av den här funktionen i v2.13.0, som bara matchade realpath-versionen. Konfiguration som vill vara kompatibel med den första versionen av den här funktionen måste antingen ange endast realpath-versionen, eller båda versionerna.
 
  * Observera att "../" inte är speciellt och kommer att matcha bokstavligt, vilket sannolikt inte är vad du vill ha.
 
@@ -122,11 +122,11 @@ Exempel
 [includeIf "gitdir:/path/to/foo/.git"]
 	path = /path/to/foo.inc
 
-; includera för alla repositories inuti /path/to/group
+; inkludera för alla kodförråd inuti /path/to/group
 [includeIf "gitdir:/path/to/group/"]
 	path = /path/to/foo.inc
 
-; inkludera för alla repon i $HOME/to/group
+; inkludera för alla kodförråd i $HOME/to/group
 [includeIf "gitdir:~/to/group/"]
 	path = /path/to/foo.inc
 
@@ -141,9 +141,9 @@ Exempel
 [includeIf "onbranch:foo-branch"]
 	path = foo.inc
 
-; include only if a remote with the given URL exists (note
-; that such a URL may be provided later in a file or in a
-; file read after this file is read, as seen in this example)
+; inkludera endast om en fjär med den angivna URL:en finns (observera
+; att en sådan URL kan tillhandahållas senare i en fil eller i en
+; fil som läses efter att denna fil har lästs, som ses i detta exempel)
 [includeIf "hasconfig:remote.*.url:https://example.com/**"]
 	path = foo.inc
 [remote "origin"]
@@ -185,7 +185,7 @@ Pseudoattributet `reset` återställer alla färger och attribut innan den angiv
 +
 En tom färgsträng ger ingen färgeffekt alls. Detta kan användas för att undvika att färglägga specifika element utan att helt inaktivera färg.
 +
-For git's pre-defined color slots, the attributes are meant to be reset at the beginning of each item in the colored output. So setting `color.decorate.branch` to `black` will paint that branch name in a plain `black`, even if the previous thing on the same output line (e.g. opening parenthesis before the list of branch names in `log --decorate` output) is set to be painted with `bold` or some other attribute. However, custom log formats may do more complicated and layered coloring, and the negated forms may be useful there.
+För gits fördefinierade färg-fack är attributen avsedda att återställas i början av varje post i den färgade utdata. Så om du ställer in `color.decorate.branch` till `black` kommer grennamnet att målas i en vanlig `svart`, även om föregående sak på samma utdatarad (t.ex. inledande parentes före listan med grennamn i `log --decorate` utdata) är inställd på att målas med `bold` eller något annat attribut. Anpassade loggformat kan dock göra mer komplicerad och lager-på-lager-färgning, och de negerade formerna kan vara användbara där.
 
 sökvägsnamn::
 	En variabel som tar ett sökvägsvärde kan ges en sträng som börjar med "`~/`" eller "`~user/`", och den vanliga tilde-expansionen sker för en sådan sträng: `~/` expanderas till värdet `$HOME` och `~user/` till den angivna användarens hemkatalog.

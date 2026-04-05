@@ -1,0 +1,85 @@
+git-diff-index(1)
+=================
+
+NAMN
+----
+git-diff-index - Jämför ett träd med det fungerande trädet eller indexet
+
+
+SYNOPSIS
+--------
+[verse]
+'git diff-index' [-m] [--cached] [--merge-base] [<vanliga-diff-alternativ>] <trädlikt> [<sökväg>...]
+
+BESKRIVNING
+-----------
+Jämför innehållet och läget för blobarna som finns i ett trädobjekt med motsvarande spårade filer i arbetskatalog, eller med motsvarande sökvägar i indexet. När <sökväg>-argument finns, jämför endast sökvägar som matchar dessa mönster. Annars jämförs alla spårade filer.
+
+ALTERNATIV
+----------
+include::diff-options.adoc[]
+
+<trädlikt>::
+	Id:t för ett trädobjekt att differera mot.
+
+--cached::
+	Beakta inte filen på disken alls.
+
+--merge-base::
+	Istället för att jämföra <trädlikt> direkt, använd mergebasen mellan <trädlikt> och HEAD istället. <trädlikt> måste vara en incheckning.
+
+-m::
+	Som standard, rapporteras filer som är registrerade i indexet men inte utcheckade som borttagna. Denna flagga gör att 'git diff-index' anger att alla filer som inte är utcheckade är uppdaterade.
+
+include::diff-format.adoc[]
+
+DRIFTSLÄGEN
+-----------
+Du kan välja om du vill lita helt på indexfilen (med hjälp av flaggan `--cached`) eller be diff-logiken att visa filer som inte matchar det statistiska tillståndet som "preliminärt ändrade". Båda dessa operationer är mycket användbara.
+
+CACHAD LÄGE
+-----------
+Om `--cached` anges, kan du fråga:
+
+	visa mig skillnaderna mellan HEAD och det aktuella indexinnehållet 
+	(de jag skulle skriva med 'git write-tree')
+
+Låt oss till exempel säga att du har arbetat med din arbetskatalog, uppdaterat några filer i indexet och är redo att checka-in. Du vill se exakt *vad* du ska checka-in, utan att behöva skriva ett nytt trädobjekt och jämföra det på det sättet, och för att göra det gör du bara
+
+	git diff-index --cached HEAD
+
+Exempel: låt oss säga att jag hade bytt namn på `commit.c` till `git-commit.c`, och jag hade gjort en `update-index` för att göra det effektivt i indexfilen. `git diff-files` skulle inte visa någonting alls, eftersom indexfilen matchar min arbetskatalog. Men att göra en 'git diff-index' gör:
+
+  torvalds@ppc970:~/git> git diff-index --cached HEAD
+  :100644 000000 4161aecc6700a2eb579e842af0b7f22b98443f74 0000000000000000000000000000000000000000 D	commit.c
+  :000000 100644 0000000000000000000000000000000000000000 4161aecc6700a2eb579e842af0b7f22b98443f74 A	git-commit.c
+
+Du kan lätt se att ovanstående är ett namnbyte.
+
+Faktum är att `git diff-index --cached` alltid *borde* vara helt likvärdigt med att faktiskt göra ett 'git write-tree' och jämföra det. Förutom att den här är mycket trevligare i fallet där du bara vill kontrollera var du befinner dig.
+
+Så att göra en `git diff-index --cached` är i grunden väldigt användbart när du frågar dig själv "vad har jag redan markerat som incheckat, och vad är skillnaden jämfört med ett tidigare träd".
+
+ICKE-CACHAT LÄGE
+----------------
+Läget "icke-cachat" har en annan metod, och är potentiellt det mest användbara av de två eftersom det den gör inte kan emuleras med ett 'git write-tree' + 'git diff-tree'. Således är det standardläget. Den icke-cachade versionen ställer frågan:
+
+  svisa mig skillnaderna mellan HEAD och det för närvarande utcheckade
+  trädet - indexera innehåll _och_ filer som inte är uppdaterade
+
+vilket uppenbarligen är en mycket användbar fråga också, eftersom den berättar vad du *skulle kunna* checka-in. Återigen matchar utdata 'git diff-tree -r'-utdatan till punkt och pricka, men med en twist.
+
+Det svåra är att om någon fil inte matchar indexet, har vi ingen backup-funktion för den, och vi använder den magiska "all-zero" sha1 för att visa det. Så låt oss säga att du har redigerat `kernel/sched.c`, men inte har gjort en 'git update-index' på den än - det finns inget "objekt" associerat med det nya tillståndet, och du får:
+
+  torvalds@ppc970:~/v2.6/linux> git diff-index --abbrev HEAD
+  :100644 100644 7476bb5ba 000000000 M	kernel/sched.c
+
+d.v.s. det visar att trädet har ändrats, och att `kernel/sched.c` inte är uppdaterat och kan innehålla nya saker. Sha1, som är helt noll, betyder att för att få den verkliga skillnaden måste du titta direkt på objektet i arbetskatalogen istället för att göra en objekt-till-objekt-diff.
+
+NOTE: Precis som med andra kommandon av den här typen tittar 'git diff-index' inte alls på innehållet i filen. Så kanske 'kernel/sched.c' inte har ändrats alls, och det är bara det att du rörde vid det. I båda fallen är det en anmärkning att du måste 'git update-index' det för att indexet ska vara synkroniserat.
+
+NOTE: Du kan ha en blandning av filer som visas som "har uppdaterats" och "är fortfarande smutsig i arbetskatalogen". Du kan alltid se vilken fil som är i vilket tillstånd, eftersom de som "har uppdaterats" visar en giltig sha1, och de som "inte synkroniseras med indexet" alltid kommer att ha den speciella sha1-koden som bara är noll.
+
+GIT
+---
+En del av linkgit:git[1]-sviten

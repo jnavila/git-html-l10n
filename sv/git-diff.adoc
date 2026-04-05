@@ -1,0 +1,176 @@
+git-diff(1)
+===========
+
+NAMN
+----
+git-diff - Visa ändringar mellan incheckningar, incheckning och arbetskatalogen, osv
+
+
+SYNOPSIS
+--------
+[synopsis]
+git diff [<flaggor>] [<incheckning>] [--] [<path>...]
+git diff [<flaggor>] --cached [--merge-base] [<incheckning>] [--] [<path>...]
+git diff [<flaggor>] [--merge-base] <commit> [<incheckning>...] <incheckning> [--] [<path>...]
+git diff [<flaggor>] <incheckning>...<incheckning> [--] [<sökväg>...]
+git diff [<flaggor>] <blob> <blob>
+git diff [<flaggor>] --no-index [--] <path> <path> [<sökvägsmönster>...]
+
+BESKRIVNING
+-----------
+Visa ändringar mellan arbetskatalog och indexet eller ett träd, ändringar mellan indexet och ett träd, ändringar mellan två träd, ändringar som är resultatet av en sammanslagning, ändringar mellan två blobobjekt eller ändringar mellan två filer på disken.
+
+`git diff [<flaggor>] [--] [<sökväg>...]`::
+
+	Det här formen är till för att visa de ändringar du gjort i förhållande till indexet (uppställningsområdet för nästa incheckning). Med andra ord, skillnaderna är vad du _kunde_ säga åt Git att lägga till ytterligare i indexet men som du fortfarande inte har gjort. Du kan köa dessa ändringar genom att använda linkgit:git-add[1].
+
+`git diff [<flaggor>] --no-index [--] <sökväg> <sökväg> [<sökvägsmönster>...]`::
+
+	Denna form är till för att jämföra de två givna sökvägarna på filsystemet. Du kan utelämna alternativet `--no-index` när du kör kommandot i ett arbetskatalog som styrs av Git och minst en av sökvägarna pekar utanför arbetsträdet, eller när du kör kommandot utanför ett arbetskatalog som styrs av Git. Denna formulär innebär `--exit-code`. Om båda sökvägarna pekar på kataloger kan ytterligare sökvägsmönstertillhandahållas. Dessa kommer att begränsa de filer som ingår i skillnaden. Alla sådana sökvägsmönster måste vara relativa eftersom de gäller för båda sidor av skillnaden.
+
+`git diff [<flaggor>] --cached [--merge-base] [<incheckning>] [--] [<sökväg>...]`::
+
+	Det här formen är till för att visa de ändringar du har köade för nästa cincheckning i förhållande till den namngivna _<incheckningen>_. Vanligtvis vill du jämföra med den senaste incheckningen, så om du inte anger _<incheckning>_ används som standard `HEAD`. Om `HEAD` inte existerar (t.ex. ofödda grenar) och _<incheckning>_ inte anges, visas alla köade ändringar. `--staged` är en synonym till `--cached`.
++
+Om `--merge-base` anges, använd sammanslagnings-basen _<incheckning>_ och `HEAD` istället för att använda _<incheckning>_. `git diff --cached --merge-base A` motsvarar `git diff --cached $(git merge-base A HEAD)`.
+
+`git diff [<flaggor>] [--merge-base] <incheckning> [--] [<sökväg>...]`::
+
+	Det här formen är till för att visa de ändringar du har gjort i din arbetskatalog i förhållande till det namngivna _<incheckning>_. Du kan använda `HEAD` för att jämföra det med det senaste incheckningen, eller ett gren-namn för att jämföra med toppen av en annan gren.
++
+Om `--merge-base` anges, använd sammanslagnings-basen _<incheckning>_ och `HEAD` istället för att använda _<incheckning>_. `git diff --merge-base A` motsvarar `git diff $(git merge-base A HEAD)`.
+
+`git diff [<flaggor>] [--merge-base] <incheckning> <incheckning> [--] [<sökväg>...]`::
+
+	Detta är för att se ändringarna mellan två godtyckliga _<incheckningar>_.
++
+Om `--merge-base` anges, använd sammanslagnings-basen för de två incheckningar för "före"-sidan. `git diff --merge-base A B` är ekvivalent med `git diff $(git merge-base A B) B`.
+
+`git diff [<flaggor>] <incheckning> <incheckning>...<incheckning> [--] [<sökväg>...]`::
+
+	Det här formen är till för att visa resultaten av en sammanslagins-incheckning. Den första listade _<incheckning>_ måste vara själva sammanslagingen; de återstående två eller fler incheckningar bör vara dess föräldrar. Praktiska sätt att producera önskad uppsättning revisioner är att använda suffixen `@` och `^!`. Om `A` är en merge-commit, ger `git diff A A^@`, `git diff A^!` och `git show A` alla samma kombinerade diff.
+
+`git diff [<flaggor>] <incheckning>..<incheckning> [--] [<sökväg>...]`::
+
+	Detta är synonymt med den tidigare formen (utan `..`) för att visa ändringarna mellan två godtyckliga _<incheckningar>_. Om _<incheckning>_ på ena sidan utelämnas, kommer det att ha samma effekt som att använda `HEAD` istället.
+
+`git diff [<flaggor>] <incheckning>..<incheckning> [--] [<sökväg>...]`::
+
+	Det här formen är till för att visa ändringarna på grenen som innehåller och upp till den andra _<incheckningen>_, med början vid en gemensam förfader till båda _<incheckningarna>_. `git diff A...B` är ekvivalent med `git diff $(git merge-base A B) B`. Du kan utelämna vilken som helst av _<incheckningarna>_, vilket har samma effekt som att använda `HEAD` istället.
+
+Om du gör något exotiskt, bör det noteras att alla _<incheckningar>_ i beskrivningen ovan, förutom i fallet `--merge-base` och i de två sista formerna som använder `..`-notationerna, kan vara vilket _<träd>_ som helst. Ett intressant träd är det som pekas ut av referensen med namnet `AUTO_MERGE`, som skrivs av `ort`-sammanslagningsstrategin vid sammanslagningskonflikter (se linkgit:git-merge[1]). Att jämföra arbetsträdet med `AUTO_MERGE` visar ändringar du hittills har gjort för att lösa textkonflikter (se exemplen nedan).
+
+För en mer komplett lista över sätt att stava _<incheckning>_, se avsnittet "SSPECIFIERING AV REVIDERINGAR" i linkgit:gitrevisions[7]. Emellertid handlar `diff` om att jämföra två _slutpunkter_, inte intervall, och intervallbeteckningarna (`<incheckning>..<incheckning>` och `<incheckning>...<incheckning>`) betyder inte ett intervall som definieras i avsnittet "ANGE OMRÅDEN" i linkgit:gitrevisions[7].
+
+`git diff [<flaggor>] <blob> <blob>`::
+
+	Det här formen är till för att visa skillnaderna mellan det råa innehållet i två blob-objekt.
+
+ALTERNATIV
+----------
+:git-diff: 1
+include::diff-options.adoc[]
+
+`-1`::
+`--base`::
+`-2`::
+`--ours`::
+`-3`::
+`--theirs`::
+	Jämför arbetskatalog med
++
+--
+ * "basversionen" (steg nr1) när `-1` eller `--base` används,
+ * "vår gren" (steg nr2) när man använder `-2` eller `--ours`, eller
+ * "deras gren" (steg nr3) när `-3` eller `--theirs` används.
+--
++
+Indexet innehåller dessa steg endast för osammanfogade poster, dvs. vid lösning av konflikter. Se linkgit:git-read-tree[1] avsnittet "3-vägs sammanslagning" för detaljerad information.
+
+`-0`::
+	Utelämna diff-utdata för osammanfogade poster och visa bara "Osammanfogad". Kan endast användas när arbetskatalog jämförs med indexet.
+
+`<sökväg>...`::
+	Parametrarna _<sökväg>_, när de är angivna, används för att begränsa differansen till de namngivna sökvägarna (du kan ange katalognamn och hämta diff-värden för alla filer under dem).
+
+
+include::diff-format.adoc[]
+
+EXEMPEL
+-------
+
+Olika sätt att kontrollera din arbetskatalog::
++
+------------
+$ git diff            <1>
+$ git diff --cached   <2>
+$ git diff HEAD       <3>
+$ git diff AUTO_MERGE <4>
+------------
++
+<1> Ändringar i arbetskatalog har ännu inte köade för nästa incheckning.
+<2> Ändringar mellan indexet och din senaste incheckning; vad du skulle checka-in om du kör `git commit` utan `-a`-flaggan.
+<3> Förändringar i arbetskatalog sedan din senaste incheckning; vad du skulle checka-in om du kör `git commit -a`
+<4> Ändringar i arbetskatalog som du hittills har gjort för att lösa textkonflikter.
+
+Jämförelse med godtyckliga incheckningar::
++
+------------
+$ git diff test            <1>
+$ git diff HEAD -- ./test  <2>
+$ git diff HEAD^ HEAD      <3>
+------------
++
+<1> Istället för att använda toppen på den aktuella grenen, jämför med toppen på "test"-grenen.
+<2> Istället för att jämföra med topen på grenen "test", jämför med topen på den aktuella grenen, men begränsa jämförelsen till filen "test".
+<3> Jämför versionen före den senaste incheckningen och den senaste incheckningen.
+
+Jämföra grenar::
++
+------------
+$ git diff ärende master    <1>
+$ git diff ärende..master   <2>
+$ git diff ärende...master  <3>
+------------
++
+<1> Ändringar mellan ämnets toppar och huvudgrenarna.
+<2> Samma som ovan.
+<3> Ändringar som inträffat på huvudgrenen sedan när ämnesgrenen startades från den.
+
+Begränsa diff-utmatning::
++
+------------
+$ git diff --diff-filter=MRC            <1>
+$ git diff --name-status                <2>
+$ git diff arch/i386 include/asm-i386   <3>
+------------
++
+<1> Visa endast ändring, namnbyte och kopiering, men inte tillägg eller borttagning.
+<2> Visar endast namn och ändringens natur, men inte faktisk skillnadsutdata.
+<3> Begränsa diff-utdata till namngivna underträd.
+
+Omformning av diff-utdata::
++
+------------
+$ git diff --find-copies-harder -B -C  <1>
+$ git diff -R                          <2>
+------------
++
+<1> Lägg extra cykler på att hitta namnbyten, kopior och fullständiga omskrivningar (väldigt dyrt).
+<2> Utgångsskillnad i omvänd ordning.
+
+KONFIGURATION
+-------------
+
+include::includes/cmd-config-section-all.adoc[]
+
+:git-diff: 1
+include::config/diff.adoc[]
+
+SE ÄVEN
+-------
+`diff`(1), linkgit:git-difftool[1], linkgit:git-log[1], linkgit:gitdiffcore[7], linkgit:git-format-patch[1], linkgit:git-apply[1], linkgit:git-show[1]
+
+GIT
+---
+En del av linkgit:git[1]-sviten

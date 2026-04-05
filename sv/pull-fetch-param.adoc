@@ -1,5 +1,5 @@
-_<repo>_::
-	Det "fjärrlagrade" repot som är källan för en hämtnings- eller dra-operation (fetch, pull). Denna parameter kan antingen vara en URL (se avsnittet <<URLS,GIT URLS>> nedan) eller namnet på en fjärren (se avsnittet <<REMOTES,FJÄRR>> nedan).
+_<repository>_::
+	"Fjärr"-kodförrådet som är källan för en fetch- eller pull-operation. Parametern kan antingen vara en URL (se avsnittet <<URLS,GIT URLS>> nedan) eller namnet på en fjärr (se avsnittet <<REMOTES,FJÄRRAR>> nedan).
 
 ifndef::git-pull[]
 _<grupp>_::
@@ -8,7 +8,7 @@ endif::git-pull[]
 
 [[fetch-refspec]]
 _<refspec>_::
-	Anger vilka referenser som ska hämtas och vilka lokala referenser som ska uppdateras. När inga __<refspec>__s visas på kommandoraden läses referenserna som ska hämtas från variablerna `remote.<repo>.fetch` istället
+	Anger vilka referenser som ska uppdateras och vilka lokala referenser som ska uppdateras. När inga __<refspec>__ar visas på kommandoraden läses referenserna som ska uppdateras från variablerna `remote.<repository>.fetch` i stället
 ifndef::git-pull[]
 	(se <<CRTB, KONFIGURERADE FJÄRRSPÅRNINGSGRENAR>> nedan)..
 endif::git-pull[]
@@ -19,28 +19,28 @@ endif::git-pull[]
 +
 Formatet för en _<refspec>_-parameter är ett valfritt plustecken `+`, följt av källtan _<src>_, följt av ett kolon `:`, följt av målet _<dst>_. Kolonet kan utelämnas när _<mål>_ är tomt. _<src>_ är vanligtvis en referens, eller ett globmönster med ett enda `*` som används för att matcha en uppsättning referenser, men det kan också vara ett fullständigt stavat hexagonalt objektnamn.
 +
-En _<refspec>_ kan innehålla ett `*` i sin _<src>_ för att indikera en enkel mönstermatchning. En sådan refspec fungerar som en glob som matchar vilken referens som helst med mönstret. En mönster _<refspec>_ måste ha ett och endast ett `*` i både _<src>_ och _<mål>_. Den mappar referenser till destinationen genom att ersätta `*` med innehållet som matchas från källan.
+En _<refspec>_ kan innehålla ett `*` i sin _<src>_ för att indikera en enkel mönstermatchning. En sådan referensspecifikation fungerar som en glob som matchar vilken referens som helst med mönstret. En mönster _<refspec>_ måste ha ett och endast ett `*` i både _<src>_ och _<mål>_. Den mappar referenser till destinationen genom att ersätta `*` med innehållet som matchas från källan.
 +
-Om en refspec har prefixet `^` kommer den att tolkas som en negativ refspec. Istället för att ange vilka referenser som ska hämtas eller vilka lokala referenser som ska uppdateras, kommer en sådan refspec istället att ange referenser som ska exkluderas. En ref kommer att anses matcha om den matchar minst en positiv refspec och inte matchar någon negativ refspec. Negativa refspecs kan vara användbara för att begränsa omfattningen av en mönsterrefspec så att den inte inkluderar specifika referenser. Negativa refspecs kan själva vara mönsterrefspecs. De får dock bara innehålla en _<src>_ och anger inte en _<mål>_. Fullständigt stavade hexadecimala objektnamn stöds inte heller.
+Om en referensspecifikation har prefixet `^` kommer den att tolkas som en negativ referensspecifikation. I stället för att ange vilka referenser som ska uppdateras eller vilka lokala referenser som ska uppdateras, kommer en sådan referensspecifikation i stället att ange referenser som ska exkluderas. En referens kommer att anses matcha om den matchar minst en positiv referensspecifikation och inte matchar någon negativ referensspecifikation. Negativa referensspecifikationer kan vara användbara för att begränsa omfattningen av en mönsterrefspec så att den inte inkluderar specifika referenser. Negativa referensspecifikationer kan själva vara mönsterrefspecar. De får dock bara innehålla en _<src>_ och anger inte en _<mål>_. Fullständigt stavade hexadecimala objektnamn stöds inte heller.
 +
 `tag <tagg>` betyder samma sak som `refs/tags/<tag>:refs/tags/<tagg>`; den begär att allt upp till den givna taggen hämtas.
 +
 Fjärrreferensen som matchar _<src>_ hämtas, och om _<mål>_ inte är en tom sträng görs ett försök att uppdatera den lokala referensen som matchar den.
 +
-Huruvida den uppdateringen är tillåten utan `--force` beror på referensnamnrymden den hämtas till, typen av objekt som hämtas och om uppdateringen anses vara en snabbspolning framåt. Generellt sett gäller samma regler för hämtning som vid pushing, se avsnittet `<refspec>...` i linkgit:git-push[1] för vad dessa är. Undantag från dessa regler som är specifika för `git fetch` anges nedan.
+Huruvida den uppdateringen är tillåten utan `--force` beror på referensnamnrymden den uppdateras till, typen av objekt som uppdateras och om uppdateringen anses vara en snabbspolning. I allmänhet gäller samma regler för uppdatering som när man skickar; se avsnittet `<refspec>...` i linkgit:git-push[1] för vilka regler det gäller. Undantag från dessa regler som är specifika för `git fetch` anges nedan.
 +
-Fram till Git version 2.20, och till skillnad från när man pushar med linkgit:git-push[1], skulle alla uppdateringar till `refs/tags/*` accepteras utan `+` i refspec (eller `--force`). Vid hämtning betraktade vi promiskuöst alla tagguppdateringar från en fjärren som tvångshämtningar. Sedan Git version 2.20 fungerar hämtning för att uppdatera `refs/tags/*` på samma sätt som vid pushing. Dvs. alla uppdateringar kommer att avvisas utan `+` i refspec (eller `--force`).
+Fram till Git version 2.20, och till skillnad från när man skickar med linkgit:git-push[1], skulle alla uppdateringar till `refs/tags/*` accepteras utan `+` i referensspecifikationen (eller `--force`). Vid uppdatering betraktade vi promiskuöst alla tagguppdateringar från en fjärr som tvångsuppdateringar. Sedan Git version 2.20 fungerar uppdatering för att uppdatera `refs/tags/*` på samma sätt som när man skickar. Dvs. alla uppdateringar kommer att avvisas utan `+` i referensspecifikationen (eller `--force`).
 +
-Till skillnad från när man pushar med linkgit:git-push[1], kommer alla uppdateringar utanför `refs/{tags,heads}/*` att accepteras utan `+` i refspec (eller `--force`), oavsett om det är att byta ut t.ex. ett trädobjekt mot en blob, eller en incheckning mot en annan incheckning som inte har den tidigare incheckning som en förfader etc.
+Till skillnad från när man skickar med linkgit:git-push[1], kommer alla uppdateringar utanför `refs/{tags,heads}/*` att accepteras utan `+` i referensspecifikationen (eller `--force`), oavsett om det är att byta ut t.ex. ett trädobjekt mot en blob, eller en incheckning mot en annan incheckning som inte har den tidigare incheckning som en förfader etc.
 +
-Till skillnad från när man pushar med linkgit:git-push[1] finns det ingen konfiguration som ändrar dessa regler, och inget som en `pre-fetch`-krok analog med `pre-receive`-kroken.
+Till skillnad från när man skickar med linkgit:git-push[1] finns det ingen konfiguration som ändrar dessa regler, och inget som en `pre-fetch`-krok analog med `pre-receive`-kroken.
 +
-Precis som med pushing med linkgit:git-push[1], kan alla regler som beskrivs ovan om vad som inte är tillåtet som en uppdatering åsidosättas genom att lägga till ett valfritt inledande `+` till en refspec (eller genom att använda kommandoradsalternativet `--force`). Det enda undantaget från detta är att ingen mängd tvång kommer att få namnrymden `refs/heads/*` att acceptera ett icke-inchecknings-objekt.
+Precis som när man skickar med linkgit:git-push[1], kan alla regler som beskrivs ovan om vad som inte är tillåtet som en uppdatering åsidosättas genom att lägga till ett valfritt inledande `+` till en referensspecifikation (eller genom att använda kommandoradsalternativet `--force`). Det enda undantaget från detta är att ingen mängd tvång kommer att få namnrymden `refs/heads/*` att acceptera ett icke-incheckningsobjekt.
 +
 [NOTE]
-När den fjärrgren du vill hämta är känd för att regelbundet spolas tillbaka och ombaseras, förväntas det att dess nya tips inte kommer att vara en underordnad av dess tidigare tips (som lagrats i din fjärrspårningsgren förra gången du hämtade). Du vill använda `+`-tecknet för att indikera att uppdateringar som inte är framåtspolade kommer att behövas för sådana grenar. Det finns inget sätt att avgöra eller deklarera att en gren kommer att göras tillgänglig i ett arkiv med detta beteende; den indragande ("pullande") användaren måste helt enkelt veta att detta är det förväntade användningsmönstret för en gren.
+När den fjärrgren du vill uppdatera är känd för att regelbundet spolas tillbaka och ombaseras, förväntas det att dess nya topp inte kommer att vara en efterföljare till dess tidigare topp (som lagrats i din fjärrspårade gren förra gången du uppdaterade). Du vill använda `+`-tecknet för att indikera att uppdateringar som inte är snabbspolningar kommer att behövas för sådana grenar. Det finns inget sätt att avgöra eller deklarera att en gren kommer att göras tillgänglig i ett kodförråd med detta beteende; den uppdaterande användaren måste helt enkelt veta att detta är det förväntade användningsmönstret för en gren.
 ifdef::git-pull[]
 +
 [NOTE]
-Det är skillnad på att lista flera _<refspec>_ direkt på `git pull`-kommandoraden och att ha flera `remote.<repo>.fetch`-poster i din konfiguration för ett _<repo>_ och att köra ett `git pull`-kommando utan några explicita _<refspec>_-parametrar. __<refspec>__s som listas explicit på kommandoraden slås alltid samman med den aktuella grenen efter hämtning. Med andra ord, om du listar mer än en fjärrreferens, kommer `git pull` att skapa en bläckfisk-sammanslagning. Å andra sidan, om du inte listar någon explicit _<refspec>_-parameter på kommandoraden, kommer `git pull` att hämta alla __<refspec>__s som den hittar i `remote.<repository>.fetch`-konfigurationen och slå samman endast den första _<refspec>_ som hittas med den aktuella grenen. Detta beror på att det sällan görs att skapa en bläckfisk från fjärrreferenser, medan det ofta är användbart att hålla reda på flera fjärrreferenser samtidigt genom att hämta mer än ett.
+Det är skillnad på att lista flera _<refspec>ar_ direkt på `git pull`-kommandoraden och att ha flera `remote.<repository>.fetch`-poster i din konfiguration för ett _<repository>_ och att köra ett `git pull`-kommando utan några explicita _<refspec>_-parametrar. __<refspec>__ar som listas explicit på kommandoraden slås alltid samman med den aktuella grenen efter uppdatering. Med andra ord, om du listar mer än en fjärrreferens, kommer `git pull` att skapa en bläckfisk-sammanslagning. Å andra sidan, om du inte listar någon explicit _<refspec>_-parameter på kommandoraden, kommer `git pull` att uppdatera alla __<refspec>__ar som den hittar i `remote.<repository>.fetch`-konfigurationen och slå samman endast den första _<refspec>_ som hittas med den aktuella grenen. Detta beror på att det sällan görs att skapa en bläckfisk från fjärrreferenser, medan det ofta är användbart att hålla reda på flera fjärrreferenser samtidigt genom att uppdatera mer än en.
 endif::git-pull[]

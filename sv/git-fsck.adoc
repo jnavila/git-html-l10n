@@ -1,0 +1,129 @@
+git-fsck(1)
+===========
+
+NAMN
+----
+git-fsck - Bekräftar konnektivitet och validitet för objektet i databasen
+
+
+SYNOPSIS
+--------
+[verse]
+'git fsck' [--tags] [--root] [--unreachable] [--cache] [--no-reflogs]
+	[--[no-]full] [--strict] [--verbose] [--lost-found]
+	[--[no-]dangling] [--[no-]progress] [--connectivity-only]
+	[--[no-]name-objects] [--[no-]references] [<objekt>...]
+
+BESKRIVNING
+-----------
+Verifierar anslutningen och giltigheten för objekten i databasen.
+
+ALTERNATIV
+----------
+<objekt>::
+	Ett objekt som behandlas som huvud för en oåtkomlighetsspårning.
++
+Om inga objekt anges använder 'git fsck' som standard indexfilen, alla SHA-1-referenser i namnrymden `refs` och alla refloggar (såvida inte --no-reflogs anges) som huvuden.
+
+--unreachable::
+	Skriv ut objekt som finns men som inte kan nås från någon av referensnoderna.
+
+--dangling::
+--no-dangling::
+	Skriv ut objekt som existerar men som aldrig används "direkt" (standard). `--no-dangling` kan användas för att utelämna denna information från utdata.
+
+--root::
+	Rapportera rotnoder.
+
+--tags::
+	Rapportera taggar.
+
+--cache::
+	Betrakta alla objekt som registrerats i indexet också som en huvudnod för en oåtkomlighetsspårning.
+
+--no-reflogs::
+	Betrakta inte incheckningar som endast refereras till av en post i en reflog som nåbara. Det här alternativet är endast avsett att söka efter incheckningar som brukade finnas i en ref, men nu inte finns det, men som fortfarande finns i motsvarande reflog.
+
+--full::
+	Kontrollera inte bara objekt i GIT_OBJECT_DIRECTORY ($GIT_DIR/objects), utan även de som finns i alternativa objektpooler listade i GIT_ALTERNATE_OBJECT_DIRECTORIES eller $GIT_DIR/objects/info/alternates, och i packade Git-packfiler som finns i $GIT_DIR/objects/pack och motsvarande paketunderkataloger i alternativa objektpooler. Detta är nu standard; du kan stänga av det med --no-full.
+
+--connectivity-only::
+	Kontrollera endast anslutningen för nåbara objekt och se till att alla objekt som refereras till av en nåbar tagg, incheckning eller träd finns. Detta snabbar upp åtgärden genom att helt undvika att läsa blobbar (även om det fortfarande kontrollerar att refererade blobbar finns). Detta kommer att upptäcka korruption i incheckningar och träd, men inte göra några semantiska kontroller (t.ex. för formatfel). Korruption i blobobjekt kommer inte att upptäckas alls.
++
+Oåtkomliga taggar, incheckningar och träd kommer också att nås för att hitta toppar för dinglande segment av historiken. Använd `--no-dangling` om du inte bryr dig om den här utdatan och vill snabba upp den ytterligare.
+
+--strict::
+	Aktivera strängare kontroll, nämligen för att fånga ett filläge inspelat med g+w-bituppsättning, vilket skapades av äldre versioner av Git. Befintliga kodförråd, inklusive Linuxkärnan, själva Git och glest kodförråd, har gamla objekt som utlöser denna kontroll, men det rekommenderas att kontrollera nya projekt med denna flagga.
+
+--verbose::
+	Var pratsam.
+
+--lost-found::
+	Skriv dinglande objekt i .git/lost-found/commit/ eller .git/lost-found/other/, beroende på typ. Om objektet är en blob skrivs innehållet in i filen, snarare än dess objektnamn.
+
+--name-objects::
+	När namn på nåbara objekt visas, visas utöver SHA-1 även ett namn som beskriver *hur* de är nåbara, kompatibelt med linkgit:git-rev-parse[1], t.ex. `HEAD@{1234567890}~25^2:src/`.
+
+--progress::
+--no-progress::
+	Förloppsstatus rapporteras som standard i standardfelströmmen när den är kopplad till en terminal, såvida inte --no-progress eller --verbose anges. --progress tvingar fram förloppsstatus även om standardfelströmmen inte dirigeras till en terminal.
+
+--references::
+--no-references::
+	Styr om referensdatabasens konsistens ska kontrolleras via 'git refs verify'. Se linkgit:git-refs[1] för mer information. Standardinställningen är att kontrollera referensdatabasen.
+
+KONFIGURATION
+-------------
+
+include::includes/cmd-config-section-all.adoc[]
+
+include::config/fsck.adoc[]
+
+DISKUSSION
+----------
+
+git-fsck testar SHA-1 och allmän objektsanitet, och den gör fullständig spårning av den resulterande nåbarheten och allt annat. Den skriver ut alla hittade korruptioner (saknade eller dåliga objekt), och om du använder flaggan `--unreachable` kommer den också att skriva ut objekt som finns men som inte är nåbara från någon av de angivna huvudnoderna (eller standarduppsättningen, som nämnts ovan).
+
+Alla korrupta objekt måste du hitta i säkerhetskopior eller andra arkiv (d.v.s. du kan bara ta bort dem och göra en 'rsync' med någon annan webbplats i hopp om att någon annan har objektet du har korrupterat).
+
+Om core.commitGraph är sant, kommer incheckningsgraf-filen också att inspekteras med hjälp av 'git commit-graph verify'. Se linkgit:git-commit-graph[1].
+
+Extraherade diagnostik
+----------------------
+
+oåtkomlig <typ> <objekt>::
+	<type>-objektet <objekt> refereras inte direkt eller indirekt till i något av träden eller incheckningar som visas. Detta kan betyda att det finns en annan rotnod som du inte anger eller att trädet är korrupt. Om du inte har missat en rotnod kan du lika gärna ta bort oåtkomliga noder eftersom de inte kan användas.
+
+saknas <typ> <objekt>::
+	<type>-objektet <objekt> refereras till men finns inte i databasen.
+
+dinglande <typ> <objekt>::
+	<typ>-objektet <objekt> finns i databasen men används aldrig 'direkt'. En dinglande incheckning kan vara en rotnod.
+
+hash-matchningsfel <objekt>::
+	Databasen har ett objekt vars hash inte matchar objektets databasvärde. Detta indikerar ett allvarligt dataintegritetsproblem.
+
+
+FSCK-MEDDELANDEN
+----------------
+
+Följande listar de typer av fel som `git fsck` upptäcker och vad varje fel betyder, med deras standardallvarlighetsgrad. Felets allvarsgrad, förutom de som är markerade som "(FATAL)", kan justeras genom att ställa in motsvarande konfigurationsvariabel `fsck.<msg-id>`.
+
+include::fsck-msgids.adoc[]
+
+
+Miljövariabler
+--------------
+
+GIT_OBJECT_DIRECTORY::
+	används för att ange objektdatabasens rot (vanligtvis $GIT_DIR/objects)
+
+GIT_INDEX_FILE::
+	används för att ange indexfilen för indexet
+
+GIT_ALTERNATE_OBJECT_DIRECTORIES::
+	används för att ange ytterligare objektdatabasrötter (vanligtvis osatta)
+
+GIT
+---
+En del av linkgit:git[1]-sviten

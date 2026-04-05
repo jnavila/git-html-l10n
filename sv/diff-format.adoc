@@ -1,0 +1,155 @@
+Rått utdataformat
+-----------------
+
+Det råa utdataformatet från `git-diff-index`, `git-diff-tree`, `git-diff-files` och `git diff --raw` är mycket lika.
+
+Dessa kommandon jämför alla två uppsättningar saker; vad som jämförs skiljer sig åt:
+
+`git-diff-index <trädlikt>`::
+	jämför _<trädlikt>_ och filerna på filsystemet.
+
+`git-diff-index --cached <trädlikt>`::
+	jämför _<trädlikt>_ och indexet.
+
+`git-diff-tree [-r] <trädlikt-1> <trädlikt-2> [<mönster>...]`::
+        jämför träden som namnges av de två argumenten.
+
+`git-diff-files [<mönster>...]`::
+        jämför indexet och filerna på filsystemet.
+
+Kommandot `git-diff-tree` börjar sin utmatning genom att skriva ut hashen för det som jämförs. Därefter skriver alla kommandon ut en utmatningsrad per ändrad fil.
+
+En utmatningsrad formateras så här:
+
+------------------------------------------------
+in-place edit  :100644 100644 bcd1234 0123456 M file0
+copy-edit      :100644 100644 abcd123 1234567 C68 file1 file2
+rename-edit    :100644 100644 abcd123 1234567 R86 file1 file3
+create         :000000 100644 0000000 1234567 A file4
+delete         :100644 000000 1234567 0000000 D file5
+unmerged       :000000 000000 0000000 0000000 U file6
+------------------------------------------------
+
+Det vill säga, från vänster till höger:
+
+. ett kolon.
+. läge för "src"; 000000 om skapande eller osammanslagen.
+. ett mellanslag.
+. läge för "dst"; 000000 om borttagning eller osammanslagen.
+. ett mellanslag.
+. sha1 för "src"; 0\{40\} om skapande eller osammanslagen.
+. ett mellanslag.
+. sha1 för "dst"; 0\{40\} om borttagning, avsammanslagning eller "arbetsträdet är inte synkroniserat med indexet".
+. ett mellanslag.
+. status, följt av ett valfritt "poäng"-nummer.
+. en tabb eller ett NUL när alternativet `-z` används.
+. sökvägen för "src"
+. en tabb eller ett NUL när `-z`-alternativet används; finns endast för C eller R.
+. sökväg för "dst"; finns bara för C eller R.
+. en LF eller en NUL när `-z`-alternativet används, för att avsluta posten.
+
+Möjliga statusbokstäver är:
+
+- `A`: tillägg av en fil
+- `C`: kopiera en fil till en ny
+- `D`: radering av en fil
+- `M`: modifiering av innehållet eller läget för en fil
+- `R`: byta namn på en fil
+- `T`: ändring av filtypen (vanlig fil, symbolisk länk eller undermodul)
+- `U`: filen är avsammanfogad (du måste slutföra sammanslagningen innan den kan sparas)
+- `X`: "okänd" ändringstyp (troligtvis ett programfel, vänligen rapportera det)
+
+Statusbokstäverna `C` och `R` följs alltid av en poäng (som anger procentandelen likhet mellan källan och målet för flytten eller kopian). Statusbokstaven `M` kan följas av en poäng (som anger procentandelen olikhet) för filomskrivningar.
+
+sha1 för "dst" visas som enbart nollor (0) om en fil i filsystemet inte är synkroniserad med indexet.
+
+Exempel:
+
+------------------------------------------------
+:100644 100644 5be4a4a 0000000 M-fil.c
+------------------------------------------------
+
+Utan `-z`-alternativet citeras sökvägar med "ovanliga" tecken enligt beskrivningen för konfigurationsvariabeln `core.quotePath` (se linkgit:git-config[1]). Med `-z` matas filnamnet ut ordagrant och raden avslutas med en NUL-byte.
+
+diff-format för sammanslagningar
+--------------------------------
+
+`git-diff-tree`, `git-diff-files` och `git-diff --raw` kan använda `-c` eller `--cc` alternativ för att generera diff-utdata även för merge-commits. Utdata skiljer sig från formatet som beskrivs ovan på följande sätt:
+
+. det finns ett kolon för varje förälder
+. det finns fler "src"-lägen och "src" sha1
+. status är sammanfogade statustecken för varje förälder
+. inget valfritt "poängnummer"
+. tabbavgränsade sökvägar till filen
+
+För `-c` och `--cc` visas endast destinations- eller slutsökvägen även om filen har bytt namn på någon sida av historiken. Med `--combined-all-paths` visas namnet på sökvägen i varje förälder följt av namnet på sökvägen i iincheckningsammanslagingen.
+
+Exempel för `-c` och `--cc` utan `--combined-all-paths`:
+
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	phooey.c
+------------------------------------------------
+
+Exempel när `--combined-all-paths` läggs till antingen `-c` eller `--cc`:
+
+------------------------------------------------
+::100644 100644 100644 fabadb8 cc95eb0 4866510 MM	desc.c	desc.c	desc.c
+::100755 100755 100755 52b7a2d 6d1ac04 d2ac7d7 RM	foo.sh	bar.sh	bar.sh
+::100644 100644 100644 e07d6c5 9042e82 ee91881 RR	fooey.c	fuey.c	phooey.c
+------------------------------------------------
+
+Observera att 'kombinerad diff' endast listar filer som har modifierats från alla föräldrar.
+
+
+include::diff-generate-patch.adoc[]
+
+
+andra diff-format
+-----------------
+
+Alternativet `--summary` beskriver nyligen tillagda, raderade, omdöpta och kopierade filer. Alternativet `--stat` lägger till `diffstat`(1)-grafen till utdata. Dessa alternativ kan kombineras med andra alternativ, såsom `-p`, och är avsedda för mänsklig konsumtion.
+
+När en ändring som involverar ett namnbyte eller en kopia visas, formaterar `--stat` sökvägarna kompakt genom att kombinera gemensamma prefix och suffix för sökvägarna. Till exempel, en ändring som flyttar `arch/i386/Makefile` till `arch/x86/Makefile` medan fyra rader ändras kommer att visas så här:
+
+------------------------------------
+arch/{i386 => x86}/Makefile    |   4 +--
+------------------------------------
+
+Alternativet `--numstat` ger informationen diffstat(1) men är utformat för enklare maskinanvändning. En post i `--numstat`-utdata ser ut så här:
+
+----------------------------------------
+1	2	README
+3	1	arch/{i386 => x86}/Makefile
+----------------------------------------
+
+Det vill säga, från vänster till höger:
+
+. antalet tillagda rader;
+. en tab;
+. antalet raderade rader;
+. en tab;
+. sökväg (möjligen med information om namnbyte/kopiering);
+. en nyrad.
+
+När utdataalternativet `-z` är aktiverat formateras utdata på följande sätt:
+
+----------------------------------------
+1	2	README NUL
+3	1	NUL arch/i386/Makefile NUL arch/x86/Makefile NUL
+----------------------------------------
+
+Som är:
+
+. antalet tillagda rader;
+. en tab;
+. antalet raderade rader;
+. en tab;
+. en NUL (existerar endast om den byts om/kopieras);
+. sökväg i föravbildning;
+. en NUL (existerar endast om den byts om/kopieras);
+. sökväg i postimage (finns endast om det byts namn/kopieras);
+. en NUL.
+
+Den extra `NUL` före preimage-sökvägen i omdöpt skiftläge är till för att tillåta skript som läser utdata att avgöra om den aktuella posten som läses är en post med en enda sökväg eller en omdöpnings-/kopieringspost utan att läsa framåt. Efter att ha läst tillagda och borttagna rader skulle läsning upp till `NUL` ge sökvägsnamnet, men om det är `NUL` kommer posten att visa två sökvägar.
