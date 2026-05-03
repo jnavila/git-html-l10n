@@ -1,7 +1,7 @@
 [[def_alternate_object_database]] дополнительная (alternate) база данных объектов::
 	С помощью механизма дополнения, <<def_repository,репозиторий>> может наследовать часть <<def_object_database,базы данных объектов>> из другой базы данных объекта, которую называют «дополнительной» («alternate»).
 
-[[def_bare_repository]]голый репозиторий (bare repository)::
+[[def_bare_repository]]голый репозиторий::
 	Голым репозиторием является <<def_directory,каталог>> (как правило, названный соответствующим образом, с суффиксом `.git`), который не имеет каких-либо локальных извлечённых копий файлов, находящихся под контролем СКВ. То есть все служебные и управляющие файлы Git, которые обычно находятся в скрытом подкаталоге `.git`, находятся вместо этого непосредственно в каталоге `repository.git', и кроме них нет ни каких других файлов, извлечённых из СКВ. Обычно люди, которые публикуют свои репозитории делают голые репозитории общедоступными.
 
 [[def_blob_object]]blob-объект, бинарный объект::
@@ -239,15 +239,15 @@ exclude;;
 [[def_porcelain]]пользовательские программы, высокоуровневый программный интерфейс Git, фарфор (porcelain)::
 	Высокоуровневый программный интерфейс к <<def_core_git,ядру Git>>, который предоставляет доступ к нему в виде вызовов больше напоминающих работу с <<def_SCM,СКВ>>. Подобно тому как фарфоровые изделия в наших домах предоставляют более удобный доступ к канализационным трубам, «фарфоровый» интерфейс предоставляет доступ к <<def_plumbing,внутреннему интерфейсу>> Git. Кроме того термином «фарфор» (porcelain) называют сами высокоуровневые пользовательские программы и пакеты программ, а также машиночитаемый формат данных, используемый в этом интерфейсе.
 
-[[def_per_worktree_ref]]per-worktree ref::
-	Refs that are per-<<def_worktree,worktree>>, rather than global. This is presently only <<def_HEAD,HEAD>> and any refs that start with `refs/bisect/`, but might later include other unusual refs.
+[[def_per_worktree_ref]]ссылка на рабочий каталог::
+	Ссылки, которые относятся к <<def_worktree,рабочему каталогу>>, а не являются глобальными. В настоящее время это только <<def_HEAD,HEAD>> и любые ссылки, начинающиеся с `refs/bisect/`, но позже могут включать другие необычные ссылки.
 
-[[def_pseudoref]]pseudoref::
+[[def_pseudoref]]псевдоссылка::
 	Ссылка, семантика которой отличается от семантики обычных ссылок. Эти ссылки можно читать с помощью обычных команд Git, но их нельзя записывать с помощью таких команд, как linkgit:git-update-ref[1].
 +
 Git знает следующие псевдоссылки:
 
- - `FETCH_HEAD` is written by linkgit:git-fetch[1] or linkgit:git-pull[1]. It may refer to multiple object IDs. Each object ID is annotated with metadata indicating where it was fetched from and its fetch status.
+ - `FETCH_HEAD` записывается linkgit:git-fetch[1] или linkgit:git-pull[1]. Он может ссылаться на несколько ID объектов. Каждый ID объекта аннотируется метаданными, указывающими, откуда он был получен и его статус получения.
 
  - `MERGE_HEAD` записывается linkgit:git-merge[1] при разрешении конфликтов слияния. Он содержит все идентификаторы коммитов, которые сливаются.
 
@@ -255,16 +255,16 @@ Git знает следующие псевдоссылки:
 	Получение <<def_branch,branch>> означает выполнение <<def_fetch,fetch>> и <<def_merge,merge>>. См. также linkgit:git-pull[1].
 
 [[def_push]]отправить::
-	Pushing a <<def_branch,branch>> means to get the branch's <<def_head_ref,head ref>> from a remote <<def_repository,repository>>, find out if it is an ancestor to the branch's local head ref, and in that case, putting all objects, which are <<def_reachable,reachable>> from the local head ref, and which are missing from the remote repository, into the remote <<def_object_database,object database>>, and updating the remote head ref. If the remote <<def_head,head>> is not an ancestor to the local head, the push fails.
+	Отправка <<def_branch,ветки>> означает получение <<def_head_ref,ссылки головы>> ветки из внешнего <<def_repository,репозитория>>, выяснение, является ли она предком локальной ссылки головы ветки, и в этом случае помещение всех <<def_reachable,достижимых>> из локальной ссылки головы объектов, отсутствующих во внешнем репозитории, во внешнюю <<def_object_database,базу данных объектов>> и обновление внешней ссылки головы. Если внешняя <<def_head,голова>> не является предком локальной головы, отправка не выполняется.
 
 [[def_reachable]]достижимость::
 	Говорят, что все предки данного <<def_commit,коммита>> «достижимы» из этого коммита. В более общем смысле, один <<def_object,объект>> достижим из другого, если мы можем добраться из одного до другого по <<def_chain,цепочке>> переходов от <<def_tag,метки>> к тому на что эта метка ссылается, от <<def_commit_object,коммитов>> к их родителям или деревьям, и от <<def_tree_object,деревьев>> к содержащимся в них поддеревьям или <<def_blob_object,blob-объектам>>.
 
 [[def_reachability_bitmap]]битовые карты доступности::
-	Reachability bitmaps store information about the <<def_reachable,reachability>> of a selected set of commits in a packfile, or a multi-pack index (MIDX), to speed up object search. The bitmaps are stored in a ".bitmap" file. A repository may have at most one bitmap file in use. The bitmap file may belong to either one pack, or the repository's multi-pack index (if it exists).
+	Битовые карты достижимости хранят информацию о <<def_reachable,достижимости>> выбранного набора коммитов в pack-файле или индексе нескольких пакетов (MIDX), чтобы ускорить поиск объектов. Битовые карты хранятся в файле ".bitmap". Репозиторий может использовать не более одного файла битовой карты. Файл битовой карты может принадлежать либо одному пакету, либо индексу нескольких пакетов репозитория (если он существует).
 
 [[def_rebase]]перебазировать::
-	To reapply a series of changes from a <<def_branch,branch>> to a different base, and reset the <<def_head,head>> of that branch to the result.
+	Повторно применить серию изменений из <<def_branch,ветки>> к другой основе и сбросить <<def_head,голову>> этой ветки на результат.
 
 [[def_ref]]ссылка (ref)::
 	Имя, которое указывает на <<def_object_name,имя объекта>> или другую ссылку (в последнем случае она называется <<def_symref,символической ссылкой>>). Для удобства при использовании в качестве аргумента в командах Git, иногда ссылки могут быть сокращены; см. подробности в linkgit:gitrevisions[7]. Ссылки хранятся в <<def_repository,репозиториях>>.
@@ -287,10 +287,10 @@ Git знает следующие псевдоссылки:
 
  - `MERGE_AUTOSTASH`
 +
-Different subhierarchies are used for different purposes. For example, the `refs/heads/` hierarchy is used to represent local branches whereas the `refs/tags/` hierarchy is used to represent local tags..
+Разные подиерархии используются для разных целей. Например, иерархия `refs/heads/` используется для представления локальных веток, тогда как иерархия `refs/tags/` используется для представления локальных меток.
 
-[[def_reflog]]reflog::
-	A reflog shows the local "history" of a ref. In other words, it can tell you what the 3rd last revision in _this_ repository was, and what was the current state in _this_ repository, yesterday 9:14pm. See linkgit:git-reflog[1] for details.
+[[def_reflog]]журнал ссылок::
+	Журнал ссылок показывает локальную «историю» ссылки. Другими словами, он может сказать вам, какой была 3-я последняя редакция в _этом_ репозитории, и каким было текущее состояние в _этом_ репозитории вчера в 21:14. Подробности см. в linkgit:git-reflog[1].
 
 [[def_refspec]]спецификатор ссылки (refspec)::
 	«Спецификатор ссылки» используется при <<def_fetch,извлечении (fetch)>> и <<def_push,отправке (push)>> для описания соответствия между внешней и локальной <<def_ref,ссылками>>. См. подробности в linkgit:git-fetch[1] или linkgit:git-push[1].
@@ -304,14 +304,14 @@ Different subhierarchies are used for different purposes. For example, the `refs
 [[def_repository]]репозиторий::
 	Коллекция <<def_ref,ссылок>> вместе с <<def_object_database,базой данных объектов>> содержащей все объекты, <<def_reachable,достижимые>> из ссылок, возможно, вместе с данными одной или нескольких <<def_porcelain,пользовательских программ>>. Репозиторий может использовать свою базу данных объектов совместно с другими репозиториями через механизм <<def_alternate_object_database,дополнения базы данных>>.
 
-[[def_resolve]]resolve::
-	The action of fixing up manually what a failed automatic <<def_merge,merge>> left behind.
+[[def_resolve]]разрешить::
+	Действие по ручному исправлению того, что оставило после себя неудавшееся автоматическое <<def_merge,слияние>>.
 
 [[def_revision]]редакция (revision)::
 	Синоним к <<def_commit,коммиту>>.
 
-[[def_rewind]]rewind::
-	To throw away part of the development, i.e. to assign the <<def_head,head>> to an earlier <<def_revision,revision>>.
+[[def_rewind]]перемотка назад::
+	Отбросить часть разработки, т.е. назначить <<def_head,голову>> на более раннюю <<def_revision,редакцию>>.
 
 [[def_SCM]]СКВ (SCM)::
 	Система контроля версий (как инструмент), то же что и система управления версиями, систему управления исходным кодом, SCM-система.
@@ -325,14 +325,14 @@ Different subhierarchies are used for different purposes. For example, the `refs
 [[def_shallow_repository]]частичный репозиторий (shallow repository)::
 	Частичный <<def_repository,репозиторий>> имеет неполную историю: ссылки на <<def_parent,родителей>> некоторых из его <<def_commit,коммитов>> были «ампутированы» (другими словами, Git'у сказано делать вид, что эти коммиты не имеют родителей, несмотря на то, что в <<def_commit_object,объектном предаставлении этого коммита>> эти записи всё ещё присутствуют). Иногда это может быть полезно, например, когда вас интересует только недавняя история проекта, даже если реальная история, хранящаяся в вышестоящем репозитории, куда больше. Частичный репозиторий можно создать, передав параметр `--depth` в linkgit:git-clone[1], и его история может быть позже углублена с помощью linkgit:git-fetch[1].
 
-[[def_stash]]stash entry::
-	An <<def_object,object>> used to temporarily store the contents of a <<def_dirty,dirty>> working directory and the index for future reuse.
+[[def_stash]]спрятанный элемент::
+	<<def_object,объект>>, используемый для временного хранения содержимого <<def_dirty,изменённого>> рабочего каталога и индекса для будущего повторного использования.
 
-[[def_submodule]]submodule::
-	A <<def_repository,repository>> that holds the history of a separate project inside another repository (the latter of which is called <<def_superproject, superproject>>).
+[[def_submodule]]подмодуль::
+	<<def_repository,репозиторий>>, который хранит историю отдельного проекта внутри другого репозитория (последний называется <<def_superproject,суперпроектом>>).
 
-[[def_superproject]]superproject::
-	A <<def_repository,repository>> that references repositories of other projects in its working tree as <<def_submodule,submodules>>. The superproject knows about the names of (but does not hold copies of) commit objects of the contained submodules.
+[[def_superproject]]суперпроект::
+	<<def_repository,репозиторий>>, который ссылается на репозитории других проектов в своём рабочем каталоге как на <<def_submodule,подмодули>>. Суперпроект знает имена (но не хранит копии) объектов коммитов содержащихся подмодулей.
 
 [[def_symref]]символическая ссылка (symref)::
 	Вместо того, чтобы непосредственно содержать <<def_SHA1,SHA-1>>, символическая ссылка имеет формат "ref: refs/some/thing" и при обращении она рекурсивно <<def_dereference,разыменовывается>>. «<<def_HEAD,HEAD>>» — самый простой пример символической ссылки. Манипулировать символическими ссылками можно с помощью команды linkgit:git-symbolic-ref[1].
@@ -343,8 +343,8 @@ Different subhierarchies are used for different purposes. For example, the `refs
 [[def_tag_object]]объект-метка::
 	<<def_object,Объект>>, который содержит <<def_ref,ссылку>>, указывающую на другой объект, который может содержать сообщение точно так же, как <<def_commit_object,объект-коммит>>. Он также может содержать подпись (PGP), в этом случае он будет называться «подписанным объектом-меткой».
 
-[[def_topic_branch]]topic branch::
-	A regular Git <<def_branch,branch>> that is used by a developer to identify a conceptual line of development. Since branches are very easy and inexpensive, it is often desirable to have several small branches that each contain very well defined concepts or small incremental yet related changes.
+[[def_topic_branch]]тематическая ветка::
+	Обычная <<def_branch,ветка>> Git, используемая разработчиком для обозначения концептуальной линии разработки. Поскольку ветки очень просты и не требуют больших затрат, часто желательно иметь несколько небольших веток, каждая из которых содержит очень чётко определённые концепции или небольшие инкрементальные, но связанные изменения.
 
 [[def_trailer]] завершитель (trailer)::
 	Метаданные вида «Ключ: Значение». Завершители находятся в конце сообщений коммитов. Они могут также называться «футтерами» («footer»), «тегами» («tags») или «трейлерами» в различных сообществах. linkgit:git-interpret-trailers[1].
@@ -355,8 +355,8 @@ Different subhierarchies are used for different purposes. For example, the `refs
 [[def_tree_object]]объект-дерево (tree object)::
 	<<def_object,Объект>>, который содержит список имён и прав доступа вместе со связанным с ними ссылками на бинарные объекты и/или другие объекты-деревья. <<def_tree,Дерево>> эквивалентно <<def_directory,каталогу>>.
 
-[[def_tree-ish]]tree-ish (also treeish)::
-	A <<def_tree_object,tree object>> or an <<def_object,object>> that can be recursively <<def_dereference,dereferenced>> to a tree object. Dereferencing a <<def_commit_object,commit object>> yields the tree object corresponding to the <<def_revision,revision>>'s top <<def_directory,directory>>. The following are all tree-ishes: a <<def_commit-ish,commit-ish>>, a tree object, a <<def_tag_object,tag object>> that points to a tree object, a tag object that points to a tag object that points to a tree object, etc.
+[[def_tree-ish]]указатель дерева (также treeish)::
+	<<def_tree_object,Объект-дерево>> или <<def_object,объект>>, который может быть рекурсивно <<def_dereference,разыменован>> в объект-дерево. Разыменование <<def_commit_object,объекта коммита>> даёт объект-дерево, соответствующий верхнему <<def_directory,каталогу>> <<def_revision,редакции>>. Следующие объекты являются указателями дерева: <<def_commit-ish,указатель коммита>>, объект-дерево, <<def_tag_object,объект-метка>>, указывающий на объект-дерево, объект-метка, указывающий на объект-метку, который указывает на объект-дерево, и т.д.
 
 [[def_unborn]]нерождённая (unborn)::
 	<<def_HEAD,HEAD>> может указывать на <<def_branch,ветку>>, которая ещё не существует и в которой пока нет ни одного коммита. Такая ветка называется «нерождённой». Наиболее типичная ситуация, когда пользователи сталкиваются с нерождённой веткой, — это создание нового репозитория без клонирования из какого-либо другого места. HEAD будет указывать на ветку «main» (или «master», в зависимости от вашей конфигурации), которой ещё только предстоит быть рождённой. Кроме того, некоторые операции, у которых есть параметр <<def_orphan,orphan (осиротить)>>, могут перевести вас на такую нерождённую ветку.

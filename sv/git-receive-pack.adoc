@@ -13,9 +13,9 @@ SYNOPSIS
 
 BESKRIVNING
 -----------
-Anropas av 'git send-pack' och uppdaterar förvaret med informationen som matas från fjärränden.
+Anropas av 'git send-pack' och uppdaterar kodförrådet med informationen som matas från fjärränden.
 
-Detta kommando anropas vanligtvis inte direkt av slutanvändaren. Användargränssnittet för protokollet finns på 'git send-pack'-sidan, och programparet är avsett att användas för att skicka uppdateringar till ett fjärrarkiv. För pull-operationer, se linkgit:git-fetch-pack[1].
+Kommandot anropas vanligtvis inte direkt av slutanvändaren. Användargränssnittet för protokollet finns på 'git send-pack'-sidan, och programparet är avsett att användas för att skicka uppdateringar till ett fjärrkodförråd. För pull-operationer, se linkgit:git-fetch-pack[1].
 
 Kommandot möjliggör skapande och snabbspolning av sha1-referenser (huvuden/taggar) på fjärrsidan (strikt taget är det den lokala änden som 'git-receive-pack' körs, men för användaren som sitter i send-pack-änden uppdaterar det fjärrsidan. Förvirrad?)
 
@@ -28,13 +28,13 @@ Ett antal andra receive.*-konfigurationsalternativ finns tillgängliga för att 
 ALTERNATIV
 ----------
 <git-kat>::
-	Förvaret att synkronisera till.
+	Kodförrådet att synkronisera till.
 
 --http-backend-info-refs::
 	Används av linkgit:git-http-backend[1] för att hantera `$GIT_URL/info/refs?service=git-receive-pack`-förfrågningar. Se `--http-backend-info-refs` i linkgit:git-upload-pack[1].
 
 --skip-connectivity-check::
-	Kringgår anslutningskontrollerna som validerar förekomsten av alla objekt i den transitiva stängningen av nåbara objekt. Det här alternativet är avsett för serveroperatörer som vill implementera sin egen objektanslutningsvalidering utanför Git. Detta är användbart i sådana fall där serversidan känner till ytterligare information om hur Git används och därmed kan förlita sig på vissa garantier för att mer effektivt beräkna objektanslutning som Git självt inte kan ge. Användning av det här alternativet utan en tillförlitlig extern mekanism för att säkerställa fullständig nåbar objektanslutning riskerar att korrumpera arkivet och bör inte användas i det allmänna fallet.
+	Kringgår anslutningskontrollerna som validerar förekomsten av alla objekt i den transitiva stängningen av nåbara objekt. Det här alternativet är avsett för serveroperatörer som vill implementera sin egen objektanslutningsvalidering utanför Git. Detta är användbart i sådana fall där serversidan känner till ytterligare information om hur Git används och därmed kan förlita sig på vissa garantier för att mer effektivt beräkna objektanslutning som Git självt inte kan ge. Användning av det här alternativet utan en tillförlitlig extern mekanism för att säkerställa fullständig nåbar objektanslutning riskerar att korrumpera kodförrådet och bör inte användas i det allmänna fallet.
 
 FÖRMOTTAGNINGSKROK
 ------------------
@@ -42,7 +42,7 @@ Innan någon referens uppdateras, om filen $GIT_DIR/hooks/pre-receive finns och 
 
        sha1-gammal SP sha1-ny SP refnamn LF
 
-Refnamnsvärdet är relativt till $GIT_DIR; t.ex. för master-huvidet är detta "refs/heads/master". De två sha1-värdena före varje refnamn är objektnamnen för refnamnet före och efter uppdateringen. Referenser som ska skapas kommer att ha sha1-gammal lika med 0\{40}, medan referenser som ska raderas kommer att ha sha1-ny lika med 0\{40}, annars bör sha1-gammal och sha1-ny vara giltiga objekt i arkivet.
+Refnamnsvärdet är relativt till $GIT_DIR; t.ex. för master-huvidet är detta "refs/heads/master". De två sha1-värdena före varje refnamn är objektnamnen för refnamnet före och efter uppdateringen. Referenser som ska skapas kommer att ha sha1-gammal lika med 0\{40}, medan referenser som ska raderas kommer att ha sha1-ny lika med 0\{40}, annars bör sha1-gammal och sha1-ny vara giltiga objekt i kodförrådet.
 
 När en signerad push accepteras (se linkgit:git-push[1]) lagras det signerade push-certifikatet i en blob och en miljövariabel `GIT_PUSH_CERT` kan konsulteras för dess objektnamn. Se beskrivningen av `post-receive` krok för ett exempel. Dessutom verifieras certifikatet med GPG och resultatet exporteras med följande miljövariabler:
 
@@ -75,7 +75,7 @@ När en signerad push accepteras (se linkgit:git-push[1]) lagras det signerade p
 
 Denna krok anropas innan något refname uppdateras och innan några snabbspolningskontroller utförs.
 
-Om pre-receive-krokenen avslutas med en avslutningsstatus som inte är noll kommer inga uppdateringar att utföras, och krokarna update, post-receive och post-update kommer inte heller att anropas. Detta kan vara användbart för att snabbt kunna lösa ut om uppdateringen inte ska stödjas.
+Om pre-receive-kroken avslutas med en avslutningsstatus som inte är noll kommer inga uppdateringar att utföras, och krokarna update, post-receive och post-update kommer inte heller att anropas. Detta kan vara användbart för att snabbt avbryta om uppdateringen inte ska tillåtas.
 
 Se anvisningarna om karantänmiljön nedan.
 
@@ -89,7 +89,7 @@ Parametern refnamn är relativ till $GIT_DIR; t.ex. för master-huvudet är dett
 
 Kroken ska avslutas med status som inte är noll om den vill förhindra uppdatering av den namngivna referensen. Annars ska den avslutas med noll.
 
-Lyckad exekvering (noll exitstatus) av denna krok garanterar inte att referensen faktiskt kommer att uppdateras, det är bara en förutsättning. Därför är det inte en bra idé att skicka meddelanden (t.ex. e-post) från denna krok. Överväg att använda post-receive-kroken istället.
+Lyckad exekvering (noll exitstatus) av denna krok garanterar inte att referensen faktiskt kommer att uppdateras, det är bara en förutsättning. Därför är det inte en bra idé att skicka meddelanden (t.ex. e-post) från denna krok. Överväg att använda post-receive-kroken i stället.
 
 EFTER-MOTTAGNINGS KROK
 ----------------------
@@ -97,11 +97,11 @@ Efter att alla referenser har uppdaterats (eller försökts uppdateras), om någ
 
        sha1-gammal SP sha1-ny SP refnamn LF
 
-Refnamnsvärdet är relativt till $GIT_DIR; t.ex. för master-huvudet är detta "refs/heads/master". De två sha1-värdena före varje refnamn är objektnamnen för refnamnet före och efter uppdateringen. Referenser som skapades kommer att ha sha1-gammal lika med 0\{40}, medan referenser som raderades kommer att ha sha1-ny lika med 0\{40}, annars bör sha1-gammal och sha1-ny vara giltiga objekt i fövaret.
+Refnamnsvärdet är relativt till $GIT_DIR; t.ex. för master-huvudet är detta "refs/heads/master". De två sha1-värdena före varje refnamn är objektnamnen för refnamnet före och efter uppdateringen. Referenser som skapades kommer att ha sha1-gammal lika med 0\{40}, medan referenser som raderades kommer att ha sha1-ny lika med 0\{40}; annars ska sha1-gammal och sha1-ny vara giltiga objekt i kodförrådet.
 
 Miljövariablerna `GIT_PUSH_CERT*` kan inspekteras, precis som i `pre-receive` kroken, efter att en signerad push har accepterats.
 
-Med hjälp av denna krok är det enkelt att generera e-postmeddelanden som beskriver uppdateringarna till kodförrådet. Detta exempelskript skickar ett e-postmeddelande per referens som listar de incheckningar som pushas till kodförrådet och loggar push-certifikaten för signerade pushes med godkända signaturer till en loggtjänst:
+Med hjälp av denna krok är det enkelt att generera e-postmeddelanden som beskriver uppdateringarna till kodförrådet. Detta exempelskript skickar ett e-postmeddelande per referens som listar de incheckningar som skickas till kodförrådet och loggar push-certifikaten för signerade pushes med godkända signaturer till en loggtjänst:
 
 ----
 #!/bin/sh
@@ -116,7 +116,7 @@ do
 		echo "Nya incheckningar:"
 		git rev-list --pretty "$nval" "^$oval"
 	fi |
-	mail -s "Ändringar i ref $ref" inchecknings-lista@mindomän
+	mail -s "Ändringar i ref $ref" incheckningslista@mindomän
 done
 # logga signerat push-certifikat, om något
 if test -n "${GIT_PUSH_CERT-}" && test ${GIT_PUSH_CERT_STATUS} = G
@@ -135,7 +135,7 @@ Observera att det är möjligt för refnamn att inte ha sha1-ny när denna krok 
 
 EFTER-UPPDATERINGS KROK
 -----------------------
-Efter all annan bearbetning, om minst en referens uppdaterades, och om filen $GIT_DIR/hooks/post-update finns och är körbar, kommer post-update att anropas med listan över referenser som har uppdaterats. Detta kan användas för att implementera alla typer av rensningsuppgifter för hela arkivet.
+Efter all annan bearbetning, om minst en referens uppdaterades, och om filen $GIT_DIR/hooks/post-update finns och är körbar, kommer post-update att anropas med listan över referenser som har uppdaterats. Detta kan användas för att implementera alla typer av rensningsuppgifter för hela kodförrådet.
 
 Avslutningskoden från detta krok-anrop ignoreras; det enda som återstår för 'git-receive-pack' att göra vid den tidpunkten är att avsluta sig själv ändå.
 
@@ -152,13 +152,13 @@ KARANTÄNS-MILJÖ
 
 När `receive-pack` tar emot objekt placeras de i en tillfällig "karantän"-katalog i `$GIT_DIR/objects`-katalogen och migreras till huvudobjektlagringen först efter att `pre-receive`-kroken har slutförts. Om push-funktionen misslyckas innan dess tas den tillfälliga katalogen bort helt.
 
-Detta har några effekter och förbehåll som är synliga för användaren:
+Det har några effekter och förbehåll som är synliga för användaren:
 
   1. Push-filer som misslyckas på grund av problem med det inkommande paketet, saknade objekt eller på grund av `pre-receive`-kroken kommer inte att lämna några data på disken. Detta är vanligtvis bra för att förhindra att upprepade misslyckade push-filer fyller upp din disk, men kan göra felsökning mer utmanande.
 
   2. Alla objekt som skapas av `pre-receive`-kroken skapas i karantäns-katalogen (och migreras endast om det lyckas).
 
-  3. `pre-receive`-kroken FÅR INTE uppdatera några referenser för att peka på objekt i karantän. Andra program som använder arkivet kommer inte att kunna se objekten (och om pre-receive-kroken misslyckas kommer dessa referenser att bli skadade). Av säkerhetsskäl avvisas alla referensuppdateringar inifrån `pre-receive` automatiskt.
+  3. `pre-receive`-kroken FÅR INTE uppdatera några referenser för att peka på objekt i karantän. Andra program som använder kodförrådet kommer inte att kunna se objekten (och om pre-receive-kroken misslyckas kommer dessa referenser att bli skadade). Av säkerhetsskäl avvisas alla referensuppdateringar inifrån `pre-receive` automatiskt.
 
 
 SE ÄVEN

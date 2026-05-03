@@ -9,11 +9,11 @@ git-gc - 清理不必要的文件并优化本地仓库
 概述
 --
 [verse]
-'git gc' [--aggressive] [--auto] [--[no-]detach] [--quiet] [--prune=<date> | --no-prune] [--force] [--keep-largest-pack]
+'git gc' [--aggressive] [--auto] [--quiet] [--prune=<日期> | --no-prune] [--force] [--keep-largest-pack]
 
 描述
 --
-在当前版本库中执行一些内务管理任务，比如压缩文件修订（以减少磁盘空间并提高性能），移除之前调用 'git add' 所创建的不可达对象，打包引用，修剪引用日志、rerere metadata 或过时的工作区。也可以更新辅助索引，如提交图。
+在当前仓库中执行一些内务管理任务，比如压缩文件修订（以减少磁盘空间并提高性能），移除之前调用 'git add' 所创建的不可达对象，打包引用，修剪引用日志、rerere metadata 或过时的工作区。也可以更新辅助索引，如提交图。
 
 当运行创建对象的普通上层命令操作时，它们会检查仓库在上次维护后是否有大幅增长，如果有，就自动运行 `git gc`。参见下面的 `gc.auto` 以了解如何禁用这一行为。
 
@@ -44,7 +44,7 @@ git-gc - 清理不必要的文件并优化本地仓库
 	在将无法访问的对象打包到 Cruft 包时，限制新 Cruft 包的大小最多为 `<n>` 字节。覆盖通过 `gc.maxCruftSize` 配置指定的任何值。参见 linkgit:git-repack[1] 的 `--max-cruft-size`选项了解更多。
 
 --expire-to=<目录>::
-	When packing unreachable objects into a cruft pack, write a cruft pack containing pruned objects (if any) to the directory `<dir>`. This option only has an effect when used together with `--cruft`. See the `--expire-to` option of linkgit:git-repack[1] for more information.
+	在将无法访问的对象打包到 Cruft 包时，限制新 Cruft 包的大小最多为 `<n>` 字节。覆盖通过 `gc.maxCruftSize` 配置指定的任何值。参见 linkgit:git-repack[1] 的 `--max-cruft-size`选项了解更多。
 
 --prune=<日期>::
 	修剪超过日期的松散对象（默认是 2 周前，可由配置变量 `gc.pruneExpire` 覆盖）。 --prune=now 删减松散对象，无论其年龄大小，如果有其他进程同时向仓库写入，则会增加损坏的风险；见下面的 “注意事项”。--prune 默认是打开的。
@@ -82,7 +82,7 @@ include::config/gc.adoc[]
 注释
 --
 
-'git gc' 非常努力地不删除在你的仓库中任何地方被引用的对象。特别是，它不仅会保留当前分支和标记集所引用的对象，还会保留索引、远程跟踪分支、 引用日志（可能引用了后来被修改或回绕的分支中的提交）以及 refs/* 名称空间中的任何其他对象。请注意，附在一个对象上的注释（由 'git notes' 创建的那种）并不有助于保持该对象的活力。如果你期待一些对象被删除，而它们没有被删除，请检查所有这些位置，并决定在你的情况下，删除这些引用是否有意义。
+'git gc' 非常努力地不删除在你的仓库中任何地方被引用的对象。特别是，它不仅会保留当前分支和标签集所引用的对象，还会保留索引、远程跟踪分支、 引用日志（可能引用了后来被修改或回绕的分支中的提交）以及 refs/* 名称空间中的任何其他对象。请注意，附在一个对象上的注释（由 'git notes' 创建的那种）并不有助于保持该对象的活力。如果你期待一些对象被删除，而它们没有被删除，请检查所有这些位置，并决定在你的情况下，删除这些引用是否有意义。
 
 另一方面，当 'git gc' 与另一个进程同时运行时，它有可能删除另一个进程正在使用但还没有创建引用的对象。这可能会导致其他进程失败，或者如果其他进程后来添加了对被删除对象的引用，则可能会破坏仓库。Git 有两个功能可以大大缓解这个问题：
 

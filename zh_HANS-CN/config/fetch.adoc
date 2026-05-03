@@ -1,0 +1,54 @@
+`fetch.recurseSubmodules`::
+	该选项控制 `git fetch`（以及 `git pull` 底层执行的 fetch）是否会递归获取已填充的子模块。它可以设置为布尔值或 `on-demand`。设为布尔值时，true 表示 fetch 和 pull 会无条件递归进入子模块，false 表示完全不递归。设为 `on-demand` 时，仅当超级项目获取到了更新子模块引用的提交时，fetch 和 pull 才会递归进入已填充的子模块。默认值为 `on-demand`；如果设置了 `submodule.recurse`，则默认取其值。
+
+`fetch.fsckObjects`::
+	如果设为 true，git-fetch-pack 会检查所有获取到的对象。检查内容见 `transfer.fsckObjects`。默认值为 `false`。如果未设置，则改用 `transfer.fsckObjects` 的值。
+
+`fetch.fsck.<msg-id>`::
+	其行为类似于 `fsck.<msg-id>`，但由 linkgit:git-fetch-pack[1] 使用，而不是 linkgit:git-fsck[1]。详情见 `fsck.<msg-id>` 的文档。
+
+`fetch.fsck.skipList`::
+	其行为类似于 `fsck.skipList`，但由 linkgit:git-fetch-pack[1] 使用，而不是 linkgit:git-fsck[1]。详情见 `fsck.skipList` 的文档。
+
+`fetch.unpackLimit`::
+	如果通过 Git 原生传输获取的对象数量低于该限制，则这些对象会被解包为松散对象文件。但如果接收对象数量等于或超过该限制，则在补齐缺失的 delta 基对象之后，会将收到的 pack 作为 pack 存储。将 push 收到的 pack 直接存储为 pack 可使 push 更快完成，尤其是在较慢的文件系统上。如果未设置，则改用 `transfer.unpackLimit` 的值。
+
+`fetch.prune`::
+	如果为 true，fetch 会自动表现得如同命令行提供了 `--prune` 选项。另见 `remote.<name>.prune` 和 linkgit:git-fetch[1] 的 PRUNING 章节。
+
+`fetch.pruneTags`::
+	如果为 true，且尚未设置相关 refspec，则 fetch 在 prune 时会自动表现得如同提供了 `refs/tags/*:refs/tags/*` 这个 refspec。这样可以同时设置该选项和 `fetch.prune`，以保持与上游 ref 的 1:1 映射。另见 `remote.<name>.pruneTags` 和 linkgit:git-fetch[1] 的 PRUNING 章节。
+
+`fetch.all`::
+	如果为 true，fetch 会尝试更新所有可用远程。可通过传递 `--no-all` 或显式指定一个或多个要获取的远程来覆盖此行为。默认值为 `false`。
+
+`fetch.output`::
+	控制 ref 更新状态的打印方式。有效值为 `full` 和 `compact`。默认值为 `full`。详情参见 linkgit:git-fetch[1] 的 OUTPUT 章节。
+
+`fetch.negotiationAlgorithm`::
+	控制在协商服务器要发送的 packfile 内容时，如何发送本地仓库中提交的信息。设为 `consecutive` 时，使用遍历连续提交并逐个检查的算法。设为 `skipping` 时，使用跳过部分提交以更快收敛的算法，但可能产生比必要更大的 packfile；设为 `noop` 则完全不发送任何信息，这几乎肯定会导致 packfile 大于必要大小，但会跳过协商步骤。设为 `default` 可覆盖先前的设置并使用默认行为。默认通常为 `consecutive`，但若 `feature.experimental` 为 `true`，则默认值为 `skipping`。未知值会导致 `git fetch` 报错退出。
++
+另见 linkgit:git-fetch[1] 的 `--negotiate-only` 和 `--negotiation-tip` 选项。
+
+`fetch.showForcedUpdates`::
+	设为 `false` 可在 linkgit:git-fetch[1] 和 linkgit:git-pull[1] 命令中启用 `--no-show-forced-updates`。默认值为 `true`。
+
+`fetch.parallel`::
+	指定一次可并行运行的最大 fetch 操作数（对子模块，或在 linkgit:git-fetch[1] 的 `--multiple` 选项生效时对远程）。
++
+值为 0 时会给出某个合理的默认值。若未设置，则默认值为 1。
++
+对于子模块，可使用 `submodule.fetchJobs` 配置项覆盖此设置。
+
+`fetch.writeCommitGraph`::
+	设为 true 时，在每次 `git fetch` 从远程下载 pack-file 后都写入 commit-graph。使用 `--split` 选项时，大多数执行只会在现有 commit-graph 文件之上创建一个很小的 commit-graph 文件。偶尔这些文件会合并，写入时间可能更长。保持 commit-graph 文件为最新有助于提升许多 Git 命令的性能，包括 `git merge-base`、`git push -f` 和 `git log --graph`。默认值为 `false`。
+
+`fetch.bundleURI`::
+	该值保存一个 URI，用于在从 origin Git 服务器执行增量 fetch 之前，通过 bundle URI 下载 Git 对象数据。这与 linkgit:git-clone[1] 中 `--bundle-uri` 选项的行为类似。如果提供的 bundle URI 包含为增量 fetch 组织的 bundle 列表，则 `git clone --bundle-uri` 会设置 `fetch.bundleURI` 的值。
++
+如果你修改了此值，且仓库中存在 `fetch.bundleCreationToken` 值，那么在从新的 bundle URI 获取之前，请先删除该 `fetch.bundleCreationToken` 值。
+
+`fetch.bundleCreationToken`::
+	当使用 `fetch.bundleURI` 从采用 "`creationToken`" 启发式的 bundle 列表进行增量获取时，该配置值会保存已下载 bundle 的最大 `creationToken` 值。如果后续通告的 `creationToken` 不严格大于该值，则会利用此值阻止再次下载这些 bundle。
++
+creation token 的值由提供该 bundle URI 的服务方决定。如果你修改了 `fetch.bundleURI` 中的 URI，那么在获取之前务必删除 `fetch.bundleCreationToken` 的值。

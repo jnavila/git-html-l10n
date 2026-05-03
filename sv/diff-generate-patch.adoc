@@ -10,7 +10,7 @@ Det som `-p`-alternativet producerar skiljer sig något från det traditionella 
 
        diff --git a/fil1 b/fil2
 +
-Filnamnen `a/` och `b/` är desamma om det inte rör sig om att byta namn/kopiera. Speciellt, även vid skapande eller borttagning, används `/dev/null` _inte_ istället för filnamnen `a/` eller `b/`.
+Filnamnen `a/` och `b/` är desamma om det inte rör sig om att byta namn/kopiera. Särskilt vid skapande eller borttagning används `/dev/null` _inte_ i stället för filnamnen `a/` eller `b/`.
 +
 När ett namnbyte/kopiering är inblandat visar `fil1` och `fil2` namnet på källfilen för namnbytet/kopieringen respektive namnet på filen som namnbytet/kopieringen producerar.
 
@@ -54,7 +54,7 @@ Indexraden innehåller namnen på blob-objekten före och efter ändringen. _<be
 Kombinerat diff-format
 ----------------------
 
-Alla diff-genererande kommandon kan använda `-c` eller `--cc` alternativet för att skapa en 'kombinerad diff' när en merge visas. Detta är standardformatet när merges visas med linkgit:git-diff[1] eller linkgit:git-show[1]. Observera också att du kan ge lämplig `--diff-merges` alternativ till vilket som helst av dessa kommandon för att tvinga generering av diffs i ett specifikt format.
+Alla kommandon som genererar diffar kan använda alternativet `-c` eller `--cc` för att skapa en 'kombinerad diff' när en sammanslagning visas. Detta är standardformatet när sammanslagningar visas med linkgit:git-diff[1] eller linkgit:git-show[1]. Observera också att du kan ge ett lämpligt `--diff-merges`-alternativ till vilket som helst av dessa kommandon för att tvinga fram generering av diffar i ett specifikt format.
 
 Ett "kombinerat diff"-format ser ut så här:
 
@@ -100,11 +100,11 @@ eller så här (när `--cc`-alternativet används):
 +
 [synopsis]
 index <hash>,<hash>..<hash>
-mode <behörighter>,<behörighter>..<behörighter>
-new file mode <behörighter>
-deleted file mode <behörighter>,<behörighter>
+mode <läge>,<läge>..<läge>
+new file mode <läge>
+deleted file mode <läge>,<läge>
 +
-Raden `mode <behörighter>,<behörighter>..<behörighter>` visas bara om minst en av <behörighter> skiljer sig från resten. Utökade huvuden med information om detekterad innehållsförflyttning (namnbyten och kopieringsdetektering) är utformade för att fungera med diff-värdet för två _<trädlikt>_ och används inte av kombinerat diff-format.
+Raden `mode <läge>,<läge>..<läge>` visas bara om minst ett av <läge>-värdena skiljer sig från resten. Utökade rubriker med information om identifierad innehållsförflyttning (namnbyten och kopieringsdetektering) är utformade för att fungera med diff-värdet för två _<trädlikt>_ och används inte av kombinerat diff-format.
 
 3.   Den följs av en tvåradig från-fil/till-fil huvud:
 
@@ -113,16 +113,16 @@ Raden `mode <behörighter>,<behörighter>..<behörighter>` visas bara om minst e
 +
 I likhet med det tvåradiga huvud för det traditionella 'unified' diff-formatet används `/dev/null` för att signalera skapade eller raderade filer.
 +
-Om alternativet --combined-all-paths däremot anges, får du istället för en tvåradig från-fil/till-fil-rubrik en N+1-radig from-file/to-file huvud, där N är antalet föräldrar i sammanslagings-incheckning:
+Om alternativet --combined-all-paths däremot anges, får du i stället för en tvåradig från-fil/till-fil-rubrik en N+1-radig from-file/to-file-rubrik, där N är antalet föräldrar i sammanslagningsincheckningen:
 
        --- a/fil
        --- a/fil
        --- a/fil
        +++ b/fil
 +
-Detta utökade format kan vara användbart om namnbytes- eller kopieringsdetektering är aktivt, så att du kan se filens ursprungliga namn i olika överordnade filer.
+Det här utökade formatet kan vara användbart om namnbytes- eller kopieringsdetektering är aktiv, så att du kan se filens ursprungliga namn i olika överordnade filer.
 
-4.   Chunk-huvud-formatet är modifierat för att förhindra att folk av misstag matar in det i `patch -p1`. Kombinerat diff-format skapades för granskning av sammanslagings inchecknings-ändringar och var inte avsett att tillämpas. Ändringen liknar ändringen i det utökade 'index'-huvudet:
+4.   Chunk-headerformatet är modifierat för att förhindra att folk av misstag matar in det i `patch -p1`. Kombinerat diff-format skapades för granskning av sammanslagningsincheckningsändringar och var inte avsett att tillämpas. Ändringen liknar ändringen i den utökade 'index'-headern:
 
        @@@ <från-fil-omfång> <från-fil-omfång> <till-fil-omfånge> @@@
 +
@@ -134,4 +134,4 @@ Ett `-`-tecknet i kolumn N betyder att raden visas i fileN men inte i resultatet
 
 I exemplet ovan ändrades funktionssignaturen från båda filerna (därav två borttagningar av `-` från både fil1 och fil2, plus `++` för att betyda att en rad som lades till inte visas i vare sig fil1 eller fil2). Dessutom är åtta andra rader desamma från fil1 men visas inte i fil2 (därav prefixet `+`).
 
-När det visas med `git diff-tree -c` jämför den föräldrarna till en sammanslagnings-incheckning med sammanslagnings-resultatet (dvs. file1..fileN är föräldrarna). När det visas med `git diff-files -c` jämför den de två olösta sammanslagnings-föräldrarna med den fungerande arbetskatalog filen (dvs. file1 är steg 2, även kallad "vår version", file2 är steg 3, även kallad "deras version").
+När det visas med `git diff-tree -c` jämför den föräldrarna till en sammanslagningsincheckning med sammanslagningsresultatet (d.v.s. file1..fileN är föräldrarna). När det visas med `git diff-files -c` jämför den de två olösta sammanslagningsföräldrarna med arbetsträdfilen (d.v.s. file1 är steg 2, även kallad "vår version", file2 är steg 3, även kallad "deras version").

@@ -3,20 +3,20 @@ git-restore(1)
 
 名称
 --
-git-restore - 恢复工作树文件
+git-restore - 恢复工作区文件
 
 概述
 --
 [synopsis]
-git restore [<options>] [--source=<tree>] [--staged] [--worktree] [--] <pathspec>...
-git restore [<options>] [--source=<tree>] [--staged] [--worktree] --pathspec-from-file=<file> [--pathspec-file-nul]
-git restore (-p|--patch) [<options>] [--source=<tree>] [--staged] [--worktree] [--] [<pathspec>...]
+'git restore' [<options>] [--source=<tree>] [--staged] [--worktree] [--] <pathspec>...
+'git restore' [<options>] [--source=<tree>] [--staged] [--worktree] --pathspec-from-file=<file> [--pathspec-file-nul] 。
+'git restore' (-p|--patch) [<options>] [--source=<tree>] [--staged] [--worktree] [--] [<pathspec>...]
 
 描述
 --
-用还原源的一些内容还原工作树中的指定路径。如果一个路径被跟踪，但在还原源中不存在，它将被删除以匹配源。
+用还原源的一些内容还原工作区中的指定路径。如果一个路径被跟踪，但在还原源中不存在，它将被删除以匹配源。
 
-该命令还可以用来用`--staged`恢复索引中的内容，或者用`--staged --worktree`同时恢复工作树和索引。
+该命令还可以用来用`--staged`恢复索引中的内容，或者用`--staged --worktree`同时恢复工作区和索引。
 
 默认情况下，如果给了`--staged`，内容将从`HEAD`恢复，否则从索引恢复。使用`--source`来恢复不同的提交。
 
@@ -24,17 +24,17 @@ git restore (-p|--patch) [<options>] [--source=<tree>] [--staged] [--worktree] [
 
 选项
 --
-`-s <tree>`::
-`--source=<tree>`::
-	用给定树的内容恢复工作树的文件。通常是通过命名与之相关的提交、分支或标签来指定源树。
+-s <目录树>::
+--source=<目录树>::
+	用给定树的内容恢复工作区的文件。通常是通过命名与之相关的提交、分支或标签来指定源树。
 +
 如果没有指定，如果给了`--staged`，则从`HEAD`恢复内容，否则从索引恢复。
 +
-As a special case, you may use `"<rev-A>...<rev-B>"` as a shortcut for the merge base of _<rev-A>_ and _<rev-B>_ if there is exactly one merge base. You can leave out at most one of _<rev-A>__ and _<rev-B>_, in which case it defaults to `HEAD`.
+作为一种特殊情况，如果 A 和 B 的合并库只有一个，则可以使用 "A\...B "作为合并库的快捷方式。您最多可以省略 A 和 B 中的一个，在这种情况下，它默认为 HEAD。
 
 `-p`::
 `--patch`::
-	Interactively select hunks in the difference between the restore source and the restore location. See the "Interactive Mode" section of linkgit:git-add[1] to learn how to operate the `--patch` mode.
+	交互式地选择还原源和还原位置之间的差异中的猎物。参见 linkgit:git-add[1] 的 ''互动模式'' 部分，了解如何操作 `--patch` 模式。
 
 include::diff-context-options.adoc[]
 
@@ -42,7 +42,7 @@ include::diff-context-options.adoc[]
 `--worktree`::
 `-S`::
 `--staged`::
-	指定恢复的位置。如果两个选项都没有指定，默认情况下会还原工作树。指定`--staged`将只恢复索引。指定两个选项将同时还原。
+	指定恢复的位置。如果两个选项都没有指定，默认情况下会还原工作区。指定`--staged`将只恢复索引。指定两个选项将同时还原。
 
 `-q`::
 `--quiet`::
@@ -54,33 +54,33 @@ include::diff-context-options.adoc[]
 
 `--ours`::
 `--theirs`::
-	When restoring files in the working tree from the index, use stage #2 (`ours`) or #3 (`theirs`) for unmerged paths. This option cannot be used when checking out paths from a tree-ish (i.e. with the `--source` option).
+	从索引中恢复工作区树中的文件时，未合并的路径应使用第 #2 阶段（‘我们的’）或第 #3 阶段（‘他们的’）。 从工作区树（即使用 `--source` 选项）中检出路径时，不能使用该选项。
 +
-Note that during `git rebase` and `git pull --rebase`, `ours` and `theirs` may appear swapped. See the explanation of the same options in linkgit:git-checkout[1] for details.
+注意，在`git rebase`和`git pull --rebase`过程中，'我们的'和'他们的'可能会出现互换。详见 linkgit:git-checkout[1] 中对相同选项的解释。
 
 `-m`::
 `--merge`::
-	从索引中恢复工作目录树上的文件时，在未合并路径中重新创建冲突合并。 该选项不能用于从工作目录树中检出路径（即使用 `--source` 选项）。
+	从索引中恢复工作区树上的文件时，在未合并路径中重新创建冲突合并。 该选项不能用于从工作区树中检出路径（即使用 `--source` 选项）。
 
-`--conflict=<style>`::
-	The same as `--merge` option above, but changes the way the conflicting hunks are presented, overriding the `merge.conflictStyle` configuration variable. Possible values are `merge` (default), `diff3`, and `zdiff3`.
+--conflict=<样式>::
+	与上面的 `--merge` 选项相同，但改变了冲突块的显示方式，覆盖 `merge.conflictStyle` 配置变量。可能的值是 `merge`（默认）和 `diff3`（除了 `merge` 样式显示的内容外，还显示原始内容）。
 
 `--ignore-unmerged`::
-	当从索引中恢复工作目录树上的文件时，如果有未合并的条目，并且没有指定 `--ours`、`--theirs` 、`--merge` 或 `--conflict` ，不要中止操作。工作目录树上未合并的路径将被忽略。
+	当从索引中恢复工作区树上的文件时，如果有未合并的条目，并且没有指定 `--ours`、`--theirs` 、`--merge` 或 `--conflict` ，不要中止操作。工作区树上未合并的路径将被忽略。
 
 `--ignore-skip-worktree-bits`::
-	In sparse checkout mode, the default is to only update entries matched by _<pathspec>_ and sparse patterns in `$GIT_DIR/info/sparse-checkout`. This option ignores the sparse patterns and unconditionally restores any files in _<pathspec>_.
+	在稀疏检出模式下，默认情况下只更新由`<路径规范>`和$GIT_DIR/info/sparse-checkout 中稀疏模式匹配的条目。这个选项忽略了稀疏模式，无条件地恢复了符合 `<路径规范>` 中的任何文件。
 
 `--recurse-submodules`::
 `--no-recurse-submodules`::
-	If _<pathspec>_ names an active submodule and the restore location includes the working tree, the submodule will only be updated if this option is given, in which case its working tree will be restored to the commit recorded in the superproject, and any local modifications overwritten. If nothing (or `--no-recurse-submodules`) is used, submodules working trees will not be updated. Just like linkgit:git-checkout[1], this will detach `HEAD` of the submodule.
+	如果`<pathspec>`命名了一个活动的子模块，并且恢复的位置包括工作区，只有在给出这个选项的情况下，子模块才会被更新，在这种情况下，它的工作区将被恢复到超级项目中记录的提交，并且任何本地修改都会被覆盖。如果什么都不使用（或`--no-recurse-submodules`），子模块的工作区将不会被更新。就像linkgit:git-checkout[1]，这将分离子模块的`HEAD`。
 
 `--overlay`::
 `--no-overlay`::
-	In overlay mode, never remove files when restoring. In no-overlay mode, remove tracked files that do not appear in the _<tree>_ of `--source=<tree>`, to make them match _<tree>_ exactly. The default is no-overlay mode.
+	在覆盖模式下，该命令在恢复时不会删除文件。在无覆盖模式下，不出现在 `--source` 树中的被追踪文件会被删除，以使它们与 `<目录树>` 完全匹配。默认是无覆盖模式。
 
 `--pathspec-from-file=<file>`::
-	Pathspec is passed in _<file>_ instead of commandline args. If _<file>_ is exactly `-` then standard input is used. Pathspec elements are separated by _LF_ or _CR_/_LF_. Pathspec elements can be quoted as explained for the configuration variable `core.quotePath` (see linkgit:git-config[1]). See also `--pathspec-file-nul` and global `--literal-pathspecs`.
+	Pathspec 在 _<文件>_ 中传递，而不是在命令行参数中传递。如果 _<文件>_ 正好是 `-`，则使用标准输入。路径规范元素由 _LF_ 或 _CR/LF_ 分隔。可以引用配置变量 `core.quotePath` 的路径规范元素（请参见 linkgit:git-config[1]）。另请参见 `--pathspec-file-nul` 和全局 `--literal-pathspecs`。
 
 `--pathspec-file-nul`::
 	只有在使用 `--pathspec-from-file` 选项时才有意义。指定路径元素用 _NUL_ 字符分隔，所有其他字符都按字面意思（包括换行符和引号）表示。
@@ -96,7 +96,7 @@ Note that during `git rebase` and `git pull --rebase`, `ours` and `theirs` may a
 实例
 --
 
-The following sequence switches to the `master` branch, reverts the `Makefile` to two revisions back, deletes `hello.c` by mistake, and gets it back from the index.
+下面的序列切换到 "master "分支，将 "Makefile "恢复到两个修订版，错误地删除了hello.c，并从索引中获取它。
 
 ------------
 $ git switch master
@@ -114,7 +114,7 @@ $ git restore hello.c                     <2>
 $ git restore '*.c'
 ------------
 
-注意 "*.c "周围的引号。 文件`hello.c`也将被恢复，尽管它已经不在工作树中了，因为文件globbing是用来匹配索引中的条目的（不是由shell在工作树中）。
+注意 "*.c "周围的引号。 文件`hello.c`也将被恢复，尽管它已经不在工作区中了，因为文件globbing是用来匹配索引中的条目的（不是由shell在工作区中）。
 
 要恢复当前目录下的所有文件
 
@@ -122,7 +122,7 @@ $ git restore '*.c'
 $ git restore .
 ------------
 
-或者用 'top' 路径规范恢复所有工作目录树文件（见linkgit:gitglossary[7]）
+或者用 'top' 路径规范恢复所有工作区树文件（见linkgit:gitglossary[7]）
 
 ------------
 $ git restore :/
@@ -134,7 +134,7 @@ $ git restore :/
 $ git restore --staged hello.c
 ------------
 
-或者你可以同时恢复索引和工作目录树（这与使用 linkgit:git-checkout[1] 相同）
+或者你可以同时恢复索引和工作区树（这与使用 linkgit:git-checkout[1] 相同）
 
 ------------
 $ git restore --source=HEAD --staged --worktree hello.c

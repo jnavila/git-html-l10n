@@ -8,17 +8,17 @@ git-rebase - 在另一个基础提示之上重新应用提交内容
 概述
 --
 [verse]
-'git rebase' [-i | --interactive] [<options>] [--exec <cmd>]
-	[--onto <newbase> | --keep-base] [<upstream> [<branch>]]
-'git rebase' [-i | --interactive] [<options>] [--exec <cmd>] [--onto <newbase>]
-	--root [<branch>]
-'git rebase' (--continue|--skip|--abort|--quit|--edit-todo|--show-current-patch)
+'git rebase' [-i | --interactive] [<选项>] [--exec <命令>]
+	[--onto <新基础> | --keep-base] [<上游仓库> [<分支>]]
+'git rebase' [-i | --interactive] [<选项>] [--exec <命令>] [--onto <新基础>]
+	--root [<分支>]
+'git rebase' (--continue | --skip | --abort | --quit | --edit-todo | --show-current-patch)
 
 描述
 --
-Transplant a series of commits onto a different starting point. You can also use `git rebase` to reorder or combine commits: see INTERACTIVE MODE below for how to do that.
+将一系列提交移植到不同的起点上。你也可以用 `git rebase` 对提交重新排序或合并：参见下文 INTERACTIVE MODE 了解如何操作。
 
-For example, imagine that you have been working on the `topic` branch in this history, and you want to "catch up" to the work done on the `master` branch.
+例如，假设你在如下历史中的 `topic` 分支上工作，并希望“追上” `master` 分支上的工作。
 
 ------------
           A---B---C topic
@@ -26,7 +26,7 @@ For example, imagine that you have been working on the `topic` branch in this hi
     D---E---F---G master
 ------------
 
-You want to transplant the commits you made on `topic` since it diverged from `master` (i.e. A, B, and C), on top of the current `master`. You can do this by running `git rebase master` while the `topic` branch is checked out. If you want to rebase `topic` while on another branch, `git rebase master topic` is a shortcut for `git checkout topic && git rebase master`.
+你希望将 `topic` 自从从 `master` 分叉以来所做的提交（即 A、B、C）移植到当前 `master` 之上。你可以在检出 `topic` 分支时运行 `git rebase master` 来实现。如果你在另一个分支上想对 `topic` 进行 rebase，`git rebase master topic` 相当于 `git checkout topic && git rebase master` 的快捷写法。
 
 ------------
                   A'--B'--C' topic
@@ -35,34 +35,34 @@ You want to transplant the commits you made on `topic` since it diverged from `m
 ------------
 
 
-If there is a merge conflict during this process, `git rebase` will stop at the first problematic commit and leave conflict markers. If this happens, you can do one of these things:
+如果在此过程中出现合并冲突，`git rebase` 会停在第一个有问题的提交处并留下冲突标记。此时你可以选择以下操作之一：
 
-1. Resolve the conflict. You can use `git diff` to find the markers (<<<<<<) and make edits to resolve the conflict. For each file you edit, you need to tell Git that the conflict has been resolved. You can mark the conflict as resolved with `git add <filename>`. After resolving all of the conflicts, you can continue the rebasing process with
+1. 如果出现冲突，`git rebase` 会在第一个有问题的提交处停止，并在树中留下冲突标记。 你可以用 `git diff` 找到这些标记 (<<<<<<)，并进行编辑以解决冲突。 每编辑一个文件，都需要告诉 Git 冲突已被解决，通常可以用
 
    git rebase --continue
 
-2. Stop the `git rebase` and return your branch to its original state with
+2. 停止 `git rebase` 并将分支恢复到原始状态：
 
    git rebase --abort
 
-3. Skip the commit that caused the merge conflict with
+3. 跳过引发合并冲突的提交：
 
-   git rebase --skip
+   $ git rebase -i Y Z
 
-If you don't specify an `<upstream>` to rebase onto, the upstream configured in `branch.<name>.remote` and `branch.<name>.merge` options will be used (see linkgit:git-config[1] for details) and the `--fork-point` option is assumed. If you are currently not on any branch or if the current branch does not have a configured upstream, the rebase will abort.
+如果未指定 `<upstream>`，将使用 `branch.<name>.remote` 和 `branch.<name>.merge` 选项中配置的上游（详见 linkgit:git-config[1]），并假定使用 `--fork-point`选项。 如果您当前不在任何分支上，或者当前分支没有配置上游，变基操作会中止。
 
-Here is a simplified description of what `git rebase <upstream>` does:
+下面是对 `git rebase <upstream>` 所做事情的简化描述：
 
-1. Make a list of all commits on your current branch since it branched off from `<upstream>` that do not have an equivalent commit in `<upstream>`.
-2. Check out `<upstream>` with the equivalent of `git checkout --detach <upstream>`.
-3. Replay the commits, one by one, in order. This is similar to running `git cherry-pick <commit>` for each commit. See REBASING MERGES for how merges are handled.
-4. Update your branch to point to the final commit with the equivalent of `git checkout -B <branch>`.
+1. 列出当前分支自从从 `<upstream>` 分叉以来、且在 `<upstream>` 中没有等价提交的所有提交。
+2. 以类似 `git checkout --detach <upstream>` 的方式检出 `<upstream>`。
+3. 按顺序逐个重放这些提交。这类似于对每个提交运行一次 `git cherry-pick <commit>`。关于如何处理合并，参见 REBASING MERGES。
+4. 以类似 `git checkout -B <branch>` 的方式更新你的分支，使其指向最终提交。
 
 [NOTE]
-When starting the rebase, `ORIG_HEAD` is set to point to the commit at the tip of the to-be-rebased branch. However, `ORIG_HEAD` is not guaranteed to still point to that commit at the end of the rebase if other commands that change `ORIG_HEAD` (like `git reset`) are used during the rebase. The previous branch tip, however, is accessible using the reflog of the current branch (i.e. `@{1}`, see linkgit:gitrevisions[7]).
+如果在重置过程中使用了其他写入伪引用的命令（例如 `git reset`），就不能保证 `ORIG_HEAD` 在重置结束时仍然指向前一个分支的分支提示。不过，使用当前分支的 引用日志（即 `@{1}`，参见 linkgit:gitrevisions[7]）可以访问前一个分支的分支提示。
 
-TRANSPLANTING A TOPIC BRANCH WITH --ONTO
-----------------------------------------
+使用 --onto 移植主题分支
+----------------
 
 下面是如何使用 `rebase --onto` 将基于一个分支的特性分支移植到另一个分支，以假装特性分支是从后一个分支分叉而来。
 
@@ -150,7 +150,7 @@ TRANSPLANTING A TOPIC BRANCH WITH --ONTO
 	终止变基操作并将 HEAD 重置为原始分支。如果在启动变基操作时提供了 `<分支>`，那么 `HEAD` 将被重置为 `<分支>`。否则，`HEAD` 将被重置为启动变基操作时的位置。
 
 --quit::
-	放弃变基操作，但 `HEAD` 不会重置回原始分支。索引和工作树也会因此保持不变。如果使用 `--autostash` 创建了临时储藏条目，它将被保存到储藏列表中。
+	放弃变基操作，但 `HEAD` 不会重置回原始分支。索引和工作区也会因此保持不变。如果使用 `--autostash` 创建了临时贮藏条目，它将被保存到贮藏列表中。
 
 --edit-todo::
 	在交互式变基过程中编辑待办事项列表。
@@ -165,7 +165,7 @@ TRANSPLANTING A TOPIC BRANCH WITH --ONTO
 +
 作为一种特殊情况，如果 A 和 B 的合并库只有一个，则可以使用 "A\...B "作为合并库的快捷方式。您最多可以省略 A 和 B 中的一个，在这种情况下，它默认为 HEAD。
 
-See TRANSPLANTING A TOPIC BRANCH WITH --ONTO above for examples.
+示例参见上文“使用 --onto 移植主题分支”。
 
 --keep-base::
 	将创建新提交的起点设为 `<upstream>` 和 `<branch>` 的合并库。运行 `git rebase --keep-base <upstream> <branch>` 相当于运行 `git rebase --reapply-cherry-picks --no-fork-point --onto <upstream>...<branch> <upstream> <branch>` 。
@@ -188,7 +188,7 @@ See TRANSPLANTING A TOPIC BRANCH WITH --ONTO above for examples.
 另请参阅下面的不兼容选项。
 
 --empty=(drop|keep|stop)::
-	How to handle commits that are not empty to start and are not clean cherry-picks of any upstream commit, but which become empty after rebasing (because they contain a subset of already upstream changes):
+	重新应用任何上游提交中所有干净的拣选，而不是先发制人地丢弃它们。(如果这些提交在重排后成为空提交，因为它们包含了上游修改的子集，则对它们的行为由 `--empty` 标志控制。）
 +
 --
 `drop`;;
@@ -208,7 +208,7 @@ See TRANSPLANTING A TOPIC BRANCH WITH --ONTO above for examples.
 --keep-empty::
 	不在结果中保留重置前开始为空的提交（即不改变父提交的任何内容）。 默认情况下保留开始时为空的提交，因为创建此类提交需要向 `git commit` 传递 `--allow-empty` 覆盖标志，表明用户非常有意地创建此类提交，因此希望保留它。
 +
-使用这个标记的情况可能很少，因为你只需启动交互式变基，并删除与你不想要的提交对应的行，就能删除开始时为空的提交。 该标记是一种方便的快捷方式，比如当外部工具生成许多空提交，而你希望将它们全部删除时。
+使用这个标签的情况可能很少，因为你只需启动交互式变基，并删除与你不想要的提交对应的行，就能删除开始时为空的提交。 该标签是一种方便的快捷方式，比如当外部工具生成许多空提交，而你希望将它们全部删除时。
 +
 如果提交开始时不是空的，但重定向后变成空的，参阅 `--empty` 标志。
 +
@@ -267,7 +267,7 @@ include::rerere-options.adoc[]
 	详尽输出。暗含 `--stat` 选项。
 
 --stat::
-	显示上次变基后上游变化的差异状态。差异状态也由配置选项 rebase.stat 控制。
+	是否显示自上次 rebase 以来上游发生了哪些变化的 diffstat。默认值为 false。
 
 -n::
 --no-stat::
@@ -320,7 +320,7 @@ include::rerere-options.adoc[]
 --committer-date-is-author-date::
 	不使用当前时间作为提交者日期，而是使用被重定向的提交的作者日期作为提交者日期。该选项暗含 `--force-rebase` 选项。
 +
-WARNING: The history walking machinery assumes that commits have non-decreasing commit timestamps. You should consider if you really need to use this option. Then you should only use this option to override the committer date when rebasing commits on top of a base which commit is older (in terms of the commit date) than the oldest commit you are applying (in terms of the author date).
+WARNING: 历史遍历机制假设提交时间戳是非递减的。你应当考虑是否确实需要使用此选项。此后，你应仅在这种情况下使用它：当你要 rebase 的基准提交（以提交日期计）比你要应用的最旧提交（以作者日期计）还要更早时，用它来覆盖提交者日期。
 
 --ignore-date::
 --reset-author-date::
@@ -330,6 +330,11 @@ WARNING: The history walking machinery assumes that commits have non-decreasing 
 
 --signoff::
 	在所有重写的提交中添加 `Signed-off-by` 尾注。请注意，如果给定了 `--interactive`，则只有标记为被选中、编辑或重写的提交才会添加尾注。
++
+另请参阅下面的不兼容选项。
+
+[[def_trailer]]尾注::
+	将给定的尾注附加到每个变基的提交消息中，通过 linkgit:git-interpret-trailers[1] 处理。此选项隐含 `--force-rebase`。
 +
 另请参阅下面的不兼容选项。
 
@@ -377,19 +382,19 @@ WARNING: The history walking machinery assumes that commits have non-decreasing 
 
 --autosquash::
 --no-autosquash::
-	Automatically squash commits with specially formatted messages into previous commits being rebased. If a commit message starts with "squash! ", "fixup! " or "amend! ", the remainder of the title is taken as a commit specifier, which matches a previous commit if it matches the title or the hash of that commit. If no commit matches fully, matches of the specifier with the start of commit titles are considered.
+	自动将带有特殊格式信息的提交压制到正在重建的前提交中。如果提交信息以 "squash!"、"fixup!" 或 "amend!" 开头，则主题行的其余部分将作为提交说明符，如果与主题行或该提交的哈希值相匹配，则与之前的提交相匹配。如果没有完全匹配的提交，则会考虑与提交主题开头的指定符匹配。
 +
 在 rebase todo 列表中，squash、fixup 和 amend 提交的操作将分别从 `pick` 改为 `squash`、`fixup` 或 `fixup -C`，而且它们会被移到所修改的提交之后。在继续之前，可以使用 `--interactive` 选项查看和编辑待办事项列表。
 +
-The recommended way to create commits with squash markers is by using the `--squash`, `--fixup`, `--fixup=amend:` or `--fixup=reword:` options of linkgit:git-commit[1], which take the target commit as an argument and automatically fill in the title of the new commit from that.
+建议使用 linkgit:git-commit[1] 的 `--squash`、`--fixup`、`--fixup=amend:` 或 `--fixup=reword:` 选项来创建带有压扁标记的提交。
 +
-Setting configuration variable `rebase.autoSquash` to true enables auto-squashing by default for interactive rebase. The `--no-autosquash` option can be used to override that setting.
+将配置变量 `rebase.autoSquash` 设为 true，可启用交互式变基默认自动清空功能。可以使用 `--no-autosquash`选项来覆盖该设置。
 +
 另请参阅下面的不兼容选项。
 
 --autostash::
 --no-autostash::
-	在操作开始前自动创建临时存储条目，并在操作结束后应用它。 这意味着你可以在脏工作树上运行变基操作。 不过，请谨慎使用：成功重储后的最终储藏应用可能会导致非实质性冲突。
+	在操作开始前自动创建临时贮藏条目，并在操作结束后应用它。 这意味着你可以在脏工作区上运行变基操作。 不过，请谨慎使用：成功重储后的最终贮藏应用可能会导致非实质性冲突。
 
 --reschedule-failed-exec::
 --no-reschedule-failed-exec::
@@ -401,7 +406,7 @@ Setting configuration variable `rebase.autoSquash` to true enables auto-squashin
 
 --update-refs::
 --no-update-refs::
-	自动强制更新任何指向正在重定向的提交的分支。任何在工作区中签出的分支都不会以这种方式更新。
+	自动强制更新任何指向正在重定向的提交的分支。任何在工作区中检出的分支都不会以这种方式更新。
 +
 如果设置了配置变量 `rebase.updateRefs`, 则可使用此选项覆盖并禁用此设置。
 +
@@ -430,6 +435,7 @@ Setting configuration variable `rebase.autoSquash` to true enables auto-squashin
  * --[no-]reapply-cherry-picks when used without --keep-base
  * --update-refs
  * --root when used without --onto
+ * --trailer
 
 此外，以下几对选项是不兼容的：
 
@@ -449,7 +455,7 @@ Setting configuration variable `rebase.autoSquash` to true enables auto-squashin
 
 默认情况下，‘合并’ 后台会保留故意为空的提交（不过，如果使用 `-i` 选项，这些提交会在待办事项列表编辑器中标记为空，或者使用 `--no-keep-empty` 自动删除）。
 
-Similar to the apply backend, by default the merge backend drops commits that become empty unless `-i`/`--interactive` is specified (in which case it stops and asks the user what to do). The merge backend also has an `--empty=(drop|keep|stop)` option for changing the behavior of handling commits that become empty.
+与应用后端类似，合并后端默认情况下也会丢弃变为空的提交，除非指定了 `-i` 或 `--interactive` 选项（在这种情况下，合并会停止并询问用户该怎么做）。 合并后端还有一个 `--empty=(drop|keep|ask)` 选项，用于改变处理变为空的提交的行为。
 
 目录重命名检测
 ~~~~~~~
@@ -461,7 +467,7 @@ Similar to the apply backend, by default the merge backend drops commits that be
 上下文
 ~~~
 
-The 'apply' backend works by creating a sequence of patches (by calling `format-patch` internally), and then applying the patches in sequence (calling `am` internally). Patches are composed of multiple hunks, each with line numbers, a context region, and the actual changes. The line numbers have to be taken with some offset, since the other side will likely have inserted or deleted lines earlier in the file. The context region is meant to help find how to adjust the line numbers in order to apply the changes to the right lines. However, if multiple areas of the code have the same surrounding lines of context, the wrong one can be picked. There are real-world cases where this has caused commits to be reapplied incorrectly with no conflicts reported. Setting `diff.context` to a larger value may prevent such types of problems, but increases the chance of spurious conflicts (since it will require more lines of matching context to apply).
+‘应用’ 后台的工作方式是创建一系列补丁（在内部调用 `format-patch`），然后依次应用这些补丁（在内部调用 `am`）。 补丁由多个块组成，每个块包含行号、上下文区域和实际更改。 行号的获取必须谨慎，因为另一方很可能在文件中插入或删除了更早的行。 上下文区域的目的是帮助找到如何调整行号，以便将更改应用到正确的行上。 但是，如果代码的多个区域有相同的上下文行，就可能选错。 在现实世界中，这种情况曾导致提交被错误地重新应用，而没有报告任何冲突。 将 `diff.context` 设置为更大的值可能会避免此类问题，但会增加发生虚假冲突的几率（因为需要更多行匹配的上下文才能应用）。
 
 ‘合并’ 后台使用每个相关文件的完整副本，从而避免了此类问题。
 
@@ -503,7 +509,7 @@ include::merge-strategies.adoc[]
 注释
 --
 
-您应该了解在共享的版本库中使用 `git rebase` 的影响。 另请参阅下面的从上游重建中恢复。
+您应该了解在共享的仓库中使用 `git rebase` 的影响。 另请参阅下面的从上游重建中恢复。
 
 在运行变基命令时，如果存在 `pre-rebase` （变基前）钩子，它会首先执行该钩子。 您可以使用此钩子进行正确性检查，并在不合适时拒绝重置。 有关示例，请参阅模板 `pre-rebase`（变基前） 钩子脚本。
 
@@ -600,7 +606,7 @@ exec cd subdir; make test
 
 当命令失败（即以非 0 状态退出）时，交互式变基操作就会停止，以便您有机会解决问题。您可以使用 `git rebase --continue` 继续。
 
-"exec" 命令在 shell（默认的 shell，通常是/bin/sh）中执行命令，因此可以使用 shell 功能（如 "cd"、">"、";"......）。命令从工作目录树的根目录运行。
+"exec" 命令在 shell（默认的 shell，通常是/bin/sh）中执行命令，因此可以使用 shell 功能（如 "cd"、">"、";"......）。命令从工作区树的根目录运行。
 
 ----------------------------------
 $ git rebase -i --exec "make test"
@@ -779,9 +785,9 @@ merge -C 6f5e4d report-a-bug # 合并 “报告一个错误”
 
 与常规的交互式变基不同，除了 `pick`（选取）命令外，还有 `label`（标签）、`reset`（重置） 和 `merge`（合并） 命令。
 
-`label` 命令会在执行该命令时将一个标签与当前 HEAD 关联。这些标签被创建为工作树本地引用（`refs/rewritten/<label>`），并将在重置完成后被删除。这样，链接到同一仓库的多个工作树中的重置操作就不会相互干扰。如果 `label` 命令失败，会立即重新安排，并给出如何继续的提示信息。
+`label` 命令会在执行该命令时将一个标签与当前 HEAD 关联。这些标签被创建为工作区本地引用（`refs/rewritten/<label>`），并将在重置完成后被删除。这样，链接到同一仓库的多个工作区中的重置操作就不会相互干扰。如果 `label` 命令失败，会立即重新安排，并给出如何继续的提示信息。
 
-`reset` 命令会将 HEAD、索引和工作树重置为指定的版本。它类似于 `exec git reset --hard <label>`，但拒绝覆盖未跟踪的文件。如果 `reset` 命令失败，会立即重新安排，并附带如何编辑待办事项列表的提示信息（这种情况通常发生在 `reset` 命令被手动插入待办事项列表且包含错字的情况下）。
+`reset` 命令会将 HEAD、索引和工作区重置为指定的版本。它类似于 `exec git reset --hard <label>`，但拒绝覆盖未跟踪的文件。如果 `reset` 命令失败，会立即重新安排，并附带如何编辑待办事项列表的提示信息（这种情况通常发生在 `reset` 命令被手动插入待办事项列表且包含错字的情况下）。
 
 `merge`（合并）命令会将指定的版本合并到当时的 HEAD 中。使用 `-C <源提交>` 时，将使用指定合并提交的提交信息。如果将 `-C` 改为小写的 `-c`，合并成功后，提交信息将在编辑器中打开，以便用户编辑信息。
 

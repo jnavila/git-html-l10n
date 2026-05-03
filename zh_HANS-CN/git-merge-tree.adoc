@@ -34,10 +34,10 @@ git-merge-tree - 显示三向合并，不触及索引
 --
 
 --stdin::
-	Read the commits to merge from the standard input rather than the command-line. See <<INPUT,INPUT FORMAT>> below for more information. Implies `-z`.
+	从标准输入而非命令行读取要合并的提交。更多信息参见下文 <<INPUT,INPUT FORMAT>>。这将隐含 `-z`。
 
 -z::
-	Do not quote filenames in the <Conflicted file info> section, and end each filename with a NUL character rather than newline. Also begin the messages section with a NUL character instead of a newline. See <<OUTPUT,OUTPUT>> below for more information.
+	在 <冲突文件信息> 部分不要引用文件名，每个文件名用 NUL 字符而不是换行来结束。 在信息部分也要用 NUL 字符而不是换行来开始。 更多信息见下面的 <<OUTPUT>>。
 
 --name-only::
 	在冲突的文件信息部分，不要为冲突的文件写一个（mode, oid, stage, path）图元列表来输出，只需提供一个有冲突的文件名列表（如果文件有多个冲突的阶段，不多次列出文件名）。
@@ -47,17 +47,17 @@ git-merge-tree - 显示三向合并，不触及索引
 	将任何信息性的消息，如"Auto-merging <path>" 或冲突通知写到标准输出流的末尾。 如果没有指定，默认情况下，如果有合并冲突，就包括这些信息，否则就省略它们。
 
 --quiet::
-	Disable all output from the program. Useful when you are only interested in the exit status. Allows merge-tree to exit early when it finds a conflict, and allows it to avoid writing most objects created by merges.
+	禁用程序的所有输出。当你只关心退出状态时很有用。它允许 merge-tree 在发现冲突时提前退出，并避免写入合并过程中创建的大多数对象。
 
 --allow-unrelated-histories::
 	如果指定的两个分支没有共同的历史，merge-tree 默认会出错。 这个标志可以用来覆盖这个检查，并使合并继续进行。
 
---merge-base=<tree-ish>::
-	Instead of finding the merge-bases for <branch1> and <branch2>, specify a merge-base for the merge. This option is incompatible with `--stdin`.
+--merge-base=<提交>::
+	不需要为 <branch1> 和 <branch2> 寻找合并基础，而是为合并指定一个合并基础，目前不支持指定多个合并基础。该选项与 `--stdin` 不兼容。
 +
-Specifying multiple bases is currently not supported, which means that when merging two branches with more than one merge-base, using this option may cause merge results to differ from what `git merge` would compute. This can include potentially losing some changes made on one side of the history in the resulting merge.
+目前不支持指定多个 base。这意味着：当合并的两个分支存在多个 merge-base 时，使用该选项可能会导致合并结果与 `git merge` 计算出的结果不同，其中可能包括在合并结果中丢失历史某一侧所做的一些更改。
 +
-With this option, since the merge-base is provided directly, <branch1> and <branch2> do not need to specify commits; trees are enough.
+由于直接提供了合并基础，<分支 1> 和 <分支 2> 不需要指定提交；树对象就足够了。
 
 -X<选项>::
 --strategy-option=<选项>::
@@ -190,7 +190,7 @@ Merge status
 应避免的错误
 ------
 
-不要在产生的顶层目录树中寻找哪些文件有冲突，而要解析 <<CFI,冲突文件信息>> 部分。 在大型存储库中，不仅解析整个目录树会慢得吓人，而且有许多冲突类型无法用冲突标记来表示（修改/删除，模式冲突，二进制文件在两边都有改变，文件/目录冲突，各种重命名冲突的变种，等等。）
+不要在产生的顶层目录树中寻找哪些文件有冲突，而要解析 <<CFI,冲突文件信息>> 部分。 在大型仓库中，不仅解析整个目录树会慢得吓人，而且有许多冲突类型无法用冲突标记来表示（修改/删除，模式冲突，二进制文件在两边都有改变，文件/目录冲突，各种重命名冲突的变种，等等。）
 
 不要把一个空的 <<CFI,冲突文件信息>> 列表理解为一个干净的合并；检查退出状态。 一个合并可以有冲突而没有单个文件的冲突（有几种类型的目录重命名冲突属于这个类别，其他的也可能在将来被添加）。
 

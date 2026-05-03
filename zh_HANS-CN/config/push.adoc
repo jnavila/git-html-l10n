@@ -1,0 +1,76 @@
+`push.autoSetupRemote`::
+	若设为 `true`，当当前分支尚无上游跟踪分支时，默认 push 会假定带上 `--set-upstream`；该选项在 `push.default` 为 `simple`、`upstream` 和 `current` 时生效。若你希望新分支默认推送到默认远程（类似 `push.default=current` 的行为），同时又希望设置上游跟踪关系，则此选项很有用。最可能受益的工作流是 `simple` 的集中式工作流：期望所有分支在远程都有同名分支。
+
+`push.default`::
+	定义在未提供 refspec（无论来自命令行、配置或其他来源）时 `git push` 应采取的动作。不同取值适合不同工作流；例如在纯集中式工作流（即 fetch 源与 push 目的地相同）中，`upstream` 可能是你想要的。可能取值包括：
++
+--
+`nothing`;;
+除非给出 refspec，否则不推送任何内容（报错退出）。这主要面向希望始终显式指定以避免失误的人。
+
+`current`;;
+推送当前分支，以更新接收端上同名分支。适用于集中式与非集中式工作流。
+
+`upstream`;;
+将当前分支推送回通常会把更改合入当前分支的那个分支（即 `@{upstream}`）。仅当你推送到的仓库与通常拉取的仓库相同（即集中式工作流）时，此模式才有意义。
+
+`tracking`;;
+这是 `upstream` 的已弃用同义词。
+
+`simple`;;
+将当前分支推送到远程上的同名分支。
++
+如果你在集中式工作流中工作（推送到你拉取的同一仓库，通常为 `origin`），那么需要配置一个同名的上游分支。
++
+自 Git 2.0 起该模式为默认，且对新手来说是最安全的选择。
+
+`matching`;;
+推送两端同名的所有分支。这会让你推送到的仓库记住将被推送出去的分支集合（例如，如果你总是把 `maint` 和 `master` 推送到那里而不推送其他分支，那么该远程仓库将拥有这两个分支，你本地的 `maint` 与 `master` 将被推送过去）。
++
+要有效使用此模式，你必须在运行 `git push` 之前确保你要推送的 _所有_ 分支都已准备就绪，因为该模式的核心就是让你一次性推送所有分支。如果你通常只完成一个分支的工作并推送结果，而其他分支仍未完成，那么此模式不适合你。此外，此模式也不适合推送到共享的中央仓库，因为其他人可能会在其中新增分支，或在你控制之外更新现有分支的末端。
++
+这曾经是默认值，但自 Git 2.0 起不再如此（新的默认值为 `simple`）。
+
+--
+
+`push.followTags`::
+	若设为 true，则默认启用 `--follow-tags`。你可以在推送时指定 `--no-follow-tags` 覆盖此配置。
+
+`push.gpgSign`::
+	可设为布尔值或字符串 `if-asked`。值为 true 时，所有推送都会进行 GPG 签名，效果等同于向 linkgit:git-push[1] 传入 `--signed`。值为 `if-asked` 时，若服务器支持则对推送进行签名，效果等同于向 `git push` 传入 `--signed=if-asked`。值为 false 可覆盖来自更低优先级配置文件的设置。命令行显式标志总会覆盖此配置选项。
+
+`push.pushOption`::
+	当命令行未给出任何 `--push-option=<option>` 参数时，`git push` 的行为就像为本变量中的每个 _<option>_ 都提供了 `--push-option=<option>` 一样。
++
+这是一个多值变量。可在更高优先级的配置文件（例如仓库中的 `.git/config`）中设置空值，以清除从较低优先级配置文件（例如 `$HOME/.gitconfig`）继承的值。
++
+----
+
+例如：
+
+/etc/gitconfig
+  push.pushoption = a
+  push.pushoption = b
+
+~/.gitconfig
+  push.pushoption = c
+
+repo/.git/config
+  push.pushoption =
+  push.pushoption = b
+
+这将导致只剩下 b（a 和 c 被清除）。
+
+----
+
+`push.recurseSubmodules`::
+	可以是 `check`、`on-demand`、`only` 或 `no`，其行为与 `push --recurse-submodules` 相同。若未设置，则默认使用 `no`，除非设置了 `submodule.recurse`（此时值为 `true` 表示 `on-demand`）。
+
+`push.useForceIfIncludes`::
+	若设为 `true`，等同于在命令行中为 linkgit:git-push[1] 指定 `--force-if-includes` 选项。在 push 时添加 `--no-force-if-includes` 会覆盖此配置。
+
+`push.negotiate`::
+	若设为 `true`，则在客户端和服务器尝试找出共同提交的多轮协商过程中，尝试减小发送的 packfile 大小。若为 `false`，Git 将仅依赖服务器的 ref 通告来查找共同提交。
+
+`push.useBitmaps`::
+	若设为 `false`，则即使 `pack.useBitmaps` 为 `true`，也会禁用 `git push` 对 bitmap 的使用，但不会 阻止其他 git 操作使用 bitmap。默认值为 `true`。

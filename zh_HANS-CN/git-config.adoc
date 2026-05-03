@@ -9,20 +9,20 @@ git-config - 获取和设置仓库或全局选项
 概述
 --
 [verse]
-'git config list' [<file-option>] [<display-option>] [--includes]
-'git config get' [<file-option>] [<display-option>] [--includes] [--all] [--regexp] [--value=<pattern>] [--fixed-value] [--default=<default>] [--url=<url>] <name>
-'git config set' [<file-option>] [--type=<type>] [--all] [--value=<pattern>] [--fixed-value] <name> <value>
-'git config unset' [<file-option>] [--all] [--value=<pattern>] [--fixed-value] <name>
-'git config rename-section' [<file-option>] <old-name> <new-name>
-'git config remove-section' [<file-option>] <name>
-'git config edit' [<file-option>]
-'git config' [<file-option>] --get-colorbool <name> [<stdout-is-tty>]
+'git config list' [<文件选项>] [<展示选项>] [--includes]
+'git config get' [<文件选项>] [<display-option>] [--includes] [--all] [--regexp=<正则表达式>] [--value=<value>] [--fixed-value] [--default=<default>] <名称>
+'git config set' [<文件选项>] [--type=<类型>] [--all] [--value=<value>] [--fixed-value] <名称> <value>
+'git config unset' [<文件选项>] [--all] [--value=<value>] [--fixed-value] <名称> <value>
+'git config rename-section' [<文件选项>] <旧名称> <新名称>
+'git config remove-section' [<文件选项>] <名称>
+'git config edit' [<文件选项>]
+'git config' [<文件选项>] --get-colorbool <名称> [<标准输出是否是终端>]
 
 描述
 --
 你可以用这个命令查询/设置/替换/取消选项。名称(name)实际上是用点隔开的节和键，值(value)会被转义。
 
-Multiple lines can be added to an option by using the `--append` option. If you want to update or unset an option which can occur on multiple lines, `--value=<pattern>` (which is an extended regular expression, unless the `--fixed-value` option is given) needs to be given. Only the existing values that match the pattern are updated or unset. If you want to handle the lines that do *not* match the pattern, just prepend a single exclamation mark in front (see also <<EXAMPLES>>), but note that this only works when the `--fixed-value` option is not in use.
+通过使用 `--add` 选项，可以为一个选项添加多行。 如果你想更新或取消一个可以出现在多行的选项，需要给出一个 `value-pattern` （除非给出 `--fixed-value` 选项，否则这是一个扩展的正则表达式）。 只有符合该模式的现有值被更新或取消设置。 如果你想处理不符合模式的行，只需在前面加上一个感叹号（参见<<EXAMPLES>>），但注意这只在没有使用 `--fixed-value` 选项时有效。
 
 `--type=<类型>` 选项指示 'git config' 确保传入和传出的值在给定的 <类型> 下是可以被规范化的。 如果没有给定 `--type=<类型>`，将不执行规范化。调用者可以用 `--no-type` 选项取消现有 `--type` 选项的指定。
 
@@ -50,46 +50,46 @@ Multiple lines can be added to an option by using the `--append` option. If you 
 list::
 	列出配置文件中设置的所有变量，以及它们的值。
 
-get::
+--get::
 	发出指定键的值。如果配置中键出现多次，则发出最后一个值。如果指定了 `--all`，则发出与键关联的所有值。如果键不存在，则返回错误代码 1。
 
-set::
+'set'::
 	为一个或多个配置选项设置值。默认情况下，此命令拒绝写入多值配置选项。传递 `--all` 将用新值替换所有多值配置选项，而 `--value=` 将替换所有其值与给定模式匹配的配置选项。
 
-unset::
+'unset'::
 	取消设置一个或多个配置选项的值。默认情况下，此命令拒绝取消设置多值键。传递 `--all` 将取消设置所有多值配置选项，而 `--value` 将取消设置所有其值与给定模式匹配的配置选项。
 
-rename-section::
+--rename-section::
 	将给定的节重命名为一个新的名称。
 
-remove-section::
+--remove-section::
 	从配置文件中删除了该节。
 
 edit::
-	Opens an editor to modify the specified config file; either `--system`, `--global`, `--local` (default), `--worktree`, or `--file <config-file>`.
+	打开一个编辑器来修改指定的配置文件；可以是 `--system`，`--global`，也可以是仓库（默认）。
 
 [[OPTIONS]]
 选项
 --
 
 --replace-all::
-	Default behavior is to replace at most one line. This replaces all lines matching the key (and optionally `--value=<pattern>`).
+	默认行为是最多替换一行。这将会替换所有与键（以及可选的 `value-pattern` ）匹配的行。
 
 --append::
-	Adds a new line to the option without altering any existing values. This is the same as providing '--value=^$' in `set`.
+	不改变任何现有的值的情况下，在选项中增加一个新的行。 这与在 `--replace-all` 选项中提供 '^$' 作为 `value-pattern` 是一样的。
 
---comment <message>::
+-m <信息>::
 	在新的或修改过的行末尾添加注释。
 +
 如果 _<消息>_ 以一个或多个空白字符后跟 "#" 开头，它将按原样使用。如果它以 "#" 开头，则在使用前会添加一个空格。否则，会在其前面加上字符串 " # "（一个空格后跟一个井号，再后跟一个空格）。生成的字符串将紧随变量定义的值之后放置。_<消息>_ 不能包含换行符（不允许多行注释）。
 
 --all::
-	With `get`, return all values for a multi-valued key.
+	和 --get 选项类似，但是该选项会返回一个多值键的所有值。
 
 --regexp::
-	With `get`, interpret the name as a regular expression. Regular expression matching is currently case-sensitive and done against a canonicalized version of the key in which section and variable names are lowercased, but subsection names are not.
+	像 --get-all 选项一样，但是用正则表达式作为名称，并写出键名。 正则表达式匹配目前是区分大小写的，并且是针对一个规范化的键的版本进行的，其中节 (section) 和变量名称是小写的，但子节名称不是小写的。
 
---url=<URL>::
+--commit-url <地址>::
 	当给定一个由两部分组成的名称 section.key 时，返回 section.<URL>.key 的值，其 <URL> 部分是给定的最相匹配的 URL（如果没有这样的键存在，section.key 的值将作为备用值）。 当只给出 section 的名称时，对 section 中的所有 key 进行处理，并将其列出。 如果没有找到值，返回错误代码 1（section: 节，key:键；在配置文件中是这样的 [section] key=value）。
 
 --global::
@@ -127,21 +127,21 @@ edit::
 --blob <blob>::
 	类似于 `--file` 选项，但使用指定的二进制对象而不是文件。例如，你可以使用 'master:.gitmodules' 来读取主分支中 '.gitmodules' 文件中的值。参见 linkgit:gitrevisions[7] 中的 “指定的修正” 部分，以获得更完整的二进制对象名称拼写方式。
 
-`--value=<pattern>`::
+--exclude=<模式>::
 `--no-value`::
-	With `get`, `set`, and `unset`, match only against _<pattern>_. The pattern is an extended regular expression unless `--fixed-value` is given.
+	在 `get`、`set` 和 `unset` 模式下，仅匹配 _<pattern>_。除非给出 `--fixed-value`，否则该模式为扩展正则表达式。
 +
-Use `--no-value` to unset _<pattern>_.
+使用 `--no-value` 来 unset _<pattern>_。
 
 --fixed-value::
-	When used with `--value=<pattern>`, treat _<pattern>_ as an exact string instead of a regular expression. This will restrict the name/value pairs that are matched to only those where the value is exactly equal to _<pattern>_.
+	当与 `value-pattern` 参数一起使用时，将 `value-pattern` 视为精确的字符串，而不是正则表达式。这将使得被匹配的名称/值对只有那些值与 `value-pattern` 完全相等的名称/值对。
 
 --type <类型>::
   'git config' 将确保任何输入或输出在给定的类型约束下是有效的，并将以 `<类型>` 的规范形式将输出的值规范化。
 +
 有效的 `<类型>` 包括：
 +
-- 'bool': canonicalize values `true`, `yes`,`on`, and positive numbers as "true", and values `false`, `no`, `off` and `0` as "false".
+- 'bool'：将 `true`、`yes`、`on` 和正数规范化为 "true"，将 `false`、`no`、`off` 和 `0` 规范化为 "false"。
 - 'int'：将数值规范化为简单的十进制数字。可选的后缀 'k'、'm' 或 'g'将导致输入的值被乘以 1024、1048576 或 1073741824。
 - 'bool-or-int'：如上所述，根据 'bool '或 'int' 进行规范化。
 - 'path'：通过在 `$HOME` 和 `~user` 的值中添加前导 `~` 来规范化指定用户的主目录。在设置值时，该说明符没有任何作用（但可以在命令行中使用 `git config section.variable ~/` 让 shell 进行扩展）。
@@ -164,11 +164,11 @@ Use `--no-value` to unset _<pattern>_.
 	对于所有输出值和/或键的选项，总是用空字符（而不是换行）结束值。使用换行符作为键和值之间的分隔符。这样可以安全地解析输出，而不会被包含换行的值所混淆。
 
 --name-only::
-	Output only the names of config variables for `list` or `get`.
+	只输出 `--list` 或 `--get-regexp` 的配置变量的名称。
 
 `--show-names`::
 `--no-show-names`::
-	With `get`, show config keys in addition to their values. The default is `--no-show-names` unless `--url` is given and there are no subsections in _<name>_.
+	在 `get` 模式下，除了值之外还显示配置键。除非给出 `--url` 且 _<name>_ 中没有子节，否则默认值为 `--no-show-names`。
 
 --show-origin::
 	用来源类型（文件、标准输入、blob、命令行）和实际来源（配置文件路径、引用或 blob id（如适用））对所有查询到的配置选项的输出进行扩充。
@@ -185,10 +185,10 @@ Use `--no-value` to unset _<pattern>_.
 	在查找数值时尊重配置文件中的 `include.*` 指令。当给出一个特定的文件时，默认为 `off`（例如，使用 `--file`、`--global` 等），当搜索所有配置文件时，默认为 `on`。
 
 --default <值>::
-  When using `get`, and the requested variable is not found, behave as if <value> were the value assigned to that variable.
+  当使用 `--get` 时，如果没有找到所要求的变量，那么表现得就像是该变量被赋予了 <值> 这个值。
 
-DEPRECATED MODES
-----------------
+弃用说明
+----
 
 以下模式已不再推荐使用，建议改用子命令。推荐迁移到新的语法。
 
@@ -202,13 +202,13 @@ DEPRECATED MODES
 --list::
 	已由 `git config list` 替代。
 
---get <name> [<value-pattern>]::
+--get-color <名称> [<默认值>]::
 	已由 `git config get [--value=<模式>] <配置名称>` 替代。
 
---get-all <name> [<value-pattern>]::
-	Replaced by `git config get [--value=<pattern>] --all <name>`.
+--get-color <名称> [<默认值>]::
+	已由 `git config unset [--value=<模式>] --all <配置名称>` 替代。
 
---get-regexp <name-regexp>::
+--extended-regexp::
 	已由 `git config get --all --show-names --regexp <名称正则表达式>` 替代。
 
 --get-urlmatch <名称> <URL>::
@@ -217,19 +217,19 @@ DEPRECATED MODES
 --get-color <名称> [<默认值>]::
 	已由 `git config get --type=color [--default=<默认值>] <配置名称>` 替代。
 
---add <name> <value>::
+-c <配置名>=<配置值>::
 	已由 `git config set --append <配置名称> <值>` 替代。
 
---unset <name> [<value-pattern>]::
+--get-color <名称> [<默认值>]::
 	已由 `git config unset [--value=<模式>] <名称>` 替代。
 
---unset-all <name> [<value-pattern>]::
+--get-color <名称> [<默认值>]::
 	已由 `git config unset [--value=<模式>] --all <配置名称>` 替代。
 
 --rename-section <旧配置名称> <新配置名称>::
 	已由 `git config rename-section <旧配置名称> <新配置名称>` 替代。
 
---remove-section <name>::
+--remove-section::
 	已由 `git config remove-section <配置名称>` 替代。
 
 -e::
@@ -238,7 +238,7 @@ DEPRECATED MODES
 
 配置
 --
-`pager.config` is only respected when listing configuration, i.e., when using `list` or `get` which may return multiple results. The default is to use a pager.
+`pager.config` 只在列出配置时被尊重，即在使用 `--list` 或任何可能返回多个结果的 `--get-*` 时。 默认情况下是使用 pager。
 
 [[FILES]]
 文件
@@ -263,11 +263,11 @@ $GIT_DIR/config.worktree::
 
 你也可以在运行任何 git 命令时通过使用 `-c` 选项提供额外的配置参数。详情见 linkgit:git[1]。
 
-选项将从所有这些可用的文件中读取。如果全局或全系统的配置文件丢失或不可读，它们将被忽略。如果版本库的配置文件丢失或不可读，'git config' 将以非零的错误代码退出。如果文件不可读，会产生一个错误信息，但如果文件丢失，则不会产生错误信息。
+选项将从所有这些可用的文件中读取。如果全局或全系统的配置文件丢失或不可读，它们将被忽略。如果仓库的配置文件丢失或不可读，'git config' 将以非零的错误代码退出。如果文件不可读，会产生一个错误信息，但如果文件丢失，则不会产生错误信息。
 
 文件是按照上述顺序读取的，最后发现的值优先于之前读取的值。 当有多个值时，将使用所有文件中某个键的所有值。
 
-By default, options are only written to the repository specific configuration file. Note that this also affects options like `set` and `unset`. *'git config' will only ever change one file at a time*.
+默认情况下，选项只被写入仓库特定的配置文件中。请注意，这也会影响到 `--replace-all` 和 `--unset` 等选项。*'git config' 一次只能改变一个文件*。
 
 你可以通过使用 `--file` 选项指定文件路径，或者使用 `--system`、`--global`、`--local` 或 `--worktree` 指定配置范围，来限制从哪些配置源读取或写入。 更多内容请参见上面的 <<OPTIONS>>。
 
@@ -371,13 +371,13 @@ GIT_CONFIG::
 你可以用以下方法将文件模式设置为真
 
 ------------
-% git config set core.filemode true
+% git config core.filemode true
 ------------
 
 假设的代理命令条目实际上有一个后缀来辨别它们适用于什么URL。下面是如何将 kernel.org 的条目改为 "ssh"。
 
 ------------
-% git config set --value='for kernel.org$' core.gitproxy '"ssh" for kernel.org'
+% git config --get core.gitproxy "for kernel.org$"
 ------------
 
 这确保了只有 kernel.org 的键/值对被替换。
@@ -385,7 +385,7 @@ GIT_CONFIG::
 要删除重名的条目，请执行
 
 ------------
-% git config unset diff.renames
+% git config --unset diff.renames
 ------------
 
 如果你想删除一个多变量的条目（如上面的 core.gitproxy），你必须提供一个与恰好一行的值相匹配的正则表达式。
@@ -393,62 +393,62 @@ GIT_CONFIG::
 要查询一个给定键的值，可以这样做
 
 ------------
-% git config get core.filemode
+% git config --get core.filemode
 ------------
 
 或者，要查询一个多变量：
 
 ------------
-% git config get --value="for kernel.org$" core.gitproxy
+% git config --get-all core.gitproxy
 ------------
 
 如果你想知道一个多变量的所有值，可以这么做：
 
 ------------
-% git config get --all --show-names core.gitproxy
+% git config --get-all core.gitproxy
 ------------
 
 如果你喜欢危险操作，你可以用一个新的 core.gitproxy 来取代 *所有* core.gitproxy
 
 ------------
-% git config set --all core.gitproxy ssh
+% git config --get-all core.gitproxy
 ------------
 
 然而，如果你真的只想替换默认代理，即没有 "for ..." 后缀的那一行，可以这样做：
 
 ------------
-% git config set --value='! for ' core.gitproxy ssh
+% git config --replace-all core.gitproxy ssh
 ------------
 
 为了真正地只匹配带有感叹号的值，你必须
 
 ------------
-% git config set --value='[!]' section.key value
+% git config section.key value '[!]'
 ------------
 
 要添加一个新的代理，而不改变任何现有的代理，使用
 
 ------------
-% git config set --append core.gitproxy '"proxy-command" for example.com'
+% git config --add core.gitproxy '"proxy-command" for example.com'
 ------------
 
 一个例子是在你的脚本中使用配置的自定义颜色：
 
 ------------
 #!/bin/sh
-WS=$(git config get --type=color --default="blue reverse" color.diff.whitespace)
-RESET=$(git config get --type=color --default="reset" "")
+WS=$(git config --get-color color.diff.whitespace "blue reverse")
+RESET=$(git config --get-color "" "reset")
 echo "${WS}your whitespace color or blue reverse${RESET}"
 ------------
 
 对于 `https://weak.example.com` 中的 URL，`http.sslVerify` 被设置为 false，而对于所有其他的 URL，它被设置为 `true`：
 
 ------------
-% git config get --type=bool --url=https://good.example.com http.sslverify
+% git config --type=bool --get-urlmatch http.sslverify https://good.example.com
 true
-% git config get --type=bool --url=https://weak.example.com http.sslverify
+% git config --type=bool --get-urlmatch http.sslverify https://weak.example.com
 false
-% git config get --url=https://weak.example.com http
+% git config --get-urlmatch http https://weak.example.com
 http.cookieFile /tmp/cookie.txt
 http.sslverify false
 ------------

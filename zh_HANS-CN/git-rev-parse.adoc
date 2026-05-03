@@ -9,14 +9,14 @@ git-rev-parse - 挑选并调整参数
 概述
 --
 [verse]
-'git rev-parse' [<options>] <arg>...
+'git rev-parse' [<选项>] <参数>...
 
 描述
 --
 
-Many Git porcelainish commands take a mixture of flags (i.e. parameters that begin with a dash '-') and parameters meant for the underlying 'git rev-list' command they use internally and flags and parameters for the other commands they use downstream of 'git rev-list'. The primary purpose of this command is to allow calling programs to distinguish between them. There are a few other operation modes that have nothing to do with the above "help parse command line options".
+许多 Git 上层命令会混合使用一些标记（即以破折号 '-' 开头的参数）和参数，这些标记和参数既用于内部使用的底层 'git rev-list' 命令，也用于 'git rev-list' 下游的其他命令。 这条命令就是用来区分它们的。
 
-除非另有说明，大多数选项和操作模式要求您在 git 仓库内部或由 git 仓库控制的个工作树中运行此命令，否则将给出致命错误。
+除非另有说明，大多数选项和操作模式要求您在 git 仓库内部或由 git 仓库控制的个工作区中运行此命令，否则将给出致命错误。
 
 
 选项
@@ -28,10 +28,10 @@ Many Git porcelainish commands take a mixture of flags (i.e. parameters that beg
 这些选项都必须在命令行中首先出现。
 
 --parseopt::
-	在选项解析模式下使用 'git rev-parse'（参见下面的 PARSEOPT 部分）。在此模式下，即使不在仓库内部或由仓库控制的工作树中，也可以使用该命令。
+	在选项解析模式下使用 'git rev-parse'（参见下面的 PARSEOPT 部分）。在此模式下，即使不在仓库内部或由仓库控制的工作区中，也可以使用该命令。
 
 --sq-quote::
-	Use 'git rev-parse' in shell quoting mode (see SQ-QUOTE section below). In contrast to the `--sq` option below, this mode only does quoting. Nothing else is done to command input. The command in this mode can be used outside a repository or a working tree controlled by a repository.
+	在 shell 引用模式下使用 'git rev-parse'（见下文 SQ-QUOTE 部分）。与下面的 `--sq` 选项不同，该模式只进行引用。对命令输入不做任何其他处理。
 
 --parseopt 的选项
 ~~~~~~~~~~~~~~
@@ -67,7 +67,7 @@ Many Git porcelainish commands take a mixture of flags (i.e. parameters that beg
 	如果用户没有提供参数，则使用 `<参数>` 代替。
 
 --prefix <参数>::
-	就像从工作树的 `<参数>` 子目录调用 'git rev-parse'一样。 任何相对文件名都会被解析为以 `<参数>` 为前缀，并以这种形式打印。
+	就像从工作区的 `<参数>` 子目录调用 'git rev-parse'一样。 任何相对文件名都会被解析为以 `<参数>` 为前缀，并以这种形式打印。
 +
 这可用于转换在子目录中运行的命令的参数，以便在移动到仓库顶层后仍可使用。 例如：
 +
@@ -81,7 +81,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 --verify::
 	验证是否正好提供了一个参数，并且该参数可以转化为原始的 20 字节 SHA-1 用于访问对象数据库。如果可以，则将其输出到标准输出；否则，出错。
 +
-如果您想确保输出结果确实命名了对象数据库中的对象，并且/或者可以用作您需要的特定类型的对象，您可以在参数中添加 `^{type}` 剥离运算符。 例如，`git rev-parse "$VAR^{commit}"` 将确保 `$VAR` 命名的现有对象是一个类似提交的对象（即一个提交，或一个指向提交的注释标记）。 要确保 `$VAR` 命名的是任何类型的现有对象，可以使用 `git rev-parse "$VAR^{object}"。
+如果您想确保输出结果确实命名了对象数据库中的对象，并且/或者可以用作您需要的特定类型的对象，您可以在参数中添加 `^{type}` 剥离运算符。 例如，`git rev-parse "$VAR^{commit}"` 将确保 `$VAR` 命名的现有对象是一个类似提交的对象（即一个提交，或一个指向提交的注释标签）。 要确保 `$VAR` 命名的是任何类型的现有对象，可以使用 `git rev-parse "$VAR^{object}"。
 +
 请注意，如果要验证来自不可信来源的名称，最好使用 `--end-of-options`，以免名称参数被误认为其他选项。
 
@@ -92,7 +92,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 --sq::
 	通常情况下，每个标志和参数的输出为一行。 该选项使输出成为单行，并适当加引号供 shell 使用。 当你希望你的参数包含空格和换行符时（例如在使用 pickaxe `-S` 和 'git diff-{asterisk}'时），这个选项很有用。与 `--sq-quote` 选项相反，命令输入仍按常规解释。
 
---short[=<length>]::
+--short[=length]::
 	与 `--verify` 模式相同，但会将对象名称缩短为至少包含 `长度` 字符的唯一前缀。最小长度为 4，默认值为配置变量 `core.abbrev` 的有效值（参见 linkgit:git-config[1]）。
 
 --not::
@@ -105,7 +105,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 	通常情况下，对象名称以 SHA-1 形式输出（可能带有 '{caret}' 前缀）；该选项使其输出形式尽可能接近原始输入。
 
 --symbolic-full-name::
-	这与 --symbolic 类似，但它会省略非引用输入（即分支或标记名称；或更明确的消歧义 "heads/master" 形式，当你想命名 "master" 分支时，却有一个不幸命名为 "master" 的标记），而显示为完整的引用名称（例如 "refs/heads/master"）。
+	这与 --symbolic 类似，但它会省略非引用输入（即分支或标签名称；或更明确的消歧义 "heads/master" 形式，当你想命名 "master" 分支时，却有一个不幸命名为 "master" 的标签），而显示为完整的引用名称（例如 "refs/heads/master"）。
 
 --output-object-format=(sha1|sha256|storage)::
 
@@ -126,11 +126,11 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 --branches[=<模式>]::
 --tags[=<模式>]::
 --remotes[=<模式>]::
-	分别显示所有分支、标记或远程跟踪分支（即分别在 `refs/heads`、`refs/tags` 或 `refs/remotes`中找到的引用）。
+	分别显示所有分支、标签或远程跟踪分支（即分别在 `refs/heads`、`refs/tags` 或 `refs/remotes`中找到的引用）。
 +
 如果给定了 `pattern`, 则只显示与给定 shell glob 匹配的引用。 如果模式不包含 globing 字符（ `?`、 `*` 或 `[` ），则通过添加 `/*` 将其转换为前缀匹配。
 
---glob=<pattern>::
+--glob=pattern::
 	显示与 shell glob 模式 `模式` 匹配的所有引用。如果模式不以 `refs/` 开头，则会自动预输入。 如果模式不包含 globing 字符（ `?` 、 `*` 或 `[` ），则会通过添加 `/*` 将其转换为前缀匹配。
 
 --exclude=<通配符模式>::
@@ -151,14 +151,14 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 	列出仓库本地的 GIT_* 环境变量（例如 GIT_DIR 或 GIT_WORK_TREE，但不包括 GIT_EDITOR）。 只列出变量名，不列出变量值，即使变量已被设置。
 
 --path-format=(absolute|relative)::
-	控制某些其他选项的行为。如果指定为绝对路径，这些选项打印的路径将是绝对和规范的。如果指定为相对路径，路径将相对于当前工作目录（如果可能）。 默认情况下，路径将与选项相关。
+	控制某些其他选项的行为。如果指定为绝对路径，这些选项打印的路径将是绝对和规范的。如果指定为相对路径，路径将相对于当前工作区（如果可能）。 默认情况下，路径将与选项相关。
 +
 该选项可以多次指定，并且只影响命令行中该选项后面的参数，要么影响到命令行的末尾，要么影响到该选项的下一个实例。
 
 以下选项会被 `--path-format` 修改：
 
 --git-dir::
-	如果已定义，则显示 `$GIT_DIR`。否则显示 .git 目录的路径。如果是相对路径，则显示当前工作目录的相对路径。
+	如果已定义，则显示 `$GIT_DIR`。否则显示 .git 目录的路径。如果是相对路径，则显示当前工作区的相对路径。
 +
 如果未定义 `$GIT_DIR`，且未检测到当前目录位于 Git 仓库或工作区中，则向标准错误流打印一条信息，并以非零状态退出。
 
@@ -166,13 +166,13 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 	如果定义了 `$GIT_COMMON_DIR`，则显示 `$GIT_COMMON_DIR` ，否则显示 `$GIT_DIR`。
 
 --resolve-git-dir <路径>::
-	检查 <路径> 是否为有效的版本库或指向有效仓库的 gitfile，并打印仓库的位置。 如果 <路径> 是 gitfile，则打印指向真实仓库的解析路径。
+	检查 <路径> 是否为有效的仓库或指向有效仓库的 gitfile，并打印仓库的位置。 如果 <路径> 是 gitfile，则打印指向真实仓库的解析路径。
 
 --git-path <路径>::
 	解析 "$GIT_DIR/<路径>"，并考虑其他路径重定位变量，如 $GIT_OBJECT_DIRECTORY、$GIT_INDEX_FILE...。例如，如果 $GIT_OBJECT_DIRECTORY 设置为 /foo/bar，那么 "git rev-parse --git-path objects/abc" 就会返回 /foo/bar/abc。
 
 --show-toplevel::
-	显示工作树顶层目录的路径（默认为绝对路径）。如果没有工作区，则会报错。
+	显示工作区顶层目录的路径（默认为绝对路径）。如果没有工作区，则会报错。
 
 --show-superproject-working-tree::
 	显示使用当前仓库作为子模块的父项目工作区（如果存在）根目录的绝对路径。 如果当前仓库未被任何项目用作子模块，则不输出任何内容。
@@ -186,10 +186,10 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 	类似于 `--git-dir`，但其输出始终是规范化的绝对路径。
 
 --is-inside-git-dir::
-	当当前工作目录低于仓库目录时，打印 "true"，否则打印 "false"。
+	当当前工作区低于仓库目录时，打印 "true"，否则打印 "false"。
 
 --is-inside-work-tree::
-	当当前工作目录位于仓库工作区内时，打印 "true"，否则打印 "false"。
+	当当前工作区位于仓库工作区内时，打印 "true"，否则打印 "false"。
 
 --is-bare-repository::
 	当仓库为裸仓库时，打印 "true"，否则打印 "false"。
@@ -204,7 +204,7 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 	从子目录调用命令时，显示当前目录相对于顶层目录的路径。
 
 --show-object-format[=(storage|input|output|compat)]::
-	Show the object format (hash algorithm) used for the repository for storage inside the `.git` directory, input, output, or compatibility. For input, multiple algorithms may be printed, space-separated. If `compat` is requested and no compatibility algorithm is enabled, prints an empty line. If not specified, the default is "storage".
+	显示用于存储在 `.git` 目录内、输入或输出的仓库的对象格式（散列算法）。对于输入，可打印多种算法，以空格分隔。 如果未指定，默认为 “存储”。
 
 --show-ref-format::
 	显示仓库使用的参考存储格式。
@@ -213,15 +213,15 @@ eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
 其他选项
 ~~~~
 
---since=<datestring>::
---after=<datestring>::
+--since=datestring::
+--after=datestring::
 	解析日期字符串，并为 'git rev-list' 输出相应的 --max-age= 参数。
 
---until=<datestring>::
---before=<datestring>::
+--until=datestring::
+--before=datestring::
 	解析日期字符串，并为 'git rev-list' 输出相应的 --min-age= 参数。
 
-<arg>...::
+<多个参数>...::
 	要解析的标志和参数。
 
 

@@ -1,0 +1,44 @@
+`branch.autoSetupMerge`::
+	告诉 `git branch`、`git switch` 和 `git checkout` 在创建新分支时进行相应设置，使 linkgit:git-pull[1] 能够从起始点分支正确地执行合并。注意，即使未设置该选项，也可以通过 `--track` 和 `--no-track` 选项按分支选择此行为。该选项默认值为 `true`。有效设置为：
+`false`;; 不进行自动设置
+`true`;; 当起始点是远程跟踪分支时自动进行设置
+`always`;; 当起始点是本地分支或远程跟踪分支时自动进行设置
+`inherit`;; 如果起始点具有跟踪配置，则将其复制到新分支
+`simple`;; 仅当起始点是远程跟踪分支且新分支与远程分支同名时才自动进行设置。
+
+`branch.autoSetupRebase`::
+	当使用 `git branch`、`git switch` 或 `git checkout` 创建一个跟踪另一分支的新分支时，该变量告诉 Git 将 pull 配置为使用 rebase 而不是 merge（见 `branch.<name>.rebase`）。有效设置为：
+`never`;; 绝不会自动将 rebase 设为 true。
+`local`;; 对于跟踪其他本地分支的分支，会将 rebase 设为 true。
+`remote`;; 对于跟踪远程跟踪分支的分支，会将 rebase 设为 true。
+`always`;; 对于所有跟踪分支，都会将 rebase 设为 true。
+
++
+关于如何设置一个分支去跟踪另一个分支，详见 `branch.autoSetupMerge`。该选项默认值为 `never`。
+
+`branch.sort`::
+	该变量控制 linkgit:git-branch[1] 显示分支时的排序顺序。若未提供 `--sort=<value>` 选项，则使用此变量的值作为默认值。有效取值可参见 linkgit:git-for-each-ref[1] 的字段名。
+
+`branch.<name>.remote`::
+	当位于分支 _<name>_ 上时，它告诉 `git fetch` 和 `git push` 应从哪个远程获取或向哪个远程推送。用于推送的远程可通过 `remote.pushDefault`（针对所有分支）覆盖；当前分支用于推送的远程还可进一步由 `branch.<name>.pushRemote` 覆盖。如果未配置远程，或者当前不在任何分支上且仓库中定义了多个远程，则 fetch 默认使用 `origin`，push 默认使用 `remote.pushDefault`。另外，`.`（句点）表示当前本地仓库（点仓库），见下文 `branch.<name>.merge` 的最后说明。
+
+`branch.<name>.pushRemote`::
+	当位于分支 _<name>_ 上时，它会在推送时覆盖 `branch.<name>.remote`。它也会在从分支 _<name>_ 推送时覆盖 `remote.pushDefault`。当你从一个地方拉取（例如上游仓库）而向另一个地方推送（例如自己的发布仓库）时，可以使用 `remote.pushDefault` 指定所有分支默认推送到哪个远程，再用此选项为特定分支覆盖该设置。
+
+`branch.<name>.merge`::
+	与 `branch.<name>.remote` 一起为给定分支定义其上游分支。它告诉 `git fetch`/`git pull`/`git rebase` 应合并哪个分支，也可能影响 `git push`（见 `push.default`）。当位于分支 _<name>_ 上时，它告诉 `git fetch` 哪个默认 refspec 应在 `FETCH_HEAD` 中标记为待合并。该值按 refspec 的远程部分处理，且必须匹配从 `branch.<name>.remote` 指定远程获取到的某个 ref。`git pull`（它会先调用 `git fetch`）会使用该合并信息查找默认要合并的分支。没有此选项时，`git pull` 默认合并获取到的第一个 refspec。指定多个值可得到 octopus merge。若你希望把 `git pull` 设置为从本地仓库中的另一个分支合并到 _<name>_，可以让 `branch.<name>.merge` 指向所需分支，并将 `branch.<name>.remote` 设为相对路径 `.`（句点）。
+
+分支 .<名字>.合并操作选项::
+	为合并到分支 _<name>_ 设置默认选项。语法和支持的选项与 linkgit:git-merge[1] 相同，但当前不支持包含空白字符的选项值。
+
+`branch.<name>.rebase`::
+	为 true 时，在执行 `git pull` 时会将分支 _<name>_ rebase 到已获取分支之上，而不是从默认远程合并默认分支。若要进行非分支特定设置，参见 `pull.rebase`。
++
+当值为 `merges`（或简写为 `m`）时，会向 `git rebase` 传递 `--rebase-merges` 选项，从而将本地合并提交也包含在 rebase 中（详见 linkgit:git-rebase[1]）。
++
+当值为 `interactive`（或简写为 `i`）时，rebase 将以交互模式运行。
++
+*注意*：这可能是一个危险操作；除非你理解其影响，否则不要使用（详见 linkgit:git-rebase[1]）。
+
+`branch.<name>.description`::
+	分支描述，可用 `git branch --edit-description` 编辑。分支描述会自动添加到 `format-patch` 的封面信或 `request-pull` 的摘要中。

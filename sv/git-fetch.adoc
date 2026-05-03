@@ -3,13 +3,13 @@ git-fetch(1)
 
 NAMN
 ----
-git-fetch - Ladda ner objekt och referenser från ett annat förvar
+git-fetch - Hämta (ladda ner) objekt och referenser från ett annat kodförråd
 
 
 SYNOPSIS
 --------
 [synopsis]
-git fetch [<opflaggortions>] [<kodförråd> [<refspec>...]]
+git fetch [<flaggor>] [<kodförråd> [<refspec>...]]
 git fetch [<flaggor>] <grupp>
 git fetch --multiple [<flaggor>] [(<kodförråd>|<grupp>)...]
 git fetch --all [<flaggor>]
@@ -19,7 +19,7 @@ BESKRIVNING
 -----------
 Hämta grenar och/eller taggar (gemensamt kallade "referenser") från ett eller flera andra kodförråd, tillsammans med de objekt som krävs för att slutföra deras historik. Fjärrspårningsgrenar uppdateras (se beskrivningen av _<refspec>_ nedan för sätt att kontrollera detta beteende).
 
-Som standard, hämtas även alla taggar som pekar in i de historiker som hämtas; effekten är att hämta taggar som pekar på grenar som du är intresserad av. Detta standardbeteende kan ändras genom att använda alternativen `--tags` eller `--no-tags` eller genom att konfigurera `remote.<namn>.tagOpt`. Genom att använda en referensspecifikation som hämtar taggar explicit kan du också hämta taggar som inte pekar in på grenar som du är intresserad av.
+Som standard hämtas även alla taggar som pekar in i de historiker som hämtas; effekten är att hämta taggar som pekar på grenar som du är intresserad av. Detta standardbeteende kan ändras genom att använda alternativen `--tags` eller `--no-tags` eller genom att konfigurera `remote.<namn>.tagOpt`. Genom att använda en refspec som hämtar taggar explicit kan du också hämta taggar som inte pekar in i grenar som du är intresserad av.
 
 `git fetch` kan hämta från antingen ett enda namngivet kodförråd eller URL, eller från flera kodförråd samtidigt om _<grupp>_ anges och det finns en `remotes.<grupp>`-post i konfigurationsfilen. (Se linkgit:git-config[1]).
 
@@ -42,7 +42,7 @@ include::urls-remotes.adoc[]
 KONFIGURERADE FJÄRSPÅRNINGSGRENAR
 ---------------------------------
 
-Du interagerar ofta med samma fjärrkodförråd genom att regelbundet och upprepade gånger hämta data från det. För att hålla koll på förloppet för ett sådant fjärrkodförråd låter `git fetch` dig konfigurera konfigurationsvariabler `remote.<kodförråd>.fetch`.
+Man interagerar ofta med samma fjärrkodförråd genom att regelbundet och upprepade gånger hämta data från det. För att hålla koll på förloppet för ett sådant fjärrkodförråd gör `git fetch` det möjligt att konfigurera konfigurationsvariablerna `remote.<kodförråd>.fetch`.
 
 Vanligtvis kan en sådan variabel se ut så här:
 
@@ -53,9 +53,9 @@ Vanligtvis kan en sådan variabel se ut så här:
 
 Denna konfiguration används på två sätt:
 
-* När `git fetch` körs utan att ange vilka grenar och/eller taggar som ska hämtas på kommandoraden, t.ex. `git fetch origin` eller `git fetch`, används `remote.<kodförråd>.fetch`-värden som referensspecifikationer– de anger vilka referenser som ska hämtas och vilka lokala referenser som ska uppdateras. Exemplet ovan hämtar alla grenar som finns i `origin` (dvs. alla referenser som matchar vänster sida av värdet `refs/heads/*`) och uppdaterar motsvarande fjärrspårningsgrenar i `refs/remotes/origin/*`-hierarkin.
+* När `git fetch` körs utan att ange vilka grenar och/eller taggar som ska hämtas på kommandoraden, t.ex. `git fetch origin` eller `git fetch`, används `remote.<kodförråd>.fetch`-värden som refspecer – de anger vilka referenser som ska hämtas och vilka lokala referenser som ska uppdateras. Exemplet ovan hämtar alla grenar som finns i `origin` (d.v.s. alla referenser som matchar vänster sida av värdet `refs/heads/*`) och uppdaterar motsvarande fjärrspårade grenar i `refs/remotes/origin/*`-hierarkin.
 
-* När `git fetch` körs med explicita grenar och/eller taggar för att hämta på kommandoraden, t.ex. `git fetch origin master`, bestämmer _<refspec>er_ som anges på kommandoraden vad som ska hämtas (t.ex. `master` i exemplet, vilket är en förkortning för `master:`, vilket i sin tur betyder "hämta `master`-grenen men jag säger inte explicit vilken fjärrspårningsgren som ska uppdateras med den från kommandoraden"), och exempelkommandot hämtar _endast_ `master`-grenen. Värdena för `remote.<kodförråd>.fetch` bestämmer vilken fjärrspårningsgren, om någon, som uppdateras. När de används på detta sätt har `remote.<kodförråd>.fetch`-värdena ingen effekt på att bestämma _vad_ som hämtas (dvs. värdena används inte som referensspecifikationer när kommandoraden listar referensspecifikationer); De används bara för att bestämma _var_ de hämtade referenserna lagras genom att fungera som en mappning.
+* När `git fetch` körs med explicita grenar och/eller taggar för att hämta på kommandoraden, t.ex. `git fetch origin master`, bestämmer _<refspec>er_ som anges på kommandoraden vad som ska hämtas (t.ex. `master` i exemplet, vilket är en förkortning för `master:`, vilket i sin tur betyder "hämta `master`-grenen men jag anger inte explicit vilken fjärrspårad gren som ska uppdateras med den från kommandoraden"), och exempelkommandot hämtar _endast_ `master`-grenen. Värdena för `remote.<kodförråd>.fetch` bestämmer vilken fjärrspårad gren, om någon, som uppdateras. När de används på detta sätt har `remote.<kodförråd>.fetch`-värdena ingen effekt på att bestämma _vad_ som hämtas (d.v.s. värdena används inte som refspecer när kommandoraden listar refspecer); de används bara för att bestämma _var_ de hämtade referenserna lagras genom att fungera som en mappning.
 
 Den senare användningen av `remote.<kodförråd>.fetch`-värdena kan åsidosättas genom att ange parametern(erna) `--refmap=<refspec>` på kommandoraden.
 
@@ -78,13 +78,13 @@ $ git remote prune <namn>
 
 För att rensa referenser som en del av ditt vanliga arbetsflöde utan att behöva komma ihåg att köra det, sätt `fetch.prune` globalt, eller `remote.<namn>.prune` per-remote i konfigurationen. Se linkgit:git-config[1].
 
-Det är här det blir knepigt och mer specifikt. Beskärningsfunktionen bryr sig egentligen inte om grenar, istället beskär den lokala <--> fjärrreferenser som en funktion av fjärrens referensspecifikation (se `<refspec>` och <<CRTB,KONFIGURERADE FJÄRSPÅRNINGSFILIER>> ovan).
+Det är här det blir knepigt och mer specifikt. Beskärningsfunktionen bryr sig egentligen inte om grenar; i stället beskär den lokala och fjärrreferenser utifrån fjärrens refspec (se `<refspec>` och <<CRTB,KONFIGURERADE FJÄRRSPÅRADE GRENAR>> ovan).
 
-Om därför referensspecifikationen för fjärren inkluderar t.ex. `refs/tags/*:refs/tags/*`, eller om du manuellt kör t.ex. `git fetch --prune <namn> "refs/tags/*:refs/tags/*"`, kommer det inte att vara inaktuella grenar för fjärrspårning som tas bort, utan alla lokala taggar som inte finns på fjärren.
+Om refspecen för fjärren till exempel inkluderar `refs/tags/*:refs/tags/*`, eller om du manuellt kör `git fetch --prune <namn> "refs/tags/*:refs/tags/*"`, kommer det inte att vara inaktuella fjärrspårade grenar som tas bort, utan alla lokala taggar som inte finns på fjärren.
 
-Det här kanske inte är vad du förväntar dig, d.v.s. du vill rensa fjärren _<namn>_, men också explicit hämta taggar från den, så när du hämtar från den raderar du alla dina lokala taggar, varav de flesta kanske inte kom från fjärren _<namn>_ från första början.
+Det här är kanske inte vad du förväntar dig: du vill rensa fjärren _<namn>_, men också uttryckligen hämta taggar från den. Då kan hämtningen radera alla dina lokala taggar, varav de flesta kanske inte kom från fjärren _<namn>_ från början.
 
-Så var försiktig när du använder detta med en referensspecifikation som `refs/tags/*:refs/tags/*`, eller någon annan referensspecifikation som kan mappa referenser från flera fjärrenheter till samma lokala namnrymd.
+Så var försiktig när du använder detta med en refspec som `refs/tags/*:refs/tags/*`, eller någon annan refspec som kan mappa referenser från flera fjärrar till samma lokala namnrymd.
 
 Eftersom det är vanligt att hålla sig uppdaterad med både grenar och taggar på fjärren kan alternativet `--prune-tags` anges tillsammans med `--prune` för att rensa bort lokala taggar som inte finns på fjärren och tvångsuppdatera de taggar som skiljer sig åt. Taggrensning kan också aktiveras med `fetch.pruneTags` eller `remote.<namn>.pruneTags` i konfigurationen. Se linkgit:git-config[1].
 
@@ -100,7 +100,7 @@ Anledningen till att det inte ger felar-ut när det anges utan `--prune` eller d
 
 Det är rimligt att t.ex. konfigurera `fetch.pruneTags=true` i `~/.gitconfig` så att taggar rensas varje gång `git fetch --prune` körs, utan att göra varje anrop av `git fetch` utan `--prune` till ett fel.
 
-Att rensa taggar med `--prune-tags` fungerar också när man hämtar en URL istället för en namngiven fjärr. Dessa kommer att rensa alla taggar som inte hittas på ursprungsadressen:
+Att rensa taggar med `--prune-tags` fungerar också när man hämtar en URL i stället för en namngiven fjärr. Dessa kommer att rensa alla taggar som inte hittas på ursprungsadressen:
 
 ------------------------------------------------
 $ git fetch origin --prune --prune-tags
@@ -120,7 +120,7 @@ Statusen för hämtningen visas i tabellform, där varje rad representerar statu
  <flagga> <sammanfattning> <från> -> <till> [<orsak>]
 -------------------------------
 
-När `--porcelain` används, är utdataformatet avsett att vara maskinläsbart. Till skillnad från de mänskligt läsbara utdataformaten skrivs det således ut med standardut istället för standardfel. Varje rad har formatet:
+När `--porcelain` används, är utdataformatet avsett att vara maskinläsbart. Till skillnad från de mänskligt läsbara utdataformaten skrivs det således ut med standardutdata i stället för standardfel. Varje rad har formatet:
 
 -------------------------------
 <flagga> <gammalt-objekt-id> <nytt-objekt-id> <lokal-referens>
@@ -128,11 +128,11 @@ När `--porcelain` används, är utdataformatet avsett att vara maskinläsbart. 
 
 Status för uppdaterade referenser visas endast om alternativet `--verbose` används.
 
-I kompakt utdataläge, specificerat med konfigurationsvariabeln fetch.output, om antingen hela _<från>_ eller _<till>_ hittas i den andra strängen, kommer den att ersättas med `*` i den andra strängen. Till exempel blir `master -> origin/master` `master -> origin/*`.
+I kompakt utdataläge, som anges med konfigurationsvariabeln fetch.output, om antingen hela _<från>_ eller _<till>_ hittas i den andra strängen, kommer den att ersättas med `*` i den andra strängen. Till exempel blir `master -> origin/master` `master -> origin/*`.
 
 flagga::
 	Ett enda tecken som anger referensens status:
-(mellanslag);; för en lyckad hämtad snabbspolning framåt;
+(mellanslag);; för en lyckad hämtad snabbspolning;
 `+`;; för en lyckad påtvingad uppdatering;
 `-`;; för en framgångsrikt beskuren ref;
 `t`;; för en lyckad tagguppdatering;
@@ -150,7 +150,7 @@ till::
 	Namnet på den lokala referensen som uppdateras, minus dess prefix `refs/<typ>/`.
 
 skäl::
-	En människoläsbar förklaring. Om referenserna har hämtats, behövs ingen förklaring. För en misslyckad referens, beskrivs orsaken till misslyckandet.
+	En människoläsbar förklaring. Om referenserna har hämtats behövs ingen förklaring. För en misslyckad referens beskrivs orsaken till misslyckandet.
 
 EXEMPEL
 -------
@@ -161,7 +161,7 @@ EXEMPEL
 $ git fetch origin
 ------------------------------------------------
 +
-Kommandot ovan kopierar alla grenar från namnrymden `refs/heads/` och lagrar dem i den lokala namnrymden `refs/remotes/origin/`, såvida inte alternativet `remote.<kodförråd>.fetch` används för att ange en referensspecifikation som inte är standard.
+Kommandot ovan kopierar alla grenar från namnrymden `refs/heads/` och lagrar dem i den lokala namnrymden `refs/remotes/origin/`, såvida inte alternativet `remote.<kodförråd>.fetch` används för att ange en refspec som inte är standard.
 
 * Använda referensspecifikationer explicit:
 +
@@ -169,18 +169,18 @@ Kommandot ovan kopierar alla grenar från namnrymden `refs/heads/` och lagrar de
 $ git fetch origin +seen:seen maint:tmp
 ------------------------------------------------
 +
-Detta uppdaterar (eller skapar, vid behov) grenarna `sedd` och `tmp` i det lokala arkivet genom att hämta från grenarna (respektive) `sedd` och `maint` från fjärrarkivet.
+Kommandot uppdaterar (eller skapar vid behov) grenarna `seen` och `tmp` i det lokala kodförrådet genom att hämta från grenarna `seen` respektive `maint` i fjärrkodförrådet.
 +
-Grenen `sedd` kommer att uppdateras även om den inte snabbspolar framåt, eftersom den har ett plustecken som prefix; `tmp` kommer inte att göra det.
+Grenen `seen` uppdateras även om den inte snabbspolar framåt, eftersom den har ett plustecken som prefix; `tmp` gör det inte.
 
-* Titta på en fjärrens gren, utan att konfigurera fjärren i ditt lokala arkiv:
+* Titta på en gren i ett fjärrkodförråd utan att konfigurera fjärren i ditt lokala kodförråd:
 +
 ------------------------------------------------
 $ git fetch git://git.kernel.org/pub/scm/git/git.git maint
 $ git log FETCH_HEAD
 ------------------------------------------------
 +
-Det första kommandot hämtar grenen `maint` från arkivet på `git://git.kernel.org/pub/scm/git/git.git` och det andra kommandot använder `FETCH_HEAD` för att undersöka grenen med linkgit:git-log[1]. De hämtade objekten kommer så småningom att tas bort av gits inbyggda housekeeping (se linkgit:git-gc[1]).
+Det första kommandot hämtar grenen `maint` från kodförrådet på `git://git.kernel.org/pub/scm/git/git.git` och det andra kommandot använder `FETCH_HEAD` för att undersöka grenen med linkgit:git-log[1]. De hämtade objekten kommer så småningom att tas bort av gits inbyggda housekeeping (se linkgit:git-gc[1]).
 
 include::transfer-data-leaks.adoc[]
 

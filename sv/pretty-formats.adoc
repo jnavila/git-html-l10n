@@ -1,81 +1,87 @@
-VACKRA FORMAT
--------------
+VISNINGSFORMAT
+--------------
 
-Om incheckningen är en sammanslagning, och om vackra-formatet inte är `oneline`, `email` eller `raw`, infogas en extra rad före raden `Author:`. Denna rad börjar med "Merge:" och hasherna för föräldraincheckningar skrivs ut, separerade med mellanslag. Observera att de listade incheckningar inte nödvändigtvis är listan över de 'direkta' föräldraincheckningarna om du har begränsat din historikvy: till exempel om du bara är intresserad av ändringar relaterade till en viss katalog eller fil.
+Om incheckningen är en sammanslagning, och om visningsformatet inte är `oneline`, `email` eller `raw`, infogas en extra rad före raden `Author:`. Denna rad börjar med "Merge:" och hasherna för föräldraincheckningar skrivs ut, separerade med mellanslag. Observera att de listade incheckningar inte nödvändigtvis är listan över de 'direkta' föräldraincheckningarna om du har begränsat din historikvy: till exempel om du bara är intresserad av ändringar relaterade till en viss katalog eller fil.
 
 Det finns flera inbyggda format, och du kan definiera ytterligare format genom att sätta ett pretty.<namn>-konfigurationsalternativ till antingen ett annat formatnamn eller en `format:`-sträng, enligt beskrivningen nedan (se linkgit:git-config[1]). Här är detaljerna för de inbyggda formaten:
 
-* `oneline`
-
-	  <hash> <titelrad>
+`oneline`::
 +
-Detta är utformat för att vara så kompakt som möjligt.
-
-* `short`
-
-	  commit <hash>
-	  Author: <författare>
-
-	      <titelrad>
-
-* `medium`
-
-	  commit <hash>
-	  Author: <författare>
-	  Date:   <författar-datum>
-
-	      <titelrad>
-
-	      <fullt-inchecknings-meddelande>
-
-* `full`
-
-	  commit <hash>
-	  Author: <författare>
-	  Commit: <incheckare>
-
-	      <titelrad>
-
-	      <fullt-inchecknings-meddelande>
-
-* `fuller`
-
-	  commit <hash>
-	  Author:     <författare>
-	  AuthorDate: <författar-datum>
-	  Commit:     <incheckare>
-	  CommitDate: <incheckare-datum>
-
-	       <titelrad>
-
-	       <fullt-inchecknings-meddelande>
-
-* `reference`
-
-	  <förkortad-hash> (<titelrad>, <kort-författar-datum>)
+[synopsis]
+--
+<hash> <title-line>
+--
 +
-Detta format används för att referera till en annan incheckning i ett inchecknings-meddelande och är detsamma som ++--pretty=\'format:%C(auto)%h (%s, %ad)'++. Som standard formateras datumet med `--date=short` om inte ett annat `--date`-alternativ uttryckligen anges. Precis som med alla `format:` med formatplatshållare påverkas inte dess utdata av andra alternativ som `--decorate` och `--walk-reflogs`.
+Det är utformat för att vara så kompakt som möjligt.
 
-* `email`
-
-	  From <hash> <datum>
-	  From: <författare>
-	  Date: <författare-datum>
-	  Subject: [PATCH] <titelrad>
-
-	  <fullt-inchecknings-meddelande>
-
-* `mboxrd`
+`short`::
 +
+[synopsis]
+--
+commit <hash> Author: <author>
+
+    <titelrad>
+--
+
+`medium`::
++
+[synopsis]
+--
+commit <hash> Author: <author> Date: <author-date>
+
+    <titelrad>
+
+    <fullt-incheckningsmeddelande>
+--
+
+`full`::
++
+[synopsis]
+--
+commit <hash> Author: <author> Commit: <committer>
+
+    <titelrad>
+
+    <fullt-incheckningsmeddelande>
+--
+
+`fuller`::
++
+[synopsis]
+--
+commit <hash> Author: <författare> AuthorDate: <författar-datum> Commit: <incheckare> CommitDate: <inchecknings-datum>
+
+     <title-line>
+
+     <full-commit-message>
+--
+
+`reference`::
++
+[synopsis]
+--
+<förkortad-hash> (<titelrad>, <kort-författar-datum>)
+--
++
+Formatet används för att referera till en annan incheckning i ett incheckningsmeddelande och är detsamma som ++--pretty=\'format:%C(auto)%h (%s, %ad)'++. Som standard formateras datumet med `--date=short` om inte ett annat `--date`-alternativ uttryckligen anges. Precis som med alla `format:` med formatplatshållare påverkas inte dess utdata av andra alternativ som `--decorate` och `--walk-reflogs`.
+
+`email`::
++
+[synopsis]
+--
+From <hash> <datum> From: <författare> Date: <författar-datum> Subject: [PATCH] <titelrad>
+
+<fullt-incheckningsmeddelande>
+--
+
+`mboxrd`::
 Som `email`, men rader i inchecknings-meddelandet som börjar med "From " (föregångna av noll eller fler ">") citeras med ">" så att de inte förväxlas med att starta en ny incheckning.
 
-* `raw`
-+
-`raw`-formatet visar hela incheckningen exakt så som den lagras i inchecknings-objektet. Det är värt att notera att hasherna visas i sin helhet, oavsett om `--abbrev` eller `--no-abbrev` används, och informationen i `parents` visar de verkliga föräldra-incheckningen, utan att ta hänsyn till grafts eller historikförenkling. Observera att detta format påverkar hur incheckningar visas, men inte hur diffen visas, t.ex. med `git log --raw`. För att få fullständiga objektnamn i ett rått diff-format, använd `--no-abbrev`.
+`raw`::
+`raw`-formatet visar hela incheckningen exakt så som den lagras i incheckningsobjektet. Det är värt att notera att hasherna visas i sin helhet, oavsett om `--abbrev` eller `--no-abbrev` används, och informationen i `parents` visar de verkliga föräldra-incheckningen, utan att ta hänsyn till grafts eller historikförenkling. Observera att detta format påverkar hur incheckningar visas, men inte hur diffen visas, t.ex. med `git log --raw`. För att få fullständiga objektnamn i ett rått diff-format, använd `--no-abbrev`.
 
-* `format:<formatsträng>`
-+
-Formatet `format:<format-sträng>` låter dig ange vilken information du vill visa. Det fungerar lite som printf-formatet, med det anmärkningsvärda undantaget att du får en nyrad med `%n` istället för `\n`.
+`format:<formatsträng>`::
+Formatet `format:<format-sträng>` låter dig ange vilken information du vill visa. Det fungerar lite som printf-formatet, med det anmärkningsvärda undantaget att du får en nyrad med `%n` i stället för `\n`.
 +
 T.ex., 'format:"Författaren till %h var %an, %ar%nTiteln var >>%s<<%n"' skulle visa något liknande:
 +
@@ -88,16 +94,21 @@ The title was >>t4119: test autocomputing -p<n> for traditional diff input.<<
 Platshållarna är:
 
 - Platshållare som expanderar till ett enda bokstavstecken:
++
+--
 ++%n++:: newline
 ++%%++:: en rå ++%++
 ++%x00++:: ++%x++ följt av två hexadecimala siffror ersätts med en byte med de hexadecimala siffrornas värde (vi kommer att kalla detta "bokstavlig formateringskod" i resten av detta dokument).
+--
 
 - Platshållare som påverkar formateringen av senare platshållare:
++
+--
 ++%Cred++:: byt färg till röd
 ++%Cgreen++:: byt färg till grönt
 ++%Cblue++:: byt färg till blå
 ++%Creset++:: återställ färg
-++%C(++_<spec>_++)++:: färgspecifikation, som beskrivs under Värden i avsnittet "KONFIGURATIONSFIL" i linkgit:git-config[1]. Som standard, visas färger endast när de är aktiverade för loggutdata (av `color.diff`, `color.ui` eller `--color`, och med respekt för `auto`-inställningarna för den förra om vi går till en terminal). ++%C(auto,++_<spec>_++)++ accepteras som en historisk synonym för standardvärdet (t.ex. ++%C(auto,red)++). Att ange ++%C(always,++_<spec>_++)++ kommer att visa färgerna även när färg inte är aktiverad på annat sätt (men överväg att bara använda `--color=always` för att aktivera färg för hela utdata, inklusive detta format och allt annat som git kan färga). Enbart `auto` (dvs. ++%C(auto)++) kommer att aktivera automatisk färgning på nästa platshållare tills färgen byts igen.
+++%C(++_<spec>_++)++:: färgspecifikation, som beskrivs under Värden i avsnittet "KONFIGURATIONSFIL" i linkgit:git-config[1]. Som standard visas färger endast när de är aktiverade för loggutdata (av `color.diff`, `color.ui` eller `--color`, och med respekt för `auto`-inställningarna för den förra om vi går till en terminal). ++%C(auto,++_<spec>_++)++ accepteras som en historisk synonym för standardvärdet (t.ex. ++%C(auto,red)++). Att ange ++%C(always,++_<spec>_++)++ kommer att visa färgerna även när färg inte är aktiverad på annat sätt (men överväg att bara använda `--color=always` för att aktivera färg för hela utdata, inklusive detta format och allt annat som git kan färga). Enbart `auto` (d.v.s. ++%C(auto)++) kommer att aktivera automatisk färgning på nästa platshållare tills färgen byts igen.
 ++%m++:: vänster (`<`), höger (`>`) eller gränsmärke (`-`)
 ++%w(++`[<w>[,<i1>[,<i2>]]]`++)++:: växla radbrytning, som alternativet `-w` i linkgit:git-shortlog[1].
 ++%<(++`<n>[,(trunc|ltrunc|mtrunc)]`++)++:: make the next placeholder take at least N column widths, padding spaces on the right if necessary. Optionally truncate (with ellipsis `..`) at the left (ltrunc) `..ft`, the middle (mtrunc) `mi..le`, or the end (trunc) `rig..`, if the output is longer than _<n>_ columns. Note 1: that truncating only works correctly with _<n>_ >= 2. Note 2: spaces around the _<n>_ and _<m>_ (see below) values are optional. Note 3: Emojis and other wide characters will take two display columns, which may over-run column boundaries. Note 4: decomposed character combining marks may be misplaced at padding boundaries.
@@ -108,10 +119,13 @@ Platshållarna är:
 ++%>>|(++_<m>_++)++:: liknande ++%>(++_<n>_++)++, ++%>|(++_<m>_++)++ respektive, förutom att om nästa platshållare tar fler mellanslag än angivet och det finns mellanslag till vänster om den, använd dessa mellanslag
 ++%><(++_<n>_++)++::
 ++%><|(++_<m>_++)++:: liknar ++%<(++_<n>_++)++, ++%<|(++_<m>_++)++ respektive, men utfyllnad på båda sidor (dvs. texten centreras)
+--
 
 - Platshållare som expanderar till information som extraheras från incheckningen:
++
+--
 +%H+:: incheckning hash
-+%h+:: förkortad inchecknings-hash
++%h+:: förkortad incheckningshash
 +%T+:: trädhash
 +%t+:: förkortad trädhash
 +%P+:: förälder-hashkoder
@@ -146,39 +160,39 @@ Platshållarna är:
 +%ch+:: incheckare-datum, mänsklig stil (som alternativet `--date=human` i linkgit:git-rev-list[1])
 +%d+:: referensnamn, som --decorate alternativet i linkgit:git-log[1]
 +%D+:: referensnamn utan " (", ")" omslag.
++%(count)+:: the number of a patch within a patch series. Used only in `--commit-list-format` in `format-patch`
++%(total)+:: the total number of patches in a patch series. Used only in `--commit-list-format` in `format-patch`
 ++%(decorate++`[:<option>,...]`++)++::
 referensnamn med anpassade dekorationer. Strängen `decorate` kan följas av ett kolon och noll eller fler kommaseparerade alternativ. Alternativvärden kan innehålla bokstavliga formateringskoder. Dessa måste användas för kommatecken (`%x2C`) och avslutande parenteser (`%x29`) på grund av deras roll i alternativsyntaxen.
 
-** `prefix=<värde>`: Visas före listan med referensnamn. Standardvärdet är "{nbsp}++(++".
-** `suffix=<värde>`: Visas efter listan med referensnamn. Standardvärdet är "+)+".
-** `separator=<värde>`: Visas mellan referensnamn. Standardvärdet är "+,+{nbsp}".
-** `pointer=<värde>`: Visas mellan HEAD och grenen den pekar på, om någon.
-		      Standardinställningen är "{nbsp}++->++{nbsp}".
-** `tag=<värde>`: Visas före taggnamn. Standardinställningen är "`tag:`{nbsp}".
+`prefix=<värde>`;; Visas före listan med referensnamn. Standard är "{nbsp}++(++".
+`suffix=<värde>`;; Visas efter listan med referensnamn. Standard är "+)+".
+`separator=<värde>`;; Visas mellan referensnamn. Standard är "+,+{nbsp}".
+`pointer=<värde>`;; Shown between HEAD and the branch it points to, if any. Defaults to "{nbsp}->{nbsp}".
+`tag=<value>`;; Shown before tag names. Defaults to "`tag:`{nbsp}".
 
 +
---
 Till exempel, för att skapa dekorationer utan radbrytning eller taggannoteringar, och med mellanslag som avgränsare:
-
-++%(decorate:prefix=,suffix=,tag=,separator= )++
---
+---------------------
+    %(decorate:prefix=,suffix=,tag=,separator= )
+---------------------
 
 ++%(describe++`[:<option>,...]`++)++::
 human-readable name, like linkgit:git-describe[1]; empty string for undescribable commits. The `describe` string may be followed by a colon and zero or more comma-separated options. Descriptions can be inconsistent when tags are added or removed at the same time.
 +
-** `tags[=<bool-value>]`: Istället för att bara överväga kommenterade taggar, överväg även lättviktiga taggar.
-** `abbrev=<nummer>`: Istället för att använda standardantalet hexadecimala siffror (som varierar beroende på antalet objekt i förvaret med standardvärdet 7) för det förkortade objektnamnet, använd <nummer> siffror, eller så många siffror som behövs för att bilda ett unikt objektnamn.
-** `match=<mönster>`: Beakta endast taggar som matchar den givna `glob(7)` _<mönster>_, exklusive prefixet `refs/tags/`.
-** `exclude=<mönster>`: Beakta inte taggar som matchar det angivna `glob(7)` _<mönster>_, exklusive prefixet `refs/tags/`.
+`tags[=<bool-value>]`;; Instead of only considering annotated tags, consider lightweight tags as well.
+`abbrev=<number>`;; Instead of using the default number of hexadecimal digits (which will vary according to the number of objects in the repository with a default of 7) of the abbreviated object name, use _<number>_ digits, or as many digits as needed to form a unique object name.
+`match=<mönster>`;; Only consider tags matching the given `glob(7)` _<pattern>_, excluding the `refs/tags/` prefix.
+`exclude=<mönster>`;; Do not consider tags matching the given `glob(7)` _<pattern>_, excluding the `refs/tags/` prefix.
 
 +%S+:: referensnamnet som anges på kommandoraden genom vilket incheckningen nåddes (som `git log --source`), fungerar bara med `git log`
 +%e+:: kodning
 +%s+:: ämne
 +%f+:: sanerad ämnesrad, lämplig för ett filnamn
 +%b+:: kropp
-+%B+:: rå kropp (oförpackat motiv och kropp)
++%B+:: rå kropp (ej radbruten ämnesrad och kropp)
 ifndef::git-rev-list[]
-+%N+:: inchecknings-anteckningar
++%N+:: incheckningsanteckningar
 endif::git-rev-list[]
 +%GG+:: rått verifieringsmeddelande från GPG för en signerad incheckning
 +%G?+:: visa "G" för en bra (giltig) signatur, "B" för en felaktig signatur, "U" för en bra signatur med okänd giltighetstid, "X" för en bra signatur som har gått ut, "Y" för en bra signatur gjord av en utgången nyckel, "R" för en bra signatur gjord av en återkallad nyckel, "E" om signaturen inte kan kontrolleras (t.ex. saknad nyckel) och "N" för ingen signatur
@@ -195,17 +209,15 @@ endif::git-rev-list[]
 +%gE+:: reflog-identitet e-postadress (respekterar .mailmap, se linkgit:git-shortlog[1] eller linkgit:git-blame[1])
 +%gs+:: reflog ämne
 ++%(trailers++`[:<alternativ>,...]`++)++::
-visa släprad för brödtexten så som de tolkas av linkgit:git-interpret-trailers[1]. Strängen `trailers` kan följas av ett kolon och noll eller fler kommaseparerade alternativ. Om något alternativ anges flera gånger vinner den sista förekomsten.
+visa slutrad för brödtexten så som de tolkas av linkgit:git-interpret-trailers[1]. Strängen `trailers` kan följas av ett kolon och noll eller fler kommaseparerade alternativ. Om något alternativ anges flera gånger vinner den sista förekomsten.
 +
-** `key=<key>`: visar endast släprad med angiven <key>. Matchning sker utan att skiftläges-känsligt och avslutande kolon är valfritt. Om alternativet anges flera gånger visas släprader som matchar någon av nycklarna. Detta alternativ aktiverar automatiskt alternativet `only` så att icke-släprader i släp-blocket döljs. Om det inte önskas kan det inaktiveras med `only=false`. T.ex. visar +%(trailers:key=Reviewed-by)+ trailerrader med nyckeln `Reviewed-by`.
-** `only[=<bool>]`: välj om icke-släprader från trailerblocket ska inkluderas.
-** `separator=<sep>`: anger avgränsaren som infogas mellan släprader. Standardinställningen är ett radmatningstecken. Strängen <sep> kan innehålla de bokstavliga formateringskoder som beskrivs ovan. För att använda kommatecken som avgränsare måste man använda `%x2C` eftersom det annars skulle tolkas som nästa alternativ. T.ex. visar +%(trailers:key=Ticket,separator=%x2C)+ alla släprader vars nyckel är "Ticket" avgränsade med ett kommatecken och ett mellanslag.
-** `unfold[=<bool>]`: gör att det beter sig som om tolka-släpraders
-`--unfold`-alternativ var angivet. T.ex., +%(trailers:only,unfold=true)+
-vecklar ut och visar alla släprader.
-** `keyonly[=<bool>]`: visar endast den viktigaste delen av släpraden.
-** `valueonly[=<bool>]`: visar endast värdedelen av släprad.
-** `key_value_separator=<sep>`: anger avgränsaren som infogas mellan nyckeln och värdet för varje trailer. Standardvärdet är ": ". Annars delar den samma semantik som `separator=<sep>` ovan.
+`key=<nyckel>`;; Visar bara slutrader med angiven <nyckel>. Matchning sker skiftlägesokänsligt och avslutande kolon är valfritt. Om flaggan anges flera gånger visas slutrader som matchar någon av nycklarna. Flaggan aktiverar automatiskt `only` så att rader som inte är slutrader i slutradsblocket döljs. Om det inte önskas kan det inaktiveras med `only=false`. T.ex. visar +%(trailers:key=Reviewed-by)+ slutrader med nyckeln `Reviewed-by`.
+`only[=<bool>]`;; Välj om rader som inte är slutrader i slutradsblocket ska inkluderas.
+ `separator=<sep>`;; Ange avgränsaren som infogas mellan slutrader. Standard är ett radmatningstecken. Strängen <sep> kan innehålla de bokstavliga formateringskoder som beskrivs ovan. För att använda kommatecken som avgränsare måste man använda `%x2C` eftersom det annars tolkas som nästa alternativ. T.ex. visar +%(trailers:key=Ticket,separator=%x2C )+ alla slutrader vars nyckel är `Ticket` avgränsade med kommatecken och mellanslag.
+`unfold[=<bool>]`;; Gör att det beter sig som om interpret-trailers `--unfold`-flagga angetts. T.ex. vecklar +%(trailers:only,unfold=true)+ ut och visar alla slutrader.
+`keyonly[=<bool>]`;; Visa bara nyckeldelen av slutraden.
+`valueonly[=<bool>]`;; Visa bara värdedelen av slutraden.
+`key_value_separator=<sep>`;; Ange avgränsaren som infogas mellan nyckel och värde i varje slutrad. Standard är ": ". I övrigt har den samma semantik som `separator=<sep>` ovan.Anger avgränsaren som infogas mellan nyckeln och värdet för varje slutrad. Standardvärdet är ": ". Annars delar den samma semantik som `separator=<sep>` ovan.
 
 NOTE: Vissa platshållare kan vara beroende av andra alternativ som ges till revisionsgenomgångsmotorn. Till exempel kommer reflog-alternativen +%g*+ att infoga en tom sträng om vi inte går igenom reflog-poster (t.ex. med `git log -g`). Platshållarna +%d+ och +%D+ kommer att använda det "korta" dekorationsformatet om `--decorate` inte redan angavs på kommandoraden.
 
@@ -216,10 +228,10 @@ Om du lägger till ett `+` (plustecken) efter +%+ för en platshållare infogas 
 Om du lägger till ett `-` (minustecken) efter +%+ för en platshållare, raderas alla radmatningar omedelbart före expansionen om och endast om platshållaren expanderar till en tom sträng.
 
 Om du lägger till ett `' '` (mellanslag) efter +%+ av en platshållare, infogas ett mellanslag omedelbart före expansionen om och endast om platshållaren expanderar till en sträng som inte är tom.
+--
 
-* `tformat:`
-+
-Formatet `tformat:` fungerar precis som `format:`, förutom att det tillhandahåller "terminator"-semantik istället för "separator"-semantik. Med andra ord, varje commit har meddelandets terminatorteckne (vanligtvis en nyrad) tillagt, snarare än en avgränsare placerad mellan poster. Detta innebär att den sista posten i ett enradigt format avslutas korrekt med en ny rad, precis som formatet "enradigt" gör. Till exempel:
+`tformat:`::
+Formatet `tformat:` fungerar precis som `format:`, förutom att det tillhandahåller "terminator"-semantik i stället för "separator"-semantik. Med andra ord har varje incheckning meddelandets terminatortecken (vanligtvis en nyrad) tillagt, snarare än en avgränsare placerad mellan poster. Detta innebär att den sista posten i ett enradigt format avslutas korrekt med en ny rad, precis som formatet "enradigt" gör. Till exempel:
 +
 ---------------------
 $ git log -2 --pretty=format:%h 4da45bef \

@@ -1,0 +1,67 @@
+`merge.conflictStyle`::
+	指定合并时将冲突块写入工作区树文件的样式。 默认样式是 "merge"（合并），它会显示一个 `<<<<<<<` 冲突标记、一方所做的更改、一个 `=======` 标记、另一方所做的更改，然后是一个 `>>>>>>>` 标记。 另一种样式 "diff3" 会在 "=======" 标记前添加 "|||||||" 标记和原文。 “合并” 样式产生的冲突区域往往比 diff3 小，一是因为不包含原始文本，二是因为当双方有子集行匹配时，这些行会被从冲突区域中拉出。 另一种样式是 "zdiff3"，它与 diff3 类似，但会在冲突区域的开头或结尾附近出现匹配行时，将这些匹配行从冲突区域中移除。
+
+`merge.defaultToUpstream`::
+	如果调用 merge 时没有任何提交参数，则通过使用存储在其远程跟踪分支中的最后观察值来合并为当前分支配置的上游分支。 `branch.<当前分支>.merge` 的值会被查阅，这些值命名了由 `branch.<当前分支>.remote` 命名的远程分支，然后通过 `remote.<远程仓库>.fetch` 将它们映射到相应的远程跟踪分支，并合并这些跟踪分支的提示。默认为 true。
+
+`merge.ff`::
+	默认情况下，当合并当前提交的后裔提交时，Git 不会创建一个额外的合并提交。相反，当前分支的顶端会被快进。当设置为 "false "时，这个变量告诉Git在这种情况下创建一个额外的合并提交（相当于在命令行中给出 `--no-ff` 选项）。当设置为`only`时，只允许这种快进合并（相当于从命令行给出`--ff-only`选项）。
+
+`merge.verifySignatures`::
+	如果为真，这等同于 --verify-signatures 命令行选项。详见 linkgit:git-merge[1]。
+
+include::fmt-merge-msg.adoc[]
+
+`merge.renameLimit`::
+	合并过程中重命名检测穷举部分要考虑的文件数量。 如果未指定，默认值为 diff.renameLimit 的值。 如果既未指定 merge.renameLimit 也未指定 diff.renameLimit，则默认值为 7000。 如果重命名检测已关闭，则此设置无效。
+
+`merge.renames`::
+	Git是否会检测重名。 如果设置为 `false`，重名检测被禁用。如果设置为 `true`，则启用基本重名检测。 默认为 diff.renames 的值。
+
+`merge.directoryRenames`::
+	Git 是否检测目录重命名。这会影响这样一种情况在合并时的处理方式：历史的一侧向某个目录新增了文件，而该目录在历史的另一侧被重命名。可取值包括：
++
+--
+`false`;; 禁用目录重命名检测，这意味着此类新文件会保留在旧目录中。
+`true`;; 启用目录重命名检测，这意味着此类新文件会被移入新目录。
+`conflict`;; 对此类路径会报告冲突。
+--
++
+如果 `merge.renames` 为 `false`，则会忽略 `merge.directoryRenames`，并将其视为 `false`。默认值为 `conflict`。
+
+`merge.renormalize`::
+	告诉 Git，仓库中文件的规范表示形式会随时间变化（例如，较早的提交记录的文本文件使用 _CRLF_ 行尾，而较新的提交使用 _LF_ 行尾）。在这样的仓库中，对于每个需要执行三方内容合并的文件，Git 都可以在执行合并前将提交中记录的数据转换为规范形式，以减少不必要的冲突。更多信息请参阅 linkgit:gitattributes[5] 中的“合并具有不同签入/检出属性的分支”一节。
+
+`merge.stat`::
+	指定在合并结束时，在 `ORIG_HEAD` 与合并结果之间打印什么内容（如果要打印的话）。可取值包括：
++
+--
+`false`;; 不显示任何内容。
+`true`;; 显示 `git diff --diffstat --summary ORIG_HEAD`。
+`compact`;; 显示 `git diff --compact-summary ORIG_HEAD`。
+--
++
+但任何无法识别的值（例如未来版本 Git 新增的值）都会被视为 `true`，而不会触发错误。默认值为 `true`。
+
+`merge.autoStash`::
+	当设置为 "true "时，在操作开始前自动创建一个临时的贮藏库条目，并在操作结束后应用它。 这意味着你可以在一个肮脏的工作区上运行merge。 然而，要小心使用：在成功的合并之后，最后的贮藏库应用可能会导致非实质性的冲突。 这个选项可以被 linkgit:git-merge[1] 的 `--no-autostash` 和 `--autostash` 选项覆盖。 默认为false。
+
+`merge.tool`::
+	控制linkgit:git-mergetool[1]使用哪个合并工具。 下面的列表显示了有效的内置值。 任何其他值都被视为自定义的合并工具，需要定义一个相应的mergetool.<tool>.cmd变量。
+
+`merge.guitool`::
+	控制linkgit:git-mergetool[1]在指定-g/--gui标志时使用的合并工具。下面的列表显示了有效的内置值。 任何其他值都被视为自定义的合并工具，需要定义一个相应的mergetool.<guitool>.cmd变量。
+
+include::{build_dir}/mergetools-merge.adoc[]
+
+`merge.verbosity`::
+	控制递归合并策略所显示的输出量。 0级除了在检测到冲突时有一个最终的错误信息外，什么都不输出。1级只输出冲突，2级输出冲突和文件变化。 5级及以上输出调试信息。 默认是第2级。 可以通过`GIT_MERGE_VERBOSITY`环境变量覆盖。
+
+合并.<driver>.name::
+	为自定义的低级合并驱动定义了一个具有可读性的名字。 详情见 linkgit:gitattributes[5]。
+
+merge.<driver>.driver::
+	定义实现自定义低级合并驱动程序的命令。详见链接 linkgit:gitattributes[5]。
+
+merge.<驱动程序>.recursive::
+	在执行共同祖先之间的内部合并时，命名一个低级别的合并驱动。 详情见 linkgit:gitattributes[5]。

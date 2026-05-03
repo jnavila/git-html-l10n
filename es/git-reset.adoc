@@ -3,52 +3,43 @@ git-reset(1)
 
 NOMBRE
 ------
-git-reset - Restablece el HEAD actual a un estado especifico
+git-reset - Establece `HEAD` o el índice a un estado especifico
 
 SINOPSIS
 --------
 [synopsis]
+git reset [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<confirmación>]
 git reset [-q] [<árbol-ismo>] [--] <especificación-de-ruta>...
 git reset [-q] [--pathspec-from-file=<fichero> [--pathspec-file-nul]] [<árbol-ismo>]
 git reset (--patch | -p) [<árbol-ismo>] [--] [<especificación-de-ruta>...]
-git reset [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<confirmación>]
 
 DESCRIPCIÓN
 -----------
-En las primeras tres formas, copia entradas de _<árbol-ismo>_ al índice. En la última forma, establece la rama actual head (`HEAD`) a _<confirmación>_, modificando opcionalmente el índice y el árbol de trabajo para que coincidan. _<árbol-ismo>_/_<confirmación>_ están predeterminados a `HEAD` en todas las formas.
+`git reset` does either of the following:
 
-`git reset [-q] [<árbol-ismo>] [--] <ruta>...`::
-`git reset [-q] [--pathspec-from-file=<fichero> [--pathspec-file-nul]] [<árbol>]`::
-	Estas formas restablecen las entradas del índice para todas las rutas que coincidan la _<especificación-de-ruta>_ al su estado en _<árbol-ismo>_. (No afecta el árbol de trabajo o la rama actual.)
-+
-Esto significa que `git reset <especificación-de-ruta>` es lo opuesto a `git add <especificación-de-ruta>`. Este comando equivale a `git restore [--source=<árbol-ismo>] --staged <especificación-de-ruta>...`.
-+
-Después de ejecutar `git reset <especificación-de-ruta>` para actualizar la entrada del índice, puedes usar linkgit:git-restore[1] para poner el contenido fuera del índice en el árbol de trabajo. Alternativamente, el contenido de una ruta fuera de una confirmación lo puedes copiar al índice y al árbol de trabajo de una vez usando linkgit:git-restore[1] y especificando una confirmación con `--source`.
-
-`git reset (--patch | -p) [<árbol-ismo>] [--] [<ruta>...]`::
-	Selecciona interactivamente pedazos en la diferencia entre el índice y _<árbol-ismo>_ (predeterminado a `HEAD`). Los pedazos elegidos se aplican en reversa al índice.
-+
-Esto significa que `git reset -p` es lo opuesto a `git add -p`, ej. puedes usarlo para restaurar selectivamente pedazos. Ver la sección "Modo Interactivo" de linkgit:git-add[1] para aprender cómo operar el modo `--patch`.
+1. `git reset [<mode>] <commit>` changes which commit `HEAD` points to. This makes it possible to undo various Git operations, for example commit, merge, rebase, and pull.
+2. When you specify files or directories or pass `--patch`, `git reset` updates the staged version of the specified files.
 
 `git reset [<modo>] [<confirmación>]`::
-	Esta forma restablece la cabeza de la rama actual a _<confirmación>_ y posiblemente actualiza el índice (restableciéndolo al árbol de _<confirmación>_) y el árbol de trabajo dependiendo de _<modo>_. Antes de la operación, `ORIG_HEAD` se establece a la punta de la rama actual. Si se omite _<modo>_, se predetermina a `--mixed`. El _<modo>_ debe ser uno de los siguientes:
+	Set the current branch head (`HEAD`) to point at _<commit>_. Depending on _<mode>_, also update the working directory and/or index to match the contents of _<commit>_. _<commit>_ defaults to `HEAD`. Before the operation, `ORIG_HEAD` is set to the tip of the current branch.
 +
---
-`--soft`::
-	No toques los ficheros del índice o del árbol de trabajo en absoluto (exceptuando restablecer la cabeza a _<confirmación>_, tal y como lo hacen todos los modos). Esto deja a todos tus ficheros modificados como "Cambios a confirmar", como `git status` lo haría.
+El _<modo>_ debe ser uno de los siguientes (predeterminado `--mixed`):
++
 
+--
 `--mixed`::
-	Restablece el índice pero no el árbol de trabajo (p. ej. los ficheros modificados se preservan pero no se marcan para confirmar) e informa qué no se ha actualizado. Esta es la acción predeterminada.
+	Leave your working directory unchanged. Update the index to match the new `HEAD`, so nothing will be staged.
 +
-Si se especifica `-N`, las rutas eliminadas son marcadas como intento de inclusión (ver linkgit:git-add[1]).
+Si se especifica `-N`, marca las rutas eliminadas como intento de inclusión (ver linkgit:git-add[1]).
+
+`--soft`::
+	Leave your working tree files and the index unchanged. For example, if you have no staged changes, you can use `git reset --soft HEAD~5; git commit` to combine the last 5 commits into 1 commit. This works even with changes in the working tree, which are left untouched, but such usage can lead to confusion.
 
 `--hard`::
-	Restablece el índice y el árbol de trabajo. Cualquier cambio a ficheros con seguimiento en el árbol de trabajo desde _<confirmación>_ es descartado. Cualquier fichero sin seguimiento o directorio en camino de escribir cualquier fichero con seguimiento es simplemente eliminado.
+	Overwrite all files and directories with the version from _<commit>_, and may overwrite untracked files. Tracked files not in _<commit>_ are removed so that the working tree matches _<commit>_. Update the index to match the new `HEAD`, so nothing will be staged.
 
 `--merge`::
-	Restablece el índice y actualiza los ficheros en el árbol de trabajo que son diferentes entre _<confirmación>_ y `HEAD`, pero mantiene aquellos que son diferentes entre el índice y el árbol de trabajo (p. ej. aquellos cambios que no han sido agregados). Si un fichero tiene diferencias entre _<confirmación>_ y el índice tiene cambios sin presentar, se aborta el restablecimiento.
-+
-En otras palabras, `--merge` hace algo como un `git read-tree -u -m <confirmación>`, pero acarrea hacia adelante entradas del índice sin fusionar.
+	Restablece el índice y actualiza los ficheros en el árbol de trabajo que son diferentes entre _<confirmación>_ y `HEAD`, pero mantiene aquellos que son diferentes entre el índice y el árbol de trabajo (p. ej. aquellos cambios que no han sido agregados). Existe principalmente para restablecer entradas del índice sin fusionar, como aquellas que quedaron atrás por `git am -3` o `git switch -m` en ciertas situaciones. Si un fichero tiene diferencias entre _<confirmación>_ y el índice tiene cambios sin presentar, se aborta el restablecimiento.
 
 `--keep`::
 	Restablece entradas del índice y actualiza ficheros en el árbol de trabajo que tienen diferencias entre _<confirmación>_ y `HEAD`. Si un fichero tiene diferencias entre _<confirmación>_ y `HEAD` tiene cambios locales, se aborta el restablecimiento.
@@ -57,6 +48,19 @@ En otras palabras, `--merge` hace algo como un `git read-tree -u -m <confirmaci�
 `--no-recurse-submodules`::
 	Cuando se actualiza el árbol de trabajo, usar `--recurse-submodules` también restablecerá recursivamente el árbol de trabajo de todos los submódulos activos según la confirmación registrada en el superproyecto, también separando la `HEAD` de los submódulos de esa confirmación.
 --
+
+`git reset [-q] [<árbol-ismo>] [--] <ruta>...`::
+`git reset [-q] [--pathspec-from-file=<fichero> [--pathspec-file-nul]] [<árbol>]`::
+	For all specified files or directories, set the staged version to the version from the given commit or tree (which defaults to `HEAD`).
++
+Esto significa que `git reset <especificación-de-ruta>` es lo opuesto a `git add <especificación-de-ruta>`: deja de presentar todos los cambios en los ficheros o directorios especificados. Equivale a `git restore --staged <especificación-de-ruta>...`.
++
+In this mode, `git reset` updates only the index (without updating the `HEAD` or working tree files). If you want to update the files as well as the index entries, use linkgit:git-restore[1].
+
+`git reset (--patch | -p) [<árbol-ismo>] [--] [<ruta>...]`::
+	Selecciona interactivamente cambios a partir de la diferencia entre el índice y la confirmación o árbol especificado (que se predeterminada a `HEAD`). El índice es modificado usando los cambios seleccionados.
++
+Esto significa que `git reset -p` es lo opuesto a `git add -p`, p. ej. puedes usarlo para retirar selectivamente cambios de la presentación. Ver la sección "Modo interactivo" de linkgit:git-add[1] para aprender cómo usar la opción `--patch`.
 
 Ver "Restablecer, restaurar y revertir" en linkgit:git[1] para diferenciar los tres comandos.
 

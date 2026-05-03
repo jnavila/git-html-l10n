@@ -50,16 +50,17 @@ Cette option ne fonctionne pas avec des dépôts appartenant à d'autres utilisa
 `--shared`::
 	Quand le dépôt à cloner est sur la machine locale, au lieu d'utiliser des liens physiques, créer automatiquement `.git/objects/info/alternates` pour partager les objets du dépôt source. Le dépôt résultant démarre sans aucun objet qui lui soit propre.
 +
-*NOTE* : c'est une opération potentiellement dangereuse ; *ne* l'utilisez *pas* à moins de comprendre ce qu'elle fait. Si vous clonez votre dépôt en utilisant cette option puis que vous supprimez des branches (ou utilisez toute autre commande Git qui élimine les références sur un commit existant) dans le dépôt source, certains objets peuvent ne plus être référencés (ou esseulés). Ces objets pourraient être supprimés lors d'opérations normales de Git (telles que `git commit`) qui appellent automatiquement `git maintenance --auto`. (Voir linkgit:git-maintenance[1].) Si ces objets sont supprimés et qu'ils étaient référencés dans un dépôt cloné, alors le dépôt cloné sera corrompu.
+NOTE: c'est une opération potentiellement dangereuse ; *ne* l'utilisez *pas* à moins de comprendre ce qu'elle fait. Si vous clonez votre dépôt en utilisant cette option puis que vous supprimez des branches (ou utilisez toute autre commande Git qui élimine les références sur un commit existant) dans le dépôt source, certains objets peuvent ne plus être référencés (ou esseulés). Ces objets pourraient être supprimés lors d'opérations normales de Git (telles que `git commit`) qui appellent automatiquement `git maintenance --auto`. (Voir linkgit:git-maintenance[1].) Si ces objets sont supprimés et qu'ils étaient référencés dans un dépôt cloné, alors le dépôt cloné sera corrompu.
 +
 Notez que lancer `git repack` sans l'option `--local` dans un dépôt cloné avec `--shared` va copier les objets depuis le dépôt source dans un paquet dans le répertoire cloné, éliminant de ce fait les économies d'espace disque de `clone --shared`. Par contre, il est possible de lancer `git gc`, qui utilise l'option `--local` par défaut.
 +
 Si vous souhaitez casser la dépendance d'un dépôt cloné avec `--shared` à son dépôt source, vous pouvez simplement lancer `git repack -a` pour copier tous les objets depuis le dépôt source dans un paquet dans le dépôt cloné.
 
-`--reference[-if-able] <dépôt>`::
+`--reference=<dépôt>`::
+`--reference-if-able=<dépôt>`::
 	Si le _<dépôt>_ référence est sur la machine locale, créer automatiquement `.git/objects/info/alternates` pour obtenir les objets depuis le _<dépôt>_ référence. L'utilisation d'un dépôt déjà existant comme alternative nécessitera moins d'objets à copier depuis le dépôt à cloner, limitant les coûts de réseau et de stockage local. Avec l'utilisation de `--reference-if-able`, un répertoire inexistant est ignoré avec un message d'avertissement au lieu de faire échouer le clonage.
 +
-*NOTE* : voir la NOTE pour l'option `--shared`, et aussi l'option `--dissociate`.
+NOTE: voir la NOTE pour l'option `--shared`, et aussi l'option `--dissociate`.
 
 `--dissociate`::
 	Emprunter les objets des dépôts référence spécifiés avec les options `--reference` seulement pour réduire les transferts réseau, et arrêter de les emprunter après la création d'un clone en créant les copies locales nécessaires des objets empruntés. Cette option peut aussi être utilisée lors d'un clonage local depuis un dépôt qui emprunte déjà des objets à un autre dépôt -- le nouveau dépôt va emprunter des objets au même dépôt, et cette option peut être utilisée pour arrêter l'emprunt.
@@ -73,16 +74,17 @@ Si vous souhaitez casser la dépendance d'un dépôt cloné avec `--shared` à s
 	Mode verbeux. N'agit pas sur l'affichage de l'état d'avancement sur le flux d'erreur standard.
 
 `--progress`::
-	L'état d'avancement est affiché sur la sortie d'erreur standard quand elle est attachée à un terminal, à moins que `--quiet` soit spécifié. Ce drapeau force l'état d'avancement même si le flux d'erreur standard n'est pas dirigé vers un terminal.
+	Affiche l'état d'avancement sur la sortie d'erreur standard quand elle est attachée à un terminal, à moins que `--quiet` soit spécifié. Ce drapeau force l'état d'avancement même si le flux d'erreur standard n'est pas dirigé vers un terminal.
 
 `--server-option=<option>`::
-	Transmettre la chaîne donnée au serveur lors d'une communication utilisant la version 2 du protocole. La chaîne donnée ne doit pas contenir de caractère _NUL_ ou _LF_. La gestion par le serveur des options du serveur, y compris les options inconnues, est spécifique au serveur. Lorsque plusieurs `--server-option=<option>` sont donnés, ils sont tous envoyés à l'autre côté dans l'ordre indiqué sur la ligne de commande. Quand `--server-option=<option>` est fourni sur la ligne de commande, les valeurs de la variable de configuration `remote.<nom>.serverOption` sont utilisées à la place.
+	Transmettre la chaîne donnée au serveur lors d'une communication utilisant la version 2 du protocole. La chaîne donnée ne doit pas contenir de caractère _NUL_ ou _LF_. La gestion par le serveur des options du serveur, y compris les options inconnues, est spécifique au serveur. Lorsque plusieurs `--server-option=<option>` sont donnés, ils sont tous envoyés à l'autre côté dans l'ordre indiqué sur la ligne de commande. Quand aucun `--server-option=<option>`n'est fourni sur la ligne de commande, les valeurs de la variable de configuration `remote.<nom>.serverOption` sont utilisées à la place.
 
 `-n`::
 `--no-checkout`::
-	Aucune extraction de `HEAD` n'est effectuée après la fin du clonage.
+	Ne pas extraire `HEAD` après la fin du clonage.
 
-`--`[`no-`]`reject-shallow`::
+`--no-reject-shallow`::
+`--reject-shallow`::
 	Échouer si le dépôt source est un dépôt superficiel. La variable de configuration `clone.rejectShallow` peut être utilisée pour spécifier la valeur par défaut.
 
 `--bare`::
@@ -92,7 +94,15 @@ Si vous souhaitez casser la dépendance d'un dépôt cloné avec `--shared` à s
 	Employer une extraction clairsemée, avec seulement les fichiers dans le répertoire de plus haut niveau initialement présent. La commande linkgit:git-sparse-checkout[1] peut être utilisée pour agrandir le répertoire de travail si nécessaire.
 
 `--filter=<spéc. du filtre>`::
-	Utiliser la fonction de clonage partiel et demander que le serveur envoie un sous-ensemble d'objets accessibles selon un filtre d'objets donné. Lorsque l'on utilise `--filter`, le _<spéc-de-filtre>_ fourni est utilisé pour le filtre de clonage partiel. Par exemple, `--filter=blob:none` filtrera tous les blobs (contenu des fichiers) jusqu'à ce que Git en ait besoin. De même, `--filter=blob:limit=<taille>` filtrera tous les blobs de taille au moins égale à _<taille>_. Pour plus de détails sur les spécifications de filtre, voir l'option `--filter` dans linkgit:git-rev-list[1].
+	Utiliser la fonction de clonage partiel et demander que le serveur envoie un sous-ensemble d'objets accessibles selon un filtre d'objets donné. Lorsque l'on utilise `--filter`, le _<spéc-de-filtre>_ fourni est utilisé pour le filtre de clonage partiel.
++
+Si `--filter=auto` est utilisé, la spécification du filtre est déterminée automatiquement par le protocole 'promisor-remote' (voir linkgit:gitprotocol-v2[5]) en combinant les spécifications du filtre annoncées par le serveur pour le prometteur distant que le client accepte (voir l'option de configuration `promisor.acceptFromServer' dans linkgit:git-config[1]). Cela permet au serveur de suggérer le filtre optimal pour les prometteurs distants disponibles.
++
+Comme pour d'autres spécifications de filtres, la valeur "auto" est persistante dans la configuration. Cela garantit que les futurs récupérations continueront de s'adapter à la recommandation actuelle du serveur.
++
+Pour plus de détails sur toutes les autres spécifications de filtres disponibles, consultez l'option `--filter=<filter-spec>` dans linkgit:git-rev-list[1].
++
+Par exemple, `--filter=blob:none` filtrera tous les blobs (le contenu de fichier) jusqu'à ce que Git en ait besoin. De plus, `--filter=blob:limit=<taille>` filtrera tous les blobs de taille au moins _<taille>_.
 
 `--also-filter-submodules`::
 	Applique également le filtre de clonage partiel à tous les sous-modules du dépôt. Requiert `--filter` et `--recurse-submodules`. Ceci peut être activé par défaut en définissant l'option de configuration `clone.filterSubmodules`.
@@ -100,31 +110,31 @@ Si vous souhaitez casser la dépendance d'un dépôt cloné avec `--shared` à s
 `--mirror`::
 	Construire un miroir du dépôt source. Ceci implique `--bare`. Par rapport à `--bare`, `--mirror` fait correspondre non seulement les branches locales de la source sur les branches locales de la cible, mais également toutes les références (y compris les branches de suivi à distance, les notes, etc.) et elle définit une configuration de refspec telle que toutes ces références sont réécrites par un `git remote update` dans le dépôt cible.
 
-`-o` _<nom>_::
-`--origin` _<nom>_::
+`-o<nom>`::
+`--origin=<nom>`::
 	Au lieu d'utiliser le nom de distant `origin` pour suivre le dépôt amont, utiliser _<nom>_. Remplace `clone.defaultRemoteName` dans la configuration.
 
-`-b` _<nom>_::
-`--branch` _<nom>_::
-	Au lieu de pointer la `HEAD` nouvellement créée sur la branche pointée par la `HEAD` du dépôt cloné, pointer plutôt sur la branche _<nom>_. Dans un dépôt non-nu, c'est la branche qui sera extraite. `--branch` accepte aussi des étiquettes et détache alors la `HEAD` à ce commit dans le dépôt résultant.
+`-b<nom>`::
+`--branch=<nom>`::
+	Pointer la `HEAD` nouvellement créée sur la branche _<nom>_ plutôt que sur la branche pointée par la `HEAD` du dépôt cloné. Dans un dépôt non-nu, c'est la branche qui sera extraite. `--branch` accepte aussi des étiquettes et détache alors la `HEAD` à ce commit dans le dépôt résultant.
 
 `--revision=<rév>`::
 	Créer un nouveau dépôt, et récupérer l'historique menant à la révision donnée _<rév>_ (et rien d'autre), sans faire de branche de suivi à distance, et sans faire de branche locale, et détacher `HEAD` à _<rév>_. L'argument peut être un nom de référence (par exemple `refs/heads/main` ou `refs/tags/v1.0`) qui se pèle vers un commit, ou un nom d'objet hexadécimal. Cette option est incompatible avec `--branch` et `--mirror`.
 
-`-u` _<upload-pack>_::
-`--upload-pack` _<upload-pack>_::
-	Quand cette option est indiquée et que le dépôt à cloner est accédé via ssh, ceci spécifie un chemin différent de celui par défaut pour la commande lancée sur l'hôte distant.
+`-u<upload-pack>`::
+`--upload-pack=<upload-pack>`::
+	Spécifier un chemin non par défaut pour l'exécution de la commande sur l'hôte distant lorsque le dépôt à cloner est accessible via ssh.
 
 `--template=<répertoire-de-modèles>`::
 	Spécifier le répertoire depuis lequel les modèles vont être tirés ; (voir la section « RÉPERTOIRE DE MODÈLES » de linkgit:git-init[1].)
 
-`-c <nom>=<valeur>`::
-`--config` `<clé>=<valeur>`::
+`-c<clé>=<valeur>`::
+`--config=<clé>=<valeur>`::
 	Définir une variable de configuration dans le dépôt nouvellement créé ; ceci prend effet immédiatement après que le dépôt est initialisé, mais avant que l'historique distant ne soit récupéré ou qu'un fichier soit extrait. La _<clé>_ est dans le même format qu'attendu par linkgit:git-config[1] (par exemple, `core.eol=true`). Si des valeurs multiples sont fournies pour la même clé, chaque valeur sera écrite dans le fichier de configuration. Ceci sécurise, par exemple, l'ajout de spécificateurs de référence de récupération supplémentaires pour le dépôt distant d'origine.
 +
 Du fait de limitations de l'implémentation actuelle, certaines variables de configuration ne prennent effet qu'après la première récupération ou la première extraction. Les variables de configuration connues pour ne pas prendre effet sont : `remote.<nom>.mirror` et `remote.<nom>.tagOpt`. Utilisez les options correspondantes `--mirror` et `--no-tags` à la place.
 
-`--depth <profondeur>`::
+`--depth=<profondeur>`::
 	Créer un clone « superficiel » avec un historique tronqué au nombre spécifié de commits. Implique `--single-branch` à moins que `--no-single-branch` ne soit fourni pour récupérer les historiques proches des sommets de toutes les branches. Pour cloner des sous-modules de manière superficielle, passer aussi `--shallow-submodules`.
 
 `--shallow-since=<date>`::
@@ -167,8 +177,8 @@ Spécifier le format de stockage de réf donné pour le dépôt. Les valeurs val
 +
 include::ref-storage-format.adoc[]
 
-`-j` _<n>_::
-`--jobs` _<n>_::
+`-j<n>`::
+`--jobs=<n>`::
 	Le nombre de sous-modules récupérés en même temps. Par défaut, l'option `submodule.fetchJobs`.
 
 _<dépôt>_::

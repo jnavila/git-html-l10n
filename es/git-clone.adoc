@@ -50,16 +50,17 @@ Por razones de seguridad, esta opción no funciona con repositorios pertenecient
 `--shared`::
 	Cuando el repositorio a clonar esta en el equipo local, en lugar de usar hardlinks , automáticamente se configura `.git/objects/info/alternates` para compartir los objetos con el repositorio fuente. El repositorio resultante comienza sin tener algún objeto.
 +
-*NOTA*: esta es posiblemente una operación peligrosa; *no* usarse a menos que entiendas lo que hace. Si clonas tu repositorio usando esta opción y luego borras ramas (o usas cualquier otro comando Git que haga a cualquier confirmación existente dereferenciada) en el repositorio fuente, algunos objetos pueden volverse no-referenciados (o colgados). Dichos objetos pueden ser eliminados por operaciones normales de Git (como `git commit`) que automáticamente llaman `git maintenance run --auto`. (Ver linkgit:git-maintenance[1]). Si esos objetos son eliminados y fueron referenciados por el repositorio clonado, entonces el repositorio clonado se corromperá.
+NOTE: esta es posiblemente una operación peligrosa; *no* usarse a menos que entiendas lo que hace. Si clonas tu repositorio usando esta opción y luego borras ramas (o usas cualquier otro comando Git que haga a cualquier confirmación existente dereferenciada) en el repositorio fuente, algunos objetos pueden volverse no-referenciados (o colgados). Dichos objetos pueden ser eliminados por operaciones normales de Git (como `git commit`) que automáticamente llaman `git maintenance run --auto`. (Ver linkgit:git-maintenance[1]). Si esos objetos son eliminados y fueron referenciados por el repositorio clonado, entonces el repositorio clonado se corromperá.
 +
 Nótese que ejecutando `git repack` sin la opción `--local` en un repositorio clonado con `--shared`, copiará objetos del repositorio fuente en un paquete en el repositorio clonado, quitando ahorros de espacio en disco de `clone --shared`. No obstante, es seguro ejecutar `git gc`, el cual usa la opción `--local` predeterminadamente.
 +
 Si quieres romper la dependencia de un repositorio clonado con `--shared` de su repositorio origen, puedes simplemente ejecutar `git repack -a` para copiar todos los objetos del repositorio origen en un paquete en el repositorio clonado.
 
-`--reference[-if-able] <repositorio>`::
+`--reference=<repositorio>`::
+`--reference-if-able=<repositorio>`::
 	Si el _<repositorio>_ referencia esta en el equipo local, automáticamente se configura `.git/objects/info/alternates` para obtener los objetos del _<repositorio>_ referencia. Usando un repositorio ya existente como un alterno requerirá que menos objetos sean copiados del repositorio siendo clonado, reduciendo costos de red y almacenamiento local. Cuando se usa `--reference-if-able`, un directorio inexistente es saltado con una advertencia en lugar de abortar la clonación.
 +
-*NOTA*: ver la NOTA para la opción `--shared`, y también la opción `--dissociate`.
+NOTE: ver la NOTA para la opción `--shared`, y también la opción `--dissociate`.
 
 `--dissociate`::
 	Toma prestados los objetos de repositorios referencia especificados con la opciones `--reference` sólo para reducir transferencias de red, y deja de tomarlos prestados de ellos después de clonar haciendo las copias locales necesarias de los objetos prestados. Esta opción también se puede usar cuando se clona localmente de un repositorio que ya toma objetos prestados de otro repositorio, el nuevo repositorio tomará prestados los objetos del mismo repositorio, y esta opción puede ser usada para dejar de tomar prestados.
@@ -73,16 +74,17 @@ Si quieres romper la dependencia de un repositorio clonado con `--shared` de su 
 	Ejecutar verbosamente. No afecta el reporte de estado de progreso hacia el flujo de error estándar.
 
 `--progress`::
-	El estado de avance se indica en la salida de error estándar por defecto cuando esta está asociada a un terminal, a menos que se especifique `--quiet`. Esta bandera forza el estado de avance incluso cuando la salida de error estándar no es por terminal.
+	Reporta el estado de avance en la salida de error estándar predeterminadamente cuando está asociada a una terminal, a menos que se especifique `--quiet`. Esta bandera forza el estado de avance incluso cuando la salida de error estándar no es por terminal.
 
 `--server-option=<opción>`::
-	Transmite la cadena de caracteres dada al servidor cuando haya comunicación utilizando la versión 2 del protocolo. La cadena de caracteres dada no debe contener ningún carácter NUL ni LF. La gestión que el servidor hace de sus opciones, incluyendo las desconocidas, es específica de cada servidor. Cuando se dan múltiples `--server-option=<opción>`, todas ellas se envían al otro lado en el orden listado en la línea de comandos. Cuando no se da ++--server-option=++__<opción>__ desde la línea de comandos, se usarán en su lugar los valores de la variable de configuración `remote.<nombre>.serverOption`.
+	Transmite la cadena de caracteres dada al servidor cuando haya comunicación utilizando la versión 2 del protocolo. La cadena de caracteres dada no debe contener ningún carácter _NUL_ ni _LF_. La gestión que el servidor hace de sus opciones, incluyendo las desconocidas, es específica de cada servidor. Cuando se dan múltiples `--server-option=<opción>`, todas ellas se envían al otro lado en el orden listado en la línea de comandos. Cuando no se da opción `--server-option=<opción>` desde la línea de comandos, se usan en su lugar los valores de la variable de configuración `remote.<nombre>.serverOption`.
 
 `-n`::
 `--no-checkout`::
 	No hace checkout de `HEAD` después de completar la clonación.
 
-`--`[`no-`]`reject-shallow`::
+`--no-reject-shallow`::
+`--reject-shallow`::
 	Falla si la fuente del repositorio es un repositorio superficial. Se puede usar la variable de configuración `clone.rejectShallow` para especificar el valor predeterminado.
 
 `--bare`::
@@ -92,7 +94,15 @@ Si quieres romper la dependencia de un repositorio clonado con `--shared` de su 
 	Emplea un checkout -escaso, sólo con los ficheros en el nivel superior del directorio que esten presentes inicialmente. Se puede usar el comando linkgit:git-sparse-checkout[1] para crecer el directorio de trabajo cuando se necesite.
 
 `--filter=<especificación-de-filtro>`::
-	Usa la característica de clonado parcial y solicita que el servidor envíe un subconjunto de objetos alcanzables conforme a un filtro de objetos dado. Cuando se usa `--filter` la _<especificación-de-filtro>_ dada se usa para el filtro de clonado parcial. Por ejemplo, `--filter=blob:none` filtrará todos los blobs (contenido del fichero) hasta que lo necesite Git. También `--filter=blob:limit=<tamaño>` filtrará todos los blobs cuyo tamaño sea por lo menos _<tamaño>_. Para mas detalles sobre especificaciones de filtros ver la opción `--filter` en linkgit:git-rev-list[1].
+	Usa la característica de clonado parcial y solicita que el servidor envíe un subconjunto de objetos alcanzables conforme a un filtro de objetos dado. Cuando se usa `--filter` la _<especificación-de-filtro>_ dada se usa para el filtro de clonado parcial.
++
+If `--filter=auto` is used the filter specification is determined automatically through the 'promisor-remote' protocol (see linkgit:gitprotocol-v2[5]) by combining the filter specifications advertised by the server for the promisor remotes that the client accepts (see the `promisor.acceptFromServer` configuration option in linkgit:git-config[1]). This allows the server to suggest the optimal filter for the available promisor remotes.
++
+As with other filter specifications, the "auto" value is persisted in the configuration. This ensures that future fetches will continue to adapt to the server's current recommendation.
++
+For details on all other available filter specifications, see the `--filter=<filter-spec>` option in linkgit:git-rev-list[1].
++
+For example, `--filter=blob:none` will filter out all blobs (file contents) until needed by Git. Also, `--filter=blob:limit=<size>` will filter out all blobs of size at least _<size>_.
 
 `--also-filter-submodules`::
 	Además aplica el filtro de clonación parcial a cualquier submódulo en el repositorio. Requiere `--filter` y `--recurse-submodules`. Esto puede habilitarse de forma predeterminada configurando la opción de configuración `clone.filterSubmodules`.
@@ -100,31 +110,31 @@ Si quieres romper la dependencia de un repositorio clonado con `--shared` de su 
 `--mirror`::
 	Configura un espejo del repositorio fuente. Esto implica `--bare`. Comparado con `--bare`, `--mirror` no solo mapea ramas locales de la fuente a ramas locales en el objetivo, mapea todas las referencias (incluyendo ramas de seguimiento-remoto, notas, etc.) y configura una especificación de referencia de tal manera que todas las referencias sean sobre-escritas por un `git remote update` en repositorio objetivo.
 
-`-o` _<nombre>_::
-`--origin` _<nombre>_::
+`-o<nombre>`::
+`--origin=<nombre>`::
 	En lugar de usar el nombre remoto `origin` para dar seguimiento al repositorio upstream, usa _<nombre>_. Anula `clone.defaultRemoteName` de la configuración.
 
-`-b` _<nombre>_::
-`--branch` _<nombre>_::
-	En lugar de apuntar la `HEAD` recientemente creada a la rama a la que apunta `HEAD` del repositorio clonado, apunta a la rama _<nombre>_. En un repositorio no-básico, a esta rama se le hará checkout. `--branch` también puede tomar etiquetas y soltar la `HEAD` en esa confirmación en el repositorio resultante.
+`-b<nombre>`::
+`--branch=<nombre>`::
+	Apunta la `HEAD` recientemente creada a la rama _<nombre>_ en lugar de apuntar a la rama a la que apunta `HEAD` del repositorio clonado. En un repositorio no-básico, a esta rama se le hará checkout. `--branch` también puede tomar etiquetas y soltar la `HEAD` en esa confirmación en el repositorio resultante.
 
 `--revision=<revisión>`::
 	Crea un repositorio nuevo, y trae el historial hasta la revisión _<rev>_ dada (y nada mas), sin hacer rama de rastreo remoto alguna, y sin hacer una rama local, y desprender `HEAD` de _<rev>_. El argumento puede ser un nombre de referencia (ej. `refs/heads/main` o `refs/tags/v1.0`) que llegue hasta una confirmación, o a un nombre de objeto hexadecimal. Esta opción es incompatible con `--branch` y `--mirror`.
 
-`-u` _<paquete-a-subir>_::
-`--upload-pack` _<paquete-a-subir>_::
-	Cuando se proporciona, y el repositorio a clonar se accesa por ssh, este especifica una ruta no predeterminada para la ejecución del comando en el otro extremo.
+`-u<paquete-a-subir>`::
+`--upload-pack=<paquete-a-subir>`::
+	Specify a non-default path for the command run on the other end when the repository to clone from is accessed via ssh.
 
 `--template=<directorio-de-plantilla>`::
 	Especifica el directorio de donde se usarán las plantillas; (Ver la sección "DIRECTORIO DE PLANTILLAS" de linkgit:git-init[1].)
 
-`-c` `<clave>=<valor>`::
-`--config` `<clave>=<valor>`::
+`-c<clave>=<valor>`::
+`--config=<clave>=<valor>`::
 	Asigna una variable de configuración en el repositorio recientemente creado; este surte efecto inmediatamente después de que el repositorio es inicializado, pero antes de que el historial remoto sea traído o de que se les haga checkout a los ficheros. La -<clave>_ es en el mismo formato que espera linkgit:git-config[1] (ej. `core.eol=true`). Si se proporcionan múltiples valores para la misma clave, cada valor se escribirá en el fichero de configuración. Esto hace seguro, por ejemplo, agregar especificaciones de referencia de fetch adicionales al origen remoto.
 +
 Debido a limitaciones de la implementación actual, algunas variables de configuración no surten efecto hasta después del fetch y checkout inicial. Variables de configuración conocidas por no surtir efecto son: `remote.<nombre>.mirror` y `remote.<nombre>.tagOpt`. En cambio, use las opciones correspondientes `--mirror` y `--no-tags`.
 
-`--depth <profundidad>`::
+`--depth=<profundidad>`::
 	Crea un clon 'superficial' con un historial truncado al número especificado de commits. Implica `--single-branch` a menos que se ponga `--no-single-branch` para traer historias cercanas a las puntas de todas las ramas. Si quieres clonar sub-módulos superficialmente, también pon `--shallow-submodules`.
 
 `--shallow-since=<fecha>`::
@@ -167,8 +177,8 @@ Especifica el formato de almacenamiento de referencia dado para el repositorio. 
 +
 include::ref-storage-format.adoc[]
 
-`-j` _<n>_::
-`--jobs` _<número>_::
+`-j<n>`::
+`--jobs=<n>`::
 	La cantidad de submódulos obtenidos al mismo tiempo. Por defecto usa el valor de la opción `submodule.fetchJobs`.
 
 _<repositorio>_::

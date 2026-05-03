@@ -5,76 +5,82 @@ Si le commit est une fusion, et si la mise en forme n'est pas `oneline`, `email`
 
 Il existe plusieurs formats intégrés, et vous pouvez définir des formats supplémentaires en définissant une option pretty.<nom> config à soit un nouveau nom de format, soit une chaîne`format:`, comme décrit ci-dessous (voir linkgit:git-config[1]). Voici le détail des formats intégrés :
 
-* `oneline`
-
-	  <empreinte> <ligne-de-titre>
+`oneline`::
++
+[synopsis]
+--
+<empreinte> <ligne-de-titre>
+--
 +
 C'est conçu pour être aussi compact que possible.
 
-* `short`
+`short`::
++
+[synopsis]
+--
+commit <empreinte> Author: <auteur>
 
-	  commit <empreinte>
-	  Author: <auteur>
+    <ligne-de-titre>
+--
 
-	      <ligne-de-titre>
+`medium`::
++
+[synopsis]
+--
+commit <empreinte> Author: <auteur> Date: <date d'auteur>
 
-* `medium`
+    <ligne-de-titre>
 
-	  commit <empreinte>
-	  Author: <auteur>
-	  Date:   <date d'auteur>
+    <message-de-validation-complet>
+--
 
-	      <ligne-de-titre>
+`full`::
++
+[synopsis]
+--
+commit <empreinte> Author: <auteur> Commit: <validateur>
 
-	      <message-de-validation-complet>
+    <ligne-de-titre>
 
-* `full`
+    <message-de-validation-complet>
+--
 
-	  commit <empreinte>
-	  Author: <auteur>
-	  Commit: <validateur>
+`fuller`::
++
+[synopsis]
+--
+commit <empreinte> Author: <auteur> AuthorDate: <date d'auteur> Commit: <validateur> CommitDate: <date de validation>
 
-	      <ligne-de-titre>
+     <ligne-de-titre>
 
-	      <message-de-validation-complet>
+     <message-de-validation-complet>
+--
 
-* `fuller`
-
-	  commit <empreinte>
-	  Author:     <auteur>
-	  AuthorDate: <date d'auteur>
-	  Commit:     <validateur>
-	  CommitDate: <date de validation>
-
-	       <ligne-de-titre>
-
-	       <message-de-validation-complet>
-
-* `reference`
-
-	  <empreinte-abrégée> (<ligne-de-titre>, <date-d'auteur-courte>)
+`reference`::
++
+[synopsis]
+--
+<empreinte-abrégée> (<ligne-de-titre>, <date-d'auteur-courte>)
+--
 +
 Ce format est utilisé pour faire référence à un autre commit dans un message de validation et est le même que ++--pretty=\'format:%C(auto)%h (%s, %ad)'++. Par défaut, la date est formatée avec `--date=short` à moins qu'une autre option `--date` ne soit explicitement spécifiée. Comme pour tout `format:` avec des espaces réservés de format, sa sortie n'est pas affectée par d'autres options comme `--decorate` et `--walk-reflogs`.
 
-* `email`
-
-	  From <empreinte> <date>
-	  From: <auteur>
-	  Date: <date d'auteur>
-	  Subject: [PATCH] <ligne de titre>
-
-	  <message-de-validation-complet>
-
-* `mboxrd`
+`email`::
 +
+[synopsis]
+--
+From <empreinte> <date> From : <auteur> Date : <date d'auteur> Subject : [PATCH] <ligne de titre>
+
+<message-de-validation-complet>
+--
+
+`mboxrd`::
 Comme `email`, mais les lignes dans le message de validation commençant par "From" (précédé de zéro ou plus ">") sont citées avec ">" pour ne pas être confondues avec le début d'un nouveau commit.
 
-* `raw`
-+
+`raw`::
 Le format `raw` montre le commit entier telle qu'elle est stockée dans l'objet commit. Notamment, les empreintes sont affichées dans leur intégralité, que `--abbrev` ou `--no-abbrev` soient utilisés ou non, et l'information 'parents' indiquent le véritable commit parent, sans tenir compte des greffes ou de la simplification d'historique. Notez que ce format affecte la façon dont les commits sont affichés, mais pas la façon dont la différence est affichée, par exemple avec `git log --raw`. Pour obtenir les noms complets des objets dans un format de diff brut, utilisez `--no-abbrev`.
 
-* `format:<chaîne-de-formatage>`
-+
+`format:<chaîne-de-formatage>`::
 Le format `format:<chaîne-de-formatage>` vous permet de spécifier quelles informations vous voulez afficher. Cela fonctionne un peu comme le format printf, à l'exception notable que vous obtenez une nouvelle ligne avec`%n` au lieu de`\n`.
 +
 Par exemple,'format : "L'auteur de %h était %an, %ar%nL'entête était >>%s<<<%n"' afficherait quelque chose comme ceci :
@@ -88,11 +94,16 @@ L'entête était >>t4119: test autocomputing -p<n> for traditional diff input.<<
 Les espaces réservés sont :
 
 - Les places qui s'étendent à un seul caractère littéral :
++
+--
 ++%n++:: retour à la ligne
 ++%%++:: un ++%++ brut
 ++%x00++:: ++%x++ suivi de deux chiffres hexadécimaux est remplacé par un octet avec la valeur des chiffres hexadécimaux (nous appellerons ceci "code de formatage littéral" dans le reste du document).
+--
 
 - Espaces réservés qui affectent le formatage des espaces réservés ultérieurs :
++
+--
 ++%Cred++:: passe la couleur au rouge
 ++%Cgreen++:: passe la couleur au vert
 ++%Cblue++:: passe la couleur au bleu
@@ -108,8 +119,11 @@ Les espaces réservés sont :
 ++%>>|(++_<m>_++)++:: similaire à ++%>(++_<n>_++)++, ++%>|(++_<m>_++)++ respectivement, sauf que si le prochain espace réservé prend plus d'espaces que prévu et qu'il y a des espaces à sa gauche, utiliser ces espaces
 ++%><(++_<n>_++)++::
 ++%><|(++_<m>_++)++:: similaire à ++%<(++_<n>_++)++, ++%<|(++_<m>_++)++ respectivement, mais en décalant des deux côtés (c'est-à-dire que le texte est centré)
+--
 
 - Espaces réservés développant les informations extraites du commit :
++
+--
 +%H+:: empreinte du commit
 +%h+:: empreinte abrégée du commit
 +%T+:: empreinte de l'arbre
@@ -146,30 +160,30 @@ Les espaces réservés sont :
 +%ch+:: date du validateur, style humain (comme l'option `--date=human` de linkgit:git-rev-list[1])
 +%d+:: les noms de ref, comme l'option --decorate de linkgit:git-log[1].
 +%D+:: les noms des refs, sans encadrement par « ( » et « ) ».
++%(count)+:: le numéro d'une rustine dans une série de rustines. Utilisé uniquement dans `--commit-list-format` dans `format-patch`
++%(total)+:: le nombre total de rustines dans une série de rustines. Utilisé uniquement dans `--commit-list-format` dans `format-patch`
 ++%(decorate++`[:<option>,...]`++)++::
 noms de réfs avec des décorations personnalisées. La chaîne "decorate" peut être suivie de deux points et de zéro ou plus options séparées par des virgules. Les valeurs d'option peuvent contenir des codes de formatage litéraux. Ils doivent être utilisés pour les virgules (`%x2C`) et les parenthèses de fermeture (`%x29`), en raison de leur rôle dans la syntaxe optionnelle.
 
-** `prefix=<valeur>` : Affiché avant la liste des noms de réf. Valeur pas défaut "{nbsp}++(++".
-** `suffix= <valeur>` : affiché après la liste des noms réf. Valeur par défaut à "+)+".
-** `separator=<valeur>` : affiché entre les noms de réf. Valeur par défaut à "+,+{nbsp} ".
-** `pointer=<valeur>` : Affichage entre HEAD et la branche pointée, le cas échéant.
-		      Par défaut "{nbsp}++->++{nbsp}".
-** `tag= <valeur>` : Afficher avant les noms des étiquettes. par défaut "`tag:`{nbsp}".
+`prefix=<valeur>`;; Affiché avant la liste des noms de réf. Valeur pas défaut "{nbsp}++(++".
+`suffix=<valeur>`;; Affiché après la liste des noms réf. Valeur par défaut à "+)+".
+`separator=<valeur>`;; Affiché entre les noms de réf. Valeur par défaut à "+,+{nbsp} ".
+`pointer=<valeur>`;; Affichage entre HEAD et la branche pointée, le cas échéant. Par défaut "{nbsp}->{nbsp}".
+`tag=<valeur>`;; Affiché avant les noms des étiquettes. par défaut "`tag:`{nbsp}".
 
 +
---
 Par exemple, pour produire des décorations sans enveloppe ni étiquettes, et des espaces comme séparateurs :
-
-++%(decorate:prefix=,suffix=,tag=,separator= )++
---
+---------------------
+    ++%(decorate:prefix=,suffix=,tag=,separator= )++
+---------------------
 
 ++%(describe++`[:<options>]`++)++::
 nom lisible par l'homme, comme linkgit:git-describe[1] ; chaîne vide pour les commits non descriptibles. La chaîne `describe` peut être suivie de deux points et de zéro ou plusieurs options séparées par des virgules. Les descriptions peuvent être incohérentes lorsque des étiquettes sont ajoutées ou supprimées en même temps.
 +
-** `tags[=<valeur-booléenne>]` : Au lieu de ne considérer que les étiquettes annotées, prendre également en compte les étiquettes légères.
-** `abbrev=<nombre>` : Au lieu d'utiliser le nombre de chiffres hexadécimaux par défaut (qui varie en fonction du nombre d'objets dans le dépôt avec une valeur par défaut de 7) du nom d'objet abrégé, utiliser <nombre> chiffres, ou autant de chiffres que nécessaire pour former un nom unique.
-** `match=<motif>` : Ne considère que les étiquettes correspondant au _<motif>_ `glob`(7) donné, à l'exclusion du préfixe `refs/tags/`.
-** `exclude=<motif>` : Ne pas prendre en compte les étiquettes correspondant au motif `glob`(7) donné, en excluant le préfixe `refs/tags/`.
+`--tags[=<valeur-booléenne>]`;; Au lieu de ne considérer que les étiquettes annotées, prendre également en compte les étiquettes légères.
+`abbrev=<nombre>`;; Au lieu d'utiliser le nombre de chiffres hexadécimaux par défaut (qui varie en fonction du nombre d'objets dans le dépôt avec une valeur par défaut de 7) du nom d'objet abrégé, utiliser _<nombre>_ chiffres, ou autant de chiffres que nécessaire pour former un nom unique.
+`match=<motif>`;; Ne considérer que les étiquettes correspondant au _<motif>_ `glob`(7) donné, à l'exclusion du préfixe `refs/tags/`.
+`exclude=<motif>`;; Ne pas prendre en compte les étiquettes correspondant au _<motif>_ `glob`(7) donné, en excluant le préfixe `refs/tags/`.
 
 +%S+:: nom de ref fourni en ligne de commande par lequel le commit a été atteint (comme `git log --source`), ne fonctionne qu’avec `git log`
 +%e+:: encodage
@@ -197,13 +211,19 @@ endif::git-rev-list[]
 ++'%(trailers++`[:<options>]`++)++::
 afficher les lignes ajoutées du corps comme interprétées par linkgit:git-interpret-trailers[1]. La chaîne `trailers` peut être suivie de deux-points et de zéro ou plus d'options séparées par des virgules. Si une option est fournie plusieurs fois, la dernière option l'emporte.
 +
-** `key=<clé>` : affiche uniquement les chaînes d'attributs avec la _<clé>_ spécifiée. L'appariement se fait de façon insensible à la casse et la virgule finale est facultative. Si l'option est donnée plusieurs fois, les lignes d'attributs correspondant à l'une des clés sont affichées. Cette option active automatiquement l'option `only` de sorte que les lignes non-attribut dans le bloc d'attributs soient masquées. Si ce n'est pas désiré, ce peut être désactivé avec `only=false`. Par exemple, +%(trailers:key=Reviewed-by)+ affiche les lignes d'attribut avec la clé `Reviewed-by`.
-** `only [=<booléen>]` : choisir si les lignes non annotées du bloc de lignes finales doivent être incluses.
-** `separator=<sep>` : spécifie le séparateur inséré entre les lignes d'attributs. Par défaut, un caractère de saut de ligne. La chaîne <sep> peut contenir les codes de formatage littéral décrits ci-dessus. Pour utiliser la virgule comme séparateur, il faut utiliser `%x2C` car sinon elle serait analysée comme option suivante. Par exemple, +%(trailers:key=Ticket,separator=%x2C )+ affiche toutes les lignes d'attributs dont la clé est « Ticket » séparées par une virgule et un espace.
-** `unfold[=<booléen>]` : se comporter comme si l'option `--unfold` d'interprétation des attributs était donnée. Par exemple, +%(trailers:only,unfold=true)+ déplie et affiche toutes les lignes d'attributs.
-** `keyonly [=<booléen>]` : ne montrer que la partie principale du bloc final.
-** `valueonly [=<booléen>]` : n'affichez que la partie valeur des lignes finales.
-** `key_value_separator=<sep>` : spécifier le séparateur inséré entre la clé et la valeur dans chaque ligne terminale. Par défaut " :". Sinon elle partage la même sémantique que `separator=<sep>` ci-dessus.
+`key=<clé>`;; affiche uniquement les chaînes d'attributs avec la _<clé>_ spécifiée. L'appariement se fait de façon insensible à la casse et la virgule finale est facultative. Si l'option est donnée plusieurs fois, les lignes d'attributs correspondant à l'une des clés sont affichées. Cette option active automatiquement l'option `only` de sorte que les lignes non-attribut dans le bloc d'attributs soient masquées. Si ce n'est pas désiré, ce peut être désactivé avec `only=false`. Par exemple, +%(trailers:key=Reviewed-by)+ affiche les lignes d'attribut avec la clé `Reviewed-by`.
+`only[=<booléen>]`;; choisir si les lignes non annotées du bloc de lignes finales doivent être incluses.
+ `separator=<sep>`;; spécifier le séparateur inséré entre les lignes d'attributs. Par défaut, un
+caractère de saut de ligne. La chaîne <sep> peut contenir les codes de
+formatage littéral décrits ci-dessus. Pour utiliser la virgule comme
+séparateur, il faut utiliser `%x2C` car sinon elle serait analysée comme
+option suivante. Par exemple, +%(trailers:key=Ticket,separator=%x2C )+
+affiche toutes les lignes d'attributs dont la clé est `Ticket` séparées par
+une virgule et un espace.
+`unfold[=<booléen>]`;; se comporter comme si l'option `--unfold` d'interprétation des attributs était donnée. Par exemple, +%(trailers:only,unfold=true)+ déplie et affiche toutes les lignes d'attributs.
+`keyonly[=<booléen>]`;; ne montrer que la partie clé de la ligne terminale.
+`valueonly[=<booléen>]`;; n'afficher que la partie valeur de la ligne terminale.
+`key_value_separator=<sep>`;; spécifier le séparateur inséré entre la clé et la valeur dans chaque ligne terminale. Par défaut " :". Sinon elle partage la même sémantique que `separator=<sep>` ci-dessus.
 
 NOTE: Certains espaces réservés peuvent dépendre d'autres options données au
 moteur de traversée de révisions. Par exemple, les options de reflog +%g*+
@@ -219,9 +239,9 @@ Si vous ajoutez un `+` (signe plus) après +%+ d'un espace réservé, un saut de
 Si vous ajoutez un `-` (signe moins) après +%+ d'un caractère de remplissage, tous les sauts de ligne consécutifs précédant immédiatement l'expansion sont supprimés si et seulement si l'espace réservé se développe en une chaîne vide.
 
 Si vous ajoutez un `' '`(espace) après +%+ d'un espace réservé, un espace est inséré immédiatement avant l'expansion si et seulement si l'espace réservé se développe en une chaîne non vide.
+--
 
-* `tformat:`
-+
+`tformat:`::
 Le format `tformat:` fonctionne exactement comme `format:`, sauf qu'il fournit une sémantique « terminator » au lieu de « separator ». En d'autres termes, chaque commit a le caractère de fin de message (habituellement une nouvelle ligne) ajouté, plutôt qu'un séparateur placé entre les entrées. Cela signifie que l'entrée finale d'un format à une ligne se terminera correctement par une nouvelle ligne, tout comme le format "oneline". Par exemple :
 +
 ---------------------

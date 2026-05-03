@@ -5,7 +5,7 @@ REMOTES[[REMOTES]]
 
 可以用下面的一个名称代替URL作为`<repository>`的参数：
 
-* 一个远端的配置文件在此仓库的git配置文件： `$GIT_DIR/config`、
+* 一个远程的配置文件在此仓库的git配置文件： `$GIT_DIR/config`、
 * 这个文件在`$GIT_DIR/remotes`目录下，或者
 * 这个文件在`$GIT_DIR/branches`目录下。
 
@@ -38,7 +38,7 @@ REMOTES[[REMOTES]]
 
 ------------
 
-`Push:` 行被 'git push' 使用，`Pull:` 行被 'git pull' 和 'git fetch' 使用。 可以为额外的分支映射指定多个 `Push:` 和 `Pull:` 行。
+`Push:` 行被 `git push` 使用，`Pull:` 行被 `git pull` 和 `git fetch` 使用。 可以为额外的分支映射指定多个 `Push:` 和 `Pull:` 行。
 
 `$GIT_DIR/branches` 中的命名文件
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -67,5 +67,29 @@ git push 使用：
 ------------
 
 
+[[UPSTREAM-BRANCHES]]
+上游分支
+----
 
+Git 中的分支可以选择关联一个上游远程分支。对于远程操作，Git 默认会使用该上游分支，例如：
 
+* 它是无参数执行 `git pull` 或 `git fetch` 时的默认目标。
+* 除少数例外情况外，它也是无参数执行 `git push` 时的默认目标。例如，你可以使用 `branch.<name>.pushRemote` 选项，将代码推送到与拉取时不同的远程；并且在默认的 `push.default=simple` 模式下，你所配置的上游分支必须与当前分支同名。
+* 包括 `git checkout` 和 `git status` 在内的各种命令都会告诉你：自从当前分支从上游分出以来，当前分支和上游分支各新增了多少个提交。例如会显示“Your branch and 'origin/main' have diverged, and have 2 and 3 different commits each respectively”。
+
+上游信息存储在 `.git/config` 的 "`remote`" 和 "`merge`" 字段中。例如，如果 `main` 的上游是 `origin/main`：
+
+------------
+[branch "main"]
+   remote = origin
+   merge = refs/heads/main
+------------
+
+你可以用 `git push --set-upstream <remote> <branch>` 显式设置上游分支，但 Git 往往也会自动为你设置上游，例如：
+
+* 当你克隆一个仓库时，Git 会自动为默认分支设置上游。
+* 如果设置了 `push.autoSetupRemote` 配置项，那么第一次推送某个分支时，`git push` 会自动设置其上游。
+* 使用 `git checkout <branch>` 检出远程跟踪分支时，会自动创建同名本地分支，并将该远程分支设置为其上游。
+
+[NOTE]
+上游分支有时也被称为 “tracking information”（跟踪信息），例如“set the branch's tracking information”。

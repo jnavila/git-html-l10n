@@ -1,0 +1,44 @@
+`mergetool.<tool>.path`::
+	覆盖给定工具的路径。如果你的工具不在 `$PATH` 中，这会很有用。
+
+`mergetool.<tool>.cmd`::
+	指定调用该 merge 工具的命令。该命令会在 shell 中求值，并可使用下列变量：`BASE` 是一个临时文件名，包含待合并文件的共同基础（如果有）；`LOCAL` 是一个临时文件名，包含当前分支上该文件的内容；`REMOTE` 是一个临时文件名，包含正在合并的分支中该文件的内容；`MERGED` 包含 merge 工具应写入成功合并结果的文件名。
+
+`mergetool.<tool>.hideResolved`::
+	允许用户为特定工具覆盖全局 `mergetool.hideResolved` 的值。完整说明见 `mergetool.hideResolved`。
+
+`mergetool.<tool>.trustExitCode`::
+	对于自定义 merge 命令，指定是否可以使用该 merge 命令的退出码来判断合并是否成功。如果未设为 true，则会检查合并目标文件的时间戳；如果文件已更新，则认为合并成功；否则会提示用户指明合并是否成功。
+
+`mergetool.meld.hasOutput`::
+	较旧版本的 `meld` 不支持 `--output` 选项。Git 会通过检查 `meld --help` 的输出来尝试检测 `meld` 是否支持 `--output`。配置 `mergetool.meld.hasOutput` 会让 Git 跳过这些检查，改用所配置的值。将 `mergetool.meld.hasOutput` 设为 `true` 会告诉 Git 无条件使用 `--output`；设为 `false` 则避免使用 `--output`。
+
+`mergetool.meld.useAutoMerge`::
+	给出 `--auto-merge` 时，meld 会自动合并所有无冲突部分，高亮冲突部分，并等待用户决策。将 `mergetool.meld.useAutoMerge` 设为 `true` 会告诉 Git 无条件对 meld 使用 `--auto-merge` 选项。将其设为 `auto` 会让 git 检测是否支持 `--auto-merge`，并仅在可用时使用该选项。值为 `false` 则完全避免使用 `--auto-merge`，这也是默认值。
+
+`mergetool.<variant>.layout`::
+	为 vimdiff 的 _<variant>_ 配置分屏窗口布局，_<variant>_ 可以是 `vimdiff`、`nvimdiff`、`gvimdiff` 中的任意一种。以 `--tool=<variant>` 启动 `git mergetool` 时（如果 `merge.tool` 已配置为 _<variant>_，也可不带 `--tool`），Git 会查阅 `mergetool.<variant>.layout` 来确定该工具的布局。如果没有对应 variant 的专用配置，则回退使用 `vimdiff` 的配置；如果这也不可用，则使用一个默认的 4 窗口布局。关于如何配置布局，参见“BACKEND SPECIFIC HINTS”
+ifdef::git-mergetool[]
+	节。
+endif::[]
+ifndef::git-mergetool[]
+	linkgit:git-mergetool[1] 中的该节。
+endif::[]
+
+`mergetool.hideResolved`::
+	在合并期间，Git 会自动尽可能多地解决冲突，并写出 `$MERGED` 文件，在其无法解决的冲突周围保留冲突标记；`$LOCAL` 和 `$REMOTE` 通常是 Git 进行冲突解决之前的文件版本。该标志会覆盖 `$LOCAL` 和 `$REMOTE`，使 merge 工具只看到未解决的冲突。可通过 `mergetool.<tool>.hideResolved` 配置变量按工具分别配置。默认值为 `false`。
+
+`mergetool.keepBackup`::
+	执行 merge 后，带冲突标记的原始文件可保存为一个带 `.orig` 扩展名的文件。如果该变量设为 `false`，则不保留该文件。默认值为 `true`（即保留备份文件）。
+
+`mergetool.keepTemporaries`::
+	调用自定义 merge 工具时，Git 会使用一组临时文件传递给该工具。如果工具返回错误且该变量设为 `true`，则这些临时文件会被保留；否则会在工具退出后删除。默认值为 `false`。
+
+`mergetool.writeToTemp`::
+	默认情况下，Git 会在工作区中写入冲突文件的临时 `BASE`、`LOCAL` 和 `REMOTE` 版本。设为 `true` 时，Git 会尝试为这些文件使用临时目录。默认值为 `false`。
+
+`mergetool.prompt`::
+	在每次调用合并解决程序前提示，让用户有机会跳过该路径。
+
+`mergetool.guiDefault`::
+	设为 `true` 则默认使用 `merge.guitool`（等同于指定 `--gui` 参数）；设为 `auto` 则根据是否存在 `DISPLAY` 环境变量的值来选择 `merge.guitool` 或 `merge.tool`。默认值为 `false`，此时必须显式提供 `--gui` 参数才会使用 `merge.guitool`。

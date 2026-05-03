@@ -20,7 +20,7 @@ BESKRIVNING
 -----------
 Mata ut innehållet eller andra egenskaper, såsom storlek, typ eller delta-information, för ett eller flera objekt.
 
-Det här kommandot kan fungera i två lägen, beroende på om ett alternativ från `--batch`-familjen är specificerat.
+Kommandot kan fungera i två lägen, beroende på om ett alternativ från `--batch`-familjen har angetts.
 
 I icke-satsläge tillhandahåller kommandot information om ett objekt som namnges på kommandoraden.
 
@@ -32,10 +32,10 @@ ALTERNATIV
 	Namnet på det objekt som ska visas. För en mer komplett lista över sätt att stava objektnamn, se avsnittet "SPECIFICERING AV REVISIONER" i linkgit:gitrevisions[7].
 
 -t::
-	Istället för innehållet, visa objekttypen som identifieras av `<objekt>`.
+	I stället för innehållet, visa objekttypen som identifieras av `<objekt>`.
 
 -s::
-	Istället för innehållet, visa objektstorleken identifierad av `<objekt>`. Om den används med alternativet `--use-mailmap`, visas storleken på det uppdaterade objektet efter att identer ersatts med hjälp av mailmap-mekanismen.
+	I stället för innehållet, visa objektstorleken identifierad av `<objekt>`. Om den används med alternativet `--use-mailmap`, visas storleken på det uppdaterade objektet efter att identer ersatts med hjälp av mailmap-mekanismen.
 
 -e::
 	Avsluta med status noll om `<objekt>` finns och är ett giltigt objekt. Om `<objekt>` har ett ogiltigt format, avsluta med status som inte är noll och generera ett felmeddelande vid stderr.
@@ -44,7 +44,7 @@ ALTERNATIV
 	Skriv ut innehållet i `<objekt>` baserat på dess typ.
 
 <typ>::
-	Vanligtvis matchar detta den verkliga typen av `<objekt>`, men det är också tillåtet att fråga efter en typ som trivialt kan avrefereras från den givna `<objekt>`. Ett exempel är att fråga efter ett "träd" där `<objekt>` är ett incheckning-objekt som innehåller det, eller att fråga efter en "blob" där `<objekt>` är ett taggobjekt som pekar på det.
+	Vanligtvis matchar detta den verkliga typen av `<objekt>`, men det är också tillåtet att fråga efter en typ som trivialt kan avrefereras från den givna `<objekt>`. Ett exempel är att fråga efter ett "träd" där `<objekt>` är ett incheckningsobjekt som innehåller det, eller att fråga efter en "blob" där `<objekt>` är ett taggobjekt som pekar på det.
 
 --mailmap::
 --no-mailmap::
@@ -56,7 +56,7 @@ ALTERNATIV
 	Visa innehållet så som det har transformerats av ett textconv filtret. I det här fallet måste `<objekt>` ha formen `<trädlikt>:<sökväg>` eller `:<sökväg>` för att filtret ska kunna tillämpas på innehållet som är registrerat i indexet vid `<sökväg>`.
 
 --filters::
-	Visa innehållet så som det konverterats av filtren som konfigurerats i den aktuella arbetskatalogen för det givna `<sökvägen>` (dvs. smetfilter, konvertering vid radslut, etc.). I det här fallet måste `<objekt>` vara av formen `<trädlikt>:<sökväg>` eller `:<sökväg>`.
+	Visa innehållet så som det konverterats av filtren som konfigurerats i det aktuella arbetsträdet för den angivna `<sökvägen>` (d.v.s. smudge-filter, konvertering vid radslut, etc.). I det här fallet måste `<objekt>` vara av formen `<trädlikt>:<sökväg>` eller `:<sökväg>`.
 
 --filter=<filter-spec>::
 --no-filter::
@@ -118,22 +118,22 @@ flush::
 +
 
 --batch-all-objects::
-	Istället för att läsa en lista med objekt på stdin, utför den begärda sats-operationen på alla objekt i kodförrådet och eventuella alternativa objektlager (inte bara nåbara objekt). Kräver att `--batch` eller `--batch-check` anges. Som standard besöks objekten i ordning sorterade efter deras hash-värden; se även `--unordered` nedan. Objekt presenteras som de är, utan att respektera "replace"-mekanismen i linkgit:git-replace[1].
+	I stället för att läsa en lista med objekt på stdin, utför den begärda sats-operationen på alla objekt i kodförrådet och eventuella alternativa objektlager (inte bara nåbara objekt). Kräver att `--batch` eller `--batch-check` anges. Som standard besöks objekten i ordning sorterade efter deras hash-värden; se även `--unordered` nedan. Objekt presenteras som de är, utan att respektera "replace"-mekanismen i linkgit:git-replace[1].
 
 --buffer::
 	Normalt sett rensas satsutdata efter att varje objekt har matats ut, så att en process interaktivt kan läsa och skriva från `cat-file`. Med det här alternativet använder utdata normal stdio-buffring; detta är mycket effektivare när `--batch-check` eller `--batch-command` anropas på ett stort antal objekt.
 
 --unordered::
-	När `--batch-all-objects` används, besök objekt i en ordning som kan vara mer effektiv för att komma åt objektinnehållet än hashordning. De exakta detaljerna i ordningen är ospecificerade, men om du inte behöver en specifik ordning bör detta generellt resultera i snabbare utdata, särskilt med `--batch`. Observera att `cat-file` fortfarande bara visar varje objekt en gång, även om det lagras flera gånger i arkivet.
+	När `--batch-all-objects` används, besök objekt i en ordning som kan vara mer effektiv för att komma åt objektinnehållet än hashordning. De exakta detaljerna i ordningen är inte angivna, men om en specifik ordning inte behövs ordning bör detta generellt resultera i snabbare utdata, särskilt med `--batch`. Observera att `cat-file` fortfarande bara visar varje objekt en gång, även om det lagras flera gånger i kodförrådet.
 
 --follow-symlinks::
-	Med `--batch` eller `--batch-check`, följ symboliska länkar inuti kodförrådet när du begär objekt med utökade SHA-1-uttryck av formen tree-ish:path-in-tree. Istället för att tillhandahålla utdata om själva länken, tillhandahålla utdata om det länkade objektet. Om en symbolisk länk pekar utanför trädet (t.ex. en länk till `/foo` eller en rotnivålänk till `../foo`), kommer den del av länken som finns utanför trädet att skrivas ut.
+	Med `--batch` eller `--batch-check` följs symboliska länkar inuti kodförrådet när objekt begärs med utökade SHA-1-uttryck av formen tree-ish:path-in-tree. I stället för att tillhandahålla utdata om själva länken ges utdata om det länkade objektet. Om en symbolisk länk pekar utanför trädet (t.ex. en länk till `/foo` eller en rotnivålänk till `../foo`), kommer den del av länken som finns utanför trädet att skrivas ut.
 +
-Det här alternativet fungerar (för närvarande) inte korrekt när ett objekt i indexet anges (t.ex. `:link` istället för `HEAD:link`) snarare än ett i trädet.
+Det här alternativet fungerar (för närvarande) inte korrekt när ett objekt i indexet anges (t.ex. `:link` i stället för `HEAD:link`) snarare än ett i trädet.
 +
 Det här alternativet kan (för närvarande) inte användas om inte `--batch` eller `--batch-check` används.
 +
-Tänk dig till exempel ett git-kodförråd som innehåller:
+Anta till exempel ett Git-kodförråd som innehåller:
 +
 --
 	f: en fil som innehåller "hej\n"
@@ -168,10 +168,10 @@ Både `plänk` och `alänk` pekar utanför trädet, så de skulle skriva ut:
 --
 
 -Z::
-	Endast meningsfullt med `--batch`, `--batch-check` eller `--batch-command`; indata och utdata är NUL-avgränsade istället för nyradsavgränsade.
+	Endast meningsfullt med `--batch`, `--batch-check` eller `--batch-command`; indata och utdata är NUL-avgränsade i stället för nyradsavgränsade.
 
 -z::
-	Endast meningsfullt med `--batch`, `--batch-check` eller `--batch-command`; inmatningen är NUL-avgränsad istället för nyradsavgränsad. Detta alternativ är föråldrat till förmån för `-Z` eftersom utmatningen annars kan vara tvetydig.
+	Endast meningsfullt med `--batch`, `--batch-check` eller `--batch-command`; inmatningen är NUL-avgränsad i stället för nyradsavgränsad. Detta alternativ är föråldrat till förmån för `-Z` eftersom utmatningen annars kan vara tvetydig.
 
 
 UTMATNING
@@ -189,7 +189,7 @@ Om `<typ>` anges, returneras det råa (men okomprimerade) innehållet i `<objekt
 SATS UTMATNING
 --------------
 
-Om `--batch` eller `--batch-check` anges, kommer `cat-file` att läsa objekt från stdin, ett per rad, och skriva ut information om dem i samma ordning som de har lästs. Som standard, betraktas hela raden som ett objekt, som om den matades till linkgit:git-rev-parse[1].
+Om `--batch` eller `--batch-check` anges kommer `cat-file` att läsa objekt från stdin, ett per rad, och skriva ut information om dem i samma ordning som de har lästs. Som standard betraktas hela raden som ett objekt, som om den matades till linkgit:git-rev-parse[1].
 
 När `--batch-command` ges, kommer `cat-file` att läsa kommandon från stdin, ett per rad, och skriva ut information baserat på det givna kommandot. Med `--batch-command` kommer `info`-kommandot följt av ett objekt att skriva ut information om objektet på samma sätt som `--batch-check` skulle göra, och `contents`-kommandot följt av ett objekt skriver ut innehållet på samma sätt som `--batch` skulle göra.
 
@@ -214,7 +214,7 @@ Du kan ange informationen som visas för varje objekt genom att använda ett anp
 	Om objektet lagras som en delta på disk, expanderas detta till den fullständiga hexadecimala representationen av deltabasobjektets namn. Annars expanderas det till null-OID (bara nollor). Se `FÖRBEHÅLL` nedan.
 
 `rest`::
-	Om denna atom används i utdatasträngen delas indatalinjerna vid den första blankstegsgränsen. Alla tecken före det mellanslaget anses vara objektnamnet; Tecken efter den första omgången av blanksteg (dvs. "resten" av raden) matas ut istället för `%(rest)`-atomen.
+	Om denna atom används i utdatasträngen delas indatalinjerna vid den första blankstegsgränsen. Alla tecken före det blanksteget anses vara objektnamnet; tecken efter den första följden av blanksteg (d.v.s. "resten" av raden) matas ut i stället för `%(rest)`-atomen.
 
 Om inget format anges, är standardformatet `%(objectname) %(objecttype) %(objectsize)`.
 
@@ -257,7 +257,7 @@ Om ett namn anges som refererar till en undermodulpost i ett träd och målobjek
 <oid> SP submodule LF
 ------------
 
-Om `--follow-symlinks` används, och en symlänk i arkivet pekar utanför arkivet, så kommer `cat-file` att ignorera alla anpassade format och skriva ut:
+Om `--follow-symlinks` används, och en symlänk i kodförrådet pekar utanför kodförrådet, så kommer `cat-file` att ignorera alla anpassade format och skriva ut:
 
 ------------
 symlink SP <storlek> LF

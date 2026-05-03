@@ -9,16 +9,16 @@ git-reflog - 管理重引用日志信息
 概述
 --
 [synopsis]
-git reflog [show] [<log-options>] [<ref>]
+git reflog [show] [<日志选项>] [<引用>]
 git reflog list
-git reflog exists <ref>
-git reflog write <ref> <old-oid> <new-oid> <message>
+git reflog exists <引用>
+git reflog write <引用> <旧对象ID> <新对象ID> <消息>
 git reflog delete [--rewrite] [--updateref]
-	[--dry-run | -n] [--verbose] <ref>@{<specifier>}...
-git reflog drop [--all [--single-worktree] | <refs>...]
-git reflog expire [--expire=<time>] [--expire-unreachable=<time>]
+	[--dry-run | -n] [--verbose] <引用>@{<标注>}...
+git reflog drop [--all [--single-worktree] | <引用>...]
+git reflog expire [--expire=<时间>] [--expire-unreachable=<时间>]
 	[--rewrite] [--updateref] [--stale-fix]
-	[--dry-run | -n] [--verbose] [--all [--single-worktree] | <refs>...]
+	[--dry-run | -n] [--verbose] [--all [--single-worktree] | <引用>...]
 
 描述
 --
@@ -34,11 +34,11 @@ git reflog expire [--expire=<time>] [--expire-unreachable=<time>]
 
 "exists" 子命令检查引用是否有引用日志。 如果引用日志存在，则以零状态退出；如果不存在，则以非零状态退出。
 
-The "write" subcommand writes a single entry to the reflog of a given reference. This new entry is appended to the reflog and will thus become the most recent entry. The reference name must be fully qualified. Both the old and new object IDs must not be abbreviated and must point to existing objects. The reflog message gets normalized.
+"write" 子命令会向指定引用的引用日志写入一条记录。该新记录会追加到引用日志末尾，因此会成为最新的一条。引用名称必须是完全限定名。旧对象 ID 与新对象 ID 都不得使用缩写，且必须指向已存在的对象。引用日志消息会被规范化。
 
-The "delete" subcommand deletes single entries from the reflog, but not the reflog itself. Its argument must be an _exact_ entry (e.g. "`git reflog delete master@{2}`"). This subcommand is also typically not used directly by end users.
+"delete" 子命令用于删除应用日志中的单个条目。其参数必须是一个_exact_条目（例如"`git reflog delete master@{2}`"）。最终用户通常也不会直接使用该子命令。
 
-The "drop" subcommand completely removes the reflog for the specified references. This is in contrast to "expire" and "delete", both of which can be used to delete reflog entries, but not the reflog itself.
+"drop" 子命令会彻底移除指定引用的引用日志。这与 "expire" 和 "delete" 不同：后两者可以删除引用日志条目，但不会删除引用日志本身。
 
 "expire" 子命令用于删除旧的引用日志条目。超过 `expire` 时间的条目，或超过 `expire-unreachable` 时间且当前 tip 无法访问的条目，都会从引用日志中删除。 终端用户通常不会直接使用该子项，请参见 linkgit:git-gc[1]。
 
@@ -56,14 +56,14 @@ The "drop" subcommand completely removes the reflog for the specified references
 
 `git reflog delete` 接受选项 `--updateref`、`--rewrite`、`-n`、`--dry-run` 和 `--verbose`，其含义与与 `expire` 一起使用时相同。
 
-Options for `drop`
-~~~~~~~~~~~~~~~~~~
+`show`（显示）的选项
+~~~~~~~~~~~~~
 
 `--all`::
-	Drop the reflogs of all references from all worktrees.
+	处理所有引用的引用日志。
 
 `--single-worktree`::
-	By default when `--all` is specified, reflogs from all working trees are dropped. This option limits the processing to reflogs from the current working tree only.
+	默认情况下，如果指定了 `--all`选项，所有工作区的引用日志都会被处理。此选项限制只处理当前工作区的引用日志。
 
 
 `expire` 的选项
@@ -75,10 +75,10 @@ Options for `drop`
 `--single-worktree`::
 	默认情况下，如果指定了 `--all`选项，所有工作区的引用日志都会被处理。此选项限制只处理当前工作区的引用日志。
 
-`--expire=<time>`::
+--expire=<时间>::
 	剪除超过指定时间的条目。如果未指定此选项，则过期时间取自配置设置 `gc.reflogExpire`，默认为 90 天。`--expire=all` 会剪除任何年龄的条目；`--expire=never` 会关闭剪除可到达条目的功能（但请参阅 `--expire-unreachable`）。
 
-`--expire-unreachable=<time>`::
+--expire-unreachable=<时间>::
 	剪除从分支当前顶端无法到达的超过 `<时间>` 的条目。如果未指定此选项，则过期时间取自配置设置 `gc.reflogExpireUnreachable`，默认为 30 天。`--expire-unreachable=all` 会修剪无法访问的条目，无论其年龄大小；`--expire-unreachable=never` 会关闭对无法访问条目的早期修剪（但请参见 `--expire`）。
 
 `--updateref`::

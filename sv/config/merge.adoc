@@ -13,10 +13,10 @@ konfliktområdet när dessa matchande rader visas nära antingen början eller
 slutet av ett konfliktområde.
 
 `merge.defaultToUpstream`::
-	Om merge anropas utan något inchecknings-argument, sammanfogas de uppströmsgrenar som konfigurerats för den aktuella grenen med hjälp av deras senast observerade värden som lagrats i deras fjärrspårningsgrenar. Värdena för `branch.<nuvarande gren>.merge` som namnger grenarna på fjärrvärd namngiven av `branch.<nuvarande gren>.remote` konsulteras, och sedan mappas de via `remote.<fjärrvärd>.fetch` till deras motsvarande fjärrspårningsgrenar, och topparna för dessa spårningsgrenar sammanfogas. Standardvärdet är sant.
+	Om merge anropas utan något incheckningsargument sammanfogas de uppströmsgrenar som konfigurerats för den aktuella grenen med hjälp av deras senast observerade värden i motsvarande fjärrspårade grenar. Värdena i `branch.<nuvarande gren>.merge`, som namnger grenarna på den fjärr som anges av `branch.<nuvarande gren>.remote`, läses av och mappas sedan via `remote.<fjärrvärd>.fetch` till motsvarande fjärrspårade grenar, varefter topparna på spårningsgrenarna sammanfogas. Standardvärdet är sant.
 
 `merge.ff`::
-	Som standard, skapar Git inte en extra sammanslagnings-incheckningar när den sammanfogar en incheckning som är en underordnad till den topen av aktuell incheckning. Istället snabbspolas spetsen för den aktuella grenen framåt. När den är satt till `false`, talar denna variabel om för Git att skapa en extra sammanslagnings-incheckning i ett sådant fall (motsvarande att ge alternativet `--no-ff` från kommandoraden). När den är satt till `only`, tillåts endast sådana snabbspolnings-sammanslagningar (motsvarande att ge alternativet `--ff-only` från kommandoraden).
+	Som standard skapar Git ingen extra sammanslagningsincheckning när en incheckning som är en efterföljare till den aktuella incheckningen sammanfogas. I stället snabbspolas toppen på den aktuella grenen framåt. När variabeln sätts till `false` instruerar den Git att skapa en extra sammanslagningsincheckning i ett sådant fall (motsvarande alternativet `--no-ff` på kommandoraden). När den sätts till `only` tillåts endast sådana snabbspolningssammanslagningar (motsvarande alternativet `--ff-only` på kommandoraden).
 
 `merge.verifySignatures`::
 	Om sant, motsvarar detta kommandoradsalternativet `--verify-signatures`. Se linkgit:git-merge[1] för mer information.
@@ -27,14 +27,14 @@ include::fmt-merge-msg.adoc[]
 	Antalet filer som ska beaktas i den uttömmande delen av namnbytesdetektering under en sammanslagning. Om inget anges används standardvärdet `diff.renameLimit`. Om varken `merge.renameLimit` eller `diff.renameLimit` anges används standardvärdet för närvarande 7000. Denna inställning har ingen effekt om namnbytesdetektering är avstängd.
 
 `merge.renames`::
-	Huruvida Git detekterar namnbyten. Om det är satt till `false` är namnbytesdetektering inaktiverad. Om det är satt till `true` är grundläggande namnbytesdetektering aktiverad. Standardvärdet är diff.renames.
+	Huruvida Git identifierar namnbyten. Om det är satt till `false` är namnbytesdetektering inaktiverad. Om det är satt till `true` är grundläggande namnbytesdetektering aktiverad. Standardvärdet är diff.renames.
 
 `merge.directoryRenames`::
-	Huruvida Git detekterar katalogbyten, vilket påverkar vad som händer vid sammanslagningstillfället med nya filer som läggs till i en katalog på ena sidan av historiken när den katalogen döptes om på den andra sidan av historiken. Möjliga värden är:
+	Huruvida Git identifierar katalognamnbyten, vilket påverkar vad som händer vid sammanslagningstillfället med nya filer som läggs till i en katalog på ena sidan av historiken när den katalogen döptes om på den andra sidan av historiken. Möjliga värden är:
 +
 --
-`false`;; Detektering av katalog-namnbyte är inaktiverat, vilket innebär att sådana nya filer kommer att lämnas kvar i den gamla katalogen.
-`true`;; Detektering av katalog namnbyte är aktiverat, vilket innebär att sådana nya filer flyttas till den nya katalogen.
+`false`;; Identifiering av katalognamnbyten är inaktiverad, vilket innebär att sådana nya filer kommer att lämnas kvar i den gamla katalogen.
+`true`;; Identifiering av katalognamnbyten är aktiverad, vilket innebär att sådana nya filer flyttas till den nya katalogen.
 `conflict`;; En konflikt kommer att rapporteras för sådana sökvägar.
 --
 +
@@ -52,16 +52,16 @@ Om `merge.renames` är `false` ignoreras `merge.directoryRenames` och behandlas 
 `compact`;; Visa `git diff --compact-summary ORIG_HEAD`.
 --
 +
-men alla okända värden (t.ex. ett värde som läggs till av en framtida version av Git) tas som `sant` istället för att utlösa ett fel. Standardvärdet är `sant`.
+men alla okända värden (t.ex. ett värde som läggs till av en framtida version av Git) tas som `sant` i stället för att utlösa ett fel. Standardvärdet är `sant`.
 
 `merge.autoStash`::
-	När den är satt till `true` skapas automatiskt en tillfällig gömma-post innan operationen börjar och tillämpas efter att operationen är avslutad. Detta innebär att du kan köra merge på ett smutsigt arbetsträd. Använd dock med försiktighet: den slutliga stash-applikationen efter en lyckad merge kan resultera i icke-triviala konflikter. Detta alternativ kan åsidosättas av alternativen `--no-autostash` och `--autostash` i linkgit:git-merge[1]. Standardvärdet är `false`.
+	När den är satt till `true` skapas automatiskt en tillfällig gömd post innan operationen börjar och tillämpas efter att operationen är avslutad. Detta innebär att merge kan köras på ett smutsigt arbetsträd. Använd dock med försiktighet: den slutliga tillämpningen av gömman efter en lyckad merge kan resultera i icke-triviala konflikter. Detta alternativ kan åsidosättas av alternativen `--no-autostash` och `--autostash` i linkgit:git-merge[1]. Standardvärdet är `false`.
 
 `merge.tool`::
 	Kontrollerar vilket sammanslagningsverktyg som används av linkgit:git-mergetool[1]. Listan nedan visar de giltiga inbyggda värdena. Alla andra värden behandlas som ett anpassat sammanslagningsverktyg och kräver att en motsvarande `mergetool.<verktyg>.cmd`-variabel definieras.
 
 `merge.guitool`::
-	Styr vilket sammanslagningsverktyg som används av linkgit:git-mergetool[1] när flaggan `-g`/`--gui` är specificerad. Listan nedan visar de giltiga inbyggda värdena. Alla andra värden behandlas som ett anpassat sammanslagningsverktyg och kräver att en motsvarande variabel `mergetool.<gui-verktyg>.cmd` definieras.
+	Styr vilket sammanslagningsverktyg som används av linkgit:git-mergetool[1] när flaggan `-g`/`--gui` har angetts. Listan nedan visar de giltiga inbyggda värdena. Alla andra värden behandlas som ett anpassat sammanslagningsverktyg och kräver att en motsvarande variabel `mergetool.<gui-verktyg>.cmd` definieras.
 
 include::{build_dir}/mergetools-merge.adoc[]
 

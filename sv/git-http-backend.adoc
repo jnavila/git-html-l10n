@@ -12,31 +12,31 @@ SYNOPSIS
 
 BESKRIVNING
 -----------
-Ett enkelt CGI-program för att leverera innehållet i ett Git-förvar till Git-klienter som kommer åt arkivet via protokollen http:// och https://. Programmet stöder klienter som hämtar data med både smart HTTP-protokollet och det bakåtkompatibla dumma HTTP-protokollet, samt klienter som skickar data med smart HTTP-protokollet. Det stöder även Gits mer effektiva "v2"-protokoll om det är korrekt konfigurerat; se diskussionen om `GIT_PROTOCOL` i avsnittet MILJÖ nedan.
+Ett enkelt CGI-program för att leverera innehållet i ett Git-kodförråd till Git-klienter som kommer åt kodförrådet via protokollen http:// och https://. Programmet stöder klienter som hämtar data med både smart HTTP-protokollet och det bakåtkompatibla dumma HTTP-protokollet, samt klienter som skickar data med smart HTTP-protokollet. Det stöder även Gits mer effektiva "v2"-protokoll om det är korrekt konfigurerat; se diskussionen om `GIT_PROTOCOL` i avsnittet MILJÖ nedan.
 
 Den verifierar att katalogen har den magiska filen "git-daemon-export-ok", och den kommer att vägra exportera alla Git-kataloger som inte uttryckligen har markerats för export på detta sätt (såvida inte miljövariabeln `GIT_HTTP_EXPORT_ALL` är satt).
 
-Som standard, är endast tjänsten `upload-pack` aktiverad, vilken betjänar klienterna `git fetch-pack` och `git ls-remote`, vilka anropas från `git fetch`, `git pull` och `git clone`. Om klienten är autentiserad är tjänsten `receive-pack` aktiverad, vilken betjänar klienterna `git send-pack`, vilka anropas från `git push`.
+Som standard är endast tjänsten `upload-pack` aktiverad, vilken betjänar klienterna `git fetch-pack` och `git ls-remote`, vilka anropas från `git fetch`, `git pull` och `git clone`. Om klienten är autentiserad är tjänsten `receive-pack` aktiverad, vilken betjänar klienterna `git send-pack`, vilka anropas från `git push`.
 
 TJÄNSTER
 --------
-Dessa tjänster kan aktiveras/inaktiveras med hjälp av per-förvar konfigurations-fil:
+Dessa tjänster kan aktiveras/inaktiveras med hjälp av kodförrådets konfigurationsfil:
 
 http.getanyfile::
-	Detta betjänar Git-klienter äldre än version 1.6.6 som inte kan använda uppladdnings-paket-tjänsten. När den är aktiverad kan klienter läsa vilken fil som helst i arkivet, inklusive objekt som inte längre är nåbara från en gren men som fortfarande finns. Den är aktiverad som standard, men ett förvar kan inaktivera den genom att ställa in detta konfigurationsvärde till `false`.
+	Det betjänar Git-klienter äldre än version 1.6.6 som inte kan använda uppladdnings-paket-tjänsten. När den är aktiverad kan klienter läsa vilken fil som helst i kodförrådet, inklusive objekt som inte längre är nåbara från en gren men som fortfarande finns. Den är aktiverad som standard, men ett kodförråd kan inaktivera den genom att ställa in detta konfigurationsvärde till `false`.
 
 http.uploadpack::
-	Detta betjänar klienterna 'git fetch-pack' och 'git ls-remote'. Det är aktiverat som standard, men ett förvar kan inaktivera det genom att ställa in konfigurationsvärdet till 'false'.
+	Det betjänar klienterna 'git fetch-pack' och 'git ls-remote'. Det är aktiverat som standard, men ett kodförråd kan inaktivera det genom att ställa in konfigurationsvärdet till 'false'.
 
 http.receivepack::
-	Detta betjänar 'git send-pack'-klienter och tillåter push (sändning). Det är inaktiverat som standard för anonyma användare och aktiverat som standard för användare som autentiserats av webbservern. Det kan inaktiveras genom att ställa in det här alternativet till 'false', eller aktiveras för alla användare, inklusive anonyma användare, genom att ställa in det till 'true'.
+	Det betjänar 'git send-pack'-klienter och tillåter push (sändning). Det är inaktiverat som standard för anonyma användare och aktiverat som standard för användare som autentiserats av webbservern. Det kan inaktiveras genom att ställa in alternativet till 'false', eller aktiveras för alla användare, inklusive anonyma användare, genom att ställa in det till 'true'.
 
 http.uploadarchive::
-	Detta betjänar 'git archive'-klienter för fjärr-arkivering över HTTP/HTTPS-protokoll. Det är inaktiverat som standard. Det fungerar bara i protokoll v2.
+	Detta betjänar `git archive`-klienter för fjärrarkivering över HTTP/HTTPS-protokoll. Funktionen är inaktiverad som standard. Den fungerar endast i protokoll v2.
 
 URL-ÖVERSÄTTNING
 ----------------
-För att bestämma platsen för förvaret på disken sammanfogar 'git http-backend' miljövariablerna PATH_INFO, som ställs in automatiskt av webbservern, och GIT_PROJECT_ROOT, som måste ställas in manuellt i webbserver-konfigurationen. Om GIT_PROJECT_ROOT inte är angivet, läser 'git http-backend' PATH_TRANSLATED, som också ställs in automatiskt av webbservern.
+För att bestämma platsen för kodförrådet på disken sammanfogar 'git http-backend' miljövariablerna PATH_INFO, som ställs in automatiskt av webbservern, och GIT_PROJECT_ROOT, som måste ställas in manuellt i webbserver-konfigurationen. Om GIT_PROJECT_ROOT inte är angivet, läser 'git http-backend' PATH_TRANSLATED, som också ställs in automatiskt av webbservern.
 
 EXEMPEL
 -------
@@ -93,9 +93,9 @@ Om du inte har `mod_rewrite` tillgänglig för att matcha mot frågesträngen, r
 </LocationMatch>
 ----------------------------------------------------------------
 +
-I det här läget, kommer servern inte att begära autentisering förrän klienten faktiskt startar objektförhandlingsfasen av push-begäran, snarare än under den initiala kontakten. Av denna anledning måste du också aktivera konfigurations-alternativet `http.receivepack` i alla förvar som ska acceptera en push. Standardbeteendet, om `http.receivepack` inte är inställt, är att avvisa alla push-begäran från oautentiserade användare; den initiala begäran kommer därför att rapportera `403 Forbidden` till klienten, utan att ens ge möjlighet till autentisering.
+I det här läget, kommer servern inte att begära autentisering förrän klienten faktiskt startar objektförhandlingsfasen av push-begäran, snarare än under den initiala kontakten. Av denna anledning måste du också aktivera konfigurations-alternativet `http.receivepack` i alla kodförråd som ska acceptera en push. Standardbeteendet, om `http.receivepack` inte är inställt, är att avvisa alla push-begäran från oautentiserade användare; den initiala begäran kommer därför att rapportera `403 Forbidden` till klienten, utan att ens ge möjlighet till autentisering.
 +
-För att kräva autentisering för både läsning och skrivning, använd ett Location (plats) direktiv runt förvaret, eller en av dess överordnade kataloger:
+För att kräva autentisering för både läsning och skrivning, använd ett Location (plats) direktiv runt kodförrådet, eller en av dess överordnade kataloger:
 +
 ----------------------------------------------------------------
 <Location /git/private>
@@ -121,7 +121,7 @@ ScriptAliasMatch \
 ScriptAlias /git/ /var/www/cgi-bin/gitweb.cgi/
 ----------------------------------------------------------------
 +
-För att hantera flera förvar från olika linkgit:gitnamespaces[7] i ett enda förvar:
+För att hantera flera kodförråd från olika linkgit:gitnamespaces[7] i ett enda kodförråd:
 +
 ----------------------------------------------------------------
 SetEnvIf Request_URI "^/git/([^/]*)" GIT_NAMESPACE=$1
@@ -139,7 +139,7 @@ AliasMatch ^/git/(.*/objects/pack/pack-[0-9a-f]{40}.(pack|idx))$ /var/www/git/$1
 ScriptAlias /git/ /usr/libexec/git-core/git-http-backend/
 ----------------------------------------------------------------
 +
-Detta kan kombineras med gitweb-konfigurationen:
+Det kan kombineras med gitweb-konfigurationen:
 +
 ----------------------------------------------------------------
 SetEnv GIT_PROJECT_ROOT /var/www/git
@@ -213,9 +213,9 @@ MILJÖ
 * QUERY_STRING
 * REQUEST_METHOD
 
-Miljövariabeln `GIT_HTTP_EXPORT_ALL` kan skickas till 'git-http-backend' för att kringgå kontrollen av filen "git-daemon-export-ok" i varje förvar innan export av det förvaret tillåts.
+Miljövariabeln `GIT_HTTP_EXPORT_ALL` kan skickas till 'git-http-backend' för att kringgå kontrollen av filen "git-daemon-export-ok" i varje kodförråd innan export av det kodförrådet tillåts.
 
-Miljövariabeln `GIT_HTTP_MAX_REQUEST_BUFFER` (eller konfigurationsalternativet `http.maxRequestBuffer`) kan ställas in för att ändra den största referensförhandlingsbegäran som git hanterar under en hämtning; en hämtning som kräver en större buffert kommer inte att lyckas. Detta värde bör normalt inte behöva ändras, men kan vara användbart om du hämtar från ett förvar med ett extremt stort antal referenser. Värdet kan anges med en enhet (t.ex. `100M` för 100 megabyte). Standardvärdet är 10 megabyte.
+Miljövariabeln `GIT_HTTP_MAX_REQUEST_BUFFER` (eller konfigurationsalternativet `http.maxRequestBuffer`) kan ställas in för att ändra den största referensförhandlingsbegäran som git hanterar under en hämtning; en hämtning som kräver en större buffert kommer inte att lyckas. Detta värde bör normalt inte behöva ändras, men kan vara användbart om du hämtar från ett kodförråd med ett extremt stort antal referenser. Värdet kan anges med en enhet (t.ex. `100M` för 100 megabyte). Standardvärdet är 10 megabyte.
 
 Klienter kan söka efter valfria protokollfunktioner (som v2-protokollet) med hjälp av HTTP-huvudet `Git-Protocol`. För att stödja dessa måste innehållet i den huvudet visas i miljövariabeln `GIT_PROTOCOL`. De flesta webbservrar skickar denna huvud till CGI via variabeln `HTTP_GIT_PROTOCOL`, och `git-http-backend` kopierar den automatiskt till `GIT_PROTOCOL`. Vissa webbservrar kan dock vara mer selektiva med vilka huvuden de skickar, i vilket fall de måste konfigureras explicit (se omnämnandet av `Git-Protocol` i Apache-konfigurationen från det tidigare EXEMPEL-avsnittet).
 

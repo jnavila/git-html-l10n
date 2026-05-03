@@ -32,16 +32,16 @@ ALTERNATIV
 	När denna flagga anges, generera ett omvänt index (en `.rev`-fil) som motsvarar det givna paketet. Om `--verify` anges, se till att det befintliga omvända indexet är korrekt. Har företräde framför `pack.writeReverseIndex`.
 
 --stdin::
-	När denna flagga anges, läses paketet från stdin istället och en kopia skrivs sedan till <pack-fil>. Om <pack-fil> inte anges skrivs paketet till objects/pack/-katalogen i det aktuella Git-arkivet med ett standardnamn som bestäms utifrån paketinnehållet. Om <pack-fil> inte anges, överväg att använda --keep för att förhindra ett kapplöpningstillstånd (race condition) mellan denna process och 'git repack'.
+	När denna flagga anges läses paketet från stdin i stället och en kopia skrivs sedan till <pack-fil>. Om <pack-fil> inte anges skrivs paketet till katalogen objects/pack/ i det aktuella Git-kodförrådet med ett standardnamn som bestäms utifrån paketinnehållet. Om <pack-fil> inte anges, överväg att använda --keep för att förhindra ett kapplöpningstillstånd (race condition) mellan denna process och 'git repack'.
 
 --fix-thin::
-	Åtgärda ett "tunt" paket som produceras av `git pack-objects --thin` (se linkgit:git-pack-objects[1] för detaljer) genom att lägga till de exkluderade objekten som de deltifierade objekten är baserade på i paketet. Det här alternativet är bara meningsfullt i samband med --stdin.
+	Åtgärda ett "tunt" paket som produceras av `git pack-objects --thin` (se linkgit:git-pack-objects[1] för detaljer) genom att lägga till de exkluderade objekten som de deltifierade objekten är baserade på i paketet. Alternativet är bara meningsfullt tillsammans med `--stdin`.
 
 --keep::
 	Innan indexet flyttas till dess slutdestination, skapa en tom .keep-fil för den associerade packfilen. Detta alternativ är vanligtvis nödvändigt med --stdin för att förhindra att en samtidig 'git repack'-process tar bort det nykonstruerade paketet och indexet innan referenser kan uppdateras för att använda objekt som finns i paketet.
 
 --keep=<medd>::
-	Precis som med --keep, skapa en .keep-fil innan du flyttar indexet till dess slutdestination. Men istället för att skapa en tom fil, placera '<medd>' följt av ett LF i .keep-filen. Meddelandet '<medd>' kan senare sökas efter i alla .keep-filer för att hitta de som inte längre är användbara.
+	Precis som med --keep, skapa en .keep-fil innan du flyttar indexet till dess slutdestination. Men i stället för att skapa en tom fil, placera '<medd>' följt av ett LF i .keep-filen. Meddelandet '<medd>' kan senare sökas efter i alla .keep-filer för att hitta de som inte längre är användbara.
 
 --index-version=<version>[,<offset>]::
 	Detta är endast avsett att användas av testsviten. Det gör det möjligt att tvinga fram versionen för det genererade paketindexet och att tvinga fram 64-bitars indexposter på objekt som finns ovanför den givna offseten.
@@ -71,12 +71,12 @@ En valfri kommaseparerad lista med `<msg-id>=<svårighetsgrad>` kan skickas för
 --object-format=<hash-algoritm>::
 	Ange det givna objektformatet (hashalgoritmen) för paketet. Giltiga värden är 'sha1' och (om aktiverat) 'sha256'. Standardvärdet är algoritmen för det aktuella kodförrådet (inställt av `extensions.objectFormat`), eller 'sha1' om inget värde är angivet eller ligger utanför ett kodförråd.
 +
-Det här alternativet kan inte användas med --stdin.
+Alternativet kan inte användas med --stdin.
 +
 include::object-format-disclaimer.adoc[]
 
 --promisor[=<meddelande>]::
-	Innan beslutet att spara pack-index, skapa en .promisor-fil för detta paket. Detta är särskilt användbart när du skriver ett löftesgivare-paket med --fix-thin eftersom namnet på paketet inte är slutgiltigt förrän paketet har skrivits helt. Om ett `<meddelande>` anges kommer det innehållet att skrivas till .promisor-filen för framtida referens. Se link:technical/partial-clone.html[partial clone] för mer information.
+	Innan pack-index checkas in, skapa en .promisor-fil för detta paket. Särskilt användbart när ett promisorpaket skrivs med --fix-thin eftersom paketets namn inte är slutligt förrän paketet har skrivits färdigt. Om ett `<message>` anges skrivs innehållet till .promisor-filen för framtida referens. Se link:technical/partial-clone.html[partial clone] för mer information.
 +
 Also, if there are objects in the given pack that references non-promisor objects (in the repo), repacks those non-promisor objects into a promisor pack. This avoids a situation in which a repo has non-promisor objects that are accessible through promisor objects.
 +

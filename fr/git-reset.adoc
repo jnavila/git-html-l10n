@@ -3,52 +3,43 @@ git-reset(1)
 
 NOM
 ---
-git-reset - Réinitialise la HEAD actuelle à l'état spécifié
+git-reset - Positionne `HEAD` ou l'index à un état connu
 
 SYNOPSIS
 --------
 [synopsis]
+git reset [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
 git reset [-q] [<arbre-esque>] [--] <spec-de-chemin>...
 git reset [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]
 git reset (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]
-git reset [--soft | --mixed [-N] | --hard | --merge | --keep] [-q] [<commit>]
 
 DESCRIPTION
 -----------
-Dans la première et la troisième forme, cette commande copie les entrées depuis `<arbre-esque>` vers l'index. Dans la dernière forme, elle amène le sommet de la branche actuelle (`HEAD`) à `<commit>`, optionnellement en modifiant l'index et l'arbre de travail en correspondance. L'`<arbre-esque>`/`<commit>` vaut par défaut `HEAD` dans toutes les formes.
+`git reset` a l'une des actions suivantes :
 
-`git reset [-q] [<arbre-esque>] [--] <spec-de-chemin>...`::
-`git reset [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]`::
-	Ces formes réinitialisent les entrées d'index pour tous fichiers correspondant à _<spec-de-chemin>_ à leur état de _<arbre-esque>_ (ceci n'affecte pas l'arbre de travail ou la branche actuelle.)
-+
-Cela signifie que `git reset <spec-de-chemin>` est l'opposé de `git add <spec-de-chemin>`. Cette commande est équivalent à `git restore [--source=<arbre-esque>] --staged <spec-de-chemin>...`.
-+
-Après avoir lancé `git reset <spec-de-chemin>` pour mettre à jour l'entrée d'index, vous pouvez linkgit:git-restore[1] pour extraire le contenu de l'index dans l'arbre de travail. Alternativement, en utilisant linkgit:git-restore[1] et en spécifiant un commit avec `--source`, vous pouvez copier le contenu d'un chemin d'un commit vers l'index et l'arbre de travail d'une seule traite.
-
-`git reset' (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]`::
-	Sélectionner interactivement les sections dans la différence entre l'index et l'_<arbre-esque>_ (par défaut `HEAD`). Les sections choisies sont ensuite appliquées en ordre inversé à l'index.
-+
-Ceci signifie que `git reset -p` est l'opposé de `git add -p`, autrement dit, vous pouvez l'utiliser pour réinitialiser sélectivement les sections. Voir la section « Mode interactif » de linkgit:git-add[1] pour apprendre comment utiliser le mode `--patch`.
+1. `git reset [<mode>] <commit>` modifie sur quel commit `HEAD` pointe. Cela permet de défaire diverses opérations Git, par exemple commit, merge, rebase et pull.
+2. Lorsque vous spécifiez des fichiers ou des répertoires ou passez `--patch`, `git reset` met à jour la version indexée des fichiers spécifiés.
 
 `git reset' [<mode>] [<commit>]`::
-	Cette forme réinitialise le sommet de la branche actuelle à _<commit>_ et met à jour l'index éventuellement (en le réinitialisant à l'arbre de _<commit>_) et l'arbre de travail en fonction de _<mode>_. Avant l'opération, `ORIG_HEAD` est définie sur le sommet de la branche actuelle. Si _<mode>_ est omis, l'option par défaut est `--mixed`. Le _<mode>_ est une valeur parmi :
+	Définir la tête de branche actuelle (`HEAD`) pour pointer sur _<commit>_. En fonction de _<mode>_, mettre également à jour le répertoire de travail et/ou l'index pour correspondre au contenu de _<commit>_. Par défaut, _<commit>_ vaut `HEAD`. Avant l'opération, `ORIG_HEAD` est réglé sur le sommet de la branche courante.
 +
---
-`--soft`::
-	Ne pas toucher du tout le fichier d'index ou l'arbre de travail (mais réinitialise le sommet à _<commit>_, juste comme le font tous les modes). Cela laisse tous vos fichiers modifiés « Modifications qui seront validées », comme l'indiquerait `git status`.
+Le _<mode>_ doit être l'un des éléments suivants (par défaut `--mixed`) :
++
 
+--
 `--mixed`::
-	Réinitialiser l'index mais pas l'arbre de travail (c'est-à-dire, les fichiers modifiés sont préservés mais marqués pour la validation) et affiche ce qui n'a pas été mis à jour. C'est l'action par défaut.
+	Laisser votre répertoire de travail inchangé. Mettre à jour l'index pour correspondre au nouveau `HEAD`, donc rien ne sera indexé.
 +
-Si `-N` est spécifié, les chemins supprimés sont marqués comme « à ajouter » (voir linkgit:git-add[1]).
+Si `-N` est spécifié, marquer les chemins supprimés comme « à ajouter » (voir linkgit:git-add[1]).
+
+`--soft`::
+	Laisser vos fichiers d'arbre de travail et l'index inchangés. Par exemple, si vous n'avez pas de modification indexée, vous pouvez utiliser `git reset --soft HEAD~5; git commit` pour combiner les 5 derniers commits en 1 commit. Cela fonctionne même avec des changements dans l'arbre de travail, qui sont laissés intacts, mais cette utilisation peut provoquer de la confusion.
 
 `--hard`::
-	Réinitialiser l'index et l'arbre de travail. Toute modification sur les fichiers suivis dans l'arbre de travail depuis _<commit>_ est supprimée. Tous les fichiers ou répertoires non suivis qui empêchent l'écriture des fichiers suivis sont simplement supprimés.
+	Écraser tous les fichiers et répertoires avec la version depuis _<commit>_, et possiblement écraser des fichiers non suivis. Les fichiers suivis qui ne sont pas dans _<commit>_ sont supprimés de sorte que l'arbre de travail correspond _<commit>_. Mettre à jour l'index pour correspondre au nouveau `HEAD`, donc rien ne sera indexé.
 
 `--merge`::
-	Réinitialiser l'index et mettre à jour les fichiers de l'arbre de travail qui sont différents entre _<commit>_ et `HEAD`, mais conserver ceux qui sont différents entre l'index et l'arbre de travail (c-à-d qui ont des modifications qui n'ont pas été indexés). Si un fichier qui est différent entre _<commit>_ et l'index a des modifications non indexées, la réinitialisation est annulée.
-+
-En d'autres termes, `--merge` fait quelque chose comme `git read-tree -u -m <commit>`, mais transfère les entrées d'index non indexées.
+	Réinitialiser l'index et mettre à jour les fichiers de l'arbre de travail qui sont différents entre _<commit>_ et `HEAD`, mais conserver ceux qui sont différents entre l'index et l'arbre de travail (c-à-d qui ont des modifications qui n'ont pas été indexés). Ceci existe principalement pour réinitialiser les entrées d'index non fusionnées, comme celles abandonnées par `git am -3` ou `git switch -m` dans certaines situations.Si un fichier qui est différent entre _<commit>_ et l'index a des modifications non indexées, la réinitialisation est annulée.
 
 `--keep`::
 	Réinitialiser les entrées d'index et mettre à jour les fichiers dans l'arbre de travail qui sont différents entre _<commit>_ et `HEAD`. Si un fichier qui est différent entre _<commit>_ et `HEAD` a des modifications locales, la réinitialisation est annulée.
@@ -57,6 +48,19 @@ En d'autres termes, `--merge` fait quelque chose comme `git read-tree -u -m <com
 `--no-recurse-submodules`::
 	Lorsque l'arbre de travail est mis à jour, l'utilisation de `--recurse-submodules` réinitialisera également de manière récursive l'arbre de travail de tous les sous-modules actifs en fonction du commit enregistré dans le superprojet, en définissant également la `HEAD` des sous-modules à détacher à ce commit.
 --
+
+`git reset [-q] [<arbre-esque>] [--] <spec-de-chemin>...`::
+`git reset [-q] [--pathspec-from-file=<fichier> [--pathspec-file-nul]] [<arbre-esque>]`::
+	Pour tous les fichiers ou répertoires spécifiés, définir la version indexée à la version du commit ou de l'arbre donné (qui par défaut vaut `HEAD`).
++
+Cela signifie que `git reset <spec-de-chemin>` est l'opposé de `git add <spec-de-chemin>` : elle désindexe toutes les modifications des fichiers ou répertoires spécifiés. C'est équivalent à `git restore --staged <spec-de-chemin>...`.
++
+Dans ce mode, `git reset` met seulement l'index à jour (sans mettre à jour `HEAD` ou les fichiers des arbres de travail). Si vous souhaitez mettre à jour les fichiers ainsi que les entrées d'index, utilisez linkgit:git-restore[1].
+
+`git reset' (--patch | -p) [<arbre-esque>] [--] [<spec-de-chemin>...]`::
+	Sélectionner interactivement les modifications dans la différence entre l'index et le commit ou arbre spécifié (par défaut `HEAD`). L'index est modifié en utilisant les modifications choisies.
++
+Ceci signifie que `git reset -p` est l'opposé de `git add -p`, autrement dit, vous pouvez l'utiliser pour désindexer sélectivement des modifications. Voir la section « Mode interactif » de linkgit:git-add[1] pour apprendre comment utiliser l'option `--patch`.
 
 Voir « Reset, restore et revert » dans linkgit:git[1] pour les différences entre les trois commandes.
 

@@ -1,0 +1,359 @@
+git-rev-parse(1)
+================
+
+NAMN
+----
+git-rev-parse - Välj ut och massera parametrar
+
+
+SYNOPSIS
+--------
+[verse]
+'git rev-parse' [<flaggor>] <arg>...
+
+BESKRIVNING
+-----------
+
+Många högnivåkommandon i Git använder en blandning av flaggor (dvs. parametrar som börjar med ett bindestreck '-') och parametrar avsedda för det underliggande 'git rev-list'-kommandot som de använder internt, samt flaggor och parametrar för andra kommandon som de använder efter 'git rev-list'. Det primära syftet med detta kommando är att låta anropande program skilja mellan dem. Det finns några andra operationslägen som inte har något att göra med ovanstående "hjälp med att analysera kommandoradsalternativ".
+
+Om inget annat anges kräver de flesta alternativ och driftlägen att kommandot körs inuti ett Git-kodförråd eller ett arbetsträd som kontrolleras av ett Git-kodförråd; annars ges ett fatalt fel.
+
+
+ALTERNATIV
+----------
+
+Driftslägen
+~~~~~~~~~~~
+
+Var och en av dessa alternativ måste visas först på kommandoraden.
+
+--parseopt::
+	Använd 'git rev-parse' i läget för alternativtolkning (se avsnittet PARSEOPT nedan). Kommandot i detta läge kan användas utanför ett kodförråd eller ett arbetsträd som styrs av ett kodförråd.
+
+--sq-quote::
+	Använd 'git rev-parse' i skalciteringsläge (se avsnittet SQ-QUOTE nedan). Till skillnad från alternativet `--sq` nedan gör läget endast citering. Ingen annan behandling görs av kommandoinmatningen. Kommandot i detta läge kan användas utanför ett kodförråd eller ett arbetsträd som styrs av ett kodförråd.
+
+Alternativ för --parseopt
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--keep-dashdash::
+	Meningsfullt endast i läget `--parseopt`. Säger åt alternativtolken att ekoa ut det första `--` som påträffas i stället för att hoppa över det.
+
+--stop-at-non-option::
+	Meningsfullt endast i läget `--parseopt`. Låter alternativtolken stanna vid det första argumentet som inte är ett alternativ. Detta kan användas för att tolka underkommandon som själva tar alternativ.
+
+--stuck-long::
+	Meningsfullt endast i läget `--parseopt`. Skriv ut alternativen i lång form om sådan finns, och med argumenten ihopskrivna.
+
+Alternativ för filtrering
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--revs-only::
+	Skriv inte ut flaggor och parametrar som inte är avsedda för kommandot 'git rev-list'.
+
+--no-revs::
+	Skriv inte ut flaggor och parametrar som är avsedda för kommandot 'git rev-list'.
+
+--flags::
+	Skriv inte ut parametrar som inte är flaggor.
+
+--no-flags::
+	Skriv inte ut flaggparametrar.
+
+Alternativ för utdata
+~~~~~~~~~~~~~~~~~~~~~
+
+--default <arg>::
+	Om användaren inte angav någon parameter, använd `<arg>` i stället.
+
+--prefix <arg>::
+	Agera som om 'git rev-parse' hade anropats från underkatalogen `<arg>` i arbetsträdet. Alla relativa filnamn löses upp som om de hade prefixet `<arg>` och skrivs ut i den formen.
++
+Det kan användas för att konvertera argument till ett kommando som körs i en underkatalog så att de fortfarande kan användas efter att man har flyttat till kodförrådets toppnivå. Till exempel:
++
+----
+prefix=$(git rev-parse --show-prefix)
+cd "$(git rev-parse --show-toplevel)"
+# rev-parse provides the -- needed for 'set'
+eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
+----
+
+--verify::
+	Verifiera att exakt en parameter har angetts och att den kan omvandlas till en rå 20-bytes SHA-1 som kan användas för att komma åt objektdatabasen. Om så är fallet, skriv ut den till standardutdata; annars ge fel.
++
+För att säkerställa att utdata verkligen namnger ett objekt i objektdatabasen och/eller kan användas som en specifik objekttyp, kan lägga till avskalningsoperatorn `^{type}` till parametern. Till exempel säkerställer `git rev-parse "$VAR^{commit}"` att `$VAR` namnger ett befintligt objekt som är incheckningslikt (dvs. en incheckning eller en kommenterad tagg som pekar på en incheckning). För att säkerställa att `$VAR` namnger ett befintligt objekt av valfri typ kan `git rev-parse "$VAR^{object}"` användas.
++
+Observera att vid verifiering av ett namn från en opålitlig källa är det klokt att använda `--end-of-options` så att namnargumentet inte misstolkas som ett annat alternativ.
+
+-q::
+--quiet::
+	Meningsfullt endast i läget `--verify`. Skriv inte ut något felmeddelande om det första argumentet inte är ett giltigt objektnamn; avsluta i stället tyst med en status som inte är noll. SHA-1 för giltiga objektnamn skrivs ut till stdout vid lyckat resultat.
+
+--sq::
+	Normalt görs utdatan en rad per flagga och parameter. Alternativet gör utdatan till en enda rad, korrekt citerad för användning i skal. Nyttigt när parametern förväntas innehålla blanksteg eller radbrytningar (t.ex. vid användning av pickaxe `-S` med 'git diff-{asterisk}'). Till skillnad från alternativet `--sq-quote` tolkas kommandoinmatningen fortfarande som vanligt.
+
+--short[=<length>]::
+	Samma som `--verify` men förkortar objektnamnet till ett unikt prefix med minst `length` tecken. Minsta längd är 4, standard är det effektiva värdet av konfigurationsvariabeln `core.abbrev` (se linkgit:git-config[1]).
+
+--not::
+	När objektnamn visas, prefixera dem med '{caret}' och ta bort '{caret}'-prefix från objektnamn som redan har ett sådant.
+
+--abbrev-ref[=(strict|loose)]::
+	Ett entydigt kortnamn för objektets namn. Alternativet core.warnAmbiguousRefs används för att välja strikt förkortningsläge.
+
+--symbolic::
+	Normalt skrivs objektnamn ut i SHA-1-form (med möjligt '{caret}'-prefix); alternativet gör att de skrivs ut i en form så nära den ursprungliga inmatningen som möjligt.
+
+--symbolic-full-name::
+	Det liknar --symbolic, men utelämnar indata som inte är referenser (d.v.s. gren- eller taggnamn; eller den mer explicit avtvetydigade formen "heads/master" när grenen "master" ska anges och det samtidigt finns en olyckligt namngiven tagg "master"), och visar dem som fullständiga referensnamn (t.ex. "refs/heads/master").
+
+--output-object-format=(sha1|sha256|storage)::
+
+	Tillåt att oid:er matas in från alla objektformat som det aktuella kodförrådet stöder.
++
+Att ange "sha1" översätter vid behov och returnerar en sha1-oid.
++
+Att ange "sha256" översätter vid behov och returnerar en sha256-oid.
++
+Att ange "storage" översätter vid behov och returnerar en oid kodad enligt lagringsformatets hashalgoritm.
+
+Alternativ för objekt
+~~~~~~~~~~~~~~~~~~~~~
+
+--all::
+	Visa alla referenser som hittas i `refs/`.
+
+--branches[=<pattern>]::
+--tags[=<pattern>]::
+--remotes[=<pattern>]::
+	Visa alla grenar, taggar respektive fjärrspårade grenar (dvs. referenser i `refs/heads`, `refs/tags` respektive `refs/remotes`).
++
+Om ett `pattern` anges visas endast referenser som matchar det angivna shell-globmönstret. Om mönstret inte innehåller ett globtecken (`?`, `*` eller `[`), görs det om till en prefixmatchning genom att lägga till `/*`.
+
+--glob=<pattern>::
+	Visa alla referenser som matchar shell-globmönstret `pattern`. Om mönstret inte börjar med `refs/` läggs det till automatiskt i början. Om mönstret inte innehåller ett globtecken (`?`, `*` eller `[`), görs det om till en prefixmatchning genom att lägga till `/*`.
+
+--exclude=<glob-pattern>::
+	Ta inte med referenser som matchar '<glob-pattern>' som nästa `--all`, `--branches`, `--tags`, `--remotes` eller `--glob` annars skulle beakta. Upprepningar av detta alternativ ackumulerar exkluderingsmönster fram till nästa `--all`, `--branches`, `--tags`, `--remotes` eller `--glob` (andra alternativ eller argument rensar inte ackumulerade mönster).
++
+Mönstren som anges ska inte börja med `refs/heads`, `refs/tags` eller `refs/remotes` när de tillämpas på `--branches`, `--tags` respektive `--remotes`, och de måste börja med `refs/` när de tillämpas på `--glob` eller `--all`. Om ett efterföljande '/{asterisk}' är avsett måste det anges explicit.
+
+--exclude-hidden=(fetch|receive|uploadpack)::
+	Inkludera inte referenser som skulle döljas av `git-fetch`, `git-receive-pack` eller `git-upload-pack` enligt konfigurationen `fetch.hideRefs`, `receive.hideRefs` eller `uploadpack.hideRefs` tillsammans med `transfer.hideRefs` (se linkgit:git-config[1]). Detta alternativ påverkar nästa pseudo-ref-alternativ `--all` eller `--glob` och nollställs efter att de har behandlats.
+
+--disambiguate=<prefix>::
+	Visa varje objekt vars namn börjar med det angivna prefixet. <prefix> måste vara minst 4 hexadecimala siffror långt för att undvika att av misstag lista vartenda objekt i kodförrådet.
+
+Alternativ för filer
+~~~~~~~~~~~~~~~~~~~~
+
+--local-env-vars::
+	Lista GIT_*-miljövariabler som är lokala för kodförrådet (t.ex. GIT_DIR eller GIT_WORK_TREE, men inte GIT_EDITOR). Endast variabelnamnen listas, inte deras värden, även om de är satta.
+
+--path-format=(absolute|relative)::
+	Styr beteendet för vissa andra alternativ. Om det anges som absolute blir sökvägarna som skrivs ut av alternativen absoluta och kanoniska. Om det anges som relative blir sökvägarna relativa till den aktuella arbetskatalogen, om det är möjligt. Standardvärdet beror på alternativet.
++
+Alternativet kan anges flera gånger och påverkar endast argumenten som följer efter det på kommandoraden, antingen till slutet av kommandoraden eller till nästa förekomst av samma alternativ.
+
+Följande alternativ påverkas av `--path-format`:
+
+--git-dir::
+	Visa `$GIT_DIR` om det är definierat. Annars visas sökvägen till .git-katalogen. Den visade sökvägen är, när den är relativ, relativ till den aktuella arbetskatalogen.
++
+Om `$GIT_DIR` inte är definierat och den aktuella katalogen inte identifieras som liggande i ett Git-kodförråd eller arbetsträd, skriv ett meddelande till stderr och avsluta med status som inte är noll.
+
+--git-common-dir::
+	Visa `$GIT_COMMON_DIR` om det är definierat, annars `$GIT_DIR`.
+
+--resolve-git-dir <path>::
+	Kontrollera om <path> är ett giltigt kodförråd eller en gitfile som pekar på ett giltigt kodförråd, och skriv ut kodförrådets plats. Om <path> är en gitfile skrivs den upplösta sökvägen till det verkliga kodförrådet ut.
+
+--git-path <path>::
+	Lös upp "$GIT_DIR/<path>" och ta hänsyn till andra variabler för omlokalisering av sökvägar, såsom $GIT_OBJECT_DIRECTORY och $GIT_INDEX_FILE. Till exempel: om $GIT_OBJECT_DIRECTORY är satt till /foo/bar så returnerar "git rev-parse --git-path objects/abc" /foo/bar/abc.
+
+--show-toplevel::
+	Visa sökvägen (som standard absolut) till arbetsträdets toppnivåkatalog. Om inget arbetsträd finns, rapportera fel.
+
+--show-superproject-working-tree::
+	Visa den absoluta sökvägen till roten för superprojektets arbetsträd (om det finns) som använder det aktuella kodförrådet som undermodul. Skriver inte ut något om det aktuella kodförrådet inte används som undermodul av något projekt.
+
+--shared-index-path::
+	Visa sökvägen till den delade indexfilen i split-index-läge, eller tomt om split-index-läge inte används.
+
+Följande alternativ påverkas inte av `--path-format`:
+
+--absolute-git-dir::
+	Som `--git-dir`, men utdatan är alltid den kanoniserade absoluta sökvägen.
+
+--is-inside-git-dir::
+	När den aktuella arbetskatalogen ligger under kodförrådskatalogen, skriv "true", annars "false".
+
+--is-inside-work-tree::
+	När den aktuella arbetskatalogen ligger i kodförrådets arbetsträd, skriv "true", annars "false".
+
+--is-bare-repository::
+	När kodförrådet är bart, skriv "true", annars "false".
+
+--is-shallow-repository::
+	När kodförrådet är grunt, skriv "true", annars "false".
+
+--show-cdup::
+	När kommandot anropas från en underkatalog, visa sökvägen till toppnivåkatalogen relativt den aktuella katalogen (vanligen en följd av "../", eller en tom sträng).
+
+--show-prefix::
+	När kommandot anropas från en underkatalog, visa sökvägen för den aktuella katalogen relativt toppnivåkatalogen.
+
+--show-object-format[=(storage|input|output|compat)]::
+	Visa objektformatet (hashalgoritmen) som används i kodförrådet för lagring i `.git`-katalogen, indata, utdata eller kompatibilitet. För indata kan flera algoritmer skrivas ut, separerade med blanksteg. Om `compat` begärs och ingen kompatibilitetsalgoritm är aktiverad skrivs en tom rad ut. Om inget anges är standard "storage".
+
+--show-ref-format::
+	Visa lagringsformatet för referenser som används i kodförrådet.
+
+
+Övriga alternativ
+~~~~~~~~~~~~~~~~~
+
+--since=<datestring>::
+--after=<datestring>::
+	Tolka datumsträngen och skriv ut motsvarande parameter `--max-age=` för 'git rev-list'.
+
+--until=<datestring>::
+--before=<datestring>::
+	Tolka datumsträngen och skriv ut motsvarande parameter `--min-age=` för 'git rev-list'.
+
+<arg>...::
+	Flaggor och parametrar som ska tolkas.
+
+
+include::revisions.adoc[]
+
+PARSEOPT
+--------
+
+I läget `--parseopt` hjälper 'git rev-parse' till att bearbeta alternativ så att skalskript får samma möjligheter som inbyggda C-kommandon. Det fungerar som en normaliserare av alternativ (t.ex. delar upp sammanslagna kortflaggor), ungefär som `getopt(1)`.
+
+Det tar emot specifikationen av de alternativ som ska tolkas via standardinmatning och ekar via standardutmatning en sträng som lämpar sig för `sh(1)` `eval` för att ersätta argumenten med normaliserade sådana. Vid fel skrivs användningstext till standardfelströmmen och kommandot avslutas med kod 129.
+
+Obs: Resultatet bör citeras när det skickas till `eval`. Se exempel nedan.
+
+Inmatningsformat
+~~~~~~~~~~~~~~~~
+
+Inmatningsformatet för 'git rev-parse --parseopt' är helt textbaserat. Det har två delar, åtskilda av en rad som endast innehåller `--`. Raderna före avskiljaren (ska vara en eller flera) används för användningstexten. Raderna efter avskiljaren beskriver alternativen.
+
+Varje alternativrad har följande format:
+
+------------
+<opt-spec><flags>*<arg-hint>? SP+ help LF
+------------
+
+`<opt-spec>`::
+	Formatet är den korta alternativbokstaven följd av det långa alternativnamnet, separerade med kommatecken. Båda delarna krävs inte, men minst en krävs. Får inte innehålla något av tecknen i `<flags>`. `h,help`, `dry-run` och `f` är exempel på korrekta `<opt-spec>`.
+
+`<flags>`::
+	`<flags>` är `*`, `=`, `?` eller `!`.
+	* Använd `=` om alternativet tar ett argument.
+
+	* Använd `?` för att ange att alternativet tar ett valfritt argument. Läget `--stuck-long` är troligen det som bör användas för att kunna tolka det valfria argumentet entydigt.
+
+	* Använd `*` för att ange att detta alternativ inte ska listas i användningstexten som genereras för argumentet `-h`. Det visas för `--help-all` enligt dokumentationen i linkgit:gitcli[7].
+
+	* Använd `!` för att inte göra det motsvarande negerade långa alternativet tillgängligt.
+
+`<arg-hint>`::
+	`<arg-hint>`, om det anges, används som namn på argumentet i hjälputmatningen för alternativ som tar argument. `<arg-hint>` avslutas vid första blanktecknet. Det är brukligt att använda bindestreck för att separera ord i argumenttips med flera ord.
+
+Resterande del av raden, efter att blanksteg tagits bort, används som hjälptext kopplad till alternativet.
+
+Tomma rader ignoreras, och rader som inte matchar denna specifikation används som huvuden för alternativgrupper (börja raden med ett mellanslag för att skapa sådana rader med flit).
+
+Exempel
+~~~~~~~
+
+------------
+OPTS_SPEC="\
+some-command [<options>] <args>...
+
+some-command does foo and bar!
+--
+h,help! visa hjälpen
+
+foo some nifty option --foo bar= some cool option --bar with an argument baz=arg another cool option --baz with a named argument qux?path qux may take a path argument but has meaning by itself
+
+  En alternativgruppsrubrik
+C?        alternativ C med ett valfritt argument"
+
+eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
+------------
+
+
+Användningstext
+~~~~~~~~~~~~~~~
+
+När `"$@"` är `-h` eller `--help` i exemplet ovan visas följande användningstext:
+
+------------
+usage: some-command [<options>] <args>...
+
+    some-command does foo and bar!
+
+    -h, --help            show the help
+    --[no-]foo            some nifty option --foo
+    --[no-]bar ...        some cool option --bar with an argument
+    --[no-]baz <arg>      another cool option --baz with a named argument
+    --[no-]qux[=<path>]   qux may take a path argument but has meaning by itself
+
+En rubrik för en alternativgrupp
+    -C[...]               alternativ C med ett valfritt argument
+------------
+
+SQ-QUOTE
+--------
+
+I läget `--sq-quote` ekar 'git rev-parse' en enda rad till standardutdata som lämpar sig för `sh(1)` `eval`. Raden skapas genom att normalisera argumenten efter `--sq-quote`. Ingen annan behandling än citering av argumenten görs.
+
+Om kommandoinmatningen fortfarande ska tolkas som vanligt av 'git rev-parse' innan utdatan skalciteras, se alternativet `--sq`.
+
+Exempel
+~~~~~~~
+
+------------
+$ cat >your-git-script.sh <<\EOF
+#!/bin/sh
+args=$(git rev-parse --sq-quote "$@")   # quote user-supplied arguments
+command="git frotz -n24 $args"          # and use it inside a handcrafted
+					# command line
+eval "$command"
+EOF
+
+$ sh your-git-script.sh "a b'c"
+------------
+
+EXEMPEL
+-------
+
+* Skriv ut objektnamnet för den aktuella incheckningen:
++
+------------
+$ git rev-parse --verify HEAD
+------------
+
+* Skriv ut objektnamnet för incheckningen från revisionen i skalvariabeln $REV:
++
+------------
+$ git rev-parse --verify --end-of-options $REV^{commit}
+------------
++
+Det ger fel om $REV är tom eller inte en giltig revision.
+
+* Liknande som ovan:
++
+------------
+$ git rev-parse --default master --verify --end-of-options $REV
+------------
++
+men om $REV är tom skrivs incheckningens objektnamn från master ut.
+
+GIT
+---
+En del av linkgit:git[1]-sviten

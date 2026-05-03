@@ -1,12 +1,12 @@
 `push.autoSetupRemote`::
-	Om satt till `true` antas `--set-upstream` vara standard push när ingen uppströmsspårning finns för den aktuella grenen; detta alternativ träder i kraft med `push.default`-alternativen `simple`, `upstream` och `current`. Det är användbart om du som standard vill att nya grenar ska pushas till standardfjärren (som beteendet hos `push.default=current`) och du också vill att uppströmsspårningen ska vara inställd. Arbetsflöden som sannolikt kommer att dra nytta av detta alternativ är `enkla` centrala arbetsflöden där alla grenar förväntas ha samma namn på fjärren.
+	Om satt till `true` antas `--set-upstream` vara standard push när ingen uppströmsspårning finns för den aktuella grenen; detta alternativ träder i kraft med `push.default`-alternativen `simple`, `upstream` och `current`. Det är användbart om nya grenar som standard ska skickas till standardfjärren (som beteendet hos `push.default=current`) och det också är önskvärt att uppströmsspårningen ska vara inställd. Arbetsflöden som sannolikt kommer att dra nytta av detta alternativ är `enkla` centrala arbetsflöden där alla grenar förväntas ha samma namn på fjärren.
 
 `push.default`::
-	Definierar åtgärden `git push` ska utföra om ingen refspec anges (vare sig från kommandoraden, konfigurationen eller någon annanstans). Olika värden är väl lämpade för specifika arbetsflöden; till exempel, i ett rent centralt arbetsflöde (dvs. hämtningskällan är lika med push-destinationen) är `upstream` förmodligen vad du vill ha. Möjliga värden är:
+	Definierar vilken åtgärd `git push` ska utföra om ingen refspec anges (varken från kommandoraden, konfigurationen eller någon annanstans). Olika värden passar olika arbetsflöden; till exempel, i ett rent centralt arbetsflöde (dvs. hämtningskällan är samma som push-destinationen) är `upstream` sannolikt rätt val. Möjliga värden är:
 +
 --
 `nothing`;;
-do not push anything (error out) unless a refspec is given. This is primarily meant for people who want to avoid mistakes by always being explicit.
+skicka ingenting (ge fel) om ingen refspec anges. Detta är främst avsett för personer som vill undvika misstag genom att alltid vara explicita.
 
 `current`;;
 skicka (push) den aktuella grenen för att uppdatera en gren med samma namn i mottagaränden. Fungerar i både centrala och icke-centrala arbetsflöden.
@@ -15,21 +15,21 @@ skicka (push) den aktuella grenen för att uppdatera en gren med samma namn i mo
 skicka (push) den aktuella grenen tillbaka till den gren vars ändringar vanligtvis är integrerade i den aktuella grenen (som kallas `@{upstream}`). Det här läget är bara meningsfullt om du skickar till samma arkiv som du normalt skulle hämta från (dvs. centralt arbetsflöde).
 
 `tracking`;;
-this is a deprecated synonym for `upstream`.
+Föråldrad synonym för `--empty=keep`.
 
 `simple`;;
-push the current branch with the same name on the remote.
+Ett praktiskt sätt att skicka den aktuella grenen till samma namn i fjärrkodförrådet.
 +
-Om du arbetar med ett centraliserat arbetsflöde (push:ar till samma förvar som du hämtar från, vilket vanligtvis är `origin`), måste du konfigurera en uppströmsgren med samma namn.
+Om du arbetar med ett centraliserat arbetsflöde (push:ar till samma kodförråd som du hämtar från, vilket vanligtvis är `origin`), måste du konfigurera en uppströmsgren med samma namn.
 +
 Det här läget är standardläget sedan Git 2.0 och är det säkraste alternativet som passar nybörjare.
 
 `matching`;;
-skicka (push) alla grenar med samma namn i båda ändar. Detta gör att arkivet du skickar kommer ihåg uppsättningen grenar som kommer att skickas ut (t.ex. om du alltid skickar `maint` och `master` där och inga andra grenar, kommer arkivet du skickar till att ha dessa två grenar, och dina lokala `maint` och `master` kommer att skickas dit).
+skicka (push) alla grenar med samma namn i båda ändar. Detta gör att kodförrådet du skickar kommer ihåg uppsättningen grenar som kommer att skickas ut (t.ex. om du alltid skickar `maint` och `master` där och inga andra grenar, kommer kodförrådet du skickar till att ha dessa två grenar, och dina lokala `maint` och `master` kommer att skickas dit).
 +
 För att använda det här läget effektivt måste du se till att _alla_ grenar du vill skicka ut är redo att skickas ut innan du kör `git push`, eftersom hela poängen med det här läget är att låta dig skicka alla grenar på en gång. Om du vanligtvis bara avslutar arbetet på en gren och skickar ut resultatet, medan andra grenar är oavslutade, är det här läget inte för dig. Det här läget är inte heller lämpligt för att skicka till ett delat centralt arkiv, eftersom andra personer kan lägga till nya grenar där, eller uppdatera toppen på befintliga grenar utanför din kontroll.
 +
-Detta brukade vara standardinställningen, men inte sedan Git 2.0 (`simple` är den nya standardinställningen).
+Det brukade vara standardinställningen, men inte sedan Git 2.0 (`simple` är den nya standardinställningen).
 
 --
 
@@ -42,7 +42,7 @@ Detta brukade vara standardinställningen, men inte sedan Git 2.0 (`simple` är 
 `push.pushOption`::
 	När inget `--push-option=<alternativ>`-argument anges från kommandoraden, beter sig `git push` som om varje _<alternativ>_ i denna variabel anges som `--push-option=<alternativ>`.
 +
-Detta är en variabel med flera värden, och ett tomt värde kan användas i en konfigurationsfil med högre prioritet (t.ex. `.git/config` i ett förvar) för att rensa värden som ärvts från konfigurationsfiler med lägre prioritet (t.ex. `$HOME/.gitconfig`).
+Det är en variabel med flera värden, och ett tomt värde kan användas i en konfigurationsfil med högre prioritet (t.ex. `.git/config` i ett kodförråd) för att rensa värden som ärvts från konfigurationsfiler med lägre prioritet (t.ex. `$HOME/.gitconfig`).
 +
 ----
 
@@ -59,7 +59,7 @@ repo/.git/config
   push.pushoption =
   push.pushoption = b
 
-Detta kommer att resultera i att endast b (a och c är nollställda).
+Detta ger endast b (a och c rensas).
 
 ----
 

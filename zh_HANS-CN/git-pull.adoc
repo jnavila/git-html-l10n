@@ -8,60 +8,54 @@ git-pull - 从另一个仓库或本地分支撷取并与之集成
 
 概述
 --
-[verse]
+[synopsis]
 'git pull' [<选项>] [<仓库> [<引用规范>...]]
 
 
 描述
 --
 
-将远程版本库的修改并入当前分支。 如果当前分支落后于远程分支，那么默认情况下，它将快速合并当前分支以匹配远程分支。 如果当前分支和远程分支有分歧，用户需要用 `--rebase` 或 `--no-rebase`（或 `pull.rebase` 中的相应配置选项）来指定如何调和分歧的分支。
+将远程仓库中的更改集成到当前分支中。
 
-更确切地说，`git pull` 运行 `git fetch` 并给出参数，然后根据配置选项或命令行标志，调用 `git rebase` 或 `git merge` 来协调不同的分支。
+首先，`git pull` 会使用相同参数（不包括 merge 选项）运行 `git fetch`，以获取远程分支。然后它会决定要集成哪个远程分支：如果你执行 `git pull` 时不带参数，则默认使用当前分支的 <<UPSTREAM-BRANCHES,upstream>>。之后，它会将该分支集成到当前分支中。
 
-<仓库> 应该是传递给 linkgit:git-fetch[1] 的远程仓库的名称。 < 用引规范 > 可以命名一个任意的远程引用（例如，一个标签的名称），甚至是一个有相应远程跟踪分支的引用集合（例如，refs/heads/{asterisk}:refs/remotes/origin/{asterisk}），但通常它是远程仓库的一个分支名称。
+将远程分支集成到当前分支主要有 4 种方式：
 
-<仓库> 和 < 分支 > 的默认值是从 linkgit:git-branch[1] `--track` 设置的当前分支的 "远程" 和 "合并" 配置中读取。
+1. `git pull --ff-only` 只会执行“快进”更新：如果你的本地分支已经与远程分支发生分叉，它就会失败。这是默认行为。
+2. `git pull --rebase` 会运行 `git rebase`
+3. `git pull --no-rebase` 会运行 `git merge`。
+4. `git pull --squash` 会运行 `git merge --squash`
 
-假设存在以下历史，且当前分支为"`master`"：
+你也可以通过配置 `pull.rebase`、`pull.squash` 或 `pull.ff` 选项来指定自己偏好的行为。
 
-------------
-	  A---B---C master on origin
-	 /
-    D---E---F---G master
-	^
-	你仓库中的 origin/master
-------------
-
-然后，"`git pull`" 将从远程的 `master` 分支获取并重放自它与本地 `master`（即 `E`）分歧以来的变化，直到它在 `master` 之上的当前提交（`C`），并将结果与两个父提交的名称和用户描述变化的日志信息一起记录在一个新提交中。
-
-------------
-	  A---B---C origin/master
-	 /         \
-    D---E---F---G---H master
-------------
-
-详情见 linkgit:git-merge[1]，包括如何呈现和处理冲突。
-
-在 Git 1.7.0 或更高版本中，要取消一个冲突的合并，请使用 `git reset --merge`。 * 警告 *：在旧版本的 Git 中，不鼓励在未提交的情况下运行 "git pull"：虽然有可能，但在发生冲突的情况下，会让你处于一个难以恢复的状态。
-
-如果任何远程修改与本地未提交的修改重叠，合并将被自动取消，工作目录树不会被改动。 一般来说，最好是在拉取之前把任何本地的修改弄到工作状态，或者用 linkgit:git-stash[1] 把它们贮藏起来。
+如果在 merge 或 rebase 过程中出现你不想处理的冲突，可以安全地使用 `git merge --abort` 或 `git rebase --abort` 来中止。
 
 选项
 --
 
--q::
---quiet::
+_<仓库>_::
+	作为获取或拉动操作的来源的 "remote" 仓库。 这个参数可以是一个 URL（见下面 <<URLS,GIT URLS>> 一节），也可以是一个远程仓库的名称（见下面 <<REMOTES,远程>> 一节）。
++
+默认为当前分支已配置的上游分支；如果没有，则为 `origin`。关于如何配置上游分支，请参见下文 <<UPSTREAM-BRANCHES,UPSTREAM BRANCHES>>。
+
+<引用规范>::
+	要获取并集成到当前分支中的分支或其他引用，例如 `git pull origin main` 中的 `main`。默认值为当前分支配置的上游分支。
++
+这可以是一个分支、标签或其他一组引用。完整语法请参见下文“Options related to fetching”下的 <<fetch-refspec,_<refspec>_>>，关于 `git pull` 如何使用此参数来决定集成哪个远程分支，请参见下文 <<DEFAULT-BEHAVIOUR,DEFAULT BEHAVIOUR>>。
+
+`-q`::
+`--quiet`::
 	这将被传递给底层的 git-fetch，以便在传输过程中抑制报告，以及底层的 git-merge，以便在合并过程中抑制输出。
 
--v::
---verbose::
+`-v`::
+`--verbose`::
 	将 --verbose 传给 git-fetch 和 git-merge。
 
---[no-]recurse-submodules[=(yes|on-demand|no)]::
-	这个选项控制是否应该获取已填充子模块的新提交，以及是否应该更新活动子模块的工作树（见linkgit:git-fetch[1], linkgit:git-config[1] 和 linkgit:gitmodules[5]）。
+`--recurse-submodules[=(yes|on-demand|no)]`::
+`--no-recurse-submodules`::
+	这个选项控制是否应该获取已填充子模块的新提交，以及是否应该更新活动子模块的工作区（见linkgit:git-fetch[1], linkgit:git-config[1] 和 linkgit:gitmodules[5]）。
 +
-如果签出是通过变基完成的，那么本地子模块的提交也会被变基。
+如果检出是通过变基完成的，那么本地子模块的提交也会被变基。
 +
 如果更新是通过合并完成的，子模块的冲突就会被解决并被检查出来。
 
@@ -72,22 +66,21 @@ git-pull - 从另一个仓库或本地分支撷取并与之集成
 
 include::merge-options.adoc[]
 
--r::
---rebase[=(false|true|merges|interactive)]::
-	为真时，在获取后将当前分支变基到上游分支之上。如果有一个远程跟踪的分支与上游分支相对应，并且上游分支在上次获取后被重新建立了基础，那么变基就会使用该信息以避免重新建立非本地的变化。
-+
-当设置为 `merges` 时，使用 `git rebase --rebase-merges` 进行重建，这样本地的合并提交就会包含在重建中（详见 linkgit:git-rebase[1]）。
-+
-如果为false，则将上游分支合并到当前分支中。
-+
-当设置为 `interactive` 时，启用变基的交互模式。
+`-r`::
+`--rebase[=(true|merges|false|interactive)]`::
+`true`;; 为真时，在获取后将当前分支变基到上游分支之上。如果有一个远程跟踪的分支与上游分支相对应，并且上游分支在上次获取后被重新建立了基础，那么变基就会使用该信息以避免重新建立非本地的变化。
+
+`merges`;; 当设置为 `merges` 时，使用 `git rebase --rebase-merges` 进行重建，这样本地的合并提交就会包含在重建中（详见 linkgit:git-rebase[1]）。
+`false`;; 如果为false，则将上游分支合并到当前分支中。
+`interactive`;; 当设置为 `interactive` 时，启用变基的交互模式。
+
 +
 如果你想让 `git pull` 总是使用 `--rebase` 而不是合并，请参见 linkgit:git-config[1] 中的 `pull.rebase`, `branch.< 分支名 >.rebase` 和 `branch.autoSetupRebase`。
 +
 [NOTE]
 这是一种潜在的「危险的」操作模式。 它重写了历史，当你已经发布了这些历史时，这并不是一个好兆头。 除非你仔细阅读了linkgit:git-rebase[1]，否则请「不要」使用这个选项。
 
---no-rebase::
+`--no-rebase`::
 	这是对 --rebase=false 的简写。
 
 与获取有关的选项
@@ -101,6 +94,7 @@ include::urls-remotes.adoc[]
 
 include::merge-strategies.adoc[]
 
+[[DEFAULT-BEHAVIOUR]]
 默认行为
 ----
 
@@ -155,14 +149,14 @@ $ git merge origin/next
 ------------------------------------------------
 
 
-如果你尝试了一次拉取，导致了复杂的冲突，想重新开始，你可以用 'git reset' 来恢复。
+如果你尝试了一次拉取，导致了复杂的冲突，想重新开始，你可以用 `git reset` 来恢复。
 
 
 include::transfer-data-leaks.adoc[]
 
 漏洞
 --
-使用 --recurse-submodules 现在只能获取已经签出的子模块的新提交。例如，当上游在刚刚获取的超级项目的提交中添加了一个新的子模块时，子模块本身不能被获取，这使得以后不需要再次获取就能签出该子模块。这个问题有望在未来的 Git 版本中被修复。
+使用 --recurse-submodules 现在只能获取已经检出的子模块的新提交。例如，当上游在刚刚获取的超级项目的提交中添加了一个新的子模块时，子模块本身不能被获取，这使得以后不需要再次获取就能检出该子模块。这个问题有望在未来的 Git 版本中被修复。
 
 参见
 --

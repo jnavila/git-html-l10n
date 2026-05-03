@@ -1,0 +1,161 @@
+`diff.autoRefreshIndex`::
+	在使用 `git diff` 与工作区文件进行比较时，不要将仅统计信息的更改视为已更改。取而代之的是静默运行 `git update-index --refresh` 来更新工作区中内容与索引中内容匹配的路径的缓存统计信息。该选项默认为 `true`。请注意，这只会影响 `git diff` 命令，而不会影响更低级的 `diff` 命令，比如 `git diff-files`。
+
+`diff.dirstat`::
+ifdef::git-diff[]
+	逗号分隔的 `--dirstat` 参数列表，用于定义 `git diff` 及其相关命令中 `--dirstat` 选项的默认工作方式
+	这些参数决定了在执行差异比较时，如何统计和展示目录变化的信息。
+endif::git-diff[]
+ifndef::git-diff[]
+	逗号分隔的 `--dirstat` 参数列表，用于定义 git diff （见 Git 文档中的 linkgit:git-diff[1] 部分）
+	及其相关命令中 `--dirstat` 选项的默认工作方式
+	这些参数决定了在执行差异比较时，如何统计和展示目录变化的信息。
+endif::git-diff[]
+	以逗号分隔的 `--dirstat` 参数列表，用于指定 linkgit:git-diff[1] 和友集的 `--dirstat` 选项的默认行为。
+	默认值可以在命令行中覆盖（使用 `--dirstat=<参数1,参数2,...>`）。
+	后备默认值（当 `diff.dirstat` 没有更改时）是 `changes,noncumulative,3` 。
+	以下参数可用：
++
+--
+`changes`;;
+	通过计算从源文件中删除的行数或添加到目标文件中的行数来计算分布状态的数字。这忽略了文件内的代码移动行为。也就是说，在文件中重新排列的行不会像其他变化一样被计算在内。这是在没有给出参数时的默认行为。
+`lines`;;
+	通过做常规基于行的差异分析，计算分布状态的数字，并将删除/添加的行数相加。(对于二进制文件，用 64 字节的块来计算，因为二进制文件没有行的概念)。在使用 `--dirstat` 时这个选项的行为开销比 `changes` 更大，但会对文件中重新排列的行进行计数。其得到的输出结果与其他的 `--*stat` 选项一致。
+`files`;;
+	通过计算被改变的文件数量来计算分布状态的数字。在分布状态分析中，每一个被改变的文件都会被平等地计算。这是计算上开销最小的 `--dirstat` 行为，因为它无需查看文件内容。
+`cumulative`;;
+	子目录中的变化计算到父目录中。 注意，当使用 `cumulative` 选项时，报告的百分比之和可能超过 100%。默认的（非累积）行为可以用 `noncumulative` 参数指定。
+_<limit>_;;
+	一个整数参数，其指定一个截止百分比（默认为 3%）。贡献值小于这个百分比的目录不显示在输出中。
+--
++
+例如：下面的参数会统计更改的文件，同时忽略占更改文件总数 10% 以下的目录，并累积父目录中的子目录计数：`files,10,cumulative`。
+
+`diff.statNameWidth`::
+	限制 `--stat` 输出中文件名部分的宽度。如果设置，则适用于生成 `--stat` 输出的所有命令，`format-patch` 除外。
+
+`diff.statGraphWidth`::
+	限制 `--stat` 输出中图形部分的宽度。如果设置，则适用于生成 `--stat` 输出的所有命令，`format-patch` 除外。
+
+`diff.context`::
+	生成 _<n>_ 行上下文差异，而不是默认的 3 行。 该值由 `-U` 选项覆盖。
+
+`diff.interHunkContext`::
+	显示 diff hunk 之间的上下文，行数不超过指定行数，从而合并彼此相近的 hunk。此值是 `--inter-hunk-context` 命令行选项的默认值。
+
+`diff.external`::
+	如果设置了该配置变量，则不会使用内部 diff 机制生成 diff，而是使用给定的命令。可以用 `GIT_EXTERNAL_DIFF` 环境变量来覆盖。该命令的参数调用方式与 linkgit:git[1] 中 "git Diffs" 一节所述相同。注意：如果只想在部分文件上使用外部差异程序，可以用 linkgit:gitattributes[5] 代替。
+
+`diff.trustExitCode`::
+	如果这个布尔值设置为 true，那么 `diff.external` 命令被期望在认为输入文件相等时返回退出码 0，在认为它们不同时返回退出码 1，类似于 `diff(1)`。如果它被设置为默认值 `false`，那么期望该命令无论文件是否相等都返回退出码 `0`。任何其他的退出码都会导致 Git 报告一个致命错误。
+
+`diff.ignoreSubmodules`::
+	设置 `--ignore-submodules` 的默认值。请注意，这只会影响上层命令 `git diff`，而不会影响更底层的 `diff` 命令，如 `git diff-files`。`git checkout` 和 `git switch` 在报告未提交的改动时也会尊重这一设置。如果将其设置为 `all`，则 `git commit` 和 `git status` 在设置 `status.submoduleSummary` 时通常会显示子模块摘要，除非使用 `--ignore-submodules` 命令行选项将其覆盖。`git submodule` 命令不受此设置影响。默认设置为 untracked，因此任何未跟踪的子模块都会被忽略。
+
+`diff.mnemonicPrefix`::
+	如果设置了该选项，`git diff` 就会根据比较的内容使用不同于标准 `a/` 和 `b/` 的前缀对。当此配置生效时，反向 diff 输出也会交换前缀的顺序：
+`git diff`;;
+	比较索引（i）和工作区树（w）；
+`git diff HEAD`;;
+	 比较（c）提交（w）工作区；
+`git diff --cached`;;
+	比较一个提交（c）和索引（i）；
+`git diff HEAD:<文件 1> <文件 2>`;;
+	比较一个（o）对象和一个（w）工作区实体；
+`git diff --no-index <a> <b>`;;
+	比较了两个非 git 项目 _<a>_ 和 _<b>_。
+
+`diff.noPrefix`::
+	如果设置了，`git diff` 不会显示任何源前缀或目标前缀。
+
+`diff.srcPrefix`::
+	如果设置了，`git diff` 使用指定的源前缀。否则，默认为 `a/`。
+
+`diff.dstPrefix`::
+	如果设置了，`git diff` 使用指定的目标前缀。否则，默认是 `b`。
+
+`diff.relative`::
+	如果设置为 `true`，`git diff` 不会显示目录外的更改，而是显示相对于当前目录的路径名。
+
+`diff.orderFile`::
+	该文件定义了在 git diff 命令的输出中如何对文件进行排序。
+ifdef::git-diff[]
+	请查看 `-O` 命令行选项以获取更多详细信息。
+endif::git-diff[]
+ifndef::git-diff[]
+	详情参见 linkgit:git-diff[1] 的 `-O` 选项。
+endif::git-diff[]
+	如果 `diff.orderFile` 是相对路径名，则将其视为
+	相对于工作区顶层的路径。
+
+`diff.renameLimit`::
+	在复制/重命名检测的穷举阶段要考虑的文件数量；等同于 `git diff` 的 `-l` 选项。如果未设置，当前默认值为 1000。若已关闭重命名检测，则此设置不起作用。
+
+`diff.renames`::
+	Git 是否以及如何检测重命名。如果设为 `false`，则禁用重命名检测；设为 `true`，则启用基础的重命名检测；设为 `copies` 或 `copy` 时，Git 还会检测副本。默认值为 `true`。注意，这只影响如 linkgit:git-diff[1] 和 linkgit:git-log[1] 这样的 `git diff` Porcelain 命令，而不影响如 linkgit:git-diff-files[1] 这样的底层命令。
+
+`diff.suppressBlankEmpty`::
+	一个布尔值，用于抑制在每个空输出行前打印空格这一标准行为。默认值为 `false`。
+
+`diff.submodule`::
+	指定子模块差异的显示格式。`short` 格式只显示范围开头和结尾的提交名称；`log` 格式像 linkgit:git-submodule[1] 的 `summary` 那样列出范围内的提交；`diff` 格式显示子模块变更内容的内联 diff。默认值为 `short`。
+
+`diff.wordRegex`::
+	POSIX 扩展正则表达式，用于在进行逐字差异计算时确定什么是 "字"。符合正则表达式的字符序列为 "字"，所有其他字符均为 *不可忽略的* 空白。
+
+diff.<驱动程序>.command::
+	自定义的 diff 驱动命令。详见 linkgit:gitattributes[5]。
+
+diff.<驱动程序>.textconv::
+	如果这个布尔值设置为 true，那么 `diff.<驱动程序>.command` 命令被期望在认为输入文件相等时返回退出码 0，在认为它们不同时返回退出码 1，类似于 `diff(1)`。如果它被设置为 false，这是默认值，那么期望该命令无论文件是否相等都返回退出码 0。任何其他的退出码都会导致 Git 报告一个致命错误。
+
+diff.<驱动程序>.xfuncname::
+	正则表达式，diff 驱动程序应使用该正则表达式识别块状头。也可以使用内置模式。详见 linkgit:gitattributes[5]。
+
+diff.<驱动程序>.binary::
+	将此选项设为 true，可使 diff 驱动程序将文件视为二进制文件。详情参见 linkgit:gitattributes[5]。
+
+diff.<驱动程序>.textconv::
+	diff 驱动程序为生成文件的文本转换版本而调用的命令。转换结果用于生成易读形式的 diff 结果。详见 linkgit:gitattributes[5]。
+
+diff.<驱动程序>.wordRegex::
+	正则表达式，diff 驱动程序应使用它来分割一行中的单词。详见 linkgit:gitattributes[5]。
+
+diff.<驱动程序>.cachetextconv::
+	将此选项设为 true 可使 diff 驱动程序缓存文本转换输出。详见 linkgit:gitattributes[5]。
+
+`diff.indentHeuristic`::
+	将此选项设为 `false`，可禁用默认的启发式方法，该方法会移动差异块边界，使补丁更容易读取。
+
+`diff.algorithm`::
+	选择差异算法。有如下可选项：
++
+--
+`default`;;
+`myers`;;
+	基本的贪婪差异算法。当前是默认设置。
+`minimal`;;
+	花费额外的时间以确保生成尽可能小的差异。
+`patience`;;
+	使用 "patience diff" 算法时产生的补丁。
+`histogram`;;
+	该算法将耐心算法扩展为 “支持低发生率的常见元素”。
+--
++
+
+`diff.wsErrorHighlight`::
+	高亮显示 diff 的 `context`、`old` 或 `new` 行中的空白错误。多个值用逗号分隔，`none` 重置以前的值，`default` 重置为 `new`，`all` 是 `old,new,context` 的缩写。空白错误用 `color.diff.whitespace`着色。命令行选项 `--ws-error-highlight=<kind>` 可覆盖此设置。
+
+`diff.colorMoved`::
+	如果设置为有效的 _<mode>_ 或 `true`，则 diff 中移动的行会以不同颜色显示。
+ifdef::git-diff[]
+	有效模式的详细信息参见 `--color-moved`。
+endif::git-diff[]
+ifndef::git-diff[]
+	有效模式的详细信息参见 linkgit:git-diff[1] 中的 `--color-moved`。
+endif::git-diff[]
+	如果只是将其设为 `true`，将使用默认的着色模式。当
+	设为 `false` 时，移动的行不会着色。
+
+`diff.colorMovedWS`::
+	当使用 `diff.colorMoved` 等设置为移动的行着色时，此选项控制空格的处理模式。有效模式的详情请参见 linkgit:git-diff[1] 中的 `--color-moved-ws`。

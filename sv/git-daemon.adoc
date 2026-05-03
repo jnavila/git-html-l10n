@@ -29,16 +29,16 @@ En riktigt enkel TCP Git-daemon som normalt lyssnar på port "DEFAULT_GIT_PORT" 
 
 Den verifierar att katalogen har den magiska filen "git-daemon-export-ok", och den kommer att vägra exportera alla Git-kataloger som inte uttryckligen har markerats för export på detta sätt (såvida inte parametern `--export-all` anges). Om du skickar vissa katalogsökvägar som `git daemon`-argument, är erbjudandena begränsade till arkiv inom dessa kataloger.
 
-Som standard, är endast tjänsten `upload-pack` aktiverad, vilken betjänar klienterna `git fetch-pack` och `git ls-remote`, vilka anropas från `git fetch`, `git pull` och `git clone`.
+Som standard är endast tjänsten `upload-pack` aktiverad, vilken betjänar klienterna `git fetch-pack` och `git ls-remote`, vilka anropas från `git fetch`, `git pull` och `git clone`.
 
-Detta är idealiskt för skrivskyddade uppdateringar, dvs. att dra in ("pulla") från Git-kodförråd.
+Detta är idealiskt för skrivskyddade uppdateringar, d.v.s. att dra in ("hämta") från Git-kodförråd.
 
 Ett `upload-archive` finns också för att hantera `git archive`.
 
 ALTERNATIV
 ----------
 `--strict-paths`::
-	Matcha sökvägar exakt (dvs. tillåt inte "/foo/kodförråd" när den verkliga sökvägen är "/foo/kodförråd.git" eller "/foo/kodförråd/.git") och använd inte användarrelativa sökvägar. `git daemon` kommer att vägra starta när det här alternativet är aktiverat och inga katalogargument anges.
+	Matcha sökvägar exakt (d.v.s. tillåt inte "/foo/repo" när den verkliga sökvägen är "/foo/repo.git" eller "/foo/repo/.git") och använd inte användarrelativa sökvägar. `git daemon` kommer att vägra starta när det här alternativet är aktiverat och inga katalogargument anges.
 
 `--base-path=<sökväg>`::
 	Ombilda alla sökvägsförfrågningar till relativa till den givna sökvägen. Detta är en sorts "Git root" - om du kör `git daemon` med `--base-path=/srv/git` på `example.com`, så om du senare försöker hämta från `git://example.com/hello.git`, kommer `git daemon` att tolka sökvägen som `/srv/git/hello.git`.
@@ -47,10 +47,10 @@ ALTERNATIV
 	Om `--base-path` är aktiverat och sökningen efter kodförråd misslyckas, kommer `git daemon` med det här alternativet att försöka söka utan att lägga till bassökvägen som prefix. Detta är användbart för att byta till användning av `--base-path`, samtidigt som de gamla sökvägarna fortfarande tillåts.
 
 `--interpolated-path=<sökvägsmall>`::
-	För att stödja virtuell värdskap (hosting) kan en interpolerad sökvägsmall användas för att dynamiskt konstruera alternativa sökvägar. Mallen stöder `%H` för målvärdnamnet som tillhandahålls av klienten men konverterat till enbart gemener, `%CH` för det kanoniska värdnamnet, `%IP` för serverns IP-adress, `%P` för portnumret och `%D` för den absoluta sökvägen till det namngivna arkivet. Efter interpolering valideras sökvägen mot kataloglistan.
+	För att stödja virtuell värdskap (hosting) kan en interpolerad sökvägsmall användas för att dynamiskt konstruera alternativa sökvägar. Mallen stöder `%H` för målvärdnamnet som tillhandahålls av klienten men konverterat till enbart gemener, `%CH` för det kanoniska värdnamnet, `%IP` för serverns IP-adress, `%P` för portnumret och `%D` för den absoluta sökvägen till det namngivna kodförrådet. Efter interpolering valideras sökvägen mot kataloglistan.
 
 `--export-all`::
-	Tillåt dra in ("pulla") från alla kataloger som ser ut som Git-kodförråd (har underkatalogerna 'objects' och 'refs'), även om de inte har filen `git-daemon-export-ok`.
+	Tillåt dra in ("hämta") från alla kataloger som ser ut som Git-kodförråd (har underkatalogerna 'objects' och 'refs'), även om de inte har filen `git-daemon-export-ok`.
 
 `--inetd`::
 	Låt servern köras som en inetd-tjänst. Innebär `--syslog` (kan åsidosättas med `--log-destination=`). Inkompatibel med alternativen `--detach`, `--port`, `--listen`, `--user` och `--group`.
@@ -89,7 +89,7 @@ Standarddestinationen är `syslog` om `--inetd` eller `--detach` anges, annars `
 
 `--user-path`::
 `--user-path=<sökväg>`::
-	Tillåt att {tilde}användarnotation används i förfrågningar. När en begäran till git://host/{tilde}alice/foo anges utan parameter, tas den som en begäran om åtkomst till 'foo'-arkivet i användarens `alice` hemkatalog. Om `--user-path=<sökväg>` anges tas samma begäran som en begäran om åtkomst till `<sökväg>/foo`-arkivet i användarens `alice` hemkatalog.
+	Tillåt att {tilde}användarnotation används i förfrågningar. När en begäran till git://host/{tilde}alice/foo anges utan parameter, tas den som en begäran om åtkomst till 'foo'-kodförrådet i användarens `alice` hemkatalog. Om `--user-path=<sökväg>` anges tas samma begäran som en begäran om åtkomst till `<sökväg>/foo`-kodförrådet i användarens `alice` hemkatalog.
 
 `--verbose`::
 	Logga detaljer om inkommande anslutningar och begärda filer.
@@ -137,13 +137,13 @@ TJÄNSTER
 Dessa tjänster kan globalt aktiveras/inaktiveras med hjälp av kommandoradsalternativen för detta kommando. Om mer detaljerad kontroll önskas (t.ex. för att tillåta att `git archive` endast körs mot i ett fåtal utvalda kodförråd som daemonen hanterar), kan konfigurationsfilen per kodförråd användas för att aktivera eller inaktivera dem.
 
 upload-pack::
-	Detta betjänar klienterna `git fetch-pack` och `git ls-remote`. Det är aktiverat som standard, men ett arkiv kan inaktivera det genom att ställa in konfigurationsalternativet `daemon.uploadpack` till `false`.
+	Kommandot betjänar klienterna `git fetch-pack` och `git ls-remote`. Det är aktiverat som standard, men ett kodförråd kan inaktivera det genom att ställa in konfigurationsalternativet `daemon.uploadpack` till `false`.
 
 upload-archive::
-	Detta hanterar `git archive --remote`. Det är inaktiverat som standard, men ett arkiv kan aktivera det genom att ställa in konfigurationsalternativet `daemon.uploadarch` till `true`.
+	Kommandot hanterar `git archive --remote`. Det är inaktiverat som standard, men ett kodförråd kan aktivera det genom att ställa in konfigurationsalternativet `daemon.uploadarch` till `true`.
 
 receive-pack::
-	Detta betjänar `git send-pack`-klienter och tillåter anonym sänding (push). Det är inaktiverat som standard eftersom det inte finns någon _no_-autentisering i protokollet (med andra ord, vem som helst kan pusha vad som helst in i arkivet, inklusive borttagning av referenser). Detta är enbart avsett för en stängd LAN-miljö där alla är vänliga. Den här tjänsten kan aktiveras genom att ställa in konfigurationsalternativet `daemon.receivepack` till `true`.
+	Detta betjänar `git send-pack`-klienter och tillåter anonym push. Funktionen är inaktiverad som standard eftersom protokollet saknar autentisering (med andra ord kan vem som helst skicka vad som helst till kodförrådet, inklusive att ta bort referenser). Detta är endast avsett för en sluten LAN-miljö där alla är betrodda. Tjänsten kan aktiveras genom att sätta konfigurationsalternativet `daemon.receivepack` till `true`.
 
 EXEMPEL
 -------
@@ -203,7 +203,7 @@ selektivt aktivera/inaktivera tjänster per kodförråd::
 
 MILJÖ
 -----
-`git daemon` kommer att sätta `REMOTE_ADDR` till IP-adressen för klienten som anslöt till den, om IP-adressen är tillgänglig. `REMOTE_ADDR` kommer att vara tillgänglig i miljön med krokar som anropas när tjänster utförs.
+`git daemon` sätter `REMOTE_ADDR` till IP-adressen för klienten som anslöt, om IP-adressen är tillgänglig. `REMOTE_ADDR` blir tillgänglig i miljön för krokar som anropas när tjänster körs.
 
 GIT
 ---
