@@ -17,7 +17,7 @@ git-diff-tree [-r] <目录树对象 1> <目录树对象 2> [<模式>...]::
 git-diff-files [<模式>...]::
         比较索引和文件系统上的文件。
 
-`git-diff-tree` 命令在最开始输出被比较对象的哈希值。之后，所有命令都会为每个更改的文件打印一个输出行。
+All the commands print one output line per changed file, except `git diff-files` in the case of an unmerged file, which prints both an "unmerged" and an "in-place edit" line.
 
 输出行的格式如下：
 
@@ -33,13 +33,13 @@ unmerged       :000000 000000 0000000 0000000 U file6
 含义如下，从左到右依次：
 
 . 冒号。
-. "src"（源文件）的模式；如果是新建或是未合并的，则为 000000。
+. mode for "src"; 000000 if creation, or if "src" is from the index and is unmerged.
 . 空格。
-. "dst" (目标文件）的模式；如果被删除或未合并则为 000000。
+. mode for "dst"; 000000 if deletion, or if "dst" is from the index and is unmerged.
 . 空格。
-. "src"（源文件）的 sha1 值；如果为新建或未合并则为 0\{40\}。
+. sha1 for "src"; 0\{40\} if creation, or if "src" is from the index and is unmerged.
 . 空格。
-. sha1 表示 "dst"（目标文件）；0\{40\} 表示删除、未合并或 “工作区树与索引不同步”。
+. sha1 for "dst"; 0\{40\} if deletion, if "dst" is from the index and is unmerged, or if "dst" is from the work tree and is out of sync with the index.
 . 空格。
 . 状态，在可选值 "score" 之后。
 . 当使用 `-z` 选项时为制表符或 NUL。
@@ -50,16 +50,16 @@ unmerged       :000000 000000 0000000 0000000 U file6
 
 可能的状态字母为：
 
-- A：文件新增部分
-- C：复制到一个新文件
-- D：文件删除部分
-- M：文件内容或文件模式修改
-- R：文件重命名
-- T：文件类型改变
-- U：文件未合并（你必须在提交之前完成合并）
-- X："unknown"（未知）更改类型（可能为错误，请报告）
+- `A`：文件新增部分
+- `C`：复制到一个新文件
+- `D`：文件删除部分
+- `M`：文件内容或文件模式修改
+- `R`：文件重命名
+- `T`：文件类型改变
+- `U`：文件未合并（你必须在提交之前完成合并）
+- `X`："unknown"（未知）更改类型（可能为错误，请报告）
 
-状态字母 C 和 R 后面总是一个分数（表示移动或复制的源与目标之间的相似性百分比）。状态字母 M 后面可能有文件重写的分数（表示相异百分比）。
+状态字母 `C` 和 `R` 后面总是一个分数（表示移动或复制的源与目标之间的相似性百分比）。状态字母 `M` 后面可能有文件重写的分数（表示相异百分比）。
 
 如果文件是文件系统上的新文件，并且与索引不同步，则 <sha1> 将显示为全 0。
 
@@ -109,7 +109,7 @@ include::diff-generate-patch.adoc[]
 其他差异格式
 ------
 
-`--summary` 选项描述新添加、删除、重命名和复制的文件。`--stat` 选项将 diffstat(1) 图添加到输出中。这些选项可以与其他选项组合在一起，如 `-p` 选项可以提高可读性。
+`--summary` 选项描述新添加、删除、重命名和复制的文件。`--stat` 选项将 `diffstat`(1) 图添加到输出中。这些选项可以与其他选项组合在一起，如 `-p` 选项可以提高可读性。
 
 当显示一个涉及到重命名或复制的更改时，`--stat` 输出会将路径名的前缀和后缀结合在一起，会以较紧凑的方式显示。例如，将 `arch/i386/Makefile` 移动到 `arch/x86/Makefile`，同时修改了 4 行，就会显示出这样的变化：
 

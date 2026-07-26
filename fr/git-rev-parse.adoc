@@ -1,0 +1,363 @@
+git-rev-parse(1)
+================
+
+NOM
+---
+git-rev-parse - Extraire et formater les paramètres
+
+
+SYNOPSIS
+--------
+[verse]
+'git rev-parse' [<options>] <arg>...
+
+DESCRIPTION
+-----------
+
+De nombreuses commandes presque-porcelaine de Git prennent un mélange de drapeaux (c'est-à-dire des paramètres qui commencent par un tiret '-') et de paramètres destinés à la commande sous-jacente 'git rev-list' qu'elles utilisent en interne, ainsi que des drapeaux et paramètres pour les autres commandes qu'elles utilisent en aval de 'git rev-list'. Le but principal de cette commande est de permettre aux programmes appelants de les distinguer. Il existe quelques autres modes de fonctionnement qui n'ont rien à voir avec l'aide ci-dessus pour l'analyse des options de ligne de commande.
+
+Sauf indication contraire, la plupart des options et des modes de fonctionnement nécessitent d'exécuter cette commande à l'intérieur d'un dépôt git ou d'un arbre de travail qui est sous le contrôle d'un dépôt git, sinon une erreur fatale sera retournée.
+
+
+OPTIONS
+-------
+
+Modes de fonctionnement
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Chacune de ces options doit apparaître en premier sur la ligne de commande.
+
+--parseopt::
+	Utiliser 'git rev-parse' en mode analyse d'options (voir la section PARSEOPT ci-dessous). La commande dans ce mode peut être utilisée en dehors d'un dépôt ou d'un arbre de travail contrôlé par un dépôt.
+
+--sq-quote::
+	Utiliser 'git rev-parse' en mode citation shell (voir la section SQ-QUOTE ci-dessous). Contrairement à l'option `--sq` ci-dessous, ce mode ne fait que la citation. Rien d'autre n'est fait sur l'entrée de la commande. La commande dans ce mode peut être utilisée en dehors d'un dépôt ou d'un arbre de travail contrôlé par un dépôt.
+
+Options pour --parseopt
+~~~~~~~~~~~~~~~~~~~~~~~
+
+--keep-dashdash::
+	Significatif uniquement en mode `--parseopt`. Indique à l'analyseur d'options de rééchoer le premier `--` rencontré au lieu de l'ignorer.
+
+--stop-at-non-option::
+	Significatif uniquement en mode `--parseopt`. Permet à l'analyseur d'options de s'arrêter au premier argument qui n'est pas une option. Cela peut être utilisé pour analyser des sous-commandes qui prennent elles-mêmes des options.
+
+--stuck-long::
+	Significatif uniquement en mode `--parseopt`. Affiche les options sous leur forme longue si disponible, et avec leurs arguments collés.
+
+Options de filtrage
+~~~~~~~~~~~~~~~~~~~
+
+--revs-only::
+	Ne pas afficher les drapeaux et paramètres non destinés à la commande 'git rev-list'.
+
+--no-revs::
+	Ne pas afficher les drapeaux et paramètres destinés à la commande 'git rev-list'.
+
+--flags::
+	Ne pas afficher les paramètres qui ne sont pas des drapeaux.
+
+--no-flags::
+	Ne pas afficher les paramètres de type drapeau.
+
+Options de sortie
+~~~~~~~~~~~~~~~~~
+
+--default <arg>::
+	Si aucun paramètre n'est donné par l'utilisateur, utiliser `<arg>` à la place.
+
+--prefix <arg>::
+	Se comporter comme si 'git rev-parse' avait été invoqué depuis le sous-répertoire `<arg>` de l'arbre de travail. Tous les noms de fichiers relatifs sont résolus comme s'ils étaient préfixés par `<arg>` et seront affichés sous cette forme.
++
+Cela peut être utilisé pour convertir les arguments d'une commande exécutée dans un sous-répertoire afin qu'ils puissent toujours être utilisés après être passé au répertoire de niveau supérieur du dépôt. Par exemple :
++
+----
+prefix=$(git rev-parse --show-prefix)
+cd "$(git rev-parse --show-toplevel)"
+# rev-parse fournit le -- nécessaire pour 'set'
+eval "set $(git rev-parse --sq --prefix "$prefix" -- "$@")"
+----
+
+--verify::
+	Vérifier qu'un seul paramètre est fourni, et qu'il peut être converti en un SHA-1 brut de 20 octets pouvant être utilisé pour accéder à la base de données d'objets. Si c'est le cas, l'émettre sur la sortie standard ; sinon, provoquer une erreur.
++
+Si vous voulez vous assurer que la sortie nomme réellement un objet dans votre base de données d'objets et/ou peut être utilisé comme un type spécifique d'objet que vous requérez, vous pouvez ajouter l'opérateur d'épluchage `^{type}` au paramètre. Par exemple, `git rev-parse "$VAR^{commit}"` vérifiera que `$VAR` nomme un objet existant qui est un commit (c'est-à-dire un commit, ou une étiquette annotée pointant vers un commit). Pour vérifier que `$VAR` nomme un objet existant de n'importe quel type, `git rev-parse "$VAR^{object}"` peut être utilisé.
++
+Notez que si vous vérifiez un nom provenant d'une source non fiable, il est prudent d'utiliser `--end-of-options` afin que l'argument de nom ne soit pas confondu avec une autre option.
+
+-q::
+--quiet::
+	Significatif uniquement en mode `--verify`. Ne pas afficher de message d'erreur si le premier argument n'est pas un nom d'objet valide ; à la place, terminer silencieusement avec un état non nul. Les SHA-1 pour les noms d'objets valides sont affichés sur la sortie standard en cas de succès.
+
+--sq::
+	Habituellement, la sortie est composée d'une ligne par drapeau et paramètre. Cette option produit une sortie sur une seule ligne, correctement citée pour être consommée par le shell. Utile lorsque vous vous attendez à ce que votre paramètre contienne des espaces et des sauts de ligne (par exemple, lorsque vous utilisez la pioche `-S` avec 'git diff-{asterisk}'). Contrairement à l'option `--sq-quote`, l'entrée de la commande est toujours interprétée comme d'habitude.
+
+--short[=<longueur>]::
+	Identique à `--verify` mais raccourcit le nom de l'objet en un préfixe unique d'au moins `length` caractères. La longueur minimale est 4, la valeur par défaut est la valeur effective de la variable de config `core.abbrev` (voir linkgit:git-config[1]).
+
+--not::
+	Lors de l'affichage des noms d'objets, les préfixer avec '{caret}' et supprimer le préfixe '{caret}' des noms d'objets qui en ont déjà un.
+
+--abbrev-ref[=(strict|loose)]::
+	Un nom court non ambigu de l'objet. L'option core.warnAmbiguousRefs est utilisée pour sélectionner le mode d'abréviation strict.
+
+--symbolic::
+	Habituellement, les noms d'objets sont affichés sous forme SHA-1 (avec un possible préfixe '{caret}') ; cette option les affiche sous une forme aussi proche que possible de l'entrée originale.
+
+--symbolic-full-name::
+	C'est similaire à --symbolic, mais omet les entrées qui ne sont pas des références (c'est-à-dire des noms de branches ou d'étiquettes ; ou plus explicitement la forme "heads/master" pour lever l'ambiguïté lorsque vous voulez nommer la branche "master" lorsqu'il existe malheureusement une étiquette "master"), et les affiche comme des noms de références complets (par exemple "refs/heads/master").
+
+--output-object-format=(sha1|sha256|storage)::
+
+	Permettre les oid à entrer depuis n'importe quel format d'objet que le dépôt actuel prend en charge.
++
+En spécifiant "sha1", traduit si nécessaire et renvoie un oid sha1.
++
+En spécifiant "sha256", traduit si nécessaire et renvoie un oid sha256.
++
+En spécifiant "storage", traduit si nécessaire et renvoie un oid encodé avec l'algorithme de hachage de stockage.
+
+Options pour les objets
+~~~~~~~~~~~~~~~~~~~~~~~
+
+--all::
+	Afficher toutes les références trouvées dans `refs/`.
+
+--branches[=<motif>]::
+--tags[=<motif>]::
+--remotes[=<motif>]::
+	Afficher respectivement toutes les branches, les étiquettes ou les branches de suivi à distance (c'est-à-dire, les références trouvées dans `refs/heads`, `refs/tags`, ou `refs/remotes`, respectivement).
++
+Si un `motif` est donné, seules les références correspondant au motif shell glob donné sont affichées. Si le motif ne contient pas de caractère de correspondance (`?`, `*`, ou `[`), il est transformé en une correspondance de préfixe en ajoutant `/*`.
+
+--glob=<motif>::
+	Afficher toutes les références correspondant au motif shell glob `motif`. Si le motif ne commence pas par `refs/`, ceci est automatiquement ajouté. Si le motif ne contient pas de caractère de correspondance (`?`, `*`, ou `[`), il est transformé en une correspondance de préfixe en ajoutant `/*`.
+
+--exclude=<motif-glob>::
+	Ne pas inclure les références correspondant à'<glob-pattern>' que les `--all`, `--branches`, `--tags`, `--remotes`, ou `--glob` suivantes considéreraient autrement. Les répétitions de cette option accumulent les motifs d'exclusion jusqu'à la prochaine option `--all`, `--branches`, `--tags`, `--remotes` ou `--glob` (les autres options ou arguments n'éliminent pas les motifs accumulés).
++
+Les motifs donnés ne doivent pas commencer par `refs/heads`, `refs/tags`, ou `refs/remotes` lorsqu'ils sont appliqués à `--branches`, `--tags`, ou `--remotes`, respectivement, et ils doivent commencer par `refs/` lorsqu'ils sont appliqués à `--glob` ou `--all`. Si un'/{asterisk}' final est intentionnel, il doit être donné explicitement.
+
+--exclude-hidden=(fetch|receive|uploadpack)::
+	Ne pas inclure les références qui seraient cachées par `git-fetch`, `git-receive-pack` ou `git-upload-pack` en consultant la configuration `fetch.hideRefs`, `receive.hideRefs` ou `uploadpack.hideRefs`correspondante ainsi que `transfer.hideRefs` (voir linkgit:git-config[1]). Cette option affecte l'option de pseudo-référence suivante `--all` ou `--glob` et est effacée après leur traitement.
+
+--disambiguate=<préfixe>::
+	Afficher chaque objet dont le nom commence par le préfixe donné. Le <préfixe> doit faire au moins 4 chiffres hexadécimaux pour éviter de lister chaque objet du dépôt par erreur.
+
+Options pour les fichiers
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+--local-env-vars::
+	Lister les variables d'environnement GIT_* qui sont locales au dépôt (par exemple GIT_DIR ou GIT_WORK_TREE, mais pas GIT_EDITOR). Seuls les noms des variables sont listés, pas leur valeur, même si elles sont définies.
+
+--path-format=(absolute|relative)::
+	Contrôle le comportement de certaines autres options. Si spécifié comme absolute, les chemins affichés par ces options seront absolus et canoniques. Si spécifié comme relative, les chemins seront relatifs au répertoire de travail courant si cela est possible. La valeur par défaut dépend de l'option.
++
+Cette option peut être spécifiée plusieurs fois et n'affecte que les arguments qui la suivent sur la ligne de commande, soit jusqu'à la fin de la ligne de commande, soit la prochaine instance de cette option.
+
+Les options suivantes sont modifiées par `--path-format` :
+
+--git-dir::
+	Afficher `$GIT_DIR` si défini. Sinon, afficher le chemin vers le répertoire .git. Le chemin affiché, lorsqu'il est relatif, est relatif au répertoire de travail courant.
++
+Si `$GIT_DIR` n'est pas défini et que le répertoire courant n'est pas détecté comme étant dans un dépôt Git ou un arbre de travail, afficher un message sur stderr et terminer avec un état non nul.
+
+--git-common-dir::
+	Afficher `$GIT_COMMON_DIR` si défini, sinon `$GIT_DIR`.
+
+--resolve-git-dir <chemin>::
+	Vérifier si <chemin> est un dépôt valide ou un gitfile qui pointe vers un dépôt valide, et afficher l'emplacement du dépôt. Si <chemin> est un gitfile, alors le chemin résolu vers le vrai dépôt est affiché.
+
+--git-path <chemin>::
+	Résoudre "$GIT_DIR/<chemin>" et prendre en compte les autres variables de relocalisation de chemin telles que $GIT_OBJECT_DIRECTORY, $GIT_INDEX_FILE... Par exemple, si $GIT_OBJECT_DIRECTORY est défini à /foo/bar, alors "git rev-parse --git-path objects/abc" renvoie /foo/bar/abc.
+
+--show-toplevel::
+	Afficher le chemin (par défaut, absolu) du répertoire de niveau supérieur de l'arbre de travail. S'il n'y a pas d'arbre de travail, signaler une erreur.
+
+--show-superproject-working-tree::
+	Afficher le chemin absolu de la racine de l'arbre de travail du super-projet (s'il existe) qui utilise le dépôt actuel comme sous-module. Ne produit rien si le dépôt actuel n'est utilisé comme sous-module par aucun projet.
+
+--shared-index-path::
+	Afficher le chemin vers le fichier d'index partagé en mode index partagé, ou vide si non en mode index partagé.
+
+Les options suivantes ne sont pas affectées par `--path-format` :
+
+--absolute-git-dir::
+	Comme `--git-dir`, mais sa sortie est toujours le chemin absolu canonisé.
+
+--is-inside-git-dir::
+	Lorsque le répertoire de travail courant se trouve sous le répertoire du dépôt, afficher "true", sinon "false".
+
+--is-inside-work-tree::
+	Lorsque le répertoire de travail courant se trouve à l'intérieur de l'arbre de travail du dépôt, afficher "true", sinon "false".
+
+--is-bare-repository::
+	Lorsque le dépôt est nu, afficher "true", sinon "false".
+
+--is-shallow-repository::
+	Lorsque le dépôt est superficiel, afficher "true", sinon "false".
+
+--show-cdup::
+	Lorsque la commande est invoquée depuis un sous-répertoire, afficher le chemin du répertoire de niveau supérieur relatif au répertoire courant (typiquement une séquence de "../", ou une chaîne vide).
+
+--show-prefix::
+	Lorsque la commande est invoquée depuis un sous-répertoire, afficher le chemin du répertoire courant relatif au répertoire de niveau supérieur.
+
+--show-object-format[=(storage|input|output|compat)]::
+	Afficher le format d'objet (algorithme de hachage) utilisé pour le dépôt en stockage à l'intérieur du répertoire `.git`, en entrée, en sortie ou en compatibilité. Pour l'entrée, plusieurs algorithmes peuvent être affichés, séparés par des espaces. Si `compat` est demandé et qu'aucun algorithme de compatibilité n'est activé, affiche une ligne vide. Si non spécifié, la valeur par défaut est "storage".
+
+--show-ref-format::
+	Afficher le format de stockage des références utilisé dans un dépôt.
+
+
+Autres options
+~~~~~~~~~~~~~~
+
+--since=<chaîne-date>::
+--after=<chaîne-date>::
+	Analyser la chaîne de date et afficher le paramètre --max-age= correspondant pour 'git rev-list'.
+
+--until=<chaîne-date>::
+--before=<chaîne-date>::
+	Analyser la chaîne de date et afficher le paramètre --min-age= correspondant pour 'git rev-list'.
+
+<arg>...::
+	Drapeaux et paramètres à analyser.
+
+
+include::revisions.adoc[]
+
+PARSEOPT
+--------
+
+En mode `--parseopt`, 'git rev-parse' aide à formater les options pour fournir aux scripts shell les mêmes fonctionnalités que les builtin C. Il fonctionne comme un normaliseur d'options (par exemple, sépare les valeurs agrégées des interrupteurs simples), un peu comme le fait `getopt(1)`.
+
+Il prend sur l'entrée standard la spécification des options à analyser et comprendre, et échoe sur la sortie standard une chaîne adaptée à `sh(1)` `eval` pour remplacer les arguments par des versions normalisées. En cas d'erreur, il affiche l'utilisation sur le flux d'erreur standard, et termine avec le code 129.
+
+Note : Assurez-vous de citer le résultat lorsque vous le passez à `eval`. Voir ci-dessous pour un exemple.
+
+Format d'entrée
+~~~~~~~~~~~~~~~
+
+Le format d'entrée de 'git rev-parse --parseopt' est entièrement basé sur du texte. Il comporte deux parties, séparées par une ligne qui ne contient que `--`. Les lignes avant le séparateur (devrait y en avoir une ou plus) sont utilisées pour l'utilisation. Les lignes après le séparateur décrivent les options.
+
+Chaque ligne d'options a ce format :
+
+------------
+<spec-opt><drapeaux>*<arg-indice>? SP+ help LF
+------------
+
+`<opt-spec>`::
+	son format est le caractère d'option courte, puis le nom d'option longue séparé par une virgule. Les deux parties ne sont pas requises, bien qu'au moins une soit nécessaire. Ne peut contenir aucun des caractères `<flags>`. `h,help`, `dry-run` et `f` sont des exemples de `<opt-spec>` corrects.
+
+`<drapeaux>`::
+	`<drapeaux>` sont `*`, `=`, `?` ou `!`.
+	* Utilisez `=` si l'option prend un argument.
+
+	* Utilisez `?` pour indiquer que l'option prend un argument optionnel. Vous voudrez probablement utiliser le mode `--stuck-long` pour pouvoir analyser sans ambiguïté l'argument optionnel.
+
+	* Utilisez `*` pour indiquer que cette option ne doit pas être listée dans l'utilisation générée pour l'argument `-h`. Elle est affichée pour `--help-all` comme documenté dans linkgit:gitcli[7].
+
+	* Utilisez `!` pour ne pas rendre disponible l'option longue négée correspondante.
+
+`<arg-hint>`::
+	`<arg-hint>`, si spécifié, est utilisé comme nom de l'argument dans l'aide, pour les options qui prennent des arguments. `<arg-hint>` se termine par le premier espace. Il est d'usage d'utiliser un tiret pour séparer les mots dans un indice d'argument multi-mots.
+
+Le reste de la ligne, après avoir supprimé les espaces, est utilisé comme aide associée à l'option.
+
+Les lignes vides sont ignorées, et les lignes qui ne correspondent pas à cette spécification sont utilisées comme en-têtes de groupe d'options (commencer la ligne par un espace pour créer de telles lignes volontairement).
+
+Exemple
+~~~~~~~
+
+------------
+OPTS_SPEC="\
+some-command [<options>] <args>...
+
+some-command fait foo et bar !
+--
+h,help! afficher l'aide
+
+foo une option astucieuse --foo bar= une option cool --bar avec un argument baz= une autre option cool --baz avec un argument nommé qux?path qux peut prendre un argument de chemin mais a une signification par lui-même
+
+  Un en-tête de groupe d'options
+C?        option C avec un argument optionnel"
+
+eval "$(echo "$OPTS_SPEC" | git rev-parse --parseopt -- "$@" || echo exit $?)"
+------------
+
+
+Texte d'utilisation
+~~~~~~~~~~~~~~~~~~~
+
+Lorsque `"$@"` vaut `-h` ou `--help` dans l'exemple ci-dessus, le texte d'utilisation suivant serait affiché :
+
+------------
+utilisation : some-command [<options>] <args>...
+
+    some-command fait foo et bar !
+
+    -h, --help            afficher l'aide
+    --[no-]foo            une option astucieuse --foo
+    --[no-]bar ...        une option cool --bar avec un argument
+    --[no-]baz <arg>      une autre option cool --baz avec un argument nommé
+    --[no-]qux[=<path>]   qux peut prendre un argument de chemin mais a une signification par lui-même
+
+En-tête d'un groupe d'options
+    -C[...]               option C avec un argument optionnel
+------------
+
+SQ-QUOTE
+--------
+
+En mode `--sq-quote`, 'git rev-parse' affiche sur la sortie standard une seule ligne adaptée à `sh(1)` `eval`. Cette ligne est produite en normalisant les arguments suivant `--sq-quote`. Rien d'autre que le quotes des arguments n'est effectué.
+
+Si vous souhaitez que l'entrée de la commande soit toujours interprétée comme d'habitude par 'git rev-parse' avant que la sortie ne soit quotée par le shell, consultez l'option `--sq`.
+
+Exemple
+~~~~~~~
+
+------------
+$ cat >your-git-script.sh <<\EOF
+#!/bin/sh
+args=$(git rev-parse --sq-quote "$@")   # quote user-supplied arguments
+command="git frotz -n24 $args"          # and use it inside a handcrafted
+					# command line
+eval "$command"
+EOF
+
+$ sh your-git-script.sh "a b'c"
+------------
+
+EXEMPLES
+--------
+
+* Afficher le nom de l'objet du commit courant :
++
+------------
+$ git rev-parse --verify HEAD
+------------
+
+* Afficher le nom de l'objet commit de la révision dans la variable shell $REV :
++
+------------
+$ git rev-parse --verify --end-of-options $REV^{commit}
+------------
++
+Cela provoquera une erreur si $REV est vide ou n'est pas une révision valide.
+
+* Similaire à ci-dessus :
++
+------------
+$ git rev-parse --default master --verify --end-of-options $REV
+------------
++
+mais si $REV est vide, le nom de l'objet commit de master sera affiché.
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

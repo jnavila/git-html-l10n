@@ -55,7 +55,14 @@ nom-de-base::
 --stdin-packs[=<mode>]::
 	Lire les noms de base des fichiers paquets (par exemple, `pack-1234abcd.pack`) depuis l'entrée standard, au lieu des arguments des noms d'objets ou de révision. Le paquet résultant contient tous les objets listés dans les paquets inclus (ceux qui ne commencent pas par `^`), excluant les objets énumérés dans les paquets exclus (commençant par `^`).
 +
-When `mode` is "follow", objects from packs not listed on stdin receive special treatment. Objects within unlisted packs will be included if those objects are (1) reachable from the included packs, and (2) not found in any excluded packs. This mode is useful, for example, to resurrect once-unreachable objects found in cruft packs to generate packs which are closed under reachability up to the boundary set by the excluded packs.
+Quand `mode` vaut « follow », les paquets peuvent en outre être préfixés par `!`, indiquant qu'ils sont exclus mais pas nécessairement fermés par atteignabilité. En plus des objets dans les paquets inclus, le paquet résultant peut inclure des objets supplémentaires en fonction de ce qui suit :
++
+--
+* Si des paquets sont marqués avec `!`, alors les objets atteignables depuis ces paquets ou les paquets inclus via des objets en dehors des paquets exclus-fermés seront inclus. Dans ce cas, tous les paquets `^` sont traités comme fermés par atteignabilité.
+* Sinon (s'il n'y a pas de paquets `!`), les objets dans les paquets non listés seront inclus si ces objets sont (1) atteignables depuis les paquets inclus, et (2) non trouvés dans les paquets exclus.
+--
++
+Ce mode est utile, par exemple, pour ressusciter des objets autrefois inatteignables trouvés dans des paquets de débris afin de générer des paquets qui sont fermés par atteignabilité jusqu'à la limite définie par les paquets exclus.
 +
 Incompatible avec `--revs`, ou options qui impliquent `--revs` (comme `--all`), à l'exception de `--unpacked`, qui est compatible.
 
@@ -88,13 +95,13 @@ La valeur par défaut pour --window est 10 et --depth est 50. La profondeur maxi
 	Ce drapeau fait ignorer un objet déjà dans le paquet donné, même s'il aurait été empaqueté par ailleurs. `nom-de-paquet` est le nom du fichier paquet sans répertoire (par exemple `pack-123.pack`). L'option peut être spécifiée plusieurs fois pour garder plusieurs paquets.
 
 --incremental::
-	This flag causes an object already in a pack to be ignored even if it would have otherwise been packed.
+	Cette option fait qu'un objet déjà dans un paquet est ignoré même s'il aurait autrement été empaqueté.
 
 --local::
-	This flag causes an object that is borrowed from an alternate object store to be ignored even if it would have otherwise been packed.
+	Cette option fait qu'un objet emprunté à un magasin d'objets alternatif est ignoré même s'il aurait autrement été empaqueté.
 
 --non-empty::
-        Only create a packed archive if it would contain at least one object.
+        Créer une archive empaquetée uniquement si elle contiendrait au moins un objet.
 
 --progress::
 	L'état d'avancement est affiché sur la sortie d'erreur standard quand elle est attachée à un terminal, à moins que -q soit spécifié. Ce drapeau force l'état d'avancement même si le flux d'erreur standard n'est pas dirigé vers un terminal.
@@ -109,7 +116,7 @@ La valeur par défaut pour --window est 10 et --depth est 50. La profondeur maxi
 	Ce drapeau permet à la commande de ne pas signaler sa progression sur le flux d'erreur standard.
 
 --no-reuse-delta::
-	When creating a packed archive in a repository that has existing packs, the command reuses existing deltas. This sometimes results in a slightly suboptimal pack. This flag tells the command not to reuse existing deltas but compute them from scratch.
+	Lors de la création d'une archive empaquetée dans un dépôt qui possède déjà des paquets, la commande réutilise les deltas existants. Cela donne parfois un paquet légèrement sous-optimal. Cette option demande à la commande de ne pas réutiliser les deltas existants mais de les calculer depuis le début.
 
 --no-reuse-object::
 	Ce drapeau indique à la commande de ne pas réutiliser les données d'objet existantes, y compris l'objet non déltifié, forçant la recompression de tout. Cela implique --no-reuse-delta. Utile seulement dans le cas obscur où l'exécution en gros d'un niveau de compression différent sur les données emballées est souhaitée.
@@ -130,7 +137,7 @@ Note : Un paquet mince viole le format d'archive empaquetée en omettant les ob
 	Optimiser un paquet qui sera fourni à un client avec un dépôt superficiel. Cette option, combinée avec --thin, peut générer un paquet plus petit au prix de quelques lenteurs.
 
 --delta-base-offset::
-	A packed archive can express the base object of a delta as either a 20-byte object name or as an offset in the stream, but ancient versions of Git don't understand the latter. By default, 'git pack-objects' only uses the former format for better compatibility. This option allows the command to use the latter format for compactness. Depending on the average delta chain length, this option typically shrinks the resulting packfile by 3-5 per-cent.
+	Une archive empaquetée peut exprimer l'objet de base d'un delta soit comme un nom d'objet de 20 octets, soit comme un décalage dans le flux, mais les anciennes versions de Git ne comprennent pas ce dernier. Par défaut, 'git pack-objects' n'utilise que le premier format pour une meilleure compatibilité. Cette option permet à la commande d'utiliser le second format pour la compacité. Selon la longueur moyenne de la chaîne de delta, cette option réduit typiquement le fichier paquet résultant de 3 à 5 pour cent.
 +
 Note : Les commandes de porcelaine comme `git gc` (voir linkgit:git-gc[1]), `git repack` (voir linkgit:git-repack[1]) passent cette option par défaut dans le Git moderne quand ils mettent des objets dans votre dépôt dans des fichiers paquets. Ainsi fait `git bundle` (voir linkgit:git-bundle[1]) quand il crée un colis.
 
@@ -144,7 +151,7 @@ Note : Les commandes de porcelaine comme `git gc` (voir linkgit:git-gc[1]), `g
 	Avec cette option, les parents qui sont cachés par des greffes sont néanmoins empaquetées.
 
 --filter=<spéc. du filtre>::
-	Omits certain objects (usually blobs) from the resulting packfile. See linkgit:git-rev-list[1] for valid `<filter-spec>` forms.
+	Omet certains objets (généralement des blobs) du fichier paquet résultant. Voir linkgit:git-rev-list[1] pour les formes valides de `<spéc-de-filtre>`.
 
 --no-filter::
 	Désactive tout argument `--filter=` précédent.
@@ -159,10 +166,10 @@ La forme '--missing=allow-any' permet de continuer le parcours d'objet si un obj
 Le forme '--missing=allow-promisor' est comme 'allow-any', mais ne permettra la traversée d'objets de continuer que pour les objets manquants du promettant EXPECTED. Il n'y aura pas de récupération d'un objet manquant. Les objets manquants inattendus entraîneront une erreur.
 
 --exclude-promisor-objects::
-	Omit objects that are known to be in the promisor remote. (This option has the purpose of operating only on locally created objects, so that when we repack, we still maintain a distinction between locally created objects [without .promisor] and objects from the promisor remote [with .promisor].) This is used with partial clone.
+	Omettre les objets dont on sait qu'ils se trouvent dans le distant prometteur. (Cette option a pour but de n'opérer que sur les objets créés localement, afin que lors du réempaquetage, on maintienne toujours une distinction entre les objets créés localement [sans .promisor] et les objets du distant prometteur [avec .promisor].) Ceci est utilisé avec le clone partiel.
 
 --keep-unreachable::
-	Objects unreachable from the refs in packs named with --unpacked= option are added to the resulting pack, in addition to the reachable objects that are not in packs marked with *.keep files. This implies `--revs`.
+	Les objets inatteignables depuis les références dans les paquets nommés avec l'option --unpacked= sont ajoutés au paquet résultant, en plus des objets atteignables qui ne sont pas dans les paquets marqués par des fichiers *.keep. Cela implique `--revs`.
 
 --pack-loose-unreachable::
 	Empaqueter les objets seuls inaccessibles (et leurs homologues seuls enlevés). Cela implique `--revs`.
@@ -174,16 +181,16 @@ Le forme '--missing=allow-promisor' est comme 'allow-any', mais ne permettra la 
 	Restreindre les correspondances de delta basées sur des "îlots". Voir ÎLOTS DE DELTA ci-dessous.
 
 --name-hash-version=<n>::
-	While performing delta compression, Git groups objects that may be similar based on heuristics using the path to that object. While grouping objects by an exact path match is good for paths with many versions, there are benefits for finding delta pairs across different full paths. Git collects objects by type and then by a "name hash" of the path and then by size, hoping to group objects that will compress well together.
+	Lors de la compression delta, Git regroupe les objets qui peuvent être similaires en se basant sur des heuristiques utilisant le chemin vers cet objet. Bien que le regroupement d'objets par correspondance de chemin exacte soit bon pour les chemins avec de nombreuses versions, il y a des avantages à trouver des paires delta sur différents chemins complets. Git collecte les objets par type, puis par un « hachage de nom » du chemin, puis par taille, dans l'espoir de regrouper des objets qui se compresseront bien ensemble.
 +
-The default name hash version is `1`, which prioritizes hash locality by considering the final bytes of the path as providing the maximum magnitude to the hash function. This version excels at distinguishing short paths and finding renames across directories. However, the hash function depends primarily on the final 16 bytes of the path. If there are many paths in the repo that have the same final 16 bytes and differ only by parent directory, then this name-hash may lead to too many collisions and cause poor results. At the moment, this version is required when writing reachability bitmap files with `--write-bitmap-index`.
+La version par défaut du hachage de nom est `1`, qui donne la priorité à la localité du hachage en considérant les derniers octets du chemin comme fournissant la magnitude maximale à la fonction de hachage. Cette version excelle à distinguer les chemins courts et à trouver les renommages entre répertoires. Cependant, la fonction de hachage dépend principalement des 16 derniers octets du chemin. S'il y a de nombreux chemins dans le dépôt qui ont les mêmes 16 derniers octets et ne diffèrent que par le répertoire parent, alors ce hachage de nom peut entraîner trop de collisions et donner de mauvais résultats. Pour l'instant, cette version est requise lors de l'écriture de fichiers bitmap d'atteignabilité avec `--write-bitmap-index`.
 +
-The name hash version `2` has similar locality features as version `1`, except it considers each path component separately and overlays the hashes with a shift. This still prioritizes the final bytes of the path, but also "salts" the lower bits of the hash using the parent directory names. This method allows for some of the locality benefits of version `1` while breaking most of the collisions from a similarly-named file appearing in many different directories. At the moment, this version is not allowed when writing reachability bitmap files with `--write-bitmap-index` and it will be automatically changed to version `1`.
+La version `2` du hachage de nom a des caractéristiques de localité similaires à la version `1`, sauf qu'elle considère chaque composant du chemin séparément et superpose les hachages avec un décalage. Cela donne toujours la priorité aux derniers octets du chemin, mais « sale » aussi les bits inférieurs du hachage en utilisant les noms des répertoires parents. Cette méthode permet de bénéficier de certains avantages de localité de la version `1` tout en cassant la plupart des collisions dues à un fichier de même nom apparaissant dans de nombreux répertoires différents. Pour l'instant, cette version n'est pas autorisée lors de l'écriture de fichiers bitmap d'atteignabilité avec `--write-bitmap-index` et sera automatiquement remplacée par la version `1`.
 
 --path-walk::
-	Perform compression by first organizing objects by path, then a second pass that compresses across paths as normal. This has the potential to improve delta compression especially in the presence of filenames that cause collisions in Git's default name-hash algorithm.
+	Effectuer la compression en organisant d'abord les objets par chemin, puis une seconde passe qui compresse sur les chemins comme d'habitude. Cela peut améliorer la compression delta, notamment en présence de noms de fichiers qui provoquent des collisions dans l'algorithme de hachage de nom par défaut de Git.
 +
-Incompatible with `--delta-islands`, `--shallow`, or `--filter`. The `--use-bitmap-index` option will be ignored in the presence of `--path-walk.`
+Incompatible avec `--delta-islands`. L'option `--use-bitmap-index` est ignorée en présence de `--path-walk`. L'option `--path-walk` prend en charge les formes `--filter=<spéc>` : `blob:none`, `blob:limit=<n>`, `tree:0`, `object:type=<type>`, et `sparse:<oid>`. Ces types de filtres pris en charge peuvent être combinés avec la forme `combine:<spéc>+<spéc>`.
 
 
 ÎLOTS DE DELTA
@@ -195,13 +202,13 @@ Dans un dépôt normal, cela tend à fonctionner automatiquement. Les objets son
 
 Mais dans certaines configurations de dépôt, vous pouvez avoir plusieurs groupes de sommets de réfs connexes mais séparés, avec des clients qui ont tendance à récupérer ces groupes indépendamment. Par exemple, imaginez que vous hébergez plusieurs « bifurcations » d'un dépôt dans un seul dépôt d'objets partagés, et que les clients les considèrent comme des dépôts séparés via `GIT_NAMESPACE` ou des dépôts séparés à l'aide d'un autre mécanisme. Un ré-empaquetage naïf peut trouver que le delta optimal pour un objet est contre une base qui se trouve seulement dans une autre bifurcations. Mais quand un client récupère, il n'aura pas l'objet de base, et il faudra trouver un nouveau delta à la volée.
 
-A similar situation may exist if you have many refs outside of `refs/heads/` and `refs/tags/` that point to related objects (e.g., `refs/pull` or `refs/changes` used by some hosting providers). By default, clients fetch only heads and tags, and deltas against objects found only in those other groups cannot be sent as-is.
+Une situation similaire peut exister si vous avez de nombreuses références en dehors de `refs/heads/` et `refs/tags/` qui pointent vers des objets liés (par exemple `refs/pull` ou `refs/changes` utilisés par certains fournisseurs d'hébergement). Par défaut, les clients ne récupèrent que les têtes et les étiquettes, et les deltas par rapport aux objets trouvés uniquement dans ces autres groupes ne peuvent pas être envoyés tels quels.
 
-Delta islands solve this problem by allowing you to group your refs into distinct "islands". Pack-objects computes which objects are reachable from which islands, and refuses to make a delta from an object `A` against a base which is not present in all of `A`'s islands. This results in slightly larger packs (because we miss some delta opportunities), but guarantees that a fetch of one island will not have to recompute deltas on the fly due to crossing island boundaries.
+Les îles delta résolvent ce problème en vous permettant de regrouper vos références en « îles » distinctes. Pack-objects calcule quels objets sont atteignables depuis quelles îles, et refuse de créer un delta depuis un objet `A` par rapport à une base qui n'est pas présente dans toutes les îles de `A`. Cela donne des paquets légèrement plus grands (parce qu'on rate quelques opportunités de delta), mais garantit qu'une récupération d'une île ne devra pas recalculer les deltas à la volée en raison du croisement des frontières d'îles.
 
-When repacking with delta islands the delta window tends to get clogged with candidates that are forbidden by the config. Repacking with a big --window helps (and doesn't take as long as it otherwise might because we can reject some object pairs based on islands before doing any computation on the content).
+Lors du réempaquetage avec des îles delta, la fenêtre de delta a tendance à se boucher avec des candidats interdits par la configuration. Le réempaquetage avec un grand --window aide (et ne prend pas aussi longtemps qu'il le pourrait autrement car on peut rejeter certaines paires d'objets basées sur les îles avant tout calcul sur le contenu).
 
-Islands are configured via the `pack.island` option, which can be specified multiple times. Each value is a left-anchored regular expressions matching refnames. For example:
+Les îles sont configurées via l'option `pack.island`, qui peut être spécifiée plusieurs fois. Chaque valeur est une expression régulière ancrée à gauche correspondant aux noms de références. Par exemple :
 
 -------------------------------------------
 [pack]
@@ -209,9 +216,9 @@ island = refs/heads/
 island = refs/tags/
 -------------------------------------------
 
-puts heads and tags into an island (whose name is the empty string; see below for more on naming). Any refs which do not match those regular expressions (e.g., `refs/pull/123`) is not in any island. Any object which is reachable only from `refs/pull/` (but not heads or tags) is therefore not a candidate to be used as a base for `refs/heads/`.
+place les têtes et les étiquettes dans une île (dont le nom est la chaîne vide ; voir ci-dessous pour plus d'informations sur le nommage). Toutes les références qui ne correspondent pas à ces expressions régulières (par exemple `refs/pull/123`) ne se trouvent dans aucune île. Tout objet qui n'est atteignable que depuis `refs/pull/` (mais pas les têtes ou les étiquettes) n'est donc pas un candidat à utiliser comme base pour `refs/heads/`.
 
-Refs are grouped into islands based on their "names", and two regexes that produce the same name are considered to be in the same island. The names are computed from the regexes by concatenating any capture groups from the regex, with a '-' dash in between. (And if there are no capture groups, then the name is the empty string, as in the above example.) This allows you to create arbitrary numbers of islands. Only up to 14 such capture groups are supported though.
+Les références sont regroupées en îles selon leurs « noms », et deux expressions régulières qui produisent le même nom sont considérées comme étant dans la même île. Les noms sont calculés à partir des expressions régulières en concaténant les groupes de capture de l'expression régulière, avec un tiret '-' entre eux. (Et s'il n'y a pas de groupes de capture, le nom est la chaîne vide, comme dans l'exemple ci-dessus.) Cela vous permet de créer un nombre arbitraire d'îles. Cependant, au maximum 14 groupes de capture sont pris en charge.
 
 Par exemple, imaginez que vous stockez les réfs pour chaque bifurcation dans `refs/virtual/ID`, où `ID` est un identifiant numérique. Vous pouvez alors configurer :
 

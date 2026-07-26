@@ -18,10 +18,15 @@ git push [--all | --branches | --mirror | --tags] [--follow-tags] [--atomic] [-n
 
 DESCRIPTION
 -----------
-
-Met à jour d'une ou de plusieurs branches, étiquettes ou autres références dans un dépôt distant depuis votre dépôt local, et envoie toutes les données nécessaires qui ne sont pas déjà sur le distant.
+Met à jour d'une ou de plusieurs branches, étiquettes ou autres références dans un ou plusieurs dépôts distants depuis votre dépôt local, et envoie toutes les données nécessaires qui ne sont pas déjà sur le distant.
 
 Le moyen le plus simple de pousser est `git push <distant> <branche>`. `git push origin main` va pousser la branche locale `main` à la branche `main` sur le distant appelé `origin`.
+
+Vous pouvez également pousser sur plusieurs distants à la fois en utilisant un groupe distant. Un groupe distant est une liste nommée de distants configurées via `remotes.<nom>` dans votre configuration git :
+
+	$ git config remotes.all-remotes "origin gitlab backup"
+
+Alors `git push all-remotes` va pousser `origin`, `gitlab`, et `backup` chacun à son tour, comme si vous aviez lancé `git push` sur chacun individuellement. Chaque distant est poussé indépendamment en utilisant sa propre configuration de correspondance push. Il y a une entrée `remotes.<groupe>` dans le fichier de configuration. (Voir linkgit:git-config[1]).
 
 L'argument `<dépôt>` vaut par défaut l'amont pour la branche actuelle, ou `origin` s'il n'y a pas d'amont configuré.
 
@@ -39,7 +44,7 @@ Vous pouvez faire arriver des choses intéressantes à un dépôt chaque fois qu
 OPTIONS
 -------
 _<dépôt>_::
-	Le dépôt "distant" qui est la destination d'une opération de poussée. Ce paramètre peut être soit une URL (voir la section <<URLS, URLS GIT >> ci-dessous) ou le nom d'un dépôt distant (voir la section <<REMOTES, DISTANTS >> ci-dessous).
+	Le dépôt "distant" qui est la destination d'une opération de poussée. Ce paramètre peut être soit une URL (voir la section <<URLS, URLS GIT >> ci-dessous), le nom d'un dépôt distant (voir la section <<REMOTES, DISTANTS >> ci-dessous) ou le nom d'un groupe distant (voir la section <<REMOTE-GROUPS,GROUPES DISTANTS>> ci-dessous).
 
 `<réf-de-spéc>...`::
 	Spécifier quelle réf destination pour mettre à jour avec quel objet source.
@@ -239,6 +244,35 @@ Lors de l'utilisation de `on-demand` ou `only`, si un sous-module possède une c
 	Utiliser uniquement les adresses IPv6, en ignorant les adresses IPv4.
 
 include::urls-remotes.adoc[]
+
+[[REMOTE-GROUPS]]
+GROUPES DISTANTS
+----------------
+
+Un groupe distant est une liste nommée de distants configurés via `remotes.<nom>` dans votre configuration git :
+
+	$ git config remotes.all-remotes "r1 r2 r3"
+
+Lorsque le nom d'un groupe est donné comme argument `<dépôt>`, la poussée est effectuée à chaque membre distant à son tour. Le principe déterminant est :
+
+	git push <options> all-remotes <args>
+
+est un équivalent grossier de :
+
+	git push <options> r1 <args>
+	git push <options> r2 <args>
+	...
+	git push <options> rN <args>
+
+où r1, r2, ..., rN sont les membres de `all-remotes`. Aucun comportement spécial n'est ajouté ou supprimé — le groupe est purement un raccourci pour exécuter la même commande push avec chaque distant membre individuellement.
+
+Lors de la poussée vers un groupe de plus d'un dépôt, Git émet un sous-processus `git push` distinct pour chaque distant membre en séquence. Chaque sous-processus reçoit les mêmes drapeaux et spécs de réf que l'invocation originale. Cela signifie que les correspondances de poussée par distant configurées via `remote.<nom>.push` ' et le mode miroir (`remote.<nom>.mirror`) sont évalués indépendamment pour chaque distant, et qu'un distant miroir dans le groupe ne peut affecter le comportement de poussée d'autres distants non-miroir dans le même groupe.
+
+L'option `--atomic` n'est pas prise en charge pour les poussées de groupe, car l'homogénéité ne peut être garantie que dans une seule connexion de transport à un seul distant. Git refusera l'invocation avec une erreur si `--atomic` est combiné avec un nom de groupe.
+
+Si un membre distant échoue, que ce soit en raison d'un rejet par poussée (par exemple, une mise à jour pas en avance rapide, un crochet côté serveur refusant une ref) ou d'une erreur de connexion (par exemple, le dépôt n'existe pas, l'authentification échoue ou le réseau est inaccessible), Git signale l'erreur et continue de pousser vers les autres distants du groupe. Le code de sortie global est non-zéro si une poussée vers un membre échoue.
+
+Cela signifie que l'utilisateur est responsable de s'assurer que la séquence des poussées individuelles est logique. Si `git push r1` échouerait pour un ensemble donné d'options et d'arguments, alors `git push all-remotes` échouera de la même manière quand il atteindra r1. La poussée d'un groupe ne fait rien de spécial pour faire réussir une poussée individuelle défaillante.
 
 SORTIE
 ------

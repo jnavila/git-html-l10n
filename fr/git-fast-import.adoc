@@ -37,19 +37,20 @@ OPTIONS
 +
 N'activez cette option que si vous faites confiance au programme qui génère le flux d'importation rapide ! Cette option est activée automatiquement pour les assistants à distance qui utilisent la capacité `import`, car ils sont déjà autorisés à exécuter leur propre code.
 
-`--signed-tags=(verbatim|warn-verbatim|warn-strip|strip|abort)`::
-	Specify how to handle signed tags. Behaves in the same way as the `--signed-commits=<mode>` below, except that the `strip-if-invalid` mode is not yet supported. Like for signed commits, the default mode is `verbatim`.
+`--signed-tags=<mode>`::
+	Spécifier comment gérer les tags signés. Se comporte de la même manière que `--signed-commits=<mode>` ci-dessous. Comme pour les commits signés, le mode par défaut est `verbatim`.
 
 `--signed-commits=<mode>`::
-	Specify how to handle signed commits. The following <mode>s are supported:
+	Spécifier comment gérer les commits signés. Les <mode>s suivants sont pris en charge :
 +
-* `verbatim`, which is the default, will silently import commit signatures.
-* `warn-verbatim` will import them, but will display a warning.
-* `abort` will make this program die when encountering a signed commit.
-* `strip` will silently make the commits unsigned.
-* `warn-strip` will make them unsigned, but will display a warning.
-* `strip-if-invalid` will check signatures and, if they are invalid, will strip them and display a warning. The validation is performed in the same way as linkgit:git-verify-commit[1] does it.
-* `sign-if-invalid[=<keyid>]`, similar to `strip-if-invalid`, verifies commit signatures and replaces invalid signatures with newly created ones. Valid signatures are left unchanged. If `<keyid>` is provided, that key is used for signing; otherwise the configured default signing key is used.
+* `verbatim`, qui est la valeur par défaut, importera silencieusement les signatures de commit.
+* `warn-verbatim` les importera, mais affichera un avertissement.
+* `abort` fera terminer ce programme lorsqu'il rencontre un commit signé.
+* `strip` rendra silencieusement les commits non signés.
+* `warn-strip` les rendra non signés, mais affichera un avertissement.
+* `strip-if-invalid` vérifiera les signatures et, si elles sont invalides, les supprimera et affichera un avertissement. La validation est effectuée de la même manière que le fait linkgit:git-verify-commit[1].
+* `sign-if-invalid[=<keyid>]`, similaire à `strip-if-invalid`, vérifie les signatures de commit et remplace les signatures invalides par des nouvelles créées. Les signatures valides sont laissées inchangées. Si `<keyid>` est fourni, cette clé est utilisée pour la signature ; sinon la clé de signature par défaut configurée est utilisée.
+* `abort-if-invalid` fera terminer ce programme lorsqu'il rencontre un commit signé qui ne peut pas être vérifié.
 
 Options pour les frontaux
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -195,7 +196,7 @@ Commandes
 fast-import accepte plusieurs commandes pour mettre à jour le dépôt actuel et contrôler le processus d'importation en cours. Une discussion plus détaillée (avec des exemples) de chaque commande suit plus bas.
 
 `commit`::
-	Crée une nouvelle branche ou met à jour une branche existante en créant un nouveau commit et en mettant à jour la branche pour qu'elle pointe sur le commit nouvellement créé.
+	Crée une nouvelle branche ou met à jour une branche existante en créant un nouveau commit et en mettant à jour la branche pour qu'elle pointe sur le commit nouveaument créé.
 
 `tag`::
 	Crée un objet étiquette annoté à partir d'un commit ou d'une branche existante. Les étiquettes légères ne sont pas prises en charge par cette commande, car elles ne sont pas recommandées pour enregistrer des points significatifs dans le temps.
@@ -219,10 +220,10 @@ fast-import accepte plusieurs commandes pour mettre à jour le dépôt actuel et
 	Marque la fin du flux. Cette commande est facultative, sauf si la fonctionnalité `done` a été demandée à l'aide de l'option de ligne de commande `--done` ou de la commande `feature done`.
 
 `get-mark`::
-	Demande à fast-import d'imprimer le SHA-1 correspondant à une marque sur le descripteur de fichier défini avec `--cat-blob-fd`, ou `stdout` si non spécifié.
+	Demande à fast-import d'afficher le SHA-1 correspondant à une marque sur le descripteur de fichier défini avec `--cat-blob-fd`, ou `stdout` si non spécifié.
 
 `cat-blob`::
-	Demande à fast-import d'imprimer un blob au format 'cat-file --batch' sur le descripteur de fichier défini avec `--cat-blob-fd` ou `stdout` si non spécifié.
+	Demande à fast-import d'afficher un blob au format 'cat-file --batch' sur le descripteur de fichier défini avec `--cat-blob-fd` ou `stdout` si non spécifié.
 
 `ls`::
 	Demande à fast-import d'afficher une ligne décrivant une entrée de répertoire au format 'ls-tree' sur le descripteur de fichier défini avec `--cat-blob-fd`, ou `stdout` si non spécifié.
@@ -262,9 +263,9 @@ one).
 
 où `<ref>` est le nom de la branche sur laquelle le commit doit être effectué. Typiquement, les noms de branches sont préfixés par `refs/heads/` dans Git, donc importer le symbole de branche CVS `RELENG-1_0` utilisera `refs/heads/RELENG-1_0` pour la valeur de `<ref>`. La valeur de `<ref>` doit être un nom de référence valide dans Git. Comme `LF` n'est pas valide dans un nom de référence Git, aucune syntaxe de citation ou d'échappement n'est supportée ici.
 
-Une commande `mark` peut optionnellement apparaître, demandant à fast-import de sauvegarder une référence au commit nouvellement créé pour une utilisation future par le frontal (voir ci-dessous pour le format). Il est très courant pour les frontaux de marquer chaque commit qu'ils créent, permettant ainsi la création de branches futures à partir de n'importe quel commit importé.
+Une commande `mark` peut optionnellement apparaître, demandant à fast-import de sauvegarder une référence au commit nouveaument créé pour une utilisation future par le frontal (voir ci-dessous pour le format). Il est très courant pour les frontaux de marquer chaque commit qu'ils créent, permettant ainsi la création de branches futures à partir de n'importe quel commit importé.
 
-La commande `data` qui suit `committer` doit fournir le message de validation (voir ci-dessous la syntaxe de la commande `data`). Pour importer un message de validation vide, utilisez des données de longueur 0. Les messages de validation sont de forme libre et ne sont pas interprétés par Git. Actuellement, ils doivent être encodés en UTF-8, car fast-import ne permet pas de spécifier d'autres encodages.
+La commande `data` qui suit `committer` doit fournir le message de validation (voir ci-dessous la syntaxe de la commande `data`). Pour importer un message de validation vide, utilisez des données de longueur 0. Les messages de validations sont de forme libre et ne sont pas interprétés par Git. Actuellement, ils doivent être encodés en UTF-8, car fast-import ne permet pas de spécifier d'autres encodages.
 
 Une ou plusieurs commandes `filemodify`, `filedelete`, `filecopy`, `filerename`, `filedeleteall` et `notemodify` peuvent être incluses pour mettre à jour le contenu de la branche avant de créer le commit. Ces commandes peuvent être fournies dans n'importe quel ordre. Cependant, il est recommandé que la commande `filedeleteall` précède toutes les commandes `filemodify`, `filecopy`, `filerename` et `notemodify` dans le même commit, car `filedeleteall` efface la branche (voir ci-dessous).
 
@@ -285,29 +286,29 @@ L'heure de la modification est spécifiée par `<quand>` en utilisant le format 
 `gpgsig`
 ^^^^^^^^
 
-The optional `gpgsig` command is used to include a PGP/GPG signature or other cryptographic signature that signs the commit data.
+La commande optionnelle `gpgsig` est utilisée pour inclure une signature PGP/GPG ou une autre signature cryptographique qui signe les données du commit.
 
 ....
 	'gpgsig' SP <git-hash-algo> SP <signature-format> LF data
 ....
 
-The `gpgsig` command takes two arguments:
+La commande `gpgsig` prend deux arguments :
 
-* `<git-hash-algo>` specifies which Git object format this signature applies to, either `sha1` or `sha256`. This allows to know which representation of the commit was signed (the SHA-1 or the SHA-256 version) which helps with both signature verification and interoperability between repos with different hash functions.
+* `<git-hash-algo>` spécifie le format d'objet Git auquel cette signature s'applique, soit `sha1` ou `sha256`. Cela permet de savoir quelle représentation du commit a été signée (la version SHA-1 ou SHA-256), ce qui aide à la fois à la vérification des signatures et à l'interopérabilité entre les dépôts avec différentes fonctions de hachage.
 
-* `<signature-format>` specifies the type of signature, such as `openpgp`, `x509`, `ssh`, or `unknown`. This is a convenience for tools that process the stream, so they don't have to parse the ASCII armor to identify the signature type.
+* `<signature-format>` spécifie le type de signature, comme `openpgp`, `x509`, `ssh` ou `unknown`. C'est une commodité pour les outils qui traitent le flux, afin qu'ils n'aient pas à analyser l'armure ASCII pour identifier le type de signature.
 
-A commit may have at most one signature for the SHA-1 object format (stored in the "gpgsig" header) and one for the SHA-256 object format (stored in the "gpgsig-sha256" header).
+Un commit peut avoir au maximum une signature pour le format d'objet SHA-1 (stockée dans l'en-tête "gpgsig") et une pour le format d'objet SHA-256 (stockée dans l'en-tête "gpgsig-sha256").
 
 Voir ci-dessous pour une description détaillée de la commande `data` qui contient les données de signature brute.
 
-Signatures are not yet checked in the current implementation though. (Already setting the `extensions.compatObjectFormat` configuration option might help with verifying both SHA-1 and SHA-256 object format signatures when it will be implemented.)
+Les signatures ne sont pas encore vérifiées dans l'implémentation actuelle. (Déjà, le fait de définir l'option de configuration `extensions.compatObjectFormat` pourrait aider à vérifier les signatures des formats d'objet SHA-1 et SHA-256 lorsqu'elle sera implémentée.)
 
-NOTE: This is highly experimental and the format of the `gpgsig` command may change in the future without compatibility guarantees.
+NOTE: Ceci est hautement expérimental et le format de la commande `gpgsig` peut changer à l'avenir sans garantie de compatibilité.
 
 `encoding`
 ^^^^^^^^^^
-La commande optionnelle `encoding` indique l'encodage du message de validation. La plupart des commits sont UTF-8 et l'encodage est omis, mais cela permet d'importer des messages de commit dans git sans les ré-encoder au préalable.
+La commande optionnelle `encoding` indique l'encodage du message de validation. La plupart des commits sont UTF-8 et l'encodage est omis, mais cela permet d'importer des messages de validation dans git sans les ré-encoder au préalable.
 
 `from`
 ^^^^^^
@@ -380,11 +381,11 @@ Dans les deux formats, `<mode>` est le type d'entrée du fichier, spécifié en 
 
 Dans les deux formats, `<chemin>` est le chemin complet du fichier à ajouter (s'il n'existe pas déjà) ou à modifier (s'il existe déjà).
 
-A `<path>` can be written as unquoted bytes or a C-style quoted string.
+Un `<chemin>` peut être écrit sous forme d'octets non cités ou d'une chaîne citée de style C.
 
-When a `<path>` does not start with a double quote (`"`), it is an unquoted string and is parsed as literal bytes without any escape sequences. However, if the filename contains `LF` or starts with double quote, it cannot be represented as an unquoted string and must be quoted. Additionally, the source `<path>` in `filecopy` or `filerename` must be quoted if it contains SP.
+Lorsqu'un `<chemin>` ne commence pas par un guillemet double (`"`), c'est une chaîne non citée et elle est analysée comme des octets littéraux sans séquences d'échappement. Cependant, si le nom de fichier contient `LF` ou commence par un guillemet double, il ne peut pas être représenté comme une chaîne non cité et doit être cité. De plus, le `<chemin>` source dans `filecopy` ou `filerename` doit être cité s'il contient SP.
 
-When a `<path>` starts with a double quote (`"`), it is a C-style quoted string, where the complete filename is enclosed in a pair of double quotes and escape sequences are used. Certain characters must be escaped by preceding them with a backslash: `LF` is written as `\n`, backslash as `\\`, and double quote as `\"`. Some characters may optionally be written with escape sequences: `\a` for bell, `\b` for backspace, `\f` for form feed, `\n` for line feed, `\r` for carriage return, `\t` for horizontal tab, and `\v` for vertical tab. Any byte can be written with 3-digit octal codes (e.g., `\033`). All filenames can be represented as quoted strings.
+Lorsqu'un `<chemin>` commence par un guillemet double (`"`), c'est une chaîne citée de style C, où le nom de fichier complet est entouré d'une paire de guillemets doubles et des séquences d'échappement sont utilisées. Certains caractères doivent être échappés en les précédant d'une barre oblique inverse : `LF` s'écrit `\n`, la barre oblique inverse s'écrit `\\`, et le guillemet double s'écrit `\"`. Certains caractères peuvent optionnellement être écrits avec des séquences d'échappement : `\a` pour la cloche, `\b` pour le retour arrière, `\f` pour le saut de page, `\n` pour le saut de ligne, `\r` pour le retour chariot, `\t` pour la tabulation horizontale, et `\v` pour la tabulation verticale. Tout octet peut être écrit avec des codes octaux à 3 chiffres (par exemple, `\033`). Tous les noms de fichiers peuvent être représentés comme des chaînes citées.
 
 Un `<chemin>` doit utiliser des séparateurs de répertoire de style UNIX (barre oblique `/`) et sa valeur doit être de forme canonique, en ce qu'il ne doit pas :
 
@@ -557,7 +558,7 @@ La commande mark est optionnelle ici car certains frontaux ont choisi de génér
 
 `data`
 ~~~~~~
-Fournit des données brutes (à utiliser comme contenu de blob/fichier, messages de commit ou messages de tags annotés) à fast-import. Les données peuvent être fournies en utilisant un nombre exact d'octets ou en étant délimitées par une ligne de fin. Les frontaux réels destinés à des conversions de qualité devraient toujours utiliser le format de comptage exact des octets, car il est plus robuste et plus performant. Le format délimité est principalement destiné à tester l'importation rapide.
+Fournit des données brutes (à utiliser comme contenu de blob/fichier, messages de validation ou messages de tags annotés) à fast-import. Les données peuvent être fournies en utilisant un nombre exact d'octets ou en étant délimitées par une ligne de fin. Les frontaux réels destinés à des conversions de qualité devraient toujours utiliser le format de comptage exact des octets, car il est plus robuste et plus performant. Le format délimité est principalement destiné à tester l'importation rapide.
 
 Les lignes de commentaires apparaissant dans la partie `<brut>` des commandes `data` sont toujours considérées comme faisant partie du corps des données et ne sont donc jamais ignorées par fast-import. Cela permet d'importer en toute sécurité tout contenu de fichier/message dont les lignes pourraient commencer par `#`.
 
@@ -637,7 +638,7 @@ Placer une commande `progress` immédiatement après un `checkpoint` informera l
 
 `get-mark`
 ~~~~~~~~~~
-Demande à fast-import d'imprimer le SHA-1 correspondant à une marque vers stdout ou vers le descripteur de fichier préalablement arrangé avec l'argument `--cat-blob-fd`. Cette commande n'a pas d'impact sur l'importation en cours ; son but est de récupérer les SHA-1 que les commits ultérieurs pourraient vouloir mentionner dans leurs messages de commit.
+Demande à fast-import d'afficher le SHA-1 correspondant à une marque vers stdout ou vers le descripteur de fichier préalablement arrangé avec l'argument `--cat-blob-fd`. Cette commande n'a pas d'impact sur l'importation en cours ; son but est de récupérer les SHA-1 que les commits ultérieurs pourraient vouloir mentionner dans leurs messages de validation.
 
 ....
 	'get-mark' SP ':' <idnum> LF
@@ -647,7 +648,7 @@ Voir "Réponses aux commandes" ci-dessous pour plus de détails sur la façon de
 
 `cat-blob`
 ~~~~~~~~~~
-Demande à fast-import d'imprimer un blob sur un descripteur de fichier préalablement défini avec l'argument `--cat-blob-fd`. La commande n'a autrement aucun impact sur l'importation courante ; son but principal est de récupérer les blobs qui peuvent être dans la mémoire de fast-import mais non accessibles depuis le dépôt cible.
+Demande à fast-import d'afficher un blob sur un descripteur de fichier préalablement défini avec l'argument `--cat-blob-fd`. La commande n'a autrement aucun impact sur l'importation courante ; son but principal est de récupérer les blobs qui peuvent être dans la mémoire de fast-import mais non accessibles depuis le dépôt cible.
 
 ....
 	'cat-blob' SP <réf-data> LF
@@ -782,7 +783,7 @@ RAPPORTS D'ACCIDENT
 -------------------
 Si fast-import reçoit une entrée invalide, il se terminera avec un statut de sortie non nul et créera un rapport d'accident au niveau supérieur du dépôt Git dans lequel il importait. Les rapports d'accident contiennent un instantané de l'état interne de fast-import ainsi que les commandes les plus récentes qui ont conduit au crash.
 
-Toutes les commandes récentes (y compris les commentaires de flux, les modifications de fichiers et les commandes de progression) sont affichées dans l'historique des commandes au sein du rapport de collision, mais les données de fichiers brutes et les messages de validation sont exclus du rapport de collision. Cette exclusion permet de gagner de l'espace dans le fichier de rapport et de réduire la quantité de mise en mémoire tampon que l'importation rapide doit effectuer pendant l'exécution.
+Toutes les commandes récentes (y compris les commentaires de flux, les modifications de fichiers et les commandes de progression) sont affichées dans l'historique des commandes au sein du rapport de collision, mais les données de fichiers brutes et les messages de validations sont exclus du rapport de collision. Cette exclusion permet de gagner de l'espace dans le fichier de rapport et de réduire la quantité de mise en mémoire tampon que l'importation rapide doit effectuer pendant l'exécution.
 
 Après avoir écrit un rapport de panne, fast-import fermera le fichier paquet actuel et exportera la table des marques. Cela permet au développeur du frontal d'inspecter l'état du dépôt et de reprendre l'importation à partir du point où elle s'est arrêtée. Les branches et les étiquettes modifiées ne sont pas mises à jour lors d'un crash, car l'importation ne s'est pas terminée avec succès. Les informations sur les branches et les étiquettes se trouvent dans le rapport d'accident et doivent être appliquées manuellement si la mise à jour est nécessaire.
 
@@ -894,60 +895,64 @@ Si vous ré-empaquetez des données importées très anciennes (par exemple, plu
 
 Incluez des messages de progrès
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Every once in a while have your frontend emit a `progress` message to fast-import. The contents of the messages are entirely free-form, so one suggestion would be to output the current month and year each time the current commit date moves into the next month. Your users will feel better knowing how much of the data stream has been processed.
+De temps en temps, faites émettre à votre frontal un message `progress` à fast-import. Le contenu des messages est entièrement libre, donc une suggestion serait de sortir le mois et l'année courants à chaque fois que la date du commit actuel passe au mois suivant. Vos utilisateurs se sentiront mieux en sachant quelle quantité du flux de données a été traitée.
 
 
-PACKFILE OPTIMIZATION
----------------------
-When packing a blob fast-import always attempts to deltify against the last blob written. Unless specifically arranged for by the frontend, this will probably not be a prior version of the same file, so the generated delta will not be the smallest possible. The resulting packfile will be compressed, but will not be optimal.
+OPTIMISATION DU FICHIER PAQUET
+------------------------------
+Lors de l'empaquetage d'un blob, fast-import tente toujours de créer un delta par rapport au dernier blob écrit. À moins d'être spécifiquement arrangé par le frontal, ce ne sera probablement pas une version précédente du même fichier, donc le delta généré ne sera pas le plus petit possible. Le fichier paquet résultant sera compressé, mais ne sera pas optimal.
 
-Frontends which have efficient access to all revisions of a single file (for example reading an RCS/CVS ,v file) can choose to supply all revisions of that file as a sequence of consecutive `blob` commands. This allows fast-import to deltify the different file revisions against each other, saving space in the final packfile. Marks can be used to later identify individual file revisions during a sequence of `commit` commands.
+Les frontaux qui ont un accès efficace à toutes les révisions d'un fichier unique (par exemple la lecture d'un fichier RCS/CVS ,v) peuvent choisir de fournir toutes les révisions de ce fichier comme une séquence de commandes `blob` consécutives. Cela permet à fast-import de créer les deltas des différentes révisions de fichier les unes par rapport aux autres, économisant de l'espace dans le fichier paquet final. Les marques peuvent être utilisées pour identifier ultérieurement les révisions individuelles de fichiers lors d'une séquence de commandes `commit`.
 
-The packfile(s) created by fast-import do not encourage good disk access patterns. This is caused by fast-import writing the data in the order it is received on standard input, while Git typically organizes data within packfiles to make the most recent (current tip) data appear before historical data. Git also clusters commits together, speeding up revision traversal through better cache locality.
+Le(s) fichier(s) paquet créé(s) par fast-import n'encourage pas de bons schémas d'accès au disque. Cela est dû au fait que fast-import écrit les données dans l'ordre où elles sont reçues sur l'entrée standard, tandis que Git organise généralement les données dans les fichiers paquets pour que les données les plus récentes (le point actuel) apparaissent avant les données historiques. Git regroupe également les commits ensemble, accélérant la traversal des révisions grâce à une meilleure localité du cache.
 
-For this reason it is strongly recommended that users repack the repository with `git repack -a -d` after fast-import completes, allowing Git to reorganize the packfiles for faster data access. If blob deltas are suboptimal (see above) then also adding the `-f` option to force recomputation of all deltas can significantly reduce the final packfile size (30-50% smaller can be quite typical).
+Pour cette raison, il est fortement recommandé aux utilisateurs de re-empaqueter le dépôt avec `git repack -a -d` après la fin de fast-import, permettant à Git de réorganiser les fichiers paquets pour un accès aux données plus rapide. Si les deltas de blobs sont sous-optimaux (voir ci-dessus), l'ajout de l'option `-f` pour forcer le recalcul de tous les deltas peut réduire considérablement la taille du fichier paquet final (30-50% plus petit peut être assez typique).
 
-Instead of running `git repack` you can also run `git gc --aggressive`, which will also optimize other things after an import (e.g. pack loose refs). As noted in the "AGGRESSIVE" section in linkgit:git-gc[1] the `--aggressive` option will find new deltas with the `-f` option to linkgit:git-repack[1]. For the reasons elaborated on above using `--aggressive` after a fast-import is one of the few cases where it's known to be worthwhile.
+Au lieu d'exécuter `git repack`, vous pouvez aussi exécuter `git gc --aggressive`, qui optimisera également d'autres choses après une importation (par exemple, empaqueter les refs détachées). Comme indiqué dans la section "AGGRESSIVE" dans linkgit:git-gc[1], l'option `--aggressive` trouvera de nouveaux deltas avec l'option `-f` de linkgit:git-repack[1]. Pour les raisons élaborées ci-dessus, l'utilisation de `--aggressive` après un fast-import est l'un des rares cas où c'est connu pour être rentable.
 
-MEMORY UTILIZATION
-------------------
-There are a number of factors which affect how much memory fast-import requires to perform an import. Like critical sections of core Git, fast-import uses its own memory allocators to amortize any overheads associated with malloc. In practice fast-import tends to amortize any malloc overheads to 0, due to its use of large block allocations.
+UTILISATION DE LA MÉMOIRE
+-------------------------
+Il existe un certain nombre de facteurs qui affectent la quantité de mémoire dont fast-import a besoin pour effectuer une importation. Comme les sections critiques du noyau de Git, fast-import utilise ses propres allocateurs de mémoire pour amortir les surcoûts associés à malloc. En pratique, fast-import a tendance à amortir les surcoûts de malloc à 0, en raison de son utilisation d'allocations de grands blocs.
 
-per object
+par objet
+~~~~~~~~~
+fast-import maintient une structure en mémoire pour chaque objet écrit dans cette exécution. Sur un système 32 bits, la structure fait 32 octets, sur un système 64 bits la structure fait 40 octets (en raison des tailles de pointeurs plus grandes). Les objets dans le tableau ne sont pas désalloués jusqu'à ce que fast-import se termine. L'importation de 2 millions d'objets sur un système 32 bits nécessitera environ 64 Mio de mémoire.
+
+Le tableau d'objets est en fait une table de hachage indexée sur le nom de l'objet (le SHA-1 unique). Cette configuration de stockage permet à fast-import de réutiliser un objet existant ou déjà écrit et d'éviter d'écrire des doublons dans le fichier paquet de sortie. Les blobs en double sont étonnamment courants dans une importation, généralement en raison de fusions de branches dans la source.
+
+par marque
 ~~~~~~~~~~
-fast-import maintains an in-memory structure for every object written in this execution. On a 32 bit system the structure is 32 bytes, on a 64 bit system the structure is 40 bytes (due to the larger pointer sizes). Objects in the table are not deallocated until fast-import terminates. Importing 2 million objects on a 32 bit system will require approximately 64 MiB of memory.
+Les marques sont stockées dans un tableau creux, utilisant 1 pointeur (4 octets ou 8 octets, selon la taille du pointeur) par marque. Bien que le tableau soit creux, les frontaux sont toujours fortement encouragés à utiliser des marques entre 1 et n, où n est le nombre total de marques requises pour cette importation.
 
-The object table is actually a hashtable keyed on the object name (the unique SHA-1). This storage configuration allows fast-import to reuse an existing or already written object and avoid writing duplicates to the output packfile. Duplicate blobs are surprisingly common in an import, typically due to branch merges in the source.
+par branche
+~~~~~~~~~~~
+Les branches sont classées comme actives et inactives. L'utilisation mémoire des deux classes est significativement différente.
 
-per mark
-~~~~~~~~
-Marks are stored in a sparse array, using 1 pointer (4 bytes or 8 bytes, depending on pointer size) per mark. Although the array is sparse, frontends are still strongly encouraged to use marks between 1 and n, where n is the total number of marks required for this import.
+Les branches inactives sont stockées dans une structure qui utilise 96 ou 120 octets (systèmes 32 ou 64 bits respectivement), plus la longueur du nom de la branche (typiquement moins de 200 octets), par branche. fast-import gérera facilement jusqu'à 10 000 branches inactives en moins de 2 Mio de mémoire.
 
-per branch
-~~~~~~~~~~
-Branches are classified as active and inactive. The memory usage of the two classes is significantly different.
+Les branches actives ont le même surcoût que les branches inactives, mais contiennent aussi des copies de chaque arbre qui a été récemment modifié sur cette branche. Si le sous-arbre `include` n'a pas été modifié depuis que la branche est devenue active, son contenu ne sera pas chargé en mémoire, mais si le sous-arbre `src` a été modifié par un commit depuis que la branche est devenue active, alors son contenu sera chargé en mémoire.
 
-Inactive branches are stored in a structure which uses 96 or 120 bytes (32 bit or 64 bit systems, respectively), plus the length of the branch name (typically under 200 bytes), per branch. fast-import will easily handle as many as 10,000 inactive branches in under 2 MiB of memory.
+Les branches actives stockant des métadonnées sur les fichiers qu'elles contiennent, leur taille de stockage en mémoire peut croître à une taille considérable (voir ci-dessous).
 
-Active branches have the same overhead as inactive branches, but also contain copies of every tree that has been recently modified on that branch. If subtree `include` has not been modified since the branch became active, its contents will not be loaded into memory, but if subtree `src` has been modified by a commit since the branch became active, then its contents will be loaded in memory.
-
-As active branches store metadata about the files contained on that branch, their in-memory storage size can grow to a considerable size (see below).
-
-fast-import automatically moves active branches to inactive status based on a simple least-recently-used algorithm. The LRU chain is updated on each `commit` command. The maximum number of active branches can be increased or decreased on the command line with --active-branches=.
+fast-import déplace automatiquement les branches actives vers le statut inactif en fonction d'un simple algorithme de moins récemment utilisé. La chaîne LRU est mise à jour à chaque commande `commit`. Le nombre maximum de branches actives peut être augmenté ou diminué sur la ligne de commande avec --active-branches=.
 
 par arbre actif
 ~~~~~~~~~~~~~~~
-Trees (aka directories) use just 12 bytes of memory on top of the memory required for their entries (see ``per active file'' below). The cost of a tree is virtually 0, as its overhead amortizes out over the individual file entries.
+Les arbres (alias répertoires) utilisent seulement 12 octets de mémoire en plus de la mémoire requise pour leurs entrées (voir ``par fichier actif'' ci-dessous). Le coût d'un arbre est virtuellement nul, car son surcoût est amorti sur les entrées individuelles de fichiers.
 
 par entrée active de fichier
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Files (and pointers to subtrees) within active trees require 52 or 64 bytes (32/64 bit platforms) per entry. To conserve space, file and tree names are pooled in a common string table, allowing the filename ``Makefile'' to use just 16 bytes (after including the string header overhead) no matter how many times it occurs within the project.
+Les fichiers (et les pointeurs vers des sous-arbres) dans les arbres actifs nécessitent 52 ou 64 octets (plateformes 32/64 bits) par entrée. Pour économiser de l'espace, les noms de fichiers et d'arbres sont regroupés dans une table de chaînes commune, permettant au nom de fichier ``Makefile'' d'utiliser seulement 16 octets (après inclusion du surcoût de l'en-tête de chaîne) peu importe le nombre de fois qu'il apparaît dans le projet.
 
-The active branch LRU, when coupled with the filename string pool and lazy loading of subtrees, allows fast-import to efficiently import projects with 2,000+ branches and 45,114+ files in a very limited memory footprint (less than 2.7 MiB per active branch).
+La LRU des branches actives, lorsqu'elle est couplée au regroupement de
+chaînes de noms de fichiers et au chargement paresseux des sous-arbres,
+permet à fast-import d'importer efficacement des projets avec 2 000+
+branches et 45 114+ fichiers dans une empreinte mémoire très limitée (moins
+de 2,7 Mio par branche active).
 
-SIGNALS
+SIGNAUX
 -------
-Sending *SIGUSR1* to the 'git fast-import' process ends the current packfile early, simulating a `checkpoint` command. The impatient operator can use this facility to peek at the objects and refs from an import in progress, at the cost of some added running time and worse compression.
+L'envoi de *SIGUSR1* au processus 'git fast-import' termine le fichier paquet actuel prématurément, simulant une commande `checkpoint`. L'opérateur pressé peut utiliser cette fonctionnalité pour jeter un œil aux objets et refs d'une importation en cours, au prix d'un temps d'exécution supplémentaire et d'une compression dégradée.
 
 CONFIGURATION
 -------------

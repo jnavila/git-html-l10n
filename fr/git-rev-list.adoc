@@ -1,0 +1,113 @@
+git-rev-list(1)
+===============
+
+NOM
+---
+git-rev-list - Affiche les objets commit dans l'ordre chronologique inverse
+
+
+SYNOPSIS
+--------
+[verse]
+'git rev-list' [<options>] <commit> ... [--] [<chemin>...]
+
+DESCRIPTION
+-----------
+
+:git-rev-list: 1
+include::rev-list-description.adoc[]
+
+'rev-list' est une commande Git essentielle, car elle fournit la capacité de construire et de parcourir les graphes d'ascendance de commits. Pour cette raison, elle possède de nombreuses options différentes qui permettent d'être utilisée par des commandes aussi différentes que 'git bisect' et 'git repack'.
+
+OPTIONS
+-------
+
+:git-rev-list: 1
+include::rev-list-options.adoc[]
+
+include::pretty-formats.adoc[]
+
+EXEMPLES
+--------
+
+* Afficher la liste des commits accessibles à partir de la branche actuelle.
++
+----------
+git rev-list HEAD
+----------
+
+* Afficher la liste des commits sur cette branche, mais absents de la branche amont.
++
+----------
+git rev-list @{upstream}..HEAD
+----------
+
+* Formater les commits avec leur auteur et message de commit (voir aussi le porcelain linkgit:git-log[1]).
++
+----------
+git rev-list --format=medium HEAD
+----------
+
+* Formater les commits avec leurs diffs (voir aussi la porcelaine linkgit:git-log[1], qui peut le faire en une seule opération).
++
+----------
+git rev-list HEAD |
+git diff-tree --stdin --format=medium -p
+----------
+
+* Afficher la liste des commits sur la branche courante qui ont touché un fichier quelconque du répertoire `Documentation`.
++
+----------
+git rev-list HEAD -- Documentation/
+----------
+
+* Afficher la liste des commits écrits par vous au cours de la dernière année, sur n'importe quelle branche, étiquette ou autre réf.
++
+----------
+git rev-list --author=you@example.com --since=1.year.ago --all
+----------
+
+* Afficher la liste des objets accessibles depuis la branche actuelle (c'est-à-dire tous les commits et les blobs et arbres qu'ils contiennent).
++
+----------
+git rev-list --objects HEAD
+----------
+
+* Comparer la taille sur disque de tous les objets accessibles, par rapport à ceux accessibles depuis les reflogs, par rapport à la taille totale empilée. Cela peut vous indiquer si l'exécution de `git repack -ad` pourrait réduire la taille du dépôt (en supprimant les objets inaccessibles), et si l'expiration des reflogs pourrait aider.
++
+----------
+# objets accessibles
+git rev-list --disk-usage --objects --all
+# plus les reflogs
+git rev-list --disk-usage --objects --all --reflog
+# taille totale du disque utilisée
+du -c .git/objects/pack/*.pack .git/objects/??/*
+# alternative à du : additionner les champs "size" et "size-pack"
+git count-objects -v
+----------
+
+* Afficher la taille sur disque de chaque branche, en excluant les objets utilisés par la branche actuelle. Cela peut trouver des valeurs aberrantes qui contribuent à une taille de dépôt gonflée (par ex., parce que quelqu'un a accidentellement validé de grands artefacts de compilation).
++
+----------
+git for-each-ref --format='%(refname)' |
+while read branch
+do
+	size=$(git rev-list --disk-usage --objects HEAD..$branch)
+	echo "$size $branch"
+done |
+sort -n
+----------
+
+* Comparer la taille sur disque des branches dans un groupe de références, en excluant un autre. Si vous mélangez des objets de plusieurs dépôts distants dans un seul dépôt, cela peut montrer quels dépôts distants contribuent à la taille du dépôt (en prenant la taille de `origin` comme référence).
++
+----------
+git rev-list --disk-usage --objects --remotes=$suspect --not --remotes=origin
+----------
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

@@ -149,13 +149,9 @@ Om en frånkopplad historik ska startas som registrerar en uppsättning sökväg
 
 `-m`::
 `--merge`::
-	Vid byte av grenar: om det finns lokala ändringar i en eller flera filer som skiljer sig mellan den aktuella grenen och den gren som växlas till, vägrar kommandot att byta gren för att bevara ändringarna i sitt sammanhang. Med det här alternativet görs dock en trevägssammanslagning mellan den aktuella grenen, innehållet i arbetsträdet och den nya grenen, och resultatet blir den nya grenen.
-+
-När en sammanslagningskonflikt inträffar, lämnas indexposterna för motstridiga sökvägar ej sammanslagna, och du måste lösa konflikterna och markera de lösta sökvägarna med `git add` (eller `git rm` om sammanslagningen ska resultera i borttagning av sökvägen).
+	When switching branches, if you have local modifications to one or more files that are different between the current branch and the branch to which you are switching, the command refuses to switch branches in order to preserve your modifications in context. With this option, the conflicting local changes are automatically stashed before the switch and reapplied afterwards. If the local changes do not overlap with the differences between branches, the switch proceeds without stashing. If reapplying the stash results in conflicts, the entry is saved to the stash list. Resolve the conflicts and run `git stash drop` when done, or clear the working tree (e.g. with `git reset --hard`) before running `git stash pop` later to re-apply your changes.
 +
 När du checkar ut sökvägar från indexet, låter det här alternativet dig återskapa den konfliktfyllda sammanslagningen i de angivna sökvägarna. Det här alternativet kan inte användas när du checkar ut sökvägar från en trädliknande källa.
-+
-När man byter grenar med `--merge` kan ändringar i etapper gå förlorade.
 
 `--conflict=<stil>`::
 	Samma som alternativet `--merge` ovan, men ändrar hur de motstridiga styckenerna presenteras och åsidosätter konfigurationsvariabeln `merge.conflictStyle`. Möjliga värden är `merge` (standard), `diff3` och `zdiff3`.
@@ -383,31 +379,29 @@ $ git checkout mittämne
 error: You have local changes to 'frotz'; not switching branches.
 ------------
 
-Du kan ge flaggan `-m` till kommandot, vilket skulle försöka en trevägssammanslagning:
+You can give the `-m` flag to the command, which will carry your local changes to the new branch:
 
 ------------
-$ git checkout -m mittämne
-Auto-merging frotz
+$ git checkout -m mytopic
+Applied autostash.
+Switched to branch 'mytopic'
+The following paths have local changes:
+M	frotz
 ------------
 
-Efter denna trevägssammanslagning registreras de lokala modifieringarna _inte_ i din indexfil, så `git diff` skulle visa dig vilka ändringar du gjort sedan starten av den nya grenen.
+After the switch, the local modifications are reapplied and are _not_ registered in your index file, so `git diff` would show you what changes you made since the tip of the new branch.
 
 === 3. Sammanslagningskonflikt
 
-När en sammanslagningskonflikt uppstår vid byte av grenar med alternativet `-m`, skulle du se något liknande:
+When the `--merge` (`-m`) option is given and the local changes overlap with the changes in the branch we're switching to, the changes are stashed and reapplied after the switch. If this process results in conflicts, the stash entry is saved and a message is printed:
 
 ------------
-$ git checkout -m mittämne
-Auto-merging frotz
-ERROR: Merge conflict in frotz
-fatal: merge program failed
-------------
-
-Vid det här laget, visar `git diff` ändringarna tydligt sammanfogade som i föregående exempel, såväl som ändringarna i de konfliktfyllda filerna. Redigera och lös konflikten och markera den som löst med `git add` som vanligt:
-
-------------
-$ edit frotz
-$ git add frotz
+$ git checkout -m mytopic
+Your local changes are stashed, however applying them
+resulted in conflicts.  You can either resolve the conflicts
+and then discard the stash with "git stash drop", or, if you
+do not want to resolve them now, run "git reset --hard" and
+apply the local changes later by running "git stash pop".
 ------------
 
 KONFIGURATION

@@ -149,13 +149,9 @@ Si vous voulez démarrer un historique déconnecté qui enregistre un ensemble d
 
 `-m`::
 `--merge`::
-	Lors d'un basculement de branche, si vous avez des modifications locales sur un fichier ou plus qui sont différentes entre la branche actuelle et celle sur laquelle vous basculez, la commande refuse le basculement pour préserver vos modifications dans leur contexte. Cependant, avec cette option, une fusion à trois points entre la branche actuelle, le contenu de votre arbre de travail et la nouvelle branche est opérée et vous serez sur la nouvelle branche.
-+
-Quand un conflit de fusion apparaît, les entrées d'index pour les chemins en conflit sont laissées non-fusionnées et vous devez résoudre les conflits et les marquer résolus pour les chemins concernés avec `git add` (ou `git rm` si la fusion doit aboutir à la suppression du chemin).
+	Lors d'un basculement de branche, si vous avez des modifications locales sur un fichier ou plus qui sont différentes entre la branche actuelle et celle sur laquelle vous basculez, la commande refuse le basculement pour préserver vos modifications dans leur contexte. Avec cette option, les modifications locales en conflit sont remisées automatiquement avant le basculement et ré-appliquées après. Si les modifications locales ne recouvrent pas les différences entre les branches, le basculement continue sans remisage. Si la ré-application du remisage résulte en conflits, l'entrée est sauvegardée sur la liste des remises. Résolvez les conflits et lancez `git stash drop` une fois terminé, ou nettoyez l'arbre de travail (par exemple, avec `git reset --hard`) avant de lancer `git stash pop` plus tard pour ré-appliquer vos modifications.
 +
 Lors de l'extraction de chemins depuis l'index, cette option vous permet de récréer la fusion en conflit dans les chemins spécifiés. Cette option ne peut pas être utilisée lors de l'extraction des chemins depuis un arbre-esque.
-+
-Lors du basculement de branche avec `--merge`, les modifications indexées peuvent être perdues.
 
 `--conflict=<style>`::
 	Identique à l'option `--merge` ci-dessus, mais la manière dont les sections en conflits sont présentées est modifiée, en surchargeant la variable de configuration `merge.conflictStyle`. Les valeurs possibles sont `merge` (fusion, par défaut), `diff3` et `zdiff3`.
@@ -383,31 +379,29 @@ $ git checkout monsujet
 error: Vos modifications locales aux fichiers suivants seraient écrasées par l'extraction :
 ------------
 
-Vous pouvez fournir l'option `-m` à la commande, ce qui essaierait une fusion à trois points :
-
-------------
-$ git checkout -m monsujet
-Fusion automatique de frotz
-------------
-
-Après cette fusion à trois points, les modifications locales ne sont _pas_ enregistrées dans votre index, donc `git diff` vous montrerait ce qui a changé depuis le sommet de la nouvelle branche.
-
-=== 3. Conflit de fusion
-
-Quand un conflit de fusion arrive pendant un basculement de branche avec l'option `-m`, vous devriez voir quelque chose comme :
+Vous pouvez fournir l'option `-m` à la commande, ce qui portera vos modifications locales sur la nouvelle branche :
 
 ------------
 $ git checkout -m mytopic
-Fusion automatique de frotz
-CONFLIT (contenu): Conflit de fusion dans frotz
-fatal: merge program failed
+Applied autostash.
+Switched to branch 'mytopic'
+The following paths have local changes:
+M	frotz
 ------------
 
-À ce stade, `git diff` affiche les modifications proprement fusionnées comme dans l'exemple précédent, ainsi que les modifications en conflit. Éditez et résolvez le conflit et marquez-le résolu avec `git add` comme d'habitude :
+Après ce basculement les modifications locales ne sont _pas_ ré-appliqué et ne sont _pas_ dans votre index, donc `git diff` vous montrerait ce qui a changé depuis le sommet de la nouvelle branche.
+
+=== 3. Conflit de fusion
+
+Lorsque l'option `--merge` (`-m`) est donnée et que les modifications locales se chevauchent avec les modifications de la branche sur laquelle nous sommes en train de basculer, les modifications sont bloquées et réappliquées après le commutateur. Si ce processus se traduit par des conflits, l'entrée est sauvegardée et un message est affiché :
 
 ------------
-$ edit frotz
-$ git add frotz
+$ git checkout -m mytopic
+Vos modifications locales sont remisées, mais leur application
+a produit des conflits. Vous pouvez soit résoudre les conflits
+et ensuite supprimer la remise avec "git stash drop", ou, si vous
+ne voulez pas les résoudre maintenant, lancez "git reset --hard" et
+appliquez les modifications locales plus tard avec "git stash pop".
 ------------
 
 CONFIGURATION

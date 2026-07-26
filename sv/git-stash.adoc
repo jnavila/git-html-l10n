@@ -8,23 +8,23 @@ git-stash - Göm undan ändringar i en lortig arbetskatalog
 SYNOPSIS
 --------
 [synopsis]
-git stash list [<logg-flaggor>]
-git stash show [-u | --include-untracked | --only-untracked] [<diff-flaggor>] [<gömma>]
-git stash drop [-q | --quiet] [<gömma>]
-git stash pop [--index] [-q | --quiet] [<gömma>]
-git stash apply [--index] [-q | --quiet] [<gömma>]
-git stash branch <branchname> [<gömma>]
-git stash [push [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
-	     [-u | --include-untracked] [-a | --all] [(-m | --message) <meddelande>]
-	     [--pathspec-from-file=<fil> [--pathspec-file-nul]]
-	     [--] [<sökvägsmönster>...]]
+git stash list [<log-options>]
+git stash show [-u | --include-untracked | --only-untracked] [<diff-options>] [<stash>]
+git stash drop [-q | --quiet] [<stash>]
+git stash pop [--index] [-q | --quiet] [<stash>]
+git stash apply [--index] [-q | --quiet] [--label-ours=<label>] [--label-theirs=<label>] [--label-base=<label>] [<stash>]
+git stash branch <branchname> [<stash>]
+git stash [push] [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
+	     [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]
+	     [--pathspec-from-file=<file> [--pathspec-file-nul]]
+	     [--] [<pathspec>...]
 git stash save [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
-           [-u | --include-untracked] [-a | --all] [<meddelande>]
+           [-u | --include-untracked] [-a | --all] [<message>]
 git stash clear
-git stash create [<meddelande>]
-git stash store [(-m | --message) <meddelande>] [-q | --quiet] <incheckning>
-git stash export (--print | --to-ref <ref>) [<gömma>...]
-git stash import <incheckning>
+git stash create [<message>]
+git stash store [(-m | --message) <message>] [-q | --quiet] <commit>
+git stash export (--print | --to-ref <ref>) [<stash>...]
+git stash import <commit>
 
 BESKRIVNING
 -----------
@@ -42,7 +42,7 @@ KOMMANDON
 
 	Spara dina lokala ändringar till en ny 'gömd post' och rulla tillbaka dem till `HEAD` (i arbetsträdet och i indexet). _<meddelande>_-delen är valfri och ger beskrivningen tillsammans med det lagrade tillståndet.
 +
-För att snabbt skapa en ögonblicksbild kan du utelämna "push". I det här läget är argument som inte är alternativ inte tillåtna för att förhindra att ett felstavat delkommando skapar en oönskad gömd post. De två undantagen från detta är `stash -p` som fungerar som alias för `stash push -p` och sökvägsmönster-poster, vilka är tillåtna efter ett dubbelt bindestreck `--` för särskiljning.
+For quickly making a snapshot, you can omit "push". In this mode, pathspec elements are only allowed after a double hyphen `--` to prevent a misspelled subcommand from making an unwanted stash entry.
 
 `save [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-u | --include-untracked] [-a | --all] [-q | --quiet] [<meddelande>]`::
 
@@ -123,6 +123,13 @@ Visa endast de ospårade filerna i den gömda posten som en del av diffen.
 	Det här alternativet är endast giltigt för kommandona `pop` och `apply`.
 +
 Försöker återställa inte bara arbetsträdets-ändringar, utan även indexets. Detta kan dock misslyckas när det finns konflikter (som lagras i indexet, där du därför inte längre kan tillämpa ändringarna som de ursprungligen var).
+
+`--label-ours=<label>`::
+`--label-theirs=<label>`::
+`--label-base=<label>`::
+	These options are only valid for the `apply` command.
++
+Use the given labels in conflict markers instead of the default "Updated upstream", "Stashed changes", and "Stash base". `--label-base` only has an effect with merge.conflictStyle=diff3.
 
 `-k`::
 `--keep-index`::

@@ -1,0 +1,27 @@
+--all::
+
+La commande par défaut empaquette toutes les étiquettes et réfs qui sont déjà empaquetées, et laisse les autres réfs seuls. C'est parce que les branches sont censées être activement développées et l'emballage de leurs sommets ne contribue pas à la performance. Cette option permet à toutes les réfs d'être empaquetées, à l'exception des réfs cachées, des refs cassées et des réfs symboliques. Utile pour un dépôt avec de nombreuses branches d'intérêt historique.
+
+--no-prune::
+
+La commande supprime généralement les réfs libres sous la hiérarchie `$GIT_DIR/refs` après les avoir empaquetées. Cette option indique de ne pas le faire.
+
+--auto::
+
+Grouper les réf. selon les besoins en fonction de l'état actuel de la base de données de réf. Le comportement dépend du format de réf utilisé par le dépôt et peut changer à l'avenir.
++
+	- "files" : Les références libres sont empilées dans le fichier `packed-refs` en fonction du ratio de références libres à la taille du fichier `packed-refs`. Plus le fichier `packed-refs` est grand, plus il faut de références libres avant de recondenser.
++
+	- "reftable" : Les tableaux sont compactés de manière à former une séquence géométrique. Pour deux tableaux N et N+1, où N+1 est plus récent, cela maintient la propriété que N est au moins deux fois plus grand que N+1. Seuls les tableaux qui violent cette propriété sont compactés.
+
+--include <motif>::
+
+Empaquette les réfs correspondant à un motif `glob(7)`. Les répétitions de cette option augmente les motifs inclus. Si une réf est incluse à la fois dans `--include` et dans `--exclude`, `-exclude` a priorité. L'utilisation de `--include` annulera l'inclusion par défaut de toutes les étiquettes. Les réfs symboliques et les réfs cassées ne seront jamais empaquetées. Avec `--all`, aucune action ne sera réalisée. Utilisez `--no-include` pour effacer et réinitialiser la liste des motifs.
+
+--exclude <motif>::
+
+Ne pas empaqueter les réfs correspondant au motif `glob(7)` donné. Les répétitions de cette option accumulent les motifs d'exclusion. Utilisez `--no-exclude` pour effacer et réinitialiser la liste des motifs. Si une réf est déjà empaquetée, la cibler avec `--exclude` ne le dépaquettera pas.
++
+Utilisé avec `--all`, empaquette seulement les réfs libres qui ne correspondent à aucun des motifs `--exclude` fournis.
++
+Utilisé avec `--include` , les réfs fournies à `--include` , moins celles qui sont fournies à `--exclude` seront empaquetées.

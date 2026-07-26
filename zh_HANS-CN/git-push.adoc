@@ -18,10 +18,15 @@ git-push - 与相关对象一起更新远程分支引用
 
 描述
 --
-
-将本地仓库中的一个或多个分支、标签或其他引用更新到远程仓库，并发送远程端尚不存在的所有必要数据。
+Updates one or more branches, tags, or other references in one or more remote repositories from your local repository, and sends all necessary data that isn't already on the remote.
 
 最简单的推送方式是 `git push <remote> <branch>`。例如，`git push origin main` 会将本地 `main` 分支推送到名为 `origin` 的远程上的 `main` 分支。
+
+You can also push to multiple remotes at once by using a remote group. A remote group is a named list of remotes configured via `remotes.<name>` in your git config:
+
+	$ git config remotes.all-remotes "origin gitlab backup"
+
+Then `git push all-remotes` will push to `origin`, `gitlab`, and `backup` in turn, as if you had run `git push` against each one individually. Each remote is pushed independently using its own push mapping configuration. There is a `remotes.<group>` entry in the configuration file. (See linkgit:git-config[1]).
 
 `<repository>` 参数默认取当前分支的上游仓库；如果没有配置上游，则默认为 `origin`。
 
@@ -39,7 +44,7 @@ Git 会按以下优先顺序决定要推送哪些分支、标签或其他引用�
 选项
 --
 _<仓库>_::
-	作为推送操作的目的地的 “远程” 仓库。 这个参数可以是一个网址（见下面 <<URLS,GIT 地址>> 一节），也可以是一个远程库的名称（见下面 <<REMOTES,远程仓库>> 一节）。
+	The "remote" repository that is the destination of a push operation. This parameter can be either a URL (see the section <<URLS,GIT URLS>> below), the name of a remote (see the section <<REMOTES,REMOTES>> below), or the name of a remote group (see the section <<REMOTE-GROUPS,REMOTE GROUPS>> below).
 
 `<refspec>...`::
 	指定要用哪个源对象来更新哪个目标引用。
@@ -57,25 +62,25 @@ _<dst>_ 决定了远程端要更新哪个引用。它必须是分支、标签或
  *  如果 _<src>_ 后面没有 `:<dst>`，则表示更新与 _<src>_ 相同的引用，除非 `remote.<repository>.push` 配置指定了不同的 _<dst>_。例如，如果 `main` 是一个分支，那么 refspec `main` 会展开为 `main:refs/heads/main`。
  *  如果 _<dst>_ 可以无歧义地指代 `<repository>` 远程上的某个引用，则会将其展开为该引用。例如，如果 `v1.0` 是远程上的一个标签，那么 `HEAD:v1.0` 会展开为 `HEAD:refs/tags/v1.0`。
  *  如果 _<src>_ 解析为以 `refs/heads/` 或 `refs/tags/` 开头的引用，则会把该前缀补到 `<dst>` 前面。例如，如果 `main` 是一个分支，那么 `main:other` 会展开为 `main:refs/heads/other`。
- *  特殊的引用规范 `:`（或`+:`以允许非快进式更新）指示 Git 推送“匹配”的分支：对于每一个存在于本地的分支，如果远程仓库已经有一个同名的分支存在，则远程仓库会被更新。
- *  一个 <引用规范> 可以在其<src>中包含一个`*'来表示一个简单的模式匹配。这样的 refspec 的功能就像一个 glob，可以匹配任何具有相同前缀的 ref。匹配 <引用规范> 必须在 <src> 和 <dst> 中都有一个 `*`。它将通过把 `*` 替换成从源头匹配的内容来把引用映射到目的地。
+ *  特殊的引用规范 `:`（或 `+:` 以允许非快进式更新）指示 Git 推送“匹配”的分支：对于每一个存在于本地的分支，如果远程仓库已经有一个同名的分支存在，则远程仓库会被更新。
+ *  一个 <引用规范> 可以在其<src>中包含一个 `*'来表示一个简单的模式匹配。这样的 refspec 的功能就像一个 glob，可以匹配任何具有相同前缀的 ref。匹配 <引用规范> 必须在 <src> 和 <dst> 中都有一个 `*`。它将通过把 `*` 替换成从源头匹配的内容来把引用映射到目的地。
  *  以 `^` 开头的 refspec 是负 refspec，用于指定要排除的引用。某个引用只有在至少匹配一个正 refspec 且不匹配任何负 refspec 时，才会被视为匹配。负 refspec 也可以是模式 refspec，但它们只能包含 _<src>_。此外，也不支持完整写出的十六进制对象名。例如，`git push origin 'refs/heads/*' '^refs/heads/dev-*'` 会推送所有分支，但以 `dev-` 开头的分支除外。
  *  如果 _<src>_ 为空，则会从远程仓库删除 _<dst>_ 引用。例如，`git push origin :dev` 会删除 `dev` 分支。
  *  `tag <tag>` 与 `refs/tags/<tag>:refs/tags/<tag>` 意思相同。
 	严格来说，这是一种 `git push` 的特殊语法，而不是 refspec，因为在 `git push origin tag v1.0` 中，`tag` 和 `v1.0` 是两个独立参数。
- *  其他含糊的解决方案可能会在未来加入，但现在我们所尝试的任何其他情况都会出错，并根据`advice.pushUnqualifiedRefname`配置（见linkgit:git-config[1]）建议你可能想推送到哪个类型的引用中。
+ *  其他含糊的解决方案可能会在未来加入，但现在我们所尝试的任何其他情况都会出错，并根据 `advice.pushUnqualifiedRefname` 配置（见linkgit:git-config[1]）建议你可能想推送到哪个类型的引用中。
 
 并非所有更新都是允许的：详情请参见下文的 PUSH RULES。
 
 `--all`::
 `--branches`::
-	推送所有分支（即`refs/heads/`下的引用）；不能与其他 < 引用规范 > 一起使用。
+	推送所有分支（即 `refs/heads/` 下的引用）；不能与其他 < 引用规范 > 一起使用。
 
 `--prune`::
 	删除没有本地对应分支的远程分支。例如，如果本地的同名分支不存在了，那么远程分支 `tmp` 将被删除。这也是对引用规范的尊重，例如，`git push --prune remote refs/heads/*:refs/tmp/*` 将确保如果 `refs/heads/foo` 不存在，那么远程的 `refs/tmp/foo` 将被删除。
 
 `--mirror`::
-	而不是命名每一个要推送的引用，指定`refs/`（包括但不限于`refs/heads/`、`refs/remotes/`和`refs/tags/`）下的所有引用都被镜像到远程仓库。 新创建的本地引用将被推送到远程端，本地更新的引用将被强制更新到远程端，而删除的引用将从远程仓库删除。 如果配置选项 `remote.<remote>.mirror`被设置，这就是默认的。
+	而不是命名每一个要推送的引用，指定 `refs/`（包括但不限于 `refs/heads/`、`refs/remotes/` 和 `refs/tags/`）下的所有引用都被镜像到远程仓库。 新创建的本地引用将被推送到远程端，本地更新的引用将被强制更新到远程端，而删除的引用将从远程仓库删除。 如果配置选项 `remote.<remote>.mirror` 被设置，这就是默认的。
 
 `-n`::
 `--dry-run`::
@@ -113,7 +118,7 @@ _<dst>_ 决定了远程端要更新哪个引用。它必须是分支、标签或
 
 -X <选项>::
 --push-option=<选项>::
-	将给定的字符串传输给服务器，服务器将它们传递给 pre-receive 以及 post-receive 钩子。给定的字符串不能包含 NUL 或 LF 字符。 当给出多个 `--push-option=< 选项 >` 时，它们将按照命令行中列出的顺序全部发送给对方。 当命令行中没有给出 `--push-option=< 选项 >` 时，将使用配置变量`push.pushOption` 的值来代替。
+	将给定的字符串传输给服务器，服务器将它们传递给 pre-receive 以及 post-receive 钩子。给定的字符串不能包含 _NUL_ 或 _LF_ 字符。 当给出多个 `--push-option=< 选项 >` 时，它们将按照命令行中列出的顺序全部发送给对方。 当命令行中没有给出 `--push-option=< 选项 >` 时，将使用配置变量 `push.pushOption` 的值来代替。
 
 --receive-pack=<git-receive-pack>::
 --exec=<git-receive-pack>::
@@ -135,24 +140,24 @@ _<dst>_ 决定了远程端要更新哪个引用。它必须是分支、标签或
 +
 `--force-with-lease=< 引用名 >`，没有指定预期值，将保护命名的引用（单独），如果它要被更新，要求其当前值与我们对它的远程跟踪分支相同。
 +
-`--force-with-lease=< 引用名 >:< 期望 >`将保护指定的引用（单独），如果它要被更新，要求它的当前值与指定的值`< 期望 >`相同（允许与我们对引用名的远程跟踪分支不同，或者在使用这种形式时，我们甚至不需要有这样一个远程跟踪分支）。 如果`< 期望 >`是空字符串，那么命名的引用必须不存在。
+`--force-with-lease=< 引用名 >:< 期望 >` 将保护指定的引用（单独），如果它要被更新，要求它的当前值与指定的值 `< 期望 >` 相同（允许与我们对引用名的远程跟踪分支不同，或者在使用这种形式时，我们甚至不需要有这样一个远程跟踪分支）。 如果 `< 期望 >` 是空字符串，那么命名的引用必须不存在。
 +
-请注意，除了`--force-with-lease=< 引用名 >:< 期望 >`以外的所有形式都是明确指定引用的预期当前值，这些形式仍然是试验性的，它们的语义可能会随着我们对这个功能的经验积累而改变。
+请注意，除了 `--force-with-lease=< 引用名 >:< 期望 >` 以外的所有形式都是明确指定引用的预期当前值，这些形式仍然是试验性的，它们的语义可能会随着我们对这个功能的经验积累而改变。
 +
 "--no-force-with-lease " 将取消之前在命令行上所有的 --force-with-lease。
 +
-关于安全性的一般说明：在没有预期值的情况下提供这个选项，即 `--force-with-lease` 或`--force-with-lease=< 引用名 >`，会与任何在后台隐式运行 `git fetch` 的远程推送的进程产生非常不好的互动，例如仓库中 cronjob 的 `git fetch origin`。
+关于安全性的一般说明：在没有预期值的情况下提供这个选项，即 `--force-with-lease` 或 `--force-with-lease=< 引用名 >`，会与任何在后台隐式运行 `git fetch` 的远程推送的进程产生非常不好的互动，例如仓库中 cronjob 的 `git fetch origin`。
 +
 与 `--force` 相比，它提供的保护是确保你的工作不基于后续的变化，但如果有后台进程在后台更新引用，这一点就很容易被破坏。除了远程跟踪信息外，我们没有任何你期望看到并愿意去破解可以作为启发式引用的东西。
 +
-如果你的编辑器或其他系统在后台为你运行`git fetch`，减轻这种情况的方法是简单地设置另一个远程：
+如果你的编辑器或其他系统在后台为你运行 `git fetch`，减轻这种情况的方法是简单地设置另一个远程：
 +
 ----
 	git remote add origin-push $(git config remote.origin.url)
 	git fetch origin-push
 ----
 +
-现在，当后台进程运行 `git fetch origin` 时，`origin-push`上的引用将不会被更新，因此，像这样的命令：
+现在，当后台进程运行 `git fetch origin` 时，`origin-push` 上的引用将不会被更新，因此，像这样的命令：
 +
 ----
 	git push --force-with-lease origin-push
@@ -167,7 +172,7 @@ _<dst>_ 决定了远程端要更新哪个引用。它必须是分支、标签或
 	git push --force-with-lease=master:base master:master
 ----
 +
-也就是说，为你已经看到并愿意覆盖的上游仓库创建一个`base` 标签，然后重写历史，最后如果远程版本仍然在 `base`，则强制推送修改到`master`，不管你本地的 `remotes/origin/master` 在后台更新了什么。
+也就是说，为你已经看到并愿意覆盖的上游仓库创建一个 `base` 标签，然后重写历史，最后如果远程版本仍然在 `base`，则强制推送修改到 `master`，不管你本地的 `remotes/origin/master` 在后台更新了什么。
 +
 另外，在“推送”时将 `--force-if-includes` 作为辅助选项与 `--force-with-lease[=< 引用名 >]` 一起指定（即不说远程的引用必须指向什么确切的提交，或远程的哪些引用被保护），将验证远程跟踪引用的更新是否在允许强制更新之前被整合在本地。
 
@@ -185,7 +190,7 @@ _<dst>_ 决定了远程端要更新哪个引用。它必须是分支、标签或
 +
 这个选项启用了一个检查，以验证远程跟踪引用的顶端是否可以从本地分支的“引用日志”条目中到达，以便进行重写。该检查确保来自远程的任何更新都已纳入本地，如果不是这样，则拒绝强制更新。
 +
-如果该选项没有指定 `--force-with-lease`，或者与 `--force-with-lease=< 引用名 >:< 期望 >`一起指定，则是“无选项”的。
+如果该选项没有指定 `--force-with-lease`，或者与 `--force-with-lease=< 引用名 >:< 期望 >` 一起指定，则是“无选项”的。
 +
 指定 `--no-force-if-includes` 就可以禁止这种行为。
 
@@ -224,7 +229,7 @@ Git 将验证在要推送的修订中发生变化的所有子模块提交在该�
 	当不需要对子模块递归时，覆盖 `push.recurseSubmodules` 配置变量。类似于使用 `--no-recurse-submodules`。
 
 +
-当使用 `on-demand` 或 `only` 时，如果一个子模块有 "push.recurseSubmodules={on-demand,only}" 或 `submodule.recurse`配置，将发生进一步递归。在这种情况下，`only` 被视为 `on-demand`。
+当使用 `on-demand` 或 `only` 时，如果一个子模块有 "push.recurseSubmodules={on-demand,only}" 或 `submodule.recurse` 配置，将发生进一步递归。在这种情况下，`only` 被视为 `on-demand`。
 
 `--verify`::
 `--no-verify`::
@@ -239,6 +244,35 @@ Git 将验证在要推送的修订中发生变化的所有子模块提交在该�
 	仅使用 IPv6 地址，忽略 IPv4 地址。
 
 include::urls-remotes.adoc[]
+
+[[REMOTE-GROUPS]]
+REMOTE GROUPS
+-------------
+
+A remote group is a named list of remotes configured via `remotes.<name>` in your git config:
+
+	$ git config remotes.all-remotes "r1 r2 r3"
+
+When a group name is given as the `<repository>` argument, the push is performed to each member remote in turn. The defining principle is:
+
+	git push <options> all-remotes <args>
+
+is exactly equivalent to:
+
+	git push <options> r1 <args>
+	git push <options> r2 <args>
+	...
+	git push <options> rN <args>
+
+where r1, r2, ..., rN are the members of `all-remotes`. No special behaviour is added or removed — the group is purely a shorthand for running the same push command against each member remote individually.
+
+When pushing to a group of more than one remote, Git spawns a separate `git push` subprocess for each member remote in sequence. Each subprocess receives the same flags and refspecs as the original invocation. This means that per-remote push mappings configured via `remote.<name>.push` and mirror mode (`remote.<name>.mirror`) are evaluated independently for each remote, and a mirror remote in the group cannot affect the push behaviour of other non-mirror remotes in the same group.
+
+The `--atomic` option is not supported for group pushes, because atomicity can only be guaranteed within a single transport connection to a single remote. Git will refuse the invocation with an error if `--atomic` is combined with a group name.
+
+If any member remote fails whether due to a push rejection (e.g. a non-fast-forward update, a server-side hook refusing a ref) or a connection error (e.g. the repository does not exist, authentication fails, or the network is unreachable), Git reports the error and continues pushing to the remaining remotes in the group. The overall exit code is non-zero if any member push fails.
+
+This means the user is responsible for ensuring that the sequence of individual pushes makes sense. If `git push r1`` would fail for a given set of options and arguments, then `git push all-remotes` will fail in the same way when it reaches r1. The group push does not do anything special to make a failing individual push succeed.
 
 输出
 --
@@ -368,12 +402,12 @@ include::urls-remotes.adoc[]
 --
 
 `git push`::
-	像`git push < 远程 >`那样工作，其中 < 远程 > 是当前分支的远程仓库（或者`origin`，如果没有为当前分支配置远程仓库）。
+	像 `git push < 远程 >` 那样工作，其中 < 远程 > 是当前分支的远程仓库（或者 `origin`，如果没有为当前分支配置远程仓库）。
 
 `git push origin`::
 	不需要额外配置，如果它与当前分支同名，并且错误输出而不推送其他分支，则将其推送到配置过的上游仓库（`branch.<分支名>.merge` 配置变量）。
 +
-当没有给出< 引用规范 >时，该命令的默认行为可以通过设置远程仓库的 `push` 选项或 `push.default`配置变量来配置。
+当没有给出< 引用规范 >时，该命令的默认行为可以通过设置远程仓库的 `push` 选项或 `push.default` 配置变量来配置。
 +
 例如，要默认只将当前分支推送到 `origin`，使用 `git config remote.origin.push HEAD`。 任何有效的< 引用规范 >（比如下面例子中的那些）都可以被配置为 `git push origin` 的默认值。
 
@@ -381,17 +415,17 @@ include::urls-remotes.adoc[]
 	将 “匹配” 的分支推送到 `origin`。关于 “匹配” 分支的描述，请参见上面 <<OPTIONS,选项>> 部分的 <<引用规范>>。
 
 `git push origin master`::
-	在源仓库中找到一个与 `master` 相匹配的引用（最可能的是找到 `refs/heads/master`），并在 `origin` 仓库中用它更新相同的引用（例如`refs/heads/master`）。 如果 `master` 不存在，它将被创建。
+	在源仓库中找到一个与 `master` 相匹配的引用（最可能的是找到 `refs/heads/master`），并在 `origin` 仓库中用它更新相同的引用（例如 `refs/heads/master`）。 如果 `master` 不存在，它将被创建。
 
 `git push origin HEAD`::
 	一个方便的方法是将当前分支推送到远程的相同名称。
 
 `git push mothership master:satellite/master dev:satellite/dev`::
-	使用与 "master" 相匹配的源引用（例如，`refs/heads/master`）来更新 `mothership` 仓库中与 `satellite/master` 相匹配的引用（很可能是 `refs/remotes/satellite/master`）；对 `dev` 和 `satellite/dev`做同样的操作。
+	使用与 "`master`" 相匹配的源引用（例如，`refs/heads/master`）来更新 `mothership` 仓库中与 `satellite/master` 相匹配的引用（很可能是 `refs/remotes/satellite/master`）；对 `dev` 和 `satellite/dev` 做同样的操作。
 +
 关于匹配语义的讨论，请参见上面描述 `<引用规范>...` 的部分。
 +
-这是为了模拟在`母舰` 上运行的 `git fetch` ，使用 `git push` 以相反的方向运行，以便整合 `卫星` 上完成的工作，当你只能以一种方式进行连接时（即卫星可以ssh到母舰，但母舰不能启动与卫星的连接，因为后者在防火墙后面或不运行 sshd），这往往是必要的。
+这是为了模拟在 `母舰` 上运行的 `git fetch` ，使用 `git push` 以相反的方向运行，以便整合 `卫星` 上完成的工作，当你只能以一种方式进行连接时（即卫星可以ssh到母舰，但母舰不能启动与卫星的连接，因为后者在防火墙后面或不运行 sshd），这往往是必要的。
 +
 在 `卫星` 机器上运行这个 `git push` 后，你将 ssh 进入 `母舰` 并在那里运行 `git merge` ，以完成对 `母舰` 上运行的 `git pull` 的模拟，以拉取 `卫星` 上的修改。
 
@@ -402,7 +436,7 @@ include::urls-remotes.adoc[]
 	通过复制当前的 `master` 分支，在 `origin` 仓库创建 `experimental` 分支。 只有在本地名称和远程名称不同的情况下，在远程仓库中创建新的分支或标签时才需要这个表单；否则，引用名称本身就可以了。
 
 `git push origin :experimental`::
-	在 `origin` 仓库（例如`refs/heads/experimental`）中找到一个与 `experimental` 相匹配的引用，并将其删除。
+	在 `origin` 仓库（例如 `refs/heads/experimental`）中找到一个与 `experimental` 相匹配的引用，并将其删除。
 
 `git push origin +dev:master`::
 	用开发分支更新仓库的主分支，允许非快速合并更新。 *这可能会使未引用的提交在源码库中悬空。*考虑以下情况，即不可能进行快速合并：

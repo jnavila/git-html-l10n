@@ -10,7 +10,7 @@
 	Utiliser une transaction atomique pour mettre à jour les références locales. Soit toutes les références sont mises à jour, soit, en cas d'erreur, aucune référence n'est mise à jour.
 
 `--depth=<profondeur>`::
-	Limiter la récupération au nombre spécifié de commits à partir du sommet de l'historique de chaque branche distante. Si vous allez chercher dans un dépôt "superficiel" créé par `git clone` avec l'option `--depth=<profondeur>` (voir linkgit:git-clone[1]), approfondir ou raccourcir l'historique jusqu'au nombre spécifié de validations. Les étiquettes pour les commits approfondis ne sont pas récupérées.
+	Limiter la récupération au nombre spécifié de commits à partir du sommet de l'historique de chaque branche distante. Si vous allez chercher dans un dépôt "superficiel" créé par `git clone` avec l'option `--depth=<profondeur>` (voir linkgit:git-clone[1]), approfondir ou raccourcir l'historique jusqu'au nombre spécifié de commits. Les étiquettes pour les commits approfondis ne sont pas récupérées.
 
 `--deepen=<profondeur>`::
 	Semblable à `--depth`, sauf que cela précise le nombre de commits à partir de la limite actuelle superficielle au lieu du sommet de l'historique de chaque branche distante.
@@ -29,8 +29,11 @@ Si le dépôt source est superficiel, il faut en extraire le plus possible afin 
 `--update-shallow`::
 	Par défaut, lors de la récupération d'un dépôt superficiel, `git fetch` refuse les références qui nécessitent une mise à jour de `.git/shallow`. Cette option met à jour le fichier `.git/shallow` et accepte de telles références.
 
+`--negotiation-restrict=(<commit>|<glob>)`::
 `--negotiation-tip=(<commit>|<glob>)`::
 	Par défaut, Git signalera au serveur les commits accessibles à partir de toutes les références locales pour trouver les commits communs afin de réduire la taille du fichier de paquet à recevoir. Si ceci est spécifié, Git ne signalera que les commits accessibles à partir des sommets donnés. Ceci est utile pour accélérer les recherches lorsque l'utilisateur sait quelle réf locale est susceptible d'avoir des commits en commun avec la réf amont qui est recherchée.
++
+`--negotiation-restrict` est le nom préféré de cette option ; `--negotiation-tip` est accepté comme synonyme.
 +
 Cette option peut être spécifiée plus d'une fois ; si c'est le cas, Git signalera les commits accessibles à partir de l'un des commits donnés.
 +
@@ -38,8 +41,19 @@ L'argument de cette option peut être un glob sur les noms de référence, une r
 +
 Voir aussi les variables de configuration `fetch.negotiationAlgorithm` et `push.negotiate` documentées dans linkgit:git-config[1], ainsi que l'option `--negotiate-only` ci-après.
 
+`--negotiation-include=(<commit>|<glob>)`::
+	Assurez-vous que les commits dans les conseils donnés sont toujours envoyés comme des lignes "have" lors de la négociation de récupération, peu importe ce que l'algorithme de négociation choisit. Ceci est utile pour garantir que l'historique commun accessible à partir de réfs spécifiques est toujours considéré, même lorsque `--negotiation-restrict` limite l'ensemble des sommets ou lorsque l'algorithme de négociation les ignorerait autrement.
++
+Cette option peut être spécifiée plus d'une fois ; si c'est le cas, chaque commit est envoyé inconditionnellement.
++
+L'argument peut être un nom de réf exact (par exemple `refs/heads/release`), une empreinte d'objet ou un motif de glob (par exemple `refs/heads/release/{asterisk}``). La syntaxe du motif est la même que pour `--negotiation-restrict`.
++
+Si `--negotiation-restrict` est utilisé, l'ensemble "have" est d'abord limité par cette option et ensuite augmenté pour inclure les sommets spécifiés par `--negotiation-include`.
++
+Si cette option n'est pas spécifiée sur la ligne de commande, les valeurs de configuration `remote.<nom>.negotiationInclude` pour le distant actuel sont utilisées à la place.
+
 `--negotiate-only`::
-	Ne rien récupérer du serveur, et à la place afficher les ancêtres des arguments fournis par `--negotiation-tip=`, que nous avons en commun avec le serveur.
+	Ne rien récupérer du serveur, et à la place afficher les ancêtres des arguments fournis par `--negotiation-restrict=`, que nous avons en commun avec le serveur.
 +
 C'est incompatible avec `--recurse-submodules=(yes|on-demand)`. En interne, ceci est utilisé pour implémenter l'option `push.negotiate`, voir linkgit:git-config[1].
 
@@ -125,7 +139,7 @@ ifndef::git-pull[]
 endif::git-pull[]
 
 `--refmap=<spéc-de-réf>`::
-	Lors de la récupération des références listées en ligne de commande, utiliser la spécification de référence (qui peut être donnée plusieurs fois) pour mapper les références sur les branches de suivi à distance, au lieu des valeurs des variables de configuration `remote.<nome>.fetch` pour le dépôt distant. Fournir un _<spéc-de-réf>_ vide à l'option `--refmap` fait que Git ignore les spécification de référence configurées et se fie entièrement aux spécifications de référence fournies comme arguments de la ligne de commande. Voir la section sur les "Branches de suivi à distance configurées" pour plus de détails.
+	Lors de la récupération des références listées en ligne de commande, utiliser la spécification de référence (qui peut être donnée plusieurs fois) pour correspondre les références sur les branches de suivi à distance, au lieu des valeurs des variables de configuration `remote.<nome>.fetch` pour le dépôt distant. Fournir un _<spéc-de-réf>_ vide à l'option `--refmap` fait que Git ignore les spécification de référence configurées et se fie entièrement aux spécifications de référence fournies comme arguments de la ligne de commande. Voir la section sur les "Branches de suivi à distance configurées" pour plus de détails.
 
 `-t`::
 `--tags`::

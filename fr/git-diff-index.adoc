@@ -1,0 +1,89 @@
+git-diff-index(1)
+=================
+
+NOM
+---
+git-diff-index - Compare un arbre avec l'arbre de travail ou l'index
+
+
+SYNOPSIS
+--------
+[verse]
+'git diff-index' [-m] [--cached] [--merge-base] [<options-diff-communes>] <arbre-esque> [<chemin>...]
+
+DESCRIPTION
+-----------
+Compare le contenu et le mode des blobs trouvés dans un objet arbre avec les fichiers suivants correspondants dans l'arbre de travail, ou avec les chemins correspondants dans l'index. Lorsque des arguments <chemin> sont présents, compare uniquement les chemins correspondant à ces motifs. Sinon, tous les fichiers suivis sont comparés.
+
+OPTIONS
+-------
+include::diff-options.adoc[]
+
+<arbre-esque>::
+	L'identifiant d'un objet arbre contre lequel comparer.
+
+--cached::
+	Ne pas considérer du tout le fichier sur disque.
+
+--merge-base::
+	Au lieu de comparer directement les <arbre-esque>s, utiliser la base de fusion entre <arbre-esque> et HEAD à la place. <arbre-esque> doit être un commit.
+
+-m::
+	Par défaut, les fichiers enregistrés dans l'index mais non extraits sont signalés comme supprimés. Cet indicateur fait dire à 'git diff-index' que tous les fichiers non extraisés sont à jour.
+
+include::diff-format.adoc[]
+
+MODES D'OPÉRATION
+-----------------
+Vous pouvez choisir si vous voulez faire entièrement confiance au fichier index (en utilisant l'indicateur `--cached`) ou demander à la logique de diff d'afficher tous les fichiers qui ne correspondent pas à l'état stat comme étant "modifiés provisoirement". Les deux opérations sont très utiles.
+
+MODE EN CACHE
+-------------
+Si `--cached` est spécifié, cela vous permet de demander :
+
+	montrez-moi les différences entre HEAD et le contenu actuel de l'index
+	(celui que j'écrirais en utilisant 'git write-tree')
+
+Par exemple, disons que vous avez travaillé sur votre répertoire de travail, mis à jour certains fichiers dans l'index et êtes prêt à valider. Vous voulez voir exactement *ce* que vous allez valider, sans avoir à écrire un nouvel objet arbre et le comparer de cette façon, et pour ce faire, vous faites simplement
+
+	git diff-index --cached HEAD
+
+Exemple : disons que j'ai renommé `commit.c` en `git-commit.c`, et que j'ai fait un `update-index` pour rendre cela effectif dans le fichier index. `git diff-files` n'afficherait rien du tout, puisque le fichier index correspond à mon répertoire de travail. Mais faire un 'git diff-index' le fait :
+
+  torvalds@ppc970:~/git> git diff-index --cached HEAD
+  :100644 000000 4161aecc6700a2eb579e842af0b7f22b98443f74 0000000000000000000000000000000000000000 D	commit.c
+  :000000 100644 0000000000000000000000000000000000000000 4161aecc6700a2eb579e842af0b7f22b98443f74 A	git-commit.c
+
+Vous pouvez facilement voir que ce qui précède est un renommage.
+
+En fait, `git diff-index --cached` *devrait* toujours être entièrement équivalent à faire réellement un 'git write-tree' et à comparer cela. Sauf que celui-ci est beaucoup plus agréable pour le cas où vous voulez simplement vérifier où vous en êtes.
+
+Donc faire un `git diff-index --cached` est fondamentalement très utile lorsque vous vous demandez "qu'ai-je déjà marqué pour être validé, et quelle est la différence avec un arbre précédent".
+
+MODE HORS CACHE
+---------------
+Le mode "hors cache" adopte une approche différente, et est potentiellement le plus utile des deux en ce que ce qu'il fait ne peut pas être émulé avec un 'git write-tree' + 'git diff-tree'. C'est donc le mode par défaut. La version hors cache pose la question :
+
+  montrez-moi les différences entre HEAD et l'arbre actuellement extrait
+  - le contenu de l'index _et_ les fichiers qui ne sont pas à jour
+
+ce qui est évidemment aussi une question très utile, puisque cela vous dit ce que vous *pourriez* valider. Encore une fois, la sortie correspond exactement à la sortie de 'git diff-tree -r', mais avec une nuance.
+
+La nuance est que si un fichier ne correspond pas à l'index, nous n'avons pas de magasin de sauvegarde pour lui, et nous utilisons le sha1 magique "tout-zéro" pour le montrer. Disons donc que vous avez modifié `kernel/sched.c`, mais que vous n'avez pas encore fait de 'git update-index' dessus - il n'y a pas d'"objet" associé au nouvel état, et vous obtenez :
+
+  torvalds@ppc970:~/v2.6/linux> git diff-index --abbrev HEAD
+  :100644 100644 7476bb5ba 000000000 M	kernel/sched.c
+
+c'est-à-dire, cela montre que l'arbre a changé, et que `kernel/sched.c` n'est pas à jour et peut contenir du nouveau contenu. Le sha1 tout-zéro signifie que pour obtenir le vrai diff, vous devez regarder l'objet dans le répertoire de travail directement plutôt que de faire un diff objet-à-objet.
+
+NOTE: Comme avec d'autres commandes de ce type, 'git diff-index' ne regarde en fait pas du tout le contenu du fichier. Donc peut-être que `kernel/sched.c` n'a pas vraiment changé, et c'est juste que vous l'avez touché. Dans les deux cas, c'est une note que vous devez faire un 'git update-index' dessus pour que l'index soit synchronisé.
+
+NOTE: Vous pouvez avoir un mélange de fichiers qui apparaissent comme "a été mis à jour" et "est encore modifié dans le répertoire de travail" ensemble. Vous pouvez toujours dire quel fichier est dans quel état, puisque ceux "mis à jour" montrent un sha1 valide, et ceux "pas synchronisés avec l'index" auront toujours le sha1 spécial tout-zéro.
+
+GIT
+---
+Fait partie de la suite linkgit:git[1]
+
+TRADUCTION
+----------
+Cette  page de manuel a été traduite par Jean-Noël Avila <jn.avila AT free DOT fr> et les membres du projet git-manpages-l10n. Veuillez signaler toute erreur de traduction par un rapport de bogue sur le site https://github.com/jnavila/git-manpages-l10n .

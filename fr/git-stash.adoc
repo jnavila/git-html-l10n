@@ -12,7 +12,7 @@ git stash list [<options-de-log>]
 git stash show [-u | --include-untracked | --only-untracked] [<options-de-diff>] [<remisage>]
 git stash drop [-q | --quiet] [<remisage>]
 git stash pop [--index] [-q|--quiet] [<remisage>]
-git stash apply [--index] [-q|--quiet] [<remisage>]
+git stash apply [--index] [-q|--quiet] [--label-ours=<label>] [--label-theirs=<label>] [--label-base=<label>] [<remisage>]
 git stash branch <nom-de-branche> [<remisage>]
 git stash [push [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-q | --quiet]
 	     [-u | --include-untracked] [-a | --all] [(-m | --message) <message>]
@@ -42,7 +42,7 @@ COMMANDES
 
 	Enregistre vos modifications locales dans une nouvelle "entrée de remisage" et les ramène dans `HEAD` (dans l'arbre de travail et dans l'index). La partie _<message>_ est facultative et donne la description ainsi que l'état du remisage.
 +
-Pour faire rapidement un instantané, vous pouvez omettre "push". Dans ce mode, les arguments de non-optionnels ne sont pas autorisés pour empêcher une sous-commande mal orthographiée de faire une entrée indésirable dans le remisage. Les deux exceptions sont `stash -p` qui agit comme alias pour `push -p` et les éléments spéc-de-chemin, qui sont autorisés après un double trait d'union `--` pour la désambiguïsation.
+Pour réaliser rapidement un instantané, vous pouvez éliminer "push". Dans de mode, les éléments de spécificateur de chemin ne sont autorisés qu'après un double-tiret `--` pour empêcher une sous-commande mal épelée de provoquer involontairement une entrée de remisage.
 
 `save [-p | --patch] [-S | --staged] [-k | --[no-]keep-index] [-u | --include-untracked] [-a | --all] [-q | --quiet] [<message>]`::
 
@@ -123,6 +123,13 @@ Afficher uniquement les fichiers non suivis dans l'entrée de remisage en tant q
 	Cette option n'est valable que pour les commandes `pop` et `apply`.
 +
 Tenter de rétablir non seulement les modifications de l'arbre de travail, mais aussi celles de l'index. Cependant, cela peut échouer, lorsque vous avez des conflits (qui sont stockés dans l'index, où vous ne pouvez donc plus appliquer les modifications telles qu'elles étaient à l'origine).
+
+`--label-ours=<label>`::
+`--label-theirs=<label>`::
+`--label-base=<label>`::
+	Ces options ne sont valides que pour la commande `apply`.
++
+Utiliser les labels fournis dans les marqueurs de conflit au lieu des valeur par défaut "Amont mis à jour", "modifications remisées" et "Base de remisage". `--label-base` n'a d'effet qu'avec `merge.conflictStyle=diff3`.
 
 `-k`::
 `--keep-index`::
@@ -267,7 +274,7 @@ $ git commit foo -m 'Partie restante'
 
 Sauvegarde de modifications sans relation pour une utilisation future::
 
-Lorsque vous êtes au milieu de changements massifs et que vous trouvez un problème sans rapport que vous ne voulez pas oublier de corriger, vous pouvez faire le ou les changements, les indexer et utiliser `git stash push --staged` pour les remiser pour une utilisation future. Ceci est similaire à la validation des modifications indexées, sauf que la validation se retrouve dans la remise et non sur la branche courante.
+Lorsque vous êtes au milieu de changements massifs et que vous trouvez un problème sans rapport que vous ne voulez pas oublier de corriger, vous pouvez faire le ou les changements, les indexer et utiliser `git stash push --staged` pour les remiser pour une utilisation future. Ceci est similaire à le commit des modifications indexées, sauf que le commit se retrouve dans la remise et non sur la branche courante.
 +
 ----------------------------------------------------------------
 # ... travail, travail, travail ...
