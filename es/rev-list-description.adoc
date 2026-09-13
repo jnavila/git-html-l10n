@@ -1,0 +1,48 @@
+Muestra las confirmaciones que son alcanzables siguiendo los enlaces `antecesores` desde la(s) confirmación(es) indicada(s), pero excluye las confirmaciones alcanzables desde aquella(s) con un '{caret}' precedido. Predeterminadamente, los resultados se muestran en orden cronológico inverso.
+
+Puedes considerarlo como una operación con conjuntos. Las confirmaciones alcanzables desde cualquiera de las confirmaciones indicadas en la línea de comandos forman un conjunto, y luego se restan de ese conjunto las confirmaciones alcanzables desde cualquiera de las indicadas precedidas por '{caret}'. Las confirmaciones restantes son las que aparecen en la salida del comando. Se pueden utilizar otras opciones y parámetros de ruta para limitar aún más el resultado.
+
+De este modo, el siguiente comando:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list foo bar ^baz
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log foo bar ^baz
+-----------------------------------------------------------------------
+endif::git-log[]
+
+significa "lista de todos los commits que son alcanzables desde 'foo' o 'bar', pero no desde 'baz'".
+
+Se puede usar la notación especial "`<commit1>..<commit2>`" como una forma abreviada de "`^<commit1> <commit2>`". Por ejemplo, cualquiera de las siguientes se puede usar porque son intercambiables:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list origin..HEAD
+$ git rev-list HEAD ^origin
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log origin..HEAD
+$ git log HEAD ^origin
+-----------------------------------------------------------------------
+endif::git-log[]
+
+Otra notación especial es "`<confirmación1>...<confirmación2>`" que es útil para fusiones. El grupo de confirmaciones resultante es la diferencia simétrica entre los dos operandos. Los siguientes dos comandos son equivalentes:
+
+ifdef::git-rev-list[]
+-----------------------------------------------------------------------
+$ git rev-list A B --not $(git merge-base --all A B)
+$ git rev-list A...B
+-----------------------------------------------------------------------
+endif::git-rev-list[]
+ifdef::git-log[]
+-----------------------------------------------------------------------
+$ git log A B --not $(git merge-base --all A B)
+$ git log A...B
+-----------------------------------------------------------------------
+endif::git-log[]
